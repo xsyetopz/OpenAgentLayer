@@ -23,11 +23,11 @@ This document describes how to use the agent team to debug issues that span mult
 
 ## Phase 1: Context Gathering
 
-### Goal
+### Phase 1 Goal
 
 Build a complete picture of the affected code paths.
 
-### Steps
+### Phase 1 Steps
 
 1. **Document the symptoms**
    - What is the expected behavior?
@@ -60,11 +60,11 @@ Build a complete picture of the affected code paths.
 
 ## Phase 2: Hypothesis Formation
 
-### Goal
+### Phase 2 Goal
 
 Generate testable hypotheses about the root cause.
 
-### Steps
+### Phase 2 Steps
 
 1. **Invoke architect**
 
@@ -91,19 +91,19 @@ Generate testable hypotheses about the root cause.
 3. **Example hypotheses**
 
    ```markdown
-   ## Hypotheses
+   ### Sample Hypotheses
 
-   ### H1: Race condition in cache invalidation (80% likely)
+   #### H1: Race condition in cache invalidation (80% likely)
    - Cause: Cache updated before transaction commits
    - Test: Add logging around cache ops, check ordering
    - Confirm: Cache shows stale data when concurrent writes
 
-   ### H2: Missing null check (60% likely)
+   #### H2: Missing null check (60% likely)
    - Cause: API returns null when entity deleted
    - Test: Check API response for deleted entities
    - Confirm: Stack trace shows NPE
 
-   ### H3: Configuration mismatch (40% likely)
+   #### H3: Configuration mismatch (40% likely)
    - Cause: Dev/prod config differs
    - Test: Compare configuration values
    - Confirm: Issue only in one environment
@@ -111,11 +111,11 @@ Generate testable hypotheses about the root cause.
 
 ## Phase 3: Hypothesis Testing
 
-### Goal
+### Phase 3 Goal
 
 Systematically test each hypothesis to find root cause.
 
-### Steps
+### Phase 3 Steps
 
 1. **Invoke verifier for each hypothesis**
 
@@ -134,7 +134,7 @@ Systematically test each hypothesis to find root cause.
 2. **Track results**
 
    ```markdown
-   ## Hypothesis Testing Results
+   ### Hypothesis Testing Results
 
    | # | Hypothesis | Result | Notes |
    |---|------------|--------|-------|
@@ -150,11 +150,11 @@ Systematically test each hypothesis to find root cause.
 
 ## Phase 4: Fix Implementation
 
-### Goal
+### Phase 4 Goal
 
 Implement a fix for the confirmed root cause.
 
-### Steps
+### Phase 4 Steps
 
 1. **Invoke architect if fix is non-trivial**
 
@@ -189,11 +189,11 @@ Implement a fix for the confirmed root cause.
 
 ## Phase 5: Regression Testing
 
-### Goal
+### Phase 5 Goal
 
 Verify the fix works and doesn't break anything else.
 
-### Steps
+### Phase 5 Steps
 
 1. **Invoke verifier**
 
@@ -233,13 +233,13 @@ Verify the fix works and doesn't break anything else.
 
 ## Example: Debugging Intermittent Auth Failure
 
-### Symptoms
+### Example Symptoms
 
 - Users randomly get "Session expired" error
 - Happens ~5% of the time
 - No pattern in timing or user type
 
-### Execution
+### Example Execution
 
 ```ignore
 # Phase 1

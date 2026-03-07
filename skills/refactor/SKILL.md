@@ -170,7 +170,7 @@ After refactoring:
 | Phase | Agent | Budget |
 |-------|-------|--------|
 | Analysis | indexer | 25K |
-| Design | architect | 35K |
+| Design | architect | 32K |
 | Baseline | verifier | 10K |
 | Migration (per sub) | implementer | 15K |
 | Verification (per sub) | verifier | 10K |

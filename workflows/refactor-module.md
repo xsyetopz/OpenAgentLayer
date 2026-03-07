@@ -7,11 +7,11 @@ This document describes the step-by-step process for refactoring a tangled or ov
 | Phase | Agent | Time | Tokens |
 |-------|-------|------|--------|
 | 1. Deep Analysis | indexer | ~20 min | 25K |
-| 2. Decomposition Design | architect | ~15 min | 35K |
-| 3. Baseline Tests | verifier | ~5 min | 10K |
+| 2. Decomposition Design | architect | ~15 min | 32K |
+| 3. Baseline Test Recording | verifier | ~5 min | 10K |
 | 4. Incremental Migration | implementer + verifier | ~30 min | 40K |
 | 5. Cleanup | implementer | ~10 min | 15K |
-| 6. Documentation | scribe | ~10 min | 15K |
+| 6. Documentation Task | scribe | ~10 min | 15K |
 | **Total** | | **~90 min** | **~140K** |
 
 ## When to Refactor
@@ -32,11 +32,11 @@ This document describes the step-by-step process for refactoring a tangled or ov
 
 ## Phase 1: Deep Analysis
 
-### Goal
+#### Objective
 
 Understand the current structure and identify natural boundaries.
 
-### Steps
+#### Procedure
 
 1. **Invoke indexer for deep analysis**
 
@@ -55,16 +55,16 @@ Understand the current structure and identify natural boundaries.
    - What is the public interface?
    - Where are the natural seams?
 
-3. **Output**
+3. **Deliverable**
    - `.claude/memory/arch/refactor-{module}-analysis.md`
 
 ## Phase 2: Decomposition Design
 
-### Goal
+#### Objective
 
 Design the new module structure following SRP.
 
-### Steps
+#### Procedure
 
 1. **Invoke architect**
 
@@ -83,23 +83,23 @@ Design the new module structure following SRP.
    - Are dependencies properly handled?
    - Is backward compatibility addressed (if needed)?
 
-3. **Output**
+3. **Deliverable**
    - `.claude/memory/arch/refactor-{module}-plan.md`
 
-### Design Checklist
+#### Design Checklist
 
 - [ ] Each new module has clear purpose
 - [ ] No circular dependencies in new structure
 - [ ] Public API is maintained (or migration path provided)
 - [ ] Test strategy defined
 
-## Phase 3: Baseline Tests
+## Phase 3: Baseline Test Recording
 
-### Goal
+#### Objective
 
 Record current test state to detect regressions.
 
-### Steps
+#### Procedure
 
 1. **Invoke verifier**
 
@@ -116,16 +116,16 @@ Record current test state to detect regressions.
    - Coverage is recorded
    - No flaky tests
 
-3. **Output**
+3. **Deliverable**
    - `.claude/memory/refactor-{module}-baseline.md`
 
 ## Phase 4: Incremental Migration
 
-### Goal
+#### Objective
 
 Extract sub-modules one at a time, testing after each.
 
-### Process
+#### Process
 
 Repeat for each sub-module in the plan:
 
@@ -141,7 +141,7 @@ Repeat for each sub-module in the plan:
 
 2. **Verify extraction**
 
-   ```
+   ```ignore
    @verifier Verify {sub_module} extraction.
 
    Compare to baseline at .claude/memory/refactor-{module}-baseline.md
@@ -160,7 +160,7 @@ Repeat for each sub-module in the plan:
    - May need to adjust the migration plan
    - Consult architect if design issues found
 
-### Migration Order (Typical)
+#### Migration Order Example
 
 1. Extract leaf dependencies first (no internal imports)
 2. Then extract modules that only depend on extracted modules
@@ -168,11 +168,11 @@ Repeat for each sub-module in the plan:
 
 ## Phase 5: Cleanup
 
-### Goal
+#### Objective
 
 Remove dead code and finalize the refactoring.
 
-### Steps
+#### Procedure
 
 1. **Invoke implementer**
 
@@ -201,13 +201,13 @@ Remove dead code and finalize the refactoring.
    git commit -m "refactor({module}): cleanup and finalize"
    ```
 
-## Phase 6: Documentation
+## Phase 6: Documentation Task
 
-### Goal
+#### Objective
 
 Document the new structure for future developers.
 
-### Steps
+#### Procedure
 
 1. **Invoke scribe**
 
@@ -236,14 +236,14 @@ Document the new structure for future developers.
 
 ## Example: Refactoring a Monolithic Auth Module
 
-### Before
+#### Pre-Refactor Structure
 
 ```ignore
 auth/
 └── mod.rs (800 LOC - handles login, session, token, password)
 ```
 
-### After
+#### Post-Refactor Structure
 
 ```ignore
 auth/
@@ -256,7 +256,7 @@ auth/
     └── mod.rs
 ```
 
-### Execution
+#### Sample Execution Flow
 
 ```ignore
 # Phase 1

@@ -7,8 +7,8 @@ This document describes the step-by-step process for adding a new feature using 
 | Phase | Agent | Time | Tokens |
 |-------|-------|------|--------|
 | 1. Index | indexer | ~15 min | 15-25K |
-| 2. Design | architect | ~10 min | 25-35K |
-| 3. Implement | implementer | ~15 min | 25-35K |
+| 2. Design | architect | ~10 min | 25-32K |
+| 3. Implement | implementer | ~15 min | 25-32K |
 | 4. Test | verifier | ~10 min | 20-30K |
 | 5. Document | scribe | ~5 min | 15-20K |
 | **Total** | | **~55 min** | **100-145K** |
@@ -19,13 +19,13 @@ This document describes the step-by-step process for adding a new feature using 
 - Agent definitions copied to `.claude/agents/`
 - Memory directory initialized
 
-## Phase 1: Project Indexing
+### Phase 1: Project Indexing
 
-### Goal
+#### Phase 1 Goal
 
 Ensure project memory is up-to-date so other agents can work efficiently.
 
-### Steps
+#### Phase 1 Steps
 
 1. **Check existing index**
 
@@ -43,18 +43,18 @@ Ensure project memory is up-to-date so other agents can work efficiently.
    - `.claude/memory/project-index.md` exists
    - Contains module map, symbol index, patterns
 
-### Skip Conditions
+#### Phase 1 Skip Conditions
 
 - Index exists and is <24h old
 - No major changes since last index
 
-## Phase 2: Architecture Design
+### Phase 2: Architecture Design
 
-### Goal
+#### Phase 2 Goal
 
 Create a detailed implementation blueprint before writing code.
 
-### Steps
+#### Phase 2 Steps
 
 1. **Gather requirements**
    - What is the feature name?
@@ -86,13 +86,13 @@ Create a detailed implementation blueprint before writing code.
    - Review design with stakeholders
    - Mark status as "approved" in arch file
 
-## Phase 3: Implementation
+### Phase 3: Implementation
 
-### Goal
+#### Phase 3 Goal
 
 Write code following the architecture plan.
 
-### Steps
+#### Phase 3 Steps
 
 1. **Review the plan**
 
@@ -116,13 +116,13 @@ Write code following the architecture plan.
    - If implementer posts question, answer it
    - If design issue found, route to architect
 
-## Phase 4: Testing
+### Phase 4: Testing
 
-### Goal
+#### Phase 4 Goal
 
 Verify the implementation works correctly.
 
-### Steps
+#### Phase 4 Steps
 
 1. **Invoke verifier**
 
@@ -145,13 +145,13 @@ Verify the implementation works correctly.
    - All tests pass
    - Coverage is acceptable
 
-## Phase 5: Documentation
+### Phase 5: Documentation
 
-### Goal
+#### Phase 5 Goal
 
 Document the feature for future developers.
 
-### Steps
+#### Phase 5 Steps
 
 1. **Invoke scribe**
 
@@ -183,13 +183,13 @@ Document the feature for future developers.
 
 ## Example: Adding a Cache Feature
 
-### Requirements
+### Example Requirements
 
 - LRU cache with configurable size
 - TTL per entry
 - Thread-safe
 
-### Execution
+### Example Execution
 
 ```ignore
 # Phase 1

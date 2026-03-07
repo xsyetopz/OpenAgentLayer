@@ -33,14 +33,14 @@ A token-efficient, feature-oriented hybrid agent architecture optimized for **Cl
 | Agent | Role | Model | Token Budget |
 |-------|------|-------|--------------|
 | **Indexer** | Repository Indexer & Feature Mapper | sonnet | 25K |
-| **Architect** | Feature-Oriented Architect | opus | 35K |
-| **Implementer** | Implementation & Refactoring Engineer | sonnet | 35K |
+| **Architect** | Feature-Oriented Architect | opus | 32K |
+| **Implementer** | Implementation & Refactoring Engineer | sonnet | 32K |
 | **Verifier** | Testing & Verification Engineer | sonnet | 30K |
 | **Scribe** | Documentation & Knowledge Engineer | sonnet | 20K |
 
 ## Directory Structure
 
-```
+```ignore
 .
 ├── agents/                    # Agent definitions (copy to .claude/agents/)
 ├── memory/                    # Memory schema templates
@@ -68,6 +68,7 @@ A token-efficient, feature-oriented hybrid agent architecture optimized for **Cl
 ```
 
 This copies:
+
 - `agents/` → `.claude/agents/`
 - `skills/` → `.claude/skills/`
 - `hooks/hooks.json` → `.claude/hooks.json`
@@ -84,7 +85,7 @@ Creates `.claude/memory/` with empty templates.
 
 Always start by indexing your project:
 
-```
+```ignore
 @indexer Index this project
 ```
 
@@ -92,7 +93,7 @@ This creates `.claude/memory/project-index.md` which other agents consume.
 
 ### 4. Feature Development Workflow
 
-```
+```ignore
 Phase 1: @indexer   → Creates project index
 Phase 2: @architect → Designs feature (reads index)
 Phase 3: @implementer → Writes code (reads design + index)
@@ -115,21 +116,23 @@ The system is designed to stay within Claude Max 5x plan budget:
 | Phase | Typical | Max |
 |-------|---------|-----|
 | Index | 15K | 25K |
-| Design | 25K | 35K |
-| Implement | 25K | 35K |
+| Design | 25K | 32K |
+| Implement | 25K | 32K |
 | Verify | 20K | 30K |
 | Document | 15K | 20K |
 | **Total** | **100K** | **145K** |
 
 ## When to Use Agent Teams vs Subagents
 
-### Use Agent Teams For:
+### Use Agent Teams For
+
 - Research/review in parallel
 - New modules (disjoint files)
 - Debugging competing hypotheses
 - Cross-layer coordination
 
-### Use Subagents For:
+### Use Subagents For
+
 - Sequential tasks
 - Same-file edits
 - Routine small tasks

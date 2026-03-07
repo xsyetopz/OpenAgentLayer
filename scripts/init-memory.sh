@@ -1,45 +1,41 @@
 #!/bin/bash
-# init-memory.sh - Initialize or reset memory directory for a project
-#
-# Usage:
-#   ./init-memory.sh /path/to/project [--reset]
-#
-# Options:
-#   --reset  Clear existing memory and start fresh
 
 set -e
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Get script directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+print_usage() {
+    echo -e "${YELLOW}Usage:${NC} $0 /path/to/project [--reset]"
+    echo "  --reset    Clear existing memory and start fresh"
+}
 
-# Parse arguments
+init_file() {
+    local path="$1"
+    local content="$2"
+    if [[ ! -f "$path" ]]; then
+        echo "$content" > "$path"
+        echo -e "${GREEN}Created${NC}: $(basename "$path")"
+    else
+        echo -e "${YELLOW}Exists${NC}: $(basename "$path")"
+    fi
+}
+
 TARGET_DIR=""
 RESET=false
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --reset)
-            RESET=true
-            shift
-            ;;
-        *)
-            TARGET_DIR="$1"
-            shift
-            ;;
+for arg in "$@"; do
+    case "$arg" in
+        --reset) RESET=true ;;
+        *) TARGET_DIR="$arg" ;;
     esac
 done
 
-# Validate target directory
 if [[ -z "$TARGET_DIR" ]]; then
     echo -e "${RED}Error: Target directory required${NC}"
-    echo "Usage: $0 /path/to/project [--reset]"
+    print_usage
     exit 1
 fi
 
@@ -54,31 +50,24 @@ MEMORY_DIR="$TARGET_DIR/.claude/memory"
 echo -e "${GREEN}Initializing memory directory: $MEMORY_DIR${NC}"
 echo ""
 
-# Handle reset
-if [[ "$RESET" == true ]]; then
-    if [[ -d "$MEMORY_DIR" ]]; then
-        echo -e "${YELLOW}Warning: This will delete all existing memory!${NC}"
-        read -p "Are you sure? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            # Backup before reset
-            backup_dir="$TARGET_DIR/.claude/memory-backup-$(date +%Y%m%d-%H%M%S)"
-            mv "$MEMORY_DIR" "$backup_dir"
-            echo -e "${GREEN}Backup created: $backup_dir${NC}"
-        else
-            echo "Reset cancelled."
-            exit 0
-        fi
+if $RESET && [[ -d "$MEMORY_DIR" ]]; then
+    echo -e "${YELLOW}Warning: This will delete all existing memory!${NC}"
+    read -p "Are you sure? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        backup_dir="$TARGET_DIR/.claude/memory-backup-$(date +%Y%m%d-%H%M%S)"
+        mv "$MEMORY_DIR" "$backup_dir"
+        echo -e "${GREEN}Backup created: $backup_dir${NC}"
+    else
+        echo "Reset cancelled."
+        exit 0
     fi
 fi
 
-# Create directory structure
 mkdir -p "$MEMORY_DIR"/{arch,adrs,debug}
 
-# Create tasks.md
-if [[ ! -f "$MEMORY_DIR/tasks.md" ]]; then
-    cat > "$MEMORY_DIR/tasks.md" << 'EOF'
-# Agent Team Task List
+init_file "$MEMORY_DIR/tasks.md" \
+"# Agent Team Task List
 
 **Last Updated:** (not yet initialized)
 
@@ -94,25 +83,19 @@ if [[ ! -f "$MEMORY_DIR/tasks.md" ]]; then
 
 ## Messages
 
-```
+\`\`\`
 (no messages yet)
-```
+\`\`\`
 
 ---
 
 ## Notes
 
 Use this file for agent team coordination.
-EOF
-    echo -e "${GREEN}Created${NC}: tasks.md"
-else
-    echo -e "${YELLOW}Exists${NC}: tasks.md"
-fi
+"
 
-# Create locks.md
-if [[ ! -f "$MEMORY_DIR/locks.md" ]]; then
-    cat > "$MEMORY_DIR/locks.md" << 'EOF'
-# File Locks
+init_file "$MEMORY_DIR/locks.md" \
+"# File Locks
 
 **Last Updated:** (not yet initialized)
 
@@ -127,16 +110,10 @@ if [[ ! -f "$MEMORY_DIR/locks.md" ]]; then
 
 | File | Owner | Since | Task | Expires |
 |------|-------|-------|------|---------|
-EOF
-    echo -e "${GREEN}Created${NC}: locks.md"
-else
-    echo -e "${YELLOW}Exists${NC}: locks.md"
-fi
+"
 
-# Create project-index.md placeholder
-if [[ ! -f "$MEMORY_DIR/project-index.md" ]]; then
-    cat > "$MEMORY_DIR/project-index.md" << 'EOF'
-# Project Index
+init_file "$MEMORY_DIR/project-index.md" \
+"# Project Index
 
 **Updated:** (not yet indexed)
 **Files:** 0 | **LOC:** 0
@@ -146,9 +123,9 @@ if [[ ! -f "$MEMORY_DIR/project-index.md" ]]; then
 This project has not been indexed yet.
 
 Run the indexer to populate this file:
-```
+\`\`\`
 @indexer Index this project
-```
+\`\`\`
 
 ## Module Map
 
@@ -173,16 +150,10 @@ Run the indexer to populate this file:
 
 | Pattern | Example | Files Using |
 |---------|---------|-------------|
-EOF
-    echo -e "${GREEN}Created${NC}: project-index.md (placeholder)"
-else
-    echo -e "${YELLOW}Exists${NC}: project-index.md"
-fi
+"
 
-# Create knowledge.md
-if [[ ! -f "$MEMORY_DIR/knowledge.md" ]]; then
-    cat > "$MEMORY_DIR/knowledge.md" << 'EOF'
-# Project Knowledge Base
+init_file "$MEMORY_DIR/knowledge.md" \
+"# Project Knowledge Base
 
 This file captures important knowledge about the project that helps future development.
 
@@ -205,16 +176,10 @@ This file captures important knowledge about the project that helps future devel
 ## Recent Learnings
 
 (Capture insights from recent development work)
-EOF
-    echo -e "${GREEN}Created${NC}: knowledge.md"
-else
-    echo -e "${YELLOW}Exists${NC}: knowledge.md"
-fi
+"
 
-# Create patterns.md
-if [[ ! -f "$MEMORY_DIR/patterns.md" ]]; then
-    cat > "$MEMORY_DIR/patterns.md" << 'EOF'
-# Coding Patterns
+init_file "$MEMORY_DIR/patterns.md" \
+"# Coding Patterns
 
 This file documents the coding patterns detected and used in this project.
 
@@ -237,16 +202,10 @@ This file documents the coding patterns detected and used in this project.
 ---
 
 *This file is updated by the indexer agent.*
-EOF
-    echo -e "${GREEN}Created${NC}: patterns.md"
-else
-    echo -e "${YELLOW}Exists${NC}: patterns.md"
-fi
+"
 
-# Create test-coverage.md
-if [[ ! -f "$MEMORY_DIR/test-coverage.md" ]]; then
-    cat > "$MEMORY_DIR/test-coverage.md" << 'EOF'
-# Test Coverage
+init_file "$MEMORY_DIR/test-coverage.md" \
+"# Test Coverage
 
 **Last Run:** (not yet run)
 
@@ -272,16 +231,10 @@ if [[ ! -f "$MEMORY_DIR/test-coverage.md" ]]; then
 ---
 
 *This file is updated by the verifier agent.*
-EOF
-    echo -e "${GREEN}Created${NC}: test-coverage.md"
-else
-    echo -e "${YELLOW}Exists${NC}: test-coverage.md"
-fi
+"
 
-# Create .gitignore for memory directory
-if [[ ! -f "$MEMORY_DIR/.gitignore" ]]; then
-    cat > "$MEMORY_DIR/.gitignore" << 'EOF'
-# Temporary files
+init_file "$MEMORY_DIR/.gitignore" \
+"# Temporary files
 .index-dirty
 *.tmp
 *.bak
@@ -291,24 +244,25 @@ if [[ ! -f "$MEMORY_DIR/.gitignore" ]]; then
 
 # Debug artifacts (optional)
 # debug/
-EOF
-    echo -e "${GREEN}Created${NC}: .gitignore"
-fi
+"
 
-echo ""
-echo -e "${GREEN}Memory directory initialized!${NC}"
-echo ""
-echo "Directory structure:"
-echo "  $MEMORY_DIR/"
-echo "  ├── project-index.md  # Will be populated by indexer"
-echo "  ├── patterns.md       # Coding patterns"
-echo "  ├── knowledge.md      # Project knowledge"
-echo "  ├── tasks.md          # Agent coordination"
-echo "  ├── locks.md          # File locks"
-echo "  ├── test-coverage.md  # Test tracking"
-echo "  ├── arch/             # Architecture plans"
-echo "  ├── adrs/             # Architecture Decision Records"
-echo "  └── debug/            # Debug artifacts"
-echo ""
-echo "Next step: Run the indexer to populate project-index.md"
-echo "  @indexer Index this project"
+cat <<EOM
+
+${GREEN}Memory directory initialized!${NC}
+
+Directory structure:
+  $MEMORY_DIR/
+  ├── project-index.md  # Will be populated by indexer
+  ├── patterns.md       # Coding patterns
+  ├── knowledge.md      # Project knowledge
+  ├── tasks.md          # Agent coordination
+  ├── locks.md          # File locks
+  ├── test-coverage.md  # Test tracking
+  ├── arch/             # Architecture plans
+  ├── adrs/             # Architecture Decision Records
+  └── debug/            # Debug artifacts
+
+Next step: Run the indexer to populate project-index.md
+  @indexer Index this project
+
+EOM

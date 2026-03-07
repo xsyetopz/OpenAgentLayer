@@ -97,6 +97,7 @@ After modifying this repository:
 The orchestrating agent must intelligently decide between agent teams and normal subagents based on actual task complexity, not perceived complexity.
 
 ### Use Subagents When
+
 - Task scope is narrow and well-defined
 - Single module affected
 - No cross-cutting concerns
@@ -104,6 +105,7 @@ The orchestrating agent must intelligently decide between agent teams and normal
 - Sequential dependencies make parallelism unhelpful
 
 ### Use Agent Teams When
+
 - Genuinely parallel work is possible (e.g., research + implementation)
 - Multiple disjoint modules need simultaneous changes
 - Task requires design review before implementation
@@ -111,6 +113,7 @@ The orchestrating agent must intelligently decide between agent teams and normal
 - Debugging with competing hypotheses
 
 ### Do NOT assume complexity based on word count
+
 A user saying "refactor the auth module" might be simple (rename a few things) or complex (full decomposition). Assess actual scope before choosing orchestration strategy.
 
 ## Code Philosophy
@@ -123,6 +126,7 @@ A user saying "refactor the auth module" might be simple (rename a few things) o
 ## Code Intelligence
 
 Prefer LSP over Grep/Read for code navigation—faster, precise, avoids reading entire files:
+
 - `workspaceSymbol` to find where something is defined
 - `findReferences` to see all usages across the codebase
 - `goToDefinition` / `goToImplementation` to jump to source
@@ -220,7 +224,8 @@ fn get_user(id: &str) -> User {
 ## Useful Algorithms
 
 ### Incremental Indexing
-```
+
+```markdown
 1. git diff --name-only HEAD~N > changed_files
 2. If changed_files.len() < threshold: update only those
 3. Else: full reindex
@@ -228,7 +233,8 @@ fn get_user(id: &str) -> User {
 ```
 
 ### Feature Clustering (for indexer)
-```
+
+```markdown
 1. Group files by directory
 2. Within directory, cluster by naming prefix (auth_*, user_*)
 3. Refine by import graph connectivity
@@ -236,7 +242,8 @@ fn get_user(id: &str) -> User {
 ```
 
 ### Lock-Free Coordination
-```
+
+```markdown
 1. Before edit: append to locks.md with timestamp
 2. Check for conflicts (same file, different owner)
 3. If conflict: back off, message in tasks.md
@@ -247,7 +254,8 @@ fn get_user(id: &str) -> User {
 ## Data Structures
 
 ### Project Index Schema
-```
+
+```ignore
 project-index.md
 ├── metadata (timestamp, file count, LOC)
 ├── module_map: {module -> (files, loc, entry, exports)}
@@ -258,7 +266,8 @@ project-index.md
 ```
 
 ### Task Coordination Schema
-```
+
+```ignore
 tasks.md
 ├── active_tasks: [{id, owner, status, description, files, blocked_by}]
 ├── completed_tasks: [{id, owner, completed_at, description}]

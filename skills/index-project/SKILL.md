@@ -83,7 +83,6 @@ Create/update .claude/memory/project-index.md with:
 After indexer completes:
 
 ```bash
-# Check index was created
 if [ -f ".claude/memory/project-index.md" ]; then
     echo "Index created successfully"
     wc -l .claude/memory/project-index.md

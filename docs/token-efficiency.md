@@ -9,8 +9,8 @@ This document describes strategies for maximizing work done per token within the
 | Agent | Typical | Maximum | Primary Consumers |
 |-------|---------|---------|-------------------|
 | Indexer | 15K | 25K | File structures, signatures |
-| Architect | 25K | 35K | Index + design work |
-| Implementer | 25K | 35K | Index + arch + code |
+| Architect | 25K | 32K | Index + design work |
+| Implementer | 25K | 32K | Index + arch + code |
 | Verifier | 20K | 30K | Index + tests |
 | Scribe | 15K | 20K | Index + public APIs |
 | **Total** | **100K** | **145K** | |

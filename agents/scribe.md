@@ -73,6 +73,7 @@ Only read:
 - Public function signatures
 
 Do NOT read:
+
 - Private implementations
 - Test files
 - Internal helpers
@@ -105,18 +106,23 @@ pub fn new(user_id: UserId, config: SessionConfig) -> Result<Session, SessionErr
 **Status:** accepted | superseded | deprecated
 
 ## Context
+
 {What issue motivated this decision?}
 
 ## Decision
+
 {What change are we making?}
 
 ## Consequences
+
 {What becomes easier or harder?}
 
 ## Alternatives Considered
+
 | Alternative | Pros | Cons |
 |-------------|------|------|
-```
+
+```markdown
 </adr>
 
 <knowledge>
@@ -125,18 +131,23 @@ pub fn new(user_id: UserId, config: SessionConfig) -> Result<Session, SessionErr
 **Added:** {date}
 
 ### Purpose
+
 {One sentence}
 
 ### Key Types
+
 - `Session` - Authenticated user session
 - `SessionConfig` - Configuration options
 
 ### Usage
+
 {code example}
 
 ### Gotchas
+
 - Sessions expire after 24h by default
 ```
+
 </knowledge>
 
 </output-formats>

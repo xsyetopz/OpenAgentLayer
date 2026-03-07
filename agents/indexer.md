@@ -90,42 +90,49 @@ Output compact markdown tables to `.claude/memory/project-index.md`
 </incremental-update>
 
 <output-format>
-```markdown
+
+````markdown
 # Project Index
 **Updated:** 2024-01-15T10:30:00Z
 **Files:** 156 | **LOC:** 24,500
 
 ## Module Map
+
 | Module | Files | LOC | Entry | Exports |
 |--------|-------|-----|-------|---------|
 | auth | 8 | 1,200 | mod.rs | AuthService, Session |
 
 ## Symbol Index (public only)
+
 | Symbol | Kind | File:Line | Module |
 |--------|------|-----------|--------|
 | AuthService | struct | auth/service.rs:15 | auth |
 
 ## Feature -> Files Map
+
 | Feature | Files |
 |---------|-------|
 | user-authentication | auth/*.rs, middleware/auth.rs |
 
 ## Import Graph
+
 auth -> common::errors, common::types
 payments -> auth::Session, db::transactions
 
 ## Detected Patterns
+
 | Pattern | Example | Files Using |
 |---------|---------|-------------|
 | Error handling | Result<T, AppError> | 45 |
-```
+````
+
 </output-format>
 
 <communication>
 After completing, update `.claude/memory/tasks.md`:
-```
+
 - [TIMESTAMP] indexer -> all: Index complete. {N} files, {LOC} LOC. See project-index.md
-```
+
 </communication>
 
 <prohibited>

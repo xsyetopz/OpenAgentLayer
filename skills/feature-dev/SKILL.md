@@ -113,8 +113,8 @@ Target budget for full workflow:
 | Phase | Agent | Budget |
 |-------|-------|--------|
 | Index | indexer | 15-25K |
-| Design | architect | 25-35K |
-| Implement | implementer | 25-35K |
+| Design | architect | 25-32K |
+| Implement | implementer | 25-32K |
 | Test | verifier | 20-30K |
 | Document | scribe | 15-20K |
 | **Total** | | **100-145K** |

@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-// =============================================================================
-// SECTION 1: TEST FIXTURES
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Test Fixtures
+// -----------------------------------------------------------------------------
 
 // mockRepository is an in-memory repository for testing.
 type mockRepository struct {
@@ -58,9 +58,9 @@ func testServiceWithRepo() (*Service, *mockRepository) {
 	return svc, repo
 }
 
-// =============================================================================
-// SECTION 2: CREATE TESTS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Create Tests
+// -----------------------------------------------------------------------------
 
 func TestService_Create_ValidData(t *testing.T) {
 	svc := testService()
@@ -68,21 +68,19 @@ func TestService_Create_ValidData(t *testing.T) {
 
 	result, err := svc.Create(ctx, CreateInput{Data: "test data"})
 
-	if err != nil {
+	switch {
+	case err != nil:
 		t.Fatalf("unexpected error: %v", err)
-	}
-	if result == nil {
+	case result == nil:
 		t.Fatal("expected result, got nil")
-	}
-	if result.ID == "" {
+	case result.ID == "":
 		t.Error("expected ID to be set")
-	}
-	if result.Data != "test data" {
+	case result.Data != "test data":
 		t.Errorf("expected Data to be 'test data', got %q", result.Data)
-	}
-	if result.CreatedAt.IsZero() {
+	case result.CreatedAt.IsZero():
 		t.Error("expected CreatedAt to be set")
 	}
+
 }
 
 func TestService_Create_EmptyData(t *testing.T) {
@@ -130,9 +128,9 @@ func TestService_Create_PersistsToRepository(t *testing.T) {
 	}
 }
 
-// =============================================================================
-// SECTION 3: GET TESTS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Get Tests
+// -----------------------------------------------------------------------------
 
 func TestService_Get_Found(t *testing.T) {
 	svc, _ := testServiceWithRepo()
@@ -172,9 +170,9 @@ func TestService_Get_NoRepository(t *testing.T) {
 	}
 }
 
-// =============================================================================
-// SECTION 4: UPDATE TESTS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Update Tests
+// -----------------------------------------------------------------------------
 
 func TestService_Update_Success(t *testing.T) {
 	svc, _ := testServiceWithRepo()
@@ -222,9 +220,9 @@ func TestService_Update_EmptyData(t *testing.T) {
 	}
 }
 
-// =============================================================================
-// SECTION 5: DELETE TESTS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Delete Tests
+// -----------------------------------------------------------------------------
 
 func TestService_Delete_Success(t *testing.T) {
 	svc, repo := testServiceWithRepo()
@@ -254,9 +252,9 @@ func TestService_Delete_NotFound(t *testing.T) {
 	}
 }
 
-// =============================================================================
-// SECTION 6: LIST TESTS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// List Tests
+// -----------------------------------------------------------------------------
 
 func TestService_List_ReturnsAll(t *testing.T) {
 	svc, _ := testServiceWithRepo()
@@ -289,9 +287,9 @@ func TestService_List_NoRepository(t *testing.T) {
 	}
 }
 
-// =============================================================================
-// SECTION 7: BENCHMARK TESTS (optional)
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Benchmark Tests (optional)
+// -----------------------------------------------------------------------------
 
 func BenchmarkService_Create(b *testing.B) {
 	svc := testService()

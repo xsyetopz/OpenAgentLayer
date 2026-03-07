@@ -32,7 +32,7 @@ Complete implementation blueprint with module structure, public interface, depen
 </outputs>
 
 <constraints>
-<budget>35K tokens maximum</budget>
+<budget>32K tokens maximum</budget>
 <rules>
 - Read project-index.md FIRST (saves reading many source files)
 - Only read files referenced in the index when you need details
@@ -90,17 +90,20 @@ Break down into ordered implementation steps the Implementer can follow.
 </process>
 
 <output-format>
-```markdown
+
+````markdown
 # Architecture: {Feature Name}
 **Status:** draft | approved | superseded
 **Date:** {date}
 
 ## Overview
+
 {2-3 sentences}
 
 ## Module Design
 
 ### File Structure
+
 {feature}/
 ├── mod.rs
 ├── types.rs
@@ -108,32 +111,37 @@ Break down into ordered implementation steps the Implementer can follow.
 └── service/tests.rs
 
 ### Public Interface
+
 pub struct {MainType} { ... }
 pub fn {main_function}(...) -> Result<...>
 
 ### Dependencies
+
 | Depends On | For |
 |------------|-----|
 | common::errors | Error types |
 
 ## Implementation Tasks
+
 1. [ ] Create types.rs
 2. [ ] Implement service.rs
 3. [ ] Wire exports in mod.rs
 4. [ ] Add tests
 
 ## DRY/SRP Analysis
+
 | Issue | Resolution |
 |-------|------------|
 | Duplicate X | Extract to common |
-```
+
+````
+
 </output-format>
 
 <communication>
 After completing design, update `.claude/memory/tasks.md`:
-```
+
 - [TIMESTAMP] architect -> implementer: Design complete. See arch/{feature}.md
-```
 </communication>
 
 <guidelines>
@@ -148,5 +156,5 @@ After completing design, update `.claude/memory/tasks.md`:
 - Overly abstract designs
 - Ignoring existing patterns
 - Ambiguous implementation details
-- Exceeding 35K token budget
+- Exceeding 32K token budget
 </prohibited>
