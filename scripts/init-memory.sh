@@ -10,6 +10,8 @@ NC='\033[0m'
 print_usage() {
     echo -e "${YELLOW}Usage:${NC} $0 /path/to/project [--reset]"
     echo "  --reset    Clear existing memory and start fresh"
+    echo
+    echo "You can also use the special path '~/.claude/' for a global memory store."
 }
 
 init_file() {
@@ -39,9 +41,33 @@ if [[ -z "$TARGET_DIR" ]]; then
     exit 1
 fi
 
+# Allow for ~ and ~/.claude/ global usage
+case "$TARGET_DIR" in
+    "~/.claude"|"~/.claude/"|"\$HOME/.claude"|\$HOME/.claude/)
+        # Expand ~, handle $HOME literal as well
+        if [[ "$TARGET_DIR" == "~/.claude"* ]]; then
+            TARGET_DIR="$HOME/.claude"
+        else
+            # Expand literal $HOME if user typed it
+            TARGET_DIR="${TARGET_DIR/\$HOME/$HOME}"
+        fi
+        ;;
+esac
+
+# Expand ~ at the start if it's there (even if not .claude/)
+if [[ "$TARGET_DIR" == ~* ]]; then
+    TARGET_DIR="${TARGET_DIR/#\~/$HOME}"
+fi
+
 if [[ ! -d "$TARGET_DIR" ]]; then
-    echo -e "${RED}Error: Target directory does not exist: $TARGET_DIR${NC}"
-    exit 1
+    echo -e "${YELLOW}Directory does not exist: $TARGET_DIR"
+    echo -e "Creating directory..."
+    mkdir -p "$TARGET_DIR"
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}Failed to create directory: $TARGET_DIR${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}Created${NC}: $TARGET_DIR"
 fi
 
 TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"

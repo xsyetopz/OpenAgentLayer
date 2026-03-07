@@ -12,25 +12,52 @@ REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 TARGET_DIR=""
 USE_SYMLINK=false
+INSTALL_SCOPE="project" # default
+
+usage() {
+    echo -e "${GREEN}Claude Code Agent Installer${NC}"
+    echo -e "Usage: $0 <target-dir>|--global [--symlink]"
+    echo -e "  <target-dir>   : Path to your project"
+    echo -e "  --global       : Install to global ~/.claude/"
+    echo -e "  --symlink      : Use symlinks instead of copies"
+    exit 1
+}
+
+# Parse args: allow --global and optional --symlink
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --symlink) USE_SYMLINK=true; shift ;;
-        *) TARGET_DIR="$1"; shift ;;
+        --global) INSTALL_SCOPE="global"; shift ;;
+        -h|--help) usage ;;
+        *)
+          if [[ -z "$TARGET_DIR" ]]; then
+              TARGET_DIR="$1"
+          else
+              echo -e "${RED}Error: Too many arguments${NC}"
+              usage
+          fi
+          shift
+          ;;
     esac
 done
 
-if [[ -z "$TARGET_DIR" ]]; then
-    echo -e "${RED}Error: Target directory required${NC}\nUsage: $0 /path/to/project [--symlink]"
-    exit 1
+if [[ "$INSTALL_SCOPE" == "global" ]]; then
+    TARGET_DIR="$HOME"
+    CLAUDE_DIR="$HOME/.claude"
+    echo -e "${GREEN}Installing Claude Code agent team to GLOBAL directory: $CLAUDE_DIR${NC}\n"
+else
+    if [[ -z "$TARGET_DIR" ]]; then
+        echo -e "${RED}Error: Target directory required, or use --global${NC}\n"
+        usage
+    fi
+    if [[ ! -d "$TARGET_DIR" ]]; then
+        echo -e "${RED}Error: Target directory does not exist: $TARGET_DIR${NC}"
+        exit 1
+    fi
+    TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
+    CLAUDE_DIR="$TARGET_DIR/.claude"
+    echo -e "${GREEN}Installing Claude Code agent team to: $TARGET_DIR${NC}\n"
 fi
-if [[ ! -d "$TARGET_DIR" ]]; then
-    echo -e "${RED}Error: Target directory does not exist: $TARGET_DIR${NC}"
-    exit 1
-fi
-TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
-CLAUDE_DIR="$TARGET_DIR/.claude"
-
-echo -e "${GREEN}Installing Claude Code agent team to: $TARGET_DIR${NC}\n"
 
 mkdir -p "$CLAUDE_DIR"/{agents,memory/{arch,adrs},skills,hooks/scripts}
 
