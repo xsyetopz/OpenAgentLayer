@@ -7,21 +7,61 @@ description: Git workflow conventions for commits, branches, and PRs. Use when t
 
 ## Commit Messages
 
-Use Conventional Commits: `type(scope): description`
+Format: `type(scope): description`
 
-Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`, `ci`
+This is the [Conventional Commits](https://www.conventionalcommits.org/) standard. The type categorizes the change, the scope narrows it to a module/area, and the description says what changed.
 
-Rules:
+### Types
 
-1. Imperative mood: "add feature" not "added feature"
-2. Subject line max 72 characters
-3. Body explains why, not what
-4. Reference issues: `Closes #123`
-5. Co-author line for AI-assisted commits:
+| Type       | When to use                                       |
+| ---------- | ------------------------------------------------- |
+| `feat`     | New user-facing functionality                     |
+| `fix`      | Bug fix                                           |
+| `refactor` | Code restructuring with no behavior change        |
+| `perf`     | Performance improvement                           |
+| `test`     | Adding or updating tests only                     |
+| `docs`     | Documentation only                                |
+| `chore`    | Build, tooling, dependency updates                |
+| `ci`       | CI/CD pipeline changes                            |
+| `style`    | Formatting, whitespace, linting (no logic change) |
 
-   ```text
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   ```
+### Scope
+
+The scope in parentheses identifies the area of the codebase affected. Use the module, component, or subsystem name. Skip scope only for cross-cutting changes.
+
+```text
+feat(auth): add OAuth2 PKCE flow
+fix(parser): handle unterminated string literals
+refactor(db): extract connection pooling into module
+perf(api): batch user lookups to eliminate N+1
+test(billing): add edge cases for proration
+docs(readme): update install instructions
+chore(deps): bump tokio to 1.38
+ci(github): add cargo deny check to pipeline
+```
+
+### Rules
+
+1. Imperative mood: "add feature" not "added feature" or "adds feature"
+2. Subject line max 72 characters (type + scope + colon + space + description)
+3. No period at end of subject line
+4. Body explains **why**, not what — the diff shows what changed
+5. Breaking changes: add `!` after scope — `feat(api)!: remove v1 endpoints`
+6. Reference issues in body or footer: `Closes #123`
+
+### Body and Footer
+
+Use a blank line to separate subject from body. The body provides context the diff can't: why the change was made, what alternatives were considered, what tradeoffs exist.
+
+```text
+fix(auth): reject expired refresh tokens
+
+Previously, expired refresh tokens were silently accepted and
+exchanged for new access tokens. This allowed indefinite session
+extension without re-authentication.
+
+Closes #187
+```
 
 ### Claude Code Commit Format
 
@@ -40,6 +80,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
 ```
+
+### Common Mistakes
+
+| Wrong                                                | Right                                        | Why                                    |
+| ---------------------------------------------------- | -------------------------------------------- | -------------------------------------- |
+| `fix: fixed the bug`                                 | `fix(parser): handle EOF in strings`         | Past tense, no scope, vague            |
+| `update stuff`                                       | `refactor(db): extract pool config`          | No type, meaningless description       |
+| `feat: add new feature for users to reset passwords` | `feat(auth): add password reset`             | Too long, redundant words              |
+| `Fix bug`                                            | `fix(api): return 404 for deleted resources` | No type prefix, capitalized, vague     |
+| `chore: various improvements`                        | Split into separate commits                  | Multiple changes need multiple commits |
 
 ## Branch Naming
 
