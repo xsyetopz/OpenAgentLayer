@@ -15,6 +15,17 @@
 					}
 				]
 			}
+		],
+		"SubagentStop": [
+			{
+				"matcher": "planner|coder|reviewer",
+				"hooks": [
+					{
+						"type": "prompt",
+						"prompt": "Check for silent scope reduction: did the agent quietly drop, skip, or stub out parts of what the user asked for WITHOUT flagging it? BLOCK if the agent silently reduced scope. PASS if the agent either (a) completed everything requested, or (b) explicitly told the user what was not completed and why."
+					}
+				]
+			}
 		]
 	}
 }
