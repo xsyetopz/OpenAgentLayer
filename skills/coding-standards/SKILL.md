@@ -49,7 +49,7 @@ Apply these standards to all code you write, modify, or review.
 
 Check in this order during reviews:
 
-1. **Scope creep** — changes beyond what was requested
+1. **Scope creep** — changes beyond what was requested (but finishing what WAS requested is not scope creep)
 2. **Behavior changes in refactors** — logic differences in restructured code
 3. **Placeholders** — `todo!()`, `// TODO`, "for now...", stub implementations
 4. **DRY violations** — duplicated constants, validation, error messages
