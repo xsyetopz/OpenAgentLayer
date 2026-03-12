@@ -260,6 +260,14 @@ else
     info "No banned patterns in agents"
 fi
 
+# Check for old autonomous-executor patterns in agents
+if grep -riE '(just do it|do not offer alternatives|don.t explain|no teaching)' "$CLAUDE_DIR/agents/" &>/dev/null; then
+    echo -e "  ${RED}✗${NC} Found old autonomous-executor patterns in agents"
+    ERRORS=$((ERRORS + 1))
+else
+    info "No old autonomous-executor patterns in agents"
+fi
+
 echo -e "\n${GREEN}Done!${NC} Installed $AGENT_COUNT agents, $SKILL_COUNT skills"
 echo ""
 echo "Agents:"
