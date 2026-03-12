@@ -1,4 +1,5 @@
 ---
+name: implement
 model: sonnet
 description: "Writes production code following plans or direct instructions. Routes: implement, code, write, build, fix, add"
 tools:

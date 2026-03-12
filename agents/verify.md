@@ -1,4 +1,5 @@
 ---
+name: verify
 model: sonnet
 description: "Verifies correctness through testing and code review. Routes: test, verify, check, review, run tests"
 tools:

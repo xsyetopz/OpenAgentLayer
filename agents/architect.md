@@ -1,4 +1,5 @@
 ---
+nane: architect
 model: opus
 description: "Analyzes codebase and designs implementation plans. Routes: design, architect, plan, 'how should I'"
 tools:
