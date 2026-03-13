@@ -22,11 +22,11 @@ Agent definitions, skills, and hooks for Claude Code. Designed for CC v2.1.71+.
 ./install.sh --global --pro
 ```
 
-Requires: Claude Code >= 2.1.71, Python 3, jq.
+Requires: Claude Code >= 2.1.58, Python 3, jq.
 
 The installer:
 
-- Checks Claude Code version >= 2.1.71
+- Checks Claude Code version >= 2.1.58
 - Validates Python 3 is available (required by hook scripts)
 - Detects and removes old agent files (planner/coder/reviewer)
 - Copies agents with model substitution based on tier

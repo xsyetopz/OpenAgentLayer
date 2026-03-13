@@ -42,12 +42,12 @@ check_version() {
 
     local major minor patch
     IFS='.' read -r major minor patch <<< "$version"
-    local required_major=2 required_minor=1 required_patch=71
+    local required_major=2 required_minor=1 required_patch=58
 
     if (( major < required_major )) || \
        (( major == required_major && minor < required_minor )) || \
        (( major == required_major && minor == required_minor && patch < required_patch )); then
-        die "Claude Code v${version} is too old. Requires >= 2.1.71"
+        die "Claude Code v${version} is too old. Requires >= 2.1.58"
     fi
     info "Claude Code v${version}"
 }
