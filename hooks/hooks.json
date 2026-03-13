@@ -66,6 +66,10 @@
 						"type": "command",
 						"command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/scripts/completion-check.py\"",
 						"timeout": 15
+					},
+					{
+						"type": "prompt",
+						"prompt": "Before ending, check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale, suggest: 'Run /session-export to save a handoff for your next session.' Do NOT auto-export — only remind."
 					}
 				]
 			}

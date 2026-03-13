@@ -28,6 +28,7 @@
 | `documentation-standards` | `/documentation-standards` | New     |
 | `performance-guide`       | `/performance-guide`       | New     |
 | `error-handling`          | `/error-handling`          | New     |
+| `session-export`          | `/session-export`          | New     |
 
 ## Hooks
 
@@ -41,7 +42,7 @@
 - PreToolUse on Bash → `pre-commit-quality.py` (blocks commits with secrets/TODOs/.env/conflicts)
 - PostToolUse on Write/Edit → LSP diagnostics + `auto-format.sh` + `anti-placeholder.py` + `anti-comment-slop.py`
 - SubagentStop → scope reduction check + `completion-check.py` + collaboration protocol check
-- Stop → `completion-check.py`
+- Stop → `completion-check.py` + session-export reminder
 
 ## Install
 
@@ -60,7 +61,7 @@ skills/          coding-standards/, desloppify/, git-workflow/,
                  collaboration-protocol/, security-checklist/,
                  test-patterns/, refactor-guide/,
                  documentation-standards/, performance-guide/,
-                 error-handling/
+                 error-handling/, session-export/
 hooks/           hooks.json, redact-pre.py, redact-post.py,
                  scripts/auto-format.sh, scripts/_patterns.py,
                  scripts/anti-placeholder.py, scripts/anti-comment-slop.py,

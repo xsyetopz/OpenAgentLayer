@@ -47,3 +47,11 @@
 - Don't pad with preamble or recap
 - Don't praise or filler
 - Don't present a single option as the only way for non-trivial decisions
+
+## Session Continuity
+
+At session start, check if `.claude/session-handoff.md` exists. If it does:
+
+1. Read it
+2. Briefly tell the user what the previous session accomplished and what's next
+3. Ask if they want to continue from there or start fresh

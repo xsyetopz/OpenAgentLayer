@@ -233,6 +233,7 @@ if command -v jq &>/dev/null; then
            --argjson post "$REDACT_POST_ENTRY" '
             .env["CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"] //= "1" |
             .env["DISABLE_AUTOUPDATER"] //= "1" |
+            (if .autoUpdatesChannel then .autoUpdatesChannel = "stable" else . end) |
             .hooks.PreToolUse = ((.hooks.PreToolUse // []) | if any(.hooks[0].command? | test("redact-pre")) then . else . + [$pre] end) |
             .hooks.PostToolUse = ((.hooks.PostToolUse // []) | if any(.hooks[0].command? | test("redact-post")) then . else . + [$post] end)
         ' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
@@ -245,6 +246,7 @@ if command -v jq &>/dev/null; then
                 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1",
                 DISABLE_AUTOUPDATER: "1"
             },
+            autoUpdatesChannel: "stable",
             hooks: {
                 PreToolUse: [$pre],
                 PostToolUse: [$post]
