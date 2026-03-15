@@ -310,7 +310,8 @@ settings_json_merge_project() {
                 .env["CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"] //= "1" |
                 .env["DISABLE_AUTOUPDATER"] //= "1" |
                 (if .autoUpdatesChannel then .autoUpdatesChannel = "latest" else . end) |
-                .hooks.PreToolUse = ((.hooks.PreToolUse // []) | if any(.hooks[0].command? | test("guard-secrets")) then . else . + [$pre] end)
+                .hooks.PreToolUse = ((.hooks.PreToolUse // []) | if any(.hooks[0].command? | test("guard-secrets")) then . else . + [$pre] end) |
+                .permissions.deny = ((.permissions.deny // []) + ["Agent(Explore)", "Agent(Plan)", "Agent(general-purpose)"] | unique)
             ' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
             info "Merged into existing settings.json"
         else
@@ -320,6 +321,9 @@ settings_json_merge_project() {
                     DISABLE_AUTOUPDATER: "1"
                 },
                 autoUpdatesChannel: "latest",
+                permissions: {
+                    deny: ["Agent(Explore)", "Agent(Plan)", "Agent(general-purpose)"]
+                },
                 hooks: {
                     PreToolUse: [$pre]
                 }

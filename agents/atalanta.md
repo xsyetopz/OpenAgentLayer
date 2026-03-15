@@ -1,5 +1,5 @@
 ---
-name: atalanta
+name: Atalanta
 model: __MODEL_TEST__
 description: "Use this agent to run tests, parse test failures, diagnose root causes, report test coverage, or validate test suites."
 tools:

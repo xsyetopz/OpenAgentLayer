@@ -1,5 +1,5 @@
 ---
-name: calliope
+name: Calliope
 model: __MODEL_DOCUMENT__
 description: "Use this agent to write or edit documentation, READMEs, changelogs, ADRs, API docs, or any markdown files."
 tools:

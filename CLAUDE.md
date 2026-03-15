@@ -14,6 +14,8 @@
 | @hermes     | hermes.md     | sonnet | sonnet | Research, explore codebase, cite sources |
 | @odysseus   | odysseus.md   | sonnet | opus   | Multi-step delegation, progress tracking |
 
+**Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
+
 ## Skills
 
 | Skill               | Slash Command        | Status |

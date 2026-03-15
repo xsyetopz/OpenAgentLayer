@@ -111,7 +111,10 @@
 			"Delete(C:\\Windows\\System32\\**)",
 			"Delete(/Users/*/Library/Keychains/**)",
 			"Delete(/Library/Keychains/**)",
-			"Delete(/Users/*/Library/Developer/Xcode/**)"
+			"Delete(/Users/*/Library/Developer/Xcode/**)",
+			"Agent(Explore)",
+			"Agent(Plan)",
+			"Agent(general-purpose)"
 		],
 		"defaultMode": "plan"
 	},

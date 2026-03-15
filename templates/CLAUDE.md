@@ -62,6 +62,8 @@
 
 Avoid running @hephaestus for tasks @atalanta or @calliope can handle.
 
+**Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
+
 ## Token Hygiene
 
 - This file: keep under 150 lines. Remove sections that don't affect agent behavior

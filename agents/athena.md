@@ -1,7 +1,7 @@
 ---
-name: athena
+name: Athena
 model: __MODEL_ARCHITECT__
-description: "Use this agent to design architecture, plan implementations, break down complex tasks, or evaluate technical approaches before writing code."
+description: "Use this agent to design architecture, plan implementations, break down complex tasks, or evaluate technical approaches before writing code. Use instead of Plan for any implementation planning or design tasks."
 tools:
   - Read
   - Grep

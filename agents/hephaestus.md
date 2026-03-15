@@ -1,5 +1,5 @@
 ---
-name: hephaestus
+name: Hephaestus
 model: __MODEL_IMPLEMENT__
 description: "Use this agent to write code, implement features, fix bugs, refactor, or build functionality."
 tools:
