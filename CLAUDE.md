@@ -1,4 +1,4 @@
-# Claude Code Agent System
+# ClaudeAgents
 
 7 agents, 11 skills, split-level hooks. Targets CC v2.1.75+.
 
