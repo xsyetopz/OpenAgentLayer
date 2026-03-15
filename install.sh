@@ -8,10 +8,13 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$SCRIPT_DIR"
-
 TARGET_DIR=""
 INSTALL_SCOPE="project"
 TIER="pro"
+
+die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
+info() { echo -e "  ${GREEN}✓${NC} $1"; }
+warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 usage() {
     echo -e "${GREEN}Claude Code Agent System Installer${NC}"
@@ -23,135 +26,65 @@ usage() {
     exit 1
 }
 
-die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
-info() { echo -e "  ${GREEN}✓${NC} $1"; }
-warn() { echo -e "  ${YELLOW}!${NC} $1"; }
-
-# --- Version check ---
 check_version() {
-    if ! command -v claude &>/dev/null; then
-        die "claude CLI not found. Install Claude Code first."
-    fi
-
-    local version
+    command -v claude &>/dev/null || die "claude CLI not found. Install Claude Code first."
     version=$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
-    if [[ -z "$version" ]]; then
-        warn "Could not parse claude version, proceeding anyway"
-        return
-    fi
-
-    local major minor patch
+    [[ -z "$version" ]] && { warn "Could not parse claude version, proceeding anyway"; return; }
     IFS='.' read -r major minor patch <<< "$version"
-    local required_major=2 required_minor=1 required_patch=75
-
-    if (( major < required_major )) || \
-       (( major == required_major && minor < required_minor )) || \
-       (( major == required_major && minor == required_minor && patch < required_patch )); then
-        die "Claude Code v${version} is too old. Requires >= 2.1.75"
-    fi
+    (( major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch >= 75))) )) || die "Claude Code v${version} is too old. Requires >= 2.1.75"
     info "Claude Code v${version}"
 }
 
-# --- Python 3 check ---
 check_python() {
-    if ! command -v python3 &>/dev/null; then
-        die "python3 not found. Hook scripts require Python 3."
-    fi
+    command -v python3 &>/dev/null || die "python3 not found. Hook scripts require Python 3."
     info "python3 found: $(python3 --version 2>&1)"
 }
 
-# --- Migration check ---
-check_migration() {
-    local claude_dir="$1"
-    local old_agents=0
-    for old_agent in planner.md coder.md reviewer.md; do
-        if [[ -f "$claude_dir/agents/$old_agent" ]]; then
-            old_agents=$((old_agents + 1))
-        fi
-    done
-    if [[ $old_agents -gt 0 ]]; then
-        warn "Found $old_agents old agent(s) (planner/coder/reviewer) in $claude_dir/agents/"
-        warn "These will be replaced by the new verb-named agents (architect/implement/audit/...)"
-        warn "Old agent files will be overwritten"
-    fi
-}
-
-# --- Parse args ---
-while [[ $# -gt 0 ]]; do
+agent_models() {
     case "$1" in
-        --global) INSTALL_SCOPE="global"; shift ;;
-        --pro) TIER="pro"; shift ;;
-        --max) TIER="max"; shift ;;
-        -h|--help) usage ;;
-        *)
-            if [[ -z "$TARGET_DIR" ]]; then
-                TARGET_DIR="$1"
-            else
-                die "Too many arguments"
-            fi
-            shift
+        pro)
+            MODEL_ARCHITECT="sonnet"
+            MODEL_IMPLEMENT="sonnet"
+            MODEL_AUDIT="sonnet"
+            MODEL_TEST="haiku"
+            MODEL_DOCUMENT="haiku"
+            MODEL_INVESTIGATE="sonnet"
+            MODEL_ORCHESTRATE="sonnet"
+            ;;
+        max)
+            MODEL_ARCHITECT="opus"
+            MODEL_IMPLEMENT="sonnet"
+            MODEL_AUDIT="sonnet"
+            MODEL_TEST="haiku"
+            MODEL_DOCUMENT="haiku"
+            MODEL_INVESTIGATE="sonnet"
+            MODEL_ORCHESTRATE="opus"
             ;;
     esac
-done
+}
 
-check_version
-check_python
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --global) INSTALL_SCOPE="global"; shift ;;
+            --pro) TIER="pro"; shift ;;
+            --max) TIER="max"; shift ;;
+            -h|--help) usage ;;
+            *)
+                [[ -z "$TARGET_DIR" ]] && TARGET_DIR="$1" || die "Too many arguments"
+                shift ;;
+        esac
+    done
+}
 
-if [[ "$INSTALL_SCOPE" == "global" ]]; then
-    TARGET_DIR="$HOME"
-    CLAUDE_DIR="$HOME/.claude"
-    echo -e "\n${GREEN}Installing to global: $CLAUDE_DIR${NC} (tier: $TIER)"
-else
-    [[ -z "$TARGET_DIR" ]] && die "Target directory required, or use --global"
-    [[ ! -d "$TARGET_DIR" ]] && die "Directory does not exist: $TARGET_DIR"
-    TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
-    CLAUDE_DIR="$TARGET_DIR/.claude"
-    echo -e "\n${GREEN}Installing to: $TARGET_DIR${NC} (tier: $TIER)"
-fi
+make_dirs() {
+    mkdir -p "$CLAUDE_DIR"/{agents,skills,hooks/scripts}
+    mkdir -p "$HOME/.claude/hooks"
+}
 
-check_migration "$CLAUDE_DIR"
-
-# --- Model mapping ---
-case "$TIER" in
-    pro)
-        MODEL_ARCHITECT="sonnet"
-        MODEL_IMPLEMENT="sonnet"
-        MODEL_AUDIT="sonnet"
-        MODEL_TEST="sonnet"
-        MODEL_DOCUMENT="sonnet"
-        MODEL_INVESTIGATE="sonnet"
-        MODEL_ORCHESTRATE="sonnet"
-        ;;
-    max)
-        MODEL_ARCHITECT="opus"
-        MODEL_IMPLEMENT="sonnet"
-        MODEL_AUDIT="sonnet"
-        MODEL_TEST="sonnet"
-        MODEL_DOCUMENT="sonnet"
-        MODEL_INVESTIGATE="sonnet"
-        MODEL_ORCHESTRATE="opus"
-        ;;
-esac
-
-mkdir -p "$CLAUDE_DIR"/{agents,skills,hooks/scripts}
-mkdir -p "$HOME/.claude/hooks"
-
-AGENT_COUNT=0
-SKILL_COUNT=0
-
-# --- Remove old agents if present ---
-for old_agent in planner.md coder.md reviewer.md; do
-    if [[ -f "$CLAUDE_DIR/agents/$old_agent" ]]; then
-        rm "$CLAUDE_DIR/agents/$old_agent"
-        warn "Removed old agent: $old_agent"
-    fi
-done
-
-# --- Install agents with model substitution ---
-echo -e "\nAgents:"
-for agent in "$REPO_DIR"/agents/*.md; do
-    [[ -f "$agent" ]] || continue
-    dest="$CLAUDE_DIR/agents/$(basename "$agent")"
+substitute_and_copy() {
+    local src="$1"
+    local dest="$2"
     sed -e "s/__MODEL_ARCHITECT__/$MODEL_ARCHITECT/g" \
         -e "s/__MODEL_IMPLEMENT__/$MODEL_IMPLEMENT/g" \
         -e "s/__MODEL_AUDIT__/$MODEL_AUDIT/g" \
@@ -159,202 +92,235 @@ for agent in "$REPO_DIR"/agents/*.md; do
         -e "s/__MODEL_DOCUMENT__/$MODEL_DOCUMENT/g" \
         -e "s/__MODEL_INVESTIGATE__/$MODEL_INVESTIGATE/g" \
         -e "s/__MODEL_ORCHESTRATE__/$MODEL_ORCHESTRATE/g" \
-        "$agent" > "$dest"
-    info "$(basename "$agent") (model substituted)"
-    AGENT_COUNT=$((AGENT_COUNT + 1))
-done
+        "$src" > "$dest"
+}
 
-# --- Install skills ---
-echo -e "\nSkills:"
-for skill_dir in "$REPO_DIR"/skills/*/; do
-    [[ -d "$skill_dir" ]] || continue
-    skill_name=$(basename "$skill_dir")
-    mkdir -p "$CLAUDE_DIR/skills/$skill_name"
-    for skill_file in "$skill_dir"*; do
-        [[ -f "$skill_file" ]] || continue
-        cp "$skill_file" "$CLAUDE_DIR/skills/$skill_name/$(basename "$skill_file")"
+copy_agents() {
+    AGENT_COUNT=0
+    echo -e "\nAgents:"
+    for agent in "$REPO_DIR"/agents/*.md; do
+        [[ -f "$agent" ]] || continue
+        local dest="$CLAUDE_DIR/agents/$(basename "$agent")"
+        substitute_and_copy "$agent" "$dest"
+        info "$(basename "$agent") (model substituted)"
+        AGENT_COUNT=$((AGENT_COUNT + 1))
     done
-    info "$skill_name"
-    SKILL_COUNT=$((SKILL_COUNT + 1))
-done
+}
 
-# --- Install hooks ---
-echo -e "\nHooks:"
+copy_skills() {
+    SKILL_COUNT=0
+    echo -e "\nSkills:"
+    for skill_dir in "$REPO_DIR"/skills/ca-*/; do
+        [[ -d "$skill_dir" ]] || continue
+        local skill_name=$(basename "$skill_dir")
+        mkdir -p "$CLAUDE_DIR/skills/$skill_name"
+        for skill_file in "$skill_dir"*; do
+            [[ -f "$skill_file" ]] || continue
+            cp "$skill_file" "$CLAUDE_DIR/skills/$skill_name/$(basename "$skill_file")"
+        done
+        info "$skill_name"
+        SKILL_COUNT=$((SKILL_COUNT + 1))
+    done
+}
 
-# User-level: redact hooks → ~/.claude/hooks/
-for hook in redact-pre.py redact-post.py; do
-    src="$REPO_DIR/hooks/$hook"
-    dest="$HOME/.claude/hooks/$hook"
-    if [[ -f "$src" ]]; then
-        cp "$src" "$dest"
-        chmod +x "$dest"
-        info "$hook → ~/.claude/hooks/ (user-level)"
+copy_hooks_scripts() {
+    echo -e "\nHooks:"
+    for hook in guard-secrets.py; do
+        local src="$REPO_DIR/hooks/$hook"
+        local dest="$HOME/.claude/hooks/$hook"
+        [[ -f "$src" ]] && { cp "$src" "$dest"; chmod +x "$dest"; info "$hook -> ~/.claude/hooks/ (user-level)"; }
+    done
+
+    [[ -f "$REPO_DIR/hooks/hooks.json" ]] && { cp "$REPO_DIR/hooks/hooks.json" "$CLAUDE_DIR/hooks.json"; info "hooks.json -> project hooks"; }
+
+    if [[ -d "$REPO_DIR/hooks/scripts" ]]; then
+        cp -r "$REPO_DIR/hooks/scripts/"* "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null || true
+        chmod +x "$CLAUDE_DIR/hooks/scripts/"*.py 2>/dev/null || true
+        HOOK_COUNT=$(ls -1 "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null | wc -l | tr -d ' ')
+        info "$HOOK_COUNT hook scripts -> project hooks"
     fi
-done
+}
 
-# Project-level: hooks.json + all scripts
-if [[ -f "$REPO_DIR/hooks/hooks.json" ]]; then
-    cp "$REPO_DIR/hooks/hooks.json" "$CLAUDE_DIR/hooks.json"
-    info "hooks.json → project hooks"
-fi
+settings_json_merge() {
+    echo -e "\nSettings:"
+    SETTINGS_FILE="$CLAUDE_DIR/settings.json"
+    [[ -f "$SETTINGS_FILE" ]] && { cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup"; info "Backed up existing settings.json"; }
 
-# Bulk copy all hook scripts
-if [[ -d "$REPO_DIR/hooks/scripts" ]]; then
-    cp -r "$REPO_DIR/hooks/scripts/"* "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null || true
-    chmod +x "$CLAUDE_DIR/hooks/scripts/"*.py "$CLAUDE_DIR/hooks/scripts/"*.sh 2>/dev/null || true
-    HOOK_COUNT=$(ls -1 "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null | wc -l | tr -d ' ')
-    info "$HOOK_COUNT hook scripts → project hooks"
-fi
+    local GUARD_SECRETS_ENTRY='{
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Bash|WebFetch",
+        "hooks": [{"type": "command", "command": "python3 \"$HOME\"/.claude/hooks/guard-secrets.py", "timeout": 5}]
+    }'
 
-# --- Merge settings.json ---
-echo -e "\nSettings:"
-SETTINGS_FILE="$CLAUDE_DIR/settings.json"
-
-if [[ -f "$SETTINGS_FILE" ]]; then
-    cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup"
-    info "Backed up existing settings.json"
-fi
-
-# Build the hook entries to merge
-REDACT_PRE_ENTRY='{
-    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Bash|WebFetch",
-    "hooks": [{"type": "command", "command": "\"$HOME\"/.claude/hooks/redact-pre.py", "timeout": 5}]
-}'
-
-REDACT_POST_ENTRY='{
-    "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|WebFetch",
-    "hooks": [{"type": "command", "command": "\"$HOME\"/.claude/hooks/redact-post.py", "timeout": 5}]
-}'
-
-if command -v jq &>/dev/null; then
-    if [[ -f "$SETTINGS_FILE" ]]; then
-        # Merge into existing settings
-        jq --argjson pre "$REDACT_PRE_ENTRY" \
-           --argjson post "$REDACT_POST_ENTRY" '
-            .env["CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"] //= "1" |
-            .env["DISABLE_AUTOUPDATER"] //= "1" |
-            (if .autoUpdatesChannel then .autoUpdatesChannel = "latest" else . end) |
-            .hooks.PreToolUse = ((.hooks.PreToolUse // []) | if any(.hooks[0].command? | test("redact-pre")) then . else . + [$pre] end) |
-            .hooks.PostToolUse = ((.hooks.PostToolUse // []) | if any(.hooks[0].command? | test("redact-post")) then . else . + [$post] end)
-        ' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
-        info "Merged into existing settings.json"
+    if command -v jq &>/dev/null; then
+        if [[ -f "$SETTINGS_FILE" ]]; then
+            jq --argjson pre "$GUARD_SECRETS_ENTRY" '
+                .env["CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"] //= "1" |
+                .env["DISABLE_AUTOUPDATER"] //= "1" |
+                (if .autoUpdatesChannel then .autoUpdatesChannel = "latest" else . end) |
+                .hooks.PreToolUse = ((.hooks.PreToolUse // []) | if any(.hooks[0].command? | test("guard-secrets")) then . else . + [$pre] end)
+            ' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
+            info "Merged into existing settings.json"
+        else
+            jq -n --argjson pre "$GUARD_SECRETS_ENTRY" '{
+                env: {
+                    CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1",
+                    DISABLE_AUTOUPDATER: "1"
+                },
+                autoUpdatesChannel: "latest",
+                hooks: {
+                    PreToolUse: [$pre]
+                }
+            }' > "$SETTINGS_FILE"
+            info "Created settings.json"
+        fi
     else
-        # Create minimal settings
-        jq -n --argjson pre "$REDACT_PRE_ENTRY" \
-              --argjson post "$REDACT_POST_ENTRY" '{
-            env: {
-                CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1",
-                DISABLE_AUTOUPDATER: "1"
-            },
-            autoUpdatesChannel: "latest",
-            hooks: {
-                PreToolUse: [$pre],
-                PostToolUse: [$post]
-            }
-        }' > "$SETTINGS_FILE"
-        info "Created settings.json"
+        warn "jq not found - skipping settings.json merge. Install jq and re-run."
     fi
-else
-    warn "jq not found — skipping settings.json merge. Install jq and re-run."
-fi
+}
 
-# --- Install CLAUDE.md template ---
-echo -e "\nTemplate:"
-if [[ "$INSTALL_SCOPE" == "project" ]]; then
-    CLAUDE_MD="$TARGET_DIR/CLAUDE.md"
-    if [[ -f "$CLAUDE_MD" ]]; then
-        warn "CLAUDE.md already exists at target — skipping (review templates/CLAUDE.md manually)"
+install_template() {
+    echo -e "\nTemplate:"
+    if [[ "$INSTALL_SCOPE" == "project" ]]; then
+        CLAUDE_MD="$TARGET_DIR/CLAUDE.md"
+        [[ -f "$CLAUDE_MD" ]] && warn "CLAUDE.md already exists at target - skipping (review templates/CLAUDE.md manually)" \
+            || { cp "$REPO_DIR/templates/CLAUDE.md" "$CLAUDE_MD"; info "CLAUDE.md installed"; }
     else
-        cp "$REPO_DIR/templates/CLAUDE.md" "$CLAUDE_MD"
-        info "CLAUDE.md installed"
+        warn "Skipping CLAUDE.md for global install (install per-project instead)"
     fi
-else
-    warn "Skipping CLAUDE.md for global install (install per-project instead)"
-fi
+}
 
-# --- Validation ---
-echo -e "\nValidation:"
-ERRORS=0
+check_json() {
+    local file="$1"
+    local label="$2"
+    if [[ -f "$file" ]]; then
+        if jq empty "$file" 2>/dev/null; then
+            info "$label is valid JSON"
+        else
+            echo -e "  ${RED}✗${NC} $label is invalid JSON"
+            return 1
+        fi
+    fi
+    return 0
+}
 
-# Check no __MODEL__ remnants
-if grep -r '__MODEL_' "$CLAUDE_DIR/agents/" &>/dev/null; then
-    echo -e "  ${RED}✗${NC} Found unreplaced __MODEL__ placeholders in agents"
-    ERRORS=$((ERRORS + 1))
-else
-    info "No __MODEL__ remnants"
-fi
+validate_python_hooks() {
+    PYTHON_ERRORS=0
+    for pyfile in "$CLAUDE_DIR/hooks/scripts/"*.py "$HOME/.claude/hooks/"*.py; do
+        [[ -f "$pyfile" ]] || continue
+        python3 -c "import py_compile; py_compile.compile('$pyfile', doraise=True)" 2>/dev/null || {
+            echo -e "  ${RED}✗${NC} Syntax error in $(basename "$pyfile")"
+            PYTHON_ERRORS=$((PYTHON_ERRORS + 1))
+        }
+    done
+    [[ $PYTHON_ERRORS -eq 0 ]] && info "All Python hooks parse without errors"
+    return $PYTHON_ERRORS
+}
 
-# Check hooks.json is valid JSON
-if [[ -f "$CLAUDE_DIR/hooks.json" ]]; then
-    if jq empty "$CLAUDE_DIR/hooks.json" 2>/dev/null; then
-        info "hooks.json is valid JSON"
+validate_ca_skills() {
+    SKILL_ERRORS=0
+    for skill_dir in "$CLAUDE_DIR"/skills/ca-*/; do
+        [[ -d "$skill_dir" ]] || continue
+        [[ -f "$skill_dir/SKILL.md" ]] || {
+            echo -e "  ${RED}✗${NC} Missing SKILL.md in $(basename "$skill_dir")"
+            SKILL_ERRORS=$((SKILL_ERRORS + 1))
+        }
+    done
+    [[ $SKILL_ERRORS -eq 0 ]] && info "All ca-* skills have SKILL.md"
+    return $SKILL_ERRORS
+}
+
+check_directories_not_present() {
+    local dirs=("$@")
+    local err=0
+    for d in "${dirs[@]}"; do
+        if [[ -d "$CLAUDE_DIR/skills/$d" ]]; then
+            echo -e "  ${RED}✗${NC} Old skill directory still present: $d"
+            err=$((err + 1))
+        fi
+    done
+    return $err
+}
+
+validate_agents() {
+    local expected=(athena hephaestus nemesis atalanta calliope hermes odysseus)
+    local errs=0
+    for agent in "${expected[@]}"; do
+        [[ -f "$CLAUDE_DIR/agents/$agent.md" ]] || {
+            echo -e "  ${RED}✗${NC} Missing agent: $agent.md"
+            errs=$((errs + 1))
+        }
+    done
+    [[ $errs -eq 0 ]] && info "All Greek agents present"
+    return $errs
+}
+
+report_summary() {
+    echo -e "\n${GREEN}Done!${NC} Installed $AGENT_COUNT agents, $SKILL_COUNT skills"
+    echo ""
+    echo "Agents:"
+    echo "  @athena      - design, plan, architect       (model: $MODEL_ARCHITECT)"
+    echo "  @hephaestus  - write code, fix bugs          (model: $MODEL_IMPLEMENT)"
+    echo "  @nemesis     - review, security audit        (model: $MODEL_AUDIT)"
+    echo "  @atalanta    - run tests, diagnose failures  (model: $MODEL_TEST)"
+    echo "  @calliope    - write/edit documentation      (model: $MODEL_DOCUMENT)"
+    echo "  @hermes      - research, explore codebase    (model: $MODEL_INVESTIGATE)"
+    echo "  @odysseus    - coordinate multi-step tasks   (model: $MODEL_ORCHESTRATE)"
+    echo ""
+    echo "Skills (ca-* prefix):"
+    for skill_dir in "$CLAUDE_DIR"/skills/ca-*/; do
+        [[ -d "$skill_dir" ]] || continue
+        echo "  /$(basename "$skill_dir")"
+    done
+}
+
+main() {
+    parse_args "$@"
+    check_version
+    check_python
+
+    if [[ "$INSTALL_SCOPE" == "global" ]]; then
+        TARGET_DIR="$HOME"
+        CLAUDE_DIR="$HOME/.claude"
+        echo -e "\n${GREEN}Installing to global: $CLAUDE_DIR${NC} (tier: $TIER)"
     else
-        echo -e "  ${RED}✗${NC} hooks.json is invalid JSON"
-        ERRORS=$((ERRORS + 1))
+        [[ -z "$TARGET_DIR" ]] && die "Target directory required, or use --global"
+        [[ ! -d "$TARGET_DIR" ]] && die "Directory does not exist: $TARGET_DIR"
+        TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
+        CLAUDE_DIR="$TARGET_DIR/.claude"
+        echo -e "\n${GREEN}Installing to: $TARGET_DIR${NC} (tier: $TIER)"
     fi
-fi
 
-# Check settings.json is valid JSON
-if [[ -f "$SETTINGS_FILE" ]]; then
-    if jq empty "$SETTINGS_FILE" 2>/dev/null; then
-        info "settings.json is valid JSON"
-    else
-        echo -e "  ${RED}✗${NC} settings.json is invalid JSON"
-        ERRORS=$((ERRORS + 1))
-    fi
-fi
+    agent_models "$TIER"
+    make_dirs
+    copy_agents
+    copy_skills
+    copy_hooks_scripts
+    settings_json_merge
+    install_template
 
-# Check Python hooks parse without syntax errors
-PYTHON_ERRORS=0
-for pyfile in "$CLAUDE_DIR/hooks/scripts/"*.py; do
-    [[ -f "$pyfile" ]] || continue
-    if ! python3 -c "import py_compile; py_compile.compile('$pyfile', doraise=True)" 2>/dev/null; then
-        echo -e "  ${RED}✗${NC} Syntax error in $(basename "$pyfile")"
-        PYTHON_ERRORS=$((PYTHON_ERRORS + 1))
-    fi
-done
-if [[ $PYTHON_ERRORS -eq 0 ]]; then
-    info "All Python hooks parse without errors"
-else
-    ERRORS=$((ERRORS + PYTHON_ERRORS))
-fi
+    echo -e "\nValidation:"
+    ERRORS=0
 
-# Check for banned patterns in agents (exclude lines that list them as prohibited)
-if grep -riE '(robust|seamless|comprehensive|allowedTools)' "$CLAUDE_DIR/agents/" | grep -viE '(never use|no .*(slop|ai)|do not|banned|prohibited|no ai slop)' &>/dev/null; then
-    echo -e "  ${RED}✗${NC} Found banned patterns in agents (outside prohibition rules)"
-    ERRORS=$((ERRORS + 1))
-else
-    info "No banned patterns in agents"
-fi
+    grep -r '__MODEL_' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __MODEL__ placeholders in agents"; ERRORS=$((ERRORS+1)); } \
+        || info "No __MODEL__ remnants"
 
-# Check for old autonomous-executor patterns in agents
-if grep -riE '(just do it|do not offer alternatives|don.t explain|no teaching)' "$CLAUDE_DIR/agents/" &>/dev/null; then
-    echo -e "  ${RED}✗${NC} Found old autonomous-executor patterns in agents"
-    ERRORS=$((ERRORS + 1))
-else
-    info "No old autonomous-executor patterns in agents"
-fi
+    check_json "$CLAUDE_DIR/hooks.json" "hooks.json" || ERRORS=$((ERRORS+1))
+    check_json "$CLAUDE_DIR/settings.json" "settings.json" || ERRORS=$((ERRORS+1))
 
-# Check for old agent names
-if [[ -f "$CLAUDE_DIR/agents/planner.md" ]] || [[ -f "$CLAUDE_DIR/agents/coder.md" ]] || [[ -f "$CLAUDE_DIR/agents/reviewer.md" ]]; then
-    echo -e "  ${RED}✗${NC} Old agent files still present (planner/coder/reviewer)"
-    ERRORS=$((ERRORS + 1))
-else
-    info "No old agent files"
-fi
+    validate_python_hooks; ERRORS=$((ERRORS + $?))
+    validate_ca_skills; ERRORS=$((ERRORS + $?))
 
-echo -e "\n${GREEN}Done!${NC} Installed $AGENT_COUNT agents, $SKILL_COUNT skills"
-echo ""
-echo "Agents:"
-echo "  @architect    — design, plan, architect     (model: $MODEL_ARCHITECT)"
-echo "  @implement    — write code, fix bugs        (model: $MODEL_IMPLEMENT)"
-echo "  @audit        — review, security audit      (model: $MODEL_AUDIT)"
-echo "  @test         — run tests, diagnose fails   (model: $MODEL_TEST)"
-echo "  @document     — write/edit documentation    (model: $MODEL_DOCUMENT)"
-echo "  @investigate  — research, explore codebase  (model: $MODEL_INVESTIGATE)"
-echo "  @orchestrate  — coordinate multi-step tasks (model: $MODEL_ORCHESTRATE)"
+    check_directories_not_present coding-standards desloppify git-workflow collaboration-protocol security-checklist test-patterns documentation-standards performance-guide error-handling session-export refactor-guide
+    ERRORS=$((ERRORS + $?))
 
-if [[ $ERRORS -gt 0 ]]; then
-    echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"
-    exit 1
-fi
+    check_directories_not_present ca-coding-standards ca-git-workflow ca-collaboration ca-security-checklist ca-documentation ca-performance ca-error-handling ca-refactor
+    ERRORS=$((ERRORS + $?))
+
+    validate_agents; ERRORS=$((ERRORS + $?))
+
+    report_summary
+
+    [[ $ERRORS -gt 0 ]] && { echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1; }
+}
+
+main "$@"

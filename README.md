@@ -1,85 +1,88 @@
-# Claude Code Agent System
+# ClaudeAgents
 
-Agent definitions, skills, and hooks for Claude Code. Designed for CC v2.1.71+.
+Agent definitions, skills, and hooks for Claude Code. Targets CC v2.1.75+.
 
 ## What's Included
 
-- **7 agents** — architect, implement, audit, test, document, investigate, orchestrate
-- **10 skills** — coding-standards, desloppify, git-workflow, collaboration-protocol, security-checklist, test-patterns, refactor-guide, documentation-standards, performance-guide, error-handling
-- **8 hooks** — secret redaction (pre/post), LSP diagnostics, auto-format, anti-placeholder, anti-comment-slop, completion-check, pre-commit-quality
-- **Template CLAUDE.md** — collaboration protocol and behavioral constraints for target projects
+- **7 agents** - athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus
+- **11 skills** - ca-review-code, ca-desloppify, ca-ship, ca-decide, ca-audit-security, ca-test-patterns, ca-document, ca-optimize, ca-handle-errors, ca-session-export, ca-commit
+- **6 hook scripts** - guard-secrets, guard-commands, check-budget, validate-write, scan-completion, _lib
+- **Template CLAUDE.md** - collaboration protocol and behavioral constraints for target projects
 
 ## Install
 
 ```bash
-# To a project (Pro tier — all sonnet)
+# To a project (Pro tier - all sonnet, haiku for test/docs)
 ./install.sh /path/to/project --pro
 
-# To a project (Max tier — opus for architect/orchestrate, sonnet for rest)
+# To a project (Max tier - opus for athena/odysseus, sonnet for rest)
 ./install.sh /path/to/project --max
 
 # Global install
 ./install.sh --global --pro
 ```
 
-Requires: Claude Code >= 2.1.75 (added 1M context window to Opus 4.6 on Max && Enterprise plans), Python 3, jq.
+Requires: Claude Code >= 2.1.75, Python 3, jq.
 
 The installer:
 
 - Checks Claude Code version >= 2.1.75
 - Validates Python 3 is available (required by hook scripts)
-- Detects and removes old agent files (planner/coder/reviewer)
+- Removes old agent and skill files from previous versions
 - Copies agents with model substitution based on tier
-- Copies all 10 skills to `.claude/skills/`
-- Installs redact hooks to `~/.claude/hooks/` (user-level)
-- Bulk copies all hook scripts to `.claude/hooks/scripts/` (project-level)
+- Copies all 11 skills to `.claude/skills/`
+- Installs guard-secrets hook to `~/.claude/hooks/` (user-level)
+- Bulk copies hook scripts to `.claude/hooks/scripts/` (project-level)
 - Merges `settings.json` via `jq` (appends, never replaces)
 - Copies `CLAUDE.md` template to project root (skips if exists)
-- Validates: JSON, Python syntax, banned patterns, model placeholders
+- Validates: JSON, Python syntax, skill structure, model placeholders
 
 ## Agents
 
-| Agent          | Pro Model | Max Model | Purpose                                        |
-| -------------- | --------- | --------- | ---------------------------------------------- |
-| `@architect`   | sonnet    | opus      | Design, plan, architect                        |
-| `@implement`   | sonnet    | sonnet    | Write code, fix bugs, build features           |
-| `@audit`       | sonnet    | sonnet    | Review code, security audit, verify changes    |
-| `@test`        | sonnet    | sonnet    | Run tests, parse failures, diagnose root cause |
-| `@document`    | sonnet    | sonnet    | Write/edit documentation (markdown only)       |
-| `@investigate` | sonnet    | sonnet    | Research, explore codebase, cite sources       |
-| `@orchestrate` | sonnet    | opus      | Coordinate multi-step tasks, delegate          |
-
-All agents include a shared Collaboration Protocol: adaptive depth, tradeoff-first responses, finish-or-flag, and evidence-over-empathy.
+| Agent         | Pro Model | Max Model | Purpose                                  |
+| ------------- | --------- | --------- | ---------------------------------------- |
+| `@athena`     | sonnet    | opus      | Design, plan, architect                  |
+| `@hephaestus` | sonnet    | sonnet    | Write code, fix bugs, build features     |
+| `@nemesis`    | sonnet    | sonnet    | Review code, security audit              |
+| `@atalanta`   | haiku     | haiku     | Run tests, parse failures, root causes   |
+| `@calliope`   | haiku     | haiku     | Write/edit documentation (markdown only) |
+| `@hermes`     | sonnet    | sonnet    | Research, explore codebase, cite sources |
+| `@odysseus`   | sonnet    | opus      | Multi-step delegation, progress tracking |
 
 ## Skills
 
-| Skill                     | Slash Command              | Triggers                                     |
-| ------------------------- | -------------------------- | -------------------------------------------- |
-| `coding-standards`        | `/coding-standards`        | Writing, editing, or reviewing code          |
-| `desloppify`              | `/desloppify`              | AI slop detection, "clean up", comment audit |
-| `git-workflow`            | `/git-workflow`            | Commits, branches, PRs                       |
-| `collaboration-protocol`  | `/collaboration-protocol`  | Decision making, tradeoffs, options          |
-| `security-checklist`      | `/security-checklist`      | Security audit, OWASP, vulnerabilities       |
-| `test-patterns`           | `/test-patterns`           | Writing tests, test strategy, coverage       |
-| `refactor-guide`          | `/refactor-guide`          | Refactoring, restructuring, extracting       |
-| `documentation-standards` | `/documentation-standards` | READMEs, changelogs, ADRs, API docs          |
-| `performance-guide`       | `/performance-guide`       | Performance, optimization, profiling         |
-| `error-handling`          | `/error-handling`          | Error handling, Result types, exceptions     |
+| Skill               | Slash Command        | Triggers                                     |
+| ------------------- | -------------------- | -------------------------------------------- |
+| `ca-review-code`    | `/ca-review-code`    | Writing, editing, or reviewing code          |
+| `ca-desloppify`     | `/ca-desloppify`     | AI slop detection, "clean up", comment audit |
+| `ca-ship`           | `/ca-ship`           | Commits, branches, PRs, git workflow         |
+| `ca-decide`         | `/ca-decide`         | Decision making, tradeoffs, options          |
+| `ca-audit-security` | `/ca-audit-security` | Security audit, OWASP, vulnerabilities       |
+| `ca-test-patterns`  | `/ca-test-patterns`  | Writing tests, test strategy, coverage       |
+| `ca-document`       | `/ca-document`       | READMEs, changelogs, ADRs, API docs          |
+| `ca-optimize`       | `/ca-optimize`       | Performance, optimization, profiling         |
+| `ca-handle-errors`  | `/ca-handle-errors`  | Error handling, Result types, exceptions     |
+| `ca-session-export` | `/ca-session-export` | Session handoff, context preservation        |
+| `ca-commit`         | `/ca-commit`         | Quick commits with Conventional Commits      |
 
 ## Hooks
 
-| Hook                  | Level   | Event                    | What It Does                                         |
-| --------------------- | ------- | ------------------------ | ---------------------------------------------------- |
-| redact-pre.py         | User    | PreToolUse               | Blocks auth header leaks, .env reads, scrubs secrets |
-| redact-post.py        | User    | PostToolUse              | Redacts secrets from output, truncates at 30K        |
-| pre-commit-quality.py | Project | PreToolUse (Bash)        | Blocks commits with secrets, .env, conflicts, TODOs  |
-| LSP diagnostics       | Project | PostToolUse (Write/Edit) | Prompts to check and fix type errors                 |
-| auto-format.sh        | Project | PostToolUse (Write/Edit) | Runs language-appropriate formatter                  |
-| anti-placeholder.py   | Project | PostToolUse (Write/Edit) | Hard blocks TODO/stubs, warns on hedge language      |
-| anti-comment-slop.py  | Project | PostToolUse (Write/Edit) | Warns on obvious/tautological comments               |
-| completion-check.py   | Project | Stop, SubagentStop       | Scans modified files for placeholder patterns        |
-| collaboration-check   | Project | SubagentStop (prompt)    | Verifies agents presented tradeoffs for decisions    |
-| scope-check           | Project | SubagentStop (prompt)    | Detects silent scope reduction by agents             |
+**User-level** (`~/.claude/hooks/`):
+
+| Hook             | Event      | What It Does                                                  |
+| ---------------- | ---------- | ------------------------------------------------------------- |
+| guard-secrets.py | PreToolUse | Blocks .env reads/writes, auth-header echoes, force-push main |
+
+**Project-level** (`.claude/hooks.json`):
+
+| Hook / Prompt      | Event                    | What It Does                                        |
+| ------------------ | ------------------------ | --------------------------------------------------- |
+| check-budget.py    | SessionStart             | Warns when CLAUDE.md/MEMORY.md exceeds line budget  |
+| guard-commands.py  | PreToolUse (Bash)        | Blocks large-output commands, commit quality checks |
+| validate-write.py  | PostToolUse (Write/Edit) | Auto-format, placeholder detection, comment slop    |
+| scan-completion.py | SubagentStop, Stop       | Scans modified files for placeholder patterns       |
+| LSP diagnostics    | PostToolUse (prompt)     | Prompts to check and fix type errors                |
+| scope-check        | SubagentStop (prompt)    | Detects silent scope reduction by agents            |
 
 ## License
 
