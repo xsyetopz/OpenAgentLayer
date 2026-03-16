@@ -42,20 +42,11 @@ remove_framework_files() {
         info "Removed agents/"
     fi
 
-    # Skills: remove skills/ca/ directory (current layout)
-    if [[ -d "$CLAUDE_DIR/skills/ca" ]]; then
-        rm -rf "$CLAUDE_DIR/skills/ca"
-        info "Removed skills/ca/"
+    # Skills: remove skills/cca/ directory (current layout)
+    if [[ -d "$CLAUDE_DIR/skills/cca" ]]; then
+        rm -rf "$CLAUDE_DIR/skills/cca"
+        info "Removed skills/cca/"
     fi
-
-    # Also remove any old ca-* directories (legacy migration)
-    local skill_count=0
-    for skill_dir in "$CLAUDE_DIR"/skills/ca-*/; do
-        [[ -d "$skill_dir" ]] || continue
-        rm -rf "$skill_dir"
-        skill_count=$((skill_count + 1))
-    done
-    [[ $skill_count -gt 0 ]] && info "Removed $skill_count legacy ca-* skill directories"
 
     # Remove skills/ if empty
     [[ -d "$CLAUDE_DIR/skills" ]] && rmdir "$CLAUDE_DIR/skills" 2>/dev/null && info "Removed empty skills/" || true
@@ -156,7 +147,7 @@ clean_settings_json() {
 confirm_uninstall() {
     echo -e "\n${YELLOW}This will remove the following from $CLAUDE_DIR:${NC}"
     echo "  - agents/ directory"
-    echo "  - skills/ca/ directory (and legacy ca-*/ directories)"
+    echo "  - skills/cca/ directory"
     echo "  - hooks/scripts/ directory"
     echo "  - hooks.json"
     echo ""
