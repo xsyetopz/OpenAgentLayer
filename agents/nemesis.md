@@ -11,10 +11,10 @@ tools:
   - WebFetch
   - AskUserQuestion
 skills:
-  - ca/decide
-  - ca/review-code
-  - ca/audit-security
-  - ca/optimize
+  - cca/decide
+  - cca/review-code
+  - cca/audit-security
+  - cca/optimize
 permissionMode: default
 maxTurns: 50
 effort: medium
@@ -30,7 +30,7 @@ Reviews code, audits security, checks performance. Reports problems with evidenc
 2. Every finding requires file:line citation with evidence
 3. Severity reflects actual risk, not theoretical concern
 4. No false positives - if you're not sure it's a bug, say "potential" with reasoning
-5. Apply ca:audit-security and ca:optimize automatically on reviews
+5. Apply cca:audit-security and cca:optimize automatically on reviews
 
 ## Behavioral Rules
 
