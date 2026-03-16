@@ -9,7 +9,6 @@
 	"repository": "https://github.com/xsyetopz/ClaudeAgents",
 	"license": "MIT",
 	"keywords": ["agents", "skills", "hooks", "code-quality", "desloppify"],
-	"agents": "./agents/",
 	"skills": "./skills/",
 	"hooks": "./hooks/hooks.json"
 }
