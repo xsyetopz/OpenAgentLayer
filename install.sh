@@ -43,6 +43,33 @@ check_python() {
     info "python3 found: $(python3 --version 2>&1)"
 }
 
+detect_plugin_conflict() {
+    local plugin_cache="$HOME/.claude/plugins/cache/ca"
+    local settings="$CLAUDE_DIR/settings.json"
+    local conflict=0
+
+    if [[ -d "$plugin_cache" ]]; then
+        warn "ClaudeAgents plugin detected in plugin cache: $plugin_cache"
+        conflict=1
+    fi
+
+    if [[ -f "$settings" ]] && command -v jq &>/dev/null; then
+        if jq -e '.enabledPlugins | keys[] | select(. == "ca" or test("ClaudeAgents"))' "$settings" &>/dev/null; then
+            warn "ClaudeAgents plugin enabled in settings.json"
+            conflict=1
+        fi
+    fi
+
+    if [[ $conflict -eq 1 ]]; then
+        echo -e "\n${YELLOW}ClaudeAgents appears to be installed as a plugin.${NC}"
+        echo "Running both plugin and manual install may cause conflicts (duplicate agents/skills)."
+        echo "Consider disabling the plugin first: claude plugin uninstall ca"
+        echo ""
+        read -rp "Continue with manual install anyway? [y/N] " confirm
+        [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
+    fi
+}
+
 agent_models() {
     case "$1" in
         pro)
@@ -82,13 +109,20 @@ parse_args() {
 }
 
 make_dirs() {
-    mkdir -p "$CLAUDE_DIR"/{agents,skills,hooks/scripts}
+    mkdir -p "$CLAUDE_DIR"/{agents,skills/ca,hooks/scripts}
+    detect_plugin_conflict
     mkdir -p "$HOME/.claude/hooks"
 }
 
 substitute_and_copy() {
     local src="$1"
     local dest="$2"
+    local shared_constraints=""
+    if [[ -f "$REPO_DIR/templates/shared-constraints.md" ]]; then
+        shared_constraints=$(cat "$REPO_DIR/templates/shared-constraints.md")
+    fi
+    local tmp
+    tmp=$(mktemp)
     sed -e "s/__MODEL_ARCHITECT__/$MODEL_ARCHITECT/g" \
         -e "s/__MODEL_IMPLEMENT__/$MODEL_IMPLEMENT/g" \
         -e "s/__MODEL_AUDIT__/$MODEL_AUDIT/g" \
@@ -96,7 +130,13 @@ substitute_and_copy() {
         -e "s/__MODEL_DOCUMENT__/$MODEL_DOCUMENT/g" \
         -e "s/__MODEL_INVESTIGATE__/$MODEL_INVESTIGATE/g" \
         -e "s/__MODEL_ORCHESTRATE__/$MODEL_ORCHESTRATE/g" \
-        "$src" > "$dest"
+        "$src" > "$tmp"
+    if grep -q '__SHARED_CONSTRAINTS__' "$tmp" 2>/dev/null && [[ -n "$shared_constraints" ]]; then
+        awk -v constraints="$shared_constraints" '{gsub(/__SHARED_CONSTRAINTS__/, constraints); print}' "$tmp" > "$dest"
+    else
+        cp "$tmp" "$dest"
+    fi
+    rm -f "$tmp"
 }
 
 # --- Diff helpers for --update mode ---
@@ -145,14 +185,14 @@ update_interactive() {
         diff_agent "agent: $name" "$CLAUDE_DIR/agents/$name" "$agent" || changes=$((changes + 1))
     done
 
-    # Check skills
-    for skill_dir in "$REPO_DIR"/skills/ca-*/; do
+    # Check skills (repo: skills/<name>/, installed: skills/ca/<name>/)
+    for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill_name=$(basename "$skill_dir")
         for skill_file in "$skill_dir"*; do
             [[ -f "$skill_file" ]] || continue
             local fname=$(basename "$skill_file")
-            diff_file "skill: $skill_name/$fname" "$CLAUDE_DIR/skills/$skill_name/$fname" "$skill_file" || changes=$((changes + 1))
+            diff_file "skill: ca:$skill_name/$fname" "$CLAUDE_DIR/skills/ca/$skill_name/$fname" "$skill_file" || changes=$((changes + 1))
         done
     done
 
@@ -202,18 +242,31 @@ copy_agents() {
     done
 }
 
+migrate_old_skills() {
+    # Remove old ca-* skill directories from target
+    local old_count=0
+    for old_dir in "$CLAUDE_DIR"/skills/ca-*/; do
+        [[ -d "$old_dir" ]] || continue
+        rm -rf "$old_dir"
+        old_count=$((old_count + 1))
+    done
+    [[ $old_count -gt 0 ]] && warn "Removed $old_count old ca-* skill directories (migrated to ca/ prefix)"
+}
+
 copy_skills() {
     SKILL_COUNT=0
+    migrate_old_skills
     echo -e "\nSkills:"
-    for skill_dir in "$REPO_DIR"/skills/ca-*/; do
+    # Skills live at skills/<name>/ in repo, install to skills/ca/<name>/ for manual installs
+    for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill_name=$(basename "$skill_dir")
-        mkdir -p "$CLAUDE_DIR/skills/$skill_name"
+        mkdir -p "$CLAUDE_DIR/skills/ca/$skill_name"
         for skill_file in "$skill_dir"*; do
             [[ -f "$skill_file" ]] || continue
-            cp "$skill_file" "$CLAUDE_DIR/skills/$skill_name/$(basename "$skill_file")"
+            cp "$skill_file" "$CLAUDE_DIR/skills/ca/$skill_name/$(basename "$skill_file")"
         done
-        info "$skill_name"
+        info "ca:$skill_name"
         SKILL_COUNT=$((SKILL_COUNT + 1))
     done
 }
@@ -415,14 +468,14 @@ validate_python_hooks() {
 
 validate_ca_skills() {
     SKILL_ERRORS=0
-    for skill_dir in "$CLAUDE_DIR"/skills/ca-*/; do
+    for skill_dir in "$CLAUDE_DIR"/skills/ca/*/; do
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/SKILL.md" ]] || {
-            echo -e "  ${RED}✗${NC} Missing SKILL.md in $(basename "$skill_dir")"
+            echo -e "  ${RED}✗${NC} Missing SKILL.md in ca/$(basename "$skill_dir")"
             SKILL_ERRORS=$((SKILL_ERRORS + 1))
         }
     done
-    [[ $SKILL_ERRORS -eq 0 ]] && info "All ca-* skills have SKILL.md"
+    [[ $SKILL_ERRORS -eq 0 ]] && info "All ca:* skills have SKILL.md"
     return $SKILL_ERRORS
 }
 
@@ -463,10 +516,10 @@ report_summary() {
     echo "  @hermes      - research, explore codebase    (model: $MODEL_INVESTIGATE)"
     echo "  @odysseus    - coordinate multi-step tasks   (model: $MODEL_ORCHESTRATE)"
     echo ""
-    echo "Skills (ca-* prefix):"
-    for skill_dir in "$CLAUDE_DIR"/skills/ca-*/; do
+    echo "Skills (ca: prefix):"
+    for skill_dir in "$CLAUDE_DIR"/skills/ca/*/; do
         [[ -d "$skill_dir" ]] || continue
-        echo "  /$(basename "$skill_dir")"
+        echo "  /ca:$(basename "$skill_dir")"
     done
 }
 
@@ -506,6 +559,9 @@ main() {
     grep -r '__MODEL_' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __MODEL__ placeholders in agents"; ERRORS=$((ERRORS+1)); } \
         || info "No __MODEL__ remnants"
 
+    grep -r '__SHARED_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } \
+        || info "No __SHARED_CONSTRAINTS__ remnants"
+
     check_json "$CLAUDE_DIR/hooks.json" "hooks.json" || ERRORS=$((ERRORS+1))
     check_json "$CLAUDE_DIR/settings.json" "settings.json" || ERRORS=$((ERRORS+1))
 
@@ -516,6 +572,10 @@ main() {
     ERRORS=$((ERRORS + $?))
 
     check_directories_not_present ca-coding-standards ca-git-workflow ca-collaboration ca-security-checklist ca-documentation ca-performance ca-error-handling ca-refactor
+    ERRORS=$((ERRORS + $?))
+
+    # Check for old ca-* flat skill directories (pre-plugin migration)
+    check_directories_not_present ca-review-code ca-desloppify ca-ship ca-decide ca-audit-security ca-test-patterns ca-document ca-optimize ca-handle-errors ca-session-export ca-commit
     ERRORS=$((ERRORS + $?))
 
     validate_agents; ERRORS=$((ERRORS + $?))

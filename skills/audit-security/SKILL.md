@@ -1,5 +1,5 @@
 ---
-name: ca-audit-security
+name: audit-security
 description: >
   Security audit checklist covering OWASP Top 10, secrets management, dependency vulnerabilities,
   and hardening. Triggers: security, audit, OWASP, vulnerability, hardening, CVE, secrets,

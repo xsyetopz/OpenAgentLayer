@@ -27,8 +27,8 @@ CTX_THRESHOLD_RED=450000
 CTX_THRESHOLD_ORANGE=300000
 CTX_THRESHOLD_YELLOW=150000
 
-CTX_SUFFIX_BLINK_RED=" ctx — /ca-session-export"
-CTX_SUFFIX_RED=" ctx — /ca-session-export"
+CTX_SUFFIX_BLINK_RED=" ctx — /ca:session-export"
+CTX_SUFFIX_RED=" ctx — /ca:session-export"
 CTX_SUFFIX_ORANGE=" ctx"
 CTX_SUFFIX_YELLOW=" ctx"
 CTX_SUFFIX_GRAY=" ctx"

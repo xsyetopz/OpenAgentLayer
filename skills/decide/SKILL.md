@@ -1,5 +1,5 @@
 ---
-name: ca-decide
+name: decide
 description: >
   Shared collaboration protocol for presenting options, tradeoffs, and rationale
   in technical decisions. Triggers: present options, tradeoffs, collaboration, decision making,

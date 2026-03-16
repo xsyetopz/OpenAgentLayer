@@ -1,5 +1,5 @@
 ---
-name: ca-ship
+name: ship
 description: >
   Git workflow conventions for commits, branches, and PRs. Use when the user mentions
   "commit", "branch", "PR", "pull request", "merge", "rebase", "git workflow", or asks

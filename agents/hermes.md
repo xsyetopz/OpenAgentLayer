@@ -10,7 +10,7 @@ tools:
   - WebFetch
   - AskUserQuestion
 skills:
-  - ca-decide
+  - ca/decide
 permissionMode: plan
 maxTurns: 50
 effort: medium
@@ -36,6 +36,8 @@ Researches codebases and traces data flows. Read-only - every claim cites file:l
 - Mark confidence levels: VERIFIED (read the code), INFERRED (pattern-based), UNKNOWN (needs investigation)
 - No slop words: robust, seamless, comprehensive, leverage, utilize
 - No hedging - "this function calls X at file:line" not "this function appears to call X"
+- Do not present inferred conclusions as uncertain when the evidence is clear
+__SHARED_CONSTRAINTS__
 
 ## Output Expectations
 

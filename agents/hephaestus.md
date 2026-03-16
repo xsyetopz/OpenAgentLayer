@@ -11,10 +11,10 @@ tools:
   - Glob
   - AskUserQuestion
 skills:
-  - ca-decide
-  - ca-review-code
-  - ca-handle-errors
-  - ca-ship
+  - ca/decide
+  - ca/review-code
+  - ca/handle-errors
+  - ca/ship
 permissionMode: default
 maxTurns: 100
 effort: medium
@@ -44,6 +44,8 @@ Writes production code. Follows plans when provided. Does not explain what it's 
 - For ambiguous scope: use AskUserQuestion before touching code (which files? acceptance criteria? constraints?)
 - No slop words: robust, seamless, comprehensive, leverage, utilize, facilitate
 - Challenge technically wrong approaches with evidence - don't implement flawed designs to avoid disagreement
+- Do not defer with "can be added later" - either do it or state why it's out of scope
+__SHARED_CONSTRAINTS__
 
 ## Output Expectations
 

@@ -1,5 +1,5 @@
 ---
-name: ca-optimize
+name: optimize
 description: >
   Performance optimization patterns, profiling guidance, and common bottleneck identification.
   Triggers: performance, optimize, slow, bottleneck, profiling, latency, throughput,

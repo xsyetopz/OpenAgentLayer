@@ -18,19 +18,19 @@
 
 ## Skills
 
-| Skill               | Slash Command        | Status |
-| ------------------- | -------------------- | ------ |
-| `ca-review-code`    | `/ca-review-code`    | Active |
-| `ca-desloppify`     | `/ca-desloppify`     | Active |
-| `ca-ship`           | `/ca-ship`           | Active |
-| `ca-decide`         | `/ca-decide`         | Active |
-| `ca-audit-security` | `/ca-audit-security` | Active |
-| `ca-test-patterns`  | `/ca-test-patterns`  | Active |
-| `ca-document`       | `/ca-document`       | Active |
-| `ca-optimize`       | `/ca-optimize`       | Active |
-| `ca-handle-errors`  | `/ca-handle-errors`  | Active |
-| `ca-session-export` | `/ca-session-export` | Active |
-| `ca-commit`         | `/ca-commit`         | Active |
+| Skill            | Slash Command       | Status |
+| ---------------- | ------------------- | ------ |
+| `review-code`    | `/ca:review-code`   | Active |
+| `desloppify`     | `/ca:desloppify`    | Active |
+| `ship`           | `/ca:ship`          | Active |
+| `decide`         | `/ca:decide`        | Active |
+| `audit-security` | `/ca:audit-security`| Active |
+| `test-patterns`  | `/ca:test-patterns` | Active |
+| `document`       | `/ca:document`      | Active |
+| `optimize`       | `/ca:optimize`      | Active |
+| `handle-errors`  | `/ca:handle-errors` | Active |
+| `session-export` | `/ca:session-export`| Active |
+| `commit`         | `/ca:commit`        | Active |
 
 ## Hooks
 
@@ -49,6 +49,10 @@
 ## Install
 
 ```bash
+# Plugin (marketplace)
+claude plugin install ca
+
+# Manual (to a project)
 ./install.sh /path/to/project --pro   # sonnet (haiku for atalanta/calliope)
 ./install.sh /path/to/project --max   # opus for athena/odysseus, sonnet otherwise
 ./install.sh --global --pro           # ~/.claude/
@@ -57,16 +61,18 @@
 ## File Structure
 
 ```text
+.claude-plugin/  plugin.json (marketplace manifest)
 agents/          athena.md, hephaestus.md, nemesis.md, atalanta.md,
                  calliope.md, hermes.md, odysseus.md
-skills/          ca-review-code/, ca-desloppify/, ca-ship/,
-                 ca-decide/, ca-audit-security/, ca-test-patterns/,
-                 ca-document/, ca-optimize/, ca-handle-errors/,
-                 ca-session-export/, ca-commit/
+skills/          review-code/, desloppify/, ship/,
+                 decide/, audit-security/, test-patterns/,
+                 document/, optimize/, handle-errors/,
+                 session-export/, commit/
 hooks/           hooks.json, guard-secrets.py,
                  scripts/_lib.py, scripts/check-budget.py,
                  scripts/guard-commands.py, scripts/validate-write.py,
                  scripts/scan-completion.py
-templates/       CLAUDE.md (installed to target projects)
+templates/       CLAUDE.md, shared-constraints.md
+build-plugin.sh  Builds marketplace-ready dist from source
 install.sh       Version check, Python check, tier flags, model substitution, migration, validation
 ```

@@ -5,11 +5,36 @@ Agent definitions, skills, and hooks for Claude Code. Targets CC v2.1.75+.
 ## What's Included
 
 - **7 agents** - athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus
-- **11 skills** - ca-review-code, ca-desloppify, ca-ship, ca-decide, ca-audit-security, ca-test-patterns, ca-document, ca-optimize, ca-handle-errors, ca-session-export, ca-commit
+- **11 skills** (ca: prefix) - review-code, desloppify, ship, decide, audit-security, test-patterns, document, optimize, handle-errors, session-export, commit
 - **6 hook scripts** - guard-secrets, guard-commands, check-budget, validate-write, scan-completion, _lib
 - **Template CLAUDE.md** - collaboration protocol and behavioral constraints for target projects
 
 ## Install
+
+### Plugin (recommended)
+
+```bash
+claude plugin install ca
+```
+
+Plugins auto-discover agents, skills, and hooks. No file copying needed.
+
+**Note**: Plugins don't support `permissions.deny` or `env` vars. After installing, add to your project's `.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "deny": ["Agent(Explore)", "Agent(Plan)", "Agent(general-purpose)"]
+  }
+}
+```
+
+The SessionStart hook will warn if these are missing.
+
+### Manual install
 
 ```bash
 # To a project (Pro tier - all sonnet, haiku for test/docs)
@@ -28,14 +53,24 @@ The installer:
 
 - Checks Claude Code version >= 2.1.75
 - Validates Python 3 is available (required by hook scripts)
+- Detects and warns about plugin/manual install conflicts
 - Removes old agent and skill files from previous versions
 - Copies agents with model substitution based on tier
-- Copies all 11 skills to `.claude/skills/`
+- Copies all 11 skills to `.claude/skills/ca/`
 - Installs guard-secrets hook to `~/.claude/hooks/` (user-level)
 - Bulk copies hook scripts to `.claude/hooks/scripts/` (project-level)
 - Merges `settings.json` via `jq` (appends, never replaces)
 - Copies `CLAUDE.md` template to project root (skips if exists)
-- Validates: JSON, Python syntax, skill structure, model placeholders
+- Validates: JSON, Python syntax, skill structure, model placeholders, shared-constraints injection
+
+### Build plugin from source
+
+```bash
+./build-plugin.sh          # Default: max tier
+./build-plugin.sh pro      # Pro tier
+```
+
+Outputs to `dist/claude-agents-plugin/`. Test locally with `claude --plugin-dir ./dist/claude-agents-plugin`.
 
 ## Agents
 
@@ -51,19 +86,19 @@ The installer:
 
 ## Skills
 
-| Skill               | Slash Command        | Triggers                                     |
-| ------------------- | -------------------- | -------------------------------------------- |
-| `ca-review-code`    | `/ca-review-code`    | Writing, editing, or reviewing code          |
-| `ca-desloppify`     | `/ca-desloppify`     | AI slop detection, "clean up", comment audit |
-| `ca-ship`           | `/ca-ship`           | Commits, branches, PRs, git workflow         |
-| `ca-decide`         | `/ca-decide`         | Decision making, tradeoffs, options          |
-| `ca-audit-security` | `/ca-audit-security` | Security audit, OWASP, vulnerabilities       |
-| `ca-test-patterns`  | `/ca-test-patterns`  | Writing tests, test strategy, coverage       |
-| `ca-document`       | `/ca-document`       | READMEs, changelogs, ADRs, API docs          |
-| `ca-optimize`       | `/ca-optimize`       | Performance, optimization, profiling         |
-| `ca-handle-errors`  | `/ca-handle-errors`  | Error handling, Result types, exceptions     |
-| `ca-session-export` | `/ca-session-export` | Session handoff, context preservation        |
-| `ca-commit`         | `/ca-commit`         | Quick commits with Conventional Commits      |
+| Skill            | Slash Command        | Triggers                                     |
+| ---------------- | -------------------- | -------------------------------------------- |
+| `review-code`    | `/ca:review-code`    | Writing, editing, or reviewing code          |
+| `desloppify`     | `/ca:desloppify`     | AI slop detection, "clean up", comment audit |
+| `ship`           | `/ca:ship`           | Commits, branches, PRs, git workflow         |
+| `decide`         | `/ca:decide`         | Decision making, tradeoffs, options          |
+| `audit-security` | `/ca:audit-security` | Security audit, OWASP, vulnerabilities       |
+| `test-patterns`  | `/ca:test-patterns`  | Writing tests, test strategy, coverage       |
+| `document`       | `/ca:document`       | READMEs, changelogs, ADRs, API docs          |
+| `optimize`       | `/ca:optimize`       | Performance, optimization, profiling         |
+| `handle-errors`  | `/ca:handle-errors`  | Error handling, Result types, exceptions     |
+| `session-export` | `/ca:session-export` | Session handoff, context preservation        |
+| `commit`         | `/ca:commit`         | Quick commits with Conventional Commits      |
 
 ## Hooks
 

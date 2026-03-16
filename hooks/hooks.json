@@ -45,7 +45,7 @@
 				"hooks": [
 					{
 						"type": "prompt",
-						"prompt": "Check for silent scope reduction: did the agent quietly drop, skip, or stub out parts of what was asked WITHOUT flagging it? Return {\"decision\": \"block\", \"reason\": \"...\"} if the agent silently reduced scope. Exit 0 (no output) if the agent either completed everything or explicitly told the user what it couldn't do and why."
+						"prompt": "Check for silent scope reduction: did the agent quietly drop, skip, or stub out parts of what was asked WITHOUT flagging it? Look for: 'simplified version', 'for now', 'can be added later', TODO/FIXME markers, placeholder implementations, or deferred work. Return {\"decision\": \"block\", \"reason\": \"...\"} if the agent silently reduced scope. Exit 0 (no output) if the agent either completed everything or explicitly told the user what it couldn't do and why."
 					},
 					{
 						"type": "command",
@@ -54,7 +54,7 @@
 					},
 					{
 						"type": "prompt",
-						"prompt": "Check collaboration protocol: for any medium/high-stakes decision, did the agent present 2-3 options with tradeoffs? Return {\"decision\": \"block\", \"reason\": \"...\"} if a non-trivial decision was made without presenting alternatives. Exit 0 if options were presented, only low-stakes decisions were made, or user input was requested."
+						"prompt": "Check collaboration protocol: for any medium/high-stakes decision, did the agent present 2-3 options with tradeoffs? Also check for sycophancy: did the agent agree with a questionable approach without challenging it? Did the agent use unnecessary hedge language ('might', 'could potentially', 'you may want to consider')? Return {\"decision\": \"block\", \"reason\": \"...\"} if a non-trivial decision was made without presenting alternatives, or if the agent was sycophantic. Exit 0 if options were presented, only low-stakes decisions were made, or user input was requested."
 					}
 				]
 			}
@@ -69,7 +69,7 @@
 					},
 					{
 						"type": "prompt",
-						"prompt": "Before ending: check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale (older than today), suggest: 'Run /ca-session-export to save a handoff for your next session.' Do NOT auto-export \u2014 only remind if significant work happened."
+						"prompt": "Before ending: check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale (older than today), suggest: 'Run /ca:session-export to save a handoff for your next session.' Do NOT auto-export \u2014 only remind if significant work happened."
 					}
 				]
 			}

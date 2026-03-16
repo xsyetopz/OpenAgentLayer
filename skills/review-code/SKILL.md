@@ -1,5 +1,5 @@
 ---
-name: ca-review-code
+name: review-code
 description: >
   Enforces coding standards, design principles, naming conventions, and anti-patterns
   when writing, editing, or reviewing code. The single source of truth for code quality rules.
@@ -194,4 +194,4 @@ def get_rate(user):
 
 ## Collaboration Protocol
 
-For any non-trivial design decision during implementation or review, see `/ca-decide` for the full protocol.
+For any non-trivial design decision during implementation or review, see `/ca:decide` for the full protocol.

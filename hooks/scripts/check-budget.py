@@ -32,12 +32,43 @@ def collect_line_budget_warnings(base_dir: str) -> list[str]:
     ]
     return warnings
 
+EXPECTED_DENY = {"Agent(Explore)", "Agent(Plan)", "Agent(general-purpose)"}
+
+
+def check_permissions_deny(project_dir: str) -> str | None:
+    """Warn if permissions.deny is missing built-in subagent entries."""
+    settings_path = Path(project_dir) / ".claude" / "settings.json"
+    if not settings_path.exists():
+        return None
+    try:
+        import json
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        deny_list = set(settings.get("permissions", {}).get("deny", []))
+        missing = EXPECTED_DENY - deny_list
+        if missing:
+            missing_json = ", ".join(f'"{m}"' for m in sorted(missing))
+            return (
+                f"[permissions] Missing permissions.deny entries: {missing_json}. "
+                "Built-in subagents (Explore, Plan, general-purpose) should be denied "
+                "so custom agents are used instead. Add to .claude/settings.json: "
+                f'"permissions": {{"deny": [{", ".join(f"{chr(34)}{d}{chr(34)}" for d in sorted(EXPECTED_DENY))}]}}'
+            )
+    except Exception:
+        pass
+    return None
+
+
 def main() -> None:
     data = read_stdin()
     if not data:
         sys.exit(0)
     project_dir = data.get("cwd", os.getcwd())
     warnings = collect_line_budget_warnings(project_dir)
+
+    deny_warning = check_permissions_deny(project_dir)
+    if deny_warning:
+        warnings.append(deny_warning)
+
     if warnings:
         print("\n".join(warnings))
     sys.exit(0)

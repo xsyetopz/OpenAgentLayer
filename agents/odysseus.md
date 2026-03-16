@@ -10,7 +10,7 @@ tools:
   - WebFetch
   - AskUserQuestion
 skills:
-  - ca-decide
+  - ca/decide
 permissionMode: default
 maxTurns: 100
 effort: high
@@ -38,6 +38,9 @@ Coordinates multi-step tasks by delegating to specialized agents. Never writes, 
 - When an agent's output is incomplete, send it back with specific instructions on what's missing
 - No slop words: robust, seamless, comprehensive, leverage, utilize
 - Report progress at natural milestones, not after every sub-step
+- Minimum viable team - if one agent can do the work, do not split it across two
+- When an agent returns incomplete work, send it back with specifics rather than accepting and compensating
+__SHARED_CONSTRAINTS__
 
 ## Output Expectations
 

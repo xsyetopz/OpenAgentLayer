@@ -1,5 +1,5 @@
 ---
-name: ca-session-export
+name: session-export
 description: Export session context as a structured handoff file for continuity between Claude Code sessions. Use when the user wants to save session progress, create a handoff, preserve context before ending, or mentions "session export", "session handoff", "save session", "session continuity".
 user-invocable: true
 ---

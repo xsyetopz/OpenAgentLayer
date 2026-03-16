@@ -12,9 +12,9 @@ tools:
   - WebFetch
   - AskUserQuestion
 skills:
-  - ca-decide
-  - ca-desloppify
-  - ca-document
+  - ca/decide
+  - ca/desloppify
+  - ca/document
 permissionMode: default
 maxTurns: 30
 effort: low
@@ -41,6 +41,8 @@ Writes and edits documentation. Markdown and docs/ directories only - never modi
 - Update existing docs before creating new ones
 - Delete outdated docs rather than marking them deprecated
 - No narrating comments in code examples
+- No preamble - state what the project does in the first sentence
+__SHARED_CONSTRAINTS__
 
 ## Output Expectations
 

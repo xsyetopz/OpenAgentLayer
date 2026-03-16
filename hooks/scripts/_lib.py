@@ -43,6 +43,46 @@ AI_PROSE_SLOP = [
     re.compile(r'needless to say\b', re.IGNORECASE),
     re.compile(r'at the end of the day\b', re.IGNORECASE),
     re.compile(r'let\'?s (?:dive in|break this down|explore)', re.IGNORECASE),
+    # Claude-specific patterns
+    re.compile(r"I'?d be happy to\b", re.IGNORECASE),
+    re.compile(r"Here'?s what I found\b", re.IGNORECASE),
+    re.compile(r"Based on my analysis\b", re.IGNORECASE),
+    # GPTZero high-multiplier phrases
+    re.compile(r"in today'?s digital age\b", re.IGNORECASE),
+    re.compile(r"plays a crucial role\b", re.IGNORECASE),
+    re.compile(r"\ba testament to\b", re.IGNORECASE),
+    re.compile(r"\baims to\b", re.IGNORECASE),
+    re.compile(r"\bserves as a\b", re.IGNORECASE),
+    re.compile(r"\baligns with\b", re.IGNORECASE),
+    # Additional dead giveaways
+    re.compile(r'\b(?:elevate|streamline|resonate|vibrant|bustling|tapestry|testament|paramount|imperative|indispensable|pivotal)\b', re.IGNORECASE),
+    re.compile(r'navigate the complexities\b', re.IGNORECASE),
+]
+
+UNICODE_SLOP = [
+    # Tier 0 -- Unicode Forensics
+    re.compile(r'\u2014'),  # Em dash
+    re.compile(r'\u2013'),  # En dash
+    re.compile(r'\u2026'),  # Horizontal ellipsis
+    re.compile(r'[\u201c\u201d]'),  # Curly double quotes
+    re.compile(r'[\u2018\u2019]'),  # Curly single quotes
+    re.compile(r'\u2192'),  # Right arrow
+    re.compile(r'\u2190'),  # Left arrow
+    re.compile(r'\u21d2'),  # Double right arrow
+    re.compile(r'[\u2264\u2265]'),  # Less/greater-equal
+    re.compile(r'\u2260'),  # Not equal
+    re.compile(r'\u2022'),  # Bullet
+    re.compile(r'\u00b7'),  # Middle dot
+    # Tier 5 -- Invisible Characters
+    re.compile(r'\u00a0'),  # Non-breaking space
+    re.compile(r'\u200b'),  # Zero-width space
+    re.compile(r'\u202f'),  # Narrow no-break space
+    re.compile(r'\u00ad'),  # Soft hyphen
+    re.compile(r'\u200c'),  # Zero-width non-joiner
+    re.compile(r'\u200d'),  # Zero-width joiner
+    re.compile(r'[\u200e\u200f]'),  # LTR/RTL marks
+    re.compile(r'\u2060'),  # Word joiner
+    re.compile(r'\ufeff'),  # BOM / ZWNBSP
 ]
 
 SECTION_NARRATORS = re.compile(
