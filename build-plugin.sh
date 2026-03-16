@@ -13,40 +13,23 @@ TIER="${1:-max}"
 die()   { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info()  { echo -e "  ${GREEN}✓${NC} $1"; }
 
-set_models() {
+set_tier() {
+    # Source files default to --max tier (opus/sonnet/haiku).
+    # --pro downgrades opus → sonnet; all other models stay the same.
     case "$1" in
-        pro)
-            MODEL_ARCHITECT="sonnet"
-            MODEL_IMPLEMENT="sonnet"
-            MODEL_AUDIT="sonnet"
-            MODEL_TEST="haiku"
-            MODEL_DOCUMENT="haiku"
-            MODEL_INVESTIGATE="sonnet"
-            MODEL_ORCHESTRATE="sonnet"
-            ;;
-        max)
-            MODEL_ARCHITECT="opus"
-            MODEL_IMPLEMENT="sonnet"
-            MODEL_AUDIT="sonnet"
-            MODEL_TEST="haiku"
-            MODEL_DOCUMENT="haiku"
-            MODEL_INVESTIGATE="sonnet"
-            MODEL_ORCHESTRATE="opus"
-            ;;
+        pro) MODEL_DOWNGRADE="yes" ;;
+        max) MODEL_DOWNGRADE="" ;;
         *) die "Unknown tier: $1. Use 'pro' or 'max'." ;;
     esac
 }
 
-substitute_models_in_file() {
+downgrade_models_in_file() {
     local src="$1" dest="$2"
-    sed -e "s/__MODEL_ARCHITECT__/$MODEL_ARCHITECT/g" \
-        -e "s/__MODEL_IMPLEMENT__/$MODEL_IMPLEMENT/g" \
-        -e "s/__MODEL_AUDIT__/$MODEL_AUDIT/g" \
-        -e "s/__MODEL_TEST__/$MODEL_TEST/g" \
-        -e "s/__MODEL_DOCUMENT__/$MODEL_DOCUMENT/g" \
-        -e "s/__MODEL_INVESTIGATE__/$MODEL_INVESTIGATE/g" \
-        -e "s/__MODEL_ORCHESTRATE__/$MODEL_ORCHESTRATE/g" \
-        "$src" > "$dest"
+    if [[ -n "$MODEL_DOWNGRADE" ]]; then
+        sed -e 's/^model: opus$/model: sonnet/' "$src" > "$dest"
+    else
+        cp "$src" "$dest"
+    fi
 }
 
 inject_constraints_in_file() {
@@ -71,12 +54,12 @@ prepare_dir() {
     shift
     rm -rf "$dst"
     mkdir -p "$dst"
-    [[ $# -gt 0 ]] && cp "$@" "$dst"/
+    [[ $# -gt 0 ]] && cp "$@" "$dst"/ || true
 }
 
 stage_agent() {
     local src="$1" dst="$2"
-    substitute_models_in_file "$src" "$dst"
+    downgrade_models_in_file "$src" "$dst"
     inject_constraints_in_file "$dst"
     remove_skill_prefix_in_file "$dst"
 }
@@ -117,8 +100,8 @@ stage_hooks() {
 validate_dist() {
     echo -e "\n${GREEN}Validation:${NC}"
     local ERRORS=0
-    grep -r '__MODEL_\|__SHARED_CONSTRAINTS__' "$DIST_DIR/agents/" &>/dev/null &&
-      { echo -e "  ${RED}✗${NC} Found unreplaced placeholders in agents"; ERRORS=$((ERRORS+1)); } ||
+    grep -r '__SHARED_CONSTRAINTS__' "$DIST_DIR/agents/" &>/dev/null &&
+      { echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } ||
       info "No placeholder remnants"
     grep -q 'CLAUDE_PROJECT_DIR' "$DIST_DIR/hooks/hooks.json" &&
       { echo -e "  ${RED}✗${NC} hooks.json still references \$CLAUDE_PROJECT_DIR"; ERRORS=$((ERRORS+1)); } ||
@@ -129,12 +112,12 @@ validate_dist() {
           { echo -e "  ${RED}✗${NC} plugin.json is invalid JSON"; ERRORS=$((ERRORS+1)); }
     fi
     echo ""
-    [[ $ERRORS -gt 0 ]] && { echo -e "${RED}Build failed with $ERRORS error(s).${NC}"; exit 1; }
+    [[ $ERRORS -gt 0 ]] && { echo -e "${RED}Build failed with $ERRORS error(s).${NC}"; exit 1; } || true
 }
 
 echo -e "${GREEN}Building ClaudeAgents plugin (tier: $TIER)${NC}\n"
 
-set_models "$TIER"
+set_tier "$TIER"
 prepare_dir "$DIST_DIR"
 prepare_dir "$DIST_DIR/.claude-plugin"
 cp "$SCRIPT_DIR/.claude-plugin/plugin.json" "$DIST_DIR/.claude-plugin/"

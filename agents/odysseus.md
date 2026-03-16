@@ -1,6 +1,6 @@
 ---
 name: Odysseus
-model: __MODEL_ORCHESTRATE__
+model: opus
 description: "Use this agent to coordinate multi-step tasks, delegate to other agents, track progress across complex workflows, or manage multi-file changes. Use instead of general-purpose for any complex, multi-step autonomous tasks."
 tools:
   - Read

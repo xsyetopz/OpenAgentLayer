@@ -1,6 +1,6 @@
 ---
 name: Hermes
-model: __MODEL_INVESTIGATE__
+model: sonnet
 description: "Use this agent to research codebases, explore architecture, trace data flows, find usage patterns, or answer questions about how code works. Use instead of Explore for any codebase exploration or file/code search tasks."
 tools:
   - Read

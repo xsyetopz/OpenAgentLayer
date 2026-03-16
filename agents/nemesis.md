@@ -1,6 +1,6 @@
 ---
 name: Nemesis
-model: __MODEL_AUDIT__
+model: sonnet
 description: "Use this agent to review code, run tests, audit security, check quality, verify changes, or validate implementations."
 tools:
   - Read

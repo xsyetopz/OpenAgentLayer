@@ -1,6 +1,6 @@
 ---
 name: Athena
-model: __MODEL_ARCHITECT__
+model: opus
 description: "Use this agent to design architecture, plan implementations, break down complex tasks, or evaluate technical approaches before writing code. Use instead of Plan for any implementation planning or design tasks."
 tools:
   - Read

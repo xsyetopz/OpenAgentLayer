@@ -1,6 +1,6 @@
 ---
 name: Hephaestus
-model: __MODEL_IMPLEMENT__
+model: sonnet
 description: "Use this agent to write code, implement features, fix bugs, refactor, or build functionality."
 tools:
   - Read

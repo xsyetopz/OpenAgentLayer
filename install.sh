@@ -44,24 +44,14 @@ check_python() {
 }
 
 agent_models() {
+    # Source files default to --max tier (opus/sonnet/haiku).
+    # --pro downgrades opus → sonnet; all other models stay the same.
     case "$1" in
         pro)
-            MODEL_ARCHITECT="sonnet"
-            MODEL_IMPLEMENT="sonnet"
-            MODEL_AUDIT="sonnet"
-            MODEL_TEST="haiku"
-            MODEL_DOCUMENT="haiku"
-            MODEL_INVESTIGATE="sonnet"
-            MODEL_ORCHESTRATE="sonnet"
+            MODEL_DOWNGRADE="yes"
             ;;
         max)
-            MODEL_ARCHITECT="opus"
-            MODEL_IMPLEMENT="sonnet"
-            MODEL_AUDIT="sonnet"
-            MODEL_TEST="haiku"
-            MODEL_DOCUMENT="haiku"
-            MODEL_INVESTIGATE="sonnet"
-            MODEL_ORCHESTRATE="opus"
+            MODEL_DOWNGRADE=""
             ;;
     esac
 }
@@ -95,14 +85,12 @@ substitute_and_copy() {
     fi
     local tmp
     tmp=$(mktemp)
-    sed -e "s/__MODEL_ARCHITECT__/$MODEL_ARCHITECT/g" \
-        -e "s/__MODEL_IMPLEMENT__/$MODEL_IMPLEMENT/g" \
-        -e "s/__MODEL_AUDIT__/$MODEL_AUDIT/g" \
-        -e "s/__MODEL_TEST__/$MODEL_TEST/g" \
-        -e "s/__MODEL_DOCUMENT__/$MODEL_DOCUMENT/g" \
-        -e "s/__MODEL_INVESTIGATE__/$MODEL_INVESTIGATE/g" \
-        -e "s/__MODEL_ORCHESTRATE__/$MODEL_ORCHESTRATE/g" \
-        "$src" > "$tmp"
+    if [[ -n "$MODEL_DOWNGRADE" ]]; then
+        # --pro: downgrade opus → sonnet in agent frontmatter
+        sed -e 's/^model: opus$/model: sonnet/' "$src" > "$tmp"
+    else
+        cp "$src" "$tmp"
+    fi
     if grep -q '__SHARED_CONSTRAINTS__' "$tmp" 2>/dev/null && [[ -n "$shared_constraints" ]]; then
         awk -v constraints="$shared_constraints" '{gsub(/__SHARED_CONSTRAINTS__/, constraints); print}' "$tmp" > "$dest"
     else
@@ -506,9 +494,6 @@ main() {
     echo -e "\nValidation:"
     ERRORS=0
 
-    grep -r '__MODEL_' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __MODEL__ placeholders in agents"; ERRORS=$((ERRORS+1)); } \
-        || info "No __MODEL__ remnants"
-
     grep -r '__SHARED_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } \
         || info "No __SHARED_CONSTRAINTS__ remnants"
 
@@ -522,7 +507,7 @@ main() {
 
     report_summary
 
-    [[ $ERRORS -gt 0 ]] && { echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1; }
+    [[ $ERRORS -gt 0 ]] && { echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1; } || true
 
     # RTK install prompt - always last
     install_rtk
