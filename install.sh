@@ -43,33 +43,6 @@ check_python() {
     info "python3 found: $(python3 --version 2>&1)"
 }
 
-detect_plugin_conflict() {
-    local plugin_cache="$HOME/.claude/plugins/cache/ca"
-    local settings="$CLAUDE_DIR/settings.json"
-    local conflict=0
-
-    if [[ -d "$plugin_cache" ]]; then
-        warn "ClaudeAgents plugin detected in plugin cache: $plugin_cache"
-        conflict=1
-    fi
-
-    if [[ -f "$settings" ]] && command -v jq &>/dev/null; then
-        if jq -e '.enabledPlugins | keys[] | select(. == "ca" or test("ClaudeAgents"))' "$settings" &>/dev/null; then
-            warn "ClaudeAgents plugin enabled in settings.json"
-            conflict=1
-        fi
-    fi
-
-    if [[ $conflict -eq 1 ]]; then
-        echo -e "\n${YELLOW}ClaudeAgents appears to be installed as a plugin.${NC}"
-        echo "Running both plugin and manual install may cause conflicts (duplicate agents/skills)."
-        echo "Consider disabling the plugin first: claude plugin uninstall ca"
-        echo ""
-        read -rp "Continue with manual install anyway? [y/N] " confirm
-        [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
-    fi
-}
-
 agent_models() {
     case "$1" in
         pro)
@@ -109,8 +82,7 @@ parse_args() {
 }
 
 make_dirs() {
-    mkdir -p "$CLAUDE_DIR"/{agents,skills/ca,hooks/scripts}
-    detect_plugin_conflict
+    mkdir -p "$CLAUDE_DIR"/{agents,skills/cca,hooks/scripts}
     mkdir -p "$HOME/.claude/hooks"
 }
 
@@ -185,14 +157,14 @@ update_interactive() {
         diff_agent "agent: $name" "$CLAUDE_DIR/agents/$name" "$agent" || changes=$((changes + 1))
     done
 
-    # Check skills (repo: skills/<name>/, installed: skills/ca/<name>/)
+    # Check skills (repo: skills/<name>/, installed: skills/cca/<name>/)
     for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill_name=$(basename "$skill_dir")
         for skill_file in "$skill_dir"*; do
             [[ -f "$skill_file" ]] || continue
             local fname=$(basename "$skill_file")
-            diff_file "skill: ca:$skill_name/$fname" "$CLAUDE_DIR/skills/ca/$skill_name/$fname" "$skill_file" || changes=$((changes + 1))
+            diff_file "skill: cca:$skill_name/$fname" "$CLAUDE_DIR/skills/cca/$skill_name/$fname" "$skill_file" || changes=$((changes + 1))
         done
     done
 
@@ -242,31 +214,19 @@ copy_agents() {
     done
 }
 
-migrate_old_skills() {
-    # Remove old ca-* skill directories from target
-    local old_count=0
-    for old_dir in "$CLAUDE_DIR"/skills/ca-*/; do
-        [[ -d "$old_dir" ]] || continue
-        rm -rf "$old_dir"
-        old_count=$((old_count + 1))
-    done
-    [[ $old_count -gt 0 ]] && warn "Removed $old_count old ca-* skill directories (migrated to ca/ prefix)"
-}
-
 copy_skills() {
     SKILL_COUNT=0
-    migrate_old_skills
     echo -e "\nSkills:"
-    # Skills live at skills/<name>/ in repo, install to skills/ca/<name>/ for manual installs
+    # Skills live at skills/<name>/ in repo, install to skills/cca/<name>/ for manual installs
     for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill_name=$(basename "$skill_dir")
-        mkdir -p "$CLAUDE_DIR/skills/ca/$skill_name"
+        mkdir -p "$CLAUDE_DIR/skills/cca/$skill_name"
         for skill_file in "$skill_dir"*; do
             [[ -f "$skill_file" ]] || continue
-            cp "$skill_file" "$CLAUDE_DIR/skills/ca/$skill_name/$(basename "$skill_file")"
+            cp "$skill_file" "$CLAUDE_DIR/skills/cca/$skill_name/$(basename "$skill_file")"
         done
-        info "ca:$skill_name"
+        info "cca:$skill_name"
         SKILL_COUNT=$((SKILL_COUNT + 1))
     done
 }
@@ -466,29 +426,17 @@ validate_python_hooks() {
     return $PYTHON_ERRORS
 }
 
-validate_ca_skills() {
+validate_cca_skills() {
     SKILL_ERRORS=0
-    for skill_dir in "$CLAUDE_DIR"/skills/ca/*/; do
+    for skill_dir in "$CLAUDE_DIR"/skills/cca/*/; do
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/SKILL.md" ]] || {
-            echo -e "  ${RED}✗${NC} Missing SKILL.md in ca/$(basename "$skill_dir")"
+            echo -e "  ${RED}✗${NC} Missing SKILL.md in cca/$(basename "$skill_dir")"
             SKILL_ERRORS=$((SKILL_ERRORS + 1))
         }
     done
-    [[ $SKILL_ERRORS -eq 0 ]] && info "All ca:* skills have SKILL.md"
+    [[ $SKILL_ERRORS -eq 0 ]] && info "All cca:* skills have SKILL.md"
     return $SKILL_ERRORS
-}
-
-check_directories_not_present() {
-    local dirs=("$@")
-    local err=0
-    for d in "${dirs[@]}"; do
-        if [[ -d "$CLAUDE_DIR/skills/$d" ]]; then
-            echo -e "  ${RED}✗${NC} Old skill directory still present: $d"
-            err=$((err + 1))
-        fi
-    done
-    return $err
 }
 
 validate_agents() {
@@ -516,10 +464,10 @@ report_summary() {
     echo "  @hermes      - research, explore codebase    (model: $MODEL_INVESTIGATE)"
     echo "  @odysseus    - coordinate multi-step tasks   (model: $MODEL_ORCHESTRATE)"
     echo ""
-    echo "Skills (ca: prefix):"
-    for skill_dir in "$CLAUDE_DIR"/skills/ca/*/; do
+    echo "Skills (cca: prefix):"
+    for skill_dir in "$CLAUDE_DIR"/skills/cca/*/; do
         [[ -d "$skill_dir" ]] || continue
-        echo "  /ca:$(basename "$skill_dir")"
+        echo "  /cca:$(basename "$skill_dir")"
     done
 }
 
@@ -566,17 +514,7 @@ main() {
     check_json "$CLAUDE_DIR/settings.json" "settings.json" || ERRORS=$((ERRORS+1))
 
     validate_python_hooks; ERRORS=$((ERRORS + $?))
-    validate_ca_skills; ERRORS=$((ERRORS + $?))
-
-    check_directories_not_present coding-standards desloppify git-workflow collaboration-protocol security-checklist test-patterns documentation-standards performance-guide error-handling session-export refactor-guide
-    ERRORS=$((ERRORS + $?))
-
-    check_directories_not_present ca-coding-standards ca-git-workflow ca-collaboration ca-security-checklist ca-documentation ca-performance ca-error-handling ca-refactor
-    ERRORS=$((ERRORS + $?))
-
-    # Check for old ca-* flat skill directories (pre-plugin migration)
-    check_directories_not_present ca-review-code ca-desloppify ca-ship ca-decide ca-audit-security ca-test-patterns ca-document ca-optimize ca-handle-errors ca-session-export ca-commit
-    ERRORS=$((ERRORS + $?))
+    validate_cca_skills; ERRORS=$((ERRORS + $?))
 
     validate_agents; ERRORS=$((ERRORS + $?))
 
@@ -584,7 +522,7 @@ main() {
 
     [[ $ERRORS -gt 0 ]] && { echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1; }
 
-    # RTK install prompt — always last
+    # RTK install prompt - always last
     install_rtk
 }
 
