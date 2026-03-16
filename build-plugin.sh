@@ -62,7 +62,7 @@ inject_constraints_in_file() {
 remove_skill_prefix_in_file() {
     local file="$1"
     local tmp=$(mktemp)
-    sed 's|  - ca/|  - |g' "$file" > "$tmp"
+    sed 's|  - cca/|  - |g' "$file" > "$tmp"
     mv "$tmp" "$file"
 }
 
@@ -120,8 +120,8 @@ validate_dist() {
     grep -r '__MODEL_\|__SHARED_CONSTRAINTS__' "$DIST_DIR/agents/" &>/dev/null &&
       { echo -e "  ${RED}✗${NC} Found unreplaced placeholders in agents"; ERRORS=$((ERRORS+1)); } ||
       info "No placeholder remnants"
-    grep -r '  - ca/' "$DIST_DIR/agents/" &>/dev/null &&
-      { echo -e "  ${RED}✗${NC} Found ca/ prefix in agent skill references"; ERRORS=$((ERRORS+1)); } ||
+    grep -r '  - cca/' "$DIST_DIR/agents/" &>/dev/null &&
+      { echo -e "  ${RED}✗${NC} Found cca/ prefix in agent skill references"; ERRORS=$((ERRORS+1)); } ||
       info "Agent skill references cleaned"
     grep -q 'CLAUDE_PROJECT_DIR' "$DIST_DIR/hooks/hooks.json" &&
       { echo -e "  ${RED}✗${NC} hooks.json still references \$CLAUDE_PROJECT_DIR"; ERRORS=$((ERRORS+1)); } ||
