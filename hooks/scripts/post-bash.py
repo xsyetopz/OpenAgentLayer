@@ -4,11 +4,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
-    SECRET_PATTERNS,
     PII_PATTERNS,
+    SECRET_PATTERNS,
+    passthrough,
     read_stdin,
     warn,
-    passthrough,
 )
 
 

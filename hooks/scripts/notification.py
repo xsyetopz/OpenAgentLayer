@@ -4,11 +4,11 @@
 Logs notification events for enterprise audit trail.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, passthrough, audit_log
+from _lib import audit_log, passthrough, read_stdin
 
 
 def main():

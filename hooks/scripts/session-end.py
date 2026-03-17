@@ -5,14 +5,14 @@ Generates a session summary if significant work was done.
 Cleans up temporary files created during the session.
 """
 
+import contextlib
 import glob
-import hashlib
 import os
 import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, warn, passthrough, audit_log
+from _lib import audit_log, passthrough, read_stdin, warn
 
 
 def cleanup():
@@ -20,10 +20,8 @@ def cleanup():
     uid = str(os.getuid())
     pattern = os.path.join(tempfile.gettempdir(), f"cca-failures-{uid}-*.jsonl")
     for f in glob.glob(pattern):
-        try:
+        with contextlib.suppress(OSError):
             os.remove(f)
-        except OSError:
-            pass
 
 
 def count_audit_entries() -> int:

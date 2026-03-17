@@ -89,7 +89,8 @@ ctx_bar_section() {
   local ctx="$1"
   [ -z "$ctx" ] && return
 
-  local ctx_int=$(clamp "${ctx%.*}" 0 100)
+  local ctx_int
+  ctx_int=$(clamp "${ctx%.*}" 0 100)
   local bar_color suffix
 
   local max_tokens

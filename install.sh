@@ -67,7 +67,7 @@ apply_package_models() {
 
 # --- TUI primitives (pure bash, no external dependencies) ---
 
-INTERACTIVE="false"
+_INTERACTIVE="false"
 SELECTED_AGENTS=""
 SELECTED_SKILLS=""
 
@@ -96,10 +96,10 @@ tui_move_to() {
 
 tui_box() {
     local title="$1" width="$2" start_row="$3"
-    local border_top border_bottom
+    local border_top _border_bottom
     local inner=$((width - 4))
     border_top=$(_repeat_char '─' $((inner + 2)))
-    border_bottom="$border_top"
+    _border_bottom="$border_top"
     tui_move_to "$start_row" 2
     printf "${GREEN}╭─ %s %s╮${NC}" "$title" "${border_top:$((${#title} + 1))}"
     tui_move_to $((start_row + 1)) 2
@@ -113,7 +113,7 @@ tui_box_bottom() {
     border=$(_repeat_char '─' $((inner + 2)))
     tui_move_to "$row" 2
     if [[ -n "$hint" ]]; then
-        local pad=$((inner + 2 - ${#hint}))
+        local _pad=$((inner + 2 - ${#hint}))
         printf "${GREEN}╰%s %s╯${NC}" "${border:$((${#hint} + 1))}" "$hint"
     else
         printf "${GREEN}╰%s╯${NC}" "$border"
@@ -156,7 +156,7 @@ tui_select_one() {
     local selected=0
     local count=${#options[@]}
     local width=54
-    local header_rows=4
+    local _header_rows=4
 
     while true; do
         tui_clear_screen
@@ -201,7 +201,7 @@ tui_select_many() {
     # Initialize all selected
     local -a checked
     for i in "${!labels[@]}"; do
-        checked[$i]=1
+        checked[i]=1
     done
 
     while true; do
@@ -237,10 +237,10 @@ tui_select_many() {
         case "$key" in
             up)    cursor=$(( (cursor - 1 + count) % count )) ;;
             down)  cursor=$(( (cursor + 1) % count )) ;;
-            space) checked[$cursor]=$(( 1 - ${checked[$cursor]} )) ;;
+            space) checked[cursor]=$(( 1 - checked[cursor] )) ;;
             enter) break ;;
-            a)     for i in "${!labels[@]}"; do checked[$i]=1; done ;;
-            n)     for i in "${!labels[@]}"; do checked[$i]=0; done ;;
+            a)     for i in "${!labels[@]}"; do checked[i]=1; done ;;
+            n)     for i in "${!labels[@]}"; do checked[i]=0; done ;;
             quit)  tui_show_cursor; exit 0 ;;
         esac
     done
@@ -334,8 +334,8 @@ interactive_mode() {
     echo ""
     echo "  Scope:    $INSTALL_SCOPE"
     echo "  Tier:     $PACKAGE"
-    echo "  Agents:   $(echo $SELECTED_AGENTS | xargs)"
-    echo "  Skills:   $(echo $SELECTED_SKILLS | xargs)"
+    echo "  Agents:   $(echo "$SELECTED_AGENTS" | xargs)"
+    echo "  Skills:   $(echo "$SELECTED_SKILLS" | xargs)"
     echo "  Zen mode: $ZEN_MODE"
     echo ""
     echo -e "Installing..."
@@ -356,7 +356,7 @@ parse_args() {
             --diagnose)   INSTALL_MODE="diagnose"; shift ;;
             -h|--help) usage ;;
             *)
-                [[ -z "$TARGET_DIR" ]] && TARGET_DIR="$1" || die "Too many arguments"
+                if [[ -z "$TARGET_DIR" ]]; then TARGET_DIR="$1"; else die "Too many arguments"; fi
                 shift ;;
         esac
     done
@@ -437,17 +437,20 @@ update_interactive() {
     # Check agents
     for agent in "$REPO_DIR"/agents/*.md; do
         [[ -f "$agent" ]] || continue
-        local name=$(basename "$agent")
+        local name
+        name=$(basename "$agent")
         diff_agent "agent: $name" "$CLAUDE_DIR/agents/$name" "$agent" || changes=$((changes + 1))
     done
 
     # Check skills (repo: skills/<name>/, installed: skills/<name>/)
     for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
-        local skill_name=$(basename "$skill_dir")
+        local skill_name
+        skill_name=$(basename "$skill_dir")
         for skill_file in "$skill_dir"*; do
             [[ -f "$skill_file" ]] || continue
-            local fname=$(basename "$skill_file")
+            local fname
+            fname=$(basename "$skill_file")
             diff_file "skill: cca-$skill_name/$fname" "$CLAUDE_DIR/skills/cca-$skill_name/$fname" "$skill_file" || changes=$((changes + 1))
         done
     done
@@ -455,7 +458,8 @@ update_interactive() {
     # Check hook scripts
     for hook_script in "$REPO_DIR"/hooks/scripts/*.py; do
         [[ -f "$hook_script" ]] || continue
-        local fname=$(basename "$hook_script")
+        local fname
+        fname=$(basename "$hook_script")
         diff_file "hook script: $fname" "$CLAUDE_DIR/hooks/scripts/$fname" "$hook_script" || changes=$((changes + 1))
     done
 
@@ -497,7 +501,8 @@ copy_agents() {
         if [[ -n "$SELECTED_AGENTS" ]] && ! echo "$SELECTED_AGENTS" | grep -qw "$name"; then
             continue
         fi
-        local dest="$CLAUDE_DIR/agents/$(basename "$agent")"
+        local dest
+        dest="$CLAUDE_DIR/agents/$(basename "$agent")"
         substitute_and_copy "$agent" "$dest"
         info "$(basename "$agent") (model substituted)"
         AGENT_COUNT=$((AGENT_COUNT + 1))
@@ -510,14 +515,16 @@ copy_skills() {
     # Clean up old bare-name skills from previous installs
     for skill_dir in "$CLAUDE_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
-        local dir_name=$(basename "$skill_dir")
+        local dir_name
+        dir_name=$(basename "$skill_dir")
         [[ "$dir_name" == cca-* ]] && continue
         rm -f "$skill_dir"SKILL.md 2>/dev/null
         rmdir "$skill_dir" 2>/dev/null && info "removed legacy /$dir_name"
     done
     for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
-        local skill_name=$(basename "$skill_dir")
+        local skill_name
+        skill_name=$(basename "$skill_dir")
         # Skip if interactive mode selected specific skills
         if [[ -n "$SELECTED_SKILLS" ]] && ! echo "$SELECTED_SKILLS" | grep -qw "$skill_name"; then
             continue
@@ -570,12 +577,12 @@ copy_hooks_scripts() {
         if [[ "$resolved_repo" == "$resolved_target" ]]; then
             rm -rf "$CLAUDE_DIR/hooks/scripts"
             ln -sfn "../../hooks/scripts" "$CLAUDE_DIR/hooks/scripts"
-            HOOK_COUNT=$(ls -1 "$REPO_DIR/hooks/scripts/"*.py 2>/dev/null | wc -l | tr -d ' ')
+            HOOK_COUNT=$(find "$REPO_DIR/hooks/scripts" -maxdepth 1 -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> symlinked (self-install)"
         else
             cp -r "$REPO_DIR/hooks/scripts/"* "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null || true
             chmod +x "$CLAUDE_DIR/hooks/scripts/"*.py 2>/dev/null || true
-            HOOK_COUNT=$(ls -1 "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null | wc -l | tr -d ' ')
+            HOOK_COUNT=$(find "$CLAUDE_DIR/hooks/scripts" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> project hooks"
         fi
     fi
@@ -644,6 +651,7 @@ settings_json_merge_project() {
     SETTINGS_FILE="$CLAUDE_DIR/settings.json"
     [[ -f "$SETTINGS_FILE" ]] && { cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup"; info "Backed up existing settings.json"; }
 
+    # shellcheck disable=SC2016 # $HOME is intentionally unexpanded — it's a literal for Claude Code hook runtime
     local GUARD_SECRETS_ENTRY='{
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Bash|WebFetch",
         "hooks": [{"type": "command", "command": "python3 \"$HOME\"/.claude/hooks/pre-secrets.py", "timeout": 5}]
@@ -696,8 +704,11 @@ install_template() {
         # Use package-specific CLAUDE.md (fall back to base)
         local template_src="$REPO_DIR/templates/CLAUDE-$PACKAGE.md"
         [[ -f "$template_src" ]] || template_src="$REPO_DIR/templates/CLAUDE.md"
-        [[ -f "$CLAUDE_MD" ]] && warn "CLAUDE.md already exists at target - skipping (review $template_src manually)" \
-            || { cp "$template_src" "$CLAUDE_MD"; info "CLAUDE.md installed (package: $PACKAGE)"; }
+        if [[ -f "$CLAUDE_MD" ]]; then
+            warn "CLAUDE.md already exists at target - skipping (review $template_src manually)"
+        else
+            cp "$template_src" "$CLAUDE_MD"; info "CLAUDE.md installed (package: $PACKAGE)"
+        fi
     else
         warn "Skipping CLAUDE.md for global install (install per-project instead)"
     fi
@@ -834,8 +845,10 @@ report_summary() {
     echo "Agents:"
     for agent in "$CLAUDE_DIR"/agents/*.md; do
         [[ -f "$agent" ]] || continue
-        local name=$(basename "$agent" .md)
-        local model=$(grep -m1 '^model:' "$agent" 2>/dev/null | sed 's/^model: *//')
+        local name
+        name=$(basename "$agent" .md)
+        local model
+        model=$(grep -m1 '^model:' "$agent" 2>/dev/null | sed 's/^model: *//')
         printf "  @%-12s (%s)\n" "$name" "$model"
     done
     echo ""
@@ -854,7 +867,8 @@ diagnose_hooks() {
 
     for script in "$CLAUDE_DIR/hooks/scripts/"*.py; do
         [[ -f "$script" ]] || continue
-        local name=$(basename "$script")
+        local name
+        name=$(basename "$script")
         [[ "$name" == "_lib.py" ]] && continue
         total=$((total + 1))
 
@@ -875,7 +889,8 @@ diagnose_hooks() {
 
     for hook in "$HOME/.claude/hooks/"*.py "$HOME/.claude/hooks/"*.sh; do
         [[ -f "$hook" ]] || continue
-        local name=$(basename "$hook")
+        local name
+        name=$(basename "$hook")
         total=$((total + 1))
 
         local result
@@ -905,7 +920,7 @@ diagnose_hooks() {
 main() {
     # Interactive mode: when no args and stdin is a TTY
     if [[ $# -eq 0 && -t 0 && -t 1 ]]; then
-        INTERACTIVE="true"
+        _INTERACTIVE="true"
         interactive_mode
     else
         parse_args "$@"
@@ -947,11 +962,17 @@ main() {
     echo -e "\nValidation:"
     ERRORS=0
 
-    grep -r '__SHARED_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } \
-        || info "No __SHARED_CONSTRAINTS__ remnants"
+    if grep -r '__SHARED_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null; then
+        echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1))
+    else
+        info "No __SHARED_CONSTRAINTS__ remnants"
+    fi
 
-    grep -r '__PACKAGE_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null && { echo -e "  ${RED}✗${NC} Found unreplaced __PACKAGE_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } \
-        || info "No __PACKAGE_CONSTRAINTS__ remnants"
+    if grep -r '__PACKAGE_CONSTRAINTS__' "$CLAUDE_DIR/agents/" &>/dev/null; then
+        echo -e "  ${RED}✗${NC} Found unreplaced __PACKAGE_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1))
+    else
+        info "No __PACKAGE_CONSTRAINTS__ remnants"
+    fi
 
     check_json "$CLAUDE_DIR/hooks.json" "hooks.json" || ERRORS=$((ERRORS+1))
     check_json "$CLAUDE_DIR/settings.json" "settings.json" || ERRORS=$((ERRORS+1))
@@ -963,7 +984,9 @@ main() {
 
     report_summary
 
-    [[ $ERRORS -gt 0 ]] && { echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1; } || true
+    if [[ $ERRORS -gt 0 ]]; then
+        echo -e "\n${RED}$ERRORS validation error(s) found. Check output above.${NC}"; exit 1
+    fi
 
     # RTK install prompt - always last
     install_rtk

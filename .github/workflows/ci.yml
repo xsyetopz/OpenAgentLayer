@@ -66,6 +66,11 @@ jobs:
           python-version: "3.12"
       - name: Install jq
         run: sudo apt-get install -y jq
+      - name: Stub claude CLI for install validation
+        run: |
+          sudo bash -c 'echo "#!/bin/sh
+          echo \"Claude Code v2.1.80\"" > /usr/local/bin/claude'
+          sudo chmod +x /usr/local/bin/claude
       - name: Test --pro install
         run: |
           mkdir -p /tmp/test-pro

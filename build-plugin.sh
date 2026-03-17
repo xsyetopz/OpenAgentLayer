@@ -3,7 +3,7 @@ set -e
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
+_YELLOW='\033[1;33m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,12 +43,14 @@ inject_constraints_in_file() {
     local shared_file="$SCRIPT_DIR/constraints/shared.md"
     local package_file="$SCRIPT_DIR/constraints/$PACKAGE.md"
     if [[ -f "$shared_file" ]] && grep -q '__SHARED_CONSTRAINTS__' "$file" 2>/dev/null; then
-        local tmp=$(mktemp)
+        local tmp
+        tmp=$(mktemp)
         awk -v constraints="$(cat "$shared_file")" '{gsub(/__SHARED_CONSTRAINTS__/, constraints); print}' "$file" > "$tmp"
         mv "$tmp" "$file"
     fi
     if [[ -f "$package_file" ]] && grep -q '__PACKAGE_CONSTRAINTS__' "$file" 2>/dev/null; then
-        local tmp=$(mktemp)
+        local tmp
+        tmp=$(mktemp)
         awk -v constraints="$(cat "$package_file")" '{gsub(/__PACKAGE_CONSTRAINTS__/, constraints); print}' "$file" > "$tmp"
         mv "$tmp" "$file"
     fi
@@ -56,7 +58,8 @@ inject_constraints_in_file() {
 
 remove_skill_prefix_in_file() {
     local file="$1"
-    local tmp=$(mktemp)
+    local tmp
+    tmp=$(mktemp)
     sed 's|  - cca:|  - |g' "$file" > "$tmp"
     mv "$tmp" "$file"
 }
@@ -66,7 +69,9 @@ prepare_dir() {
     shift
     rm -rf "$dst"
     mkdir -p "$dst"
-    [[ $# -gt 0 ]] && cp "$@" "$dst"/ || true
+    if [[ $# -gt 0 ]]; then
+        cp "$@" "$dst"/
+    fi
 }
 
 stage_agent() {
@@ -80,7 +85,8 @@ stage_all_agents() {
     mkdir -p "$DIST_DIR/agents"
     for agent in "$SCRIPT_DIR"/agents/*.md; do
         [[ -f "$agent" ]] || continue
-        local name=$(basename "$agent")
+        local name
+        name=$(basename "$agent")
         stage_agent "$agent" "$DIST_DIR/agents/$name"
         info "Agent: $name"
     done
@@ -90,7 +96,8 @@ copy_skills() {
     mkdir -p "$DIST_DIR/skills"
     for skill_dir in "$SCRIPT_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
-        local skill=$(basename "$skill_dir")
+        local skill
+        skill=$(basename "$skill_dir")
         mkdir -p "$DIST_DIR/skills/$skill"
         cp "$skill_dir"* "$DIST_DIR/skills/$skill/" 2>/dev/null || true
         info "Skill: $skill"
@@ -99,6 +106,7 @@ copy_skills() {
 
 stage_hooks() {
     mkdir -p "$DIST_DIR/hooks/scripts"
+    # shellcheck disable=SC2016
     sed 's|\\\"$CLAUDE_PROJECT_DIR\\\"/.claude/hooks/scripts/|\\\"${CLAUDE_PLUGIN_ROOT}\\\"/hooks/scripts/|g' \
         "$SCRIPT_DIR/hooks/configs/base.json" > "$DIST_DIR/hooks/hooks.json"
     info "hooks.json (paths transformed to \${CLAUDE_PLUGIN_ROOT})"
@@ -112,19 +120,31 @@ stage_hooks() {
 validate_dist() {
     echo -e "\n${GREEN}Validation:${NC}"
     local ERRORS=0
-    grep -r '__SHARED_CONSTRAINTS__' "$DIST_DIR/agents/" &>/dev/null &&
-      { echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"; ERRORS=$((ERRORS+1)); } ||
-      info "No placeholder remnants"
-    grep -q 'CLAUDE_PROJECT_DIR' "$DIST_DIR/hooks/hooks.json" &&
-      { echo -e "  ${RED}✗${NC} hooks.json still references \$CLAUDE_PROJECT_DIR"; ERRORS=$((ERRORS+1)); } ||
-      info "hooks.json paths use \${CLAUDE_PLUGIN_ROOT}"
+    if grep -r '__SHARED_CONSTRAINTS__' "$DIST_DIR/agents/" &>/dev/null; then
+        echo -e "  ${RED}✗${NC} Found unreplaced __SHARED_CONSTRAINTS__ in agents"
+        ERRORS=$((ERRORS+1))
+    else
+        info "No placeholder remnants"
+    fi
+    if grep -q 'CLAUDE_PROJECT_DIR' "$DIST_DIR/hooks/hooks.json"; then
+        echo -e "  ${RED}✗${NC} hooks.json still references \$CLAUDE_PROJECT_DIR"
+        ERRORS=$((ERRORS+1))
+    else
+        info "hooks.json paths use \${CLAUDE_PLUGIN_ROOT}"
+    fi
     if command -v jq &>/dev/null; then
-        jq empty "$DIST_DIR/.claude-plugin/plugin.json" 2>/dev/null &&
-          info "plugin.json is valid JSON" ||
-          { echo -e "  ${RED}✗${NC} plugin.json is invalid JSON"; ERRORS=$((ERRORS+1)); }
+        if jq empty "$DIST_DIR/.claude-plugin/plugin.json" 2>/dev/null; then
+            info "plugin.json is valid JSON"
+        else
+            echo -e "  ${RED}✗${NC} plugin.json is invalid JSON"
+            ERRORS=$((ERRORS+1))
+        fi
     fi
     echo ""
-    [[ $ERRORS -gt 0 ]] && { echo -e "${RED}Build failed with $ERRORS error(s).${NC}"; exit 1; } || true
+    if [[ $ERRORS -gt 0 ]]; then
+        echo -e "${RED}Build failed with $ERRORS error(s).${NC}"
+        exit 1
+    fi
 }
 
 echo -e "${GREEN}Building ClaudeAgents plugin (package: $PACKAGE)${NC}\n"

@@ -27,7 +27,11 @@ parse_args() {
             --global) INSTALL_SCOPE="global"; shift ;;
             -h|--help) usage ;;
             *)
-                [[ -z "$TARGET_DIR" ]] && TARGET_DIR="$1" || die "Too many arguments"
+                if [[ -z "$TARGET_DIR" ]]; then
+                    TARGET_DIR="$1"
+                else
+                    die "Too many arguments"
+                fi
                 shift ;;
         esac
     done
@@ -46,7 +50,9 @@ remove_skills() {
         info "Removed skills/"
     fi
     # Remove skills/ if empty
-    [[ -d "$CLAUDE_DIR/skills" ]] && rmdir "$CLAUDE_DIR/skills" 2>/dev/null && info "Removed empty skills/" || true
+    if [[ -d "$CLAUDE_DIR/skills" ]] && rmdir "$CLAUDE_DIR/skills" 2>/dev/null; then
+        info "Removed empty skills/"
+    fi
 }
 
 remove_hook_scripts() {
@@ -64,7 +70,9 @@ remove_hooks_json() {
 }
 
 remove_empty_hooks_dir() {
-    [[ -d "$CLAUDE_DIR/hooks" ]] && rmdir "$CLAUDE_DIR/hooks" 2>/dev/null && info "Removed empty hooks/" || true
+    if [[ -d "$CLAUDE_DIR/hooks" ]] && rmdir "$CLAUDE_DIR/hooks" 2>/dev/null; then
+        info "Removed empty hooks/"
+    fi
 }
 
 remove_framework_files() {

@@ -6,13 +6,13 @@ Suggests alternative approaches when stuck.
 """
 
 import hashlib
+import json
 import os
 import sys
-import json
 import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, warn, passthrough, audit_log
+from _lib import audit_log, passthrough, read_stdin, warn
 
 MAX_CONSECUTIVE = 3
 

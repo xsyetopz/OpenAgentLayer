@@ -5,11 +5,11 @@ When an agent in a team is about to go idle, check if their assigned
 work is actually complete. Force continuation if work remains.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, warn, passthrough, audit_log
+from _lib import audit_log, read_stdin, warn
 
 
 def main():

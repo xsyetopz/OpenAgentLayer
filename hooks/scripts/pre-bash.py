@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 import os
 import re
 import subprocess
@@ -7,13 +8,13 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
-    SECRET_PATTERNS,
     MERGE_CONFLICT,
     PLACEHOLDER_HARD,
-    is_test_file,
-    read_stdin,
+    SECRET_PATTERNS,
     deny,
+    is_test_file,
     passthrough,
+    read_stdin,
 )
 
 LARGE_OUTPUT_RULES: list[tuple[re.Pattern, str]] = [
@@ -41,15 +42,14 @@ BROAD_RM = re.compile(
     r'\brm\s+-[a-zA-Z]*r[a-zA-Z]*f[a-zA-Z]*\s+(?:/\s|~/|"\$HOME"|\.\.?\s|/\*)',
 )
 
+
 def get_staged_files() -> list[str]:
     try:
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--name-only"],
-            capture_output=True, text=True, timeout=10
-        )
+        result = subprocess.run(["git", "diff", "--cached", "--name-only"], capture_output=True, text=True, timeout=10)
         return [f for f in result.stdout.strip().split("\n") if f]
     except Exception:
         return []
+
 
 def file_issues(filepath: str) -> list[str]:
     issues = []
@@ -60,17 +60,18 @@ def file_issues(filepath: str) -> list[str]:
         issues.append(f".env file staged: {filepath}")
         return issues
     try:
-        content = open(filepath, encoding="utf-8", errors="ignore").read()
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
+            content = f.read()
     except Exception:
         return issues
     if MERGE_CONFLICT.search(content):
         issues.append(f"Merge conflict markers in {filepath}")
-    if not is_test_file(filepath):
-        if any(pat.search(content) for pat in PLACEHOLDER_HARD[:4]):
-            issues.append(f"Placeholder in {filepath}")
+    if not is_test_file(filepath) and any(pat.search(content) for pat in PLACEHOLDER_HARD[:4]):
+        issues.append(f"Placeholder in {filepath}")
     if any(pat.search(content) for pat in SECRET_PATTERNS):
         issues.append(f"Possible secret/credential in {filepath}")
     return issues
+
 
 def check_large_output(cmd: str) -> str | None:
     for pattern, message in LARGE_OUTPUT_RULES:
@@ -78,11 +79,14 @@ def check_large_output(cmd: str) -> str | None:
             return message
     return None
 
+
 def forbidden_git_add(cmd: str) -> bool:
     return BLANKET_STAGE.search(cmd) is not None
 
+
 def forbidden_rm(cmd: str) -> bool:
     return BROAD_RM.search(cmd) is not None
+
 
 def precommit_check(cmd: str) -> list[str]:
     if "git commit" not in cmd:
@@ -92,6 +96,7 @@ def precommit_check(cmd: str) -> list[str]:
     for filepath in staged:
         blockers.extend(file_issues(filepath))
     return blockers
+
 
 def main() -> None:
     data = read_stdin()
@@ -117,6 +122,7 @@ def main() -> None:
     if DNS_EXFIL.search(cmd):
         deny("[guard] DNS/ICMP tools can exfiltrate data (CVE-2025-55284). Use curl for connectivity checks.")
     passthrough()
+
 
 if __name__ == "__main__":
     main()

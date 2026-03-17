@@ -1,0 +1,10 @@
+{
+	"recommendations": [
+		"charliermarsh.ruff",
+		"foxundermoon.shell-format",
+		"timonwong.shellcheck",
+		"redhat.vscode-yaml",
+		"DavidAnson.vscode-markdownlint",
+		"EditorConfig.EditorConfig"
+	]
+}
