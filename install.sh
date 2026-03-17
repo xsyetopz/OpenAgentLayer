@@ -65,11 +65,18 @@ apply_package_models() {
     esac
 }
 
-# --- TUI primitives (pure bash, no dependencies) ---
+# --- TUI primitives (pure bash, no external dependencies) ---
 
 INTERACTIVE="false"
 SELECTED_AGENTS=""
 SELECTED_SKILLS=""
+
+# Repeat a character N times without seq (pure bash)
+_repeat_char() {
+    local char="$1" count="$2" result=""
+    for ((i = 0; i < count; i++)); do result+="$char"; done
+    printf '%s' "$result"
+}
 
 tui_clear_screen() {
     printf '\033[2J\033[H'
@@ -91,7 +98,7 @@ tui_box() {
     local title="$1" width="$2" start_row="$3"
     local border_top border_bottom
     local inner=$((width - 4))
-    border_top=$(printf '─%.0s' $(seq 1 $((inner + 2))))
+    border_top=$(_repeat_char '─' $((inner + 2)))
     border_bottom="$border_top"
     tui_move_to "$start_row" 2
     printf "${GREEN}╭─ %s %s╮${NC}" "$title" "${border_top:$((${#title} + 1))}"
@@ -103,7 +110,7 @@ tui_box_bottom() {
     local width="$1" row="$2" hint="$3"
     local inner=$((width - 4))
     local border
-    border=$(printf '─%.0s' $(seq 1 $((inner + 2))))
+    border=$(_repeat_char '─' $((inner + 2)))
     tui_move_to "$row" 2
     if [[ -n "$hint" ]]; then
         local pad=$((inner + 2 - ${#hint}))
@@ -363,18 +370,12 @@ make_dirs() {
 substitute_and_copy() {
     local src="$1"
     local dest="$2"
-    local shared_constraints="" package_constraints=""
-    if [[ -f "$REPO_DIR/constraints/shared.md" ]]; then
-        shared_constraints=$(cat "$REPO_DIR/constraints/shared.md")
-    fi
-    if [[ -f "$REPO_DIR/constraints/$PACKAGE.md" ]]; then
-        package_constraints=$(cat "$REPO_DIR/constraints/$PACKAGE.md")
-    fi
-    local tmp tmp2
+    local tmp
     tmp=$(mktemp)
-    tmp2=$(mktemp)
     apply_package_models "$src" "$tmp"
     # Use Python for multiline-safe substitution (awk breaks on newlines in -v)
+    local pkg_file=""
+    [[ -f "$REPO_DIR/constraints/$PACKAGE.md" ]] && pkg_file="$REPO_DIR/constraints/$PACKAGE.md"
     python3 -c "
 import sys
 text = open(sys.argv[1]).read()
@@ -383,22 +384,15 @@ pkg = open(sys.argv[3]).read() if sys.argv[3] != '' else ''
 text = text.replace('__SHARED_CONSTRAINTS__', shared)
 text = text.replace('__PACKAGE_CONSTRAINTS__', pkg)
 open(sys.argv[4], 'w').write(text)
-" "$tmp" \
-  "${REPO_DIR}/constraints/shared.md" \
-  "$([ -f "$REPO_DIR/constraints/$PACKAGE.md" ] && echo "$REPO_DIR/constraints/$PACKAGE.md" || echo "")" \
-  "$dest"
-    rm -f "$tmp2"
+" "$tmp" "${REPO_DIR}/constraints/shared.md" "$pkg_file" "$dest"
     # Rewrite skill refs from plugin format (cca:skill) to manual format (cca-skill)
-    local tmp3
-    tmp3=$(mktemp)
-    sed 's|  - cca:|  - cca-|g' "$dest" > "$tmp3" && mv "$tmp3" "$dest"
+    local tmp2
+    tmp2=$(mktemp)
+    sed 's|  - cca:|  - cca-|g' "$dest" > "$tmp2" && mv "$tmp2" "$dest"
     if [[ "$ZEN_MODE" == "true" && -f "$REPO_DIR/constraints/zen.md" ]]; then
-        local zen_constraints
-        zen_constraints=$(cat "$REPO_DIR/constraints/zen.md")
-        echo "" >> "$dest"
-        echo "$zen_constraints" >> "$dest"
+        cat "$REPO_DIR/constraints/zen.md" >> "$dest"
     fi
-    rm -f "$tmp" "$tmp2"
+    rm -f "$tmp"
 }
 
 # --- Diff helpers for --update mode ---

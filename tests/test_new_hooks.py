@@ -71,13 +71,13 @@ class TestAuditLogging:
             })
             assert result.returncode == 0
             log_file = os.path.join(tmpdir, "cca-hooks.jsonl")
-            if os.path.exists(log_file):
-                with open(log_file) as f:
-                    lines = f.readlines()
-                assert len(lines) >= 1
-                entry = json.loads(lines[0])
-                assert entry["event"] == "Notification"
-                assert entry["hook"] == "notification.py"
+            assert os.path.exists(log_file), "Audit log file should be created when CCA_HOOK_LOG_DIR is set"
+            with open(log_file) as f:
+                lines = f.readlines()
+            assert len(lines) >= 1, "Audit log should contain at least one entry"
+            entry = json.loads(lines[0])
+            assert entry["event"] == "Notification"
+            assert entry["hook"] == "notification.py"
 
     def test_no_log_when_disabled(self):
         with tempfile.TemporaryDirectory() as tmpdir:

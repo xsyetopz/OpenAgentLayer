@@ -2,25 +2,26 @@
 """SessionEnd hook: cleanup and final audit summary.
 
 Generates a session summary if significant work was done.
-Reminds about session export for long sessions.
+Cleans up temporary files created during the session.
 """
 
+import glob
+import hashlib
 import os
 import sys
-import json
+import tempfile
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _lib import read_stdin, warn, passthrough, audit_log
 
-FAILURE_LOG = "/tmp/cca-failure-log.jsonl"
-
 
 def cleanup():
-    """Remove temporary files created during the session."""
-    for tmp_file in [FAILURE_LOG]:
+    """Remove per-user/per-project failure logs from this session."""
+    uid = str(os.getuid())
+    pattern = os.path.join(tempfile.gettempdir(), f"cca-failures-{uid}-*.jsonl")
+    for f in glob.glob(pattern):
         try:
-            if os.path.exists(tmp_file):
-                os.remove(tmp_file)
+            os.remove(f)
         except OSError:
             pass
 

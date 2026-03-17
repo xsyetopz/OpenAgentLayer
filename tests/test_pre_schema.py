@@ -16,11 +16,10 @@ class TestWriteValidation:
             "tool_name": "Write",
             "tool_input": {"file_path": "/tmp/test.py", "content": ""},
         })
-        # Should block or warn on empty content
         output = parse_hook_output(result)
-        if output:
-            decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
-            assert decision in ("deny", "") or result.returncode == 2 or result.returncode == 0
+        assert output, "Expected JSON output for empty content denial"
+        decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
+        assert decision == "deny"
 
 
 class TestEditValidation:
@@ -44,11 +43,10 @@ class TestEditValidation:
                 "new_string": "foo",
             },
         })
-        # Should block no-op edits
         output = parse_hook_output(result)
-        if output:
-            decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
-            assert decision == "deny" or result.returncode == 2
+        assert output, "Expected JSON output for no-op edit denial"
+        decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
+        assert decision == "deny"
 
 
 class TestBashValidation:
@@ -65,6 +63,6 @@ class TestBashValidation:
             "tool_input": {"command": ""},
         })
         output = parse_hook_output(result)
-        if output:
-            decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
-            assert decision == "deny" or result.returncode == 2
+        assert output, "Expected JSON output for empty command denial"
+        decision = output.get("hookSpecificOutput", {}).get("permissionDecision", "")
+        assert decision == "deny"
