@@ -5,8 +5,8 @@
 ```bash
 git clone https://github.com/xsyetopz/ClaudeAgents.git
 cd ClaudeAgents
-make lint    # shellcheck + ruff + jsonlint
-make test    # pytest
+make lint    # shellcheck + jsonlint
+make test    # node --test
 make build   # build plugin
 ```
 
@@ -23,9 +23,9 @@ make build   # build plugin
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 feat(agents): add pre-planning checklist to athena
-fix(hooks): handle Python 3.9 type annotation syntax
+fix(hooks): handle edge case in bash-guard regex
 docs: update README with architecture diagram
 test: add hook unit tests for post-write
 chore(ci): add shellcheck to CI pipeline
@@ -52,15 +52,15 @@ Scopes: `agents`, `skills`, `hooks`, `install`, `ci`, `docs`
 
 ## Adding a Hook
 
-1. Create `hooks/scripts/your-hook.py`
-2. Use `_lib.py` helpers: `read_stdin()`, `deny()`, `allow()`, `warn()`, `passthrough()`, `audit_log()`
+1. Create `hooks/scripts/your-hook.mjs`
+2. Use `_lib.mjs` helpers: `readStdin()`, `deny()`, `allow()`, `warn()`, `passthrough()`, `auditLog()`
 3. Add the hook to all config files: `hooks/configs/{base,pro,max,enterprise}.json`
-4. Add tests in `tests/test_your_hook.py`
+4. Add tests in `tests/test-your-hook.mjs`
 5. Run `make validate`
 
 ## Code Style
 
-- **Python**: ruff (configured in pyproject.toml), Python 3.9+ compatible
+- **JavaScript**: Node.js >= 18 ESM (.mjs), stdlib-only
 - **Bash**: shellcheck
 - **JSON**: valid JSON (validated in CI)
 - **Markdown**: clear structure, no filler adjectives

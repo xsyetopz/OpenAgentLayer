@@ -45,9 +45,12 @@ check_version() {
     info "Claude Code v${version}"
 }
 
-check_python() {
-    command -v python3 &>/dev/null || die "python3 not found. Hook scripts require Python 3."
-    info "python3 found: $(python3 --version 2>&1)"
+check_node() {
+    command -v node &>/dev/null || die "node not found. Hook scripts require Node.js >= 18."
+    local node_ver
+    node_ver=$(node --version 2>/dev/null | grep -oE '[0-9]+' | head -1)
+    (( node_ver >= 18 )) || die "Node.js v${node_ver} is too old. Requires >= 18."
+    info "node found: $(node --version 2>&1)"
 }
 
 apply_package_models() {
@@ -373,17 +376,17 @@ substitute_and_copy() {
     local tmp
     tmp=$(mktemp)
     apply_package_models "$src" "$tmp"
-    # Use Python for multiline-safe substitution (awk breaks on newlines in -v)
     local pkg_file=""
     [[ -f "$REPO_DIR/constraints/$PACKAGE.md" ]] && pkg_file="$REPO_DIR/constraints/$PACKAGE.md"
-    python3 -c "
-import sys
-text = open(sys.argv[1]).read()
-shared = open(sys.argv[2]).read() if sys.argv[2] != '' else ''
-pkg = open(sys.argv[3]).read() if sys.argv[3] != '' else ''
-text = text.replace('__SHARED_CONSTRAINTS__', shared)
-text = text.replace('__PACKAGE_CONSTRAINTS__', pkg)
-open(sys.argv[4], 'w').write(text)
+    node -e "
+const fs = require('fs');
+const [, src, sharedPath, pkgPath, out] = process.argv;
+let text = fs.readFileSync(src, 'utf8');
+const shared = sharedPath ? fs.readFileSync(sharedPath, 'utf8') : '';
+const pkg = pkgPath ? fs.readFileSync(pkgPath, 'utf8') : '';
+text = text.split('__SHARED_CONSTRAINTS__').join(shared);
+text = text.split('__PACKAGE_CONSTRAINTS__').join(pkg);
+fs.writeFileSync(out, text);
 " "$tmp" "${REPO_DIR}/constraints/shared.md" "$pkg_file" "$dest"
     # Rewrite skill refs from plugin format (cca:skill) to manual format (cca-skill)
     local tmp2
@@ -456,7 +459,7 @@ update_interactive() {
     done
 
     # Check hook scripts
-    for hook_script in "$REPO_DIR"/hooks/scripts/*.py; do
+    for hook_script in "$REPO_DIR"/hooks/scripts/*.mjs; do
         [[ -f "$hook_script" ]] || continue
         local fname
         fname=$(basename "$hook_script")
@@ -467,7 +470,7 @@ update_interactive() {
     diff_file "hooks.json" "$CLAUDE_DIR/hooks.json" "$REPO_DIR/hooks/configs/base.json" || changes=$((changes + 1))
 
     # Check user-level hooks
-    for hook in pre-secrets.py rtk-rewrite.sh; do
+    for hook in pre-secrets.mjs rtk-rewrite.sh; do
         [[ -f "$REPO_DIR/hooks/user/$hook" ]] || continue
         diff_file "user hook: $hook" "$HOME/.claude/hooks/$hook" "$REPO_DIR/hooks/user/$hook" || changes=$((changes + 1))
     done
@@ -541,7 +544,7 @@ copy_skills() {
 
 copy_hooks_scripts() {
     echo -e "\nHooks:"
-    for hook in pre-secrets.py rtk-rewrite.sh; do
+    for hook in pre-secrets.mjs rtk-rewrite.sh; do
         local src="$REPO_DIR/hooks/user/$hook"
         local dest="$HOME/.claude/hooks/$hook"
         [[ -f "$src" ]] && { cp "$src" "$dest"; chmod +x "$dest"; info "$hook -> ~/.claude/hooks/ (user-level)"; }
@@ -559,12 +562,12 @@ copy_hooks_scripts() {
         if [[ "$resolved_repo" == "$resolved_target" ]]; then
             rm -rf "$CLAUDE_DIR/hooks/scripts"
             ln -sfn "../../hooks/scripts" "$CLAUDE_DIR/hooks/scripts"
-            HOOK_COUNT=$(find "$REPO_DIR/hooks/scripts/" -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
+            HOOK_COUNT=$(find "$REPO_DIR/hooks/scripts/" -name '*.mjs' 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> symlinked (self-install)"
         else
             cp -r "$REPO_DIR/hooks/scripts/"* "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null || true
-            find "$CLAUDE_DIR/hooks/scripts/" -name '*.py' -exec chmod +x {} \; 2>/dev/null || true
-            HOOK_COUNT=$(find "$CLAUDE_DIR/hooks/scripts/" -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
+            find "$CLAUDE_DIR/hooks/scripts/" -name '*.mjs' -exec chmod +x {} \; 2>/dev/null || true
+            HOOK_COUNT=$(find "$CLAUDE_DIR/hooks/scripts/" -name '*.mjs' 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> project hooks"
         fi
     fi
@@ -661,7 +664,7 @@ settings_json_merge_project() {
     # shellcheck disable=SC2016
     local GUARD_SECRETS_ENTRY='{
         "matcher": "Write|Edit|MultiEdit|NotebookEdit|Read|Bash|WebFetch",
-        "hooks": [{"type": "command", "command": "python3 \"$HOME\"/.claude/hooks/pre-secrets.py", "timeout": 5}]
+        "hooks": [{"type": "command", "command": "node \"$HOME\"/.claude/hooks/pre-secrets.mjs", "timeout": 5}]
     }'
 
     if command -v jq &>/dev/null; then
@@ -766,17 +769,17 @@ check_json() {
     return 0
 }
 
-validate_python_hooks() {
-    PYTHON_ERRORS=0
-    for pyfile in "$CLAUDE_DIR/hooks/scripts/"*.py "$HOME/.claude/hooks/"*.py; do
-        [[ -f "$pyfile" ]] || continue
-        python3 -c "import py_compile; py_compile.compile('$pyfile', doraise=True)" 2>/dev/null || {
-            echo -e "  ${RED}✗${NC} Syntax error in $(basename "$pyfile")"
-            PYTHON_ERRORS=$((PYTHON_ERRORS + 1))
+validate_node_hooks() {
+    NODE_ERRORS=0
+    for mjsfile in "$CLAUDE_DIR/hooks/scripts/"*.mjs "$HOME/.claude/hooks/"*.mjs; do
+        [[ -f "$mjsfile" ]] || continue
+        node --check "$mjsfile" 2>/dev/null || {
+            echo -e "  ${RED}✗${NC} Syntax error in $(basename "$mjsfile")"
+            NODE_ERRORS=$((NODE_ERRORS + 1))
         }
     done
-    [[ $PYTHON_ERRORS -eq 0 ]] && info "All Python hooks parse without errors"
-    return $PYTHON_ERRORS
+    [[ $NODE_ERRORS -eq 0 ]] && info "All Node.js hooks parse without errors"
+    return $NODE_ERRORS
 }
 
 validate_cca_skills() {
@@ -838,16 +841,16 @@ diagnose_hooks() {
     echo -e "\n${GREEN}Hook Diagnostics:${NC}"
     local total=0 passed=0 failed=0
 
-    for script in "$CLAUDE_DIR/hooks/scripts/"*.py; do
+    for script in "$CLAUDE_DIR/hooks/scripts/"*.mjs; do
         [[ -f "$script" ]] || continue
         local name
         name=$(basename "$script")
-        [[ "$name" == "_lib.py" ]] && continue
+        [[ "$name" == "_lib.mjs" ]] && continue
         total=$((total + 1))
 
         local result
         result=$(echo '{"tool_name":"Bash","tool_input":{"command":"echo test"},"hook_event_name":"PreToolUse"}' | \
-            python3 "$script" 2>&1)
+            node "$script" 2>&1)
         local exit_code=$?
 
         if [[ $exit_code -eq 0 ]]; then
@@ -860,16 +863,16 @@ diagnose_hooks() {
         fi
     done
 
-    for hook in "$HOME/.claude/hooks/"*.py "$HOME/.claude/hooks/"*.sh; do
+    for hook in "$HOME/.claude/hooks/"*.mjs "$HOME/.claude/hooks/"*.sh; do
         [[ -f "$hook" ]] || continue
         local name
         name=$(basename "$hook")
         total=$((total + 1))
 
         local result
-        if [[ "$hook" == *.py ]]; then
+        if [[ "$hook" == *.mjs ]]; then
             result=$(echo '{"tool_name":"Bash","tool_input":{"command":"echo test"}}' | \
-                python3 "$hook" 2>&1)
+                node "$hook" 2>&1)
         else
             result=$(echo '{"tool_name":"Bash","tool_input":{"command":"echo test"}}' | \
                 bash "$hook" 2>&1)
@@ -899,7 +902,7 @@ main() {
     fi
 
     check_version
-    check_python
+    check_node
 
     if [[ "$INSTALL_SCOPE" == "global" ]]; then
         TARGET_DIR="$HOME"
@@ -948,7 +951,7 @@ main() {
     check_json "$CLAUDE_DIR/hooks.json" "hooks.json" || ERRORS=$((ERRORS+1))
     check_json "$CLAUDE_DIR/settings.json" "settings.json" || ERRORS=$((ERRORS+1))
 
-    validate_python_hooks; ERRORS=$((ERRORS + $?))
+    validate_node_hooks; ERRORS=$((ERRORS + $?))
     validate_cca_skills; ERRORS=$((ERRORS + $?))
 
     validate_agents; ERRORS=$((ERRORS + $?))

@@ -1,6 +1,6 @@
 {
 	"name": "cca",
-	"version": "0.5.1",
+	"version": "0.6.0",
 	"description": "7 specialised agents, 10 skills, 13 safety hooks for Claude Code",
 	"author": {
 		"name": "xsyetopz",

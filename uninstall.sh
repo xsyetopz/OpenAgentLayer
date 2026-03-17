@@ -86,7 +86,7 @@ remove_framework_files() {
 
 remove_user_level_hooks() {
     echo -e "\nRemoving user-level hooks:"
-    for hook in pre-secrets.py rtk-rewrite.sh; do
+    for hook in pre-secrets.mjs rtk-rewrite.sh; do
         if [[ -f "$HOME/.claude/hooks/$hook" ]]; then
             rm -f "$HOME/.claude/hooks/$hook"
             info "Removed ~/.claude/hooks/$hook"
@@ -169,7 +169,7 @@ confirm_uninstall() {
     echo "  - hooks.json"
     echo ""
     echo -e "${YELLOW}User-level hooks to remove:${NC}"
-    echo "  - ~/.claude/hooks/pre-secrets.py"
+    echo "  - ~/.claude/hooks/pre-secrets.mjs"
     echo "  - ~/.claude/hooks/rtk-rewrite.sh"
     if [[ "$INSTALL_SCOPE" == "global" ]]; then
         echo "  - ~/.claude/statusline-command.sh"

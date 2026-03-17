@@ -1,6 +1,6 @@
 #!/bin/bash
 # _run.sh — universal CCA hook runner
-# Usage: _run.sh <hook-script.py>
+# Usage: _run.sh <hook-script.mjs>
 # Reads CLAUDE_PROJECT_DIR or CLAUDE_PLUGIN_ROOT to find the hook.
 # Falls back gracefully if hook file is missing (exit 0 = no-op).
 
@@ -15,7 +15,7 @@ fi
 HOOK="$DIR/$1"
 
 if [ -f "$HOOK" ]; then
-    exec python3 "$HOOK"
+    exec node "$HOOK"
 else
     >&2 echo "cca: hook not found: $1"
     exit 0

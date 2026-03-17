@@ -40,25 +40,25 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 
 **User-level** (`~/.claude/hooks/`):
 
-- `pre-secrets.py` — guards .env, credentials, force-push
+- `pre-secrets.mjs` — guards .env, credentials, force-push
 
 **Project-level** (`hooks.json` → `hooks/scripts/`):
 
-- `pre/validate-input.py` — schema validation for tool inputs
-- `pre/bash-guard.py` — guards dangerous bash commands
-- `pre/http-proxy.py` — optional HTTP DLP forwarding
-- `post/write-quality.py` — auto-format + placeholder + slop scan
-- `post/bash-redact.py` — redacts secrets from output
-- `post/failure-circuit.py` — retry loop detection
-- `post/http-proxy.py` — optional HTTP DLP forwarding
-- `post/subagent-scan.py` — placeholder scan on subagent stop
-- `post/stop-scan.py` — placeholder scan on session stop
-- `session/start-budget.py` — line budget warnings
-- `session/end-cleanup.py` — cleanup + audit summary
-- `session/prompt-git-context.py` — git context injection
-- `session/teammate-idle-resume.py` — force idle agent continuation
-- `session/notification-audit.py` — audit logging
-- `session/permission-audit.py` — audit trail
+- `pre/validate-input.mjs` — schema validation for tool inputs
+- `pre/bash-guard.mjs` — guards dangerous bash commands
+- `pre/http-proxy.mjs` — optional HTTP DLP forwarding
+- `post/write-quality.mjs` — auto-format + placeholder + slop scan
+- `post/bash-redact.mjs` — redacts secrets from output
+- `post/failure-circuit.mjs` — retry loop detection
+- `post/http-proxy.mjs` — optional HTTP DLP forwarding
+- `post/subagent-scan.mjs` — placeholder scan on subagent stop
+- `post/stop-scan.mjs` — placeholder scan on session stop
+- `session/start-budget.mjs` — line budget warnings
+- `session/end-cleanup.mjs` — cleanup + audit summary
+- `session/prompt-git-context.mjs` — git context injection
+- `session/teammate-idle-resume.mjs` — force idle agent continuation
+- `session/notification-audit.mjs` — audit logging
+- `session/permission-audit.mjs` — audit trail
 
 ## Model Strategy
 
@@ -71,8 +71,8 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 ## Development
 
 ```bash
-make lint      # shellcheck + ruff + jsonlint
-make test      # pytest
+make lint      # shellcheck + jsonlint
+make test      # node --test
 make build     # build plugin
 make validate  # lint + test + build
 ```
@@ -85,13 +85,13 @@ make validate  # lint + test + build
 agents/          7 agent definitions (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
 skills/          11 skill directories (review-code, desloppify, ship, style-detect, etc.)
 hooks/           configs/ (base.json, pro.json, max.json)
-                 user/ (pre-secrets.py, rtk-rewrite.sh)
-                 scripts/ (_lib.py, pre/, post/, session/)
+                 user/ (pre-secrets.mjs, rtk-rewrite.sh)
+                 scripts/ (_lib.mjs, pre/, post/, session/)
 constraints/     shared.md, pro.md, max.md, zen.md
 templates/       CLAUDE.md, settings-global.json
 output-styles/   cca.md (custom output style)
 statusline/      statusline-command.sh (context/cost/git statusline)
-tests/           pytest tests for all hooks
+tests/           node:test tests for all hooks
 install.sh       Package flags, model substitution, validation
 build-plugin.sh  Builds marketplace-ready dist from source
 ```

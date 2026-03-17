@@ -17,30 +17,18 @@ jobs:
       - name: Lint shell scripts
         run: shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh statusline/statusline-command.sh
 
-  ruff:
-    name: Python Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install ruff
-        run: pip install ruff
-      - name: Lint
-        run: ruff check hooks/scripts/ hooks/user/
-      - name: Format check
-        run: ruff format --check hooks/scripts/ hooks/user/
-
   jsonlint:
     name: JSON Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
       - name: Validate JSON files
         run: |
           find . -name '*.json' -not -path './node_modules/*' -not -path './dist/*' | while read f; do
-            python3 -c "import json; json.load(open('$f'))" 2>&1 || { echo "Invalid JSON: $f"; exit 1; }
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" 2>&1 || { echo "Invalid JSON: $f"; exit 1; }
           done
 
   hook-tests:
@@ -48,22 +36,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-      - name: Install test dependencies
-        run: pip install pytest
+          node-version: "18"
       - name: Run tests
-        run: pytest tests/ -v
+        run: node --test tests/test-*.mjs
 
   install-test:
     name: Install Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "18"
       - name: Install jq
         run: sudo apt-get install -y jq
       - name: Test --pro install
@@ -78,7 +64,7 @@ jobs:
           ! grep -r '__SHARED_CONSTRAINTS__' /tmp/test-pro/.claude/agents/ || exit 1
           ! grep -r '__PACKAGE_CONSTRAINTS__' /tmp/test-pro/.claude/agents/ || exit 1
           # Verify hooks.json is valid JSON
-          python3 -c "import json; json.load(open('/tmp/test-pro/.claude/hooks/hooks.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('/tmp/test-pro/.claude/hooks/hooks.json','utf8'))"
           echo "Pro install validated"
       - name: Test --max install
         run: |
@@ -97,9 +83,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
+          node-version: "18"
       - name: Install jq
         run: sudo apt-get install -y jq
       - name: Build plugin
@@ -108,7 +94,7 @@ jobs:
         run: |
           test -d dist/claude-agents-plugin
           test -f dist/claude-agents-plugin/plugin.json
-          python3 -c "import json; json.load(open('dist/claude-agents-plugin/plugin.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('dist/claude-agents-plugin/plugin.json','utf8'))"
           # No placeholder remnants
           ! grep -r '__SHARED_CONSTRAINTS__' dist/claude-agents-plugin/ || exit 1
           ! grep -r '__PACKAGE_CONSTRAINTS__' dist/claude-agents-plugin/ || exit 1

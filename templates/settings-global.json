@@ -139,7 +139,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$HOME\"/.claude/hooks/pre-secrets.py",
+						"command": "node \"$HOME\"/.claude/hooks/pre-secrets.mjs",
 						"timeout": 5
 					}
 				]
@@ -179,7 +179,7 @@
 		"command": "bash __HOME__/.claude/statusline-command.sh"
 	},
 	"autoUpdatesChannel": "latest",
-	"availableModels": ["opus", "sonnet", "haiku"],
+	"availableModels": ["opusplan", "opus[1m]", "opus", "sonnet[1m]", "sonnet", "haiku"],
 	"skipWebFetchPreflight": true,
 	"alwaysThinkingEnabled": true,
 	"terminalImageSupport": true

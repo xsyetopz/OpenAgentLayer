@@ -10,16 +10,16 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 - **Anti-rationalization Stop hook** prevents Claude from rationalizing incomplete work
 - **JSON audit logging** via `CCA_HOOK_LOG_DIR` env var (all hooks write JSONL)
 - **Agent team workflow commands**: team-review, team-feature, team-debug, team-refactor, team-ship
-- **CI/CD pipeline**: GitHub Actions for shellcheck, ruff, jsonlint, pytest, install validation, plugin build
+- **CI/CD pipeline**: GitHub Actions for shellcheck, jsonlint, node:test, install validation, plugin build
 - **Test suite**: 65 tests covering all hook scripts, shared patterns, and install validation
 - **SECURITY.md**: vulnerability reporting, security model, sandboxing recommendations
 - **CONTRIBUTING.md**: development workflow, commit conventions, contribution guides
 - **GitHub issue/PR templates**: bug reports, feature requests, agent submissions
 - **Makefile**: lint, format, test, validate, build, clean targets
-- **pyproject.toml**: ruff + pytest configuration
+- **package.json**: node:test configuration
 - **.editorconfig**: consistent formatting across editors
 - **Hook runner** (`_run.sh`): universal hook invocation script
-- **Retry loop detection** (post-failure.py): warns after 3 consecutive failures to same tool
+- **Retry loop detection** (post-failure.mjs): warns after 3 consecutive failures to same tool
 
 ### Changed
 
@@ -36,12 +36,12 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 - **plugin.json**: added `agents`, `commands` fields; bumped version to 0.4.0
 - **Settings template**: added git force-push, git reset --hard, shell config, and gnupg deny rules
 - **.gitignore**: trimmed from 300+ lines of boilerplate to ~30 relevant entries
-- **Python 3.9 compatibility**: added `from __future__ import annotations` to hooks using `str | None` syntax
+- **Node.js ESM migration**: all hooks rewritten from Python to Node.js (.mjs)
 
 ### Fixed
 
 - Hermes agent constraints not being injected during install (wrong placeholder syntax)
-- Hook scripts crash on Python 3.9 due to `str | None` union type syntax
+- Hook scripts no longer require Python runtime (Node.js only)
 
 ## [0.3.0] - 2026-03-15
 

@@ -108,8 +108,8 @@ stage_hooks() {
     # Copy pre-built hooks.json (already has CLAUDE_PLUGIN_ROOT paths)
     cp "$SCRIPT_DIR/hooks/hooks.json" "$DIST_DIR/hooks/hooks.json"
     info "hooks.json"
-    # Copy top-level scripts (_lib.py etc.)
-    for script in "$SCRIPT_DIR"/hooks/scripts/*.py; do
+    # Copy top-level scripts (_lib.mjs etc.)
+    for script in "$SCRIPT_DIR"/hooks/scripts/*.mjs; do
         [[ -f "$script" ]] || continue
         cp "$script" "$DIST_DIR/hooks/scripts/"
         info "Hook script: $(basename "$script")"
@@ -118,9 +118,9 @@ stage_hooks() {
     for subdir in pre post session; do
         if [[ -d "$SCRIPT_DIR/hooks/scripts/$subdir" ]]; then
             mkdir -p "$DIST_DIR/hooks/scripts/$subdir"
-            find "$SCRIPT_DIR/hooks/scripts/$subdir" -name '*.py' ! -path '*__pycache__*' \
+            find "$SCRIPT_DIR/hooks/scripts/$subdir" -name '*.mjs' \
                 -exec cp {} "$DIST_DIR/hooks/scripts/$subdir/" \;
-            info "Hook scripts: $subdir/ ($(find "$DIST_DIR/hooks/scripts/$subdir" -name '*.py' | wc -l | tr -d ' ') files)"
+            info "Hook scripts: $subdir/ ($(find "$DIST_DIR/hooks/scripts/$subdir" -name '*.mjs' | wc -l | tr -d ' ') files)"
         fi
     done
 }

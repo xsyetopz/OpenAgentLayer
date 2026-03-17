@@ -7,7 +7,7 @@
 <!-- Which part of the system? -->
 - [ ] Agent (agents/*.md)
 - [ ] Skill (skills/*/SKILL.md)
-- [ ] Hook (hooks/scripts/*.py)
+- [ ] Hook (hooks/scripts/*.mjs)
 - [ ] Installer (install.sh / build-plugin.sh)
 - [ ] CI/CD (.github/workflows/)
 - [ ] Documentation

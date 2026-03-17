@@ -184,7 +184,7 @@ export CCA_HOOK_LOG_DIR="/var/log/cca"
 Writes to `$CCA_HOOK_LOG_DIR/cca-hooks.jsonl`:
 
 ```json
-{"ts":"2026-03-17T12:00:00Z","event":"PreToolUse","tool":"Bash","action":"blocked","reason":"rm -rf pattern","hook":"pre-bash.py"}
+{"ts":"2026-03-17T12:00:00Z","event":"PreToolUse","tool":"Bash","action":"blocked","reason":"rm -rf pattern","hook":"pre-bash.mjs"}
 ```
 
 ---
@@ -192,8 +192,8 @@ Writes to `$CCA_HOOK_LOG_DIR/cca-hooks.jsonl`:
 ## Development
 
 ```bash
-make lint      # shellcheck + ruff + jsonlint
-make test      # pytest (65 tests)
+make lint      # shellcheck + jsonlint
+make test      # node --test (72 tests)
 make build     # build plugin
 make validate  # lint + test + build
 ```
@@ -212,7 +212,7 @@ claude plugin uninstall cca          # plugin
 
 ## Requirements
 
-Claude Code >= 2.1.75, Python 3.9+, jq (optional).
+Claude Code >= 2.1.75, Node.js >= 18, jq (optional).
 
 ---
 

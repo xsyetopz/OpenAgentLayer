@@ -10,12 +10,12 @@ ClaudeAgents hooks are **guardrails, not walls**. They catch common mistakes and
 
 ### What hooks protect against
 
-- Accidental secret leaks in command output (post-bash.py)
-- Blanket `git add .` that may stage .env files (pre-bash.py)
-- Broad `rm -rf` on system paths (pre-bash.py)
-- Placeholder/stub code reaching production (post-write.py, subagent-scan.py)
-- Silent scope reduction by agents (subagent-scan.py)
-- DNS exfiltration patterns (pre-bash.py)
+- Accidental secret leaks in command output (post-bash.mjs)
+- Blanket `git add .` that may stage .env files (pre-bash.mjs)
+- Broad `rm -rf` on system paths (pre-bash.mjs)
+- Placeholder/stub code reaching production (post-write.mjs, subagent-scan.mjs)
+- Silent scope reduction by agents (subagent-scan.mjs)
+- DNS exfiltration patterns (pre-bash.mjs)
 
 ### What hooks do NOT protect against
 

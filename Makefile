@@ -56,28 +56,22 @@ diagnose: ## Run hook diagnostics (no install)
 # ──────────────────────────────────────────────
 
 .PHONY: lint
-lint: lint-shell lint-python lint-json ## Run all linters
+lint: lint-shell lint-json ## Run all linters
 
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts with shellcheck
 	shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh statusline/statusline-command.sh
 
-.PHONY: lint-python
-lint-python: ## Lint Python with ruff
-	ruff check hooks/scripts/ hooks/user/ tests/
-
 .PHONY: lint-json
 lint-json: ## Validate all JSON files parse correctly
 	@echo "Validating JSON files..."
 	@find . -name '*.json' -not -path './node_modules/*' -not -path './dist/*' -not -path './.git/*' | while read f; do \
-		python3 -c "import json; json.load(open('$$f'))" 2>&1 || { echo "FAILED: $$f"; exit 1; }; \
+		node -e "JSON.parse(require('fs').readFileSync('$$f','utf8'))" 2>&1 || { echo "FAILED: $$f"; exit 1; }; \
 	done
 	@echo "All JSON valid."
 
 .PHONY: format
-format: ## Auto-format Python files
-	ruff format hooks/scripts/ hooks/user/ tests/
-	ruff check --fix hooks/scripts/ hooks/user/ tests/ 2>/dev/null || true
+format: ## No-op (formatting handled by project tooling)
 
 .PHONY: build
 build: ## Build plugin dist (PACKAGE=pro|max)
@@ -114,11 +108,11 @@ validate-dist: build ## Build then validate dist structure
 hooks-json: ## Regenerate hooks/hooks.json from configs/base.json
 	@sed 's|"$$CLAUDE_PROJECT_DIR"/.claude/hooks/scripts/|"$${CLAUDE_PLUGIN_ROOT}"/hooks/scripts/|g' \
 		hooks/configs/base.json > hooks/hooks.json
-	@python3 -c "import json; json.load(open('hooks/hooks.json'))" && echo "hooks/hooks.json regenerated."
+	@node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'))" && echo "hooks/hooks.json regenerated."
 
 .PHONY: clean
 clean: ## Remove build artifacts and caches
-	rm -rf dist/ build/ __pycache__ .pytest_cache .ruff_cache htmlcov/ .coverage
+	rm -rf dist/ build/ node_modules/ htmlcov/ .coverage
 	find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
 
 # ──────────────────────────────────────────────
@@ -127,20 +121,19 @@ clean: ## Remove build artifacts and caches
 
 .PHONY: test
 test: ## Run all tests
-	pytest tests/ -v
+	node --test tests/test-*.mjs
 
 .PHONY: test-quick
 test-quick: ## Run tests without verbose output
-	pytest tests/ -q
+	node --test tests/test-*.mjs 2>&1 | tail -5
 
 .PHONY: test-cov
-test-cov: ## Run tests with coverage report
-	pytest tests/ -v --cov=hooks/scripts --cov-report=term-missing --cov-report=html
-	@echo "HTML coverage report: htmlcov/index.html"
+test-cov: ## Run all tests (no coverage tooling)
+	node --test tests/test-*.mjs
 
 .PHONY: test-watch
-test-watch: ## Re-run tests on file changes (requires pytest-watch)
-	ptw tests/ -- -v
+test-watch: ## Re-run tests on file changes (requires nodemon)
+	nodemon --watch tests/ --watch hooks/scripts/ --ext mjs --exec 'node --test tests/test-*.mjs'
 
 .PHONY: test-hooks
 test-hooks: diagnose ## Smoke-test installed hooks against live claude
@@ -177,7 +170,7 @@ release-check: validate validate-dist ## Full pre-release check: lint + test + b
 
 .PHONY: version
 version: ## Show current plugin version
-	@python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])"
+	@node -e "console.log(JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).version)"
 
 # ──────────────────────────────────────────────
 # Help
