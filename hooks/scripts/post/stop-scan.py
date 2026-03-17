@@ -8,12 +8,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import (
     PLACEHOLDER_HARD,
     PLACEHOLDER_SOFT,
-    block,
+    generic_block,
+    generic_warn,
     is_meta_file,
     is_test_file,
     passthrough,
     read_stdin,
-    warn,
 )
 
 
@@ -96,15 +96,15 @@ def main() -> None:
                 f"Completion check: {len(all_hard)} placeholder(s), "
                 f"{len(all_soft)} hedge(s) in modified files:\n" + "\n".join((all_hard + all_soft)[:15])
             )
-            block(output + "\n\nFix all placeholder code before finishing.")
+            generic_block(output + "\n\nFix all placeholder code before finishing.")
             return
         elif all_soft:
             output = f"Completion check: {len(all_soft)} hedge(s) in modified files:\n" + "\n".join(all_soft[:15])
-            warn(output, event="Stop")
+            generic_warn(output)
             return
 
     if session_export_stale(project_dir):
-        warn("Consider running /cca:session-export to save a handoff for your next session.", event="Stop")
+        generic_warn("Consider running /cca:session-export to save a handoff for your next session.")
     else:
         passthrough()
 

@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y jq shellcheck
       - name: Lint
         run: |
-          shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh templates/statusline.sh
+          shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh statusline/statusline-command.sh
           ruff check hooks/scripts/ hooks/user/
       - name: Test
         run: pytest tests/ -v

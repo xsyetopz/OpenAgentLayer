@@ -60,7 +60,7 @@ lint: lint-shell lint-python lint-json ## Run all linters
 
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts with shellcheck
-	shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh templates/statusline.sh
+	shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh statusline/statusline-command.sh
 
 .PHONY: lint-python
 lint-python: ## Lint Python with ruff

@@ -9,8 +9,8 @@ from _lib import (
     PII_PATTERNS,
     SECRET_PATTERNS,
     passthrough,
+    post_warn,
     read_stdin,
-    warn,
 )
 
 
@@ -59,11 +59,10 @@ def main() -> None:
         passthrough()
 
     summary = ", ".join(hits[:5])
-    warn(
+    post_warn(
         f"[redact] Sensitive data detected in command output: {summary}. "
         "Do not repeat, log, or reference these values. "
-        "Replace with [REDACTED] in any output.",
-        event="PostToolUse",
+        "Replace with [REDACTED] in any output."
     )
 
 

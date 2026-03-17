@@ -12,7 +12,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from _lib import audit_log, passthrough, read_stdin, warn
+from _lib import audit_log, generic_warn, passthrough, read_stdin
 
 MAX_CONSECUTIVE = 3
 
@@ -70,11 +70,10 @@ def main():
 
     consecutive = get_recent_failures(tool_name)
     if consecutive >= MAX_CONSECUTIVE:
-        warn(
+        generic_warn(
             f"Tool '{tool_name}' has failed {consecutive} times consecutively. "
             f"Stop retrying the same approach. Consider: "
-            f"(1) a different tool, (2) a different approach, (3) asking the user for guidance.",
-            event="PostToolUseFailure",
+            f"(1) a different tool, (2) a different approach, (3) asking the user for guidance."
         )
     else:
         passthrough()

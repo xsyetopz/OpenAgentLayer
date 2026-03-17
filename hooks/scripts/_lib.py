@@ -252,6 +252,25 @@ def warn(message: str, event: str = "PostToolUse") -> NoReturn:
     )
 
 
+def post_warn(message: str) -> NoReturn:
+    _print_and_exit(
+        {
+            "hookSpecificOutput": {
+                "hookEventName": "PostToolUse",
+                "additionalContext": message,
+            }
+        }
+    )
+
+
+def generic_warn(message: str) -> NoReturn:
+    _print_and_exit({"reason": message})
+
+
+def generic_block(message: str) -> NoReturn:
+    _print_and_exit({"decision": "block", "reason": message})
+
+
 def passthrough() -> NoReturn:
     sys.exit(0)
 

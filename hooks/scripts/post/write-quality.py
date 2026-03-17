@@ -14,12 +14,11 @@ from _lib import (
     PLACEHOLDER_HARD,
     SUPPRESSION_PATTERNS,
     SYCOPHANCY_PATTERNS,
-    deny,
     is_prose_file,
     is_test_file,
     passthrough,
+    post_warn,
     read_stdin,
-    warn,
 )
 
 FORMATTERS: dict[str, list[list[str]]] = {
@@ -122,19 +121,18 @@ def main() -> None:
     )
     if not content:
         if format_note:
-            warn(format_note.strip())
+            post_warn(format_note.strip())
         passthrough()
     placeholders = placeholder_patterns(content, file_path)
     if placeholders:
-        deny(
+        post_warn(
             f"Placeholder code in {os.path.basename(file_path)}: "
             f"{', '.join(placeholders[:3])}. "
-            f"Finish the implementation.{format_note}",
-            event="PostToolUse",
+            f"Finish the implementation.{format_note}"
         )
     suppressions = suppression_patterns(content, file_path)
     if suppressions:
-        warn(
+        post_warn(
             f"Lint suppression in {os.path.basename(file_path)}: "
             f"{', '.join(suppressions[:3])}. "
             f"Fix the root cause instead of suppressing. "
@@ -149,19 +147,19 @@ def main() -> None:
             f"Remove narrating comments and AI filler.{format_note}"
         )
         if prose:
-            warn(slop_msg)
+            post_warn(slop_msg)
         else:
-            deny(slop_msg, event="PostToolUse")
+            post_warn(slop_msg)
     if prose:
         syco = sycophancy_patterns(content)
         if syco:
-            warn(
+            post_warn(
                 f"Sycophantic phrasing in {os.path.basename(file_path)} "
                 f"({', '.join(syco[:3])}). "
                 f"Remove filler openers and apology phrases.{format_note}"
             )
     if format_note:
-        warn(format_note.strip())
+        post_warn(format_note.strip())
     passthrough()
 
 
