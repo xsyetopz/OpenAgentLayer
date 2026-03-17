@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 import os
 import sys
+from typing import Any
 
-sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, deny, passthrough
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from _lib import deny, passthrough, read_stdin
 
 
-def validate_write(tool_input: dict) -> str | None:
+def validate_write(tool_input: dict[str, Any]) -> str | None:
     fp = tool_input.get("file_path", "")
     if not fp or not fp.startswith("/"):
         return "file_path must be an absolute path"
@@ -17,7 +19,7 @@ def validate_write(tool_input: dict) -> str | None:
     return None
 
 
-def validate_edit(tool_input: dict) -> str | None:
+def validate_edit(tool_input: dict[str, Any]) -> str | None:
     fp = tool_input.get("file_path", "")
     if not fp or not fp.startswith("/"):
         return "file_path must be an absolute path"
@@ -32,21 +34,21 @@ def validate_edit(tool_input: dict) -> str | None:
     return None
 
 
-def validate_bash(tool_input: dict) -> str | None:
+def validate_bash(tool_input: dict[str, Any]) -> str | None:
     cmd = tool_input.get("command", "")
     if not cmd or not cmd.strip():
         return "command must be non-empty"
     return None
 
 
-def validate_read(tool_input: dict) -> str | None:
+def validate_read(tool_input: dict[str, Any]) -> str | None:
     fp = tool_input.get("file_path", "")
     if not fp or not fp.startswith("/"):
         return "file_path must be an absolute path"
     return None
 
 
-def validate_webfetch(tool_input: dict) -> str | None:
+def validate_webfetch(tool_input: dict[str, Any]) -> str | None:
     url = tool_input.get("url", "")
     if not url:
         return "url must be non-empty"

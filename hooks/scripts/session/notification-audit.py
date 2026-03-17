@@ -7,7 +7,7 @@ Logs notification events for enterprise audit trail.
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import audit_log, passthrough, read_stdin
 
 

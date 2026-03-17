@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import (
     PLACEHOLDER_HARD,
     PLACEHOLDER_SOFT,
@@ -17,7 +17,7 @@ from _lib import (
 )
 
 
-def run_git_diff(*args) -> set[str]:
+def run_git_diff(*args: str) -> set[str]:
     try:
         result = subprocess.run(
             ["git", "diff", "--name-only", *args],
@@ -39,7 +39,8 @@ def read_file_lines(filepath: str) -> list[str]:
         return []
 
 def match_placeholders(filepath: str, lines: list[str]) -> tuple[list[str], list[str]]:
-    hard, soft = [], []
+    hard: list[str] = []
+    soft: list[str] = []
     for line_num, line in enumerate(lines, 1):
         if any(pat.search(line) for pat in PLACEHOLDER_HARD):
             hard.append(f"  {filepath}:{line_num}: {line.strip()[:80]}")
@@ -48,7 +49,8 @@ def match_placeholders(filepath: str, lines: list[str]) -> tuple[list[str], list
     return hard, soft
 
 def scan_files(files: list[str]) -> tuple[list[str], list[str]]:
-    all_hard, all_soft = [], []
+    all_hard: list[str] = []
+    all_soft: list[str] = []
     for filepath in files:
         if not os.path.isfile(filepath) or is_test_file(filepath) or is_meta_file(filepath):
             continue

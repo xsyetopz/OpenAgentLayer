@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import (
-    SECRET_PATTERNS,
     PII_PATTERNS,
+    SECRET_PATTERNS,
+    passthrough,
     read_stdin,
     warn,
-    passthrough,
 )
 
 
 def detect_sensitive(text: str) -> list[str]:
-    hits = []
+    hits: list[str] = []
     for pat in SECRET_PATTERNS:
         if pat.search(text):
             hits.append("secret/credential")

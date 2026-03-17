@@ -17,7 +17,7 @@ from _lib import (
     read_stdin,
 )
 
-LARGE_OUTPUT_RULES: list[tuple[re.Pattern, str]] = [
+LARGE_OUTPUT_RULES: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(r"\bcat\b.*\.(log|lock|jsonl|csv|sql|txt)\b", re.IGNORECASE),
         "Use `tail -n 200` or `grep` instead of catting large files into context.",
@@ -53,7 +53,7 @@ def get_staged_files() -> list[str]:
         return []
 
 def file_issues(filepath: str) -> list[str]:
-    issues = []
+    issues: list[str] = []
     if not os.path.isfile(filepath):
         return issues
     basename = os.path.basename(filepath)
@@ -89,7 +89,7 @@ def precommit_check(cmd: str) -> list[str]:
     if "git commit" not in cmd:
         return []
     staged = get_staged_files()
-    blockers = []
+    blockers: list[str] = []
     for filepath in staged:
         blockers.extend(file_issues(filepath))
     return blockers

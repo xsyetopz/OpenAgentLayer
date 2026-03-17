@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import os
 import sys
 
@@ -13,7 +15,7 @@ from _lib import (
 
 
 def detect_sensitive(text: str) -> list[str]:
-    hits = []
+    hits: list[str] = []
     for pat in SECRET_PATTERNS:
         if pat.search(text):
             hits.append("secret/credential")

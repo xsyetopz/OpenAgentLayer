@@ -10,7 +10,7 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import contextlib
 
 from _lib import audit_log, passthrough, read_stdin, warn

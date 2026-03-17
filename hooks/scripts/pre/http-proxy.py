@@ -2,11 +2,11 @@
 import json
 import os
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
-sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, deny, passthrough
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from _lib import deny, passthrough, read_stdin
 
 TIMEOUT = 5
 

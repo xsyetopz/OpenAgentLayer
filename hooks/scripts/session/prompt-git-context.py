@@ -9,7 +9,7 @@ import os
 import subprocess
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import audit_log, passthrough, read_stdin, warn
 
 
@@ -19,7 +19,7 @@ def get_git_context() -> str:
     Each git command has a 1s timeout (3s total worst case) to stay
     safely under the 5s hook timeout configured in hooks.json.
     """
-    parts = []
+    parts: list[str] = []
     try:
         branch = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],

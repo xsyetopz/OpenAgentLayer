@@ -19,7 +19,7 @@ def get_git_context() -> str:
     Each git command has a 1s timeout (3s total worst case) to stay
     safely under the 5s hook timeout configured in hooks.json.
     """
-    parts = []
+    parts: list[str] = []
     try:
         branch = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],

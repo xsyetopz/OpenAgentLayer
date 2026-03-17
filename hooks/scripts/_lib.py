@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import json
 import os
 import re
 import sys
+from typing import Any, NoReturn
 
 PLACEHOLDER_HARD = [
     re.compile(r'\bTODO\b(?!\s*\(.*test)'),
@@ -190,17 +192,17 @@ WORKAROUND_SOFT = [
     re.compile(r"(?:might as well|may as well)\s+(?:also|just)", re.IGNORECASE),
 ]
 
-def read_stdin() -> dict:
+def read_stdin() -> dict[str, Any]:
     try:
-        return json.load(sys.stdin)
+        return json.load(sys.stdin)  # type: ignore[no-any-return]
     except Exception:
         return {}
 
-def _print_and_exit(data):
+def _print_and_exit(data: dict[str, Any]) -> NoReturn:
     print(json.dumps(data))
     sys.exit(0)
 
-def deny(reason: str, event: str = "PreToolUse") -> None:
+def deny(reason: str, event: str = "PreToolUse") -> NoReturn:
     _print_and_exit({
         "hookSpecificOutput": {
             "hookEventName": event,
@@ -209,7 +211,7 @@ def deny(reason: str, event: str = "PreToolUse") -> None:
         }
     })
 
-def allow(reason: str = "", event: str = "PreToolUse") -> None:
+def allow(reason: str = "", event: str = "PreToolUse") -> NoReturn:
     result = {
         "hookSpecificOutput": {
             "hookEventName": event,
@@ -220,10 +222,10 @@ def allow(reason: str = "", event: str = "PreToolUse") -> None:
         result["hookSpecificOutput"]["permissionDecisionReason"] = reason
     _print_and_exit(result)
 
-def block(reason: str) -> None:
+def block(reason: str) -> NoReturn:
     _print_and_exit({"decision": "block", "reason": reason})
 
-def warn(message: str, event: str = "PostToolUse") -> None:
+def warn(message: str, event: str = "PostToolUse") -> NoReturn:
     _print_and_exit({
         "hookSpecificOutput": {
             "hookEventName": event,
@@ -231,11 +233,11 @@ def warn(message: str, event: str = "PostToolUse") -> None:
         }
     })
 
-def passthrough() -> None:
+def passthrough() -> NoReturn:
     sys.exit(0)
 
 
-def audit_log(event: str, hook: str, action: str, reason: str = "", tool: str = "", extra=None) -> None:
+def audit_log(event: str, hook: str, action: str, reason: str = "", tool: str = "", extra: dict[str, Any] | None = None) -> None:
     """Write a JSONL audit entry if CCA_HOOK_LOG_DIR is set."""
     log_dir = os.environ.get("CCA_HOOK_LOG_DIR")
     if not log_dir:

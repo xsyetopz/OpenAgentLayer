@@ -8,7 +8,7 @@ work is actually complete. Force continuation if work remains.
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import audit_log, read_stdin, warn
 
 

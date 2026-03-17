@@ -1,23 +1,25 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 import os
 import shutil
 import subprocess
 import sys
+from typing import Any
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from _lib import (
-    PLACEHOLDER_HARD,
-    COMMENT_SLOP_PATTERNS,
     AI_PROSE_SLOP,
+    COMMENT_SLOP_PATTERNS,
+    PLACEHOLDER_HARD,
     SUPPRESSION_PATTERNS,
     SYCOPHANCY_PATTERNS,
-    is_test_file,
-    is_prose_file,
-    read_stdin,
     deny,
-    warn,
+    is_prose_file,
+    is_test_file,
     passthrough,
+    read_stdin,
+    warn,
 )
 
 FORMATTERS: dict[str, list[list[str]]] = {
@@ -37,7 +39,7 @@ FORMATTERS: dict[str, list[list[str]]] = {
     "hpp":   [["clang-format", "-i"]],
 }
 
-def get_tool_file_and_content(data: dict) -> tuple[str, str]:
+def get_tool_file_and_content(data: dict[str, Any]) -> tuple[str, str]:
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
@@ -56,12 +58,14 @@ def run_formatter(file_path: str) -> str | None:
     for cmd_parts in FORMATTERS.get(ext, []):
         if shutil.which(cmd_parts[0]):
             try:
-                before = open(file_path, "rb").read()
+                with open(file_path, "rb") as f:
+                    before = f.read()
                 subprocess.run(
-                    cmd_parts + [file_path],
+                    [*cmd_parts, file_path],
                     capture_output=True, timeout=30,
                 )
-                after = open(file_path, "rb").read()
+                with open(file_path, "rb") as f:
+                    after = f.read()
                 if after != before:
                     return cmd_parts[0]
                 return None

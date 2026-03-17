@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Any
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
@@ -37,7 +38,7 @@ FORMATTERS: dict[str, list[list[str]]] = {
     "hpp":   [["clang-format", "-i"]],
 }
 
-def get_tool_file_and_content(data: dict) -> tuple[str, str]:
+def get_tool_file_and_content(data: dict[str, Any]) -> tuple[str, str]:
     tool_name = data.get("tool_name", "")
     tool_input = data.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
