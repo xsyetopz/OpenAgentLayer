@@ -9,6 +9,8 @@ import {
 	genericBlock,
 	genericWarn,
 	postWarn,
+	stopBlock,
+	stopWarn,
 	warn,
 } from "../hooks/scripts/_lib.mjs";
 
@@ -23,9 +25,13 @@ const SCHEMA_PATH = resolve(
 
 let Ajv;
 try {
-	Ajv = (await import("ajv")).default;
+	Ajv = (await import("ajv/dist/2020.js")).default;
 } catch {
-	// ajv not installed; schema validation tests will be skipped
+	try {
+		Ajv = (await import("ajv")).default;
+	} catch {
+		// ajv not installed; schema validation tests will be skipped
+	}
 }
 
 function captureExit(fn, ...args) {
@@ -155,6 +161,46 @@ describe("Allow", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(allow, "allowed");
+		assert.ok(validate(output), JSON.stringify(validate.errors));
+	});
+});
+
+describe("StopWarn", () => {
+	it("should have correct output structure", () => {
+		const output = captureExit(stopWarn, "stale session");
+		assert.equal(output.hookSpecificOutput.hookEventName, "Stop");
+		assert.equal(output.hookSpecificOutput.additionalContext, "stale session");
+	});
+
+	it("should have no extra fields", () => {
+		const output = captureExit(stopWarn, "msg");
+		const keys = Object.keys(output.hookSpecificOutput);
+		assert.deepEqual(
+			new Set(keys),
+			new Set(["hookEventName", "additionalContext"]),
+		);
+	});
+
+	it("should validate against schema", { skip: !Ajv }, () => {
+		const ajv = new Ajv();
+		const validate = ajv.compile(loadSchema());
+		const output = captureExit(stopWarn, "test");
+		assert.ok(validate(output), JSON.stringify(validate.errors));
+	});
+});
+
+describe("StopBlock", () => {
+	it("should have correct output structure", () => {
+		const output = captureExit(stopBlock, "placeholders found");
+		assert.equal(output.decision, "block");
+		assert.equal(output.reason, "placeholders found");
+		assert.ok(!("hookSpecificOutput" in output));
+	});
+
+	it("should validate against schema", { skip: !Ajv }, () => {
+		const ajv = new Ajv();
+		const validate = ajv.compile(loadSchema());
+		const output = captureExit(stopBlock, "test");
 		assert.ok(validate(output), JSON.stringify(validate.errors));
 	});
 });

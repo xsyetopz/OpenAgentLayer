@@ -3,14 +3,14 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
-	genericBlock,
-	genericWarn,
 	isMetaFile,
 	isTestFile,
 	PLACEHOLDER_HARD,
 	PLACEHOLDER_SOFT,
 	passthrough,
 	readStdin,
+	stopBlock,
+	stopWarn,
 } from "../_lib.mjs";
 
 function runGitDiff(...args) {
@@ -101,17 +101,17 @@ if (files.length) {
 			`Completion check: ${allHard.length} placeholder(s), ` +
 			`${allSoft.length} hedge(s) in modified files:\n` +
 			[...allHard, ...allSoft].slice(0, 15).join("\n");
-		genericBlock(`${output}\n\nFix all placeholder code before finishing.`);
+		stopBlock(`${output}\n\nFix all placeholder code before finishing.`);
 	} else if (allSoft.length) {
 		const output =
 			`Completion check: ${allSoft.length} hedge(s) in modified files:\n` +
 			allSoft.slice(0, 15).join("\n");
-		genericWarn(output);
+		stopWarn(output);
 	}
 }
 
 if (sessionExportStale(projectDir)) {
-	genericWarn(
+	stopWarn(
 		"Consider running /cca:session-export to save a handoff for your next session.",
 	);
 } else {

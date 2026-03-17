@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Claude Code Hook Output",
-	"description": "Valid JSON output schema for Claude Code hooks. hookSpecificOutput is event-scoped: only PreToolUse, UserPromptSubmit, and PostToolUse are valid hookEventName values.",
+	"description": "Valid JSON output schema for Claude Code hooks. hookSpecificOutput is event-scoped: PreToolUse, UserPromptSubmit, PostToolUse, and Stop are valid hookEventName values.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
@@ -83,6 +83,20 @@
 						"hookEventName": {
 							"type": "string",
 							"const": "PostToolUse"
+						},
+						"additionalContext": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["hookEventName"],
+					"properties": {
+						"hookEventName": {
+							"type": "string",
+							"const": "Stop"
 						},
 						"additionalContext": {
 							"type": "string"

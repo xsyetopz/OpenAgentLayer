@@ -236,6 +236,19 @@ export function genericBlock(message) {
 	_printAndExit({ decision: "block", reason: message });
 }
 
+export function stopWarn(message) {
+	_printAndExit({
+		hookSpecificOutput: {
+			hookEventName: "Stop",
+			additionalContext: message,
+		},
+	});
+}
+
+export function stopBlock(message) {
+	_printAndExit({ decision: "block", reason: message });
+}
+
 export function passthrough() {
 	process.exit(0);
 }
