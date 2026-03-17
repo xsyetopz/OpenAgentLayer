@@ -125,7 +125,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 \"$HOME\"/.claude/hooks/guard-secrets.py",
+						"command": "python3 \"$HOME\"/.claude/hooks/pre-secrets.py",
 						"timeout": 5
 					}
 				]

@@ -78,7 +78,7 @@ remove_framework_files() {
 
 remove_user_level_hooks() {
     echo -e "\nRemoving user-level hooks:"
-    for hook in guard-secrets.py rtk-rewrite.sh; do
+    for hook in pre-secrets.py rtk-rewrite.sh; do
         if [[ -f "$HOME/.claude/hooks/$hook" ]]; then
             rm -f "$HOME/.claude/hooks/$hook"
             info "Removed ~/.claude/hooks/$hook"
@@ -117,12 +117,12 @@ clean_settings_json() {
         # Remove framework permissions
         del(.permissions) |
 
-        # Remove hooks referencing guard-secrets or rtk-rewrite
+        # Remove hooks referencing pre-secrets or rtk-rewrite
         (if .hooks then
             .hooks |= with_entries(
                 .value |= map(select(
                     (.hooks // []) | all(
-                        (.command // "") | (test("guard-secrets|rtk-rewrite") | not)
+                        (.command // "") | (test("pre-secrets|rtk-rewrite") | not)
                     )
                 ))
             ) |
@@ -161,7 +161,7 @@ confirm_uninstall() {
     echo "  - hooks.json"
     echo ""
     echo -e "${YELLOW}User-level hooks to remove:${NC}"
-    echo "  - ~/.claude/hooks/guard-secrets.py"
+    echo "  - ~/.claude/hooks/pre-secrets.py"
     echo "  - ~/.claude/hooks/rtk-rewrite.sh"
     if [[ "$INSTALL_SCOPE" == "global" ]]; then
         echo "  - ~/.claude/statusline-command.sh"
