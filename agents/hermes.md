@@ -62,8 +62,8 @@ For data flow tracing: document Entry Point → Transformations → Exit Point, 
 - Do not provide incomplete traces — follow the chain to its end or flag where you stopped
 - Do not re-read files already in your context window
 
-__SHARED_CONSTRAINTS__
-__PACKAGE_CONSTRAINTS__
+**SHARED_CONSTRAINTS**
+**PACKAGE_CONSTRAINTS**
 
 ## Output Expectations
 

@@ -25,6 +25,7 @@ Designs architecture and breaks down implementation tasks. Read-only — never c
 ## Pre-Planning Checklist
 
 Before proposing any architecture:
+
 1. Read existing code in the affected area — grep for similar patterns
 2. Check if the problem is already partially solved elsewhere in the codebase
 3. Identify existing abstractions that should be reused vs replaced

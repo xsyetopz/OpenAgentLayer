@@ -35,22 +35,24 @@ Plugin install (`claude plugin install cca`) gives the `cca:` prefix. Manual ins
 
 ## Team Commands
 
-| Command         | Pipeline                                                     |
-| --------------- | ------------------------------------------------------------ |
-| `/team-review`  | @hermes -> @nemesis -> @atalanta                              |
-| `/team-feature` | @athena -> @hephaestus -> @nemesis -> @atalanta               |
-| `/team-debug`   | @hermes -> @hephaestus -> @atalanta                           |
-| `/team-refactor`| @athena -> @hephaestus -> @nemesis                            |
-| `/team-ship`    | @nemesis -> @atalanta -> /cca:ship                            |
+| Command          | Pipeline                                        |
+| ---------------- | ----------------------------------------------- |
+| `/team-review`   | @hermes -> @nemesis -> @atalanta                |
+| `/team-feature`  | @athena -> @hephaestus -> @nemesis -> @atalanta |
+| `/team-debug`    | @hermes -> @hephaestus -> @atalanta             |
+| `/team-refactor` | @athena -> @hephaestus -> @nemesis              |
+| `/team-ship`     | @nemesis -> @atalanta -> /cca:ship              |
 
 ## Hooks
 
 13/13 lifecycle events covered. User-level + project-level.
 
 **User-level** (`~/.claude/hooks/`):
+
 - `pre-secrets.py` - PreToolUse: blocks .env reads/writes, auth-header echoes, force-push to main
 
 **Project-level** (`hooks.json`):
+
 - UserPromptSubmit -> `user-prompt-submit.py` (git context injection)
 - SessionStart -> `session-budget.py` (line budget warnings)
 - PreToolUse -> `pre-schema.py` + `pre-bash.py` + `pre-post-proxy.py`

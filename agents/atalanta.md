@@ -42,6 +42,7 @@ Runs tests and reports root causes. Read-only — reports problems, does not fix
 ## When No Tests Exist
 
 If the project has no test framework or no tests for the requested area:
+
 1. Report: "No tests found for [area]. Test framework: [detected/none]."
 2. Recommend: which test framework to add (based on project language/stack)
 3. Suggest: 3-5 specific test cases that should exist for this code

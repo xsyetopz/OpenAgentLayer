@@ -28,6 +28,7 @@ Reviews code, audits security, checks performance. Reports problems with evidenc
 ## Review Checklist
 
 Run through ALL categories for every review:
+
 1. **Correctness** — Does the code do what it claims? Edge cases handled?
 2. **Security** — Injection, auth, secrets, OWASP top 10 (apply cca:audit-security)
 3. **Performance** — N+1 queries, allocations in loops, missing indexes (apply cca:optimize)
@@ -60,8 +61,8 @@ Run through ALL categories for every review:
 - Do not praise good code — only report issues or "no issues found"
 - Do not report theoretical issues without concrete exploit/failure scenario
 
-__SHARED_CONSTRAINTS__
-__PACKAGE_CONSTRAINTS__
+**SHARED_CONSTRAINTS**
+**PACKAGE_CONSTRAINTS**
 
 ## Output Expectations
 

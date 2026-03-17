@@ -5,6 +5,7 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 ## [0.4.0] - 2026-03-17
 
 ### Added
+
 - **13/13 hook lifecycle events** covered (was 6/13): UserPromptSubmit, PostToolUseFailure, SessionEnd, TeammateIdle, Notification, PermissionRequest
 - **Anti-rationalization Stop hook** prevents Claude from rationalizing incomplete work
 - **JSON audit logging** via `CCA_HOOK_LOG_DIR` env var (all hooks write JSONL)
@@ -21,6 +22,7 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 - **Retry loop detection** (post-failure.py): warns after 3 consecutive failures to same tool
 
 ### Changed
+
 - **Agent quality overhaul**: all 7 agents rewritten with sharper prompts
   - Added `color` field to all agents for UI distinction
   - Added `Anti-Patterns (DO NOT)` sections to all agents
@@ -37,26 +39,31 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 - **Python 3.9 compatibility**: added `from __future__ import annotations` to hooks using `str | None` syntax
 
 ### Fixed
+
 - Hermes agent constraints not being injected during install (wrong placeholder syntax)
 - Hook scripts crash on Python 3.9 due to `str | None` union type syntax
 
 ## [0.3.0] - 2026-03-15
 
 ### Fixed
+
 - `sed -i` portability across macOS and Linux
 - Legacy skill references cleaned up
 
 ### Changed
+
 - Rearchitected framework structure, renamed tiers
 
 ## [0.2.0] - 2026-03-14
 
 ### Added
+
 - Enterprise hooks and expanded gitignore
 - Hooks, personas, and safety rails documentation
 
 ## [0.1.0] - 2026-03-13
 
 ### Added
+
 - Initial release: 7 agents, 10 skills, hook system
 - MCP test harness for hook development

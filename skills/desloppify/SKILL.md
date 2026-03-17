@@ -22,21 +22,21 @@ If you can delete a sentence and lose no information, delete it. If you can repl
 
 Flag characters that standard keyboards cannot produce. AI models inject these from training data. Replace unconditionally in code, comments, and documentation.
 
-| Char | Codepoint | Name | Action |
-| ---- | --------- | ---- | ------ |
-| `---` | U+2014 | Em dash | Replace with ` -- ` or ` - ` |
-| `--` | U+2013 | En dash | Replace with `-` |
-| `...` | U+2026 | Horizontal ellipsis | Replace with `...` |
-| `"` `"` | U+201C/D | Curly double quotes | Replace with `"` |
-| `'` `'` | U+2018/9 | Curly single quotes | Replace with `'` |
-| `->` | U+2192 | Right arrow | Replace with `->` |
-| `<-` | U+2190 | Left arrow | Replace with `<-` |
-| `=>` | U+21D2 | Double right arrow | Replace with `=>` |
-| `<=` `>=` | U+2264/5 | Less/greater-equal | Replace with `<=` `>=` |
-| `!=` | U+2260 | Not equal | Replace with `!=` |
-| `-` | U+2022 | Bullet | Replace with `-` or `*` |
-| `.` | U+00B7 | Middle dot | Replace with `.` |
-| (c) (tm) (r) | Various | Legal symbols | Delete unless legal context |
+| Char         | Codepoint | Name                | Action                       |
+| ------------ | --------- | ------------------- | ---------------------------- |
+| `---`        | U+2014    | Em dash             | Replace with ` -- ` or ` - ` |
+| `--`         | U+2013    | En dash             | Replace with `-`             |
+| `...`        | U+2026    | Horizontal ellipsis | Replace with `...`           |
+| `"` `"`      | U+201C/D  | Curly double quotes | Replace with `"`             |
+| `'` `'`      | U+2018/9  | Curly single quotes | Replace with `'`             |
+| `->`         | U+2192    | Right arrow         | Replace with `->`            |
+| `<-`         | U+2190    | Left arrow          | Replace with `<-`            |
+| `=>`         | U+21D2    | Double right arrow  | Replace with `=>`            |
+| `<=` `>=`    | U+2264/5  | Less/greater-equal  | Replace with `<=` `>=`       |
+| `!=`         | U+2260    | Not equal           | Replace with `!=`            |
+| `-`          | U+2022    | Bullet              | Replace with `-` or `*`      |
+| `.`          | U+00B7    | Middle dot          | Replace with `.`             |
+| (c) (tm) (r) | Various   | Legal symbols       | Delete unless legal context  |
 
 **Exemptions**: Markdown tables using `|`, ASCII box-drawing chars (`+`, `-`, `|`), code blocks containing string literals with intentional Unicode, and files where the project already uses these characters as established style.
 
@@ -325,63 +325,63 @@ Exception: severity indicators and established project style are fine.
 
 These are invisible but break string matching, URLs, and copy-paste. Always remove. No exemptions.
 
-| Char | Codepoint | Name | Action |
-| ---- | --------- | ---- | ------ |
-| (space) | U+00A0 | Non-breaking space | Replace with regular space |
-| (empty) | U+200B | Zero-width space | Delete |
-| (space) | U+202F | Narrow no-break space | Replace with regular space |
-| (empty) | U+00AD | Soft hyphen | Delete |
-| (empty) | U+200C | Zero-width non-joiner | Delete |
-| (empty) | U+200D | Zero-width joiner | Delete |
-| (empty) | U+200E | LTR mark | Delete |
-| (empty) | U+200F | RTL mark | Delete |
-| (empty) | U+2060 | Word joiner | Delete |
-| (empty) | U+FEFF | BOM / ZWNBSP | Delete |
+| Char    | Codepoint | Name                  | Action                     |
+| ------- | --------- | --------------------- | -------------------------- |
+| (space) | U+00A0    | Non-breaking space    | Replace with regular space |
+| (empty) | U+200B    | Zero-width space      | Delete                     |
+| (space) | U+202F    | Narrow no-break space | Replace with regular space |
+| (empty) | U+00AD    | Soft hyphen           | Delete                     |
+| (empty) | U+200C    | Zero-width non-joiner | Delete                     |
+| (empty) | U+200D    | Zero-width joiner     | Delete                     |
+| (empty) | U+200E    | LTR mark              | Delete                     |
+| (empty) | U+200F    | RTL mark              | Delete                     |
+| (empty) | U+2060    | Word joiner           | Delete                     |
+| (empty) | U+FEFF    | BOM / ZWNBSP          | Delete                     |
 
 ## Rewrite Rules
 
-| Slop | Replacement |
-| ---- | ----------- |
-| "Utilize" / "Leverage" | "Use" |
-| "Facilitate" | "Allow" / "Let" |
-| "Robust" | [Delete, or specific quality: "tested", "handles X"] |
-| "Seamless" | [Delete, or what happens: "without restart", "in one step"] |
-| "Comprehensive" | [Delete, or scope: "covers X, Y, Z"] |
-| "Ensure" | "Check" / "Verify" |
-| "Enhance" | "Improve" / "Add" / [specific change] |
-| "Optimize" | "Speed up" / "Reduce" / [specific metric] |
-| "In order to" | "To" |
-| "A number of" | [Specific number, or "some"] |
-| "Due to the fact that" | "Because" |
-| "In the event that" | "If" |
-| "Prior to" | "Before" |
-| "Has the ability to" / "Is able to" | "Can" |
-| "In terms of" | [Delete, restructure sentence] |
-| Triple adjective stacking | Pick the one that matters |
-| "Elevate" | "Improve" / specific change |
-| "Streamline" | "Simplify" / "Remove steps" |
-| "Navigate" (metaphorical) | "Handle" / "Work with" |
-| "Foster" | "Encourage" / "Support" |
-| "Resonate" | "Match" / "Fit" |
-| "Stakeholder" | "User" / "Team" / specific role |
-| "Touchpoint" | "Interaction" / "Step" |
-| "Bandwidth" (metaphorical) | "Time" / "Capacity" |
-| "Deep dive" | "Detailed look" / "Analysis" |
-| "Paradigm" | "Pattern" / "Approach" |
-| "Ecosystem" | "System" / "Tools" / specific |
-| "Architected" (verb) | "Designed" / "Built" |
-| "Curated" | "Chosen" / "Selected" |
-| "Crafted" | "Made" / "Built" / "Wrote" |
-| "Bespoke" | "Custom" |
-| "Granular" | "Detailed" / "Fine" |
-| "Holistic" | "Complete" / "Full" |
-| "Pivotal" | "Key" / "Important" |
-| "Paramount" | "Critical" / "Top priority" |
-| "Aligns with" | "Matches" / "Follows" |
-| "Aims to" | "Does" / specific verb |
-| "Serves as" | "Is" |
-| "Plays a crucial role" | "Is needed for" / specific |
-| "A testament to" | Delete, or specific evidence |
+| Slop                                | Replacement                                                 |
+| ----------------------------------- | ----------------------------------------------------------- |
+| "Utilize" / "Leverage"              | "Use"                                                       |
+| "Facilitate"                        | "Allow" / "Let"                                             |
+| "Robust"                            | [Delete, or specific quality: "tested", "handles X"]        |
+| "Seamless"                          | [Delete, or what happens: "without restart", "in one step"] |
+| "Comprehensive"                     | [Delete, or scope: "covers X, Y, Z"]                        |
+| "Ensure"                            | "Check" / "Verify"                                          |
+| "Enhance"                           | "Improve" / "Add" / [specific change]                       |
+| "Optimize"                          | "Speed up" / "Reduce" / [specific metric]                   |
+| "In order to"                       | "To"                                                        |
+| "A number of"                       | [Specific number, or "some"]                                |
+| "Due to the fact that"              | "Because"                                                   |
+| "In the event that"                 | "If"                                                        |
+| "Prior to"                          | "Before"                                                    |
+| "Has the ability to" / "Is able to" | "Can"                                                       |
+| "In terms of"                       | [Delete, restructure sentence]                              |
+| Triple adjective stacking           | Pick the one that matters                                   |
+| "Elevate"                           | "Improve" / specific change                                 |
+| "Streamline"                        | "Simplify" / "Remove steps"                                 |
+| "Navigate" (metaphorical)           | "Handle" / "Work with"                                      |
+| "Foster"                            | "Encourage" / "Support"                                     |
+| "Resonate"                          | "Match" / "Fit"                                             |
+| "Stakeholder"                       | "User" / "Team" / specific role                             |
+| "Touchpoint"                        | "Interaction" / "Step"                                      |
+| "Bandwidth" (metaphorical)          | "Time" / "Capacity"                                         |
+| "Deep dive"                         | "Detailed look" / "Analysis"                                |
+| "Paradigm"                          | "Pattern" / "Approach"                                      |
+| "Ecosystem"                         | "System" / "Tools" / specific                               |
+| "Architected" (verb)                | "Designed" / "Built"                                        |
+| "Curated"                           | "Chosen" / "Selected"                                       |
+| "Crafted"                           | "Made" / "Built" / "Wrote"                                  |
+| "Bespoke"                           | "Custom"                                                    |
+| "Granular"                          | "Detailed" / "Fine"                                         |
+| "Holistic"                          | "Complete" / "Full"                                         |
+| "Pivotal"                           | "Key" / "Important"                                         |
+| "Paramount"                         | "Critical" / "Top priority"                                 |
+| "Aligns with"                       | "Matches" / "Follows"                                       |
+| "Aims to"                           | "Does" / specific verb                                      |
+| "Serves as"                         | "Is"                                                        |
+| "Plays a crucial role"              | "Is needed for" / specific                                  |
+| "A testament to"                    | Delete, or specific evidence                                |
 
 ## Remediation Protocol
 

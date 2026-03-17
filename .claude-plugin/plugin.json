@@ -8,7 +8,15 @@
 	},
 	"repository": "https://github.com/xsyetopz/ClaudeAgents",
 	"license": "MIT",
-	"keywords": ["agents", "skills", "hooks", "code-quality", "safety", "orchestration", "desloppify"],
+	"keywords": [
+		"agents",
+		"skills",
+		"hooks",
+		"code-quality",
+		"safety",
+		"orchestration",
+		"desloppify"
+	],
 	"agents": "./agents/",
 	"skills": "./skills/",
 	"hooks": "./hooks/hooks.json",
