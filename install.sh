@@ -93,12 +93,12 @@ make_dirs() {
 substitute_and_copy() {
     local src="$1"
     local dest="$2"
-    local shared_constraints="" persona_constraints=""
+    local shared_constraints="" package_constraints=""
     if [[ -f "$REPO_DIR/constraints/shared.md" ]]; then
         shared_constraints=$(cat "$REPO_DIR/constraints/shared.md")
     fi
     if [[ -f "$REPO_DIR/constraints/$PACKAGE.md" ]]; then
-        persona_constraints=$(cat "$REPO_DIR/constraints/$PACKAGE.md")
+        package_constraints=$(cat "$REPO_DIR/constraints/$PACKAGE.md")
     fi
     local tmp tmp2
     tmp=$(mktemp)
@@ -109,13 +109,15 @@ substitute_and_copy() {
     else
         cp "$tmp" "$tmp2"
     fi
-    if grep -q '__PACKAGE_CONSTRAINTS__' "$tmp2" 2>/dev/null && [[ -n "$persona_constraints" ]]; then
-        awk -v constraints="$persona_constraints" '{gsub(/__PACKAGE_CONSTRAINTS__/, constraints); print}' "$tmp2" > "$dest"
+    if grep -q '__PACKAGE_CONSTRAINTS__' "$tmp2" 2>/dev/null && [[ -n "$package_constraints" ]]; then
+        awk -v constraints="$package_constraints" '{gsub(/__PACKAGE_CONSTRAINTS__/, constraints); print}' "$tmp2" > "$dest"
     else
         cp "$tmp2" "$dest"
     fi
     # Rewrite skill refs from plugin format (cca:skill) to manual format (cca-skill)
-    sed -i '' 's|  - cca:|  - cca-|g' "$dest"
+    local tmp3
+    tmp3=$(mktemp)
+    sed 's|  - cca:|  - cca-|g' "$dest" > "$tmp3" && mv "$tmp3" "$dest"
     if [[ "$ZEN_MODE" == "true" && -f "$REPO_DIR/constraints/zen.md" ]]; then
         local zen_constraints
         zen_constraints=$(cat "$REPO_DIR/constraints/zen.md")
@@ -231,6 +233,14 @@ copy_agents() {
 copy_skills() {
     SKILL_COUNT=0
     echo -e "\nSkills:"
+    # Clean up old bare-name skills from previous installs
+    for skill_dir in "$CLAUDE_DIR"/skills/*/; do
+        [[ -d "$skill_dir" ]] || continue
+        local dir_name=$(basename "$skill_dir")
+        [[ "$dir_name" == cca-* ]] && continue
+        rm -f "$skill_dir"SKILL.md 2>/dev/null
+        rmdir "$skill_dir" 2>/dev/null && info "removed legacy /$dir_name"
+    done
     for skill_dir in "$REPO_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill_name=$(basename "$skill_dir")
