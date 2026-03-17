@@ -8,12 +8,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
     PLACEHOLDER_HARD,
     PLACEHOLDER_SOFT,
-    is_test_file,
+    block,
     is_meta_file,
-    read_stdin,
-    stop_message,
+    is_test_file,
     passthrough,
+    read_stdin,
+    warn,
 )
+
 
 def run_git_diff(*args) -> set[str]:
     try:
@@ -84,18 +86,18 @@ def main() -> None:
                 f"{len(all_soft)} hedge(s) in modified files:\n"
                 + "\n".join((all_hard + all_soft)[:15])
             )
-            stop_message(output + "\n\nFix all placeholder code before finishing.")
+            block(output + "\n\nFix all placeholder code before finishing.")
             return
         elif all_soft:
             output = (
                 f"Completion check: {len(all_soft)} hedge(s) in modified files:\n"
                 + "\n".join(all_soft[:15])
             )
-            stop_message(output)
+            warn(output, event="Stop")
             return
 
     if session_export_stale(project_dir):
-        stop_message("Consider running /cca:session-export to save a handoff for your next session.")
+        warn("Consider running /cca:session-export to save a handoff for your next session.", event="Stop")
     else:
         passthrough()
 

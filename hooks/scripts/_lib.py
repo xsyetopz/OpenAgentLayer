@@ -231,9 +231,6 @@ def warn(message: str, event: str = "PostToolUse") -> None:
         }
     })
 
-def stop_message(message: str) -> None:
-    _print_and_exit({"systemMessage": message})
-
 def passthrough() -> None:
     sys.exit(0)
 
