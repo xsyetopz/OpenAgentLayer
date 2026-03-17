@@ -103,14 +103,23 @@ copy_skills() {
 
 stage_hooks() {
     mkdir -p "$DIST_DIR/hooks/scripts"
-    # shellcheck disable=SC2016
-    sed 's|\\\"$CLAUDE_PROJECT_DIR\\\"/.claude/hooks/scripts/|\\\"${CLAUDE_PLUGIN_ROOT}\\\"/hooks/scripts/|g' \
-        "$SCRIPT_DIR/hooks/configs/base.json" > "$DIST_DIR/hooks/hooks.json"
-    info "hooks.json (paths transformed to \${CLAUDE_PLUGIN_ROOT})"
+    # Copy pre-built hooks.json (already has CLAUDE_PLUGIN_ROOT paths)
+    cp "$SCRIPT_DIR/hooks/hooks.json" "$DIST_DIR/hooks/hooks.json"
+    info "hooks.json"
+    # Copy top-level scripts (_lib.py etc.)
     for script in "$SCRIPT_DIR"/hooks/scripts/*.py; do
         [[ -f "$script" ]] || continue
         cp "$script" "$DIST_DIR/hooks/scripts/"
         info "Hook script: $(basename "$script")"
+    done
+    # Copy subdirectory scripts (pre/, post/, session/)
+    for subdir in pre post session; do
+        if [[ -d "$SCRIPT_DIR/hooks/scripts/$subdir" ]]; then
+            mkdir -p "$DIST_DIR/hooks/scripts/$subdir"
+            find "$SCRIPT_DIR/hooks/scripts/$subdir" -name '*.py' ! -path '*__pycache__*' \
+                -exec cp {} "$DIST_DIR/hooks/scripts/$subdir/" \;
+            info "Hook scripts: $subdir/ ($(find "$DIST_DIR/hooks/scripts/$subdir" -name '*.py' | wc -l | tr -d ' ') files)"
+        fi
     done
 }
 
