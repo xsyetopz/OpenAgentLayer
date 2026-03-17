@@ -1,5 +1,4 @@
 ---
-name: review-code
 description: >
   Enforces coding standards, design principles, naming conventions, and anti-patterns
   when writing, editing, or reviewing code. The single source of truth for code quality rules.
@@ -62,6 +61,14 @@ Check in this order during reviews:
 9. **Large functions** - 30+ lines without extraction
 10. **Missing error handling** - `unwrap()` in prod, swallowed errors
 11. **Ultimatum decisions** - presenting a single approach as the only option for medium/high-stakes decisions without alternatives
+
+## Frontend Review
+
+- Placeholder content: "Lorem ipsum", demo data, `TODO` text in UI
+- Generic styling: default Tailwind colors, white/purple palette, Inter/Arial fonts
+- Marketing copy: buttons with "Unleash", "Empower", "Transform" -- should be functional labels
+- Missing design system: hardcoded colors/fonts instead of variables/tokens
+- Decorative bloat: unnecessary gradients, shadows, animations without purpose
 
 ## Language-Specific
 

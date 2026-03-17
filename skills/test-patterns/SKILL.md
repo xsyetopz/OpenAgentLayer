@@ -1,5 +1,4 @@
 ---
-name: test-patterns
 description: >
   Test design patterns, strategies, and coverage guidance for writing effective tests.
   Triggers: write tests, test patterns, testing strategy, test coverage, unit test,

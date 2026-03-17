@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, deny, passthrough
+from _lib import deny, passthrough, read_stdin
 
 
 def validate_write(tool_input: dict) -> str | None:

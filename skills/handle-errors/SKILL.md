@@ -1,5 +1,4 @@
 ---
-name: handle-errors
 description: >
   Error handling patterns, Result types, exception strategies, and error recovery.
   Triggers: error handling, Result type, exception, error recovery, error propagation,

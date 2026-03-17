@@ -1,6 +1,6 @@
 {
 	"name": "cca",
-	"version": "0.4.0",
+	"version": "0.5.0",
 	"description": "7 specialised agents, 10 skills, 13 safety hooks for Claude Code",
 	"author": {
 		"name": "xsyetopz",
@@ -19,6 +19,5 @@
 	],
 	"agents": "./agents/",
 	"skills": "./skills/",
-	"hooks": "./hooks/hooks.json",
-	"commands": "./commands/"
+	"hooks": "./hooks/hooks.json"
 }

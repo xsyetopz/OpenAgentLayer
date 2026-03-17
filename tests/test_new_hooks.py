@@ -3,7 +3,8 @@
 import json
 import os
 import tempfile
-from conftest import run_hook, parse_hook_output
+
+from conftest import parse_hook_output, run_hook
 
 
 class TestUserPromptSubmit:

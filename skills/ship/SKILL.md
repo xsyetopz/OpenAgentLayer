@@ -1,10 +1,14 @@
 ---
-name: ship
 description: >
   Git workflow conventions for commits, branches, and PRs. Use when the user mentions
   "commit", "git commit", "stage and commit", "branch", "PR", "pull request", "merge",
   "rebase", "git workflow", or asks about commit message format, branch naming, or PR templates.
 user-invocable: true
+context:
+  - command: "git diff --cached --stat 2>/dev/null || echo 'nothing staged'"
+    label: "Staged changes"
+  - command: "git log --oneline -5 2>/dev/null || echo 'no commits'"
+    label: "Recent commits"
 ---
 
 # Git Workflow
@@ -83,6 +87,23 @@ Closes #42
 Co-Authored-By: Claude <noreply@anthropic.com>
 EOF
 )"
+```
+
+### Commit Message Quality
+
+Commit messages must not be sycophantic or flowery. The description is a plain imperative statement, not a performance.
+
+- Start with an imperative verb: "Add", "Fix", "Remove", "Update", "Extract", "Rename"
+- Do NOT use: "Gracefully handle", "Beautifully implement", "Elegantly refactor", "Carefully extract"
+- Do NOT use filler adjectives: no "comprehensive", "robust", "seamless" in commit messages
+- The scope and description name the thing and what happened to it -- nothing more
+
+```text
+Bad:  "feat(auth): gracefully handle token expiry with elegant retry logic"
+Good: "feat(auth): retry on expired token"
+
+Bad:  "fix(parser): carefully fix the edge case that was causing issues"
+Good: "fix(parser): handle EOF in unterminated strings"
 ```
 
 ### Common Mistakes

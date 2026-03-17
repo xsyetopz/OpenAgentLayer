@@ -8,13 +8,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
     PLACEHOLDER_HARD,
     PLACEHOLDER_SOFT,
-    is_test_file,
-    is_meta_file,
-    read_stdin,
     block,
-    warn,
+    is_meta_file,
+    is_test_file,
     passthrough,
+    read_stdin,
+    warn,
 )
+
 
 def run_git_diff(*args) -> set[str]:
     try:

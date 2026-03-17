@@ -111,6 +111,15 @@ TAUTOLOGICAL_COMMENTS = re.compile(
 
 COMMENT_SLOP_PATTERNS = [SECTION_NARRATORS, EDUCATIONAL_COMMENTS, TAUTOLOGICAL_COMMENTS]
 
+SYCOPHANCY_PATTERNS = [
+    re.compile(r"(?i)^(sure|of course|absolutely|great question|good point|I'd be happy to)"),
+    re.compile(r"(?i)^(let me know if|hope this helps|feel free to)"),
+    re.compile(r"(?i)sorry for (the|any) (confusion|inconvenience|error)"),
+    re.compile(r"(?i)I apologize for"),
+    re.compile(r"(?i)^(that's a great|that's an excellent|that's a good) (question|point|idea|observation)"),
+    re.compile(r"(?i)^(certainly|definitely|you're (absolutely )?right)"),
+]
+
 SECRET_PATTERNS = [
     re.compile(r'(?i)\b[A-Z0-9]{20,}[_-]?[A-Z0-9]{10,}\b'),
     re.compile(r'(?i)\b(?:api|secret|token|key|passwd|password)\s*[:=]\s*["\']?([^\s"\']{8,})'),

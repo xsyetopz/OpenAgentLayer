@@ -3,8 +3,13 @@
 		"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
 		"CLAUDE_CODE_HIDE_ACCOUNT_INFO": "1",
 		"CLAUDE_CODE_IDLE_TERMINATE_MINUTES": "15",
-		"DISABLE_AUTOUPDATER": "1"
+		"DISABLE_AUTOUPDATER": "1",
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
+		"ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
+		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5-20251001"
 	},
+	"model": "__CCA_MODEL__",
+	"outputStyle": "CCA",
 	"permissions": {
 		"allow": [
 			"Bash(*)",
@@ -171,7 +176,7 @@
 	},
 	"statusLine": {
 		"type": "command",
-		"command": "bash __HOME__/.claude/statusline-command.sh"
+		"command": "bash __HOME__/.claude/cca-statusline.sh"
 	},
 	"autoUpdatesChannel": "latest",
 	"availableModels": ["opus", "sonnet", "haiku"],

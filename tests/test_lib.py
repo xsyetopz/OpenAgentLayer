@@ -8,16 +8,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "hooks" / "scripts"))
 
 from _lib import (
     AI_PROSE_SLOP,
+    COMMENT_SLOP_PATTERNS,
+    PII_PATTERNS,
     PLACEHOLDER_HARD,
     PLACEHOLDER_SOFT,
     SECRET_PATTERNS,
-    PII_PATTERNS,
     UNICODE_SLOP,
-    COMMENT_SLOP_PATTERNS,
     WORKAROUND_HARD,
-    is_test_file,
-    is_prose_file,
     is_meta_file,
+    is_prose_file,
+    is_test_file,
 )
 
 

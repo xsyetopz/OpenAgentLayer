@@ -5,12 +5,12 @@ Injects git branch and recent commit context into the session.
 Validates prompts for potential issues.
 """
 
+import os
 import subprocess
 import sys
-import os
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _lib import read_stdin, warn, passthrough, audit_log
+from _lib import audit_log, passthrough, read_stdin, warn
 
 
 def get_git_context() -> str:
@@ -55,7 +55,6 @@ def main():
 
     audit_log("UserPromptSubmit", "user-prompt-submit.py", "processed")
 
-    # Inject git context for first prompt or when context seems useful
     git_ctx = get_git_context()
     if git_ctx:
         warn(f"Git context:\n{git_ctx}", event="UserPromptSubmit")

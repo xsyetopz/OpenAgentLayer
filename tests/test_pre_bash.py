@@ -1,6 +1,6 @@
 """Tests for hooks/scripts/pre-bash.py — Bash command validation."""
 
-from conftest import run_hook, parse_hook_output
+from conftest import parse_hook_output, run_hook
 
 
 def make_bash_input(command: str) -> dict:

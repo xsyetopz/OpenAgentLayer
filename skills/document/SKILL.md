@@ -1,5 +1,4 @@
 ---
-name: document
 description: >
   Standards for writing documentation: READMEs, changelogs, ADRs, API docs, and inline docs.
   Triggers: documentation, docs, README, changelog, ADR, architecture decision record,

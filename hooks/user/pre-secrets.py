@@ -43,9 +43,7 @@ def is_sensitive_file(filepath: str) -> bool:
         return True
     if filepath.endswith(SENSITIVE_EXTENSIONS):
         return True
-    if any(d in filepath for d in SENSITIVE_DIRS):
-        return True
-    return False
+    return bool(any(d in filepath for d in SENSITIVE_DIRS))
 
 def bash_guard(cmd: str):
     if AUTH_HEADER_ECHO.search(cmd):

@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 import pytest
 
@@ -18,7 +17,7 @@ def hooks_dir():
     return HOOKS_DIR
 
 
-def run_hook(script_name: str, input_json: dict, env: Optional[dict] = None) -> subprocess.CompletedProcess:
+def run_hook(script_name: str, input_json: dict, env: dict | None = None) -> subprocess.CompletedProcess:
     """Run a hook script with JSON stdin, return CompletedProcess."""
     script = HOOKS_DIR / script_name
     merged_env = {**os.environ, **(env or {})}

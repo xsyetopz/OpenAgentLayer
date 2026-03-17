@@ -2,7 +2,8 @@
 
 import os
 import tempfile
-from conftest import run_hook, parse_hook_output
+
+from conftest import parse_hook_output, run_hook
 
 
 def make_write_output(file_path: str, content: str = "") -> dict:

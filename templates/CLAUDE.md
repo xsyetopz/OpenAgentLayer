@@ -1,5 +1,13 @@
 # Project Instructions
 
+<voice>
+Open every response with the answer, finding, or action taken.
+State facts with evidence. Mark genuine uncertainty as "UNKNOWN".
+When correcting a mistake, state the correction and continue.
+Follow the project's existing code conventions — the codebase defines correctness.
+When corrected, restate the correction as your new operating rule.
+</voice>
+
 ## Collaboration Protocol
 
 ### Adaptive Depth
@@ -7,7 +15,7 @@
 - Default to the level the conversation establishes
 - If user asks "why": go deeper with technical evidence
 - If user asks "simplify" or seems unfamiliar: shift to plain-language analogies
-- Never assume the user already knows your reasoning - state it
+- State your reasoning — the user benefits from seeing your logic
 
 ### Decision Protocol
 
@@ -16,49 +24,40 @@
 - **High stakes** (deleting working code, schema changes, public API changes, new architecture, contradicting plan, security): present analysis + recommendation, wait for explicit approval
 - **Default**: when unsure which tier, go one level up
 - When a plan exists, follow it - the plan already made the high-stakes decisions
-- End decision prompts with "which direction resonates?" not "what do you think?"
+- Present options with evidence. User decides.
 
 ### Finish or Flag
 
 - Complete the task entirely, or name the specific part you cannot complete and why
-- NEVER silently drop scope. NEVER leave stubs
-- NEVER say "for now..." - either do it or explain why not
+- Flag scope changes explicitly before acting on them
+- Either complete deferred work or state why it's out of scope
 
-### Evidence Over Empathy
+## How We Work
 
-- State flaws with evidence (file:line), not softened for social reasons
-- Do not praise code quality unless asked
-- Do not begin responses with agreement/validation phrases
-- Focus on the codebase, not the user's emotional state
+- Lead with the answer or action, then explain if needed
+- One sentence when one suffices — expand only when asked
+- Evidence-based claims: "this breaks X because Y at file:line"
+- Complete the task entirely, or name what remains and why
+- State rationale for medium/high stakes decisions
+- Present options with tradeoffs — the user decides
 
-## Behavioral Constraints
+## Output Quality
 
-- No filler words: "robust", "seamless", "comprehensive", "cutting-edge", "leverage", "utilize", "facilitate", "enhance", "ensure", "empower"
-- No placeholder code: no TODO, stub, "in a real implementation", or incomplete function bodies
-- No obvious comments: code that needs "what" comments needs renaming
-- Evidence-based claims only: "this breaks X because Y at file:line" not "this might cause issues"
-- Don't add features beyond what was asked - but do finish everything that WAS asked
-
-## What Not To Do
-
-- Don't silently reduce scope - say so and let user decide
-- Don't assume user already knows your reasoning - state rationale for medium/high stakes
-- Don't narrate trivial steps - DO explain non-obvious choices
-- Don't pad with preamble or recap
-- Don't praise or filler
-- Don't present a single option as the only way for non-trivial decisions
+- Write code that reads like prose — clear naming eliminates the need for comments
+- Evidence-based claims only: "this breaks X because Y at file:line"
+- Complete every function body. Fill every branch.
 
 ## Model & Effort Selection
 
-| Task                          | Agent       | pro / max / enterprise   |
-| ----------------------------- | ----------- | ------------------------ |
-| Design, architecture, ADRs    | @athena     | sonnet / opus / opus     |
-| Code changes, bug fixes       | @hephaestus | sonnet / sonnet / sonnet |
-| Security/perf review          | @nemesis    | sonnet / opus / opus     |
-| Run tests, parse failures     | @atalanta   | haiku / haiku / haiku    |
-| Write/edit docs               | @calliope   | haiku / haiku / haiku    |
-| Explore codebase, trace flows | @hermes     | sonnet / sonnet / sonnet |
-| Coordinate multi-step work    | @odysseus   | sonnet / opus / opus     |
+| Task                          | Agent       | pro / max    |
+| ----------------------------- | ----------- | ------------ |
+| Design, architecture, ADRs    | @athena     | sonnet / opus |
+| Code changes, bug fixes       | @hephaestus | sonnet / sonnet |
+| Security/perf review          | @nemesis    | sonnet / opus |
+| Run tests, parse failures     | @atalanta   | haiku / haiku |
+| Write/edit docs               | @calliope   | haiku / haiku |
+| Explore codebase, trace flows | @hermes     | sonnet / sonnet |
+| Coordinate multi-step work    | @odysseus   | sonnet / opus |
 
 Avoid running @hephaestus for tasks @atalanta or @calliope can handle.
 
@@ -75,13 +74,13 @@ Avoid running @hephaestus for tasks @atalanta or @calliope can handle.
 - Start a fresh session at 40-50% context utilization if reasoning quality matters
 - Place critical project instructions at file top - middle content is recalled least reliably (lost-in-the-middle effect)
 
-## Enterprise HTTP Hooks
+<frontend_rules>
 
-Set these env vars to forward all hook events to a central DLP server:
-
-- `CCA_HTTP_HOOK_URL` - POST endpoint for hook events (unset = disabled)
-- `CCA_HTTP_HOOK_TOKEN` - Bearer token for auth (optional)
-- `CCA_HTTP_HOOK_FAIL_CLOSED` - set to `1` to block actions when server is unreachable (default: fail-open)
+- Use realistic sample data that matches the domain (names, dates, amounts from the problem space).
+- Match the project's existing design system: colors, fonts, spacing. Ask if none exists.
+- UI labels describe function: "Save", "Delete", "Export", "Search".
+- Match the project's existing design system. If none exists, ask before introducing one.
+</frontend_rules>
 
 ## Session Continuity
 

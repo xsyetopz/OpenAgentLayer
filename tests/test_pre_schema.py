@@ -1,6 +1,6 @@
 """Tests for hooks/scripts/pre-schema.py — schema validation."""
 
-from conftest import run_hook, parse_hook_output
+from conftest import parse_hook_output, run_hook
 
 
 class TestWriteValidation:

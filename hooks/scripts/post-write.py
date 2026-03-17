@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 import os
 import shutil
 import subprocess
@@ -7,15 +8,16 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _lib import (
-    PLACEHOLDER_HARD,
-    COMMENT_SLOP_PATTERNS,
     AI_PROSE_SLOP,
-    is_test_file,
-    is_prose_file,
-    read_stdin,
+    COMMENT_SLOP_PATTERNS,
+    PLACEHOLDER_HARD,
+    SYCOPHANCY_PATTERNS,
     deny,
-    warn,
+    is_prose_file,
+    is_test_file,
     passthrough,
+    read_stdin,
+    warn,
 )
 
 FORMATTERS: dict[str, list[list[str]]] = {
@@ -54,12 +56,14 @@ def run_formatter(file_path: str) -> str | None:
     for cmd_parts in FORMATTERS.get(ext, []):
         if shutil.which(cmd_parts[0]):
             try:
-                before = open(file_path, "rb").read()
+                with open(file_path, "rb") as f:
+                    before = f.read()
                 subprocess.run(
-                    cmd_parts + [file_path],
+                    [*cmd_parts, file_path],
                     capture_output=True, timeout=30,
                 )
-                after = open(file_path, "rb").read()
+                with open(file_path, "rb") as f:
+                    after = f.read()
                 if after != before:
                     return cmd_parts[0]
                 return None
@@ -78,10 +82,17 @@ def slop_patterns(content: str, file_path: str) -> list[str]:
         if pat.search(content):
             hits.append("narrating comment")
             break
-    if is_prose_file(file_path):
-        for pat in AI_PROSE_SLOP:
-            if pat.search(content):
-                hits.append(pat.pattern)
+    for pat in AI_PROSE_SLOP:
+        if pat.search(content):
+            hits.append(pat.pattern)
+    return hits[:5]
+
+
+def sycophancy_patterns(content: str) -> list[str]:
+    hits: list[str] = []
+    for pat in SYCOPHANCY_PATTERNS:
+        if pat.search(content):
+            hits.append(pat.pattern)
     return hits[:5]
 
 def main() -> None:
@@ -108,13 +119,26 @@ def main() -> None:
             f"Finish the implementation.{format_note}",
             event="PostToolUse",
         )
+    prose = is_prose_file(file_path)
     slop = slop_patterns(content, file_path)
     if slop:
-        warn(
+        slop_msg = (
             f"Comment/prose slop in {os.path.basename(file_path)} "
             f"({', '.join(slop[:3])}). "
             f"Remove narrating comments and AI filler.{format_note}"
         )
+        if prose:
+            warn(slop_msg)
+        else:
+            deny(slop_msg, event="PostToolUse")
+    if prose:
+        syco = sycophancy_patterns(content)
+        if syco:
+            warn(
+                f"Sycophantic phrasing in {os.path.basename(file_path)} "
+                f"({', '.join(syco[:3])}). "
+                f"Remove filler openers and apology phrases.{format_note}"
+            )
     if format_note:
         warn(format_note.strip())
     passthrough()

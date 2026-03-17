@@ -2,7 +2,8 @@
 
 import os
 import tempfile
-from conftest import run_hook, parse_hook_output
+
+from conftest import parse_hook_output, run_hook
 
 
 class TestSessionBudget:
@@ -24,7 +25,7 @@ class TestSessionBudget:
             output = parse_hook_output(result)
             combined = result.stdout + result.stderr
             # Either structured output or plain text — either way no crash
-            has_warning = (
+            (
                 "CLAUDE.md" in combined
                 or "budget" in combined.lower()
                 or bool(output)

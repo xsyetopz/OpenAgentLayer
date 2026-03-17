@@ -29,31 +29,39 @@ Claude Code is powerful out of the box. ClaudeAgents adds:
 
 ## Architecture
 
-```
-User Request
-    |
-    v
- @odysseus (orchestrator) ─── delegates to ───>  @athena   (plan)
-    |                                             @hephaestus (build)
-    |                                             @nemesis  (review)
-    |                                             @atalanta (test)
-    |                                             @calliope (docs)
-    |                                             @hermes   (research)
-    |
-    v
- Safety Hooks (13 lifecycle events)
-    |
-    ├── PreToolUse ────── block dangerous commands, validate schemas
-    ├── PostToolUse ───── auto-format, detect placeholders, redact secrets
-    ├── SubagentStop ──── catch scope reduction, enforce collaboration protocol
-    ├── Stop ──────────── anti-rationalization gate, completion check
-    ├── SessionStart ──── context budget warning, git context injection
-    ├── UserPromptSubmit  prompt validation
-    ├── PostToolUseFailure  retry loop detection
-    ├── TeammateIdle ──── force agent continuation
-    ├── SessionEnd ────── cleanup, audit summary
-    ├── Notification ──── audit logging
-    └── PermissionRequest  audit trail
+```mermaid
+graph TD
+    User([User Request]) --> Odysseus["@odysseus (orchestrator)"]
+
+    subgraph Agents [Specialized Agents]
+        Athena["@athena (plan)"]
+        Hephaestus["@hephaestus (build)"]
+        Nemesis["@nemesis (review)"]
+        Atalanta["@atalanta (test)"]
+        Calliope["@calliope (docs)"]
+        Hermes["@hermes (research)"]
+    end
+
+    Odysseus -- delegates to --> Agents
+
+    Odysseus --> Hooks["Safety Hooks (13 lifecycle events)"]
+
+    subgraph Events [Lifecycle Hooks]
+        direction TB
+        PreToolUse["<b>PreToolUse</b>: block dangerous commands, validate schemas"]
+        PostToolUse["<b>PostToolUse</b>: auto-format, detect placeholders, redact secrets"]
+        SubagentStop["<b>SubagentStop</b>: catch scope reduction, enforce protocol"]
+        Stop["<b>Stop</b>: anti-rationalization gate, completion check"]
+        SessionStart["<b>SessionStart</b>: context budget warning, git context injection"]
+        UserPromptSubmit["<b>UserPromptSubmit</b>: prompt validation"]
+        PostToolUseFailure["<b>PostToolUseFailure</b>: retry loop detection"]
+        TeammateIdle["<b>TeammateIdle</b>: force agent continuation"]
+        SessionEnd["<b>SessionEnd</b>: cleanup, audit summary"]
+        Notification["<b>Notification</b>: audit logging"]
+        PermissionRequest["<b>PermissionRequest</b>: audit trail"]
+    end
+
+    Hooks --> Events
 ```
 
 ---
@@ -174,6 +182,7 @@ export CCA_HOOK_LOG_DIR="/var/log/cca"
 ```
 
 Writes to `$CCA_HOOK_LOG_DIR/cca-hooks.jsonl`:
+
 ```json
 {"ts":"2026-03-17T12:00:00Z","event":"PreToolUse","tool":"Bash","action":"blocked","reason":"rm -rf pattern","hook":"pre-bash.py"}
 ```

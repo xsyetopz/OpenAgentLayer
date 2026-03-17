@@ -5,7 +5,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/user-prompt-submit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/prompt-git-context.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]
@@ -16,7 +16,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session-budget.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/start-budget.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]
@@ -27,7 +27,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre-schema.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre/validate-input.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]
@@ -37,7 +37,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre-bash.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre/bash-guard.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 10
 					}
 				]
@@ -46,7 +46,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre-post-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre/http-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 8
 					}
 				]
@@ -58,11 +58,11 @@
 				"hooks": [
 					{
 						"type": "prompt",
-						"prompt": "After modifying a file, note any LSP diagnostics (errors or warnings) in your response but do not stop your current task. Continue with your work."
+						"prompt": "After modifying a file, note any LSP diagnostics in your response. Continue with your current task."
 					},
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post-write.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/write-quality.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 15
 					}
 				]
@@ -72,7 +72,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post-bash.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/bash-redact.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 10
 					}
 				]
@@ -82,7 +82,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre-post-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/http-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 8
 					}
 				]
@@ -93,7 +93,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post-failure.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/failure-circuit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]
@@ -105,16 +105,16 @@
 				"hooks": [
 					{
 						"type": "prompt",
-						"prompt": "Check for silent scope reduction: did the agent quietly drop, skip, or stub out parts of what was asked WITHOUT flagging it? Look for: 'simplified version', 'for now', 'can be added later', unfinished-work markers, placeholder implementations, or deferred work. If the agent silently reduced scope, tell the user exactly what was dropped and block the agent from continuing until the user acknowledges the reduction."
+						"prompt": "Review the agent's deliverable against the original request. List: (1) what was completed with file paths, (2) what remains incomplete. If any part was simplified or deferred, state it explicitly."
 					},
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/subagent-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/subagent-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 15
 					},
 					{
 						"type": "prompt",
-						"prompt": "Check collaboration protocol: for any medium/high-stakes decision, did the agent present 2-3 options with tradeoffs? Check for sycophancy: did the agent agree with a questionable approach without challenging it? Did it use unnecessary hedge language ('might', 'could potentially', 'you may want to consider')? If a non-trivial decision was made without presenting alternatives, or if the agent was sycophantic, flag this to the user before allowing the agent to continue."
+						"prompt": "Verify the agent's decision quality: (1) for medium/high-stakes decisions, were 2-3 options with tradeoffs presented? (2) were findings stated with evidence and file:line citations? Flag any decisions made without presenting alternatives."
 					}
 				]
 			}
@@ -124,7 +124,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/teammate-idle.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/teammate-idle-resume.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]
@@ -135,7 +135,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notification.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/notification-audit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 3
 					}
 				]
@@ -146,7 +146,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/permission-request.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/permission-audit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 3
 					}
 				]
@@ -157,11 +157,11 @@
 				"hooks": [
 					{
 						"type": "prompt",
-						"prompt": "Before stopping: Did you complete ALL parts of the original request? If you're about to stop with work remaining, explicitly list what was NOT done and why. Do not rationalize partial completion as 'sufficient' or 'the rest can be done later' — either complete it or flag it clearly."
+						"prompt": "List every part of the original request and its status: DONE, IN_PROGRESS, or REMAINING. For REMAINING items, state what blocks them."
 					},
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/stop-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/stop-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 15
 					}
 				]
@@ -172,7 +172,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session-end.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/end-cleanup.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
 						"timeout": 5
 					}
 				]

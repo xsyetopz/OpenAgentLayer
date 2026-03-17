@@ -21,12 +21,11 @@ warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 usage() {
     echo -e "${GREEN}Claude Code Agent System Installer${NC}"
-    echo "Usage: $0 <target-dir>|--global [--pro|--max|--enterprise] [--zen-mode] [--update] [--diagnose]"
+    echo "Usage: $0 <target-dir>|--global [--pro|--max] [--zen-mode] [--update] [--diagnose]"
     echo "  <target-dir>    : Path to your project"
     echo "  --global        : Install to global ~/.claude/"
-    echo "  --pro           : Sonnet default, balanced safety, PII-aware (default)"
-    echo "  --max           : Opus for planning/review/coordination, higher context budget"
-    echo "  --enterprise    : Max + audit logs, HTTP DLP, fail-closed, compliance"
+    echo "  --pro           : Claude Pro — opusplan orchestrator, sonnet agents (default)"
+    echo "  --max           : Claude Max 5x/20x — opusplan orchestrator, opus for planning/review"
     echo "  --zen-mode      : Composable flag: plan-first, quiet, ask-on-ambiguity"
     echo "  --update        : Show diffs and selectively update installed files"
     echo "  --diagnose      : Run hook diagnostics without installing"
@@ -49,9 +48,9 @@ check_python() {
 
 apply_package_models() {
     local src="$1" tmp="$2" agent_name
-    agent_name=$(grep -m1 '^name:' "$src" 2>/dev/null | sed 's/^name: *//')
+    agent_name=$(grep -m1 '^name:' "$src" 2>/dev/null | sed 's/^name: *//' | tr '[:upper:]' '[:lower:]')
     case "$PACKAGE" in
-        enterprise|max)
+        max)
             # opus for athena, nemesis, odysseus; sonnet for rest
             case "$agent_name" in
                 athena|nemesis|odysseus) cp "$src" "$tmp" ;;
@@ -264,14 +263,12 @@ interactive_mode() {
     # Screen 2: Package tier
     local tier_result
     tier_result=$(tui_select_one "Package Tier" \
-        "Pro         Sonnet everywhere (Haiku for tests)" \
-        "Max         + Opus for planning/review" \
-        "Enterprise  + audit logs, DLP, compliance" \
+        "Pro   Claude Pro — opusplan, sonnet agents" \
+        "Max   Claude Max 5x/20x — opusplan + opus agents" \
     )
     case "$tier_result" in
         0) PACKAGE="pro" ;;
         1) PACKAGE="max" ;;
-        2) PACKAGE="enterprise" ;;
     esac
 
     # Screen 3: Agent selection
@@ -343,7 +340,7 @@ parse_args() {
             --global)     INSTALL_SCOPE="global"; shift ;;
             --pro)        PACKAGE="pro"; shift ;;
             --max)        PACKAGE="max"; shift ;;
-            --enterprise) PACKAGE="enterprise"; shift ;;
+            --enterprise) warn "--enterprise removed, using --max"; PACKAGE="max"; shift ;;
             --consumer)   PACKAGE="pro"; warn "--consumer is deprecated, use --pro"; shift ;;
             --zen)        warn "--zen is deprecated, use --zen-mode"; ZEN_MODE="true"; shift ;;
             --zen-mode)   ZEN_MODE="true"; shift ;;
@@ -362,7 +359,7 @@ parse_args() {
 }
 
 make_dirs() {
-    mkdir -p "$CLAUDE_DIR"/{agents,skills,hooks/scripts,commands}
+    mkdir -p "$CLAUDE_DIR"/{agents,skills,hooks/scripts/{pre,post,session},commands,output-styles}
     mkdir -p "$HOME/.claude/hooks"
 }
 
@@ -473,7 +470,8 @@ update_interactive() {
 
     # Check global extras
     if [[ "$INSTALL_SCOPE" == "global" ]]; then
-        diff_file "statusline-command.sh" "$HOME/.claude/statusline-command.sh" "$REPO_DIR/templates/statusline-command.sh" || changes=$((changes + 1))
+        diff_file "cca-statusline.sh" "$HOME/.claude/cca-statusline.sh" "$REPO_DIR/statusline/cca-statusline.sh" || changes=$((changes + 1))
+        diff_file "output-style: cca.md" "$HOME/.claude/output-styles/cca.md" "$REPO_DIR/output-styles/cca.md" || changes=$((changes + 1))
     fi
 
     if [[ $changes -eq 0 ]]; then
@@ -539,21 +537,6 @@ copy_skills() {
     done
 }
 
-copy_commands() {
-    local cmd_src="$REPO_DIR/commands"
-    [[ -d "$cmd_src" ]] || return 0
-    local cmd_count=0
-    echo -e "\nCommands:"
-    mkdir -p "$CLAUDE_DIR/commands"
-    for cmd in "$cmd_src"/*.md; do
-        [[ -f "$cmd" ]] || continue
-        cp "$cmd" "$CLAUDE_DIR/commands/$(basename "$cmd")"
-        info "$(basename "$cmd")"
-        cmd_count=$((cmd_count + 1))
-    done
-    [[ $cmd_count -eq 0 ]] && info "no commands to install" || true
-}
-
 copy_hooks_scripts() {
     echo -e "\nHooks:"
     for hook in pre-secrets.py rtk-rewrite.sh; do
@@ -576,12 +559,12 @@ copy_hooks_scripts() {
         if [[ "$resolved_repo" == "$resolved_target" ]]; then
             rm -rf "$CLAUDE_DIR/hooks/scripts"
             ln -sfn "../../hooks/scripts" "$CLAUDE_DIR/hooks/scripts"
-            HOOK_COUNT=$(find "$REPO_DIR/hooks/scripts/" -maxdepth 1 -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
+            HOOK_COUNT=$(find "$REPO_DIR/hooks/scripts/" -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> symlinked (self-install)"
         else
             cp -r "$REPO_DIR/hooks/scripts/"* "$CLAUDE_DIR/hooks/scripts/" 2>/dev/null || true
-            chmod +x "$CLAUDE_DIR/hooks/scripts/"*.py 2>/dev/null || true
-            HOOK_COUNT=$(find "$CLAUDE_DIR/hooks/scripts/" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ')
+            find "$CLAUDE_DIR/hooks/scripts/" -name '*.py' -exec chmod +x {} \; 2>/dev/null || true
+            HOOK_COUNT=$(find "$CLAUDE_DIR/hooks/scripts/" -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
             info "$HOOK_COUNT hook scripts -> project hooks"
         fi
     fi
@@ -590,10 +573,32 @@ copy_hooks_scripts() {
 install_global_extras() {
     [[ "$INSTALL_SCOPE" != "global" ]] && return
     echo -e "\nGlobal extras:"
-    if [[ -f "$REPO_DIR/templates/statusline-command.sh" ]]; then
+
+    # Statusline
+    if [[ -f "$REPO_DIR/statusline/cca-statusline.sh" ]]; then
+        cp "$REPO_DIR/statusline/cca-statusline.sh" "$HOME/.claude/cca-statusline.sh"
+        chmod +x "$HOME/.claude/cca-statusline.sh"
+        info "cca-statusline.sh -> ~/.claude/"
+    elif [[ -f "$REPO_DIR/templates/statusline-command.sh" ]]; then
         cp "$REPO_DIR/templates/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
         chmod +x "$HOME/.claude/statusline-command.sh"
-        info "statusline-command.sh -> ~/.claude/"
+        info "statusline-command.sh -> ~/.claude/ (legacy)"
+    fi
+
+    # Output style
+    if [[ -f "$REPO_DIR/output-styles/cca.md" ]]; then
+        mkdir -p "$HOME/.claude/output-styles"
+        cp "$REPO_DIR/output-styles/cca.md" "$HOME/.claude/output-styles/cca.md"
+        info "cca.md -> ~/.claude/output-styles/"
+    fi
+}
+
+install_output_style() {
+    [[ "$INSTALL_SCOPE" == "global" ]] && return  # handled in install_global_extras
+    echo -e "\nOutput style:"
+    if [[ -f "$REPO_DIR/output-styles/cca.md" ]]; then
+        cp "$REPO_DIR/output-styles/cca.md" "$CLAUDE_DIR/output-styles/cca.md"
+        info "cca.md -> .claude/output-styles/"
     fi
 }
 
@@ -602,10 +607,17 @@ settings_json_merge_global() {
     local TEMPLATE="$REPO_DIR/templates/settings-global.json"
     [[ -f "$TEMPLATE" ]] || { warn "templates/settings-global.json not found - skipping global settings"; return; }
 
-    # Substitute __HOME__ placeholder
+    # Determine model setting based on package tier
+    local cca_model="opusplan"
+    case "$PACKAGE" in
+        max|enterprise) cca_model="opus[1m]" ;;
+        pro)            cca_model="opusplan" ;;
+    esac
+
+    # Substitute __HOME__ and __CCA_MODEL__ placeholders
     local tmp_template
     tmp_template=$(mktemp)
-    sed "s|__HOME__|$HOME|g" "$TEMPLATE" > "$tmp_template"
+    sed -e "s|__HOME__|$HOME|g" -e "s|__CCA_MODEL__|$cca_model|g" "$TEMPLATE" > "$tmp_template"
 
     if ! command -v jq &>/dev/null; then
         warn "jq not found - copying template as settings.json (no merge)"
@@ -835,9 +847,8 @@ report_summary() {
     echo ""
     echo "Package: $PACKAGE$([ "$ZEN_MODE" = "true" ] && echo " + zen-mode")"
     case "$PACKAGE" in
-        enterprise) echo "  Opus: athena, nemesis, odysseus | Fail-closed | Audit logs | HTTP DLP | Compliance" ;;
-        max)        echo "  Opus: athena, nemesis, odysseus | Higher context budget | Same guardrails as pro" ;;
-        pro)        echo "  Sonnet all | Balanced | PII-aware | Streaming-safe" ;;
+        max) echo "  opusplan orchestrator | Opus: athena, nemesis, odysseus | Extended context" ;;
+        pro) echo "  opusplan orchestrator | Sonnet agents | Haiku for tests/docs" ;;
     esac
     [[ "$ZEN_MODE" == "true" ]] && echo "  Zen: plan-first, quiet output, ask-on-ambiguity"
     echo ""
@@ -950,12 +961,11 @@ main() {
     make_dirs
     copy_agents
     copy_skills
-    copy_commands
     copy_hooks_scripts
     install_global_extras
+    install_output_style
     settings_json_merge
     install_template
-    install_mcp_harness
 
     echo -e "\nValidation:"
     ERRORS=0

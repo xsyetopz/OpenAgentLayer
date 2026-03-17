@@ -1,5 +1,4 @@
 ---
-name: decide
 description: >
   Shared collaboration protocol for presenting options, tradeoffs, and rationale
   in technical decisions. Triggers: present options, tradeoffs, collaboration, decision making,
@@ -40,7 +39,8 @@ For medium/high stakes decisions:
 - Con: [one concrete disadvantage]
 
 **Recommendation:** Option [X] because [specific reason].
-End with "which direction resonates?" not "what do you think?"
+
+Present options with evidence. User decides.
 
 ## Finish or Flag
 
