@@ -1,0 +1,182 @@
+{
+	"hooks": {
+		"UserPromptSubmit": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/prompt-git-context.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"SessionStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/start-budget.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"PreToolUse": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/pre/validate-input.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			},
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/pre/bash-guard.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 10
+					}
+				]
+			},
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/pre/http-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 8
+					}
+				]
+			}
+		],
+		"PostToolUse": [
+			{
+				"matcher": "Write|Edit",
+				"hooks": [
+					{
+						"type": "prompt",
+						"prompt": "After modifying a file, note any LSP diagnostics in your response. Continue with your current task."
+					},
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/write-quality.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 15
+					}
+				]
+			},
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/bash-redact.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 10
+					}
+				]
+			},
+			{
+				"matcher": "Bash|Write|Edit",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/http-proxy.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 8
+					}
+				]
+			}
+		],
+		"PostToolUseFailure": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/failure-circuit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"SubagentStop": [
+			{
+				"matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
+				"hooks": [
+					{
+						"type": "prompt",
+						"prompt": "Review the agent's deliverable against the original request. List: (1) what was completed with file paths, (2) what remains incomplete. If any part was simplified or deferred, state it explicitly."
+					},
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/subagent-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 15
+					},
+					{
+						"type": "prompt",
+						"prompt": "Verify the agent's decision quality: (1) for medium/high-stakes decisions, were 2-3 options with tradeoffs presented? (2) were findings stated with evidence and file:line citations? Flag any decisions made without presenting alternatives."
+					}
+				]
+			}
+		],
+		"TeammateIdle": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/teammate-idle-resume.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			}
+		],
+		"Notification": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/notification-audit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 3
+					}
+				]
+			}
+		],
+		"PermissionRequest": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/permission-audit.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 3
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "prompt",
+						"prompt": "List every part of the original request and its status: DONE, IN_PROGRESS, or REMAINING. For REMAINING items, state what blocks them."
+					},
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/post/stop-scan.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 15
+					}
+				]
+			}
+		],
+		"SessionEnd": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/session/end-cleanup.py; [ -f \"$H\" ] && python3 \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
+			}
+		]
+	}
+}
