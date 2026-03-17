@@ -23,7 +23,6 @@ node_modules/
 !.env.example
 
 # IDE
-.vscode/
 .idea/
 .serena/
 .cursorignore
