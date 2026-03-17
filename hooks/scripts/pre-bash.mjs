@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
@@ -102,35 +103,41 @@ function precommitCheck(cmd) {
 	return blockers;
 }
 
-const data = readStdin();
-if (!data || data.tool_name !== "Bash") passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || data.tool_name !== "Bash") passthrough();
 
-const command = (data.tool_input?.command ?? "").trim();
+		const command = (data.tool_input?.command ?? "").trim();
 
-const msg = checkLargeOutput(command);
-if (msg) deny(`[guard] ${msg}`);
+		const msg = checkLargeOutput(command);
+		if (msg) deny(`[guard] ${msg}`);
 
-if (forbiddenGitAdd(command))
-	deny("Use `git add <specific files>` - review what you're staging.");
-if (forbiddenRm(command))
-	deny("Blocked: rm -rf on broad path. Be more specific.");
+		if (forbiddenGitAdd(command))
+			deny("Use `git add <specific files>` - review what you're staging.");
+		if (forbiddenRm(command))
+			deny("Blocked: rm -rf on broad path. Be more specific.");
 
-const blockers = precommitCheck(command);
-if (blockers.length > 0) {
-	deny(
-		"Pre-commit checks failed:\n" +
-			blockers
-				.slice(0, 10)
-				.map((b) => `  - ${b}`)
-				.join("\n") +
-			"\nFix these issues before committing.",
-	);
-}
+		const blockers = precommitCheck(command);
+		if (blockers.length > 0) {
+			deny(
+				"Pre-commit checks failed:\n" +
+					blockers
+						.slice(0, 10)
+						.map((b) => `  - ${b}`)
+						.join("\n") +
+					"\nFix these issues before committing.",
+			);
+		}
 
-if (DNS_EXFIL.test(command)) {
-	deny(
-		"[guard] DNS/ICMP tools can exfiltrate data (CVE-2025-55284). Use curl for connectivity checks.",
-	);
-}
+		if (DNS_EXFIL.test(command)) {
+			deny(
+				"[guard] DNS/ICMP tools can exfiltrate data (CVE-2025-55284). Use curl for connectivity checks.",
+			);
+		}
 
-passthrough();
+		passthrough();
+	} catch {
+		passthrough();
+	}
+})();

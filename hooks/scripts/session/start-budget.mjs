@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "../suppress-stderr.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { readStdin } from "../_lib.mjs";
@@ -64,20 +65,22 @@ function checkPermissionsDeny(projectDir) {
 	return null;
 }
 
-function main() {
-	const data = readStdin();
-	if (!data || Object.keys(data).length === 0) process.exit(0);
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || Object.keys(data).length === 0) process.exit(0);
 
-	const projectDir = data.cwd ?? process.cwd();
-	const warnings = collectLineBudgetWarnings(projectDir);
+		const projectDir = data.cwd ?? process.cwd();
+		const warnings = collectLineBudgetWarnings(projectDir);
 
-	const denyWarning = checkPermissionsDeny(projectDir);
-	if (denyWarning) warnings.push(denyWarning);
+		const denyWarning = checkPermissionsDeny(projectDir);
+		if (denyWarning) warnings.push(denyWarning);
 
-	if (warnings.length > 0) {
-		process.stdout.write(`${warnings.join("\n")}\n`);
+		if (warnings.length > 0) {
+			process.stdout.write(`${warnings.join("\n")}\n`);
+		}
+		process.exit(0);
+	} catch {
+		process.exit(0);
 	}
-	process.exit(0);
-}
-
-main();
+})();

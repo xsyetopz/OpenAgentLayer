@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { createHash } from "node:crypto";
 import {
 	closeSync,
@@ -61,27 +62,33 @@ function logFailure(toolName, error) {
 	}
 }
 
-const data = readStdin();
-const toolName = data.tool_name ?? "unknown";
-const error = data.tool_error ?? data.error ?? "";
+(async () => {
+	try {
+		const data = await readStdin();
+		const toolName = data.tool_name ?? "unknown";
+		const error = data.tool_error ?? data.error ?? "";
 
-logFailure(toolName, String(error));
-auditLog(
-	"PostToolUseFailure",
-	"post-failure.mjs",
-	"logged",
-	String(error).slice(0, 200),
-	toolName,
-);
+		logFailure(toolName, String(error));
+		auditLog(
+			"PostToolUseFailure",
+			"post-failure.mjs",
+			"logged",
+			String(error).slice(0, 200),
+			toolName,
+		);
 
-const consecutive = getRecentFailures(toolName);
-if (consecutive >= MAX_CONSECUTIVE) {
-	warn(
-		`Tool '${toolName}' has failed ${consecutive} times consecutively. ` +
-			`Stop retrying the same approach. Consider: ` +
-			`(1) a different tool, (2) a different approach, (3) asking the user for guidance.`,
-		"PostToolUseFailure",
-	);
-} else {
-	passthrough();
-}
+		const consecutive = getRecentFailures(toolName);
+		if (consecutive >= MAX_CONSECUTIVE) {
+			warn(
+				`Tool '${toolName}' has failed ${consecutive} times consecutively. ` +
+					`Stop retrying the same approach. Consider: ` +
+					`(1) a different tool, (2) a different approach, (3) asking the user for guidance.`,
+				"PostToolUseFailure",
+			);
+		} else {
+			passthrough();
+		}
+	} catch {
+		passthrough();
+	}
+})();

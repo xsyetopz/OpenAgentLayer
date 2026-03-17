@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "../suppress-stderr.mjs";
 import { spawnSync } from "node:child_process";
 import { auditLog, passthrough, readStdin, warn } from "../_lib.mjs";
 
@@ -32,22 +33,24 @@ function getGitContext() {
 	return parts.join("\n");
 }
 
-function main() {
-	const data = readStdin();
-	const prompt = (data.prompt ?? "").trim();
+(async () => {
+	try {
+		const data = await readStdin();
+		const prompt = (data.prompt ?? "").trim();
 
-	if (!prompt) {
+		if (!prompt) {
+			passthrough();
+		}
+
+		auditLog("UserPromptSubmit", "user-prompt-submit.mjs", "processed");
+
+		const gitCtx = getGitContext();
+		if (gitCtx) {
+			warn(`Git context:\n${gitCtx}`, "UserPromptSubmit");
+		} else {
+			passthrough();
+		}
+	} catch {
 		passthrough();
 	}
-
-	auditLog("UserPromptSubmit", "user-prompt-submit.mjs", "processed");
-
-	const gitCtx = getGitContext();
-	if (gitCtx) {
-		warn(`Git context:\n${gitCtx}`, "UserPromptSubmit");
-	} else {
-		passthrough();
-	}
-}
-
-main();
+})();

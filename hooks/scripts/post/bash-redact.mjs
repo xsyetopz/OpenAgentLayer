@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "../suppress-stderr.mjs";
 import {
 	PII_PATTERNS,
 	passthrough,
@@ -40,18 +41,24 @@ function detectSensitive(text) {
 	return hits;
 }
 
-const data = readStdin();
-if (!data || !Object.keys(data).length) passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || !Object.keys(data).length) passthrough();
 
-const toolResponse = data.tool_response || "";
-if (!toolResponse || typeof toolResponse !== "string") passthrough();
+		const toolResponse = data.tool_response || "";
+		if (!toolResponse || typeof toolResponse !== "string") passthrough();
 
-const hits = detectSensitive(toolResponse);
-if (!hits.length) passthrough();
+		const hits = detectSensitive(toolResponse);
+		if (!hits.length) passthrough();
 
-const summary = hits.slice(0, 5).join(", ");
-postWarn(
-	`[redact] Sensitive data detected in command output: ${summary}. ` +
-		"Do not repeat, log, or reference these values. " +
-		"Replace with [REDACTED] in any output.",
-);
+		const summary = hits.slice(0, 5).join(", ");
+		postWarn(
+			`[redact] Sensitive data detected in command output: ${summary}. ` +
+				"Do not repeat, log, or reference these values. " +
+				"Replace with [REDACTED] in any output.",
+		);
+	} catch {
+		passthrough();
+	}
+})();

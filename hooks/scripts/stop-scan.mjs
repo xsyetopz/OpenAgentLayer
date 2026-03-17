@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -80,34 +81,40 @@ function sessionExportStale(projectDir) {
 	}
 }
 
-const data = readStdin();
-if (!data || data.stop_hook_active) passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || data.stop_hook_active) passthrough();
 
-const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-const files = modifiedFiles();
+		const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
+		const files = modifiedFiles();
 
-if (files.length > 0) {
-	const [allHard, allSoft] = scanFiles(files);
+		if (files.length > 0) {
+			const [allHard, allSoft] = scanFiles(files);
 
-	if (allHard.length > 0) {
-		const output =
-			`Completion check: ${allHard.length} placeholder(s), ` +
-			`${allSoft.length} hedge(s) in modified files:\n` +
-			[...allHard, ...allSoft].slice(0, 15).join("\n");
-		block(`${output}\n\nFix all placeholder code before finishing.`);
-	} else if (allSoft.length > 0) {
-		const output =
-			`Completion check: ${allSoft.length} hedge(s) in modified files:\n` +
-			allSoft.slice(0, 15).join("\n");
-		warn(output, "Stop");
+			if (allHard.length > 0) {
+				const output =
+					`Completion check: ${allHard.length} placeholder(s), ` +
+					`${allSoft.length} hedge(s) in modified files:\n` +
+					[...allHard, ...allSoft].slice(0, 15).join("\n");
+				block(`${output}\n\nFix all placeholder code before finishing.`);
+			} else if (allSoft.length > 0) {
+				const output =
+					`Completion check: ${allSoft.length} hedge(s) in modified files:\n` +
+					allSoft.slice(0, 15).join("\n");
+				warn(output, "Stop");
+			}
+		}
+
+		if (sessionExportStale(projectDir)) {
+			warn(
+				"Consider running /cca:session-export to save a handoff for your next session.",
+				"Stop",
+			);
+		} else {
+			passthrough();
+		}
+	} catch {
+		passthrough();
 	}
-}
-
-if (sessionExportStale(projectDir)) {
-	warn(
-		"Consider running /cca:session-export to save a handoff for your next session.",
-		"Stop",
-	);
-} else {
-	passthrough();
-}
+})();

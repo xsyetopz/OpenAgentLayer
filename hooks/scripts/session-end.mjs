@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { existsSync, readdirSync, readFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -34,17 +35,23 @@ function countAuditEntries() {
 	}
 }
 
-readStdin();
+(async () => {
+	try {
+		await readStdin();
 
-auditLog("SessionEnd", "session-end.mjs", "session_ended");
-cleanup();
+		auditLog("SessionEnd", "session-end.mjs", "session_ended");
+		cleanup();
 
-const entries = countAuditEntries();
-if (entries > 0) {
-	warn(
-		`Session ended. ${entries} hook events logged to $CCA_HOOK_LOG_DIR/cca-hooks.jsonl.`,
-		"SessionEnd",
-	);
-} else {
-	passthrough();
-}
+		const entries = countAuditEntries();
+		if (entries > 0) {
+			warn(
+				`Session ended. ${entries} hook events logged to $CCA_HOOK_LOG_DIR/cca-hooks.jsonl.`,
+				"SessionEnd",
+			);
+		} else {
+			passthrough();
+		}
+	} catch {
+		passthrough();
+	}
+})();

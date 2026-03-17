@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, mkdirSync } from "node:fs";
 import { extname, join } from "node:path";
 
 export const PLACEHOLDER_HARD = [
@@ -173,12 +173,29 @@ export function isMetaFile(filepath) {
 	return META_FILE_RE.test(filepath);
 }
 
+/**
+ * Read and parse JSON from stdin using event-based flowing mode.
+ * Avoids readFileSync(0) which can hang on macOS (spawnSync pipe)
+ * or throw EOF/EISDIR on Windows and EAGAIN on Linux.
+ * @returns {Promise<object>}
+ */
 export function readStdin() {
-	try {
-		return JSON.parse(readFileSync(0, "utf8"));
-	} catch {
-		return {};
-	}
+	return new Promise((resolve) => {
+		let data = "";
+		process.stdin.setEncoding("utf-8");
+		process.stdin.on("data", (chunk) => {
+			data += chunk;
+		});
+		process.stdin.on("end", () => {
+			try {
+				resolve(JSON.parse(data));
+			} catch {
+				resolve({});
+			}
+		});
+		process.stdin.on("error", () => resolve({}));
+		process.stdin.resume();
+	});
 }
 
 export function _printAndExit(data) {

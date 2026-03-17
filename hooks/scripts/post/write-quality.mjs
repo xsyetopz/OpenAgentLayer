@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "../suppress-stderr.mjs";
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
@@ -124,61 +125,67 @@ function sycophancyPatterns(content) {
 		.slice(0, 5);
 }
 
-const data = readStdin();
-if (!data || !Object.keys(data).length) passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || !Object.keys(data).length) passthrough();
 
-const { filePath, content } = getToolFileAndContent(data);
-if (!filePath) passthrough();
+		const { filePath, content } = getToolFileAndContent(data);
+		if (!filePath) passthrough();
 
-const formatterUsed = runFormatter(filePath);
-const formatNote = formatterUsed
-	? ` [format] File was auto-formatted by ${formatterUsed}. Your output was adjusted.`
-	: "";
+		const formatterUsed = runFormatter(filePath);
+		const formatNote = formatterUsed
+			? ` [format] File was auto-formatted by ${formatterUsed}. Your output was adjusted.`
+			: "";
 
-if (!content) {
-	if (formatNote) postWarn(formatNote.trim());
-	passthrough();
-}
+		if (!content) {
+			if (formatNote) postWarn(formatNote.trim());
+			passthrough();
+		}
 
-const placeholders = placeholderPatterns(content, filePath);
-if (placeholders.length) {
-	postWarn(
-		`Placeholder code in ${basename(filePath)}: ` +
-			`${placeholders.slice(0, 3).join(", ")}. ` +
-			`Finish the implementation.${formatNote}`,
-	);
-}
+		const placeholders = placeholderPatterns(content, filePath);
+		if (placeholders.length) {
+			postWarn(
+				`Placeholder code in ${basename(filePath)}: ` +
+					`${placeholders.slice(0, 3).join(", ")}. ` +
+					`Finish the implementation.${formatNote}`,
+			);
+		}
 
-const suppressions = suppressionPatterns(content, filePath);
-if (suppressions.length) {
-	postWarn(
-		`Lint suppression in ${basename(filePath)}: ` +
-			`${suppressions.slice(0, 3).join(", ")}. ` +
-			`Fix the root cause instead of suppressing. ` +
-			`If this is a verified false positive, add a comment explaining why.${formatNote}`,
-	);
-}
+		const suppressions = suppressionPatterns(content, filePath);
+		if (suppressions.length) {
+			postWarn(
+				`Lint suppression in ${basename(filePath)}: ` +
+					`${suppressions.slice(0, 3).join(", ")}. ` +
+					`Fix the root cause instead of suppressing. ` +
+					`If this is a verified false positive, add a comment explaining why.${formatNote}`,
+			);
+		}
 
-const prose = isProseFile(filePath);
-const slop = slopPatterns(content);
-if (slop.length) {
-	postWarn(
-		`Comment/prose slop in ${basename(filePath)} ` +
-			`(${slop.slice(0, 3).join(", ")}). ` +
-			`Remove narrating comments and AI filler.${formatNote}`,
-	);
-}
+		const prose = isProseFile(filePath);
+		const slop = slopPatterns(content);
+		if (slop.length) {
+			postWarn(
+				`Comment/prose slop in ${basename(filePath)} ` +
+					`(${slop.slice(0, 3).join(", ")}). ` +
+					`Remove narrating comments and AI filler.${formatNote}`,
+			);
+		}
 
-if (prose) {
-	const syco = sycophancyPatterns(content);
-	if (syco.length) {
-		postWarn(
-			`Sycophantic phrasing in ${basename(filePath)} ` +
-				`(${syco.slice(0, 3).join(", ")}). ` +
-				`Remove filler openers and apology phrases.${formatNote}`,
-		);
+		if (prose) {
+			const syco = sycophancyPatterns(content);
+			if (syco.length) {
+				postWarn(
+					`Sycophantic phrasing in ${basename(filePath)} ` +
+						`(${syco.slice(0, 3).join(", ")}). ` +
+						`Remove filler openers and apology phrases.${formatNote}`,
+				);
+			}
+		}
+
+		if (formatNote) postWarn(formatNote.trim());
+		passthrough();
+	} catch {
+		passthrough();
 	}
-}
-
-if (formatNote) postWarn(formatNote.trim());
-passthrough();
+})();

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, extname } from "node:path";
@@ -111,53 +112,59 @@ function sycophancyPatterns(content) {
 		.slice(0, 5);
 }
 
-const data = readStdin();
-if (!data) passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data) passthrough();
 
-const [filePath, content] = getToolFileAndContent(data);
-if (!filePath) passthrough();
+		const [filePath, content] = getToolFileAndContent(data);
+		if (!filePath) passthrough();
 
-const formatterUsed = runFormatter(filePath);
-const formatNote = formatterUsed
-	? ` [format] File was auto-formatted by ${formatterUsed}. Your output was adjusted.`
-	: "";
+		const formatterUsed = runFormatter(filePath);
+		const formatNote = formatterUsed
+			? ` [format] File was auto-formatted by ${formatterUsed}. Your output was adjusted.`
+			: "";
 
-if (!content) {
-	if (formatNote) warn(formatNote.trim());
-	passthrough();
-}
+		if (!content) {
+			if (formatNote) warn(formatNote.trim());
+			passthrough();
+		}
 
-const placeholders = placeholderPatterns(content, filePath);
-if (placeholders.length > 0) {
-	deny(
-		`Placeholder code in ${basename(filePath)}: ` +
-			`${placeholders.slice(0, 3).join(", ")}. ` +
-			`Finish the implementation.${formatNote}`,
-		"PostToolUse",
-	);
-}
+		const placeholders = placeholderPatterns(content, filePath);
+		if (placeholders.length > 0) {
+			deny(
+				`Placeholder code in ${basename(filePath)}: ` +
+					`${placeholders.slice(0, 3).join(", ")}. ` +
+					`Finish the implementation.${formatNote}`,
+				"PostToolUse",
+			);
+		}
 
-const prose = isProseFile(filePath);
-const slop = slopPatterns(content);
-if (slop.length > 0) {
-	const slopMsg =
-		`Comment/prose slop in ${basename(filePath)} ` +
-		`(${slop.slice(0, 3).join(", ")}). ` +
-		`Remove narrating comments and AI filler.${formatNote}`;
-	if (prose) warn(slopMsg);
-	else deny(slopMsg, "PostToolUse");
-}
+		const prose = isProseFile(filePath);
+		const slop = slopPatterns(content);
+		if (slop.length > 0) {
+			const slopMsg =
+				`Comment/prose slop in ${basename(filePath)} ` +
+				`(${slop.slice(0, 3).join(", ")}). ` +
+				`Remove narrating comments and AI filler.${formatNote}`;
+			if (prose) warn(slopMsg);
+			else deny(slopMsg, "PostToolUse");
+		}
 
-if (prose) {
-	const syco = sycophancyPatterns(content);
-	if (syco.length > 0) {
-		warn(
-			`Sycophantic phrasing in ${basename(filePath)} ` +
-				`(${syco.slice(0, 3).join(", ")}). ` +
-				`Remove filler openers and apology phrases.${formatNote}`,
-		);
+		if (prose) {
+			const syco = sycophancyPatterns(content);
+			if (syco.length > 0) {
+				warn(
+					`Sycophantic phrasing in ${basename(filePath)} ` +
+						`(${syco.slice(0, 3).join(", ")}). ` +
+						`Remove filler openers and apology phrases.${formatNote}`,
+				);
+			}
+		}
+
+		if (formatNote) warn(formatNote.trim());
+		passthrough();
+	} catch {
+		passthrough();
 	}
-}
-
-if (formatNote) warn(formatNote.trim());
-passthrough();
+})();

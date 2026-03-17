@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import "./suppress-stderr.mjs";
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import {
@@ -66,25 +67,31 @@ function scanFiles(files) {
 	return [allHard, allSoft];
 }
 
-const data = readStdin();
-if (!data || data.stop_hook_active) passthrough();
+(async () => {
+	try {
+		const data = await readStdin();
+		if (!data || data.stop_hook_active) passthrough();
 
-const files = modifiedFiles();
-if (!files.length) passthrough();
+		const files = modifiedFiles();
+		if (!files.length) passthrough();
 
-const [allHard, allSoft] = scanFiles(files);
+		const [allHard, allSoft] = scanFiles(files);
 
-if (allHard.length > 0) {
-	const output =
-		`Completion check: ${allHard.length} placeholder(s), ` +
-		`${allSoft.length} hedge(s) in modified files:\n` +
-		[...allHard, ...allSoft].slice(0, 15).join("\n");
-	block(`${output}\n\nFix all placeholder code before finishing.`);
-} else if (allSoft.length > 0) {
-	const output =
-		`Completion check: ${allSoft.length} hedge(s) in modified files:\n` +
-		allSoft.slice(0, 15).join("\n");
-	warn(output, "SubagentStop");
-} else {
-	passthrough();
-}
+		if (allHard.length > 0) {
+			const output =
+				`Completion check: ${allHard.length} placeholder(s), ` +
+				`${allSoft.length} hedge(s) in modified files:\n` +
+				[...allHard, ...allSoft].slice(0, 15).join("\n");
+			block(`${output}\n\nFix all placeholder code before finishing.`);
+		} else if (allSoft.length > 0) {
+			const output =
+				`Completion check: ${allSoft.length} hedge(s) in modified files:\n` +
+				allSoft.slice(0, 15).join("\n");
+			warn(output, "SubagentStop");
+		} else {
+			passthrough();
+		}
+	} catch {
+		passthrough();
+	}
+})();
