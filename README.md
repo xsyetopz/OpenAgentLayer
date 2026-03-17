@@ -21,6 +21,20 @@ cd ClaudeAgents
 
 ---
 
+## Marketplace
+
+Manage the plugin via the CLI:
+
+```bash
+claude plugin install cca           # install from marketplace
+claude plugin update cca            # update to latest version
+claude plugin remove cca            # remove
+claude plugin list                  # list installed plugins
+claude plugin validate ./dist/...   # validate a local build
+```
+
+---
+
 ## Agents
 
 | Who             | What                             | pro    | max    | enterprise |
