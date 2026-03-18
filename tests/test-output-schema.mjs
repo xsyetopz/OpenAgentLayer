@@ -166,20 +166,37 @@ describe("Allow", () => {
 });
 
 describe("StopWarn", () => {
-	it("should output empty JSON and write message to stderr", () => {
+	it("should produce no stdout and write message to stderr", () => {
 		let stderrMsg = "";
+		let captured = "";
+		let exitCalled = false;
 		const origStderr = process.stderr.write.bind(process.stderr);
+		const origWrite = process.stdout.write.bind(process.stdout);
+		const origExit = process.exit;
 		process.stderr.write = (chunk) => {
 			stderrMsg += chunk;
 			return true;
 		};
+		process.stdout.write = (chunk) => {
+			captured += chunk;
+			return true;
+		};
+		process.exit = () => {
+			exitCalled = true;
+			throw new Error("__exit__");
+		};
 		try {
-			const output = captureExit(stopWarn, "stale session");
-			assert.deepEqual(output, {});
-			assert.ok(stderrMsg.includes("stale session"));
+			stopWarn("stale session");
+		} catch (err) {
+			if (!err.message.includes("__exit__")) throw err;
 		} finally {
 			process.stderr.write = origStderr;
+			process.stdout.write = origWrite;
+			process.exit = origExit;
 		}
+		assert.strictEqual(captured, "", "stopWarn must not write to stdout");
+		assert.ok(exitCalled, "stopWarn must call process.exit");
+		assert.ok(stderrMsg.includes("stale session"));
 	});
 });
 

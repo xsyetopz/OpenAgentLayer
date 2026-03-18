@@ -257,7 +257,7 @@ export function genericBlock(message, event = "PreToolUse") {
 
 export function stopWarn(message) {
 	process.stderr.write(`[cca:stop] ${message}\n`);
-	_printAndExit({});
+	passthrough();
 }
 
 export function stopBlock(message) {
