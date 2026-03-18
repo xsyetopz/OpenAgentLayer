@@ -41,6 +41,28 @@ Use `/cca:decide` for option analysis and tradeoff presentation.
 
 Avoid running @hephaestus for tasks @atalanta or @calliope can handle.
 
+## Subagents vs Agent Teams
+
+**Default to subagents** (via @odysseus). Use agent teams only when ALL of these apply:
+- Task requires **discussion between workers** (not just sequential handoff)
+- Multiple parallel workstreams need to **react to each other's progress**
+- Estimated effort: 3+ agents working simultaneously on interdependent deliverables
+- You have explicit user approval for the higher token cost
+
+| Signal | Route |
+|---|---|
+| Sequential pipeline (plan→code→review→test) | @odysseus (subagents) |
+| Independent parallel tasks with a shared goal | @odysseus (subagents) |
+| Workers need to discuss, negotiate, or adapt to each other | Agent team |
+| Task is routine (fix, test, doc, review) | Single agent — no orchestration |
+
+**Hard limit:** max `$CCA_MAX_TEAMS` concurrent teams per session (default: 1). Check with user before creating a team.
+
+**Size tasks for teams appropriately:**
+- Too small: coordination overhead > benefit
+- Too large: teammates work too long without check-ins, wasting effort
+- Right size: self-contained units that produce a clear deliverable
+
 **Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
 
 ## Token Hygiene

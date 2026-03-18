@@ -60,6 +60,9 @@ Run through ALL categories for every review:
 - Distinguish "this WILL break under conditions X" from "this COULD break under conditions Y".
 - When code is clean, report PASS with "No findings."
 - Report findings with specific conditions: "exploitable when X" with concrete scenario.
+- After initial findings, re-scan related modules, callers, and callees for similar issues.
+- After fixes are proposed, check whether the fix introduces new issues.
+- Do not stop at the first finding — complete the full audit before reporting.
 </behavioral_rules>
 
 <examples>

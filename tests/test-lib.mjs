@@ -3,9 +3,11 @@ import { describe, it } from "node:test";
 import {
 	AI_PROSE_SLOP,
 	COMMENT_SLOP_PATTERNS,
+	isCommentLine,
 	isMetaFile,
 	isProseFile,
 	isTestFile,
+	matchPlaceholders,
 	PII_PATTERNS,
 	PLACEHOLDER_HARD,
 	PLACEHOLDER_SOFT,
@@ -169,6 +171,27 @@ describe("SecretPatterns", () => {
 			),
 		);
 	});
+
+	it("should NOT match JSX key props", () => {
+		assert.ok(
+			!SECRET_PATTERNS.some((p) => p.test("key={level.name}")),
+			"JSX key={...} must not trigger secret detection",
+		);
+	});
+
+	it("should NOT match Rust token types", () => {
+		assert.ok(
+			!SECRET_PATTERNS.some((p) => p.test("token: TokenKind::Ident")),
+			"Rust token type must not trigger secret detection",
+		);
+	});
+
+	it("should NOT match bare key assignments", () => {
+		assert.ok(
+			!SECRET_PATTERNS.some((p) => p.test('key = "some-config-value"')),
+			"bare key = must not trigger secret detection",
+		);
+	});
 });
 
 describe("PIIPatterns", () => {
@@ -253,5 +276,47 @@ describe("HelperFunctions", () => {
 		assert.ok(isMetaFile("skills/review/SKILL.md"));
 		assert.ok(isMetaFile("CLAUDE.md"));
 		assert.ok(!isMetaFile("src/main.py"));
+	});
+
+	it("should detect plan files as meta", () => {
+		assert.ok(isMetaFile(".claude/plans/my-plan.md"));
+		assert.ok(isMetaFile("/abs/path/.claude/plans/foo.md"));
+	});
+});
+
+describe("isCommentLine", () => {
+	it("should detect comment leaders", () => {
+		assert.ok(isCommentLine("// this is a comment"));
+		assert.ok(isCommentLine("  # python comment"));
+		assert.ok(isCommentLine("/* block comment */"));
+		assert.ok(isCommentLine("  -- sql comment"));
+		assert.ok(isCommentLine("<!-- html comment -->"));
+	});
+
+	it("should NOT match code lines", () => {
+		assert.ok(!isCommentLine("const x = temporary;"));
+		assert.ok(!isCommentLine('key = "for now"'));
+		assert.ok(!isCommentLine("fn placeholder() {}"));
+	});
+});
+
+describe("matchPlaceholders", () => {
+	it("should match hard placeholders on any line", () => {
+		const lines = ["const x = 1;", "// FIXME: broken", "return x;"];
+		const { hard, soft } = matchPlaceholders("src/foo.ts", lines);
+		assert.equal(hard.length, 1);
+		assert.equal(soft.length, 0);
+	});
+
+	it("should only match soft placeholders in comments", () => {
+		const lines = [
+			"const temporary = true;",
+			"// temporary workaround",
+			"return temporary;",
+		];
+		const { hard, soft } = matchPlaceholders("src/foo.ts", lines);
+		assert.equal(hard.length, 0);
+		assert.equal(soft.length, 1, "only the comment line should match");
+		assert.ok(soft[0].includes(":2:"));
 	});
 });

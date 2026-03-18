@@ -26,6 +26,23 @@
 - At 40-50% context utilization, recommend a fresh session.
 - Prefer KISS over SOLID. Functions under 30 lines. Abstractions earn their place through reuse.
 
+### Assumptions
+
+- If the answer is recoverable from codebase, tests, configs, or docs — recover it yourself and proceed.
+- Ask the user only when the missing info would materially change correctness, architecture, security, or a destructive action.
+- If important assumptions affected the result, mention them in the final output.
+
+### Vague Tasks
+
+- Reconstruct the likely real goal from codebase context, recent changes, and surrounding code.
+- Turn a rough prompt into a precise internal brief before executing.
+- A short prompt still requires the same quality bar.
+
+### Done Means Done
+
+- A task is not done until: the behavior works, tests pass, lint is clean, and the result matches the original request.
+- Do not return partial work when you can complete it yourself.
+
 ### Escalation
 
 - Name the needed agent and explain why when escalating.

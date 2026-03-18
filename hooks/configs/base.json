@@ -50,6 +50,16 @@
 						"timeout": 8
 					}
 				]
+			},
+			{
+				"matcher": "TeamCreate",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre/team-guard.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
+						"timeout": 5
+					}
+				]
 			}
 		],
 		"PostToolUse": [

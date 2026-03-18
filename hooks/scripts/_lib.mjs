@@ -120,7 +120,7 @@ export const SYCOPHANCY_PATTERNS = [
 ];
 
 export const SECRET_PATTERNS = [
-	/\b(?:api|secret|token|key|passwd|password)\s*[:=]\s*["']?([^\s"']{8,})/i,
+	/\b(?:api_?key|api_?secret|secret_?key|auth_?token|access_?key|passwd|password)\s*[:=]\s*["']([^\s"']{8,})["']/i,
 	/sk-[a-z0-9-]{20,}/i,
 	/AKIA[0-9A-Z]{16}/,
 	/gh[pous]_[A-Za-z0-9_]{36,}/,
@@ -145,7 +145,7 @@ export const TEST_FILE_RE =
 	/(?:test_|_test\.|\.test\.|\.spec\.|tests\/|__tests__\/|test\.)/i;
 
 export const META_FILE_RE =
-	/(?:hooks\/scripts\/|hooks\/hooks\.json|agents\/.*\.md|templates\/.*\.md|skills\/.*\/SKILL\.md|install\.sh|CLAUDE\.md)/i;
+	/(?:hooks\/scripts\/|hooks\/hooks\.json|agents\/.*\.md|templates\/.*\.md|skills\/.*\/SKILL\.md|install\.sh|CLAUDE\.md|\.claude\/plans\/)/i;
 
 export const WORKAROUND_HARD = [
 	/(?:Actually|Better|Instead),?\s+(?:let'?s|I'?ll|we(?:'ll)?)\s+(?:just|simply)/i,
@@ -162,6 +162,8 @@ export const WORKAROUND_SOFT = [
 ];
 
 const PROSE_EXTENSIONS = new Set([".md", ".mdx", ".txt", ".rst", ".adoc"]);
+
+const COMMENT_LEADER_RE = /^\s*(?:\/\/|\/\*|#|--|;|%|<!--)/;
 
 export function isTestFile(filepath) {
 	return TEST_FILE_RE.test(filepath);
@@ -257,16 +259,50 @@ export function genericBlock(message, event = "PreToolUse") {
 
 export function stopWarn(message) {
 	process.stderr.write(`[cca:stop] ${message}\n`);
-	passthrough();
+	_printAndExit({
+		hookSpecificOutput: {
+			hookEventName: "Stop",
+			additionalContext: message,
+		},
+	});
 }
 
 export function stopBlock(message) {
 	process.stderr.write(`[cca:stop] BLOCKED: ${message}\n`);
+	process.stdout.write(
+		`${JSON.stringify({
+			hookSpecificOutput: {
+				hookEventName: "Stop",
+				additionalContext: message,
+			},
+		})}\n`,
+	);
 	process.exit(1);
 }
 
 export function passthrough() {
 	process.exit(0);
+}
+
+export function isCommentLine(line) {
+	return COMMENT_LEADER_RE.test(line);
+}
+
+export function matchPlaceholders(filepath, lines) {
+	const hard = [];
+	const soft = [];
+	lines.forEach((line, idx) => {
+		const lineNum = idx + 1;
+		if (PLACEHOLDER_HARD.some((pat) => pat.test(line))) {
+			hard.push(`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)}`);
+		} else if (
+			isCommentLine(line) &&
+			PLACEHOLDER_SOFT.some((pat) => pat.test(line))
+		) {
+			soft.push(`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)}`);
+		}
+	});
+	return { hard, soft };
 }
 
 export function auditLog(

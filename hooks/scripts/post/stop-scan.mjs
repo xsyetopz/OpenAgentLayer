@@ -6,8 +6,7 @@ import { join } from "node:path";
 import {
 	isMetaFile,
 	isTestFile,
-	PLACEHOLDER_HARD,
-	PLACEHOLDER_SOFT,
+	matchPlaceholders,
 	passthrough,
 	readStdin,
 	stopBlock,
@@ -40,20 +39,6 @@ function readFileLines(filepath) {
 	} catch {
 		return [];
 	}
-}
-
-function matchPlaceholders(filepath, lines) {
-	const hard = [];
-	const soft = [];
-	lines.forEach((line, idx) => {
-		const lineNum = idx + 1;
-		if (PLACEHOLDER_HARD.some((pat) => pat.test(line))) {
-			hard.push(`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)}`);
-		} else if (PLACEHOLDER_SOFT.some((pat) => pat.test(line))) {
-			soft.push(`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)}`);
-		}
-	});
-	return { hard, soft };
 }
 
 function scanFiles(files) {
@@ -114,7 +99,10 @@ function sessionExportStale(projectDir) {
 			}
 		}
 
-		if (sessionExportStale(projectDir)) {
+		if (
+			process.env.CCA_HANDOFF_REMIND === "1" &&
+			sessionExportStale(projectDir)
+		) {
 			stopWarn(
 				"Consider running /cca:handoff to save a handoff for your next session.",
 			);

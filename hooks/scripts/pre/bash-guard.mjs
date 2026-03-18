@@ -78,7 +78,7 @@ function fileIssues(filepath) {
 	}
 	if (
 		!isTestFile(filepath) &&
-		PLACEHOLDER_HARD.slice(0, 4).some((pat) => pat.test(content))
+		PLACEHOLDER_HARD.some((pat) => pat.test(content))
 	) {
 		issues.push(`Placeholder in ${filepath}`);
 	}

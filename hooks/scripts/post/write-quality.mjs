@@ -65,8 +65,32 @@ function getToolFileAndContent(data) {
 		content = toolInput.content || "";
 	} else if (toolName === "Edit") {
 		content = toolInput.new_string || "";
+	} else if (toolName === "MultiEdit") {
+		const edits = toolInput.edits || [];
+		content = edits.map((e) => e.new_string || "").join("\n");
 	}
 	return { filePath, content };
+}
+
+function hasProjectConfig(cmd) {
+	const dir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+	switch (cmd) {
+		case "prettier":
+			return (
+				existsSync(join(dir, "node_modules/.bin/prettier")) ||
+				existsSync(join(dir, ".prettierrc")) ||
+				existsSync(join(dir, ".prettierrc.json")) ||
+				existsSync(join(dir, ".prettierrc.js")) ||
+				existsSync(join(dir, ".prettierrc.yaml"))
+			);
+		case "deno":
+			return (
+				existsSync(join(dir, "deno.json")) ||
+				existsSync(join(dir, "deno.jsonc"))
+			);
+		default:
+			return true;
+	}
 }
 
 function runFormatter(filePath) {
@@ -75,6 +99,7 @@ function runFormatter(filePath) {
 	const candidates = FORMATTERS[ext] || [];
 	for (const cmdParts of candidates) {
 		if (!which(cmdParts[0])) continue;
+		if (!hasProjectConfig(cmdParts[0])) continue;
 		try {
 			const before = readFileSync(filePath);
 			spawnSync(cmdParts[0], [...cmdParts.slice(1), filePath], {
@@ -98,7 +123,7 @@ function placeholderPatterns(content, filePath) {
 	);
 }
 
-function slopPatterns(content) {
+function slopPatterns(content, filePath) {
 	const hits = [];
 	for (const pat of COMMENT_SLOP_PATTERNS) {
 		if (pat.test(content)) {
@@ -106,8 +131,11 @@ function slopPatterns(content) {
 			break;
 		}
 	}
-	for (const pat of AI_PROSE_SLOP) {
-		if (pat.test(content)) hits.push(pat.source);
+	// AI prose slop: prose files only (common code identifiers cause false positives)
+	if (isProseFile(filePath)) {
+		for (const pat of AI_PROSE_SLOP) {
+			if (pat.test(content)) hits.push(pat.source);
+		}
 	}
 	return hits.slice(0, 5);
 }
@@ -163,7 +191,7 @@ function sycophancyPatterns(content) {
 		}
 
 		const prose = isProseFile(filePath);
-		const slop = slopPatterns(content);
+		const slop = slopPatterns(content, filePath);
 		if (slop.length) {
 			postWarn(
 				`Comment/prose slop in ${basename(filePath)} ` +

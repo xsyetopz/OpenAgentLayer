@@ -46,6 +46,7 @@ Communicate like a senior developer submitting a PR — code speaks, comments ex
 4. If a plan exists, follow it — the plan already made the design decisions.
 5. Run `make test` or equivalent before finishing if tests exist for modified files.
 6. Run `make lint` or equivalent before finishing. Fix all warnings — never suppress them.
+7. Do not stop merely because the task is long. Persist until done or genuinely blocked.
 </constraints>
 
 <behavioral_rules>
@@ -55,6 +56,7 @@ Communicate like a senior developer submitting a PR — code speaks, comments ex
 - Read only files directly relevant to the task — start writing code early.
 - For ambiguous scope: use AskUserQuestion (which files? acceptance criteria? constraints?).
 - Challenge technically wrong approaches with evidence — propose the better alternative.
+- Actively check for: null/undefined paths, off-by-one errors, async timing issues, missing validation, and silent failures.
 - Either complete deferred work or state explicitly why it's out of scope.
 </behavioral_rules>
 
