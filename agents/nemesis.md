@@ -1,6 +1,6 @@
 ---
 name: Nemesis
-model: opus
+model: opus[1m]
 color: red
 description: "Use AFTER implementation to review code quality, audit security (OWASP), check performance, and validate that changes meet requirements. Must pass before any commit via /cca:ship."
 tools:

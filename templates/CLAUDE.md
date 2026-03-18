@@ -29,15 +29,15 @@ Use `/cca:decide` for option analysis and tradeoff presentation.
 
 ## Model & Effort Selection
 
-| Task                          | Agent       | pro / max    |
-| ----------------------------- | ----------- | ------------ |
-| Design, architecture, ADRs    | @athena     | sonnet / opus |
-| Code changes, bug fixes       | @hephaestus | sonnet / sonnet |
-| Security/perf review          | @nemesis    | sonnet / opus |
-| Run tests, parse failures     | @atalanta   | haiku / haiku |
-| Write/edit docs               | @calliope   | haiku / haiku |
-| Explore codebase, trace flows | @hermes     | sonnet / sonnet |
-| Coordinate multi-step work    | @odysseus   | sonnet / opus |
+| Task                          | Agent       | pro / max               |
+| ----------------------------- | ----------- | ----------------------- |
+| Design, architecture, ADRs    | @athena     | `sonnet` / `opus[1m]`   |
+| Code changes, bug fixes       | @hephaestus | `sonnet` / `sonnet`     |
+| Security/perf review          | @nemesis    | `sonnet` / `opus[1m]`   |
+| Run tests, parse failures     | @atalanta   | haiku / haiku           |
+| Write/edit docs               | @calliope   | haiku / haiku           |
+| Explore codebase, trace flows | @hermes     | `sonnet` / `sonnet`     |
+| Coordinate multi-step work    | @odysseus   | `opusplan` / `opusplan` |
 
 Avoid running @hephaestus for tasks @atalanta or @calliope can handle.
 

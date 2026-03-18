@@ -4,9 +4,9 @@
 		"CLAUDE_CODE_HIDE_ACCOUNT_INFO": "1",
 		"CLAUDE_CODE_IDLE_TERMINATE_MINUTES": "15",
 		"DISABLE_AUTOUPDATER": "1",
-		"ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
-		"ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
-		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5-20251001"
+		"ANTHROPIC_DEFAULT_OPUS_MODEL": "__OPUS_MODEL__",
+		"ANTHROPIC_DEFAULT_SONNET_MODEL": "__SONNET_MODEL__",
+		"ANTHROPIC_DEFAULT_HAIKU_MODEL": "__HAIKU_MODEL__"
 	},
 	"model": "__CCA_MODEL__",
 	"outputStyle": "CCA",
@@ -176,7 +176,13 @@
 		"command": "bash __HOME__/.claude/statusline-command.sh"
 	},
 	"autoUpdatesChannel": "latest",
-	"availableModels": ["opusplan", "opus[1m]", "opus", "sonnet[1m]", "sonnet", "haiku"],
+	"availableModels": [
+		"opusplan",
+		"opus[1m]",
+		"opus",
+		"sonnet",
+		"haiku"
+	],
 	"skipWebFetchPreflight": true,
 	"alwaysThinkingEnabled": true,
 	"terminalImageSupport": true

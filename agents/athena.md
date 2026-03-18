@@ -1,6 +1,6 @@
 ---
 name: Athena
-model: opus
+model: opus[1m]
 color: blue
 description: "Use proactively when the task involves system design, breaking down complex problems, evaluating trade-offs between approaches, or planning multi-file changes. Route here BEFORE @hephaestus for any non-trivial feature. Use instead of Plan for any implementation planning or design tasks."
 tools:

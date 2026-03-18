@@ -4,35 +4,35 @@
 
 ## Agents
 
-| Agent       | File          | pro    | max    | Purpose                                  |
-| ----------- | ------------- | ------ | ------ | ---------------------------------------- |
-| @athena     | athena.md     | sonnet | opus   | Design, plan, architect                  |
-| @hephaestus | hephaestus.md | sonnet | sonnet | Write code, fix bugs, build features     |
-| @nemesis    | nemesis.md    | sonnet | opus   | Review code, security audit              |
-| @atalanta   | atalanta.md   | haiku  | haiku  | Run tests, parse failures, root causes   |
-| @calliope   | calliope.md   | haiku  | haiku  | Write/edit documentation (markdown only) |
-| @hermes     | hermes.md     | sonnet | sonnet | Research, explore codebase, cite sources |
-| @odysseus   | odysseus.md   | sonnet | opus   | Multi-step delegation, progress tracking |
+| Agent       | File          | pro        | max        | Purpose                                  |
+| ----------- | ------------- | ---------- | ---------- | ---------------------------------------- |
+| @athena     | athena.md     | `sonnet`   | `opus[1m]` | Design, plan, architect                  |
+| @hephaestus | hephaestus.md | `sonnet`   | `sonnet`   | Write code, fix bugs, build features     |
+| @nemesis    | nemesis.md    | `sonnet`   | `opus[1m]` | Review code, security audit              |
+| @atalanta   | atalanta.md   | `haiku`    | `haiku`    | Run tests, parse failures, root causes   |
+| @calliope   | calliope.md   | `haiku`    | `haiku`    | Write/edit documentation (markdown only) |
+| @hermes     | hermes.md     | `sonnet`   | `sonnet`   | Research, explore codebase, cite sources |
+| @odysseus   | odysseus.md   | `opusplan` | `opusplan` | Multi-step delegation, progress tracking |
 
 **Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
 
 ## Skills
 
-Plugin install (`claude plugin install cca`) gives the `cca:` prefix. Manual install (`install.sh`) uses the `cca-` prefix.
+Plugin install (`claude plugin install cca`) gives the `cca:` prefix. Manual install (`install.sh`) has no prefix.
 
-| Skill            | Plugin                | Manual                | Status |
-| ---------------- | --------------------- | --------------------- | ------ |
-| `review`    | `/cca:review`    | `/cca-review`    | Active |
-| `desloppify`     | `/cca:desloppify`     | `/cca-desloppify`     | Active |
-| `ship`           | `/cca:ship`           | `/cca-ship`           | Active |
-| `decide`         | `/cca:decide`         | `/cca-decide`         | Active |
-| `security` | `/cca:security` | `/cca-security` | Active |
-| `test`  | `/cca:test`  | `/cca-test`  | Active |
-| `docs`       | `/cca:docs`       | `/cca-docs`       | Active |
-| `perf`       | `/cca:perf`       | `/cca-perf`       | Active |
-| `errors`  | `/cca:errors`  | `/cca-errors`  | Active |
-| `handoff` | `/cca:handoff` | `/cca-handoff` | Active |
-| `style`   | `/cca:style`   | `/cca-style`   | Active |
+| Skill        | Plugin            | Manual        | Status |
+| ------------ | ----------------- | ------------- | ------ |
+| `review`     | `/cca:review`     | `/review`     | Active |
+| `desloppify` | `/cca:desloppify` | `/desloppify` | Active |
+| `ship`       | `/cca:ship`       | `/ship`       | Active |
+| `decide`     | `/cca:decide`     | `/decide`     | Active |
+| `security`   | `/cca:security`   | `/security`   | Active |
+| `test`       | `/cca:test`       | `/test`       | Active |
+| `docs`       | `/cca:docs`       | `/docs`       | Active |
+| `perf`       | `/cca:perf`       | `/perf`       | Active |
+| `errors`     | `/cca:errors`     | `/errors`     | Active |
+| `handoff`    | `/cca:handoff`    | `/handoff`    | Active |
+| `style`      | `/cca:style`      | `/style`      | Active |
 
 ## Hooks
 
@@ -63,8 +63,8 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 ## Model Strategy
 
 - **Pro** (`--pro`): `opusplan` orchestrator (opus planning, sonnet execution). All subagents sonnet/haiku.
-- **Max** (`--max`): `opusplan` orchestrator. Athena/Nemesis/Odysseus get opus. Rest sonnet/haiku.
-- Env vars pin model versions: `ANTHROPIC_DEFAULT_OPUS_MODEL=claude-opus-4-6`, etc.
+- **Max** (`--max`): `opusplan` orchestrator. Athena/Nemesis get opus[1m]. Rest sonnet/haiku.
+- Env vars pin model versions per tier: pro uses standard context, max uses `opus[1m]`.
 - Output style: CCA (positive identity framing, evidence-based, developer-facing).
 - Statusline: model, context %, cost, git branch.
 

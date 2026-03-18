@@ -614,9 +614,21 @@ settings_json_merge_global() {
         pro)            cca_model="opusplan" ;;
     esac
 
+    local opus_model="claude-opus-4-6"
+    local sonnet_model="claude-sonnet-4-6"
+    local haiku_model="claude-haiku-4-5-20251001"
+    case "$PACKAGE" in
+        max|enterprise) opus_model="claude-opus-4-6[1m]" ;;
+    esac
+
     local tmp_template
     tmp_template=$(mktemp)
-    sed -e "s|__HOME__|$HOME|g" -e "s|__CCA_MODEL__|$cca_model|g" "$TEMPLATE" > "$tmp_template"
+    sed -e "s|__HOME__|$HOME|g" \
+        -e "s|__CCA_MODEL__|$cca_model|g" \
+        -e "s|__OPUS_MODEL__|$opus_model|g" \
+        -e "s|__SONNET_MODEL__|$sonnet_model|g" \
+        -e "s|__HAIKU_MODEL__|$haiku_model|g" \
+        "$TEMPLATE" > "$tmp_template"
 
     if ! command -v jq &>/dev/null; then
         warn "jq not found - copying template as settings.json (no merge)"
@@ -825,7 +837,7 @@ report_summary() {
     echo "Package: $PACKAGE$([ "$ZEN_MODE" = "true" ] && echo " + zen-mode")"
     case "$PACKAGE" in
         max) echo "  opusplan orchestrator | Opus: athena, nemesis, odysseus | Extended context" ;;
-        pro) echo "  opusplan orchestrator | Sonnet agents | Haiku for tests/docs" ;;
+        pro) echo "  opusplan orchestrator | Sonnet agents, opusplan odysseus | Haiku for tests/docs" ;;
     esac
     [[ "$ZEN_MODE" == "true" ]] && echo "  Zen: plan-first, quiet output, ask-on-ambiguity"
     echo ""
