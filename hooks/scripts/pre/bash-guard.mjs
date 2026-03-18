@@ -4,13 +4,15 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import {
 	deny,
+	HOOK_STRICT,
 	isMetaFile,
 	isTestFile,
 	MERGE_CONFLICT,
+	matchSecrets,
+	PLACEHOLDER_EMPTY_BODY,
 	PLACEHOLDER_HARD,
 	passthrough,
 	readStdin,
-	SECRET_PATTERNS,
 } from "../_lib.mjs";
 
 const LARGE_OUTPUT_RULES = [
@@ -53,40 +55,53 @@ function getStagedFiles() {
 }
 
 function fileIssues(filepath) {
-	const issues = [];
+	const blockers = [];
+	const warnings = [];
 	try {
 		readFileSync(filepath); // existence check
 	} catch {
-		return issues;
+		return { blockers, warnings };
 	}
 
 	const basename = filepath.split("/").pop();
 	if (basename === ".env" || basename.startsWith(".env.")) {
-		issues.push(`.env file staged: ${filepath}`);
-		return issues;
+		blockers.push(`.env file staged: ${filepath}`);
+		return { blockers, warnings };
 	}
 
 	let content;
 	try {
 		content = readFileSync(filepath, "utf8");
 	} catch {
-		return issues;
+		return { blockers, warnings };
 	}
 
 	if (MERGE_CONFLICT.test(content)) {
-		issues.push(`Merge conflict markers in ${filepath}`);
+		blockers.push(`Merge conflict markers in ${filepath}`);
 	}
-	if (
-		!isTestFile(filepath) &&
-		PLACEHOLDER_HARD.some((pat) => pat.test(content))
-	) {
-		issues.push(`Placeholder in ${filepath}`);
+
+	if (!isTestFile(filepath)) {
+		const allPlaceholders = [...PLACEHOLDER_HARD, ...PLACEHOLDER_EMPTY_BODY];
+		if (allPlaceholders.some((pat) => pat.test(content))) {
+			blockers.push(`Placeholder in ${filepath}`);
+		}
 	}
-	if (isMetaFile(filepath) || isTestFile(filepath)) return issues;
-	if (SECRET_PATTERNS.some((pat) => pat.test(content))) {
-		issues.push(`Possible secret/credential in ${filepath}`);
+
+	if (isMetaFile(filepath) || isTestFile(filepath))
+		return { blockers, warnings };
+
+	// Per-line secret scanning with context
+	const lines = content.split("\n");
+	const secretHits = matchSecrets(filepath, lines);
+	for (const hit of secretHits) {
+		const msg = `Possible secret in ${hit.file}:${hit.line}: ${hit.text}`;
+		if (HOOK_STRICT) {
+			blockers.push(msg);
+		} else {
+			warnings.push(msg);
+		}
 	}
-	return issues;
+	return { blockers, warnings };
 }
 
 function checkLargeOutput(cmd) {
@@ -105,13 +120,17 @@ function forbiddenRm(cmd) {
 }
 
 function precommitCheck(cmd) {
-	if (!cmd.includes("git commit")) return [];
+	if (!/\bgit\s+commit\b(?!-tree)/.test(cmd))
+		return { blockers: [], warnings: [] };
 	const staged = getStagedFiles();
-	const blockers = [];
+	const allBlockers = [];
+	const allWarnings = [];
 	for (const filepath of staged) {
-		blockers.push(...fileIssues(filepath));
+		const { blockers, warnings } = fileIssues(filepath);
+		allBlockers.push(...blockers);
+		allWarnings.push(...warnings);
 	}
-	return blockers;
+	return { blockers: allBlockers, warnings: allWarnings };
 }
 
 (async () => {
@@ -130,7 +149,17 @@ function precommitCheck(cmd) {
 		if (forbiddenRm(command))
 			deny("Blocked: rm -rf on broad path. Be more specific.");
 
-		const blockers = precommitCheck(command);
+		const { blockers, warnings } = precommitCheck(command);
+		if (warnings.length > 0) {
+			process.stderr.write(
+				"[cca:guard] Warnings:\n" +
+					warnings
+						.slice(0, 10)
+						.map((w) => `  - ${w}`)
+						.join("\n") +
+					"\n",
+			);
+		}
 		if (blockers.length > 0) {
 			deny(
 				"Pre-commit checks failed:\n" +

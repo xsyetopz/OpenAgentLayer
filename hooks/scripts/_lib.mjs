@@ -2,6 +2,14 @@
 import { appendFileSync, mkdirSync } from "node:fs";
 import { extname, join } from "node:path";
 
+export const HOOK_STRICT = process.env.CCA_HOOK_STRICT === "1";
+
+export const CCA_ALLOW_RE = /\bcca-allow\b/;
+
+export function hasSuppression(line) {
+	return CCA_ALLOW_RE.test(line);
+}
+
 export const PLACEHOLDER_HARD = [
 	/\bTODO\b(?!\s*\(.*test)/,
 	/\bFIXME\b/,
@@ -11,6 +19,9 @@ export const PLACEHOLDER_HARD = [
 	/\bunimplemented!\s*\(\s*\)/,
 	/raise\s+NotImplementedError/,
 	/(def\s+\w+\([^)]*\)\s*:\s*\n\s*pass)\s*$/m,
+];
+
+export const PLACEHOLDER_EMPTY_BODY = [
 	/fn\s+\w+\s*\([^)]*\)\s*(?:->[^{]*)?\{[\s]*\}/,
 	/function\s+\w+\s*\([^)]*\)\s*\{[\s]*\}/,
 ];
@@ -288,13 +299,28 @@ export function isCommentLine(line) {
 	return COMMENT_LEADER_RE.test(line);
 }
 
-export function matchPlaceholders(filepath, lines) {
+export function matchPlaceholders(
+	filepath,
+	lines,
+	{ includeEmptyBody = false } = {},
+) {
 	const hard = [];
 	const soft = [];
+	const patterns = includeEmptyBody
+		? [...PLACEHOLDER_HARD, ...PLACEHOLDER_EMPTY_BODY]
+		: PLACEHOLDER_HARD;
 	lines.forEach((line, idx) => {
 		const lineNum = idx + 1;
-		if (PLACEHOLDER_HARD.some((pat) => pat.test(line))) {
+		if (hasSuppression(line)) return;
+		if (patterns.some((pat) => pat.test(line))) {
 			hard.push(`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)}`);
+		} else if (
+			!includeEmptyBody &&
+			PLACEHOLDER_EMPTY_BODY.some((pat) => pat.test(line))
+		) {
+			soft.push(
+				`  ${filepath}:${lineNum}: ${line.trim().slice(0, 80)} [empty body]`,
+			);
 		} else if (
 			isCommentLine(line) &&
 			PLACEHOLDER_SOFT.some((pat) => pat.test(line))
@@ -303,6 +329,24 @@ export function matchPlaceholders(filepath, lines) {
 		}
 	});
 	return { hard, soft };
+}
+
+export function matchSecrets(filepath, lines) {
+	const hits = [];
+	lines.forEach((line, idx) => {
+		if (hasSuppression(line)) return;
+		for (const pat of SECRET_PATTERNS) {
+			if (pat.test(line)) {
+				hits.push({
+					file: filepath,
+					line: idx + 1,
+					text: line.trim().slice(0, 80),
+				});
+				break;
+			}
+		}
+	});
+	return hits;
 }
 
 export function auditLog(

@@ -8,6 +8,7 @@ import {
 	COMMENT_SLOP_PATTERNS,
 	isProseFile,
 	isTestFile,
+	PLACEHOLDER_EMPTY_BODY,
 	PLACEHOLDER_HARD,
 	passthrough,
 	postWarn,
@@ -118,9 +119,10 @@ function runFormatter(filePath) {
 
 function placeholderPatterns(content, filePath) {
 	if (isTestFile(filePath)) return [];
-	return PLACEHOLDER_HARD.filter((pat) => pat.test(content)).map(
-		(pat) => pat.source,
-	);
+	const allPatterns = [...PLACEHOLDER_HARD, ...PLACEHOLDER_EMPTY_BODY];
+	return allPatterns
+		.filter((pat) => pat.test(content))
+		.map((pat) => pat.source);
 }
 
 function slopPatterns(content, filePath) {

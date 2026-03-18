@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import {
+	HOOK_STRICT,
 	isMetaFile,
 	isTestFile,
 	matchPlaceholders,
@@ -54,7 +55,11 @@ function scanFiles(files) {
 		}
 		const lines = readFileLines(filepath);
 		const { hard, soft } = matchPlaceholders(filepath, lines);
-		allHard.push(...hard);
+		if (HOOK_STRICT) {
+			allHard.push(...hard);
+		} else {
+			allSoft.push(...hard);
+		}
 		allSoft.push(...soft);
 	}
 	return { allHard, allSoft };

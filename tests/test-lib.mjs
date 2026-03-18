@@ -3,12 +3,15 @@ import { describe, it } from "node:test";
 import {
 	AI_PROSE_SLOP,
 	COMMENT_SLOP_PATTERNS,
+	hasSuppression,
 	isCommentLine,
 	isMetaFile,
 	isProseFile,
 	isTestFile,
 	matchPlaceholders,
+	matchSecrets,
 	PII_PATTERNS,
+	PLACEHOLDER_EMPTY_BODY,
 	PLACEHOLDER_HARD,
 	PLACEHOLDER_SOFT,
 	SECRET_PATTERNS,
@@ -318,5 +321,106 @@ describe("matchPlaceholders", () => {
 		assert.equal(hard.length, 0);
 		assert.equal(soft.length, 1, "only the comment line should match");
 		assert.ok(soft[0].includes(":2:"));
+	});
+
+	it("should treat empty function bodies as soft by default", () => {
+		const lines = ["function stub() {}", "return 1;"];
+		const { hard, soft } = matchPlaceholders("src/foo.ts", lines);
+		assert.equal(hard.length, 0, "empty body should not be hard");
+		assert.equal(soft.length, 1, "empty body should be soft");
+		assert.ok(soft[0].includes("[empty body]"));
+	});
+
+	it("should treat empty function bodies as hard when includeEmptyBody is true", () => {
+		const lines = ["function stub() {}", "return 1;"];
+		const { hard, soft } = matchPlaceholders("src/foo.ts", lines, {
+			includeEmptyBody: true,
+		});
+		assert.equal(hard.length, 1, "empty body should be hard with flag");
+		assert.equal(soft.length, 0);
+	});
+
+	it("should skip lines with cca-allow suppression", () => {
+		const lines = ["// FIXME: known issue // cca-allow", "return x;"];
+		const { hard, soft } = matchPlaceholders("src/foo.ts", lines);
+		assert.equal(hard.length, 0, "suppressed line should be skipped");
+		assert.equal(soft.length, 0);
+	});
+});
+
+describe("PlaceholderEmptyBody", () => {
+	it("should detect empty JS function body", () => {
+		assert.ok(PLACEHOLDER_EMPTY_BODY.some((p) => p.test("function stub() {}")));
+	});
+
+	it("should detect empty Rust function body", () => {
+		assert.ok(
+			PLACEHOLDER_EMPTY_BODY.some((p) =>
+				p.test("fn process_item(x: &str) -> bool {}"),
+			),
+		);
+	});
+
+	it("should NOT be in PLACEHOLDER_HARD", () => {
+		assert.ok(
+			!PLACEHOLDER_HARD.some((p) => p.test("function stub() {}")),
+			"empty JS body should not be in PLACEHOLDER_HARD",
+		);
+		assert.ok(
+			!PLACEHOLDER_HARD.some((p) => p.test("fn foo() {}")),
+			"empty Rust body should not be in PLACEHOLDER_HARD",
+		);
+	});
+});
+
+describe("hasSuppression", () => {
+	it("should detect cca-allow in JS comment", () => {
+		assert.ok(hasSuppression("// some code // cca-allow"));
+	});
+
+	it("should detect cca-allow in Python comment", () => {
+		assert.ok(hasSuppression("x = 1  # cca-allow"));
+	});
+
+	it("should NOT match without the keyword", () => {
+		assert.ok(!hasSuppression("// some normal comment"));
+	});
+});
+
+describe("matchSecrets", () => {
+	it("should detect API key on specific line", () => {
+		const lines = [
+			"const config = {};",
+			'api_key = "sk-proj-abc123def456ghi789jklmnop"',
+			"export default config;",
+		];
+		const hits = matchSecrets("src/config.js", lines);
+		assert.equal(hits.length, 1);
+		assert.equal(hits[0].line, 2);
+		assert.equal(hits[0].file, "src/config.js");
+	});
+
+	it("should detect AWS key", () => {
+		const lines = ["AKIAIOSFODNN7EXAMPLE"];
+		const hits = matchSecrets("config.txt", lines);
+		assert.equal(hits.length, 1);
+	});
+
+	it("should skip lines with cca-allow", () => {
+		const lines = [
+			'api_key = "sk-proj-abc123def456ghi789jklmnop" // cca-allow',
+		];
+		const hits = matchSecrets("src/config.js", lines);
+		assert.equal(hits.length, 0, "suppressed line should be skipped");
+	});
+
+	it("should NOT match normal code identifiers", () => {
+		const lines = [
+			"key={level.name}",
+			"token: TokenKind::Ident",
+			'const color = "0xff0000";',
+		];
+		const hits = matchSecrets("src/app.jsx", lines);
+		assert.equal(hits.length, 0, "normal code should not trigger");
 	});
 });
