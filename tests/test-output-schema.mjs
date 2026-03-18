@@ -90,8 +90,8 @@ describe("PostWarn", () => {
 describe("GenericWarn", () => {
 	it("should have correct output structure", () => {
 		const output = captureExit(genericWarn, "warning text");
-		assert.equal(output.reason, "warning text");
-		assert.ok(!("hookSpecificOutput" in output));
+		assert.equal(output.hookSpecificOutput.hookEventName, "PostToolUse");
+		assert.equal(output.hookSpecificOutput.additionalContext, "warning text");
 	});
 
 	it("should validate against schema", { skip: !Ajv }, () => {
@@ -105,9 +105,9 @@ describe("GenericWarn", () => {
 describe("GenericBlock", () => {
 	it("should have correct output structure", () => {
 		const output = captureExit(genericBlock, "blocked");
-		assert.equal(output.decision, "block");
-		assert.equal(output.reason, "blocked");
-		assert.ok(!("hookSpecificOutput" in output));
+		assert.equal(output.hookSpecificOutput.hookEventName, "PreToolUse");
+		assert.equal(output.hookSpecificOutput.permissionDecision, "deny");
+		assert.equal(output.hookSpecificOutput.permissionDecisionReason, "blocked");
 	});
 
 	it("should validate against schema", { skip: !Ajv }, () => {
@@ -168,14 +168,17 @@ describe("Allow", () => {
 describe("StopWarn", () => {
 	it("should have correct output structure", () => {
 		const output = captureExit(stopWarn, "stale session");
-		assert.equal(output.reason, "stale session");
-		assert.ok(!("hookSpecificOutput" in output));
+		assert.equal(output.hookSpecificOutput.hookEventName, "Stop");
+		assert.equal(output.hookSpecificOutput.additionalContext, "stale session");
 	});
 
 	it("should have no extra fields", () => {
 		const output = captureExit(stopWarn, "msg");
-		const keys = Object.keys(output);
-		assert.deepEqual(new Set(keys), new Set(["reason"]));
+		const keys = Object.keys(output.hookSpecificOutput);
+		assert.deepEqual(
+			new Set(keys),
+			new Set(["hookEventName", "additionalContext"]),
+		);
 	});
 
 	it("should validate against schema", { skip: !Ajv }, () => {
@@ -189,9 +192,12 @@ describe("StopWarn", () => {
 describe("StopBlock", () => {
 	it("should have correct output structure", () => {
 		const output = captureExit(stopBlock, "placeholders found");
-		assert.equal(output.decision, "block");
-		assert.equal(output.reason, "placeholders found");
-		assert.ok(!("hookSpecificOutput" in output));
+		assert.equal(output.hookSpecificOutput.hookEventName, "Stop");
+		assert.equal(output.hookSpecificOutput.permissionDecision, "deny");
+		assert.equal(
+			output.hookSpecificOutput.permissionDecisionReason,
+			"placeholders found",
+		);
 	});
 
 	it("should validate against schema", { skip: !Ajv }, () => {

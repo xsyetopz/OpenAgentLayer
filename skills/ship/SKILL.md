@@ -54,12 +54,14 @@ ci(github): add cargo deny check to pipeline
 
 ### Rules
 
-1. Imperative mood: "add feature" not "added feature" or "adds feature"
+1. Active present tense: "add feature" not "added feature" or "adds feature"
 2. Subject line max 72 characters (type + scope + colon + space + description)
 3. No period at end of subject line
 4. Body explains **why**, not what - the diff shows what changed
 5. Breaking changes: add `!` after scope - `feat(api)!: remove v1 endpoints`
 6. Reference issues in body or footer: `Closes #123`
+7. Start with an action verb: "Add", "Fix", "Remove" — not "Gracefully handle", "Elegantly refactor"
+8. No filler adjectives in the description: avoid "thorough", "clean", "proper" and similar padding
 
 ### Body and Footer
 
@@ -73,41 +75,6 @@ exchanged for new access tokens. This allowed indefinite session
 extension without re-authentication.
 
 Closes #187
-```
-
-### Claude Code Commit Format
-
-Always use HEREDOC for commit messages to preserve formatting:
-
-```bash
-git commit -m "$(cat <<'EOF'
-feat(auth): add token refresh on expiry
-
-Tokens now auto-refresh 5 minutes before expiry to prevent
-mid-request auth failures.
-
-Closes #42
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
-```
-
-### Commit Message Quality
-
-Commit messages must not be sycophantic or flowery. The description is a plain imperative statement, not a performance.
-
-- Start with an imperative verb: "Add", "Fix", "Remove", "Update", "Extract", "Rename"
-- Do NOT use: "Gracefully handle", "Beautifully implement", "Elegantly refactor", "Carefully extract"
-- Do NOT use filler adjectives: no "comprehensive", "robust", "seamless" in commit messages
-- The scope and description name the thing and what happened to it -- nothing more
-
-```text
-Bad:  "feat(auth): gracefully handle token expiry with elegant retry logic"
-Good: "feat(auth): retry on expired token"
-
-Bad:  "fix(parser): carefully fix the edge case that was causing issues"
-Good: "fix(parser): handle EOF in unterminated strings"
 ```
 
 ### Common Mistakes
@@ -160,15 +127,6 @@ The `pre-commit-quality` hook automatically checks staged files before `git comm
 
 If the hook blocks a commit, fix the issue before retrying.
 
-## Commit Atomicity
-
-Each commit should be one logical change:
-
-- Don't mix refactoring with feature changes
-- Don't mix formatting with behavior changes
-- Don't bundle unrelated fixes into one commit
-- If a change requires multiple steps, each step that leaves the codebase in a working state should be a separate commit
-
 ## Safe Git Pipeline
 
 AI drafts, humans approve. Never run `git push` or `git commit` without first presenting the user with what will happen.
@@ -220,14 +178,6 @@ EOF
   --base main \
   --head feat/your-branch
 ```
-
-### Command Safety Taxonomy
-
-| Category  | Examples                                                | Policy                              |
-| --------- | ------------------------------------------------------- | ----------------------------------- |
-| Safe      | `git status`, `git diff --stat`, `git log`              | AI may run freely                   |
-| Guarded   | `git add`, `git commit`, `gh pr create`                 | AI drafts, user approves            |
-| Dangerous | `git push --force`, `git reset --hard`, `git rebase -i` | Never without explicit user request |
 
 Never run `git push --force` to main/master under any circumstances. Flag it and refuse.
 

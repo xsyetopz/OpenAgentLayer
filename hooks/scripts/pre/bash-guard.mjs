@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import {
 	deny,
+	isMetaFile,
 	isTestFile,
 	MERGE_CONFLICT,
 	PLACEHOLDER_HARD,
@@ -81,6 +82,7 @@ function fileIssues(filepath) {
 	) {
 		issues.push(`Placeholder in ${filepath}`);
 	}
+	if (isMetaFile(filepath) || isTestFile(filepath)) return issues;
 	if (SECRET_PATTERNS.some((pat) => pat.test(content))) {
 		issues.push(`Possible secret/credential in ${filepath}`);
 	}

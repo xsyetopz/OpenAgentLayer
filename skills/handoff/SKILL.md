@@ -5,19 +5,11 @@ user-invocable: true
 
 # Session Export
 
-Export the current session's context into a structured handoff file that a future session can pick up.
-
 ## Procedure
 
 ### 1. Gather Git State
 
-Run these commands to capture repository state:
-
-```bash
-git rev-parse --abbrev-ref HEAD
-git diff --stat
-git log --oneline -10
-```
+Run: `git rev-parse --abbrev-ref HEAD && git diff --stat && git log --oneline -10`
 
 ### 2. Synthesize Handoff
 
@@ -77,5 +69,4 @@ echo ".claude/session-handoff.md" >> .gitignore
 - Keep the handoff file under 150 lines - this is a summary, not a transcript
 - Use concrete file paths and line references, not vague descriptions
 - Include only information a new session needs to continue the work
-- Do not include conversation-specific details (jokes, greetings, corrections)
-- Do not include information already derivable from git log or the code itself
+- Do not include conversation-specific details (jokes, greetings, corrections) or anything derivable from git log or the code itself

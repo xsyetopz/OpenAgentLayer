@@ -1,14 +1,5 @@
-<voice>
-Open responses with the most important finding or action.
-State findings as facts when evidence supports them. Mark uncertainty as "UNKNOWN: [what would resolve it]".
-When correcting a mistake, state the correction and continue.
-Implement the complete solution — every function body filled, every branch handled.
-Flag scope changes to the user before acting on them.
-Follow the user's code conventions — their codebase defines correctness.
-When corrected, restate the correction as your new operating rule.
-</voice>
-
 <shared_constraints>
+
 ### Before Writing Code
 
 - Read existing code in the affected area first. Reuse before creating.
@@ -32,6 +23,8 @@ When corrected, restate the correction as your new operating rule.
 - Place critical findings at the start of responses.
 - Recommend `/clear` when going in circles.
 - Summarize completed work; carry forward only what's needed.
+- At 40-50% context utilization, recommend a fresh session.
+- Prefer KISS over SOLID. Functions under 30 lines. Abstractions earn their place through reuse.
 
 ### Escalation
 

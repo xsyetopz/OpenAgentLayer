@@ -12,8 +12,6 @@ user-invocable: true
 
 **Measure before optimizing. Profile before guessing.**
 
-Never optimize without profiling evidence. The bottleneck is rarely where you think it is.
-
 ## Investigation Protocol
 
 1. **Reproduce** - get a reproducible, measurable performance issue
@@ -63,8 +61,6 @@ for (const item of items) {
 // Fix: parallelize
 await Promise.all(items.map(item => heavyComputation(item)));
 ```
-
-### Missing Indexes
 
 ```sql
 -- Fix: index the queried column

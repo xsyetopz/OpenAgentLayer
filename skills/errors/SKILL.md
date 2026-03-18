@@ -8,8 +8,6 @@ user-invocable: true
 
 # Error Handling
 
-Apply these patterns when implementing or reviewing error handling.
-
 ## Core Principle
 
 **Handle errors at the boundary where you have enough context to do something useful. Propagate everywhere else.**
@@ -97,12 +95,6 @@ class ValidationError(AppError):
     def __init__(self, field: str, message: str):
         self.field = field
         super().__init__(f"{field}: {message}")
-
-class NotFoundError(AppError):
-    def __init__(self, entity: str, id: str):
-        self.entity = entity
-        self.id = id
-        super().__init__(f"{entity} not found: {id}")
 ```
 
 - Specific exceptions over generic `Exception`
@@ -134,14 +126,12 @@ func LoadUser(id string) (*User, error) {
 
 ## Anti-Patterns
 
-| Anti-Pattern                    | Problem                     | Fix                       |
-| ------------------------------- | --------------------------- | ------------------------- |
-| `unwrap()` / `expect()` in prod | Panic on unexpected input   | Use `?` or `match`        |
-| Swallowed exceptions            | Bugs hidden silently        | Log or propagate          |
-| String-only errors              | Can't match on error type   | Use typed errors          |
-| Catch-all at every level        | Over-handling, lost context | Handle at boundaries      |
-| Error codes as magic numbers    | Unreadable, unmaintainable  | Use named constants/enums |
-| Logging and rethrowing          | Duplicate log entries       | Do one or the other       |
+| Anti-Pattern                 | Problem                     | Fix                       |
+| ---------------------------- | --------------------------- | ------------------------- |
+| Swallowed exceptions         | Bugs hidden silently        | Log or propagate          |
+| String-only errors           | Can't match on error type   | Use typed errors          |
+| Catch-all at every level     | Over-handling, lost context | Handle at boundaries      |
+| Error codes as magic numbers | Unreadable, unmaintainable  | Use named constants/enums |
 
 ## Error Messages
 
@@ -156,3 +146,5 @@ Good error messages include:
 Bad:  "Error: invalid input"
 Good: "Failed to parse config at line 42: expected integer for 'port', got 'abc'"
 ```
+
+See `/cca:review` for language-specific anti-patterns (no unwrap in prod, no any, etc.).

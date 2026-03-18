@@ -22,17 +22,17 @@ Plugin install (`claude plugin install cca`) gives the `cca:` prefix. Manual ins
 
 | Skill            | Plugin                | Manual                | Status |
 | ---------------- | --------------------- | --------------------- | ------ |
-| `review-code`    | `/cca:review-code`    | `/cca-review-code`    | Active |
+| `review`    | `/cca:review`    | `/cca-review`    | Active |
 | `desloppify`     | `/cca:desloppify`     | `/cca-desloppify`     | Active |
 | `ship`           | `/cca:ship`           | `/cca-ship`           | Active |
 | `decide`         | `/cca:decide`         | `/cca-decide`         | Active |
-| `audit-security` | `/cca:audit-security` | `/cca-audit-security` | Active |
-| `test-patterns`  | `/cca:test-patterns`  | `/cca-test-patterns`  | Active |
-| `document`       | `/cca:document`       | `/cca-document`       | Active |
-| `optimize`       | `/cca:optimize`       | `/cca-optimize`       | Active |
-| `handle-errors`  | `/cca:handle-errors`  | `/cca-handle-errors`  | Active |
-| `session-export` | `/cca:session-export` | `/cca-session-export` | Active |
-| `style-detect`   | `/cca:style-detect`   | `/cca-style-detect`   | Active |
+| `security` | `/cca:security` | `/cca-security` | Active |
+| `test`  | `/cca:test`  | `/cca-test`  | Active |
+| `docs`       | `/cca:docs`       | `/cca-docs`       | Active |
+| `perf`       | `/cca:perf`       | `/cca-perf`       | Active |
+| `errors`  | `/cca:errors`  | `/cca-errors`  | Active |
+| `handoff` | `/cca:handoff` | `/cca-handoff` | Active |
+| `style`   | `/cca:style`   | `/cca-style`   | Active |
 
 ## Hooks
 
@@ -83,7 +83,7 @@ make validate  # lint + test + build
 .claude-plugin/  plugin.json (marketplace manifest)
 .github/         workflows/ (ci.yml, release.yml), ISSUE_TEMPLATE/, CONTRIBUTING.md
 agents/          7 agent definitions (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
-skills/          11 skill directories (review-code, desloppify, ship, style-detect, etc.)
+skills/          11 skill directories (review, desloppify, ship, style, etc.)
 hooks/           configs/ (base.json, pro.json, max.json)
                  user/ (pre-secrets.mjs, rtk-rewrite.sh)
                  scripts/ (_lib.mjs, pre/, post/, session/)

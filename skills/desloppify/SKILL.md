@@ -5,15 +5,9 @@ user-invocable: true
 
 # Desloppify
 
-Strip AI-generated linguistic patterns from code comments, documentation, READMEs, changelogs, commit messages, PR descriptions, and prose. AI slop erodes trust and makes professional work look auto-generated.
-
-## The Core Principle
+Strip AI-generated linguistic patterns from code comments, documentation, READMEs, changelogs, commit messages, PR descriptions, and prose.
 
 **Say what things do. Not what they are. Not how great they are.**
-
-A function processes payments. It doesn't "seamlessly facilitate comprehensive transaction orchestration." A library parses JSON. It doesn't "empower developers to unlock the full potential of data interchange."
-
-If you can delete a sentence and lose no information, delete it. If you can replace three adjectives with one fact, do it. If a comment restates the code, the comment is the bug.
 
 ## Detection Tiers
 
@@ -43,20 +37,28 @@ Flag characters that standard keyboards cannot produce. AI models inject these f
 
 These appear 10-100x more often in AI output than human writing. Presence is near-certain AI signal.
 
-**Filler Adjectives/Adverbs:**
+**Filler Words:**
 
 ```text
 robust, seamless, comprehensive, cutting-edge, state-of-the-art, innovative,
 streamlined, versatile, scalable, elegant, powerful, flexible, dynamic,
-efficient, intuitive, holistic
-```
-
-**Corporate Nothing-Speak:**
-
-```text
+efficient, intuitive, holistic,
 leverage, utilize, facilitate, implement (when meaning "use"), enhance,
 optimize, ensure, empower, foster, enable, drive, harness, spearhead,
 ecosystem, paradigm
+```
+
+**Filler Phrases:**
+
+```text
+"Sure!" / "Of course!" / "Absolutely!" / "Great question!" / "Excellent point!"
+"I'd be happy to" / "I'd love to help" / "Let me know if you need anything else"
+"Hope this helps" / "Happy to help" / "Feel free to ask" / "Don't hesitate to"
+"I think" / "perhaps" / "it might be worth" / "You might want to consider"
+"It depends on your use case" / "There are several approaches"
+"Generally speaking" / "One possible approach"
+"Let's dive in" / "Let's break this down" / "Without further ado"
+"First and foremost" / "Last but not least"
 ```
 
 **GPTZero High-Multiplier Phrases** (50x-270x more frequent in AI text):
@@ -85,75 +87,20 @@ ecosystem, paradigm
 "straightforward"               (when used as filler, not technical)
 ```
 
-**Additional Dead Giveaways:**
+**Weasel/Hedge Phrases:**
 
 ```text
-"elevate"                       "streamline"
-"navigate the complexities"     "foster innovation"
-"a deep understanding"          "the broader context"
-"this approach"                 (as sentence opener, repeatedly)
-"it's also worth"               "another key aspect"
-"this highlights"               "this underscores"
-"resonate"                      "resonates with"
-"vibrant"                       "bustling"
-"testament"                     "tapestry"
-"commendable"                   "laudable"
-"paramount"                     "imperative"
-"indispensable"                 "pivotal"
-"in the context of"             "within the scope of"
+"It's important to note"   "It's worth mentioning"   "It should be noted that"
+"As mentioned earlier"     "At the end of the day"   "In today's landscape"
+"In order to"              "Moving forward"           "Needless to say"
+"elevate"  "streamline"  "navigate the complexities"  "foster innovation"
+"testament"  "tapestry"  "paramount"  "pivotal"  "indispensable"
 ```
 
-**Hedge/Placeholder Language:**
+**Placeholder Language** (hard-blocked by anti-placeholder hook — replace with complete implementation):
 
 ```text
-"for now"                        "simplified version"
-"in a real implementation"       "placeholder"
-"temporary"                      "quick and dirty"
-```
-
-These are hard-blocked by the `anti-placeholder` hook. If you see them in code, replace with the complete implementation.
-
-**Weasel Phrases:**
-
-```text
-"It's important to note"         "It's worth mentioning"
-"It should be noted that"        "Keep in mind that"
-"As mentioned earlier"           "At the end of the day"
-"In today's landscape"           "Moving forward"
-"In order to"                    "With that being said"
-"That said"                      "Needless to say"
-```
-
-**Sycophantic/Filler Openers and Closers:**
-
-```text
-"Sure!"                          "Of course!"                 "Absolutely!"
-"Great question"                 "Good point"                 "That's an excellent question"
-"I'd be happy to"                "I'd love to help"
-"Let me know if you need anything else"                        "Hope this helps"
-"Sorry for the confusion"        "I apologize for the error"
-"I think"                        "perhaps"                    "it might be worth"
-"Great question!"                "Excellent point!"
-"That's a fantastic approach"    "Definitely!"  "Certainly!"
-"I hope this helps"              "Feel free to ask"
-"Don't hesitate to"              "Happy to help"
-"Let me know if you need"        "If you have any questions"
-```
-
-**Hedge Shields:**
-
-```text
-"It depends on your use case"    "There are several approaches"
-"You might want to consider"     "One possible approach"
-"Generally speaking"             "Typically"
-```
-
-**AI Transition Crutches:**
-
-```text
-"Let's dive in"                  "Let's break this down"
-"Let's explore"                  "Without further ado"
-"First and foremost"             "Last but not least"
+"for now"  "simplified version"  "in a real implementation"  "placeholder"  "temporary"
 ```
 
 ### Tier 2 -- Contextual Signals (flag when clustered)
@@ -169,17 +116,11 @@ Legitimate words AI overuses. Flag when they appear in groups or where a human w
 **Structural Tells:**
 
 - Triple adjective stacking: "a robust, scalable, and efficient solution"
-- Unnecessary "not only X but also Y" constructions
-- Semicolons for fake sophistication where periods work
-- Em-dash abuse for parentheticals that don't need emphasis
-- 3+ consecutive paragraphs starting with the same structure
 - Exactly 3 bullet points in every list (AI default)
 - Every paragraph approximately the same length
 - Setup-body-conclusion micro-structure in every section
 - No sentence fragments -- AI never uses them, humans do
-- False balance: every argument paired with counter-argument
 - "While X, Y" opener pattern used repeatedly
-- Lists with parallel grammatical structure that reads like it was generated
 - Collapsed authorial voice -- reads like "the mean of all written text"
 
 **Naming Patterns in Code:**
@@ -196,7 +137,7 @@ Legitimate words AI overuses. Flag when they appear in groups or where a human w
 
 ### Tier 3 -- Code-Specific Slop
 
-**Obvious Comments (delete entirely):**
+**Obvious Comments + Narrating Structure (delete entirely):**
 
 ```python
 counter += 1  # Increment the counter
@@ -205,11 +146,7 @@ results = []  # Initialize empty results list
 return data  # Return the data
 if error:  # Check if there's an error
     raise error  # Raise the error
-```
 
-**Narrating Structure (delete entirely):**
-
-```python
 # Import dependencies
 import os
 
@@ -223,7 +160,7 @@ def main():
 def helper():
 ```
 
-**Non-Information Comments (delete entirely):**
+**Non-Information Comments + Verbosity (delete or replace with real code):**
 
 ```python
 # This class handles user authentication
@@ -234,27 +171,24 @@ def __init__(self):
 
 # Process the data
 def process_data(data):
+
+# AI writes:
+if len(items) == 0:
+    return []
+
+# Human writes:
+if not items:
+    return []
+
+# AI writes:
+result = some_function()
+return result
+
+# Human writes:
+return some_function()
 ```
 
-**Placeholder/Hedge Comments -- do not rewrite these, replace with correct complete implementation instead:**
-
-Such comments expose missing work. Do not fix by rewriting the comment -- fix by implementing what's missing. Never leave a placeholder; never leave a "TODO" for core function or error handling.
-
-```text
-// In a real implementation, you would...
-// For production use, consider...
-// This is a simplified version
-// TODO: Add proper error handling
-// For demonstration purposes
-// Placeholder: connect database here
-// FIXME: handle edge cases
-// NOTE: This can be improved
-// HACK: temporary workaround
-// TODO make this async later
-// Should validate input here
-```
-
-If you find yourself writing a comment apologizing for a shortcut, an unfinished case, or "for demo only," stop and do the missing work instead.
+Placeholder/hedge comments expose missing work. Do not fix by rewriting the comment -- fix by implementing what's missing. Never leave a `TODO` for core function or error handling.
 
 **Over-Abstraction:**
 
@@ -272,27 +206,6 @@ If you find yourself writing a comment apologizing for a shortcut, an unfinished
 - Error messages that are complete English sentences with periods (humans use terse messages)
 - JSDoc/docstring for private/internal functions that are only called once
 
-**Verbosity Tells:**
-
-```python
-# AI writes:
-if len(items) == 0:
-    return []
-
-# Human writes:
-if not items:
-    return []
-```
-
-```python
-# AI writes:
-result = some_function()
-return result
-
-# Human writes:
-return some_function()
-```
-
 ### Tier 4 -- Doc and README Slop
 
 **Hype Copy (rewrite to factual):**
@@ -308,23 +221,9 @@ SLOP:  "Built with developer experience in mind"
 CLEAN: [Delete. If the DX is good, the docs prove it.]
 ```
 
-**Padding Sections (delete if empty of real content):**
+**Padding Sections** — delete "Why X?", "Philosophy", "Our Vision" unless they contain concrete differentiators.
 
-```text
-## Why [Project Name]?   -> Delete unless concrete differentiators
-## Philosophy             -> Delete unless genuinely novel
-## Our Vision             -> Delete
-```
-
-**Emoji Abuse (strip or reduce):**
-
-```text
-## Getting Started        not  ## :rocket: Getting Started
-### Features              not  ### :sparkles: Features
-- Easy configuration      not  - :wrench: Easy config
-```
-
-Exception: severity indicators and established project style are fine.
+**Emoji Abuse** — strip emoji from headers and bullets unless established project style. Severity indicators are fine.
 
 ### Tier 5 -- Invisible Characters (always remove)
 
@@ -349,63 +248,32 @@ These are invisible but break string matching, URLs, and copy-paste. Always remo
 | ----------------------------------- | ----------------------------------------------------------- |
 | "Utilize" / "Leverage"              | "Use"                                                       |
 | "Facilitate"                        | "Allow" / "Let"                                             |
-| "Robust"                            | [Delete, or specific quality: "tested", "handles X"]        |
-| "Seamless"                          | [Delete, or what happens: "without restart", "in one step"] |
-| "Comprehensive"                     | [Delete, or scope: "covers X, Y, Z"]                        |
+| "Robust"                            | Delete, or specific quality: "tested", "handles X"          |
+| "Seamless"                          | Delete, or what happens: "without restart", "in one step"   |
+| "Comprehensive"                     | Delete, or scope: "covers X, Y, Z"                          |
 | "Ensure"                            | "Check" / "Verify"                                          |
 | "Enhance"                           | "Improve" / "Add" / [specific change]                       |
-| "Optimize"                          | "Speed up" / "Reduce" / [specific metric]                   |
 | "In order to"                       | "To"                                                        |
-| "A number of"                       | [Specific number, or "some"]                                |
 | "Due to the fact that"              | "Because"                                                   |
 | "In the event that"                 | "If"                                                        |
 | "Prior to"                          | "Before"                                                    |
 | "Has the ability to" / "Is able to" | "Can"                                                       |
-| "In terms of"                       | [Delete, restructure sentence]                              |
+| "In terms of"                       | Delete, restructure sentence                                |
 | Triple adjective stacking           | Pick the one that matters                                   |
-| "Elevate"                           | "Improve" / specific change                                 |
 | "Streamline"                        | "Simplify" / "Remove steps"                                 |
-| "Navigate" (metaphorical)           | "Handle" / "Work with"                                      |
 | "Foster"                            | "Encourage" / "Support"                                     |
 | "Resonate"                          | "Match" / "Fit"                                             |
 | "Stakeholder"                       | "User" / "Team" / specific role                             |
-| "Touchpoint"                        | "Interaction" / "Step"                                      |
-| "Bandwidth" (metaphorical)          | "Time" / "Capacity"                                         |
-| "Deep dive"                         | "Detailed look" / "Analysis"                                |
 | "Paradigm"                          | "Pattern" / "Approach"                                      |
 | "Ecosystem"                         | "System" / "Tools" / specific                               |
-| "Architected" (verb)                | "Designed" / "Built"                                        |
-| "Curated"                           | "Chosen" / "Selected"                                       |
-| "Crafted"                           | "Made" / "Built" / "Wrote"                                  |
+| "Curated" / "Crafted"               | "Chosen" / "Made" / "Built"                                 |
 | "Bespoke"                           | "Custom"                                                    |
-| "Granular"                          | "Detailed" / "Fine"                                         |
-| "Holistic"                          | "Complete" / "Full"                                         |
-| "Pivotal"                           | "Key" / "Important"                                         |
-| "Paramount"                         | "Critical" / "Top priority"                                 |
-| "Aligns with"                       | "Matches" / "Follows"                                       |
 | "Aims to"                           | "Does" / specific verb                                      |
 | "Serves as"                         | "Is"                                                        |
 | "Plays a crucial role"              | "Is needed for" / specific                                  |
 | "A testament to"                    | Delete, or specific evidence                                |
 
-## Remediation Protocol
-
-### Step 1: Scan
-
-Read target file(s). Identify all Tier 0 Unicode violations, Tier 1 matches (definite slop), Tier 2 clusters (probable slop), and Tier 5 invisible characters.
-
-### Step 2: Classify each finding
-
-- **AUTO-FIX** -- Tier 0 and Tier 5 characters (no judgment needed, always wrong)
-- **DELETE** -- adds no information (obvious comments, filler phrases, hype copy)
-- **REWRITE** -- useful information buried under slop language
-- **FLAG** -- Tier 2 word that might be intentional; needs human judgment
-
-### Step 3: Apply rewrites
-
-Use the substitution table. For items not in the table: replace with the simplest word that preserves meaning. If no meaning is lost by deletion, delete.
-
-### Step 4: Verify
+## Verification Checklist
 
 - No Tier 0 Unicode characters remain (outside exempted contexts)
 - No Tier 1 phrases remain
@@ -419,25 +287,4 @@ Use the substitution table. For items not in the table: replace with the simples
 
 ## Output Format
 
-When reporting on a desloppify pass:
-
-```markdown
-## Desloppify: [filename]
-
-### Findings
-| Line | Tier | Original                  | Action                           |
-| ---- | ---- | ------------------------- | -------------------------------- |
-| 5    | T0   | U+2014 em dash            | AUTO-FIX -> " -- "               |
-| 12   | T1   | "robust and seamless"     | REWRITE -> "handles X without Y" |
-| 34   | T3   | "// Initialize the array" | DELETE                           |
-| 56   | T2   | "delve into"              | REWRITE -> "examine"             |
-| 89   | T5   | U+200B zero-width space   | AUTO-FIX -> deleted              |
-
-### Summary
-- Auto-fixed: [n] items (Tier 0 + Tier 5)
-- Deleted: [n] items
-- Rewritten: [n] items
-- Flagged: [n] items
-```
-
-When directly editing files (not reporting), skip the report -- just make the changes.
+When reporting, use: `| Line | Tier | Original | Action |` table with AUTO-FIX/DELETE/REWRITE/FLAG actions. When directly editing files, skip the report — just make the changes.

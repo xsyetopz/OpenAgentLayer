@@ -8,15 +8,6 @@ user-invocable: true
 
 # Documentation Standards
 
-## Core Principle
-
-**Say what things do. Not what they are. Not how great they are.**
-
-First sentence states what the thing does:
-
-- "Parses YAML configuration files into typed structs."
-- NOT "A powerful, flexible YAML parsing library."
-
 ## README Structure
 
 ```markdown
@@ -103,17 +94,6 @@ Creates a user account.
 | 422    | Invalid email format     |
 ```
 
-## Inline Documentation
+See `/cca:review` for inline documentation and comments policy.
 
-- Public APIs: doc comments required (what it does, parameters, return value, errors)
-- Internal code: comments explain "why", not "what"
-- No file headers, section separators, or authorship comments
-- No tautological comments (comment restates the code)
-
-## Prohibited Patterns
-
-- Filler adjectives: "robust", "seamless", "powerful", "flexible", "elegant"
-- Hype copy: "revolutionizes", "cutting-edge", "state-of-the-art"
-- Emoji section headers (unless established project style)
-- Empty sections or placeholder content
-- Passive voice when active is clearer: "X does Y" not "Y is done by X"
+See `/cca:desloppify` for prohibited language patterns.

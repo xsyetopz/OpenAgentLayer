@@ -41,7 +41,7 @@ check_version() {
     version=$(claude --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
     [[ -z "$version" ]] && { warn "Could not parse claude version, proceeding anyway"; return; }
     IFS='.' read -r major minor patch <<< "$version"
-    (( major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch >= 75))) )) || die "Claude Code v${version} is too old. Requires >= 2.1.75"
+    (( major > 2 || (major == 2 && (minor > 1 || (minor == 1 && patch >= 76))) )) || die "Claude Code v${version} is too old. Requires >= 2.1.76"
     info "Claude Code v${version}"
 }
 
@@ -298,18 +298,18 @@ interactive_mode() {
     # Screen 4: Skill selection
     local skill_indices
     skill_indices=$(tui_select_many "Skills" \
-        "review-code     Code review" \
+        "review           Code review" \
         "desloppify      Remove AI slop" \
         "ship            Commits, branches, PRs" \
         "decide          Present options + tradeoffs" \
-        "audit-security  Security audit (OWASP)" \
-        "test-patterns   Test strategy + coverage" \
-        "document        Docs: READMEs, ADRs" \
-        "optimize        Performance optimization" \
-        "handle-errors   Error handling patterns" \
-        "session-export  Session handoff" \
+        "security        Security audit (OWASP)" \
+        "test            Test strategy + coverage" \
+        "docs            Docs: READMEs, ADRs" \
+        "perf            Performance optimization" \
+        "errors          Error handling patterns" \
+        "handoff         Session handoff" \
     )
-    local skill_names=(review-code desloppify ship decide audit-security test-patterns document optimize handle-errors session-export)
+    local skill_names=(review desloppify ship decide security test docs perf errors handoff)
     SELECTED_SKILLS=""
     for idx in $skill_indices; do
         SELECTED_SKILLS="$SELECTED_SKILLS ${skill_names[$idx]}"
@@ -550,7 +550,7 @@ copy_hooks_scripts() {
         [[ -f "$src" ]] && { cp "$src" "$dest"; chmod +x "$dest"; info "$hook -> ~/.claude/hooks/ (user-level)"; }
     done
 
-    local hooks_src="$REPO_DIR/hooks/configs/$PACKAGE.json"
+    local hooks_src="$REPO_DIR/hooks/configs/hooks.json"
     [[ -f "$hooks_src" ]] || hooks_src="$REPO_DIR/hooks/configs/base.json"
     cp "$hooks_src" "$CLAUDE_DIR/hooks.json"
     info "hooks.json -> project hooks (package: $PACKAGE)"

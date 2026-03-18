@@ -166,7 +166,7 @@
 					},
 					{
 						"type": "prompt",
-						"prompt": "Before ending: check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale (older than today), suggest: 'Run /cca:session-export to save a handoff for your next session.' Do NOT auto-export — only remind if significant work happened."
+						"prompt": "Before ending: check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale (older than today), suggest: 'Run /cca:handoff to save a handoff for your next session.' Do NOT auto-export — only remind if significant work happened."
 					}
 				]
 			}

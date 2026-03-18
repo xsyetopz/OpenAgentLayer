@@ -100,16 +100,16 @@ claude plugin validate ./dist/...   # validate a local build
 
 | What it does | Plugin | Manual |
 |---|---|---|
-| Code review | `/cca:review-code` | `/cca-review-code` |
+| Code review | `/cca:review` | `/cca-review` |
 | Remove AI slop | `/cca:desloppify` | `/cca-desloppify` |
 | Commits, branches, PRs | `/cca:ship` | `/cca-ship` |
 | Present options + tradeoffs | `/cca:decide` | `/cca-decide` |
-| Security audit (OWASP) | `/cca:audit-security` | `/cca-audit-security` |
-| Test strategy + coverage | `/cca:test-patterns` | `/cca-test-patterns` |
-| Docs: READMEs, ADRs, changelogs | `/cca:document` | `/cca-document` |
-| Performance optimization | `/cca:optimize` | `/cca-optimize` |
-| Error handling patterns | `/cca:handle-errors` | `/cca-handle-errors` |
-| Session handoff | `/cca:session-export` | `/cca-session-export` |
+| Security audit (OWASP) | `/cca:security` | `/cca-security` |
+| Test strategy + coverage | `/cca:test` | `/cca-test` |
+| Docs: READMEs, ADRs, changelogs | `/cca:docs` | `/cca-docs` |
+| Performance optimization | `/cca:perf` | `/cca-perf` |
+| Error handling patterns | `/cca:errors` | `/cca-errors` |
+| Session handoff | `/cca:handoff` | `/cca-handoff` |
 
 ---
 

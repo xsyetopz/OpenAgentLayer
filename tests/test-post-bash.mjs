@@ -13,7 +13,7 @@ function makeBashOutput(command, toolResponse) {
 describe("SecretDetection", () => {
 	it("should warn on API key in output", () => {
 		const result = runHook(
-			"post-bash.mjs",
+			"post/bash-redact.mjs",
 			makeBashOutput(
 				"env",
 				'API_KEY="sk-abc123def456ghi789jkl012mno345pqr678stu901"',
@@ -34,7 +34,7 @@ describe("SecretDetection", () => {
 
 	it("should warn on AWS key in output", () => {
 		const result = runHook(
-			"post-bash.mjs",
+			"post/bash-redact.mjs",
 			makeBashOutput("env", "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE"),
 		);
 		const output = parseHookOutput(result);
@@ -54,7 +54,7 @@ describe("SecretDetection", () => {
 describe("CleanOutput", () => {
 	it("should pass clean output", () => {
 		const result = runHook(
-			"post-bash.mjs",
+			"post/bash-redact.mjs",
 			makeBashOutput("ls", "file1.py\nfile2.py\nfile3.py\n"),
 		);
 		assert.equal(result.status, 0);

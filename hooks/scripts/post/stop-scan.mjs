@@ -116,7 +116,7 @@ function sessionExportStale(projectDir) {
 
 		if (sessionExportStale(projectDir)) {
 			stopWarn(
-				"Consider running /cca:session-export to save a handoff for your next session.",
+				"Consider running /cca:handoff to save a handoff for your next session.",
 			);
 		} else {
 			passthrough();

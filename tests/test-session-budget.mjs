@@ -7,7 +7,7 @@ import { runHook } from "./helpers.mjs";
 
 describe("SessionBudget", () => {
 	it("should run without error", () => {
-		const result = runHook("session-budget.mjs", {});
+		const result = runHook("session/start-budget.mjs", {});
 		assert.equal(result.status, 0);
 	});
 
@@ -18,7 +18,7 @@ describe("SessionBudget", () => {
 		writeFileSync(join(tmpDir, "CLAUDE.md"), lines, "utf8");
 
 		const result = runHook(
-			"session-budget.mjs",
+			"session/start-budget.mjs",
 			{},
 			{ CLAUDE_PROJECT_DIR: tmpDir },
 		);

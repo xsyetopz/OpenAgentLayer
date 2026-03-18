@@ -2,7 +2,7 @@
 import "../suppress-stderr.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { readStdin } from "../_lib.mjs";
+import { passthrough, readStdin, warn } from "../_lib.mjs";
 
 const TARGETS = [
 	["CLAUDE.md", 150],
@@ -77,9 +77,9 @@ function checkPermissionsDeny(projectDir) {
 		if (denyWarning) warnings.push(denyWarning);
 
 		if (warnings.length > 0) {
-			process.stdout.write(`${warnings.join("\n")}\n`);
+			warn(warnings.join("\n"), "SessionStart");
 		}
-		process.exit(0);
+		passthrough();
 	} catch {
 		process.exit(0);
 	}

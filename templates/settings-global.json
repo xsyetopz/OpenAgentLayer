@@ -25,10 +25,7 @@
 			"Upload(*)",
 			"Search(*)",
 			"Plan(*)",
-			"List(*)",
-			"Bash(rm -rf ./*cache*)",
-			"Bash(rm -rf ./dist*)",
-			"Bash(rm -rf ./node_modules*)"
+			"List(*)"
 		],
 		"deny": [
 			"Read(.env)",

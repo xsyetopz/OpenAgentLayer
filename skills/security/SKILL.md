@@ -8,8 +8,6 @@ user-invocable: true
 
 # Security Checklist
 
-Apply this checklist when reviewing code for security, auditing systems, or implementing security-sensitive features.
-
 ## Injection (OWASP A03)
 
 | Vector             | Check                                            | Fix                                                    |
@@ -28,7 +26,6 @@ Apply this checklist when reviewing code for security, auditing systems, or impl
 - Session tokens are cryptographically random, sufficient length (128+ bits)
 - Passwords hashed with bcrypt/scrypt/argon2 - never MD5/SHA-1/SHA-256 alone
 - Rate limiting on login, registration, and password reset endpoints
-- Account lockout or exponential backoff after failed attempts
 - JWT tokens validated: signature, expiry, issuer, audience
 - RBAC/ABAC permissions checked at the data layer, not just UI
 
@@ -85,12 +82,3 @@ Apply this checklist when reviewing code for security, auditing systems, or impl
 
 **Summary:** X critical, Y high, Z medium findings
 ```
-
-## Severity Levels
-
-| Level    | Definition                                    | SLA               |
-| -------- | --------------------------------------------- | ----------------- |
-| CRITICAL | Actively exploitable, data exposure likely    | Fix before deploy |
-| HIGH     | Exploitable with effort, significant impact   | Fix this sprint   |
-| MEDIUM   | Requires specific conditions, moderate impact | Fix this quarter  |
-| LOW      | Defense-in-depth improvement                  | Backlog           |

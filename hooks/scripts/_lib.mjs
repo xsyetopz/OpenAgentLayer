@@ -120,12 +120,14 @@ export const SYCOPHANCY_PATTERNS = [
 ];
 
 export const SECRET_PATTERNS = [
-	/\b[A-Z0-9]{20,}[_-]?[A-Z0-9]{10,}\b/i,
 	/\b(?:api|secret|token|key|passwd|password)\s*[:=]\s*["']?([^\s"']{8,})/i,
-	/sk-[a-z0-9]{20,}/i,
+	/sk-[a-z0-9-]{20,}/i,
 	/AKIA[0-9A-Z]{16}/,
 	/gh[pous]_[A-Za-z0-9_]{36,}/,
 	/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/,
+	/\bAIza[0-9A-Za-z_-]{35}\b/,
+	/\bxox[bpras]-[0-9a-zA-Z-]{10,}\b/,
+	/-----BEGIN (?:RSA |EC )?PRIVATE KEY-----/,
 ];
 
 export const PII_PATTERNS = [
@@ -224,7 +226,7 @@ export function allow(reason = "", event = "PreToolUse") {
 }
 
 export function block(reason) {
-	_printAndExit({ decision: "block", reason });
+	deny(reason);
 }
 
 export function warn(message, event = "PostToolUse") {
@@ -245,20 +247,31 @@ export function postWarn(message) {
 	});
 }
 
-export function genericWarn(message) {
-	_printAndExit({ reason: message });
+export function genericWarn(message, event = "PostToolUse") {
+	warn(message, event);
 }
 
-export function genericBlock(message) {
-	_printAndExit({ decision: "block", reason: message });
+export function genericBlock(message, event = "PreToolUse") {
+	deny(message, event);
 }
 
 export function stopWarn(message) {
-	_printAndExit({ reason: message });
+	_printAndExit({
+		hookSpecificOutput: {
+			hookEventName: "Stop",
+			additionalContext: message,
+		},
+	});
 }
 
 export function stopBlock(message) {
-	_printAndExit({ decision: "block", reason: message });
+	_printAndExit({
+		hookSpecificOutput: {
+			hookEventName: "Stop",
+			permissionDecision: "deny",
+			permissionDecisionReason: message,
+		},
+	});
 }
 
 export function passthrough() {

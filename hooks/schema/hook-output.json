@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Claude Code Hook Output",
-	"description": "Valid JSON output schema for Claude Code hooks. hookSpecificOutput is event-scoped: PreToolUse, UserPromptSubmit, PostToolUse are valid hookEventName values.",
+	"description": "Valid JSON output schema for Claude Code hooks. hookSpecificOutput is event-scoped.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
@@ -20,7 +20,7 @@
 		"decision": {
 			"type": "string",
 			"enum": ["approve", "block"],
-			"description": "Top-level decision for non-standard events"
+			"description": "Top-level decision (deprecated — use hookSpecificOutput)"
 		},
 		"reason": {
 			"type": "string",
@@ -37,7 +37,7 @@
 		},
 		"hookSpecificOutput": {
 			"type": "object",
-			"description": "Event-specific output. hookEventName must be one of: PreToolUse, UserPromptSubmit, PostToolUse.",
+			"description": "Event-specific output keyed by hookEventName.",
 			"oneOf": [
 				{
 					"type": "object",
@@ -83,6 +83,76 @@
 						"hookEventName": {
 							"type": "string",
 							"const": "PostToolUse"
+						},
+						"additionalContext": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["hookEventName"],
+					"properties": {
+						"hookEventName": {
+							"type": "string",
+							"const": "Stop"
+						},
+						"permissionDecision": {
+							"type": "string",
+							"enum": ["allow", "deny", "ask"]
+						},
+						"permissionDecisionReason": {
+							"type": "string"
+						},
+						"additionalContext": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["hookEventName"],
+					"properties": {
+						"hookEventName": {
+							"type": "string",
+							"const": "SubagentStop"
+						},
+						"permissionDecision": {
+							"type": "string",
+							"enum": ["allow", "deny", "ask"]
+						},
+						"permissionDecisionReason": {
+							"type": "string"
+						},
+						"additionalContext": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["hookEventName"],
+					"properties": {
+						"hookEventName": {
+							"type": "string",
+							"const": "SessionStart"
+						},
+						"additionalContext": {
+							"type": "string"
+						}
+					}
+				},
+				{
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["hookEventName"],
+					"properties": {
+						"hookEventName": {
+							"type": "string",
+							"const": "TeammateIdle"
 						},
 						"additionalContext": {
 							"type": "string"

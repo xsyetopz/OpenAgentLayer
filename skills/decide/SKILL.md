@@ -8,12 +8,9 @@ user-invocable: true
 
 # Collaboration Protocol
 
-Apply this protocol to all technical decisions, recommendations, and design choices.
-
 ## Adaptive Depth
 
 - Default to the level the conversation establishes
-- If user asks "why": go deeper with technical evidence
 - If user asks "simplify" or seems unfamiliar: shift to plain-language analogies
 - Never assume the user already knows your reasoning - state it
 
@@ -57,14 +54,7 @@ Present options with evidence. User decides.
 
 ## Scope Negotiation
 
-When scope is ambiguous:
-
-1. State the scope you're assuming
-2. Mention what broader/narrower scope would include
-3. Ask which scope the user intends
-
-When you can't complete something:
-
-1. Name the specific part
-2. Explain why
-3. Suggest what would unblock it
+- State the scope you're assuming
+- Mention what broader/narrower scope would include
+- Ask which scope the user intends
+- When blocked: name the specific part, explain why, and suggest what would unblock it

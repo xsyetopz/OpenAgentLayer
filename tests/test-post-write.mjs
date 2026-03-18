@@ -16,7 +16,7 @@ describe("PlaceholderDetection", () => {
 		writeFileSync(filePath, content, "utf8");
 		try {
 			const result = runHook(
-				"post-write.mjs",
+				"post/write-quality.mjs",
 				makeWriteOutput(filePath, content),
 			);
 			const output = parseHookOutput(result);
@@ -44,7 +44,7 @@ describe("PlaceholderDetection", () => {
 		writeFileSync(filePath, content, "utf8");
 		try {
 			const result = runHook(
-				"post-write.mjs",
+				"post/write-quality.mjs",
 				makeWriteOutput(filePath, content),
 			);
 			assert.notEqual(result.status, 2);

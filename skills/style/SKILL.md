@@ -9,8 +9,7 @@ Run this command to detect project conventions, then follow the detected style i
 node -e "
 const fs = require('fs');
 const path = require('path');
-const { globSync } = require('fs');
-const exts = { py: '**/*.py', ts: '**/*.ts', js: '**/*.js', rs: '**/*.rs', go: '**/*.go' };
+const exts = { py: '*.py', ts: '*.ts', js: '*.js', rs: '*.rs', go: '*.go' };
 let files = [];
 for (const [ext, pat] of Object.entries(exts)) {
   try {
@@ -43,5 +42,3 @@ console.log('Languages: ' + JSON.stringify(langs));
 console.log('Sample: ' + files.slice(0, 5).join(' '));
 "
 ```
-
-Style conventions detected from the project's source files. Follow these conventions in all code you write.

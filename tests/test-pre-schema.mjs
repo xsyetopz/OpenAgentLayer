@@ -4,7 +4,7 @@ import { parseHookOutput, runHook } from "./helpers.mjs";
 
 describe("WriteValidation", () => {
 	it("should allow absolute path write", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Write",
 			tool_input: { file_path: "/tmp/test.py", content: "print('hello')" },
 		});
@@ -12,7 +12,7 @@ describe("WriteValidation", () => {
 	});
 
 	it("should block empty content write", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Write",
 			tool_input: { file_path: "/tmp/test.py", content: "" },
 		});
@@ -28,7 +28,7 @@ describe("WriteValidation", () => {
 
 describe("EditValidation", () => {
 	it("should allow valid edit", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Edit",
 			tool_input: {
 				file_path: "/tmp/test.py",
@@ -40,7 +40,7 @@ describe("EditValidation", () => {
 	});
 
 	it("should block same-string edit", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Edit",
 			tool_input: {
 				file_path: "/tmp/test.py",
@@ -60,7 +60,7 @@ describe("EditValidation", () => {
 
 describe("BashValidation", () => {
 	it("should allow non-empty command", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Bash",
 			tool_input: { command: "echo hello" },
 		});
@@ -68,7 +68,7 @@ describe("BashValidation", () => {
 	});
 
 	it("should block empty command", () => {
-		const result = runHook("pre-schema.mjs", {
+		const result = runHook("pre/validate-input.mjs", {
 			tool_name: "Bash",
 			tool_input: { command: "" },
 		});

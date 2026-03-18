@@ -163,6 +163,10 @@
 						"type": "command",
 						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/stop-scan.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
 						"timeout": 15
+					},
+					{
+						"type": "prompt",
+						"prompt": "Before ending: check if significant work was done this session (files modified, decisions made, multi-step tasks in progress). If so, and if .claude/session-handoff.md does not exist or is stale (older than today), suggest: 'Run /cca:handoff to save a handoff for your next session.' Do NOT auto-export — only remind if significant work happened."
 					}
 				]
 			}

@@ -250,7 +250,7 @@ describe("HelperFunctions", () => {
 	it("should detect meta files", () => {
 		assert.ok(isMetaFile("hooks/scripts/pre-bash.py"));
 		assert.ok(isMetaFile("agents/athena.md"));
-		assert.ok(isMetaFile("skills/review-code/SKILL.md"));
+		assert.ok(isMetaFile("skills/review/SKILL.md"));
 		assert.ok(isMetaFile("CLAUDE.md"));
 		assert.ok(!isMetaFile("src/main.py"));
 	});

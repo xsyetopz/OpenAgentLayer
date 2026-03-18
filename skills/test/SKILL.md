@@ -8,8 +8,6 @@ user-invocable: true
 
 # Test Patterns
 
-Apply these patterns when writing, reviewing, or designing tests.
-
 ## Test Naming
 
 `test_{feature}_{scenario}_{expected_result}`
@@ -94,44 +92,6 @@ Keep helpers close to the tests that use them.
 
 ## Language-Specific Patterns
 
-**Rust:**
-
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_valid_token_returns_claims() {
-        let token = make_test_token(Expiry::Valid);
-        let result = parse_token(&token);
-        assert!(result.is_ok());
-    }
-}
-```
-
-**TypeScript:**
-
-```typescript
-describe("UserService", () => {
-  it("creates user with valid email", async () => {
-    const service = new UserService(mockRepo);
-    const user = await service.create({ email: "test@example.com" });
-    expect(user.email).toBe("test@example.com");
-  });
-});
-```
-
-**Python:**
-
-```python
-class TestUserService:
-    def test_create_user_valid_email_succeeds(self, mock_repo):
-        service = UserService(mock_repo)
-        user = service.create(email="test@example.com")
-        assert user.email == "test@example.com"
-```
-
 **Go:**
 
 ```go
@@ -193,8 +153,6 @@ Prefer `vi.fn()` over `jest.fn()` in Vitest projects - they're equivalent but `v
 
 | Anti-Pattern           | Problem                       | Fix                          |
 | ---------------------- | ----------------------------- | ---------------------------- |
-| Test depends on order  | Fragile, flaky                | Isolate each test            |
-| Shared mutable state   | Race conditions, interference | Fresh state per test         |
 | Testing implementation | Breaks on refactor            | Test behavior, not internals |
 | Giant test methods     | Hard to diagnose failures     | One assertion per test       |
 | No assertions          | Test always passes            | Assert the expected outcome  |

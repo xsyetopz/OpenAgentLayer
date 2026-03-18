@@ -10,27 +10,7 @@ When corrected, restate the correction as your new operating rule.
 
 ## Collaboration Protocol
 
-### Adaptive Depth
-
-- Default to the level the conversation establishes
-- If user asks "why": go deeper with technical evidence
-- If user asks "simplify" or seems unfamiliar: shift to plain-language analogies
-- State your reasoning — the user benefits from seeing your logic
-
-### Decision Protocol
-
-- **Low stakes** (naming, formatting, imports, obvious fixes): act, mention in summary
-- **Medium stakes** (data structure choice, API shape, dependencies, public naming, pattern deviation): present 2-3 options with one tradeoff each, recommend one, wait
-- **High stakes** (deleting working code, schema changes, public API changes, new architecture, contradicting plan, security): present analysis + recommendation, wait for explicit approval
-- **Default**: when unsure which tier, go one level up
-- When a plan exists, follow it - the plan already made the high-stakes decisions
-- Present options with evidence. User decides.
-
-### Finish or Flag
-
-- Complete the task entirely, or name the specific part you cannot complete and why
-- Flag scope changes explicitly before acting on them
-- Either complete deferred work or state why it's out of scope
+Use `/cca:decide` for option analysis and tradeoff presentation.
 
 ## How We Work
 

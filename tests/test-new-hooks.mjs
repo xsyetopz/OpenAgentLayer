@@ -7,19 +7,19 @@ import { parseHookOutput, runHook } from "./helpers.mjs";
 
 describe("UserPromptSubmit", () => {
 	it("should run without error", () => {
-		const result = runHook("user-prompt-submit.mjs", { prompt: "hello" });
+		const result = runHook("session/prompt-git-context.mjs", { prompt: "hello" });
 		assert.equal(result.status, 0);
 	});
 
 	it("should pass empty prompt", () => {
-		const result = runHook("user-prompt-submit.mjs", { prompt: "" });
+		const result = runHook("session/prompt-git-context.mjs", { prompt: "" });
 		assert.equal(result.status, 0);
 	});
 });
 
 describe("PostFailure", () => {
 	it("should run without error", () => {
-		const result = runHook("post-failure.mjs", {
+		const result = runHook("post/failure-circuit.mjs", {
 			tool_name: "Bash",
 			tool_error: "command not found",
 		});
@@ -27,7 +27,7 @@ describe("PostFailure", () => {
 	});
 
 	it("should log failure", () => {
-		const result = runHook("post-failure.mjs", {
+		const result = runHook("post/failure-circuit.mjs", {
 			tool_name: "Bash",
 			tool_error: "permission denied",
 		});
@@ -37,14 +37,14 @@ describe("PostFailure", () => {
 
 describe("SessionEnd", () => {
 	it("should run without error", () => {
-		const result = runHook("session-end.mjs", {});
+		const result = runHook("session/end-cleanup.mjs", {});
 		assert.equal(result.status, 0);
 	});
 });
 
 describe("TeammateIdle", () => {
 	it("should run and warn", () => {
-		const result = runHook("teammate-idle.mjs", { agent_name: "hermes" });
+		const result = runHook("session/teammate-idle-resume.mjs", { agent_name: "hermes" });
 		const output = parseHookOutput(result);
 		assert.equal(result.status, 0);
 		if (output?.hookSpecificOutput) {
@@ -59,7 +59,7 @@ describe("TeammateIdle", () => {
 
 describe("Notification", () => {
 	it("should run without error", () => {
-		const result = runHook("notification.mjs", {
+		const result = runHook("session/notification-audit.mjs", {
 			message: "test notification",
 		});
 		assert.equal(result.status, 0);
@@ -68,7 +68,7 @@ describe("Notification", () => {
 
 describe("PermissionRequest", () => {
 	it("should run without error", () => {
-		const result = runHook("permission-request.mjs", {
+		const result = runHook("session/permission-audit.mjs", {
 			tool_name: "Bash",
 			permission: "execute",
 		});
@@ -80,7 +80,7 @@ describe("AuditLogging", () => {
 	it("should write audit log when enabled", () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "cca-audit-"));
 		const result = runHook(
-			"notification.mjs",
+			"session/notification-audit.mjs",
 			{ message: "test" },
 			{ CCA_HOOK_LOG_DIR: tmpDir },
 		);
@@ -90,12 +90,15 @@ describe("AuditLogging", () => {
 		assert.ok(lines.length >= 1, "Audit log should contain at least one entry");
 		const entry = JSON.parse(lines[0]);
 		assert.equal(entry.event, "Notification");
-		assert.equal(entry.hook, "notification.mjs");
+		assert.ok(
+			entry.hook.includes("notification"),
+			`Expected hook to include 'notification', got: ${entry.hook}`,
+		);
 	});
 
 	it("should not write log when disabled", () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "cca-noaudit-"));
-		const result = runHook("notification.mjs", { message: "test" });
+		const result = runHook("session/notification-audit.mjs", { message: "test" });
 		assert.equal(result.status, 0);
 		const logFile = join(tmpDir, "cca-hooks.jsonl");
 		assert.ok(!existsSync(logFile));

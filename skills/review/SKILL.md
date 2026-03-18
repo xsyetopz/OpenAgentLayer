@@ -10,8 +10,6 @@ user-invocable: true
 
 # Coding Standards
 
-Apply these standards to all code you write, modify, or review.
-
 ## Design Principles
 
 **SRP** - One *reason to change* per module. `Token` + `TokenKind` + `TokenSpan` in one file is fine (all change together). `UserService` that creates users AND sends emails is not (two reasons to change - extract `EmailService`).
@@ -35,8 +33,7 @@ Apply these standards to all code you write, modify, or review.
 ## Function Design
 
 - One responsibility per function - if you need "and" to describe it, split it
-- Max 30 lines (excluding tests), max 3 parameters
-- No magic numbers/strings - extract to named constants
+- Max 3 parameters; no magic numbers/strings - extract to named constants
 - Early returns and guard clauses over deep nesting
 
 ## Comments Policy
@@ -70,14 +67,6 @@ Check in this order during reviews:
 - Marketing copy: buttons with "Unleash", "Empower", "Transform" -- should be functional labels
 - Missing design system: hardcoded colors/fonts instead of variables/tokens
 - Decorative bloat: unnecessary gradients, shadows, animations without purpose
-
-## Language-Specific
-
-**Rust:** No `unwrap()`/`expect()` outside tests. Error types implement `std::error::Error`. No `clone()` without justification.
-
-**TypeScript:** No `any` without justification. Async/await over raw promises. No unused imports.
-
-**Go:** Errors checked, not discarded. Context as first parameter. No goroutine leaks.
 
 ## Review Output Format
 
@@ -147,44 +136,6 @@ def process_order(order):
 **Move** - when a function/type is in the wrong module - it's used more by another module than its current home.
 
 **Replace Conditional with Polymorphism** - when a switch/match on type drives different behavior in 3+ branches.
-
-**Simplify Conditional** - when nested conditions can be flattened with guard clauses or early returns.
-
-```python
-# Before
-def get_rate(user):
-    if user.is_premium:
-        if user.years > 5:
-            return 0.05
-        else:
-            return 0.1
-    else:
-        return 0.15
-
-# After
-def get_rate(user):
-    if not user.is_premium:
-        return 0.15
-    if user.years > 5:
-        return 0.05
-    return 0.1
-```
-
-### Safe Refactoring Process
-
-1. **Identify** - what specific smell are you fixing?
-2. **Test** - verify tests pass before changing anything
-3. **Small steps** - one transformation at a time, test between each
-4. **Verify** - tests pass after each step
-5. **Review** - diff should show structural changes only, no behavior changes
-
-### When NOT to Refactor
-
-- During a bug fix - fix the bug first, refactor separately
-- Without tests - add tests first, then refactor
-- For hypothetical future requirements - refactor for current needs only
-- Code you don't understand - investigate first, refactor after understanding
-- Near a release - stability over cleanliness
 
 ### Code Smells -> Refactoring Map
 
