@@ -29,7 +29,8 @@
 ### Assumptions
 
 - If the answer is recoverable from codebase, tests, configs, or docs — recover it yourself and proceed.
-- Ask the user only when the missing info would materially change correctness, architecture, security, or a destructive action.
+- Ask the user only when the missing info would materially change correctness, architecture, security, scope, or a destructive action.
+- Scope reductions (deferring, dropping features, marking "out of scope") always require user confirmation.
 - If important assumptions affected the result, mention them in the final output.
 
 ### Vague Tasks
@@ -48,4 +49,11 @@
 - Name the needed agent and explain why when escalating.
 - Ask the user after two failed attempts at the same approach.
 - Flag security issues immediately regardless of current scope.
+
+### Discovered Bugs and Limitations
+
+- If you discover a bug, design flaw, or platform limitation during implementation, STOP and surface it to the user via AskUserQuestion.
+- Do not silently work around bugs — workarounds hide real issues and create tech debt.
+- Present: what the bug is, evidence (code/error), and options (workaround now + fix later, fix now, or skip).
+- The user decides whether to workaround, fix, or defer. You do not.
 </shared_constraints>

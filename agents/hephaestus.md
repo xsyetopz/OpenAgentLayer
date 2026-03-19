@@ -57,7 +57,7 @@ Communicate like a senior developer submitting a PR — code speaks, comments ex
 - For ambiguous scope: use AskUserQuestion (which files? acceptance criteria? constraints?).
 - Challenge technically wrong approaches with evidence — propose the better alternative.
 - Actively check for: null/undefined paths, off-by-one errors, async timing issues, missing validation, and silent failures.
-- Either complete deferred work or state explicitly why it's out of scope.
+- Never defer work or declare anything "out of scope" without asking the user first via AskUserQuestion. The user decides scope, not you.
 </behavioral_rules>
 
 <before_finishing>
@@ -80,5 +80,5 @@ __SHARED_CONSTRAINTS__
 __PACKAGE_CONSTRAINTS__
 
 <output_format>
-Code changes with brief summary of what changed and why. If scope was reduced, state what was dropped and why.
+Code changes with brief summary of what changed and why.
 </output_format>

@@ -166,7 +166,7 @@ describe("Allow", () => {
 });
 
 describe("StopWarn", () => {
-	it("should produce no stdout and write message to stderr", () => {
+	it("should write message to stderr and produce no stdout", () => {
 		let stderrMsg = "";
 		let captured = "";
 		let exitCalled = false;
@@ -196,21 +196,12 @@ describe("StopWarn", () => {
 		}
 		assert.ok(exitCalled, "stopWarn must call process.exit");
 		assert.ok(stderrMsg.includes("stale session"));
-		const parsed = JSON.parse(captured.trim());
-		assert.strictEqual(
-			parsed.hookSpecificOutput.hookEventName,
-			"Stop",
-			"stopWarn must emit Stop event JSON to stdout",
-		);
-		assert.ok(
-			parsed.hookSpecificOutput.additionalContext.includes("stale session"),
-			"stopWarn stdout must include the message",
-		);
+		assert.strictEqual(captured, "", "stopWarn must not write to stdout");
 	});
 });
 
 describe("StopBlock", () => {
-	it("should exit with code 1 and write JSON to stdout and message to stderr", () => {
+	it("should exit with code 2 and write flat decision JSON to stdout", () => {
 		let stderrMsg = "";
 		let stdoutMsg = "";
 		let exitCode = null;
@@ -238,14 +229,15 @@ describe("StopBlock", () => {
 			process.stdout.write = origStdout;
 			process.exit = origExit;
 		}
-		assert.equal(exitCode, 1);
+		assert.equal(exitCode, 2);
 		assert.ok(stderrMsg.includes("placeholders found"));
 		const parsed = JSON.parse(stdoutMsg.trim());
-		assert.strictEqual(parsed.hookSpecificOutput.hookEventName, "Stop");
-		assert.ok(
-			parsed.hookSpecificOutput.additionalContext.includes(
-				"placeholders found",
-			),
+		assert.strictEqual(parsed.decision, "block");
+		assert.ok(parsed.reason.includes("placeholders found"));
+		assert.strictEqual(
+			parsed.hookSpecificOutput,
+			undefined,
+			"stopBlock must not use hookSpecificOutput wrapper",
 		);
 	});
 });
