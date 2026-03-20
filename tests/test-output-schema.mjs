@@ -166,17 +166,11 @@ describe("Allow", () => {
 });
 
 describe("StopWarn", () => {
-	it("should write message to stderr and produce no stdout", () => {
-		let stderrMsg = "";
+	it("should write JSON to stdout with decision warn", () => {
 		let captured = "";
 		let exitCalled = false;
-		const origStderr = process.stderr.write.bind(process.stderr);
 		const origWrite = process.stdout.write.bind(process.stdout);
 		const origExit = process.exit;
-		process.stderr.write = (chunk) => {
-			stderrMsg += chunk;
-			return true;
-		};
 		process.stdout.write = (chunk) => {
 			captured += chunk;
 			return true;
@@ -190,19 +184,18 @@ describe("StopWarn", () => {
 		} catch (err) {
 			if (!err.message.includes("__exit__")) throw err;
 		} finally {
-			process.stderr.write = origStderr;
 			process.stdout.write = origWrite;
 			process.exit = origExit;
 		}
 		assert.ok(exitCalled, "stopWarn must call process.exit");
-		assert.ok(stderrMsg.includes("stale session"));
-		assert.strictEqual(captured, "", "stopWarn must not write to stdout");
+		const parsed = JSON.parse(captured.trim());
+		assert.strictEqual(parsed.decision, "warn");
+		assert.ok(parsed.reason.includes("stale session"));
 	});
 });
 
 describe("StopBlock", () => {
 	it("should exit with code 2 and write flat decision JSON to stdout", () => {
-		let stderrMsg = "";
 		let stdoutMsg = "";
 		let exitCode = null;
 		const origStderr = process.stderr.write.bind(process.stderr);
@@ -230,7 +223,6 @@ describe("StopBlock", () => {
 			process.exit = origExit;
 		}
 		assert.equal(exitCode, 2);
-		assert.ok(stderrMsg.includes("placeholders found"));
 		const parsed = JSON.parse(stdoutMsg.trim());
 		assert.strictEqual(parsed.decision, "block");
 		assert.ok(parsed.reason.includes("placeholders found"));

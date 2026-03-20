@@ -1,6 +1,6 @@
 # ClaudeAgents
 
-7 agents, 11 skills, 13 hooks, custom output style + statusline. Targets CC v2.1.76+.
+7 agents, 11 skills, 10 hooks, custom output style + statusline. Targets CC v2.1.76+.
 
 ## Agents
 
@@ -46,19 +46,14 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 
 - `pre/validate-input.mjs` — schema validation for tool inputs
 - `pre/bash-guard.mjs` — guards dangerous bash commands
-- `pre/http-proxy.mjs` — optional HTTP DLP forwarding
 - `post/write-quality.mjs` — auto-format + placeholder + slop scan
 - `post/bash-redact.mjs` — redacts secrets from output
 - `post/failure-circuit.mjs` — retry loop detection
-- `post/http-proxy.mjs` — optional HTTP DLP forwarding
 - `post/subagent-scan.mjs` — placeholder scan on subagent stop
 - `post/stop-scan.mjs` — placeholder scan on session stop
 - `session/start-budget.mjs` — line budget warnings
-- `session/end-cleanup.mjs` — cleanup + audit summary
 - `session/prompt-git-context.mjs` — git context injection
 - `session/teammate-idle-resume.mjs` — force idle agent continuation
-- `session/notification-audit.mjs` — audit logging
-- `session/permission-audit.mjs` — audit trail
 
 ## Model Strategy
 

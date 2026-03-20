@@ -80,7 +80,7 @@ function readStdin() {
 
 function isSensitiveFile(filepath) {
 	const base = basename(filepath);
-	if (base === ".env" || base.startsWith(".env.")) return true;
+	if (base === ".env" || (base.startsWith(".env.") && !base.endsWith(".example"))) return true;
 	const ext = `.${filepath.split(".").pop()}`;
 	if (SENSITIVE_EXTENSIONS.has(ext)) return true;
 	return SENSITIVE_DIRS.some((d) => filepath.includes(d));

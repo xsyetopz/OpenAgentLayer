@@ -64,7 +64,10 @@ function fileIssues(filepath) {
 	}
 
 	const basename = filepath.split("/").pop();
-	if (basename === ".env" || basename.startsWith(".env.")) {
+	if (
+		basename === ".env" ||
+		(basename.startsWith(".env.") && !basename.endsWith(".example"))
+	) {
 		blockers.push(`.env file staged: ${filepath}`);
 		return { blockers, warnings };
 	}

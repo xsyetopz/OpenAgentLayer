@@ -12,10 +12,9 @@ import { auditLog, passthrough, readStdin } from "../_lib.mjs";
 			"PermissionRequest",
 			"permission-request.mjs",
 			"permission_requested",
-			{
-				tool: toolName,
-				extra: { permission: String(permission).slice(0, 200) },
-			},
+			"",
+			toolName,
+			{ permission: String(permission).slice(0, 200) },
 		);
 		passthrough();
 	} catch {

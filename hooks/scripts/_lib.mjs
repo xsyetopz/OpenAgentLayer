@@ -269,12 +269,13 @@ export function genericBlock(message, event = "PreToolUse") {
 }
 
 export function stopWarn(message) {
-	process.stderr.write(`[cca:stop] ${message}\n`);
+	process.stdout.write(
+		`${JSON.stringify({ decision: "warn", reason: message })}\n`,
+	);
 	process.exit(0);
 }
 
 export function stopBlock(message) {
-	process.stderr.write(`[cca:stop] BLOCKED: ${message}\n`);
 	process.stdout.write(
 		`${JSON.stringify({
 			decision: "block",
