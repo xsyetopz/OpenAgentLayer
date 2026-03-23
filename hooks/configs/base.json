@@ -41,16 +41,6 @@
 						"timeout": 10
 					}
 				]
-			},
-			{
-				"matcher": "TeamCreate",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/pre/team-guard.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
-						"timeout": 5
-					}
-				]
 			}
 		],
 		"PostToolUse": [
@@ -98,17 +88,6 @@
 						"type": "command",
 						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/post/subagent-scan.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
 						"timeout": 15
-					}
-				]
-			}
-		],
-		"TeammateIdle": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "H=\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/teammate-idle-resume.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
-						"timeout": 5
 					}
 				]
 			}

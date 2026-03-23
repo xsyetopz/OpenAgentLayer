@@ -92,17 +92,6 @@
 				]
 			}
 		],
-		"TeammateIdle": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/session/teammate-idle-resume.mjs",
-						"timeout": 5
-					}
-				]
-			}
-		],
 		"Stop": [
 			{
 				"hooks": [

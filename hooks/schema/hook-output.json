@@ -122,22 +122,6 @@
 							"type": "string"
 						}
 					}
-				},
-				{
-					"type": "object",
-					"additionalProperties": false,
-					"required": [
-						"hookEventName"
-					],
-					"properties": {
-						"hookEventName": {
-							"type": "string",
-							"const": "TeammateIdle"
-						},
-						"additionalContext": {
-							"type": "string"
-						}
-					}
 				}
 			]
 		}

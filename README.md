@@ -3,14 +3,12 @@
 [![CI](https://github.com/xsyetopz/ClaudeAgents/actions/workflows/ci.yml/badge.svg)](https://github.com/xsyetopz/ClaudeAgents/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**7 agents, 10 skills, 13 hooks.** One plans, one codes, one reviews, one tests -- you talk.
+**7 agents, 11 skills, 8 hooks.** One plans, one codes, one reviews, one tests -- you talk.
 
 ```bash
-# One command
-bash <(curl -fsSL https://raw.githubusercontent.com/xsyetopz/ClaudeAgents/master/install.sh)
-
-# Or via plugin
-claude plugin install cca
+# Bootstrap (registers marketplace, installs user-level extras, then installs plugin)
+git clone https://github.com/xsyetopz/ClaudeAgents && cd ClaudeAgents
+./install.sh --pro    # or --max for opus planning/review agents
 ```
 
 ---
@@ -23,7 +21,6 @@ Claude Code is powerful out of the box. ClaudeAgents adds:
 - **Safety hooks** that catch placeholders, secrets, scope reduction, and sloppy AI prose automatically
 - **Anti-rationalization gates** that prevent Claude from rationalizing incomplete work
 - **Tier-based models** so you control cost: Haiku for tests, Sonnet for code, Opus for architecture
-- **Agent team workflows** for end-to-end feature development, debugging, and review
 
 ---
 
@@ -44,7 +41,7 @@ graph TD
 
     Odysseus -- delegates to --> Agents
 
-    Odysseus --> Hooks["Safety Hooks (13 lifecycle events)"]
+    Odysseus --> Hooks["Safety Hooks (8 lifecycle events)"]
 
     subgraph Events [Lifecycle Hooks]
         direction TB
@@ -55,10 +52,6 @@ graph TD
         SessionStart["<b>SessionStart</b>: context budget warning, git context injection"]
         UserPromptSubmit["<b>UserPromptSubmit</b>: prompt validation"]
         PostToolUseFailure["<b>PostToolUseFailure</b>: retry loop detection"]
-        TeammateIdle["<b>TeammateIdle</b>: force agent continuation"]
-        SessionEnd["<b>SessionEnd</b>: cleanup, audit summary"]
-        Notification["<b>Notification</b>: audit logging"]
-        PermissionRequest["<b>PermissionRequest</b>: audit trail"]
     end
 
     Hooks --> Events
@@ -66,86 +59,67 @@ graph TD
 
 ---
 
-## Marketplace
-
-Manage the plugin via the CLI:
+## Plugin Management
 
 ```bash
-claude plugin install cca           # install from marketplace
-claude plugin update cca            # update to latest version
-claude plugin remove cca            # remove
-claude plugin list                  # list installed plugins
-claude plugin validate ./dist/...   # validate a local build
+claude plugin install cca@claude-agents   # install (done by bootstrap)
+claude plugin update cca@claude-agents    # update to latest
+claude plugin uninstall cca@claude-agents # remove
+claude plugin list                        # list installed
 ```
 
 ---
 
 ## Agents
 
-| Who | What | pro | max | enterprise |
-|-----|------|-----|-----|------------|
-| **@athena** | Plans, designs, architects | sonnet | opus | opus |
-| **@hephaestus** | Writes code, fixes bugs | sonnet | sonnet | sonnet |
-| **@nemesis** | Reviews code, audits security | sonnet | opus | opus |
-| **@atalanta** | Runs tests, finds root causes | haiku | haiku | haiku |
-| **@calliope** | Writes docs (markdown only) | haiku | haiku | haiku |
-| **@hermes** | Explores codebases, traces flows | sonnet | sonnet | sonnet |
-| **@odysseus** | Coordinates multi-step tasks | sonnet | opus | opus |
+| Who             | What                             | pro      | max      |
+| --------------- | -------------------------------- | -------- | -------- |
+| **@athena**     | Plans, designs, architects       | sonnet   | opus[1m] |
+| **@hephaestus** | Writes code, fixes bugs          | sonnet   | sonnet   |
+| **@nemesis**    | Reviews code, audits security    | sonnet   | opus[1m] |
+| **@atalanta**   | Runs tests, finds root causes    | haiku    | haiku    |
+| **@calliope**   | Writes docs (markdown only)      | haiku    | haiku    |
+| **@hermes**     | Explores codebases, traces flows | sonnet   | sonnet   |
+| **@odysseus**   | Coordinates multi-step tasks     | opusplan | opusplan |
 
-**`--pro`** = Sonnet everywhere (Haiku for tests/docs). **`--max`** = Opus for @athena, @nemesis, @odysseus. **`--enterprise`** = max + audit logs, DLP, compliance.
+**`--pro`** = Sonnet everywhere (Haiku for tests/docs). **`--max`** = Opus[1m] for @athena, @nemesis; opusplan for @odysseus.
 
 ---
 
 ## Skills
 
-| What it does | Plugin | Manual |
-|---|---|---|
-| Code review | `/cca:review` | `/cca-review` |
-| Remove AI slop | `/cca:desloppify` | `/cca-desloppify` |
-| Commits, branches, PRs | `/cca:ship` | `/cca-ship` |
-| Present options + tradeoffs | `/cca:decide` | `/cca-decide` |
-| Security audit (OWASP) | `/cca:security` | `/cca-security` |
-| Test strategy + coverage | `/cca:test` | `/cca-test` |
-| Docs: READMEs, ADRs, changelogs | `/cca:docs` | `/cca-docs` |
-| Performance optimization | `/cca:perf` | `/cca-perf` |
-| Error handling patterns | `/cca:errors` | `/cca-errors` |
-| Session handoff | `/cca:handoff` | `/cca-handoff` |
-
----
-
-## Team Workflows
-
-Pre-built multi-agent pipelines:
-
-| Command | Pipeline |
-|---------|----------|
-| `/team-review` | @hermes explores -> @nemesis reviews -> @atalanta tests |
-| `/team-feature` | @athena plans -> @hephaestus builds -> @nemesis reviews -> @atalanta tests |
-| `/team-debug` | @hermes investigates -> @hephaestus fixes -> @atalanta verifies |
-| `/team-refactor` | @athena designs -> @hephaestus refactors -> @nemesis reviews |
-| `/team-ship` | @nemesis reviews -> @atalanta tests -> /cca:ship |
+| What it does                    | Command           |
+| ------------------------------- | ----------------- |
+| Code review                     | `/cca:review`     |
+| Remove AI slop                  | `/cca:desloppify` |
+| Commits, branches, PRs          | `/cca:ship`       |
+| Present options + tradeoffs     | `/cca:decide`     |
+| Security audit (OWASP)          | `/cca:security`   |
+| Test strategy + coverage        | `/cca:test`       |
+| Docs: READMEs, ADRs, changelogs | `/cca:docs`       |
+| Performance optimization        | `/cca:perf`       |
+| Error handling patterns         | `/cca:errors`     |
+| Session handoff                 | `/cca:handoff`    |
+| Code style detection            | `/cca:style`      |
 
 ---
 
 ## Safety Rails
 
-**13/13 hook lifecycle events covered.** All automatic.
+**8/8 hook lifecycle events covered.** All automatic.
 
-| Hook | When | What it does |
-|------|------|-------------|
-| `pre-secrets` | Before any tool | Blocks .env reads, auth header leaks, force-push to main |
-| `pre-bash` | Before shell | Blocks dangerous commands, DNS exfil, blanket git add |
-| `pre-schema` | Before any tool | Validates file paths and content |
-| `post-write` | After write/edit | Auto-formats, catches placeholders and comment slop |
-| `post-bash` | After shell | Scrubs secrets and PII from output |
-| `post-failure` | After tool error | Detects retry loops, suggests alternatives |
-| `user-prompt-submit` | User sends prompt | Git context injection |
-| `subagent-scan` | Agent stop | Catches stubs, silent scope reduction |
-| `stop-scan` | Session end | Anti-rationalization gate, completion check |
-| `teammate-idle` | Agent idle | Prevents premature idle in team workflows |
-| `session-budget` | Session start | Warns when config files exceed line budgets |
-| `notification` | Notifications | Audit logging |
-| `permission-request` | Permission dialog | Audit trail |
+| Hook                 | When              | What it does                                             |
+| -------------------- | ----------------- | -------------------------------------------------------- |
+| `pre-secrets`        | Before any tool   | Blocks .env reads, auth header leaks, force-push to main |
+| `pre-bash`           | Before shell      | Blocks dangerous commands, DNS exfil, blanket git add    |
+| `pre-schema`         | Before any tool   | Validates file paths and content                         |
+| `post-write`         | After write/edit  | Auto-formats, catches placeholders and comment slop      |
+| `post-bash`          | After shell       | Scrubs secrets and PII from output                       |
+| `post-failure`       | After tool error  | Detects retry loops, suggests alternatives               |
+| `user-prompt-submit` | User sends prompt | Git context injection                                    |
+| `subagent-scan`      | Agent stop        | Catches stubs, silent scope reduction                    |
+| `stop-scan`          | Session end       | Anti-rationalization gate, completion check              |
+| `session-budget`     | Session start     | Warns when config files exceed line budgets              |
 
 Plus: LSP error check prompt after every file change, scope reduction and collaboration protocol prompts on every agent stop.
 
@@ -154,11 +128,11 @@ Plus: LSP error check prompt after every file change, scope reduction and collab
 ## Install
 
 ```bash
-./install.sh /path/to/project --pro        # sonnet (haiku for atalanta/calliope)
-./install.sh /path/to/project --max        # opus for athena/nemesis/odysseus
-./install.sh /path/to/project --enterprise # max + audit logs, DLP, compliance
-./install.sh /path/to/project --max --zen-mode  # composable zen constraints
-./install.sh --global --pro                # ~/.claude/
+# Bootstrap: registers marketplace, installs user-level extras, installs plugin
+git clone https://github.com/xsyetopz/ClaudeAgents && cd ClaudeAgents
+./install.sh --pro         # sonnet agents (haiku for atalanta/calliope)
+./install.sh --max         # opus[1m] for athena/nemesis
+./install.sh --skip-rtk    # skip RTK token-savings tool
 ```
 
 ---
@@ -203,9 +177,8 @@ make validate  # lint + test + build
 ## Uninstall
 
 ```bash
-claude plugin uninstall cca          # plugin
-./uninstall.sh --global              # manual global
-./uninstall.sh /path/to/project      # manual project
+./uninstall.sh --global              # removes plugin, user-level files, cleans settings
+./uninstall.sh /path/to/project      # removes project-level files
 ```
 
 ---

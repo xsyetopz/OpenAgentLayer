@@ -3,11 +3,13 @@ import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { parseHookOutput, runHook } from "./helpers.mjs";
+import { runHook } from "./helpers.mjs";
 
 describe("UserPromptSubmit", () => {
 	it("should run without error", () => {
-		const result = runHook("session/prompt-git-context.mjs", { prompt: "hello" });
+		const result = runHook("session/prompt-git-context.mjs", {
+			prompt: "hello",
+		});
 		assert.equal(result.status, 0);
 	});
 
@@ -39,21 +41,6 @@ describe("SessionEnd", () => {
 	it("should run without error", () => {
 		const result = runHook("session/end-cleanup.mjs", {});
 		assert.equal(result.status, 0);
-	});
-});
-
-describe("TeammateIdle", () => {
-	it("should run and warn", () => {
-		const result = runHook("session/teammate-idle-resume.mjs", { agent_name: "hermes" });
-		const output = parseHookOutput(result);
-		assert.equal(result.status, 0);
-		if (output?.hookSpecificOutput) {
-			const ctx = output.hookSpecificOutput.additionalContext || "";
-			assert.ok(
-				ctx.toLowerCase().includes("hermes") ||
-					ctx.toLowerCase().includes("idle"),
-			);
-		}
 	});
 });
 
@@ -98,7 +85,9 @@ describe("AuditLogging", () => {
 
 	it("should not write log when disabled", () => {
 		const tmpDir = mkdtempSync(join(tmpdir(), "cca-noaudit-"));
-		const result = runHook("session/notification-audit.mjs", { message: "test" });
+		const result = runHook("session/notification-audit.mjs", {
+			message: "test",
+		});
 		assert.equal(result.status, 0);
 		const logFile = join(tmpDir, "cca-hooks.jsonl");
 		assert.ok(!existsSync(logFile));

@@ -14,7 +14,7 @@ TARGET_DIR=""
 INSTALL_SCOPE="project"
 
 usage() {
-    echo -e "${GREEN}Claude Code Agent System Uninstaller${NC}"
+    echo -e "${GREEN}CCA Uninstaller${NC}"
     echo "Usage: $0 <target-dir>|--global"
     echo "  <target-dir>  : Path to your project"
     echo "  --global      : Uninstall from global ~/.claude/"
@@ -119,7 +119,7 @@ clean_settings_json() {
 
     jq '
         # Remove framework env vars
-        .env |= (del(.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) | del(.CLAUDE_CODE_HIDE_ACCOUNT_INFO) | del(.CLAUDE_CODE_IDLE_TERMINATE_MINUTES) | del(.DISABLE_AUTOUPDATER)) |
+        .env |= (del(.CLAUDE_CODE_HIDE_ACCOUNT_INFO) | del(.CLAUDE_CODE_IDLE_TERMINATE_MINUTES) | del(.DISABLE_AUTOUPDATER)) |
         if (.env | length) == 0 then del(.env) else . end |
 
         # Remove framework permissions
@@ -178,6 +178,9 @@ confirm_uninstall() {
     echo -e "${YELLOW}Settings cleanup:${NC}"
     echo "  - Framework keys removed from settings.json (backup created)"
     echo ""
+    echo -e "${YELLOW}Plugin:${NC}"
+    echo "  - claude plugin uninstall cca@claude-agents"
+    echo ""
     echo -e "${GREEN}Will NOT remove:${NC}"
     echo "  - CLAUDE.md (may contain customizations)"
     echo "  - RTK (separate tool - use 'brew uninstall rtk' or remove manually)"
@@ -193,20 +196,31 @@ main() {
 
     if [[ "$INSTALL_SCOPE" == "global" ]]; then
         CLAUDE_DIR="$HOME/.claude"
-        echo -e "${GREEN}Claude Code Agent System Uninstaller${NC}"
+        echo -e "${GREEN}CCA Uninstaller${NC}"
         echo "Target: $CLAUDE_DIR (global)"
     else
         [[ -z "$TARGET_DIR" ]] && die "Target directory required, or use --global"
         [[ ! -d "$TARGET_DIR" ]] && die "Directory does not exist: $TARGET_DIR"
         TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
         CLAUDE_DIR="$TARGET_DIR/.claude"
-        echo -e "${GREEN}Claude Code Agent System Uninstaller${NC}"
+        echo -e "${GREEN}CCA Uninstaller${NC}"
         echo "Target: $CLAUDE_DIR"
     fi
 
     [[ -d "$CLAUDE_DIR" ]] || die "No .claude directory found at target"
 
     confirm_uninstall
+
+    # Uninstall plugin first
+    if command -v claude &>/dev/null; then
+        echo -e "\nUninstalling plugin:"
+        if claude plugin uninstall cca@claude-agents 2>/dev/null; then
+            info "Plugin uninstalled"
+        else
+            warn "Plugin not installed or already removed"
+        fi
+    fi
+
     remove_framework_files
     remove_user_level_hooks
     remove_global_extras

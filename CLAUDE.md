@@ -1,6 +1,6 @@
 # ClaudeAgents
 
-7 agents, 11 skills, 10 hooks, custom output style + statusline. Targets CC v2.1.76+.
+7 agents, 11 skills, 8 hooks, custom output style + statusline. Targets CC v2.1.76+.
 
 ## Agents
 
@@ -18,21 +18,21 @@
 
 ## Skills
 
-Plugin install (`claude plugin install cca`) gives the `cca:` prefix. Manual install (`install.sh`) has no prefix.
+Install via plugin: `claude plugin install cca@claude-agents`. Bootstrap script handles marketplace registration and user-level extras.
 
-| Skill        | Plugin            | Manual        | Status |
-| ------------ | ----------------- | ------------- | ------ |
-| `review`     | `/cca:review`     | `/review`     | Active |
-| `desloppify` | `/cca:desloppify` | `/desloppify` | Active |
-| `ship`       | `/cca:ship`       | `/ship`       | Active |
-| `decide`     | `/cca:decide`     | `/decide`     | Active |
-| `security`   | `/cca:security`   | `/security`   | Active |
-| `test`       | `/cca:test`       | `/test`       | Active |
-| `docs`       | `/cca:docs`       | `/docs`       | Active |
-| `perf`       | `/cca:perf`       | `/perf`       | Active |
-| `errors`     | `/cca:errors`     | `/errors`     | Active |
-| `handoff`    | `/cca:handoff`    | `/handoff`    | Active |
-| `style`      | `/cca:style`      | `/style`      | Active |
+| Skill        | Command           | Status |
+| ------------ | ----------------- | ------ |
+| `review`     | `/cca:review`     | Active |
+| `desloppify` | `/cca:desloppify` | Active |
+| `ship`       | `/cca:ship`       | Active |
+| `decide`     | `/cca:decide`     | Active |
+| `security`   | `/cca:security`   | Active |
+| `test`       | `/cca:test`       | Active |
+| `docs`       | `/cca:docs`       | Active |
+| `perf`       | `/cca:perf`       | Active |
+| `errors`     | `/cca:errors`     | Active |
+| `handoff`    | `/cca:handoff`    | Active |
+| `style`      | `/cca:style`      | Active |
 
 ## Hooks
 
@@ -53,7 +53,6 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 - `post/stop-scan.mjs` — placeholder scan on session stop
 - `session/start-budget.mjs` — line budget warnings
 - `session/prompt-git-context.mjs` — git context injection
-- `session/teammate-idle-resume.mjs` — force idle agent continuation
 
 ## Model Strategy
 
@@ -87,7 +86,7 @@ templates/       CLAUDE.md, settings-global.json
 output-styles/   cca.md (custom output style)
 statusline/      statusline-command.sh (context/cost/git statusline)
 tests/           node:test tests for all hooks
-install.sh       Package flags, model substitution, validation
+install.sh       Bootstrap: marketplace registration, user-level extras, plugin install
 build-plugin.sh  Builds marketplace-ready dist from source
 ```
 

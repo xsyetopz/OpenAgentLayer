@@ -6,10 +6,9 @@ All notable changes to ClaudeAgents are documented here. Format follows [Keep a 
 
 ### Added
 
-- **13/13 hook lifecycle events** covered (was 6/13): UserPromptSubmit, PostToolUseFailure, SessionEnd, TeammateIdle, Notification, PermissionRequest
+- **8/8 hook lifecycle events** covered: UserPromptSubmit, PostToolUseFailure, SessionEnd, Notification, PermissionRequest
 - **Anti-rationalization Stop hook** prevents Claude from rationalizing incomplete work
 - **JSON audit logging** via `CCA_HOOK_LOG_DIR` env var (all hooks write JSONL)
-- **Agent team workflow commands**: team-review, team-feature, team-debug, team-refactor, team-ship
 - **CI/CD pipeline**: GitHub Actions for shellcheck, jsonlint, node:test, install validation, plugin build
 - **Test suite**: 65 tests covering all hook scripts, shared patterns, and install validation
 - **SECURITY.md**: vulnerability reporting, security model, sandboxing recommendations
