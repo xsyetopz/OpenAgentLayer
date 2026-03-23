@@ -4,15 +4,15 @@
 
 ## Agents
 
-| Agent       | File          | pro        | max        | Purpose                                  |
-| ----------- | ------------- | ---------- | ---------- | ---------------------------------------- |
-| @athena     | athena.md     | `sonnet`   | `opus[1m]` | Design, plan, architect                  |
-| @hephaestus | hephaestus.md | `sonnet`   | `sonnet`   | Write code, fix bugs, build features     |
-| @nemesis    | nemesis.md    | `sonnet`   | `opus[1m]` | Review code, security audit              |
-| @atalanta   | atalanta.md   | `haiku`    | `haiku`    | Run tests, parse failures, root causes   |
-| @calliope   | calliope.md   | `haiku`    | `haiku`    | Write/edit documentation (markdown only) |
-| @hermes     | hermes.md     | `sonnet`   | `sonnet`   | Research, explore codebase, cite sources |
-| @odysseus   | odysseus.md   | `opusplan` | `opusplan` | Multi-step delegation, progress tracking |
+| Agent       | File          | Model      | Purpose                                  |
+| ----------- | ------------- | ---------- | ---------------------------------------- |
+| @athena     | athena.md     | `opus[1m]` | Design, plan, architect                  |
+| @hephaestus | hephaestus.md | `opus[1m]` | Write code, fix bugs, build features     |
+| @nemesis    | nemesis.md    | `opus[1m]` | Review code, security audit              |
+| @atalanta   | atalanta.md   | `opus[1m]` | Run tests, parse failures, root causes   |
+| @calliope   | calliope.md   | `opus[1m]` | Write/edit documentation (markdown only) |
+| @hermes     | hermes.md     | `opus[1m]` | Research, explore codebase, cite sources |
+| @odysseus   | odysseus.md   | `opusplan` | Multi-step delegation, progress tracking |
 
 **Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
 
@@ -56,11 +56,9 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 
 ## Model Strategy
 
-- **Pro** (`--pro`): `opusplan` orchestrator (opus planning, sonnet execution). All subagents sonnet/haiku.
-- **Max** (`--max`): `opusplan` orchestrator. Athena/Nemesis get opus[1m]. Rest sonnet/haiku.
-- Env vars pin model versions per tier: pro uses standard context, max uses `opus[1m]`.
-- Output style: CCA (positive identity framing, evidence-based, developer-facing).
-- Statusline: model, context %, cost, git branch.
+- Orchestrator: `opusplan` (opus planning, sonnet execution).
+- All subagents: `opus[1m]`.
+- Env vars pin model versions. Output style: CCA. Statusline: model, context %, cost, git branch.
 
 ## Development
 
@@ -77,11 +75,11 @@ make validate  # lint + test + build
 .claude-plugin/  plugin.json (marketplace manifest)
 .github/         workflows/ (ci.yml, release.yml), ISSUE_TEMPLATE/, CONTRIBUTING.md
 agents/          7 agent definitions (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
-skills/          11 skill directories (review, desloppify, ship, style, etc.)
-hooks/           configs/ (base.json, pro.json, max.json)
+skills/          11 skill directories (review, desloppify, ship, test, etc.)
+hooks/           configs/ (base.json)
                  user/ (pre-secrets.mjs, rtk-rewrite.sh)
                  scripts/ (_lib.mjs, pre/, post/, session/)
-constraints/     shared.md, pro.md, max.md, zen.md
+constraints/     shared.md, max.md, zen.md
 templates/       CLAUDE.md, settings-global.json
 output-styles/   cca.md (custom output style)
 statusline/      statusline-command.sh (context/cost/git statusline)

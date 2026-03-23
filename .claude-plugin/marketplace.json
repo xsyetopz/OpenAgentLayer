@@ -8,7 +8,7 @@
 			"name": "cca",
 			"source": "./",
 			"description": "7 specialised agents, 11 skills, and 10 safety hooks for Claude Code",
-			"version": "0.8.1",
+			"version": "0.9.0",
 			"keywords": [
 				"agents",
 				"skills",

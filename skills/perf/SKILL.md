@@ -22,50 +22,7 @@ user-invocable: true
 
 ## Common Bottlenecks
 
-### N+1 Queries
-
-```python
-# Problem: 1 query for users + N queries for orders
-for user in users:
-    orders = db.query(f"SELECT * FROM orders WHERE user_id = {user.id}")
-
-# Fix: join or batch
-users_with_orders = db.query("SELECT u.*, o.* FROM users u LEFT JOIN orders o ON o.user_id = u.id")
-```
-
-### Allocations in Loops
-
-```rust
-// Problem: new Vec per iteration
-for item in items {
-    let buffer = Vec::new();
-    process(&mut buffer, item);
-}
-
-// Fix: allocate once, reuse
-let mut buffer = Vec::new();
-for item in items {
-    buffer.clear();
-    process(&mut buffer, item);
-}
-```
-
-### Blocking in Async
-
-```typescript
-// Problem: sequential when operations are independent
-for (const item of items) {
-  await heavyComputation(item);
-}
-
-// Fix: parallelize
-await Promise.all(items.map(item => heavyComputation(item)));
-```
-
-```sql
--- Fix: index the queried column
-CREATE INDEX idx_orders_customer_email ON orders(customer_email);
-```
+See `reference/bottleneck-patterns.md` for N+1 patterns (Prisma, SQLAlchemy, GORM), allocation reuse, async parallelization, missing indexes, and caching implementations.
 
 ## Data Structure Selection
 
@@ -90,12 +47,7 @@ Always define: cache key strategy, eviction policy (LRU, TTL, size-based), inval
 
 ## Profiling Tools
 
-| Language        | CPU Profiler               | Memory Profiler                  |
-| --------------- | -------------------------- | -------------------------------- |
-| Rust            | `cargo flamegraph`, `perf` | `dhat`, `heaptrack`              |
-| TypeScript/Node | `--prof`, `clinic.js`      | `--heap-prof`, Chrome DevTools   |
-| Python          | `cProfile`, `py-spy`       | `tracemalloc`, `memory-profiler` |
-| Go              | `pprof`                    | `pprof` (heap profile)           |
+See `reference/profiling-tools.md` for commands, flags, and output interpretation per language (Rust, TypeScript/Node, Python, Go).
 
 ## Anti-Patterns
 

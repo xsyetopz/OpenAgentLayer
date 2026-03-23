@@ -166,7 +166,7 @@ describe("Allow", () => {
 });
 
 describe("StopWarn", () => {
-	it("should write JSON to stdout with decision warn", () => {
+	it("should write JSON to stdout with decision approve", () => {
 		let captured = "";
 		let exitCalled = false;
 		const origWrite = process.stdout.write.bind(process.stdout);
@@ -189,7 +189,7 @@ describe("StopWarn", () => {
 		}
 		assert.ok(exitCalled, "stopWarn must call process.exit");
 		const parsed = JSON.parse(captured.trim());
-		assert.strictEqual(parsed.decision, "warn");
+		assert.strictEqual(parsed.decision, "approve");
 		assert.ok(parsed.reason.includes("stale session"));
 	});
 });

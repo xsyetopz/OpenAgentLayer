@@ -7,40 +7,18 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST_DIR="$SCRIPT_DIR/dist/claude-agents-plugin"
-PACKAGE="${1:-pro}"
-
-die()   { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
-info()  { echo -e "  ${GREEN}✓${NC} $1"; }
-
-set_package() {
-    case "$1" in
-        enterprise|pro|max) PACKAGE="$1" ;;
-        consumer) PACKAGE="pro" ;;
-        *) die "Unknown package: $1. Use 'pro', 'max', or 'enterprise'." ;;
-    esac
-}
+die()  { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
+info() { echo -e "  ${GREEN}✓${NC} $1"; }
 
 apply_package_models_in_file() {
     local src="$1" dest="$2"
-    local agent_name
-    agent_name=$(grep -m1 '^name:' "$src" 2>/dev/null | sed 's/^name: *//')
-    case "$PACKAGE" in
-        enterprise|max)
-            case "$agent_name" in
-                athena|nemesis|odysseus) cp "$src" "$dest" ;;
-                *) sed -e 's/^model: opus$/model: sonnet/' "$src" > "$dest" ;;
-            esac
-            ;;
-        pro)
-            sed -e 's/^model: opus$/model: sonnet/' "$src" > "$dest"
-            ;;
-    esac
+    cp "$src" "$dest"
 }
 
 inject_constraints_in_file() {
     local file="$1"
     local shared_file="$SCRIPT_DIR/constraints/shared.md"
-    local package_file="$SCRIPT_DIR/constraints/$PACKAGE.md"
+    local package_file="$SCRIPT_DIR/constraints/max.md"
     if [[ -f "$shared_file" ]] && grep -q '__SHARED_CONSTRAINTS__' "$file" 2>/dev/null; then
         local tmp
         tmp=$(mktemp)
@@ -152,9 +130,8 @@ validate_dist() {
     fi
 }
 
-echo -e "${GREEN}Building ClaudeAgents plugin (package: $PACKAGE)${NC}\n"
+echo -e "${GREEN}Building ClaudeAgents plugin${NC}\n"
 
-set_package "$PACKAGE"
 prepare_dir "$DIST_DIR"
 prepare_dir "$DIST_DIR/.claude-plugin"
 cp "$SCRIPT_DIR/.claude-plugin/plugin.json" "$DIST_DIR/.claude-plugin/"

@@ -1,6 +1,6 @@
 ---
 name: Hermes
-model: sonnet
+model: opus[1m]
 color: cyan
 description: "Use to answer 'how does X work?' questions, trace data flows, find where code is used, explore unfamiliar codebases, or gather context before planning. Route here BEFORE @athena when the codebase is unfamiliar. Use instead of Explore for any codebase exploration or file/code search tasks."
 tools:

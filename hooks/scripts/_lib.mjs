@@ -270,7 +270,7 @@ export function genericBlock(message, event = "PreToolUse") {
 
 export function stopWarn(message) {
 	process.stdout.write(
-		`${JSON.stringify({ decision: "warn", reason: message })}\n`,
+		`${JSON.stringify({ decision: "approve", reason: message })}\n`,
 	);
 	process.exit(0);
 }

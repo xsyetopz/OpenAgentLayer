@@ -10,15 +10,14 @@ user-invocable: true
 
 ## Injection (OWASP A03)
 
-| Vector             | Check                                            | Fix                                                    |
-| ------------------ | ------------------------------------------------ | ------------------------------------------------------ |
-| SQL injection      | All queries use parameterized statements         | Never concatenate user input into SQL                  |
-| Command injection  | No user input in shell commands                  | Use subprocess with list args, no shell=True           |
-| XSS                | All output escaped in HTML context               | Use framework auto-escaping, escape dynamic attributes |
-| Template injection | No user input in template expressions            | Use sandboxed templates, escape variables              |
-| Path traversal     | File paths validated against allowed directories | Canonicalize paths, reject `..` sequences              |
-| LDAP injection     | Queries use parameterized filters                | Escape special LDAP characters                         |
-| Header injection   | No user input in HTTP headers without validation | Reject newlines in header values                       |
+See `reference/owasp-checklist.md` for full injection patterns with code examples.
+
+| Vector | Check |
+|--------|-------|
+| SQL | Parameterized statements — never concatenate user input |
+| Command | No user input in shell — list args, `shell=False` |
+| XSS | All output escaped in HTML context |
+| Path traversal | Canonicalize paths, reject `..` sequences |
 
 ## Authentication & Authorization (OWASP A01, A07)
 
@@ -62,15 +61,7 @@ user-invocable: true
 
 ## API-Specific Attacks
 
-| Vector                         | Severity | Check                                                                                  | Fix                                                                           |
-| ------------------------------ | -------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| SSRF                           | CRITICAL | User-controlled URLs never passed to internal HTTP clients                             | Allowlist target domains, block 169.254.169.254 and RFC-1918 ranges           |
-| Mass Assignment / Over-posting | HIGH     | Request bodies not bound directly to model objects without filter                      | Explicit allowlist of accepted fields; never `Object.assign(req.body)`        |
-| Insecure Deserialization       | CRITICAL | No untrusted data deserialized via pickle, yaml.load, ObjectInputStream, JSON revivers | Use safe loaders (yaml.safe_load), validate schema before deserializing       |
-| BOLA / IDOR                    | HIGH     | Resource ownership verified server-side before returning or mutating                   | Check `resource.owner_id == current_user.id` at service layer, not just route |
-| GraphQL - unbounded depth      | HIGH     | Query depth and complexity limits enforced                                             | Set max depth (≤10), complexity budget, disable introspection in production   |
-| GraphQL - batching abuse       | MEDIUM   | Batch query count capped per request                                                   | Limit batch size, apply per-operation rate limits                             |
-| Rate Limiting Bypass           | HIGH     | Auth, password reset, and API key endpoints have rate limits                           | Enforce limits by IP + account; use token bucket or leaky bucket              |
+See `reference/api-attacks.md` for SSRF, BOLA/IDOR, Mass Assignment, GraphQL, deserialization, and rate limiting with code examples.
 
 ## Review Output Format
 

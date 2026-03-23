@@ -1,6 +1,6 @@
 ---
 name: Atalanta
-model: haiku
+model: opus[1m]
 color: green
 description: "Use to run test suites, diagnose failures, identify flaky tests, and report coverage. Route here AFTER @hephaestus to validate changes, or independently to check test health."
 tools:

@@ -18,12 +18,12 @@
 <!-- How did you verify this works? -->
 - [ ] `make lint` passes
 - [ ] `make test` passes
-- [ ] Tested install with `./install.sh /tmp/test --pro`
+- [ ] Tested install with `CI=true ./install.sh`
 - [ ] Tested in a live Claude Code session
 
 ## Checklist
 
-- [ ] No placeholder code (TODO, FIXME, stub, incomplete functions)
+- [ ] No placeholder code <!-- cca-allow -->
 - [ ] No secrets or credentials in the diff
 - [ ] CLAUDE.md updated if structure changed
 - [ ] CHANGELOG.md updated

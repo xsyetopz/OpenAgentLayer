@@ -45,24 +45,24 @@ user-invocable: true
 
 ## Anti-Pattern Checklist
 
-Check in this order during reviews:
+Check in this order. See `reference/anti-patterns.md` for language-specific examples.
 
-1. **Scope creep** - changes beyond what was requested (but finishing what WAS requested is not scope creep)
-2. **Behavior changes in refactors** - logic differences in restructured code
-3. **Placeholders** - `todo!()`, `// TODO`, "for now...", stub implementations
-4. **DRY violations** - duplicated constants, validation, error messages
-5. **Over-commenting** - headers, separators, docstrings on unchanged code
-6. **SRP violations** - modules with multiple reasons to change
-7. **Over-engineering** - abstractions used once, premature generalization
-8. **Bad naming** - generic names from the banned list above
-9. **Large functions** - 30+ lines without extraction
-10. **Missing error handling** - `unwrap()` in prod, swallowed errors
-11. **Ultimatum decisions** - presenting a single approach as the only option for medium/high-stakes decisions without alternatives
-12. **Lint suppression** - `noqa`, `eslint-disable`, `#[allow(...)]`, `@SuppressWarnings` added to silence warnings rather than fix root causes. Only acceptable for verified false positives with an explanatory comment.
+1. **Scope creep** — changes beyond what was requested
+2. **Behavior changes in refactors** — logic differences in restructured code
+3. **Placeholders** — stub implementations, "for now...", unimplemented branches
+4. **DRY violations** — duplicated constants, validation, error messages
+5. **Over-commenting** — headers, separators, docstrings on unchanged code
+6. **SRP violations** — modules with multiple reasons to change
+7. **Over-engineering** — abstractions used once, premature generalization
+8. **Bad naming** — generic names from the banned list above
+9. **Large functions** — 30+ lines without extraction
+10. **Missing error handling** — `unwrap()` in prod, swallowed errors
+11. **Ultimatum decisions** — single approach presented without alternatives for non-trivial decisions
+12. **Lint suppression** — silencing warnings without explanatory comment on verified false positive
 
 ## Frontend Review
 
-- Placeholder content: "Lorem ipsum", demo data, `TODO` text in UI
+- Placeholder content: "Lorem ipsum", demo data, `TODO` text in UI <!-- cca-allow -->
 - Generic styling: default Tailwind colors, white/purple palette, Inter/Arial fonts
 - Marketing copy: buttons with "Unleash", "Empower", "Transform" -- should be functional labels
 - Missing design system: hardcoded colors/fonts instead of variables/tokens
@@ -83,9 +83,9 @@ Check in this order during reviews:
 - Add features, refactors, or improvements beyond what was asked
 - Add comments to code you didn't write or change
 - Create abstractions for single-use cases
-- Remove code without asking; leave placeholder/stub implementations
+- Remove code without asking; leave placeholder/stub implementations <!-- cca-allow -->
 - Use "for now...", "in a real implementation...", "simplified..."
-- Use TODO/FIXME unless explicitly requested
+- Use TODO/FIXME unless explicitly requested <!-- cca-allow -->
 - Add dependencies without justification
 - Refactor during a bug fix; change behavior during a refactoring
 - Skip error handling or use `unwrap()` in non-test code
@@ -95,61 +95,9 @@ Check in this order during reviews:
 
 Cardinal rule: refactoring changes structure, never behavior.
 
-### Pre-Refactor Checklist
+Pre-refactor: tests pass, scope defined, commit before starting.
 
-1. **Tests pass** - run the full relevant test suite before starting
-2. **Scope defined** - know exactly what you're changing and what you're not
-3. **No behavior changes** - if you need to change behavior, that's a separate task
-4. **Commit before starting** - create a clean rollback point
-
-### Refactoring Catalog
-
-**Extract Function** - when a code block does one identifiable thing within a larger function.
-
-```python
-# Before
-def process_order(order):
-    if not order.items:
-        raise ValueError("Empty order")
-    if order.total < 0:
-        raise ValueError("Negative total")
-    # ... 20 more lines of processing
-
-# After
-def validate_order(order):
-    if not order.items:
-        raise ValueError("Empty order")
-    if order.total < 0:
-        raise ValueError("Negative total")
-
-def process_order(order):
-    validate_order(order)
-    # ... processing
-```
-
-**Extract Type/Class** - when a group of fields and functions operate on the same data.
-
-**Inline Function** - when a function body is as clear as its name, or it's called once.
-
-**Rename** - when a name doesn't communicate what it does. Use the naming rules above.
-
-**Move** - when a function/type is in the wrong module - it's used more by another module than its current home.
-
-**Replace Conditional with Polymorphism** - when a switch/match on type drives different behavior in 3+ branches.
-
-### Code Smells -> Refactoring Map
-
-| Smell                                                                | Refactoring                           |
-| -------------------------------------------------------------------- | ------------------------------------- |
-| Long function (30+ lines)                                            | Extract Function                      |
-| Long parameter list (4+)                                             | Introduce Parameter Object            |
-| Duplicate code                                                       | Extract Function or Extract Type      |
-| Feature envy (function uses another object's data more than its own) | Move Function                         |
-| Data clump (same fields always appear together)                      | Extract Type                          |
-| Switch on type                                                       | Replace Conditional with Polymorphism |
-| Deep nesting                                                         | Guard clauses, Extract Function       |
-| Dead code                                                            | Delete it                             |
-| Comments explaining "what"                                           | Rename, Extract Function              |
+See `reference/refactoring-catalog.md` for complete moves with before/after examples.
 
 ## Collaboration Protocol
 

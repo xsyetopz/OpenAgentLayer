@@ -8,9 +8,8 @@ import {
 	isMetaFile,
 	isTestFile,
 	MERGE_CONFLICT,
+	matchPlaceholders,
 	matchSecrets,
-	PLACEHOLDER_EMPTY_BODY,
-	PLACEHOLDER_HARD,
 	passthrough,
 	readStdin,
 } from "../_lib.mjs";
@@ -84,8 +83,11 @@ function fileIssues(filepath) {
 	}
 
 	if (!isTestFile(filepath)) {
-		const allPlaceholders = [...PLACEHOLDER_HARD, ...PLACEHOLDER_EMPTY_BODY];
-		if (allPlaceholders.some((pat) => pat.test(content))) {
+		const lines = content.split("\n");
+		const { hard } = matchPlaceholders(filepath, lines, {
+			includeEmptyBody: true,
+		});
+		if (hard.length > 0) {
 			blockers.push(`Placeholder in ${filepath}`);
 		}
 	}

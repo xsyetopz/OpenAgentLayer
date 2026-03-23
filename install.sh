@@ -8,7 +8,6 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$SCRIPT_DIR"
-PACKAGE="pro"
 SKIP_RTK="false"
 
 die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
@@ -17,9 +16,7 @@ warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 usage() {
     echo -e "${GREEN}CCA Bootstrap${NC}"
-    echo "Usage: $0 [--pro|--max] [--skip-rtk]"
-    echo "  --pro       : Claude Pro — opusplan orchestrator, sonnet agents (default)"
-    echo "  --max       : Claude Max 5x/20x — opusplan orchestrator, opus for planning/review"
+    echo "Usage: $0 [--skip-rtk]"
     echo "  --skip-rtk  : Skip RTK installation"
     exit 1
 }
@@ -27,8 +24,6 @@ usage() {
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --pro)        PACKAGE="pro"; shift ;;
-            --max)        PACKAGE="max"; shift ;;
             --skip-rtk)   SKIP_RTK="true"; shift ;;
             -h|--help)    usage ;;
             *)            die "Unknown argument: $1" ;;
@@ -94,14 +89,10 @@ merge_global_settings() {
     local TEMPLATE="$REPO_DIR/templates/settings-global.json"
     [[ -f "$TEMPLATE" ]] || { warn "templates/settings-global.json not found — skipping"; return; }
 
-    # Determine model values based on package tier
     local cca_model="opusplan"
-    local opus_model="claude-opus-4-6"
+    local opus_model="claude-opus-4-6[1m]"
     local sonnet_model="claude-sonnet-4-6"
-    local haiku_model="claude-haiku-4-5-20251001"
-    case "$PACKAGE" in
-        max) opus_model="claude-opus-4-6[1m]" ;;
-    esac
+    local haiku_model="claude-haiku-4-5"
 
     # Substitute placeholders in template
     local tmp_template
@@ -215,8 +206,9 @@ install_plugin() {
         return
     fi
 
+    claude plugin uninstall cca@claude-agents 2>/dev/null || true
     if claude plugin install cca@claude-agents; then
-        info "Plugin installed"
+        info "Plugin installed (latest)"
     else
         warn "Plugin install failed — run manually: claude plugin install cca@claude-agents"
     fi
@@ -292,7 +284,6 @@ validate() {
 report_summary() {
     echo -e "\n${GREEN}CCA Bootstrap complete!${NC}"
     echo ""
-    echo "  Package:     $PACKAGE"
     echo "  Plugin:      cca@claude-agents"
     echo "  Output style: CCA"
     echo ""
@@ -307,7 +298,7 @@ report_summary() {
 main() {
     parse_args "$@"
 
-    echo -e "${GREEN}CCA Bootstrap${NC} (package: $PACKAGE)"
+    echo -e "${GREEN}CCA Bootstrap${NC}"
     echo ""
 
     check_version

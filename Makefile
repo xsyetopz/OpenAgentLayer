@@ -6,50 +6,34 @@ SHELL := /bin/bash
 
 SCRIPT_DIR := $(shell pwd)
 DIST_DIR   := $(SCRIPT_DIR)/dist/claude-agents-plugin
-PACKAGE    ?= pro
 
 # ──────────────────────────────────────────────
 # User targets (install, update, uninstall)
 # ──────────────────────────────────────────────
 
 .PHONY: install
-install: ## Interactive install (TUI picker)
+install: ## Install (max tier)
 	./install.sh
 
 .PHONY: install-global
-install-global: ## Install globally to ~/.claude/ (max tier)
-	./install.sh --max
-
-.PHONY: install-project
-install-project: ## Install to current project directory
-	./install.sh . --$(PACKAGE)
+install-global: ## Install globally to ~/.claude/
+	./install.sh
 
 .PHONY: install-plugin
-install-plugin: ## Install as Claude Code plugin (marketplace format)
-	@echo "Clearing cached cca plugin..."
+install-plugin: ## Install plugin from working tree (uninstalls stale first)
 	@rm -rf ~/.claude/plugins/cache/temp_local_*
-	@if [ -d ~/.claude/plugins/marketplaces/claude-agents ]; then \
-		echo "Updating marketplace copy..."; \
-		rsync -a --delete --exclude='.git' ./ ~/.claude/plugins/marketplaces/claude-agents/; \
-	else \
-		echo "No marketplace copy found — installing fresh..."; \
-		mkdir -p ~/.claude/plugins/marketplaces/claude-agents; \
-		rsync -a --exclude='.git' ./ ~/.claude/plugins/marketplaces/claude-agents/; \
-	fi
+	@mkdir -p ~/.claude/plugins/marketplaces/claude-agents
+	@rsync -a --delete --exclude='.git' ./ ~/.claude/plugins/marketplaces/claude-agents/
+	@claude plugin uninstall cca@claude-agents 2>/dev/null || true
 	claude plugin install cca
-	@echo "Plugin installed from working tree."
 
 .PHONY: update
-update: ## Show diffs and selectively update installed files
-	./install.sh --global --$(PACKAGE) --update
+update: ## Re-run install (updates all user-level files and plugin)
+	./install.sh
 
 .PHONY: uninstall
 uninstall: ## Uninstall from ~/.claude/
 	./uninstall.sh --global
-
-.PHONY: diagnose
-diagnose: ## Run hook diagnostics (no install)
-	./install.sh --global --diagnose
 
 # ──────────────────────────────────────────────
 # Developer targets (lint, format, build, validate)
@@ -74,16 +58,8 @@ lint-json: ## Validate all JSON files parse correctly
 format: ## No-op (formatting handled by project tooling)
 
 .PHONY: build
-build: ## Build plugin dist (PACKAGE=pro|max)
-	./build-plugin.sh $(PACKAGE)
-
-.PHONY: build-all
-build-all: ## Build plugin for all tiers and validate each
-	@for pkg in pro max; do \
-		echo "=== Building $$pkg ==="; \
-		./build-plugin.sh $$pkg || exit 1; \
-	done
-	@echo "All builds passed."
+build: ## Build plugin dist
+	./build-plugin.sh
 
 .PHONY: validate
 validate: lint test build ## Full validation: lint + test + build
@@ -141,7 +117,7 @@ test-hooks: diagnose ## Smoke-test installed hooks against live claude
 test-install: ## Test install to a temp directory, then validate
 	@tmpdir=$$(mktemp -d) && \
 		echo "Installing to $$tmpdir ..." && \
-		./install.sh "$$tmpdir" --$(PACKAGE) && \
+		./install.sh "$$tmpdir" && \
 		echo "" && echo "Validating install..." && \
 		test -f "$$tmpdir/.claude/hooks.json" && \
 		test -d "$$tmpdir/.claude/agents" && \
@@ -179,7 +155,7 @@ version: ## Show current plugin version
 help: ## Show this help
 	@echo "ClaudeAgents Makefile"
 	@echo ""
-	@echo "Usage: make <target> [PACKAGE=pro|max]"
+	@echo "Usage: make <target>"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"} \
 		/^[a-zA-Z_-]+:.*##/ { \

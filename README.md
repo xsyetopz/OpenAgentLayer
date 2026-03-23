@@ -8,7 +8,7 @@
 ```bash
 # Bootstrap (registers marketplace, installs user-level extras, then installs plugin)
 git clone https://github.com/xsyetopz/ClaudeAgents && cd ClaudeAgents
-./install.sh --pro    # or --max for opus planning/review agents
+./install.sh
 ```
 
 ---
@@ -20,7 +20,7 @@ Claude Code is powerful out of the box. ClaudeAgents adds:
 - **Specialized agents** that know their role -- an architect won't write code, a reviewer won't fix bugs
 - **Safety hooks** that catch placeholders, secrets, scope reduction, and sloppy AI prose automatically
 - **Anti-rationalization gates** that prevent Claude from rationalizing incomplete work
-- **Tier-based models** so you control cost: Haiku for tests, Sonnet for code, Opus for architecture
+- **Consistent models** — every subagent runs `opus[1m]`, orchestrator runs `opusplan`
 
 ---
 
@@ -72,17 +72,15 @@ claude plugin list                        # list installed
 
 ## Agents
 
-| Who             | What                             | pro      | max      |
-| --------------- | -------------------------------- | -------- | -------- |
-| **@athena**     | Plans, designs, architects       | sonnet   | opus[1m] |
-| **@hephaestus** | Writes code, fixes bugs          | sonnet   | sonnet   |
-| **@nemesis**    | Reviews code, audits security    | sonnet   | opus[1m] |
-| **@atalanta**   | Runs tests, finds root causes    | haiku    | haiku    |
-| **@calliope**   | Writes docs (markdown only)      | haiku    | haiku    |
-| **@hermes**     | Explores codebases, traces flows | sonnet   | sonnet   |
-| **@odysseus**   | Coordinates multi-step tasks     | opusplan | opusplan |
-
-**`--pro`** = Sonnet everywhere (Haiku for tests/docs). **`--max`** = Opus[1m] for @athena, @nemesis; opusplan for @odysseus.
+| Who             | What                             | Model    |
+| --------------- | -------------------------------- | -------- |
+| **@athena**     | Plans, designs, architects       | opus[1m] |
+| **@hephaestus** | Writes code, fixes bugs          | opus[1m] |
+| **@nemesis**    | Reviews code, audits security    | opus[1m] |
+| **@atalanta**   | Runs tests, finds root causes    | opus[1m] |
+| **@calliope**   | Writes docs (markdown only)      | opus[1m] |
+| **@hermes**     | Explores codebases, traces flows | opus[1m] |
+| **@odysseus**   | Coordinates multi-step tasks     | opusplan |
 
 ---
 
@@ -130,8 +128,7 @@ Plus: LSP error check prompt after every file change, scope reduction and collab
 ```bash
 # Bootstrap: registers marketplace, installs user-level extras, installs plugin
 git clone https://github.com/xsyetopz/ClaudeAgents && cd ClaudeAgents
-./install.sh --pro         # sonnet agents (haiku for atalanta/calliope)
-./install.sh --max         # opus[1m] for athena/nemesis
+./install.sh               # all agents on opus[1m]
 ./install.sh --skip-rtk    # skip RTK token-savings tool
 ```
 

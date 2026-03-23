@@ -90,64 +90,13 @@ order = OrderBuilder().with_items(3).with_discount(0.1).shipped().build()
 
 Keep helpers close to the tests that use them.
 
+## TDD Workflow
+
+For test-driven development with the agent system, see `reference/tdd-workflow.md` — red/green/refactor cycle, orchestrator rules, state tracking.
+
 ## Language-Specific Patterns
 
-**Go:**
-
-```go
-func TestUserService_Create_ValidEmail(t *testing.T) {
-    t.Parallel()
-    repo := &mockUserRepo{}
-    svc := NewUserService(repo)
-
-    user, err := svc.Create(context.Background(), "test@example.com")
-
-    require.NoError(t, err)
-    assert.Equal(t, "test@example.com", user.Email)
-}
-```
-
-Use `t.Parallel()` for independent tests. Use `require` (stops test on failure) vs `assert` (continues). Table-driven tests for multiple input variants:
-
-```go
-func TestValidateEmail(t *testing.T) {
-    cases := []struct {
-        name  string
-        input string
-        valid bool
-    }{
-        {"valid", "user@example.com", true},
-        {"missing at", "userexample.com", false},
-        {"empty", "", false},
-    }
-    for _, tc := range cases {
-        t.Run(tc.name, func(t *testing.T) {
-            t.Parallel()
-            assert.Equal(t, tc.valid, validateEmail(tc.input))
-        })
-    }
-}
-```
-
-**Vitest (TypeScript):**
-
-```typescript
-import { describe, it, expect, vi } from "vitest";
-
-describe("UserService.create", () => {
-  it("creates user with valid email", async () => {
-    const mockRepo = { save: vi.fn().mockResolvedValue({ id: "1" }) };
-    const service = new UserService(mockRepo);
-
-    const user = await service.create({ email: "test@example.com" });
-
-    expect(user.email).toBe("test@example.com");
-    expect(mockRepo.save).toHaveBeenCalledOnce();
-  });
-});
-```
-
-Prefer `vi.fn()` over `jest.fn()` in Vitest projects - they're equivalent but `vi` is the native import.
+See `reference/patterns-by-language.md` for Go, TypeScript/Vitest, Python/pytest, and Rust — naming conventions, table-driven tests, factory functions, mocks, async patterns.
 
 ## Anti-Patterns
 
