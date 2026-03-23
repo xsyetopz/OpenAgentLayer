@@ -81,33 +81,26 @@ register_marketplace() {
     info "Enabled cca@claude-agents plugin"
 }
 
-load_model_config() {
-    local -n models=$1
-    models["cca"]="opusplan"
-    models["opus"]="claude-opus-4-6[1m]"
-    models["sonnet"]="claude-sonnet-4-6"
-    models["haiku"]="claude-haiku-4-5"
-}
+CCA_MODEL="opusplan"
+OPUS_MODEL="claude-opus-4-6[1m]"
+SONNET_MODEL="claude-sonnet-4-6"
+HAIKU_MODEL="claude-haiku-4-5"
 
-substitute_template_vars() {
-    local template=$1
-    local tmp_template=$2
-    declare -A models
-    load_model_config models
+merge_global_settings() {
+    echo -e "\n${GREEN}Merging global settings...${NC}"
+    local SETTINGS_FILE="$HOME/.claude/settings.json"
+    local TEMPLATE="$REPO_DIR/templates/settings-global.json"
+    [[ -f "$TEMPLATE" ]] || { warn "templates/settings-global.json not found — skipping"; return; }
+
+    local tmp_template
+    tmp_template=$(mktemp)
 
     sed -e "s|__HOME__|$HOME|g" \
-        -e "s|__CCA_MODEL__|${models[cca]}|g" \
-        -e "s|__OPUS_MODEL__|${models[opus]}|g" \
-        -e "s|__SONNET_MODEL__|${models[sonnet]}|g" \
-        -e "s|__HAIKU_MODEL__|${models[haiku]}|g" \
-        "$template" > "$tmp_template"
-}
-
-# --- Global settings merge ---
-
-deep_merge_settings() {
-    local tmp_template=$1
-    local settings_file=$2
+        -e "s|__CCA_MODEL__|$CCA_MODEL|g" \
+        -e "s|__OPUS_MODEL__|$OPUS_MODEL|g" \
+        -e "s|__SONNET_MODEL__|$SONNET_MODEL|g" \
+        -e "s|__HAIKU_MODEL__|$HAIKU_MODEL|g" \
+        "$TEMPLATE" > "$tmp_template"
 
     jq -s '
         .[0] as $tpl | .[1] as $usr |
@@ -119,33 +112,13 @@ deep_merge_settings() {
             mcpServers: (($tpl.mcpServers // {}) * ($usr.mcpServers // {}))
         } *
         ($usr | to_entries | map(select(.key as $k | ($tpl | has($k)) | not)) | from_entries)
-    ' "$tmp_template" "$settings_file" > "${settings_file}.tmp" && mv "${settings_file}.tmp" "$settings_file"
-}
-
-log_merge_results() {
-    declare -A models
-    load_model_config models
-
-    info "Model pins: opus=${models[opus]} sonnet=${models[sonnet]} haiku=${models[haiku]}"
-    info "Orchestrator: ${models[cca]}"
-    info "Output style: CCA"
-    info "Permissions and deny list merged"
-}
-
-merge_global_settings() {
-    echo -e "\n${GREEN}Merging global settings...${NC}"
-    local SETTINGS_FILE="$HOME/.claude/settings.json"
-    local TEMPLATE="$REPO_DIR/templates/settings-global.json"
-    [[ -f "$TEMPLATE" ]] || { warn "templates/settings-global.json not found — skipping"; return; }
-
-    local tmp_template
-    tmp_template=$(mktemp)
-
-    substitute_template_vars "$TEMPLATE" "$tmp_template"
-    deep_merge_settings "$tmp_template" "$SETTINGS_FILE"
+    ' "$tmp_template" "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
     rm -f "$tmp_template"
 
-    log_merge_results
+    info "Model pins: opus=$OPUS_MODEL sonnet=$SONNET_MODEL haiku=$HAIKU_MODEL"
+    info "Orchestrator: $CCA_MODEL"
+    info "Output style: CCA"
+    info "Permissions and deny list merged"
 }
 
 # --- User-level file installation ---
