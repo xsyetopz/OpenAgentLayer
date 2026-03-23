@@ -5,13 +5,8 @@
  * Wraps any command (typically `claude`) in a pseudo-terminal and redacts
  * secrets from stdout in real-time before they reach the terminal/OBS.
  *
- * Usage:
- *   stream-guard claude
- *   CCA_STREAM_MODE=1 stream-guard claude --model opus
- *   alias claude-stream='CCA_STREAM_MODE=1 stream-guard claude'
- *
  * Zero external dependencies — uses node:child_process with pipe-based
- * interception and raw stdin mode for interactivity.
+ * interception and a flush timer to avoid buffering hangs.
  */
 
 import { spawn } from "node:child_process";
@@ -32,6 +27,7 @@ const DEFAULT_SAFE_PREFIXES = [
 	"EXPO_PUBLIC_",
 ];
 const DEFAULT_MIN_LENGTH = 8;
+const FLUSH_INTERVAL_MS = 50;
 
 const SECRET_PATTERNS = [
 	{
@@ -171,6 +167,37 @@ function buildRedactor(secretMap, customPatterns) {
 	};
 }
 
+function createFlushingPipe(inputStream, outputStream, redact) {
+	let buffer = "";
+	let flushTimer = null;
+
+	function flush() {
+		if (buffer) {
+			outputStream.write(redact(buffer));
+			buffer = "";
+		}
+		flushTimer = null;
+	}
+
+	inputStream.on("data", (chunk) => {
+		buffer += chunk.toString();
+
+		const lastNewline = buffer.lastIndexOf("\n");
+		if (lastNewline >= 0) {
+			const complete = buffer.slice(0, lastNewline + 1);
+			buffer = buffer.slice(lastNewline + 1);
+			outputStream.write(redact(complete));
+		}
+
+		if (flushTimer) clearTimeout(flushTimer);
+		if (buffer) {
+			flushTimer = setTimeout(flush, FLUSH_INTERVAL_MS);
+		}
+	});
+
+	return { flush };
+}
+
 function main() {
 	const args = process.argv.slice(2);
 
@@ -201,8 +228,6 @@ function main() {
 		`[stream-guard] Active: ${secretMap.size} env values, ${patternCount} patterns\n`,
 	);
 
-	process.env.CCA_STREAM_MODE = "1";
-
 	const child = spawn(args[0], args.slice(1), {
 		stdio: ["pipe", "pipe", "pipe"],
 		env: { ...process.env, CCA_STREAM_MODE: "1" },
@@ -212,27 +237,18 @@ function main() {
 		process.stdin.setRawMode(true);
 	}
 	process.stdin.resume();
-	process.stdin.pipe(child.stdin);
-
-	let stdoutBuffer = "";
-	child.stdout.on("data", (chunk) => {
-		stdoutBuffer += chunk.toString();
-		const lastNewline = stdoutBuffer.lastIndexOf("\n");
-		if (lastNewline >= 0) {
-			const complete = stdoutBuffer.slice(0, lastNewline + 1);
-			stdoutBuffer = stdoutBuffer.slice(lastNewline + 1);
-			process.stdout.write(redact(complete));
+	process.stdin.on("data", (chunk) => {
+		if (!child.stdin.destroyed) {
+			child.stdin.write(chunk);
 		}
 	});
 
-	child.stderr.on("data", (chunk) => {
-		process.stderr.write(redact(chunk.toString()));
-	});
+	const stdoutPipe = createFlushingPipe(child.stdout, process.stdout, redact);
+	const stderrPipe = createFlushingPipe(child.stderr, process.stderr, redact);
 
 	child.on("exit", (code) => {
-		if (stdoutBuffer) {
-			process.stdout.write(redact(stdoutBuffer));
-		}
+		stdoutPipe.flush();
+		stderrPipe.flush();
 		if (process.stdin.isTTY) {
 			process.stdin.setRawMode(false);
 		}
@@ -243,6 +259,8 @@ function main() {
 		process.stderr.write(`[stream-guard] Failed to spawn: ${err.message}\n`);
 		process.exit(1);
 	});
+
+	child.stdin.on("error", () => {});
 
 	process.on("SIGINT", () => child.kill("SIGINT"));
 	process.on("SIGTERM", () => child.kill("SIGTERM"));

@@ -140,25 +140,30 @@ git clone https://github.com/xsyetopz/ClaudeAgents && cd ClaudeAgents
 
 Activate 4-layer secret redaction when streaming on Twitch/YouTube:
 
+Add to `~/.zshrc` or `~/.bashrc`:
+
 ```bash
-# ~/.zshrc or ~/.bashrc
 export CCA_STREAM_MODE=1
-alias claude-stream='CCA_STREAM_MODE=1 /path/to/ClaudeAgents/bin/stream-guard claude'
+alias claude-stream='CCA_STREAM_MODE=1 node ~/CodeProjects/ClaudeAgents/bin/stream-guard claude'
 ```
 
-| Layer | What | How |
-|-------|------|-----|
-| 1 | Block secret-exposing commands | PreToolUse denies `env`, `cat .env`, `echo $SECRET`, etc. |
-| 2 | Flag secrets in tool output | PostToolUse scans for .env values + secret patterns |
-| 3 | Safety context injection | SessionStart instructs model to never output secrets |
-| 4 | Real-time stdout redaction | PTY proxy rewrites secrets before they reach terminal/OBS |
+Replace `~/CodeProjects/ClaudeAgents` with wherever you cloned the repo.
+
+| Layer | What                           | How                                                       |
+| ----- | ------------------------------ | --------------------------------------------------------- |
+| 1     | Block secret-exposing commands | PreToolUse denies `env`, `cat .env`, `echo $SECRET`, etc. |
+| 2     | Flag secrets in tool output    | PostToolUse scans for .env values + secret patterns       |
+| 3     | Safety context injection       | SessionStart instructs model to never output secrets      |
+| 4     | Real-time stdout redaction     | PTY proxy rewrites secrets before they reach terminal/OBS |
 
 Layers 1-3 run as Claude Code hooks. Layer 4 wraps the `claude` process externally.
 
 ```bash
-CCA_STREAM_MODE=1 bin/stream-guard claude
+CCA_STREAM_MODE=1 node /absolute/path/to/bin/stream-guard claude
 claude-stream
 ```
+
+Unset `CCA_STREAM_MODE` or set to `0` to disable all stream-guard hooks.
 
 All stream-guard hooks are no-ops when `CCA_STREAM_MODE` is unset.
 
