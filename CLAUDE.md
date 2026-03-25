@@ -58,9 +58,16 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 
 ## Model Strategy
 
-- Orchestrator: `opusplan` (opus planning, sonnet execution).
-- All subagents: `opus[1m]`.
-- Env vars pin model versions. Output style: CCA. Statusline: model, context %, cost, git branch.
+Two tiers, set at install time via `./install.sh --tier <5x|20x>`:
+
+| Role                       | 5X (default)        | 20X                   |
+| -------------------------- | ------------------- | --------------------- |
+| Orchestrator (`CCA_MODEL`) | `opusplan`          | `opus[1m]`            |
+| Sonnet slot                | `claude-sonnet-4-6` | `claude-opus-4-6[1m]` |
+| Haiku slot                 | `claude-haiku-4-5`  | `claude-sonnet-4-6`   |
+| All subagents              | `opus[1m]`          | `opus[1m]`            |
+
+Env vars pin model versions in `~/.claude/settings.json`. Output style: CCA. Statusline: model, context %, cost, git branch.
 
 ## Development
 

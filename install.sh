@@ -9,6 +9,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$SCRIPT_DIR"
 SKIP_RTK="false"
+CCA_TIER="5x"
 
 die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }
@@ -16,8 +17,9 @@ warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
 usage() {
     echo -e "${GREEN}CCA Bootstrap${NC}"
-    echo "Usage: $0 [--skip-rtk]"
-    echo "  --skip-rtk  : Skip RTK installation"
+    echo "Usage: $0 [--skip-rtk] [--tier 5x|20x]"
+    echo "  --skip-rtk    : Skip RTK installation"
+    echo "  --tier 5x|20x : Model tier (default: 5x)"
     exit 1
 }
 
@@ -25,6 +27,7 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --skip-rtk)   SKIP_RTK="true"; shift ;;
+            --tier)       CCA_TIER="${2:-}"; shift 2 ;;
             -h|--help)    usage ;;
             *)            die "Unknown argument: $1" ;;
         esac
@@ -80,11 +83,6 @@ register_marketplace() {
     info "Registered claude-agents marketplace"
     info "Enabled cca@claude-agents plugin"
 }
-
-CCA_MODEL="opusplan"
-OPUS_MODEL="claude-opus-4-6[1m]"
-SONNET_MODEL="claude-sonnet-4-6"
-HAIKU_MODEL="claude-haiku-4-5"
 
 merge_global_settings() {
     echo -e "\n${GREEN}Merging global settings...${NC}"
@@ -376,6 +374,7 @@ report_summary() {
     echo -e "\n${GREEN}CCA Bootstrap complete!${NC}"
     echo ""
     echo "  Plugin:      cca@claude-agents"
+    echo "  Tier:        $CCA_TIER (orchestrator: $CCA_MODEL)"
     echo "  Output style: CCA"
     echo ""
     echo "  The plugin provides: 7 agents, 11 skills, 10 project-level hooks"
@@ -386,6 +385,22 @@ report_summary() {
 
 main() {
     parse_args "$@"
+
+    case "$CCA_TIER" in
+        20x)
+            CCA_MODEL="opus[1m]"
+            OPUS_MODEL="claude-opus-4-6[1m]"
+            SONNET_MODEL="claude-opus-4-6[1m]"
+            HAIKU_MODEL="claude-sonnet-4-6"
+            ;;
+        5x|*)
+            CCA_TIER="5x"
+            CCA_MODEL="opusplan"
+            OPUS_MODEL="claude-opus-4-6[1m]"
+            SONNET_MODEL="claude-sonnet-4-6"
+            HAIKU_MODEL="claude-haiku-4-5"
+            ;;
+    esac
 
     echo -e "${GREEN}CCA Bootstrap${NC}"
     echo ""
