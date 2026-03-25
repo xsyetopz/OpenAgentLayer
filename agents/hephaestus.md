@@ -1,6 +1,6 @@
 ---
 name: Hephaestus
-model: opus[1m]
+model: sonnet
 color: orange
 description: "Use to implement features, fix bugs, refactor code, or write new modules. If a plan from @athena exists, follow it. For changes touching >3 files without a plan, route to @athena first."
 tools:

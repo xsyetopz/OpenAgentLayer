@@ -1,6 +1,6 @@
 ---
 name: Calliope
-model: opus[1m]
+model: haiku
 color: purple
 description: "Use for READMEs, changelogs, ADRs, API docs, and inline doc comments. Route here AFTER implementation is complete and reviewed."
 tools:
