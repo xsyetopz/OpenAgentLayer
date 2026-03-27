@@ -1,0 +1,149 @@
+[
+  {
+    "id": "prompt-git-context",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "UserPromptSubmit",
+        "matcher": null,
+        "timeout": 5,
+        "script": "session/prompt-git-context.mjs"
+      }
+    ]
+  },
+  {
+    "id": "start-budget",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "SessionStart",
+        "matcher": null,
+        "timeout": 5,
+        "script": "session/start-budget.mjs"
+      }
+    ]
+  },
+  {
+    "id": "validate-input",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "PreToolUse",
+        "matcher": null,
+        "timeout": 5,
+        "script": "pre/validate-input.mjs"
+      }
+    ]
+  },
+  {
+    "id": "bash-guard",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "PreToolUse",
+        "matcher": "Bash",
+        "timeout": 10,
+        "script": "pre/bash-guard.mjs"
+      }
+    ]
+  },
+  {
+    "id": "write-quality",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "PostToolUse",
+        "matcher": "Write|Edit",
+        "timeout": 15,
+        "script": "post/write-quality.mjs"
+      }
+    ]
+  },
+  {
+    "id": "bash-redact",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "PostToolUse",
+        "matcher": "Bash",
+        "timeout": 10,
+        "script": "post/bash-redact.mjs"
+      }
+    ]
+  },
+  {
+    "id": "failure-circuit",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "PostToolUseFailure",
+        "matcher": null,
+        "timeout": 5,
+        "script": "post/failure-circuit.mjs"
+      }
+    ]
+  },
+  {
+    "id": "subagent-scan",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "SubagentStop",
+        "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
+        "timeout": 15,
+        "script": "post/subagent-scan.mjs"
+      }
+    ]
+  },
+  {
+    "id": "stop-scan",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "hook",
+        "event": "Stop",
+        "matcher": null,
+        "timeout": 15,
+        "script": "post/stop-scan.mjs"
+      }
+    ]
+  },
+  {
+    "id": "secret-path-guard",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "staged-placeholder-guard",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "staged-secret-guard",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "pre-commit-test",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "protected-branch-confirm",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "pre-push-test",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  }
+]

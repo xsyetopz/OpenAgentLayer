@@ -1,0 +1,83 @@
+#!/bin/bash
+set -euo pipefail
+
+usage() {
+    cat <<'EOF' >&2
+Usage: openagentsbtw-codex <mode> [prompt...]
+
+Modes:
+  triage      Generated openagentsbtw Codex route
+  docs        Generated openagentsbtw Codex route
+  desloppify  Generated openagentsbtw Codex route
+  handoff     Generated openagentsbtw Codex route
+  test        Generated openagentsbtw Codex route
+  plan        Generated openagentsbtw Codex route
+  implement   Generated openagentsbtw Codex route
+  review      Generated openagentsbtw Codex route
+  orchestrate Generated openagentsbtw Codex route
+EOF
+    exit 1
+}
+
+[[ $# -ge 1 ]] || usage
+
+MODE="$1"
+shift
+
+if [[ $# -gt 0 ]]; then
+    PROMPT="$*"
+elif [[ ! -t 0 ]]; then
+    PROMPT="$(cat)"
+else
+    usage
+fi
+
+PROFILE="openagentsbtw"
+SYSTEM_PROMPT=""
+
+case "$MODE" in
+    triage)
+        PROFILE="openagentsbtw-codex-mini"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer hermes for bounded search, classification, and evidence gathering. Keep the result concise and citation-driven."
+        ;;
+    docs)
+        PROFILE="openagentsbtw-codex-mini"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer calliope for documentation-only work. Keep prose factual, terse, and free of filler."
+        ;;
+    desloppify)
+        PROFILE="openagentsbtw-codex-mini"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer calliope or the desloppify skill for bounded text cleanup. Remove AI filler, sycophancy, narrating comments, and optional-offer boilerplate."
+        ;;
+    handoff)
+        PROFILE="openagentsbtw-codex-mini"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer calliope for writing the handoff and hermes for gathering exact repo state. Keep the summary compact and operational."
+        ;;
+    test)
+        PROFILE="openagentsbtw-codex-mini"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer atalanta for targeted validation and failure diagnosis. Run and analyze; do not drift into implementation."
+        ;;
+    plan)
+        PROFILE="openagentsbtw"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer athena for architecture, planning, tradeoffs, and sequencing. Lead with the recommendation and keep the plan concrete."
+        ;;
+    implement)
+        PROFILE="openagentsbtw"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer hephaestus for implementation. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why."
+        ;;
+    review)
+        PROFILE="openagentsbtw"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer nemesis for review. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests."
+        ;;
+    orchestrate)
+        PROFILE="openagentsbtw"
+        SYSTEM_PROMPT="Use openagentsbtw. Prefer odysseus for multi-step coordination. Delegate only bounded work and track step ownership explicitly."
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+exec codex exec --profile "$PROFILE" "${SYSTEM_PROMPT}
+
+Task:
+${PROMPT}"

@@ -6,7 +6,7 @@ Report security issues to the maintainers via GitHub Security Advisories (prefer
 
 ## Security Model
 
-ClaudeAgents hooks are **guardrails, not walls**. They catch common mistakes and enforce best practices, but are not a security boundary against determined adversaries.
+openagentsbtw hooks are **guardrails, not walls**. They catch common mistakes and enforce best practices, but are not a security boundary against determined adversaries.
 
 ### What hooks protect against
 

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to ClaudeAgents are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
+All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [0.4.0] - 2026-03-17
 

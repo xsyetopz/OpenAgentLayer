@@ -1,0 +1,132 @@
+[
+  {
+    "id": "prompt-git-context",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "start-budget",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "validate-input",
+    "status": "unsupported",
+    "reason": "OpenCode's documented plugin events do not expose the same pre-tool structured input contract this hook expects."
+  },
+  {
+    "id": "bash-guard",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "plugin",
+        "event": "tool.execute.before",
+        "tools": [
+          "bash"
+        ],
+        "field": "command"
+      }
+    ]
+  },
+  {
+    "id": "write-quality",
+    "status": "unsupported",
+    "reason": "OpenCode plugins can intercept tool execution, but this repo does not have a documented write-diagnostics equivalent wired into the shared policy."
+  },
+  {
+    "id": "bash-redact",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "failure-circuit",
+    "status": "unsupported",
+    "reason": "OpenCode plugin events used here do not include a Claude-style post-tool failure hook contract."
+  },
+  {
+    "id": "subagent-scan",
+    "status": "unsupported",
+    "reason": "OpenCode does not expose a Claude-style subagent-stop hook surface in the documented plugin and git-hook interfaces used here."
+  },
+  {
+    "id": "stop-scan",
+    "status": "unsupported",
+    "reason": "No mapping is defined for this platform in the shared hook policy source."
+  },
+  {
+    "id": "secret-path-guard",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "plugin",
+        "event": "tool.execute.before",
+        "tools": [
+          "read",
+          "edit",
+          "write"
+        ],
+        "field": "filePath"
+      }
+    ]
+  },
+  {
+    "id": "staged-placeholder-guard",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "git-hook",
+        "hook": "pre-commit",
+        "kind": "staged-text-block"
+      }
+    ]
+  },
+  {
+    "id": "staged-secret-guard",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "git-hook",
+        "hook": "pre-commit",
+        "kind": "staged-diff-pattern-block"
+      },
+      {
+        "type": "git-hook",
+        "hook": "pre-commit",
+        "kind": "staged-path-block"
+      }
+    ]
+  },
+  {
+    "id": "pre-commit-test",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "git-hook",
+        "hook": "pre-commit",
+        "kind": "package-test"
+      }
+    ]
+  },
+  {
+    "id": "protected-branch-confirm",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "git-hook",
+        "hook": "pre-push",
+        "kind": "branch-confirm"
+      }
+    ]
+  },
+  {
+    "id": "pre-push-test",
+    "status": "supported",
+    "surfaces": [
+      {
+        "type": "git-hook",
+        "hook": "pre-push",
+        "kind": "package-test"
+      }
+    ]
+  }
+]

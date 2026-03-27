@@ -1,232 +1,261 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$SCRIPT_DIR"
+
+REMOVE_CLAUDE="false"
+REMOVE_OPENCODE="false"
+REMOVE_CODEX="false"
+OPENCODE_SCOPE="global"
+
 die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }
 warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
-TARGET_DIR=""
-INSTALL_SCOPE="project"
+check_python3() {
+    command -v python3 &>/dev/null || die "python3 is required for Codex uninstall cleanup."
+}
 
 usage() {
-    echo -e "${GREEN}CCA Uninstaller${NC}"
-    echo "Usage: $0 <target-dir>|--global"
-    echo "  <target-dir>  : Path to your project"
-    echo "  --global      : Uninstall from global ~/.claude/"
-    exit 1
+    cat <<'EOF'
+openagentsbtw uninstaller
+
+Usage: ./uninstall.sh [system toggles] [options]
+
+System toggles (allow multiple):
+  --claude
+  --opencode
+  --codex
+  --all
+
+Options:
+  --opencode-scope project|global
+  -h, --help
+EOF
+    exit 0
 }
 
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --global) INSTALL_SCOPE="global"; shift ;;
+            --claude) REMOVE_CLAUDE="true" ;;
+            --opencode) REMOVE_OPENCODE="true" ;;
+            --codex) REMOVE_CODEX="true" ;;
+            --all)
+                REMOVE_CLAUDE="true"
+                REMOVE_OPENCODE="true"
+                REMOVE_CODEX="true"
+                ;;
+            --opencode-scope)
+                OPENCODE_SCOPE="${2:-}"
+                shift
+                ;;
             -h|--help) usage ;;
-            *)
-                if [[ -z "$TARGET_DIR" ]]; then
-                    TARGET_DIR="$1"
-                else
-                    die "Too many arguments"
-                fi
-                shift ;;
+            *) die "Unknown argument: $1" ;;
         esac
+        shift
     done
 }
 
-remove_agents() {
-    if [[ -d "$CLAUDE_DIR/agents" ]]; then
-        rm -rf "$CLAUDE_DIR/agents"
-        info "Removed agents/"
+ensure_selection() {
+    if [[ "$REMOVE_CLAUDE" == "false" && "$REMOVE_OPENCODE" == "false" && "$REMOVE_CODEX" == "false" ]]; then
+        REMOVE_CLAUDE="true"
+        REMOVE_OPENCODE="true"
+        REMOVE_CODEX="true"
     fi
 }
 
-remove_skills() {
-    if [[ -d "$CLAUDE_DIR/skills/" ]]; then
-        rm -rf "$CLAUDE_DIR/skills/"
-        info "Removed skills/"
-    fi
-    # Remove skills/ if empty
-    if [[ -d "$CLAUDE_DIR/skills" ]] && rmdir "$CLAUDE_DIR/skills" 2>/dev/null; then
-        info "Removed empty skills/"
-    fi
-}
+remove_claude() {
+    [[ "$REMOVE_CLAUDE" == "true" ]] || return 0
 
-remove_hook_scripts() {
-    if [[ -d "$CLAUDE_DIR/hooks/scripts" ]]; then
-        rm -rf "$CLAUDE_DIR/hooks/scripts"
-        info "Removed hooks/scripts/"
-    fi
-}
+    echo -e "\n${GREEN}Removing Claude Code support${NC}"
 
-remove_hooks_json() {
-    if [[ -f "$CLAUDE_DIR/hooks.json" ]]; then
-        rm -f "$CLAUDE_DIR/hooks.json"
-        info "Removed hooks.json"
+    if command -v claude &>/dev/null; then
+        claude plugin uninstall openagentsbtw@openagentsbtw 2>/dev/null || true
+        claude plugin uninstall openagentsbtw 2>/dev/null || true
     fi
-}
 
-remove_empty_hooks_dir() {
-    if [[ -d "$CLAUDE_DIR/hooks" ]] && rmdir "$CLAUDE_DIR/hooks" 2>/dev/null; then
-        info "Removed empty hooks/"
+    rm -f "$HOME/.claude/hooks/pre-secrets.mjs" "$HOME/.claude/hooks/rtk-rewrite.sh"
+    rm -f "$HOME/.claude/output-styles/cca.md" "$HOME/.claude/statusline-command.sh"
+    rm -rf "$HOME/.claude/plugins/marketplaces/openagentsbtw"
+    info "Removed Claude plugin files"
+
+    local settings_file="$HOME/.claude/settings.json"
+    if [[ -f "$settings_file" ]] && command -v jq &>/dev/null; then
+        cp "$settings_file" "${settings_file}.backup"
+        jq '
+            del(.enabledPlugins["openagentsbtw@openagentsbtw"]) |
+            del(.extraKnownMarketplaces["openagentsbtw"])
+        ' "$settings_file" > "${settings_file}.tmp" && mv "${settings_file}.tmp" "$settings_file"
+        info "Cleaned Claude marketplace settings"
     fi
 }
 
-remove_framework_files() {
-    echo -e "\nRemoving framework files:"
-    remove_agents
-    remove_skills
-    remove_hook_scripts
-    remove_hooks_json
-    remove_empty_hooks_dir
+remove_opencode() {
+    [[ "$REMOVE_OPENCODE" == "true" ]] || return 0
+
+    echo -e "\n${GREEN}Removing OpenCode support${NC}"
+
+    local target
+    if [[ "$OPENCODE_SCOPE" == "global" ]]; then
+        target="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+    else
+        target="$PWD/.opencode"
+    fi
+
+    local agent
+    for agent in odysseus athena hephaestus nemesis atalanta calliope hermes argus orion prometheus; do
+        rm -f "$target/agents/$agent.md"
+    done
+
+    local command
+    for command in openagents-review openagents-test openagents-implement openagents-docs openagents-deps openagents-explain openagents-plan-feature openagents-plan-refactor openagents-audit openagents-ship; do
+        rm -f "$target/commands/$command.md"
+    done
+
+    local ctx
+    for ctx in overview tech-stack conventions structure agent-notes; do
+        rm -f "$target/context/$ctx.md"
+    done
+
+    rm -f "$target/plugins/openagentsbtw.ts"
+
+    if [[ -d "$REPO_DIR/opencode/templates/skills" ]]; then
+        while IFS= read -r skill_dir; do
+            rm -rf "$target/skills/$skill_dir"
+        done < <(find "$REPO_DIR/opencode/templates/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+    fi
+
+    info "Removed OpenCode files from $target"
+    warn "OpenCode config keys in opencode.json/jsonc were not edited automatically"
 }
 
-remove_user_level_hooks() {
-    echo -e "\nRemoving user-level hooks:"
-    for hook in pre-secrets.mjs rtk-rewrite.sh; do
-        if [[ -f "$HOME/.claude/hooks/$hook" ]]; then
-            rm -f "$HOME/.claude/hooks/$hook"
-            info "Removed ~/.claude/hooks/$hook"
+remove_codex() {
+    [[ "$REMOVE_CODEX" == "true" ]] || return 0
+
+    echo -e "\n${GREEN}Removing Codex support${NC}"
+    check_python3
+
+    rm -rf "$HOME/.codex/plugins/openagentsbtw" "$HOME/.codex/openagentsbtw"
+
+    local agent
+    for agent in athena hephaestus nemesis atalanta calliope hermes odysseus; do
+        local agent_file="$HOME/.codex/agents/$agent.toml"
+        if [[ -f "$agent_file" ]] && grep -q 'openagentsbtw managed file' "$agent_file"; then
+            rm -f "$agent_file"
         fi
     done
-}
 
-remove_global_extras() {
-    [[ "$INSTALL_SCOPE" != "global" ]] && return
-    echo -e "\nRemoving global extras:"
-    if [[ -f "$HOME/.claude/statusline-command.sh" ]]; then
-        rm -f "$HOME/.claude/statusline-command.sh"
-        info "Removed ~/.claude/statusline-command.sh"
-    fi
-}
+    HOOKS_TARGET="$HOME/.codex/hooks.json" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
 
-clean_settings_json() {
-    SETTINGS_FILE="$CLAUDE_DIR/settings.json"
-    [[ -f "$SETTINGS_FILE" ]] || return
+target = Path(os.environ["HOOKS_TARGET"])
+if not target.exists():
+    raise SystemExit(0)
 
-    echo -e "\nCleaning settings.json:"
+try:
+    payload = json.loads(target.read_text())
+except Exception:
+    raise SystemExit(0)
+hooks = payload.get("hooks", {})
+for event, groups in list(hooks.items()):
+    filtered = []
+    for group in groups:
+        commands = [
+            hook.get("command", "")
+            for hook in group.get("hooks", [])
+            if isinstance(hook, dict)
+        ]
+        if any(".codex/openagentsbtw/hooks/scripts/" in command for command in commands):
+            continue
+        filtered.append(group)
+    if filtered:
+        hooks[event] = filtered
+    else:
+        hooks.pop(event, None)
 
-    if ! command -v jq &>/dev/null; then
-        warn "jq not found - cannot clean settings.json. Remove framework keys manually."
+target.write_text(json.dumps(payload, indent=2) + "\n")
+PY
+
+    MARKETPLACE_TARGET="$HOME/.agents/plugins/marketplace.json" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+target = Path(os.environ["MARKETPLACE_TARGET"])
+if not target.exists():
+    raise SystemExit(0)
+
+try:
+    payload = json.loads(target.read_text())
+except Exception:
+    raise SystemExit(0)
+plugins = payload.get("plugins", [])
+payload["plugins"] = [
+    entry
+    for entry in plugins
+    if not (
+        isinstance(entry, dict)
+        and entry.get("name") == "openagentsbtw"
+    )
+]
+target.write_text(json.dumps(payload, indent=2) + "\n")
+PY
+
+    AGENTS_MD_TARGET="$HOME/.codex/AGENTS.md" CONFIG_TARGET="$HOME/.codex/config.toml" python3 - <<'PY'
+import os
+from pathlib import Path
+
+def strip_block(path_str, start, end):
+    path = Path(path_str)
+    if not path.exists():
         return
-    fi
+    text = path.read_text()
+    if start in text and end in text:
+        before, _, rest = text.partition(start)
+        _, _, after = rest.partition(end)
+        text = before.rstrip()
+        after = after.lstrip("\n")
+        if text and after:
+            text = text + "\n\n" + after
+        elif after:
+            text = after
+        if text and not text.endswith("\n"):
+            text += "\n"
+        path.write_text(text)
 
-    cp "$SETTINGS_FILE" "${SETTINGS_FILE}.backup"
-    info "Backed up to settings.json.backup"
+strip_block(
+    os.environ["AGENTS_MD_TARGET"],
+    "<!-- >>> openagentsbtw codex >>> -->",
+    "<!-- <<< openagentsbtw codex <<< -->",
+)
+strip_block(
+    os.environ["CONFIG_TARGET"],
+    "# >>> openagentsbtw codex >>>",
+    "# <<< openagentsbtw codex <<<",
+)
+PY
 
-    jq '
-        # Remove framework env vars
-        .env |= (del(.CLAUDE_CODE_HIDE_ACCOUNT_INFO) | del(.CLAUDE_CODE_IDLE_TERMINATE_MINUTES) | del(.DISABLE_AUTOUPDATER)) |
-        if (.env | length) == 0 then del(.env) else . end |
-
-        # Remove framework permissions
-        del(.permissions) |
-
-        # Remove hooks referencing pre-secrets or rtk-rewrite
-        (if .hooks then
-            .hooks |= with_entries(
-                .value |= map(select(
-                    (.hooks // []) | all(
-                        (.command // "") | (test("pre-secrets|rtk-rewrite") | not)
-                    )
-                ))
-            ) |
-            .hooks |= with_entries(select(.value | length > 0)) |
-            if (.hooks | length) == 0 then del(.hooks) else . end
-        else . end) |
-
-        # Remove framework top-level keys
-        del(.disableAllHooks) |
-        del(.statusLine) |
-        del(.autoUpdatesChannel) |
-        del(.availableModels) |
-        del(.skipWebFetchPreflight) |
-        del(.alwaysThinkingEnabled) |
-        del(.terminalImageSupport) |
-
-        # Keep: mcpServers, enabledPlugins, extraKnownMarketplaces, and any other user keys
-        .
-    ' "$SETTINGS_FILE" > "${SETTINGS_FILE}.tmp" && mv "${SETTINGS_FILE}.tmp" "$SETTINGS_FILE"
-
-    # Check if settings.json is now essentially empty
-    local key_count
-    key_count=$(jq 'keys | length' "$SETTINGS_FILE" 2>/dev/null || echo "0")
-    if [[ "$key_count" == "0" ]]; then
-        info "settings.json is now empty (all framework keys removed)"
-    else
-        info "Cleaned framework keys from settings.json ($key_count user key(s) preserved)"
-    fi
-}
-
-confirm_uninstall() {
-    echo -e "\n${YELLOW}This will remove the following from $CLAUDE_DIR:${NC}"
-    echo "  - agents/ directory"
-    echo "  - skills/ directory"
-    echo "  - hooks/scripts/ directory"
-    echo "  - hooks.json"
-    echo ""
-    echo -e "${YELLOW}User-level hooks to remove:${NC}"
-    echo "  - ~/.claude/hooks/pre-secrets.mjs"
-    echo "  - ~/.claude/hooks/rtk-rewrite.sh"
-    if [[ "$INSTALL_SCOPE" == "global" ]]; then
-        echo "  - ~/.claude/statusline-command.sh"
-    fi
-    echo ""
-    echo -e "${YELLOW}Settings cleanup:${NC}"
-    echo "  - Framework keys removed from settings.json (backup created)"
-    echo ""
-    echo -e "${YELLOW}Plugin:${NC}"
-    echo "  - claude plugin uninstall cca@claude-agents"
-    echo ""
-    echo -e "${GREEN}Will NOT remove:${NC}"
-    echo "  - CLAUDE.md (may contain customizations)"
-    echo "  - RTK (separate tool - use 'brew uninstall rtk' or remove manually)"
-    echo "  - settings.json file itself (only framework keys cleaned)"
-    echo "  - User-added mcpServers, plugins, marketplaces"
-    echo ""
-    read -rp "Proceed with uninstall? [y/N] " confirm
-    [[ "$confirm" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 0; }
+    info "Removed Codex plugin, agents, hooks, and managed profile blocks"
 }
 
 main() {
     parse_args "$@"
+    ensure_selection
 
-    if [[ "$INSTALL_SCOPE" == "global" ]]; then
-        CLAUDE_DIR="$HOME/.claude"
-        echo -e "${GREEN}CCA Uninstaller${NC}"
-        echo "Target: $CLAUDE_DIR (global)"
-    else
-        [[ -z "$TARGET_DIR" ]] && die "Target directory required, or use --global"
-        [[ ! -d "$TARGET_DIR" ]] && die "Directory does not exist: $TARGET_DIR"
-        TARGET_DIR="$(cd "$TARGET_DIR" && pwd)"
-        CLAUDE_DIR="$TARGET_DIR/.claude"
-        echo -e "${GREEN}CCA Uninstaller${NC}"
-        echo "Target: $CLAUDE_DIR"
-    fi
+    remove_claude
+    remove_opencode
+    remove_codex
 
-    [[ -d "$CLAUDE_DIR" ]] || die "No .claude directory found at target"
-
-    confirm_uninstall
-
-    # Uninstall plugin first
-    if command -v claude &>/dev/null; then
-        echo -e "\nUninstalling plugin:"
-        if claude plugin uninstall cca@claude-agents 2>/dev/null; then
-            info "Plugin uninstalled"
-        else
-            warn "Plugin not installed or already removed"
-        fi
-    fi
-
-    remove_framework_files
-    remove_user_level_hooks
-    remove_global_extras
-    clean_settings_json
-
-    echo -e "\n${GREEN}Uninstall complete.${NC}"
+    echo -e "\n${GREEN}openagentsbtw uninstall complete${NC}"
 }
 
 main "$@"

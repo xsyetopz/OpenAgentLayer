@@ -1,12 +1,13 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DIST_DIR="$SCRIPT_DIR/dist/claude-agents-plugin"
+CLAUDE_DIR="$SCRIPT_DIR/claude"
+DIST_DIR="$SCRIPT_DIR/dist/openagentsbtw-claude-plugin"
 die()  { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }
 
@@ -17,8 +18,8 @@ apply_package_models_in_file() {
 
 inject_constraints_in_file() {
     local file="$1"
-    local shared_file="$SCRIPT_DIR/constraints/shared.md"
-    local package_file="$SCRIPT_DIR/constraints/max.md"
+    local shared_file="$CLAUDE_DIR/constraints/shared.md"
+    local package_file="$CLAUDE_DIR/constraints/max.md"
     if [[ -f "$shared_file" ]] && grep -q '__SHARED_CONSTRAINTS__' "$file" 2>/dev/null; then
         local tmp
         tmp=$(mktemp)
@@ -60,7 +61,7 @@ stage_agent() {
 
 stage_all_agents() {
     mkdir -p "$DIST_DIR/agents"
-    for agent in "$SCRIPT_DIR"/agents/*.md; do
+    for agent in "$CLAUDE_DIR"/agents/*.md; do
         [[ -f "$agent" ]] || continue
         local name
         name=$(basename "$agent")
@@ -71,7 +72,7 @@ stage_all_agents() {
 
 copy_skills() {
     mkdir -p "$DIST_DIR/skills"
-    for skill_dir in "$SCRIPT_DIR"/skills/*/; do
+    for skill_dir in "$CLAUDE_DIR"/skills/*/; do
         [[ -d "$skill_dir" ]] || continue
         local skill
         skill=$(basename "$skill_dir")
@@ -84,19 +85,19 @@ copy_skills() {
 stage_hooks() {
     mkdir -p "$DIST_DIR/hooks/scripts"
     # Copy pre-built hooks.json (already has CLAUDE_PLUGIN_ROOT paths)
-    cp "$SCRIPT_DIR/hooks/hooks.json" "$DIST_DIR/hooks/hooks.json"
+    cp "$CLAUDE_DIR/hooks/hooks.json" "$DIST_DIR/hooks/hooks.json"
     info "hooks.json"
     # Copy top-level scripts (_lib.mjs etc.)
-    for script in "$SCRIPT_DIR"/hooks/scripts/*.mjs; do
+    for script in "$CLAUDE_DIR"/hooks/scripts/*.mjs; do
         [[ -f "$script" ]] || continue
         cp "$script" "$DIST_DIR/hooks/scripts/"
         info "Hook script: $(basename "$script")"
     done
     # Copy subdirectory scripts (pre/, post/, session/)
     for subdir in pre post session; do
-        if [[ -d "$SCRIPT_DIR/hooks/scripts/$subdir" ]]; then
+        if [[ -d "$CLAUDE_DIR/hooks/scripts/$subdir" ]]; then
             mkdir -p "$DIST_DIR/hooks/scripts/$subdir"
-            find "$SCRIPT_DIR/hooks/scripts/$subdir" -name '*.mjs' \
+            find "$CLAUDE_DIR/hooks/scripts/$subdir" -name '*.mjs' \
                 -exec cp {} "$DIST_DIR/hooks/scripts/$subdir/" \;
             info "Hook scripts: $subdir/ ($(find "$DIST_DIR/hooks/scripts/$subdir" -name '*.mjs' | wc -l | tr -d ' ') files)"
         fi
@@ -130,16 +131,17 @@ validate_dist() {
     fi
 }
 
-echo -e "${GREEN}Building ClaudeAgents plugin${NC}\n"
+echo -e "${GREEN}Building openagentsbtw Claude plugin${NC}\n"
 
 prepare_dir "$DIST_DIR"
 prepare_dir "$DIST_DIR/.claude-plugin"
-cp "$SCRIPT_DIR/.claude-plugin/plugin.json" "$DIST_DIR/.claude-plugin/"
+cp "$CLAUDE_DIR/.claude-plugin/plugin.json" "$DIST_DIR/.claude-plugin/"
+cp "$CLAUDE_DIR/.claude-plugin/marketplace.json" "$DIST_DIR/.claude-plugin/"
 info "Plugin manifest"
 stage_all_agents
 copy_skills
 stage_hooks
-[[ -f "$SCRIPT_DIR/README.md" ]] && cp "$SCRIPT_DIR/README.md" "$DIST_DIR/"
+[[ -f "$CLAUDE_DIR/CLAUDE.md" ]] && cp "$CLAUDE_DIR/CLAUDE.md" "$DIST_DIR/CLAUDE.md"
 validate_dist
 
 echo -e "${GREEN}Build complete: $DIST_DIR${NC}\n"

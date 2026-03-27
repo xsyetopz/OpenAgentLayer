@@ -1,39 +1,52 @@
-# ClaudeAgents Makefile
+# openagentsbtw Makefile
 # Usage: make help
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 SCRIPT_DIR := $(shell pwd)
-DIST_DIR   := $(SCRIPT_DIR)/dist/claude-agents-plugin
+DIST_DIR   := $(SCRIPT_DIR)/dist/openagentsbtw-claude-plugin
 
 # ──────────────────────────────────────────────
 # User targets (install, update, uninstall)
 # ──────────────────────────────────────────────
 
 .PHONY: install
-install: ## Install (max 5x tier)
-	./install.sh
+install: ## Install all systems
+	./install.sh --all
 
-.PHONY: install-20x
-install-20x: ## Install (max 20x tier)
-	./install.sh --tier 20x
+.PHONY: install-claude
+install-claude: ## Install Claude Code support
+	./install.sh --claude
 
-.PHONY: install-plugin
-install-plugin: ## Install plugin from working tree (dev workflow)
+.PHONY: install-opencode
+install-opencode: ## Install OpenCode support
+	./install.sh --opencode
+
+.PHONY: install-codex
+install-codex: ## Install Codex support
+	./install.sh --codex
+
+.PHONY: install-claude-20x
+install-claude-20x: ## Install Claude Code support with 20x tier
+	./install.sh --claude --claude-tier 20x
+
+.PHONY: install-claude-plugin
+install-claude-plugin: ## Install Claude plugin from working tree
 	@rm -rf ~/.claude/plugins/cache/temp_local_*
-	@mkdir -p ~/.claude/plugins/marketplaces/claude-agents
-	@rsync -a --delete --exclude='.git' --exclude='node_modules' --exclude='dist' ./ ~/.claude/plugins/marketplaces/claude-agents/
-	@claude plugin uninstall cca@claude-agents 2>/dev/null || true
-	claude plugin install cca
+	@mkdir -p ~/.claude/plugins/marketplaces/openagentsbtw
+	@rsync -a --delete --exclude='.git' --exclude='node_modules' --exclude='dist' ./claude/ ~/.claude/plugins/marketplaces/openagentsbtw/
+	@claude plugin uninstall openagentsbtw@openagentsbtw 2>/dev/null || true
+	@claude plugin uninstall openagentsbtw 2>/dev/null || true
+	claude plugin install openagentsbtw
 
 .PHONY: update
-update: ## Re-run install (updates all user-level files and plugin)
-	./install.sh
+update: ## Re-run install for all systems
+	./install.sh --all
 
 .PHONY: uninstall
-uninstall: ## Uninstall from ~/.claude/
-	./uninstall.sh --global
+uninstall: ## Uninstall all systems
+	./uninstall.sh --all
 
 # ──────────────────────────────────────────────
 # Developer targets (lint, format, build, validate)
@@ -44,7 +57,7 @@ lint: lint-shell lint-json ## Run all linters
 
 .PHONY: lint-shell
 lint-shell: ## Lint shell scripts with shellcheck
-	shellcheck install.sh build-plugin.sh uninstall.sh hooks/scripts/_run.sh statusline/statusline-command.sh
+	shellcheck install.sh build-plugin.sh uninstall.sh claude/hooks/scripts/_run.sh claude/statusline/statusline-command.sh
 
 .PHONY: lint-json
 lint-json: ## Validate all JSON files parse correctly
@@ -83,8 +96,8 @@ validate-dist: build ## Build then validate dist structure
 .PHONY: hooks-json
 hooks-json: ## Regenerate hooks/hooks.json from configs/base.json
 	@sed 's|"$$CLAUDE_PROJECT_DIR"/.claude/hooks/scripts/|"$${CLAUDE_PLUGIN_ROOT}"/hooks/scripts/|g' \
-		hooks/configs/base.json > hooks/hooks.json
-	@node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json','utf8'))" && echo "hooks/hooks.json regenerated."
+		claude/hooks/configs/base.json > claude/hooks/hooks.json
+	@node -e "JSON.parse(require('fs').readFileSync('claude/hooks/hooks.json','utf8'))" && echo "claude/hooks/hooks.json regenerated."
 
 .PHONY: clean
 clean: ## Remove build artifacts and caches
@@ -96,19 +109,19 @@ clean: ## Remove build artifacts and caches
 
 .PHONY: test
 test: ## Run all tests
-	node --test tests/test-*.mjs
+	node --test claude/tests/test-*.mjs
 
 .PHONY: test-quick
 test-quick: ## Run tests without verbose output
-	node --test tests/test-*.mjs 2>&1 | tail -5
+	node --test claude/tests/test-*.mjs 2>&1 | tail -5
 
 .PHONY: test-cov
 test-cov: ## Run all tests (no coverage tooling)
-	node --test tests/test-*.mjs
+	node --test claude/tests/test-*.mjs
 
 .PHONY: test-watch
 test-watch: ## Re-run tests on file changes (requires nodemon)
-	nodemon --watch tests/ --watch hooks/scripts/ --ext mjs --exec 'node --test tests/test-*.mjs'
+	nodemon --watch claude/tests/ --watch claude/hooks/scripts/ --ext mjs --exec 'node --test claude/tests/test-*.mjs'
 
 .PHONY: test-hooks
 test-hooks: diagnose ## Smoke-test installed hooks against live claude
@@ -118,7 +131,7 @@ test-install: ## Validate install/build scripts syntax and plugin manifest
 	@bash -n install.sh && echo "install.sh: syntax OK"
 	@bash -n build-plugin.sh && echo "build-plugin.sh: syntax OK"
 	@bash -n uninstall.sh && echo "uninstall.sh: syntax OK"
-	@node -e "const p = JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')); \
+	@node -e "const p = JSON.parse(require('fs').readFileSync('claude/.claude-plugin/plugin.json','utf8')); \
 		console.log('Plugin: ' + p.name + ' v' + p.version)"
 
 .PHONY: test-plugin
@@ -137,7 +150,7 @@ release-check: validate validate-dist ## Full pre-release check: lint + test + b
 
 .PHONY: version
 version: ## Show current plugin version
-	@node -e "console.log(JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).version)"
+	@node -e "console.log(JSON.parse(require('fs').readFileSync('claude/.claude-plugin/plugin.json','utf8')).version)"
 
 # ──────────────────────────────────────────────
 # Help
@@ -145,7 +158,7 @@ version: ## Show current plugin version
 
 .PHONY: help
 help: ## Show this help
-	@echo "ClaudeAgents Makefile"
+	@echo "openagentsbtw Makefile"
 	@echo ""
 	@echo "Usage: make <target>"
 	@echo ""

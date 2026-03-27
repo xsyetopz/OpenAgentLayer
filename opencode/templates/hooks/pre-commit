@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -e
+
+echo "Running pre-commit checks..."
+
+echo "Checking for TODO/FIXME/XXX comments..."
+if git diff --cached --name-only | xargs grep -l "TODO\\|FIXME\\|XXX" 2>/dev/null; then
+  echo "Potential placeholder comments detected in staged files. Resolve or remove them before committing."
+  exit 1
+fi
+
+echo "Checking for potential secrets..."
+PATTERNS=(
+  "AKIA[0-9A-Z]{16}"
+  "ghp_[a-zA-Z0-9]{36}"
+  "gho_[a-zA-Z0-9]{36}"
+  "ghs_[a-zA-Z0-9]{36}"
+  "ghr_[a-zA-Z0-9]{36}"
+  "-----BEGIN.*PRIVATE KEY-----"
+  "password[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]"
+  "api_key[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]"
+  "secret[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]"
+)
+
+for pattern in "${PATTERNS[@]}"; do
+  if git diff --cached | grep -E "$pattern" 2>/dev/null; then
+    echo "Potential secret detected in staged changes."
+    echo "Pattern matched: $pattern"
+    exit 1
+  fi
+done
+
+echo "Checking for .env files..."
+if git diff --cached --name-only | grep -E "\\.env" 2>/dev/null; then
+  echo ".env files should not be committed."
+  exit 1
+fi
+
+if [ -f "package.json" ] && grep -q '"test"' package.json; then
+  echo "Running tests..."
+  if command -v bun >/dev/null 2>&1; then
+    bun test 2>/dev/null || npm test
+  elif command -v npm >/dev/null 2>&1; then
+    npm test
+  fi
+
+  if [ $? -ne 0 ]; then
+    echo "Tests failed. Fix them before committing."
+    exit 1
+  fi
+fi
+
+echo "✓ pre-commit checks passed!"
+exit 0

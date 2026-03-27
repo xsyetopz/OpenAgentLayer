@@ -1,0 +1,132 @@
+[
+  {
+    "name": "decide",
+    "description": "Shared collaboration protocol for presenting options, tradeoffs, and rationale in technical decisions. Triggers: present options, tradeoffs, collaboration, decision making, \"which approach\", \"how should we\", alternatives, options analysis, trade-off.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "desloppify",
+    "description": "Detect and remove AI-generated linguistic slop from code, comments, documentation, READMEs, changelogs, commit messages, and any text artifacts. Use whenever the user mentions \"AI slop\", \"desloppify\", \"remove AI-isms\", \"sounds like AI\", \"too AI\", \"clean up AI writing\", \"make it sound human\", or asks to review text for AI patterns. Also trigger when reviewing any AI-generated documentation, comments, or prose -- even if the user doesn't explicitly mention AI slop -- if the content exhibits hallmark AI writing patterns like filler adjectives, hedge phrases, or obvious code comments. Trigger for any request to \"clean up\", \"tighten\", or \"edit\" AI-generated text, and when auditing codebases for comment quality.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "docs",
+    "description": "Standards for writing documentation: READMEs, changelogs, ADRs, API docs, and inline docs. Triggers: documentation, docs, README, changelog, ADR, architecture decision record, API documentation, doc standards, write docs, update docs.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": "Recommended routing: `openagentsbtw-codex docs \"<task>\"` for routine docs edits, or `openagentsbtw-codex desloppify \"<task>\"` for cleanup-heavy passes."
+  },
+  {
+    "name": "errors",
+    "description": "Error handling patterns, Result types, exception strategies, and error recovery. Triggers: error handling, Result type, exception, error recovery, error propagation, unwrap, panic, try-catch, error boundary, error types, anyhow, thiserror.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "handoff",
+    "description": "Export session context as a structured handoff file for continuity between Claude Code sessions. Use when the user wants to save session progress, create a handoff, preserve context before ending, or mentions \"session export\", \"session handoff\", \"save session\", \"session continuity\".",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": "Recommended routing: `openagentsbtw-codex handoff \"<focus>\"` for compact session exports."
+  },
+  {
+    "name": "openagentsbtw",
+    "description": "Use the openagentsbtw role system in Codex when work benefits from explicit planning, implementation, review, testing, documentation, or multi-agent orchestration.",
+    "userInvocable": true,
+    "platforms": [
+      "codex"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "perf",
+    "description": "Performance optimization patterns, profiling guidance, and common bottleneck identification. Triggers: performance, optimize, slow, bottleneck, profiling, latency, throughput, memory usage, CPU usage, N+1, caching, benchmark.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "review",
+    "description": "Enforces coding standards, design principles, naming conventions, and anti-patterns when writing, editing, or reviewing code. The single source of truth for code quality rules. Triggers: implement, write code, add function, create module, refactor, edit code, fix bug, review code, check quality, review PR, validate implementation, code review, restructure, extract, rename, move, simplify, decompose, clean up code, reduce complexity, split module.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "security",
+    "description": "Security audit checklist covering OWASP Top 10, secrets management, dependency vulnerabilities, and hardening. Triggers: security, audit, OWASP, vulnerability, hardening, CVE, secrets, injection, XSS, CSRF, authentication, authorization, penetration test.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "ship",
+    "description": "Git workflow conventions for commits, branches, and PRs. Use when the user mentions \"commit\", \"git commit\", \"stage and commit\", \"branch\", \"PR\", \"pull request\", \"merge\", \"rebase\", \"git workflow\", or asks about commit message format, branch naming, or PR templates.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "style",
+    "description": "Detects project code style conventions and injects them as context. Preloaded by @hephaestus.",
+    "userInvocable": false,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  },
+  {
+    "name": "test",
+    "description": "Test design patterns, strategies, and coverage guidance for writing effective tests. Triggers: write tests, test patterns, testing strategy, test coverage, unit test, integration test, mock, fixture, test architecture, TDD, test-driven.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode"
+    ],
+    "codexLead": ""
+  }
+]

@@ -1,0 +1,239 @@
+[
+  {
+    "id": "prompt-git-context",
+    "script": "session/prompt-git-context.mjs",
+    "claude": {
+      "event": "UserPromptSubmit",
+      "timeout": 5
+    },
+    "codex": {
+      "event": "UserPromptSubmit",
+      "timeout": 10,
+      "statusMessage": "openagentsbtw git context"
+    }
+  },
+  {
+    "id": "start-budget",
+    "script": "session/start-budget.mjs",
+    "claude": {
+      "event": "SessionStart",
+      "timeout": 5
+    },
+    "codex": {
+      "event": "SessionStart",
+      "matcher": "startup|resume",
+      "timeout": 10,
+      "statusMessage": "openagentsbtw session checks"
+    }
+  },
+  {
+    "id": "validate-input",
+    "script": "pre/validate-input.mjs",
+    "claude": {
+      "event": "PreToolUse",
+      "timeout": 5
+    },
+    "unsupported": {
+      "codex": "Codex PreToolUse currently intercepts Bash only; Claude's richer multi-tool input validation does not map cleanly.",
+      "opencode": "OpenCode's documented plugin events do not expose the same pre-tool structured input contract this hook expects."
+    }
+  },
+  {
+    "id": "bash-guard",
+    "script": "pre/bash-guard.mjs",
+    "claude": {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "timeout": 10
+    },
+    "codex": {
+      "event": "PreToolUse",
+      "matcher": "Bash",
+      "timeout": 10,
+      "statusMessage": "openagentsbtw bash guard"
+    },
+    "opencode": {
+      "plugin": {
+        "event": "tool.execute.before",
+        "tools": [
+          "bash"
+        ],
+        "field": "command",
+        "message": "openagentsbtw blocked a dangerous bash command",
+        "patterns": [
+          "/\\brm\\s+-rf\\s+\\/$/",
+          "/\\bgit\\s+add\\s+\\.\\b/",
+          "/\\bgit\\s+commit\\b/",
+          "/\\bgit\\s+push\\b/"
+        ]
+      }
+    }
+  },
+  {
+    "id": "write-quality",
+    "script": "post/write-quality.mjs",
+    "claude": {
+      "event": "PostToolUse",
+      "matcher": "Write|Edit",
+      "timeout": 15,
+      "prompt": "After modifying a file, note any LSP diagnostics in your response. Continue with your current task."
+    },
+    "unsupported": {
+      "codex": "Codex PostToolUse is currently Bash-only, so there is no documented file-write hook payload for this policy.",
+      "opencode": "OpenCode plugins can intercept tool execution, but this repo does not have a documented write-diagnostics equivalent wired into the shared policy."
+    }
+  },
+  {
+    "id": "bash-redact",
+    "script": "post/bash-redact.mjs",
+    "claude": {
+      "event": "PostToolUse",
+      "matcher": "Bash",
+      "timeout": 10
+    },
+    "codex": {
+      "event": "PostToolUse",
+      "matcher": "Bash",
+      "timeout": 10,
+      "statusMessage": "openagentsbtw output redaction"
+    }
+  },
+  {
+    "id": "failure-circuit",
+    "script": "post/failure-circuit.mjs",
+    "claude": {
+      "event": "PostToolUseFailure",
+      "timeout": 5
+    },
+    "unsupported": {
+      "codex": "Codex does not document a PostToolUseFailure event in the verified hook flow used by this repo.",
+      "opencode": "OpenCode plugin events used here do not include a Claude-style post-tool failure hook contract."
+    }
+  },
+  {
+    "id": "subagent-scan",
+    "script": "post/subagent-scan.mjs",
+    "claude": {
+      "event": "SubagentStop",
+      "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
+      "timeout": 15
+    },
+    "unsupported": {
+      "codex": "Codex has multi-agent support, but the documented hook surface used here does not expose Claude's SubagentStop event contract.",
+      "opencode": "OpenCode does not expose a Claude-style subagent-stop hook surface in the documented plugin and git-hook interfaces used here."
+    }
+  },
+  {
+    "id": "stop-scan",
+    "script": "post/stop-scan.mjs",
+    "claude": {
+      "event": "Stop",
+      "timeout": 15
+    },
+    "codex": {
+      "event": "Stop",
+      "timeout": 15,
+      "statusMessage": "openagentsbtw completion scan"
+    }
+  },
+  {
+    "id": "secret-path-guard",
+    "opencode": {
+      "plugin": {
+        "event": "tool.execute.before",
+        "tools": [
+          "read",
+          "edit",
+          "write"
+        ],
+        "field": "filePath",
+        "message": "openagentsbtw blocked access to a secret-like file",
+        "patterns": [
+          "/(^|\\/)(\\.env($|\\.)|.*\\.(pem|key))$/i"
+        ]
+      }
+    }
+  },
+  {
+    "id": "staged-placeholder-guard",
+    "opencode": {
+      "gitHooks": [
+        {
+          "hook": "pre-commit",
+          "kind": "staged-text-block",
+          "label": "for TODO/FIXME/XXX comments",
+          "pattern": "TODO\\|FIXME\\|XXX",
+          "message": "Potential placeholder comments detected in staged files. Resolve or remove them before committing."
+        }
+      ]
+    }
+  },
+  {
+    "id": "staged-secret-guard",
+    "opencode": {
+      "gitHooks": [
+        {
+          "hook": "pre-commit",
+          "kind": "staged-diff-pattern-block",
+          "label": "for potential secrets",
+          "patterns": [
+            "AKIA[0-9A-Z]{16}",
+            "ghp_[a-zA-Z0-9]{36}",
+            "gho_[a-zA-Z0-9]{36}",
+            "ghs_[a-zA-Z0-9]{36}",
+            "ghr_[a-zA-Z0-9]{36}",
+            "-----BEGIN.*PRIVATE KEY-----",
+            "password[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]",
+            "api_key[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]",
+            "secret[[:space:]]*=[[:space:]]*['\\\"][^'\\\"]+['\\\"]"
+          ],
+          "message": "Potential secret detected in staged changes."
+        },
+        {
+          "hook": "pre-commit",
+          "kind": "staged-path-block",
+          "label": "for .env files",
+          "pattern": "\\.env",
+          "message": ".env files should not be committed."
+        }
+      ]
+    }
+  },
+  {
+    "id": "pre-commit-test",
+    "opencode": {
+      "gitHooks": [
+        {
+          "hook": "pre-commit",
+          "kind": "package-test",
+          "label": "Running tests...",
+          "message": "Tests failed. Fix them before committing."
+        }
+      ]
+    }
+  },
+  {
+    "id": "protected-branch-confirm",
+    "opencode": {
+      "gitHooks": [
+        {
+          "hook": "pre-push",
+          "kind": "branch-confirm"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pre-push-test",
+    "opencode": {
+      "gitHooks": [
+        {
+          "hook": "pre-push",
+          "kind": "package-test",
+          "label": "Running tests before push...",
+          "message": "Tests failed. Fix them before pushing."
+        }
+      ]
+    }
+  }
+]

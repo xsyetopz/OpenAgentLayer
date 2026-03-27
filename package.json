@@ -5,7 +5,10 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "test": "node --test tests/test-*.mjs"
+    "bootstrap:source": "node scripts/bootstrap-source.mjs",
+    "generate": "node scripts/generate.mjs",
+    "check:generated": "node scripts/check-generated.mjs",
+    "test": "node --test claude/tests/test-*.mjs"
   },
   "devDependencies": {
     "ajv": "^8.18.0"

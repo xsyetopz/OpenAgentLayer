@@ -1,0 +1,67 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/openagentsbtw/hooks/scripts/session/prompt-git-context.mjs\"",
+            "timeout": 10,
+            "statusMessage": "openagentsbtw git context"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/openagentsbtw/hooks/scripts/session/start-budget.mjs\"",
+            "timeout": 10,
+            "statusMessage": "openagentsbtw session checks"
+          }
+        ],
+        "matcher": "startup|resume"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/openagentsbtw/hooks/scripts/pre/bash-guard.mjs\"",
+            "timeout": 10,
+            "statusMessage": "openagentsbtw bash guard"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/openagentsbtw/hooks/scripts/post/bash-redact.mjs\"",
+            "timeout": 10,
+            "statusMessage": "openagentsbtw output redaction"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.codex/openagentsbtw/hooks/scripts/post/stop-scan.mjs\"",
+            "timeout": 15,
+            "statusMessage": "openagentsbtw completion scan"
+          }
+        ]
+      }
+    ]
+  }
+}

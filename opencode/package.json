@@ -1,0 +1,31 @@
+{
+  "name": "openagentsbtw-opencode",
+  "version": "0.1.0",
+  "description": "openagentsbtw for OpenCode - specialized agents, tools, and commands",
+  "type": "module",
+  "bin": {
+    "openagentsbtw-opencode-install": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "bun run src/cli.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit",
+    "lint": "bunx biome lint . --max-diagnostics 16384",
+    "lint:fix": "bunx biome lint . --write --unsafe --max-diagnostics 16384",
+    "format": "bunx biome format . --max-diagnostics 16384",
+    "format:fix": "bunx biome format . --write --max-diagnostics 16384",
+    "check": "bunx biome check . --max-diagnostics 16384",
+    "check:fix": "bunx biome check . --write --unsafe --max-diagnostics 16384"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "1.3.3",
+    "glob": "^13.0.6",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.9",
+    "@types/bun": "^1.3.11",
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2"
+  }
+}

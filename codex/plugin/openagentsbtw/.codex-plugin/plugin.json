@@ -1,0 +1,40 @@
+{
+  "name": "openagentsbtw",
+  "version": "1.1.2",
+  "description": "openagentsbtw roles, skills, and safety defaults for Codex",
+  "author": {
+    "name": "xsyetopz",
+    "url": "https://github.com/xsyetopz"
+  },
+  "homepage": "https://github.com/xsyetopz/openagentsbtw/tree/main/codex",
+  "repository": "https://github.com/xsyetopz/openagentsbtw",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "agents",
+    "skills",
+    "hooks",
+    "code-review",
+    "orchestration"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "openagentsbtw",
+    "shortDescription": "Codex-native roles, skills, and safety defaults",
+    "longDescription": "Packages the openagentsbtw role system for Codex with reusable skills, installer-managed custom agents, hook scripts, and AGENTS.md guidance.",
+    "developerName": "xsyetopz",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Bash",
+      "Search"
+    ],
+    "websiteURL": "https://github.com/xsyetopz/openagentsbtw",
+    "defaultPrompt": [
+      "Use openagentsbtw to plan a multi-file refactor with Athena before implementation.",
+      "Use openagentsbtw to review recent changes with Nemesis and then run targeted validation with Atalanta."
+    ],
+    "brandColor": "#10A37F"
+  }
+}
