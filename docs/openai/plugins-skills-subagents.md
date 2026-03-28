@@ -48,9 +48,11 @@ Config is also where Codex-native defaults live: profile selection, `commit_attr
 
 ## Wrapper Routing
 
-`openagentsbtw-codex <mode> ...` is the supported routing layer for mode-specific CLI flows. The wrapper selects the managed profile and supplies a strong role-shaped prompt for plan, implement, review, orchestration, docs, cleanup, handoff, and bounded validation.
+`openagentsbtw-codex <mode> ...` is the supported routing layer for mode-specific CLI flows. The wrapper selects the managed profile and supplies a strong role-shaped prompt for plan, accept-edits, implement, review, orchestration, docs, cleanup, handoff, and bounded validation.
 
 That wrapper contract is more reliable than implying the plugin can hard-bind native `/plan` or `/review` to a custom agent. Native `/plan` remains useful, but it is documented as a reasoning mode, not as an agent selector.
+
+We also support `oabtw-codex` as a short alias for the same wrapper behavior. The alias is human-facing only; plugin IDs, marketplace keys, and profile names remain `openagentsbtw`.
 
 ## Local Observation
 

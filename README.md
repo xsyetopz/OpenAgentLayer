@@ -95,6 +95,32 @@ Installed Codex helper command:
 - `~/.codex/openagentsbtw/bin/openagentsbtw-codex implement ...`
 - `~/.codex/openagentsbtw/bin/openagentsbtw-codex review ...`
 
+## Updating
+
+Short version:
+
+```bash
+git pull
+./install.sh --claude --codex
+```
+
+Pick only the systems you use.
+
+What this refreshes:
+
+- plugin files
+- generated skills
+- agents
+- hooks
+- wrapper commands
+- managed config blocks
+
+Important:
+
+- Codex does not currently have a first-class plugin update command in this repo flow. Re-run the installer to get additions, removals, and changed generated assets.
+- Claude may auto-refresh some plugin state, but the supported path here is still: update the repo, then re-run `install.sh`.
+- If a release removes files, the reinstall step is what cleans up the synced plugin payloads and scripts.
+
 ## Layout
 
 ```text

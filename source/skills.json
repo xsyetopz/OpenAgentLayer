@@ -30,7 +30,7 @@
       "codex",
       "opencode"
     ],
-    "codexLead": "Recommended routing: `openagentsbtw-codex docs \"<task>\"` for routine docs edits, or `openagentsbtw-codex desloppify \"<task>\"` for cleanup-heavy passes."
+    "codexLead": "Recommended routing: `oabtw-codex docs \"<task>\"` for routine docs edits, or `oabtw-codex desloppify \"<task>\"` for cleanup-heavy passes. `openagentsbtw-codex` remains the canonical equivalent."
   },
   {
     "name": "errors",
@@ -52,7 +52,7 @@
       "codex",
       "opencode"
     ],
-    "codexLead": "Recommended routing: `openagentsbtw-codex handoff \"<focus>\"` for compact session exports."
+    "codexLead": "Recommended routing: `oabtw-codex handoff \"<focus>\"` for compact session exports. `openagentsbtw-codex` remains the canonical equivalent."
   },
   {
     "name": "openagentsbtw",

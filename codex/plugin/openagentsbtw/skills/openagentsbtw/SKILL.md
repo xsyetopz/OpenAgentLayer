@@ -30,26 +30,33 @@ Use this skill when the task benefits from the openagentsbtw role split while op
 
 Use these wrappers when you want consistent profile selection plus explicit role-shaped prompting:
 
-- `openagentsbtw-codex triage`
+Short alias: `oabtw-codex`
+Canonical equivalent: `openagentsbtw-codex`
+
+- `oabtw-codex triage`
   `hermes`-shaped routing on `openagentsbtw-codex-mini` for bounded search, classification, and evidence gathering.
-- `openagentsbtw-codex docs`
+- `oabtw-codex docs`
   `calliope`-shaped routing on `openagentsbtw-codex-mini` for documentation-only edits.
-- `openagentsbtw-codex desloppify`
+- `oabtw-codex desloppify`
   `calliope`-shaped routing on `openagentsbtw-codex-mini` for prose cleanup, comment cleanup, and anti-slop passes.
-- `openagentsbtw-codex handoff`
+- `oabtw-codex handoff`
   compact handoff writing on `openagentsbtw-codex-mini`.
-- `openagentsbtw-codex test`
+- `oabtw-codex test`
   `atalanta`-shaped routing on `openagentsbtw-codex-mini` for targeted validation.
-- `openagentsbtw-codex plan`
+- `oabtw-codex plan`
   `athena`-shaped routing on `openagentsbtw`.
-- `openagentsbtw-codex implement`
+- `oabtw-codex accept`
+  sandboxed auto-accept implementation routing on `openagentsbtw-accept-edits`.
+- `oabtw-codex implement`
   `hephaestus`-shaped routing on `openagentsbtw`.
-- `openagentsbtw-codex review`
+- `oabtw-codex review`
   `nemesis`-shaped routing on `openagentsbtw`.
-- `openagentsbtw-codex orchestrate`
+- `oabtw-codex orchestrate`
   `odysseus`-shaped routing on `openagentsbtw`.
 
 These wrappers do not hard-bind a native Codex mode like `/plan` to a custom agent. The reliable contract is profile selection plus a strong system prompt, while the custom agent TOMLs hold the actual model pinning for each specialist.
+
+The `accept` route is an openagentsbtw convenience mode, not a native Codex collaboration mode. It maps to `approval_policy = "never"` plus `sandbox_mode = "workspace-write"` so edits auto-apply inside the sandbox without turning on full access.
 
 ## Default Flow
 

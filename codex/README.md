@@ -20,10 +20,12 @@ This package ports openagentsbtw onto Codex’s native extension surfaces: custo
 Wrapper command after install:
 
 ```bash
-~/.codex/openagentsbtw/bin/openagentsbtw-codex docs "tighten the README install section"
-~/.codex/openagentsbtw/bin/openagentsbtw-codex implement "fix the auth race in src/auth.ts"
-~/.codex/openagentsbtw/bin/openagentsbtw-codex review "audit the current diff for regressions"
+~/.codex/openagentsbtw/bin/oabtw-codex docs "tighten the README install section"
+~/.codex/openagentsbtw/bin/oabtw-codex implement "fix the auth race in src/auth.ts"
+~/.codex/openagentsbtw/bin/oabtw-codex review "audit the current diff for regressions"
 ```
+
+`oabtw-codex` is the short alias. `openagentsbtw-codex` remains the canonical equivalent and is installed alongside it.
 
 The installer:
 
@@ -32,8 +34,37 @@ The installer:
 - installs custom agents into `~/.codex/agents/`
 - installs hook scripts into `~/.codex/openagentsbtw/hooks/` and merges `~/.codex/hooks.json`
 - appends managed openagentsbtw guidance to `~/.codex/AGENTS.md`
-- appends managed `openagentsbtw-plus`, `openagentsbtw-pro`, `openagentsbtw-codex-mini`, and selected `openagentsbtw` profiles to `~/.codex/config.toml`
+- appends managed `openagentsbtw-plus`, `openagentsbtw-pro`, `openagentsbtw-codex-mini`, `openagentsbtw`, and `openagentsbtw-accept-edits` profiles to `~/.codex/config.toml`
 - optionally runs `rtk init -g --codex`
+
+## Updating
+
+Use this when you want new features, removals, or changed defaults:
+
+```bash
+git pull
+./install.sh --codex
+```
+
+If you use a specific tier, repeat it:
+
+```bash
+./install.sh --codex --codex-tier pro
+```
+
+What gets refreshed:
+
+- `~/.codex/plugins/openagentsbtw`
+- `~/.codex/agents/`
+- `~/.codex/openagentsbtw/hooks/`
+- `~/.codex/openagentsbtw/bin/`
+- managed openagentsbtw blocks in `~/.codex/config.toml` and `~/.codex/AGENTS.md`
+
+Important:
+
+- The supported update path is reinstall-from-repo.
+- This is how users get additions and removals, not just new files.
+- There is no separate openagentsbtw-specific in-app updater for Codex in this repo flow.
 
 The plugin package gives Codex the skills and install surface. Default behavior comes from `AGENTS.md`, the managed profiles, enabled hooks, and the `openagentsbtw-codex` wrapper.
 
@@ -45,6 +76,8 @@ The plugin package gives Codex the skills and install surface. Default behavior 
   Uses `gpt-5.4` for `athena` and `odysseus`, `gpt-5.3-codex` for the main coding roles, and `gpt-5.4-mini` for lighter roles.
 - `openagentsbtw-codex-mini`
   A separate lightweight profile for narrow high-volume tasks using `gpt-5.1-codex-mini`. It is installed for manual use rather than assigned as a default role.
+- `openagentsbtw-accept-edits`
+  A sandboxed auto-accept profile for implementation work. It keeps `sandbox_mode = "workspace-write"` but switches to `approval_policy = "never"`.
 
 ## Behavior Policy
 
@@ -58,10 +91,18 @@ The plugin package gives Codex the skills and install surface. Default behavior 
 
 ## Routing
 
-- `openagentsbtw-codex plan|implement|review|orchestrate` is the supported CLI routing layer.
+- `oabtw-codex plan|implement|review|orchestrate` is the short supported CLI routing layer.
+- `oabtw-codex accept` is the sandboxed auto-accept implementation route.
+- `openagentsbtw-codex` remains supported as the canonical full-form command.
 - Wrapper modes select the managed profile and reinforce the intended specialist path.
 - Native `/plan` still helps with reasoning depth, but it does not guarantee `athena` selection.
 - Specialist model pinning lives in the installed custom agent TOMLs, not in the plugin manifest.
+
+## Safety Model
+
+- Codex safety is centered on sandboxing, approvals, writable roots, rules, project trust, and hooks.
+- This is similar in outcome to Claude Code’s permissions, but not the same implementation shape.
+- Current Codex hooks intercept Bash, not a broad built-in edit/write/read tool matrix.
 
 ## Notes
 

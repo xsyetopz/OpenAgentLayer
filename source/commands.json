@@ -93,6 +93,11 @@
       "prompt": "Use openagentsbtw. Route planning through athena-style architecture analysis on the main profile. Treat native /plan as reasoning mode only, not role selection. Lead with the recommendation and keep the plan concrete."
     },
     {
+      "mode": "accept",
+      "profile": "openagentsbtw-accept-edits",
+      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the sandboxed auto-accept profile. This mode keeps workspace-write sandboxing but does not pause for edit approvals. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why."
+    },
+    {
       "mode": "implement",
       "profile": "openagentsbtw",
       "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why."

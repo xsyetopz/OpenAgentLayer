@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
     cat <<'EOF' >&2
-Usage: openagentsbtw-codex <mode> [prompt...]
+Usage: oabtw-codex <mode> [prompt...]
 
 Modes:
   triage      Generated openagentsbtw Codex route

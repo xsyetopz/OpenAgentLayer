@@ -17,6 +17,10 @@ The Codex port keeps only the Claude hook behavior that maps onto documented Cod
 - `post/stop-scan.mjs`
   Scans modified files for placeholder code before final completion.
 
+## Important Limitation
+
+Codex hooks are useful guardrails, not a complete Claude-style permission layer. In the current Codex docs, `PreToolUse` and `PostToolUse` only intercept `Bash`. They do not provide a general-purpose hook matrix for built-in edit/read/write surfaces, so hook-based enforcement in Codex should be treated as a shell guardrail layered on top of sandboxing and approvals, not a full replacement for Claude’s richer permission patterns.
+
 ## Hooks We Did Not Port
 
 The Claude package has more hook coverage, but several pieces are Claude-specific or rely on tools/events that Codex does not document in the same way:

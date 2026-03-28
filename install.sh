@@ -530,8 +530,9 @@ PY
     info "Codex hook scripts -> ~/.codex/openagentsbtw/hooks/scripts/"
 
     cp "$REPO_DIR/bin/openagentsbtw-codex" "$bin_root/openagentsbtw-codex"
-    chmod +x "$bin_root/openagentsbtw-codex"
-    info "Codex wrapper command -> ~/.codex/openagentsbtw/bin/openagentsbtw-codex"
+    cp "$REPO_DIR/bin/oabtw-codex" "$bin_root/oabtw-codex"
+    chmod +x "$bin_root/openagentsbtw-codex" "$bin_root/oabtw-codex"
+    info "Codex wrapper commands -> ~/.codex/openagentsbtw/bin/openagentsbtw-codex and ~/.codex/openagentsbtw/bin/oabtw-codex"
 
     MARKETPLACE_TARGET="$marketplace_target" python3 - <<'PY'
 import json
@@ -735,6 +736,22 @@ sandbox_mode = "workspace-write"
 service_tier = "flex"
 
 [profiles.openagentsbtw.features]
+codex_hooks = true
+multi_agent = true
+fast_mode = false
+
+[profiles.openagentsbtw-accept-edits]
+model = "{default_model}"
+model_reasoning_effort = "{default_reasoning}"
+plan_mode_reasoning_effort = "high"
+model_verbosity = "medium"
+personality = "none"
+commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+service_tier = "flex"
+
+[profiles.openagentsbtw-accept-edits.features]
 codex_hooks = true
 multi_agent = true
 fast_mode = false

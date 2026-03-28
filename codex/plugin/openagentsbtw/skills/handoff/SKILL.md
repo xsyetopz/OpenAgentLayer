@@ -6,7 +6,7 @@ user-invocable: true
 ---
 # Session Export
 
-Recommended routing: `openagentsbtw-codex handoff "<focus>"` for compact session exports.
+Recommended routing: `oabtw-codex handoff "<focus>"` for compact session exports. `openagentsbtw-codex` remains the canonical equivalent.
 
 ## Procedure
 

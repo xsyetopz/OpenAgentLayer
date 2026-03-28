@@ -53,6 +53,8 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(config, /personality = "none"/);
 		assert.equal(config.includes('personality = "pragmatic"'), false);
+		assert.match(config, /\[profiles\.openagentsbtw-accept-edits\]/);
+		assert.match(config, /approval_policy = "never"/);
 	});
 
 	it("ports the CCA-style response contract into Codex guidance", () => {
@@ -67,6 +69,7 @@ describe("generated Codex defaults", () => {
 
 	it("ships wrapper prompts that route through explicit specialist paths", () => {
 		const wrapper = read("bin/openagentsbtw-codex");
+		const shortWrapper = read("bin/oabtw-codex");
 		assert.match(
 			wrapper,
 			/Route planning through athena-style architecture analysis/,
@@ -79,6 +82,36 @@ describe("generated Codex defaults", () => {
 			wrapper,
 			/Route implementation through hephaestus-style execution/,
 		);
+		assert.match(shortWrapper, /accept\s+Generated openagentsbtw Codex route/);
+		assert.match(
+			shortWrapper,
+			/Route implementation through hephaestus-style execution on the sandboxed auto-accept profile/,
+		);
+		assert.match(shortWrapper, /Usage: oabtw-codex <mode> \[prompt\.\.\.\]/);
+		assert.match(
+			shortWrapper,
+			/Route planning through athena-style architecture analysis/,
+		);
+	});
+
+	it("keeps canonical plugin identifiers while adding only a wrapper alias", () => {
+		const codexPlugin = read(
+			"codex/plugin/openagentsbtw/.codex-plugin/plugin.json",
+		);
+		const claudePlugin = read("claude/.claude-plugin/plugin.json");
+		const claudeSettings = read("claude/templates/settings-global.json");
+		assert.match(codexPlugin, /"name": "openagentsbtw"/);
+		assert.match(claudePlugin, /"name": "openagentsbtw"/);
+		assert.match(claudeSettings, /"openagentsbtw@openagentsbtw": true/);
+		assert.equal(claudeSettings.includes('"oabtw@oabtw"'), false);
+	});
+});
+
+describe("generated Codex docs", () => {
+	it("documents the Bash-only hook limitation", () => {
+		const hooks = read("docs/openai/hooks.md");
+		assert.match(hooks, /PreToolUse` and `PostToolUse` only intercept `Bash`/);
+		assert.match(hooks, /not a complete Claude-style permission layer/);
 	});
 });
 

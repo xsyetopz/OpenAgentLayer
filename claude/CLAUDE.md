@@ -18,7 +18,28 @@
 
 ## Skills
 
-Install via plugin: `claude plugin install openagentsbtw@openagentsbtw`. Bootstrap script handles marketplace registration and user-level extras.
+Install via plugin: `claude plugin install openagentsbtw@openagentsbtw`. Bootstrap script handles marketplace registration and user-level extras. `oabtw` is only a documentation shorthand; the Claude plugin ID stays canonical.
+
+## Updating
+
+Use this when you want new features or removed plugin assets:
+
+```bash
+git pull
+./install.sh --claude
+```
+
+If you use a specific tier, repeat it:
+
+```bash
+./install.sh --claude --claude-tier 20x
+```
+
+Important:
+
+- The supported update path in this repo is reinstall-from-repo.
+- That refreshes plugin files, hooks, generated assets, and managed user-level setup.
+- Even if Claude refreshes plugin state on its own, users should still rerun `install.sh` after pulling changes here.
 
 | Skill        | Command           | Status |
 | ------------ | ----------------- | ------ |

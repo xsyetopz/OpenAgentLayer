@@ -749,7 +749,7 @@ function renderOpenCodeCommands(commands) {
 	].join("\n");
 }
 
-function renderCodexWrapper(modes) {
+function renderCodexWrapper(commandName, modes) {
 	const cases = modes
 		.map(
 			(mode) => `    ${mode.mode})
@@ -764,7 +764,7 @@ set -euo pipefail
 
 usage() {
     cat <<'EOF' >&2
-Usage: openagentsbtw-codex <mode> [prompt...]
+Usage: ${commandName} <mode> [prompt...]
 
 Modes:
 ${modes.map((mode) => `  ${mode.mode.padEnd(11)} Generated openagentsbtw Codex route`).join("\n")}
@@ -809,7 +809,12 @@ async function generateCommands(commandData) {
 	);
 	await writeFile(
 		path.join("bin", "openagentsbtw-codex"),
-		renderCodexWrapper(commandData.codexModes),
+		renderCodexWrapper("openagentsbtw-codex", commandData.codexModes),
+		true,
+	);
+	await writeFile(
+		path.join("bin", "oabtw-codex"),
+		renderCodexWrapper("oabtw-codex", commandData.codexModes),
 		true,
 	);
 }

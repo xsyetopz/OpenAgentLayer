@@ -6,7 +6,7 @@ user-invocable: true
 ---
 # Documentation Standards
 
-Recommended routing: `openagentsbtw-codex docs "<task>"` for routine docs edits, or `openagentsbtw-codex desloppify "<task>"` for cleanup-heavy passes.
+Recommended routing: `oabtw-codex docs "<task>"` for routine docs edits, or `oabtw-codex desloppify "<task>"` for cleanup-heavy passes. `openagentsbtw-codex` remains the canonical equivalent.
 
 ## README Structure
 
