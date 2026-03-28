@@ -159,7 +159,7 @@ prompt_codex_tier() {
     fi
 
     echo ""
-    read -rp "  Codex tier preset [plus/Pro]: " CODEX_TIER
+    read -rp "  Codex tier preset [plus/pro]: " CODEX_TIER
     CODEX_TIER="${CODEX_TIER:-pro}"
 }
 
