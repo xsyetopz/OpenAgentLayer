@@ -2,15 +2,15 @@
 
 ## Custom Agents
 
-| Task                                | Agent        |
-| ----------------------------------- | ------------ |
-| Architecture, planning, sequencing  | `athena`     |
-| Code changes and refactors          | `hephaestus` |
-| Review, security, regressions       | `nemesis`    |
-| Test execution and failure analysis | `atalanta`   |
-| Documentation                       | `calliope`   |
-| Codebase exploration                | `hermes`     |
-| Multi-step coordination             | `odysseus`   |
+| Task | Agent |
+| --- | --- |
+| Architecture, planning, sequencing | `athena` |
+| Code changes and refactors | `hephaestus` |
+| Review, security, regressions | `nemesis` |
+| Test execution and failure analysis | `atalanta` |
+| Documentation | `calliope` |
+| Codebase exploration | `hermes` |
+| Multi-step coordination | `odysseus` |
 
 ## Working Rules
 
@@ -26,3 +26,4 @@
 - For code claims, cite the exact path:line when the context benefits from evidence.
 - Do not leave placeholders, deferred core work, "for now", or "future PR" notes unless the user explicitly narrowed scope.
 - Internal comments explain non-obvious why only. Do not add narrating or educational comments.
+

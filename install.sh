@@ -436,7 +436,7 @@ install_opencode() {
     local cmd=(
         bun run "$REPO_DIR/opencode/src/cli.ts"
         --scope "$OPENCODE_SCOPE"
-        --plugins inject-preamble,openagentsbtw-core,conventions,safety-guard
+        --plugins "inject-preamble,openagentsbtw-core,conventions,safety-guard"
     )
 
     if [[ -n "$OPENCODE_DEFAULT_MODEL" ]]; then
@@ -791,9 +791,9 @@ validate_claude() {
 
     local errors=0
     if jq empty "$HOME/.claude/settings.json" 2>/dev/null; then
-        info "~/.claude/settings.json is valid JSON"
+        info "$HOME/.claude/settings.json is valid JSON"
     else
-        echo -e "  ${RED}✗${NC} ~/.claude/settings.json is invalid JSON"
+        echo -e "  ${RED}✗${NC} $HOME/.claude/settings.json is invalid JSON"
         errors=$((errors + 1))
     fi
 
