@@ -1,6 +1,6 @@
 {
   "name": "openagentsbtw-opencode",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "openagentsbtw for OpenCode - specialized agents, tools, and commands",
   "type": "module",
   "bin": {

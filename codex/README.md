@@ -36,6 +36,7 @@ The installer:
 
 - copies the plugin payload into `~/.codex/plugins/openagentsbtw`
 - registers a personal plugin marketplace entry in `~/.agents/plugins/marketplace.json`
+- enables the plugin in `~/.codex/config.toml` under `[plugins."openagentsbtw@openagentsbtw-local"]` (if not already present)
 - installs custom agents into `~/.codex/agents/`
 - installs hook scripts into `~/.codex/openagentsbtw/hooks/` and merges `~/.codex/hooks.json`
 - keeps openagentsbtw memory state in `~/.codex/openagentsbtw/state/`
@@ -76,6 +77,8 @@ Important:
 - There is no separate openagentsbtw-specific in-app updater for Codex in this repo flow.
 
 The plugin package gives Codex the skills and install surface. Default behavior comes from `AGENTS.md`, the managed profiles, enabled hooks, and the `openagentsbtw-codex` wrapper.
+
+As of this package version, the wrappers also auto-attach the plugin by prepending `$openagentsbtw` to the prompt when the plugin is installed under `~/.codex/plugins/openagentsbtw`. This avoids having to manually invoke the plugin in normal wrapper-driven workflows.
 
 ## Model Presets
 

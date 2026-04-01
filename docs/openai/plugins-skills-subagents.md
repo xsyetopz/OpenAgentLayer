@@ -52,6 +52,8 @@ The Codex memory feature follows that same split. Native Codex SQLite/session pe
 
 `openagentsbtw-codex <mode> ...` is the supported routing layer for mode-specific CLI flows. The wrapper selects the managed profile, adds per-mode model overrides where needed, and supplies a strong role-shaped prompt for plan, accept-edits, implement, review, orchestration, docs, cleanup, handoff, bounded validation, and the explicit `deepwiki` exploration path.
 
+Wrappers also auto-attach the plugin by prepending `$openagentsbtw` to the prompt when the plugin is installed under `~/.codex/plugins/openagentsbtw`. This is the most reliable way we can make “plugin usage” automatic in Codex today.
+
 The wrapper also exposes `memory show`, `memory forget-project`, and `memory prune` so users can inspect or clear the openagentsbtw memory layer without touching SQLite directly.
 
 `deepwiki` is intentionally explicit instead of silently changing `triage`. It depends on an opt-in `mcp_servers.deepwiki` config block and is meant for GitHub repo exploration, not as a universal replacement for local repo reads.

@@ -6,6 +6,13 @@ Codex supports both global and project config files. The basic flow is `~/.codex
 
 openagentsbtw installs managed `openagentsbtw-plus`, `openagentsbtw-pro`, `openagentsbtw-codex-mini`, `openagentsbtw`, and `openagentsbtw-accept-edits` profiles into `~/.codex/config.toml` rather than overwriting arbitrary top-level user settings.
 
+The installer also enables the plugin in Codex config by adding (or preserving) a plugin entry:
+
+```toml
+[plugins."openagentsbtw@openagentsbtw-local"]
+enabled = true
+```
+
 - `openagentsbtw-plus`
   Defaults to `gpt-5.2` with high reasoning for the main interactive session.
 - `openagentsbtw-pro`

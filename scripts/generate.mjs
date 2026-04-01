@@ -818,6 +818,11 @@ else
     usage
 fi
 
+PLUGIN_INVOKE=""
+if [[ -f "$HOME/.codex/plugins/openagentsbtw/.codex-plugin/plugin.json" ]]; then
+    PLUGIN_INVOKE=$'$openagentsbtw\\n\\n'
+fi
+
 PROFILE="openagentsbtw"
 SYSTEM_PROMPT=""
 CODEX_CONFIG_ARGS=()
@@ -829,7 +834,7 @@ ${cases}
         ;;
 esac
 
-exec codex exec --profile "$PROFILE" "\${CODEX_CONFIG_ARGS[@]}" "\${SYSTEM_PROMPT}
+exec codex exec --profile "$PROFILE" "\${CODEX_CONFIG_ARGS[@]}" "\${PLUGIN_INVOKE}\${SYSTEM_PROMPT}
 
 Task:
 \${PROMPT}"

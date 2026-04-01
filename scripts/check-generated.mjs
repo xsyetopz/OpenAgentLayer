@@ -23,6 +23,7 @@ async function main() {
 		"codex",
 		"opencode",
 		"bin/openagentsbtw-codex",
+		"bin/oabtw-codex",
 	]);
 }
 

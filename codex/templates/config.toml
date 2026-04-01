@@ -82,6 +82,9 @@ sqlite = true
 multi_agent = true
 fast_mode = false
 
+[plugins."openagentsbtw@openagentsbtw-local"]
+enabled = true
+
 # Optional: enable only if you want the DeepWiki exploration route.
 #
 # [mcp_servers.deepwiki]

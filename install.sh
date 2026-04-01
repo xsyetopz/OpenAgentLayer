@@ -946,6 +946,20 @@ commit_attribution_line = (
     else 'commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"\n\n'
 )
 
+has_plugin_entry = (
+    re.search(
+        r'^[\s]*\[plugins\."openagentsbtw@openagentsbtw-local"\][\s]*$',
+        text_without_managed,
+        flags=re.M,
+    )
+    is not None
+)
+plugin_entry_block = (
+    ""
+    if has_plugin_entry
+    else '\n[plugins."openagentsbtw@openagentsbtw-local"]\nenabled = true\n'
+)
+
 body = f"""{profile_line}{commit_attribution_line}[profiles.openagentsbtw-plus]
 model = "gpt-5.2"
 model_reasoning_effort = "high"
@@ -1027,6 +1041,7 @@ multi_agent = true
 fast_mode = false
 
 {deepwiki_block}"""
+body = body.rstrip() + plugin_entry_block + "\n"
 block = f"{start}\n{body.rstrip()}\n{end}\n"
 text = existing_text
 

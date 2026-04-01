@@ -2,6 +2,13 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.6] - 2026-04-01
+
+### Fixed
+
+- Codex wrappers auto-attach the openagentsbtw plugin (no manual `$openagentsbtw` invocation needed when using `oabtw-codex` / `openagentsbtw-codex`).
+- Codex install enables the plugin in `~/.codex/config.toml` unless the user already defines the plugin table.
+
 ## [1.1.5] - 2026-03-31
 
 ### Fixed
