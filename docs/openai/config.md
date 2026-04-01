@@ -30,7 +30,6 @@ The managed profiles share the same model/style defaults unless noted otherwise:
 - `model_verbosity = "medium"` except the codex-mini profile, which stays low
 - `personality = "none"`
 - `sandbox_mode = "workspace-write"` across every managed profile
-- `service_tier = "flex"`
 - `codex_hooks = true`
 - `sqlite = true`
 - `multi_agent = true`
@@ -112,7 +111,7 @@ That means Codex is good at sandbox boundaries and approval boundaries, but it i
 
 ## Fast Mode
 
-OpenAI documents Fast mode and the `service_tier` controls separately. openagentsbtw disables Fast mode in the profile because the system depends on deeper planning, stronger review, and predictable hook execution rather than lowest-latency behavior. Sources: <https://developers.openai.com/codex/speed>, <https://developers.openai.com/codex/config-reference>
+OpenAI documents Fast mode and `service_tier` controls separately. openagentsbtw disables Fast mode in managed profiles because the system depends on deeper planning, stronger review, and predictable hook execution rather than lowest-latency behavior. Managed profiles intentionally do not hard-code `service_tier`, so Codex can use an account-supported default tier unless users override it themselves. Sources: <https://developers.openai.com/codex/speed>, <https://developers.openai.com/codex/config-reference>
 
 ## AGENTS Fallbacks
 
