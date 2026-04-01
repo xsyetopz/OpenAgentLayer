@@ -119,4 +119,4 @@ Codex supports project doc fallback filenames. We intentionally keep openagentsb
 
 ## Install Behavior
 
-The installer appends a managed profile block instead of attempting a full TOML rewrite. If the user already has a default `profile = ...` set, the installer preserves it and leaves profile selection to the user. If no default profile exists, the installer points `profile = ...` at the selected preset, with `openagentsbtw-plus` now the default install choice and `openagentsbtw-pro` remaining explicit opt-in.
+The installer appends a managed profile block instead of attempting a full TOML rewrite. During interactive Codex install, it asks whether to set a top-level `profile = ...` default in `~/.codex/config.toml` (to the selected preset). If declined, existing/default profile behavior is preserved and users can still choose with `--profile`. For automation, `--codex-set-top-profile` and `--no-codex-set-top-profile` force that behavior without prompts. In CI/non-interactive runs, when neither flag is provided, it keeps the previous fallback behavior and sets `profile = ...` only when none exists.

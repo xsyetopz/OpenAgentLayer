@@ -20,6 +20,7 @@ OPENCODE_DEFAULT_MODEL=""
 OPENCODE_MODEL_OVERRIDES=()
 CODEX_TIER=""
 CODEX_DEEPWIKI="false"
+CODEX_SET_TOP_PROFILE="auto"
 MCP_CHROME_DEVTOOLS="keep"
 MCP_BROWSERMCP="keep"
 MCP_CHROME_DEVTOOLS_SET="false"
@@ -51,6 +52,9 @@ Options:
   --opencode-model ROLE=MODEL
                           Override a specific OpenCode role model
   --codex-tier plus|pro   Codex preset for subscriber/model access
+    --codex-set-top-profile Force setting top-level Codex profile in ~/.codex/config.toml
+    --no-codex-set-top-profile
+                                                    Do not set top-level Codex profile in ~/.codex/config.toml
   --codex-deepwiki        Configure DeepWiki MCP for Codex
   --chrome-devtools-mcp   Enable Chrome DevTools MCP server (all selected systems)
   --no-chrome-devtools-mcp
@@ -93,6 +97,12 @@ parse_args() {
             --codex-tier)
                 CODEX_TIER="${2:-}"
                 shift
+                ;;
+            --codex-set-top-profile)
+                CODEX_SET_TOP_PROFILE="true"
+                ;;
+            --no-codex-set-top-profile)
+                CODEX_SET_TOP_PROFILE="false"
                 ;;
             --codex-deepwiki)
                 CODEX_DEEPWIKI="true"
@@ -222,6 +232,20 @@ prompt_codex_tier() {
     echo ""
     read -rp "  Codex tier preset [plus/pro]: " CODEX_TIER
     CODEX_TIER="${CODEX_TIER:-plus}"
+}
+
+prompt_codex_profile_top() {
+    [[ "$INSTALL_CODEX" == "true" ]] || return 0
+    [[ "$CODEX_SET_TOP_PROFILE" != "auto" ]] && return 0
+    [[ "${CI:-}" == "true" ]] && return 0
+
+    local profile_name="openagentsbtw-${CODEX_TIER}"
+    echo ""
+    if prompt_toggle "Set Codex default profile at top-level in ~/.codex/config.toml to ${profile_name}?" "Y"; then
+        CODEX_SET_TOP_PROFILE="true"
+    else
+        CODEX_SET_TOP_PROFILE="false"
+    fi
 }
 
 validate_codex_tier() {
@@ -882,13 +906,28 @@ PY
     info "Codex guidance merged into ~/.codex/AGENTS.md"
 
     local profile_name="openagentsbtw-${CODEX_TIER}"
-    local profile_line=""
-    if [[ ! -f "$config_target" ]] || ! grep -Eq '^[[:space:]]*profile[[:space:]]*=' "$config_target"; then
-        profile_line="profile = \"${profile_name}\"
-"
+    local existing_profile="false"
+    if [[ -f "$config_target" ]] && grep -Eq '^[[:space:]]*profile[[:space:]]*=' "$config_target"; then
+        existing_profile="true"
     fi
 
-    CONFIG_TARGET="$config_target" PROFILE_LINE="$profile_line" CODEX_TIER="$CODEX_TIER" CODEX_DEEPWIKI="$CODEX_DEEPWIKI" python3 - <<'PY'
+    local set_top_profile_action="$CODEX_SET_TOP_PROFILE"
+    local will_set_top_profile="false"
+    case "$set_top_profile_action" in
+        true)
+            will_set_top_profile="true"
+            ;;
+        false)
+            will_set_top_profile="false"
+            ;;
+        auto)
+            if [[ "$existing_profile" == "false" ]]; then
+                will_set_top_profile="true"
+            fi
+            ;;
+    esac
+
+    CONFIG_TARGET="$config_target" PROFILE_ACTION="$set_top_profile_action" PROFILE_NAME="$profile_name" CODEX_TIER="$CODEX_TIER" CODEX_DEEPWIKI="$CODEX_DEEPWIKI" python3 - <<'PY'
 import os
 import re
 from pathlib import Path
@@ -897,7 +936,8 @@ target = Path(os.environ["CONFIG_TARGET"])
 target.parent.mkdir(parents=True, exist_ok=True)
 start = "# >>> openagentsbtw codex >>>"
 end = "# <<< openagentsbtw codex <<<"
-profile_line = os.environ.get("PROFILE_LINE", "")
+profile_action = os.environ.get("PROFILE_ACTION", "auto")
+profile_name = os.environ.get("PROFILE_NAME", "openagentsbtw-plus")
 tier = os.environ["CODEX_TIER"]
 deepwiki = os.environ.get("CODEX_DEEPWIKI", "false") == "true"
 
@@ -930,11 +970,37 @@ def remove_block(text: str, start: str, end: str) -> str:
 existing_text = target.read_text() if target.exists() else ""
 text_without_managed = remove_block(existing_text, start, end)
 
+has_existing_profile = (
+    re.search(r"^[\s]*profile[\s]*=", text_without_managed, flags=re.M) is not None
+)
+set_top_profile = (
+    profile_action == "true"
+    or (profile_action == "auto" and not has_existing_profile)
+)
+
+if set_top_profile:
+    text_without_managed = re.sub(
+        r"^[\s]*profile[\s]*=.*\n?",
+        "",
+        text_without_managed,
+        flags=re.M,
+    )
+
 prefix_lines: list[str] = []
+rest_lines: list[str] = []
+in_prefix = True
 for line in text_without_managed.splitlines():
     if re.match(r"^[\s]*\[", line):
-        break
-    prefix_lines.append(line)
+        in_prefix = False
+    if in_prefix:
+        prefix_lines.append(line)
+    else:
+        rest_lines.append(line)
+
+if set_top_profile:
+    while prefix_lines and prefix_lines[0].strip() == "":
+        prefix_lines.pop(0)
+    prefix_lines.insert(0, f'profile = "{profile_name}"')
 
 prefix = "\n".join(prefix_lines)
 has_commit_attribution = (
@@ -960,7 +1026,7 @@ plugin_entry_block = (
     else '\n[plugins."openagentsbtw@openagentsbtw-local"]\nenabled = true\n'
 )
 
-body = f"""{profile_line}{commit_attribution_line}[profiles.openagentsbtw-plus]
+body = f"""{commit_attribution_line}[profiles.openagentsbtw-plus]
 model = "gpt-5.2"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
@@ -1038,27 +1104,16 @@ fast_mode = false
 {deepwiki_block}"""
 body = body.rstrip() + plugin_entry_block + "\n"
 block = f"{start}\n{body.rstrip()}\n{end}\n"
-text = existing_text
 
-if start in text and end in text:
-    before, _, rest = text.partition(start)
-    _, _, after = rest.partition(end)
-    text = before.rstrip()
-    if text:
-        text += "\n\n"
-    text += block
-    after = after.lstrip("\n")
-    if after:
-        text += "\n" + after
-else:
-    text = text.rstrip()
-    if text:
-        text += "\n\n"
-    text += block
+prefix_text = "\n".join(prefix_lines).strip("\n")
+rest_text = "\n".join(rest_lines).strip("\n")
+
+parts = [part for part in [prefix_text, rest_text, block.rstrip()] if part]
+text = "\n\n".join(parts)
 
 target.write_text(text if text.endswith("\n") else text + "\n")
 PY
-    if [[ -n "$profile_line" ]]; then
+    if [[ "$will_set_top_profile" == "true" ]]; then
         info "Codex default profile set to ${profile_name}"
     else
         warn "Existing Codex default profile preserved; use --profile ${profile_name} to activate this system."
@@ -1129,6 +1184,7 @@ main() {
     prompt_opencode_models
     prompt_codex_tier
     validate_codex_tier
+    prompt_codex_profile_top
     prompt_mcp_toggles
 
     echo -e "${GREEN}openagentsbtw installer${NC}"
