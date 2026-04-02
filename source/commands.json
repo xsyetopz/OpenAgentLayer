@@ -92,11 +92,7 @@
       "mode": "deepwiki",
       "profile": "openagentsbtw-codex-mini",
       "prompt": "Use openagentsbtw. Route this through hermes-style exploration on the codex-mini profile. Use DeepWiki MCP tools first for public GitHub repository understanding, then verify exact local file or line claims with repo reads before stating them. Keep the result concise, evidence-driven, and scoped to exploration.",
-      "requiresDeepwiki": true,
-      "configOverrides": [
-        "model = \"gpt-5.1-codex-mini\"",
-        "model_reasoning_effort = \"low\""
-      ]
+      "requiresDeepwiki": true
     },
     {
       "mode": "docs",
@@ -128,7 +124,7 @@
       "profile": "openagentsbtw-accept-edits",
       "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the sandboxed auto-accept profile. This mode keeps workspace-write sandboxing but does not pause for edit approvals. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
       "configOverrides": [
-        "model = \"gpt-5.2-codex\"",
+        "model = \"gpt-5.3-codex\"",
         "model_reasoning_effort = \"high\""
       ]
     },
@@ -137,18 +133,14 @@
       "profile": "openagentsbtw",
       "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
       "configOverrides": [
-        "model = \"gpt-5.2-codex\"",
+        "model = \"gpt-5.3-codex\"",
         "model_reasoning_effort = \"high\""
       ]
     },
     {
       "mode": "review",
       "profile": "openagentsbtw",
-      "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests.",
-      "configOverrides": [
-        "model = \"gpt-5.2\"",
-        "model_reasoning_effort = \"high\""
-      ]
+      "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests."
     },
     {
       "mode": "orchestrate",

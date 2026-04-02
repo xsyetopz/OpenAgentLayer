@@ -2,6 +2,34 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.9] - 2026-04-02
+
+### Added
+
+- Codex completion check now supports `cca-allow` suppression when scanning for placeholders/hedges.
+- Codex hook library tests for placeholder/hedge behavior.
+
+### Changed
+
+- Version `1.1.9` is now aligned across the Claude plugin, Codex plugin, and OpenCode package.
+- Codex model presets and routing:
+  - `openagentsbtw-plus` defaults to `gpt-5.3-codex` as the daily driver.
+  - `openagentsbtw-pro` defaults to `gpt-5.4` for the flagship route.
+  - `openagentsbtw-codex-mini` is a lightweight profile (low reasoning/verbosity) without requiring a "mini" model.
+- Codex completion check is now focused on unfinished-work signals:
+  - hard placeholders block only for non-prose files
+  - hedges (e.g. "for now", "for simplicity") are warnings
+
+### Fixed
+
+- Codex completion check no longer blocks on broad "AI prose" / "sycophancy" keyword lists in normal technical writing.
+
+## [1.1.8] - 2026-04-02
+
+### Fixed
+
+- Codex hooks and wrappers are silent on routine success paths; only warnings/errors surface output.
+
 ## [1.1.7] - 2026-04-01
 
 ### Fixed

@@ -61,14 +61,14 @@ describe("generated skills", () => {
 });
 
 describe("generated Codex defaults", () => {
-	it("uses native commit attribution and ships the 5.2-first profile split", () => {
+	it("uses native commit attribution and ships the 5.3-codex-first profile split", () => {
 		const config = read("codex/templates/config.toml");
 		assert.match(
 			config,
 			/commit_attribution = "Co-Authored-By: Codex <codex@users\.noreply\.github\.com>"/,
 		);
-		assert.match(config, /model = "gpt-5\.2"/);
-		assert.match(config, /model = "gpt-5\.2-codex"/);
+		assert.match(config, /model = "gpt-5\.3-codex"/);
+		assert.match(config, /model = "gpt-5\.4"/);
 		assert.match(config, /personality = "none"/);
 		assert.equal(config.includes('personality = "pragmatic"'), false);
 		assert.match(config, /\[profiles\.openagentsbtw-accept-edits\]/);
@@ -80,7 +80,10 @@ describe("generated Codex defaults", () => {
 		const guidance = read("codex/templates/AGENTS.md");
 		assert.match(guidance, /Start with the answer, decision, or action\./);
 		assert.match(guidance, /If something is uncertain, say `UNKNOWN`/);
-		assert.match(guidance, /Default to the 5\.2-first path for daily work\./);
+		assert.match(
+			guidance,
+			/Default to the 5\.3-codex-first path for daily work\./,
+		);
 		assert.match(guidance, /oabtw-codex explore/);
 		assert.match(guidance, /`deepwiki`/);
 		assert.equal(
@@ -120,12 +123,9 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(
 			shortWrapper,
-			/CODEX_CONFIG_ARGS\+=\(-c "model = \\"gpt-5\.2-codex\\""\)/,
+			/CODEX_CONFIG_ARGS\+=\(-c "model = \\"gpt-5\.3-codex\\""\)/,
 		);
-		assert.match(
-			shortWrapper,
-			/CODEX_CONFIG_ARGS\+=\(-c "model = \\"gpt-5\.2\\""\)/,
-		);
+		assert.equal(shortWrapper.includes("gpt-5.2"), false);
 		assert.match(shortWrapper, /DeepWiki is not configured/);
 		assert.match(shortWrapper, /Usage: oabtw-codex <mode> \[prompt\.\.\.\]/);
 		assert.match(

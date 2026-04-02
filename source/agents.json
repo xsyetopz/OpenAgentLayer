@@ -25,7 +25,7 @@
     },
     "codex": {
       "description": "Architecture and planning agent for multi-file changes, sequencing, and tradeoff analysis.",
-      "model": "gpt-5.2",
+      "model": "gpt-5.3-codex",
       "reasoning": "high",
       "sandboxMode": "read-only"
     }
@@ -58,7 +58,7 @@
     },
     "codex": {
       "description": "Primary implementation agent for code changes, bug fixes, and refactors.",
-      "model": "gpt-5.2-codex",
+      "model": "gpt-5.3-codex",
       "reasoning": "high",
       "sandboxMode": "workspace-write"
     }
@@ -99,7 +99,7 @@
     },
     "codex": {
       "description": "Review and audit agent focused on correctness, regressions, security, and missing tests.",
-      "model": "gpt-5.2",
+      "model": "gpt-5.3-codex",
       "reasoning": "high",
       "sandboxMode": "read-only"
     }
@@ -138,7 +138,7 @@
     },
     "codex": {
       "description": "Validation agent for running tests, parsing failures, and reporting exact root-cause evidence.",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "reasoning": "medium",
       "sandboxMode": "workspace-write"
     }
@@ -170,7 +170,7 @@
     },
     "codex": {
       "description": "Documentation agent for READMEs, ADRs, changelogs, and precise handoff artifacts.",
-      "model": "gpt-5.4-mini",
+      "model": "gpt-5.3-codex",
       "reasoning": "medium",
       "sandboxMode": "workspace-write"
     }
@@ -203,7 +203,7 @@
     },
     "codex": {
       "description": "Exploration agent for repo tracing, dependency analysis, and evidence-heavy read-only investigation.",
-      "model": "gpt-5.2-codex",
+      "model": "gpt-5.3-codex",
       "reasoning": "medium",
       "sandboxMode": "read-only"
     }
@@ -249,7 +249,7 @@
     },
     "codex": {
       "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents.",
-      "model": "gpt-5.2",
+      "model": "gpt-5.3-codex",
       "reasoning": "high",
       "sandboxMode": "read-only"
     }

@@ -14,15 +14,15 @@ enabled = true
 ```
 
 - `openagentsbtw-plus`
-  Defaults to `gpt-5.2` with high reasoning for the main interactive session.
+  Defaults to `gpt-5.3-codex` with high reasoning for the main interactive session.
 - `openagentsbtw-pro`
   Defaults to `gpt-5.4` with high reasoning for the main interactive session.
 - `openagentsbtw-codex-mini`
-  Defaults to `gpt-5.1-codex-mini` with low reasoning for narrow high-volume work.
+  Defaults to `gpt-5.3-codex` with low reasoning for narrow high-volume work.
 - `openagentsbtw`
   Tracks the selected install preset so users can still refer to one stable profile name.
 - `openagentsbtw-accept-edits`
-  Uses `gpt-5.2-codex` with high reasoning for sandboxed auto-accept implementation work.
+  Uses `gpt-5.3-codex` with high reasoning for sandboxed auto-accept implementation work.
 
 The managed profiles share the same model/style defaults unless noted otherwise:
 
@@ -45,8 +45,8 @@ The matching repo sample is in `codex/templates/config.toml`.
 Wrapper routing adds mode-specific overrides on top of those profiles:
 
 - `plan` and `orchestrate` follow the selected `openagentsbtw` tier
-- `implement` and `accept` force `gpt-5.2-codex` with `high`
-- `review` forces `gpt-5.2` with `high`
+- `implement` and `accept` force `gpt-5.3-codex` with `high`
+- `review` follows the selected `openagentsbtw` tier (use `openagentsbtw-pro` for `gpt-5.4`)
 - bounded utility modes stay on `openagentsbtw-codex-mini`
 
 ## Optional DeepWiki MCP

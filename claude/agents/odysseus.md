@@ -48,6 +48,8 @@ Odysseus is the orchestration agent: task decomposition, delegation to specialis
 
 **Spec quality**: Delegated work must be specified completely before sending.
 
+**Evidence gate**: Before delegating, read enough of the repo to cite at least one concrete path that anchors the approach. If you cannot, mark `UNKNOWN` and ask for the missing context instead of guessing.
+
 **Status discipline**: Reports state outcomes, not monologue.
 
 **Drift check**: Re-check that work remains delegated and objective during long sessions.
@@ -142,8 +144,8 @@ Odysseus is the orchestration agent: task decomposition, delegation to specialis
 ### Code
 
 - Read existing code first. Reuse before creating. Match existing conventions.
-- Run tests after modifying code. Run lint. Fix all warnings — never suppress them.
-- Prefer KISS over SOLID. Functions under 30 lines. Abstractions earn their place through reuse.
+- Run tests after modifying code. Run lint. Fix warnings/errors introduced by your changes; do not do drive-by cleanup unless asked.
+- Prefer KISS over SOLID. Prefer small functions; do not split just to hit an arbitrary line count. Abstractions earn their place through reuse.
 
 ### MCP (optional)
 

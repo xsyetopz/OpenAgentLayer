@@ -6,10 +6,7 @@ import {
 	isProseFile,
 	isMetaFile,
 	isTestFile,
-	matchCommentSlop,
 	matchPlaceholders,
-	matchProseSlop,
-	matchSycophancy,
 	passthrough,
 	readStdin,
 	stopBlock,
@@ -40,9 +37,7 @@ function modifiedFiles() {
 function scan(files) {
 	const hard = [];
 	const soft = [];
-	const commentSlop = [];
-	const proseSlop = [];
-	const sycophancy = [];
+	const hardProse = [];
 
 	for (const file of files) {
 		if (!existsSync(file) || isTestFile(file) || isMetaFile(file)) continue;
@@ -50,19 +45,18 @@ function scan(files) {
 			const content = readFileSync(file, "utf8");
 			const lines = content.split("\n");
 			const result = matchPlaceholders(file, lines);
-			hard.push(...result.hard);
-			soft.push(...result.soft);
-			commentSlop.push(...matchCommentSlop(file, lines));
-			sycophancy.push(...matchSycophancy(file, lines));
 			if (isProseFile(file)) {
-				proseSlop.push(...matchProseSlop(file, lines));
+				hardProse.push(...result.hard);
+			} else {
+				hard.push(...result.hard);
 			}
+			soft.push(...result.soft);
 		} catch {
 			// Ignore binary or unreadable files.
 		}
 	}
 
-	return { hard, soft, commentSlop, proseSlop, sycophancy };
+	return { hard, hardProse, soft };
 }
 
 (async () => {
@@ -81,20 +75,15 @@ function scan(files) {
 		passthrough();
 	}
 
-	const { hard, soft, commentSlop, proseSlop, sycophancy } = scan(files);
+	const { hard, hardProse, soft } = scan(files);
 	if (hard.length) {
 		stopBlock(
 			`openagentsbtw completion check found placeholder code in modified files:\n${hard.slice(0, 12).join("\n")}`,
 		);
 	}
-	if (commentSlop.length) {
-		stopBlock(
-			`openagentsbtw completion check found narrating or educational comments in modified files:\n${commentSlop.slice(0, 12).join("\n")}`,
-		);
-	}
-	if (sycophancy.length) {
-		stopBlock(
-			`openagentsbtw completion check found sycophantic or optional-offer phrasing in modified files:\n${sycophancy.slice(0, 12).join("\n")}`,
+	if (hardProse.length) {
+		systemMessage(
+			`openagentsbtw completion check found placeholders in prose files (non-blocking):\n${hardProse.slice(0, 12).join("\n")}`,
 		);
 	}
 	if (soft.length) {
@@ -108,20 +97,8 @@ function scan(files) {
 		}
 		systemMessage(notes.join("\n\n"));
 	}
-	if (proseSlop.length) {
-		const notes = [
-			`openagentsbtw completion check found prose filler in modified files:\n${proseSlop.slice(0, 12).join("\n")}`,
-		];
-		if (memoryResult?.skipped === "transcript_unavailable") {
-			notes.push(
-				"openagentsbtw memory skipped this turn because Codex did not expose a transcript path.",
-			);
-		}
-		systemMessage(notes.join("\n\n"));
-	}
 	if (
 		!soft.length &&
-		!proseSlop.length &&
 		memoryResult?.skipped === "transcript_unavailable"
 	) {
 		systemMessage(

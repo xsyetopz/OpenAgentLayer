@@ -19,6 +19,8 @@ export const PLACEHOLDER_EMPTY_BODY = [
 
 export const PLACEHOLDER_SOFT = [
 	/\bfor now\b/i,
+	/\bfor simplicity\b/i,
+	/for the sake of simplicity/i,
 	/simplified version/i,
 	/in a real implementation/i,
 	/\bplaceholder\b/i,
@@ -33,7 +35,7 @@ export const PLACEHOLDER_SOFT = [
 
 export const AI_PROSE_SLOP = [
 	/\b(?:robust|seamless|comprehensive|cutting-edge|innovative|streamlined)\b/i,
-	/\b(?:leverage|utilize|facilitate|enhance|ensure|empower|foster|harness)\b/i,
+	/\b(?:leverage|utilize|facilitate|enhance|empower|foster)\b/i,
 	/it'?s (?:important|worth) (?:to )?(?:note|mention)/i,
 	/(?:great|excellent|fantastic) (?:question|point|approach)/i,
 	/\b(?:delve|underscore|bolster|unpack|craft|curate)\b/i,
@@ -69,7 +71,6 @@ export const SYCOPHANCY_PATTERNS = [
 	/I apologize for/i,
 	/^(that's a great|that's an excellent|that's a good) (question|point|idea|observation)/i,
 	/^(certainly|definitely|you're (absolutely )?right)/i,
-	/\bif you want,?\b/i,
 ];
 
 export const SECRET_PATTERNS = [
@@ -94,6 +95,7 @@ export const PII_PATTERNS = [
 ];
 
 const COMMENT_LEADER_RE = /^\s*(?:\/\/|\/\*|#|--|;|%|<!--)/;
+const SUPPRESSION_RE = /\bcca-allow\b/;
 
 export const TEST_FILE_RE =
 	/(?:test_|_test\.|\.test\.|\.spec\.|tests\/|__tests__\/|test\.)/i;
@@ -159,6 +161,10 @@ export function isCommentLine(line) {
 	return COMMENT_LEADER_RE.test(line);
 }
 
+function hasSuppression(line) {
+	return SUPPRESSION_RE.test(line);
+}
+
 export function isTestFile(filepath) {
 	return TEST_FILE_RE.test(filepath);
 }
@@ -179,9 +185,11 @@ export function matchPlaceholders(filepath, lines, includeEmptyBody = false) {
 	const patterns = includeEmptyBody
 		? [...PLACEHOLDER_HARD, ...PLACEHOLDER_EMPTY_BODY]
 		: PLACEHOLDER_HARD;
+	const treatSoftAnywhere = isProseFile(filepath);
 
 	lines.forEach((line, index) => {
 		const lineNumber = index + 1;
+		if (hasSuppression(line)) return;
 		if (patterns.some((pattern) => pattern.test(line))) {
 			hard.push(`  ${filepath}:${lineNumber}: ${line.trim().slice(0, 100)}`);
 			return;
@@ -196,8 +204,10 @@ export function matchPlaceholders(filepath, lines, includeEmptyBody = false) {
 			return;
 		}
 		if (
-			isCommentLine(line) &&
-			PLACEHOLDER_SOFT.some((pattern) => pattern.test(line))
+			(treatSoftAnywhere
+				? PLACEHOLDER_SOFT.some((pattern) => pattern.test(line))
+				: isCommentLine(line) &&
+					PLACEHOLDER_SOFT.some((pattern) => pattern.test(line)))
 		) {
 			soft.push(`  ${filepath}:${lineNumber}: ${line.trim().slice(0, 100)}`);
 		}

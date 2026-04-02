@@ -733,26 +733,26 @@ from pathlib import Path
 agents_dir = Path(os.environ["CODEX_AGENTS_DIR"])
 tier = os.environ["CODEX_TIER"]
 
-profiles = {
-    "plus": {
-        "athena": ("gpt-5.2", "high"),
-        "hephaestus": ("gpt-5.2-codex", "high"),
-        "nemesis": ("gpt-5.2", "high"),
-        "odysseus": ("gpt-5.2", "high"),
-        "hermes": ("gpt-5.2-codex", "medium"),
-        "atalanta": ("gpt-5.4-mini", "medium"),
-        "calliope": ("gpt-5.4-mini", "medium"),
-    },
-    "pro": {
-        "athena": ("gpt-5.4", "high"),
-        "hephaestus": ("gpt-5.2-codex", "high"),
-        "nemesis": ("gpt-5.2", "high"),
-        "odysseus": ("gpt-5.4", "high"),
-        "hermes": ("gpt-5.2-codex", "medium"),
-        "atalanta": ("gpt-5.4-mini", "medium"),
-        "calliope": ("gpt-5.4-mini", "medium"),
-    },
-}
+	profiles = {
+	    "plus": {
+	        "athena": ("gpt-5.3-codex", "high"),
+	        "hephaestus": ("gpt-5.3-codex", "high"),
+	        "nemesis": ("gpt-5.3-codex", "high"),
+	        "odysseus": ("gpt-5.3-codex", "high"),
+	        "hermes": ("gpt-5.3-codex", "medium"),
+	        "atalanta": ("gpt-5.3-codex", "medium"),
+	        "calliope": ("gpt-5.3-codex", "medium"),
+	    },
+	    "pro": {
+	        "athena": ("gpt-5.4", "high"),
+	        "hephaestus": ("gpt-5.3-codex", "high"),
+	        "nemesis": ("gpt-5.4", "high"),
+	        "odysseus": ("gpt-5.4", "high"),
+	        "hermes": ("gpt-5.3-codex", "medium"),
+	        "atalanta": ("gpt-5.3-codex", "medium"),
+	        "calliope": ("gpt-5.4", "medium"),
+	    },
+	}
 
 for path in agents_dir.glob("*.toml"):
     agent = path.stem
@@ -875,7 +875,7 @@ body = """## openagentsbtw
 - Prefer `athena` before non-trivial multi-file implementation.
 - Prefer `nemesis` for review and `atalanta` for targeted validation before closing substantial changes.
 - Keep Fast mode off for this workflow.
-- Default to the 5.2-first path for daily work. Use the pro tier only when you explicitly want 5.4 for harder planning or orchestration.
+- Default to the 5.3-codex-first path for daily work. Use the pro tier only when you explicitly want 5.4 for harder planning or orchestration.
 - Use real `AGENTS.md` files in projects instead of symlinked `CLAUDE.md`.
 - Prefer `oabtw-codex triage` or `oabtw-codex deepwiki` before broad repo exploration. Use DeepWiki only for public GitHub repos, then verify local file:line claims in the repo.
 - Start with the answer, decision, or action. Do not restate the prompt or narrate intent.
@@ -941,9 +941,9 @@ profile_name = os.environ.get("PROFILE_NAME", "openagentsbtw-plus")
 tier = os.environ["CODEX_TIER"]
 deepwiki = os.environ.get("CODEX_DEEPWIKI", "false") == "true"
 
-default_model = "gpt-5.4" if tier == "pro" else "gpt-5.2"
+default_model = "gpt-5.4" if tier == "pro" else "gpt-5.3-codex"
 default_reasoning = "high"
-accept_model = "gpt-5.2-codex"
+accept_model = "gpt-5.3-codex"
 accept_reasoning = "high"
 
 deepwiki_block = """
@@ -1027,7 +1027,7 @@ plugin_entry_block = (
 )
 
 body = f"""{commit_attribution_line}[profiles.openagentsbtw-plus]
-model = "gpt-5.2"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
@@ -1057,7 +1057,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw-codex-mini]
-model = "gpt-5.1-codex-mini"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "low"
 plan_mode_reasoning_effort = "low"
 model_verbosity = "low"

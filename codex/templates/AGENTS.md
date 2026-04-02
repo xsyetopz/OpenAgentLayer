@@ -16,7 +16,7 @@
 
 - Use real AGENTS.md files for Codex guidance. Do not symlink CLAUDE.md.
 - Keep Fast mode off for openagentsbtw workflows.
-- Default to the 5.2-first path for daily work. Use the pro tier only when you explicitly want 5.4 for harder planning or orchestration.
+- Default to the 5.3-codex-first path for daily work. Use the pro tier only when you explicitly want 5.4 for harder planning or orchestration.
 - Keep this file short and task-shaping. Put deep reference material in docs and link to it.
 - Use athena before large multi-file implementation when the plan is not already clear. Run nemesis review plus targeted validation before closing substantial work.
 - Prefer `oabtw-codex explore`, `trace`, `debug`, or `deepwiki` before broad repo exploration. Keep `triage` as the generic fallback. Use DeepWiki only for public GitHub repos, then verify local file:line claims in the repo.

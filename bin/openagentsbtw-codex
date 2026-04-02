@@ -77,8 +77,6 @@ case "$MODE" in
     deepwiki)
         PROFILE="openagentsbtw-codex-mini"
         SYSTEM_PROMPT="Use openagentsbtw. Route this through hermes-style exploration on the codex-mini profile. Use DeepWiki MCP tools first for public GitHub repository understanding, then verify exact local file or line claims with repo reads before stating them. Keep the result concise, evidence-driven, and scoped to exploration."
-        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.1-codex-mini\"")
-        CODEX_CONFIG_ARGS+=(-c "model_reasoning_effort = \"low\"")
         if ! grep -Eq '^[[:space:]]*\[mcp_servers\.deepwiki\]' "$HOME/.codex/config.toml" 2>/dev/null; then
             echo "DeepWiki is not configured. Reinstall with --codex-deepwiki or use triage." >&2
             exit 1
@@ -111,20 +109,18 @@ case "$MODE" in
     accept)
         PROFILE="openagentsbtw-accept-edits"
         SYSTEM_PROMPT="Use openagentsbtw. Route implementation through hephaestus-style execution on the sandboxed auto-accept profile. This mode keeps workspace-write sandboxing but does not pause for edit approvals. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why."
-        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.2-codex\"")
+        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.3-codex\"")
         CODEX_CONFIG_ARGS+=(-c "model_reasoning_effort = \"high\"")
         ;;
     implement)
         PROFILE="openagentsbtw"
         SYSTEM_PROMPT="Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why."
-        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.2-codex\"")
+        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.3-codex\"")
         CODEX_CONFIG_ARGS+=(-c "model_reasoning_effort = \"high\"")
         ;;
     review)
         PROFILE="openagentsbtw"
         SYSTEM_PROMPT="Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests."
-        CODEX_CONFIG_ARGS+=(-c "model = \"gpt-5.2\"")
-        CODEX_CONFIG_ARGS+=(-c "model_reasoning_effort = \"high\"")
         ;;
     orchestrate)
         PROFILE="openagentsbtw"

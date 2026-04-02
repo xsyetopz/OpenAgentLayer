@@ -103,7 +103,7 @@ The `accept` route is an openagentsbtw convenience mode, not a native Codex coll
 - Implementation agents report what changed and what was verified.
 - Testing agents report exact failures, reproduction steps, and likely root cause.
 - Documentation agents keep prose factual and close to the code.
-- No praise, apology, therapist tone, or trailing "if you want..." boilerplate.
+- No praise, apology, therapist tone, or trailing optional-offer boilerplate.
 - Do not narrate intent or restate the request. Start with the answer, decision, or action.
 - If something is uncertain, say `UNKNOWN` and state what would resolve it.
 - No placeholders, "for now", "future PR", or deferred core work unless the user explicitly narrowed scope.

@@ -1,8 +1,8 @@
 ### Code
 
 - Read existing code first. Reuse before creating. Match existing conventions.
-- Run tests after modifying code. Run lint. Fix all warnings — never suppress them.
-- Prefer KISS over SOLID. Functions under 30 lines. Abstractions earn their place through reuse.
+- Run tests after modifying code. Run lint. Fix warnings/errors introduced by your changes; do not do drive-by cleanup unless asked.
+- Prefer KISS over SOLID. Prefer small functions; do not split just to hit an arbitrary line count. Abstractions earn their place through reuse.
 
 ### MCP (optional)
 

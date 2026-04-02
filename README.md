@@ -95,9 +95,9 @@ If RTK is enabled during Codex install, the installer also runs `rtk init -g --c
 
 Codex preset summary:
 
-- `plus`: default 5.2-first preset using `gpt-5.2` for planning/default sessions, `gpt-5.2-codex` for implementation-heavy paths, and `gpt-5.4-mini` for lighter roles
-- `pro`: explicit opt-in preset using `gpt-5.4` for planning/orchestration while keeping coding and review paths on the 5.2 split
-- `openagentsbtw-codex-mini`: optional profile for narrow, high-volume work using `gpt-5.1-codex-mini`
+- `plus`: default 5.3-codex-first preset using `gpt-5.3-codex` for planning/default sessions, review, and implementation
+- `pro`: explicit opt-in preset using `gpt-5.4` for the main interactive session (and for the primary planning/review orchestration agents installed into `~/.codex/agents/`)
+- `openagentsbtw-codex-mini`: optional lightweight profile for narrow, high-volume work using `gpt-5.3-codex` with low reasoning/verbosity
 
 Installed Codex helper command:
 

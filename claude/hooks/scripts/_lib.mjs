@@ -42,7 +42,7 @@ export const PLACEHOLDER_SOFT = [
 
 export const AI_PROSE_SLOP = [
 	/\b(?:robust|seamless|comprehensive|cutting-edge|innovative|streamlined)\b/i,
-	/\b(?:leverage|utilize|facilitate|enhance|ensure|empower|foster|harness)\b/i,
+	/\b(?:leverage|utilize|facilitate|enhance|empower|foster)\b/i,
 	/it'?s (?:important|worth) (?:to )?(?:note|mention)/i,
 	/(?:great|excellent|fantastic) (?:question|point|approach)/i,
 	/\b(?:delve|underscore|bolster|unpack|craft|curate)\b/i,

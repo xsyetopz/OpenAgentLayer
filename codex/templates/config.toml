@@ -3,7 +3,7 @@
 commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"
 
 [profiles.openagentsbtw-plus]
-model = "gpt-5.2"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
@@ -33,7 +33,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw-codex-mini]
-model = "gpt-5.1-codex-mini"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "low"
 plan_mode_reasoning_effort = "low"
 model_verbosity = "low"
@@ -48,7 +48,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw]
-model = "gpt-5.2"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
@@ -63,7 +63,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw-accept-edits]
-model = "gpt-5.2-codex"
+model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
@@ -80,7 +80,7 @@ fast_mode = false
 [plugins."openagentsbtw@openagentsbtw-local"]
 enabled = true
 
-# Optional: enable only if you want the DeepWiki exploration route.
+# Optional: enable only to use the DeepWiki exploration route.
 #
 # [mcp_servers.deepwiki]
 # url = "https://mcp.deepwiki.com/mcp"

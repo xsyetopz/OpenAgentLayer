@@ -83,11 +83,11 @@ As of this package version, the wrappers also auto-attach the plugin by prependi
 ## Model Presets
 
 - `plus`
-  Default preset. Uses `gpt-5.2` for planning/default sessions, `gpt-5.2-codex` for implementation-heavy paths, and `gpt-5.4-mini` for lighter secondary roles.
+  Default preset. Uses `gpt-5.3-codex` as the daily driver for planning/default sessions, review, and implementation.
 - `pro`
-  Explicit opt-in preset. Uses `gpt-5.4` for `athena` and `odysseus`, while coding and review paths remain on the `5.2` split.
+  Explicit opt-in preset. Uses `gpt-5.4` for the main interactive session when you want a flagship route. The installer also maps planning/review orchestration agents (`athena`, `nemesis`, `odysseus`, `calliope`) to `gpt-5.4`.
 - `openagentsbtw-codex-mini`
-  A separate lightweight profile for narrow high-volume tasks using `gpt-5.1-codex-mini`. It is installed for manual use rather than assigned as a default role.
+  A separate lightweight profile for narrow high-volume tasks. It uses low reasoning/verbosity on `gpt-5.3-codex` (it is a *lightweight profile*, not a requirement to use a "mini" model).
 - `openagentsbtw-accept-edits`
   A sandboxed auto-accept profile for implementation work. It keeps `sandbox_mode = "workspace-write"` but switches to `approval_policy = "never"`.
 
@@ -95,7 +95,7 @@ As of this package version, the wrappers also auto-attach the plugin by prependi
 
 - Responses should read like the old CCA style: direct, terse, and evidence-first.
 - Start with the answer, decision, or action. Do not restate the prompt or narrate intent.
-- No praise, apology loops, or trailing `if you want...` boilerplate.
+- No praise, apology loops, or trailing optional-offer boilerplate.
 - If the user's premise is wrong, say so directly and explain why.
 - If something is uncertain, say `UNKNOWN` and state what would resolve it.
 - No placeholders, "for now", "future PR", or deferred core work unless the user explicitly narrows scope.
