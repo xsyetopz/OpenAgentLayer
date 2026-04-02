@@ -733,26 +733,26 @@ from pathlib import Path
 agents_dir = Path(os.environ["CODEX_AGENTS_DIR"])
 tier = os.environ["CODEX_TIER"]
 
-	profiles = {
-	    "plus": {
-	        "athena": ("gpt-5.3-codex", "high"),
-	        "hephaestus": ("gpt-5.3-codex", "high"),
-	        "nemesis": ("gpt-5.3-codex", "high"),
-	        "odysseus": ("gpt-5.3-codex", "high"),
-	        "hermes": ("gpt-5.3-codex", "medium"),
-	        "atalanta": ("gpt-5.3-codex", "medium"),
-	        "calliope": ("gpt-5.3-codex", "medium"),
-	    },
-	    "pro": {
-	        "athena": ("gpt-5.4", "high"),
-	        "hephaestus": ("gpt-5.3-codex", "high"),
-	        "nemesis": ("gpt-5.4", "high"),
-	        "odysseus": ("gpt-5.4", "high"),
-	        "hermes": ("gpt-5.3-codex", "medium"),
-	        "atalanta": ("gpt-5.3-codex", "medium"),
-	        "calliope": ("gpt-5.4", "medium"),
-	    },
-	}
+profiles = {
+    "plus": {
+        "athena": ("gpt-5.3-codex", "high"),
+        "hephaestus": ("gpt-5.3-codex", "high"),
+        "nemesis": ("gpt-5.3-codex", "high"),
+        "odysseus": ("gpt-5.3-codex", "high"),
+        "hermes": ("gpt-5.3-codex", "medium"),
+        "atalanta": ("gpt-5.3-codex", "medium"),
+        "calliope": ("gpt-5.3-codex", "medium"),
+    },
+    "pro": {
+        "athena": ("gpt-5.4", "high"),
+        "hephaestus": ("gpt-5.3-codex", "high"),
+        "nemesis": ("gpt-5.4", "high"),
+        "odysseus": ("gpt-5.4", "high"),
+        "hermes": ("gpt-5.3-codex", "medium"),
+        "atalanta": ("gpt-5.3-codex", "medium"),
+        "calliope": ("gpt-5.4", "medium"),
+    },
+}
 
 for path in agents_dir.glob("*.toml"):
     agent = path.stem
