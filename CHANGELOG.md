@@ -2,6 +2,19 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.10] - 2026-04-04
+
+### Changed
+
+- Version `1.1.10` is now aligned across the Claude plugin, Codex plugin, and OpenCode package.
+- Codex model presets and routing:
+  - `openagentsbtw-pro` now defaults to `gpt-5.2` for the main high-reasoning route.
+  - `openagentsbtw-plus` stays on `gpt-5.3-codex` for implementation-heavy code work.
+  - `openagentsbtw-codex-mini` now uses `gpt-5.3-codex-spark` for the lightweight route.
+  - the stable `openagentsbtw` profile is pinned to `gpt-5.2` instead of mirroring the selected tier.
+- Codex install defaults now prefer the `pro` preset when no `--codex-tier` is supplied.
+- Managed Codex guidance and research docs now describe the `gpt-5.2` / `gpt-5.3-codex` / `gpt-5.3-codex-spark` split and remove full `gpt-5.4` from managed routing.
+
 ## [1.1.9] - 2026-04-02
 
 ### Added

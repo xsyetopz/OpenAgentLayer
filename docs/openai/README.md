@@ -37,7 +37,7 @@ This directory documents the Codex-specific port of openagentsbtw. It was re-ver
 - Codex is treated as a first-class system, not as a placeholder skill.
 - We use native Codex surfaces for the jobs they actually do: plugin packaging, skill discovery, custom agent model pinning, hooks, config, wrapper routing, and real `AGENTS.md` files.
 - We keep Fast mode off in the openagentsbtw Codex profile.
-- We treat `gpt-5.3-codex` as the default Codex workhorse and keep `gpt-5.4` as an explicit pro-tier planning/orchestration path.
+- We use `gpt-5.2` for high-reasoning main work, `gpt-5.3-codex` for implementation-heavy coding, and `gpt-5.3-codex-spark` for the lightweight mini profile.
 - We do not symlink `CLAUDE.md` for Codex. The project guidance lives in actual `AGENTS.md` files.
 - Native `/plan` is treated as reasoning mode, not as a guaranteed custom-agent selector.
 - DeepWiki is optional MCP infrastructure for explicit exploration flows, not a hidden dependency of the normal routing path.

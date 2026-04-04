@@ -51,7 +51,7 @@ Options:
                           Use one model id for all OpenCode agents
   --opencode-model ROLE=MODEL
                           Override a specific OpenCode role model
-  --codex-tier plus|pro   Codex preset for subscriber/model access
+  --codex-tier plus|pro   Codex model routing preset
     --codex-set-top-profile Force setting top-level Codex profile in ~/.codex/config.toml
     --no-codex-set-top-profile
                                                     Do not set top-level Codex profile in ~/.codex/config.toml
@@ -225,13 +225,13 @@ prompt_codex_tier() {
     [[ -n "$CODEX_TIER" ]] && return 0
 
     if [[ "${CI:-}" == "true" ]]; then
-        CODEX_TIER="plus"
+        CODEX_TIER="pro"
         return 0
     fi
 
     echo ""
-    read -rp "  Codex tier preset [plus/pro]: " CODEX_TIER
-    CODEX_TIER="${CODEX_TIER:-plus}"
+    read -rp "  Codex tier preset [pro/plus]: " CODEX_TIER
+    CODEX_TIER="${CODEX_TIER:-pro}"
 }
 
 prompt_codex_profile_top() {
@@ -744,13 +744,13 @@ profiles = {
         "calliope": ("gpt-5.3-codex", "medium"),
     },
     "pro": {
-        "athena": ("gpt-5.4", "high"),
+        "athena": ("gpt-5.2", "high"),
         "hephaestus": ("gpt-5.3-codex", "high"),
-        "nemesis": ("gpt-5.4", "high"),
-        "odysseus": ("gpt-5.4", "high"),
+        "nemesis": ("gpt-5.2", "high"),
+        "odysseus": ("gpt-5.2", "high"),
         "hermes": ("gpt-5.3-codex", "medium"),
         "atalanta": ("gpt-5.3-codex", "medium"),
-        "calliope": ("gpt-5.4", "medium"),
+        "calliope": ("gpt-5.3-codex", "medium"),
     },
 }
 
@@ -875,7 +875,7 @@ body = """## openagentsbtw
 - Prefer `athena` before non-trivial multi-file implementation.
 - Prefer `nemesis` for review and `atalanta` for targeted validation before closing substantial changes.
 - Keep Fast mode off for this workflow.
-- Default to the 5.3-codex-first path for daily work. Use the pro tier only when you explicitly want 5.4 for harder planning or orchestration.
+- Use `gpt-5.2` for high-reasoning main work, `gpt-5.3-codex` for implementation, and `gpt-5.3-codex-spark` for the lightweight mini profile.
 - Use real `AGENTS.md` files in projects instead of symlinked `CLAUDE.md`.
 - Prefer `oabtw-codex triage` or `oabtw-codex deepwiki` before broad repo exploration. Use DeepWiki only for public GitHub repos, then verify local file:line claims in the repo.
 - Start with the answer, decision, or action. Do not restate the prompt or narrate intent.
@@ -937,11 +937,11 @@ target.parent.mkdir(parents=True, exist_ok=True)
 start = "# >>> openagentsbtw codex >>>"
 end = "# <<< openagentsbtw codex <<<"
 profile_action = os.environ.get("PROFILE_ACTION", "auto")
-profile_name = os.environ.get("PROFILE_NAME", "openagentsbtw-plus")
+profile_name = os.environ.get("PROFILE_NAME", "openagentsbtw-pro")
 tier = os.environ["CODEX_TIER"]
 deepwiki = os.environ.get("CODEX_DEEPWIKI", "false") == "true"
 
-default_model = "gpt-5.4" if tier == "pro" else "gpt-5.3-codex"
+default_model = "gpt-5.2"
 default_reasoning = "high"
 accept_model = "gpt-5.3-codex"
 accept_reasoning = "high"
@@ -1042,7 +1042,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw-pro]
-model = "gpt-5.4"
+model = "gpt-5.2"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
@@ -1057,7 +1057,7 @@ multi_agent = true
 fast_mode = false
 
 [profiles.openagentsbtw-codex-mini]
-model = "gpt-5.3-codex"
+model = "gpt-5.3-codex-spark"
 model_reasoning_effort = "low"
 plan_mode_reasoning_effort = "low"
 model_verbosity = "low"

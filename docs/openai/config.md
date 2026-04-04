@@ -16,11 +16,11 @@ enabled = true
 - `openagentsbtw-plus`
   Defaults to `gpt-5.3-codex` with high reasoning for the main interactive session.
 - `openagentsbtw-pro`
-  Defaults to `gpt-5.4` with high reasoning for the main interactive session.
+  Defaults to `gpt-5.2` with high reasoning for the main interactive session.
 - `openagentsbtw-codex-mini`
-  Defaults to `gpt-5.3-codex` with low reasoning for narrow high-volume work.
+  Defaults to `gpt-5.3-codex-spark` with low reasoning for narrow high-volume work.
 - `openagentsbtw`
-  Tracks the selected install preset so users can still refer to one stable profile name.
+  Stays pinned to `gpt-5.2` so wrappers and users can rely on one stable high-reasoning main profile name.
 - `openagentsbtw-accept-edits`
   Uses `gpt-5.3-codex` with high reasoning for sandboxed auto-accept implementation work.
 
@@ -44,10 +44,9 @@ The matching repo sample is in `codex/templates/config.toml`.
 
 Wrapper routing adds mode-specific overrides on top of those profiles:
 
-- `plan` and `orchestrate` follow the selected `openagentsbtw` tier
+- `plan`, `review`, and `orchestrate` use the stable `openagentsbtw` profile on `gpt-5.2`
 - `implement` and `accept` force `gpt-5.3-codex` with `high`
-- `review` follows the selected `openagentsbtw` tier (use `openagentsbtw-pro` for `gpt-5.4`)
-- bounded utility modes stay on `openagentsbtw-codex-mini`
+- bounded utility modes stay on `openagentsbtw-codex-mini` with `gpt-5.3-codex-spark`
 
 ## Optional DeepWiki MCP
 
@@ -119,4 +118,4 @@ Codex supports project doc fallback filenames. We intentionally keep openagentsb
 
 ## Install Behavior
 
-The installer appends a managed profile block instead of attempting a full TOML rewrite. During interactive Codex install, it asks whether to set a top-level `profile = ...` default in `~/.codex/config.toml` (to the selected preset). If declined, existing/default profile behavior is preserved and users can still choose with `--profile`. For automation, `--codex-set-top-profile` and `--no-codex-set-top-profile` force that behavior without prompts. In CI/non-interactive runs, when neither flag is provided, it keeps the previous fallback behavior and sets `profile = ...` only when none exists.
+The installer appends a managed profile block instead of attempting a full TOML rewrite. During interactive Codex install, it asks whether to set a top-level `profile = ...` default in `~/.codex/config.toml` (to the selected preset). If declined, existing/default profile behavior is preserved and users can still choose with `--profile`. For automation, `--codex-set-top-profile` and `--no-codex-set-top-profile` force that behavior without prompts. In CI/non-interactive runs, when neither flag is provided, it defaults the selected preset to `pro` and sets `profile = ...` only when none exists.

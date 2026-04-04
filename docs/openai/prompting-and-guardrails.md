@@ -17,7 +17,7 @@ openagentsbtw’s Codex prompts were rewritten around GPT/Codex guidance rather 
 - Multi-agent work is framed around Codex custom agents and the broader multi-agent feature set rather than Claude subagent routing.
 - Project shaping guidance moves into `AGENTS.md`, because OpenAI documents that as the main project-instruction channel.
 - Hook logic is narrower and more deterministic because Codex’s documented hook events are narrower than the Claude hook graph.
-- The `plus`/`pro` model split means the smaller `mini` and `codex-mini` paths need more explicit task framing than `gpt-5.4`.
+- The `plus`/`pro` model split means the smaller `mini` and `codex-mini` paths need more explicit task framing than the main `gpt-5.2` / `gpt-5.3-codex` routes.
 
 ## Guardrail Strategy
 

@@ -83,11 +83,11 @@ As of this package version, the wrappers also auto-attach the plugin by prependi
 ## Model Presets
 
 - `plus`
-  Default preset. Uses `gpt-5.3-codex` as the daily driver for planning/default sessions, review, and implementation.
+  Code-specialized preset. Uses `gpt-5.3-codex` for implementation-heavy daily work.
 - `pro`
-  Explicit opt-in preset. Uses `gpt-5.4` for the main interactive session when you want a flagship route. The installer also maps planning/review orchestration agents (`athena`, `nemesis`, `odysseus`, `calliope`) to `gpt-5.4`.
+  Default high-reasoning preset. Uses `gpt-5.2` for the main interactive session. The installer also maps planning/review orchestration agents (`athena`, `nemesis`, `odysseus`) to `gpt-5.2`.
 - `openagentsbtw-codex-mini`
-  A separate lightweight profile for narrow high-volume tasks. It uses low reasoning/verbosity on `gpt-5.3-codex` (it is a *lightweight profile*, not a requirement to use a "mini" model).
+  A separate lightweight profile for narrow high-volume tasks. It uses low reasoning/verbosity on `gpt-5.3-codex-spark`.
 - `openagentsbtw-accept-edits`
   A sandboxed auto-accept profile for implementation work. It keeps `sandbox_mode = "workspace-write"` but switches to `approval_policy = "never"`.
 
