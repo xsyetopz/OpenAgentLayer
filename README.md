@@ -10,7 +10,7 @@ Deterministic, multi-platform agents/skills/hooks for:
 
 Everything is generated from `source/` at install/build time so we don’t maintain duplicate agent/skill/hook files per platform.
 
-## Quickstart (ADHD edition)
+## Quickstart
 
 Install one system:
 
