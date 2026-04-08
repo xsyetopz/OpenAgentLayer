@@ -750,22 +750,14 @@ install_opencode() {
         info "OpenCode models: auto-detect/fallback"
     fi
 
-    # Guard against `set -u` crashes if this script is sourced/modified and the array
-    # wasn't initialized for some reason.
-    local -a overrides=()
-    local overrides_decl=""
-    overrides_decl="$(declare -p OPENCODE_MODEL_OVERRIDES 2>/dev/null || true)"
-    # `declare -a OPENCODE_MODEL_OVERRIDES` (no `=`) means "declared but unassigned",
-    # which still trips `set -u` if we expand it. Treat as empty.
-    if [[ -n "$overrides_decl" && "$overrides_decl" == *"="* ]]; then
-        overrides=("${OPENCODE_MODEL_OVERRIDES[@]}")
-    fi
-
+    # `set -u` + empty/unset arrays can still trip; expand overrides with nounset off.
     local override
-    for override in "${overrides[@]}"; do
+    set +u
+    for override in "${OPENCODE_MODEL_OVERRIDES[@]}"; do
         cmd+=(--model "$override")
         info "OpenCode override: $override"
     done
+    set -u
 
     OABTW_OPENCODE_TEMPLATES_DIR="$OPENCODE_TEMPLATES_DIR" "${cmd[@]}"
     info "OpenCode support installed"

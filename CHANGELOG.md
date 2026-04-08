@@ -13,6 +13,12 @@ All notable changes to openagentsbtw are documented here. Format follows [Keep a
 
 - GitHub Actions workflows now install a compatible Node.js version before running `bun run check:generated` / `bun run test`, and remove references to deleted legacy template hook files.
 
+## [1.2.2] - 2026-04-08
+
+### Fixed
+
+- `install.sh` no longer crashes under `set -u` when the OpenCode overrides array is empty (Bash treats `${arr[@]}` as “unbound” under nounset when the array has no elements).
+
 ## [1.2.0] - 2026-04-08
 
 ### Added
