@@ -68,8 +68,6 @@ export interface InstallOptions {
 	dryRun: boolean;
 	noOverrides: boolean;
 	plugins: string[];
-	chromeDevtoolsMcp?: boolean;
-	browserMcp?: boolean;
 	defaultModel?: string;
 	modelOverrides?: Record<string, string>;
 	providers?: ProviderAvailability;

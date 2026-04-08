@@ -58,17 +58,15 @@ Wrapper routing adds mode-specific overrides on top of those profiles:
 
 This is opt-in because it is only useful for the explicit `deepwiki` exploration route and only makes sense for GitHub repos that DeepWiki can index.
 
-## Optional Chrome DevTools MCP
+## Optional Playwright CLI
 
-`./install.sh --codex --chrome-devtools-mcp` appends a managed `mcp_servers.chrome-devtools` block to `~/.codex/config.toml` (and `--no-chrome-devtools-mcp` removes only the managed block).
+openagentsbtw can optionally install Playwright CLI globally:
 
-This enables the `chrome-devtools-mcp@latest` server, which lets agents use Chrome DevTools for debugging and performance traces.
+```bash
+./install.sh --playwright-cli
+```
 
-## Optional Browser MCP
-
-`./install.sh --codex --browsermcp` appends a managed `mcp_servers.browsermcp` block to `~/.codex/config.toml` (and `--no-browsermcp` removes only the managed block).
-
-Browser MCP requires installing the Browser MCP Chrome extension and connecting a tab before tools can act on that page.
+Playwright CLI supports installing “skills” into a repo so coding agents can use browser automation. See `playwright-cli install --skills` in the upstream docs.
 
 ## Memory Layer
 

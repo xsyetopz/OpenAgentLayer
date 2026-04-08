@@ -1,9 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import {
-	applyMcpToggles,
 	buildAgentDisableConfig,
 	buildMcpConfig,
 	mergeInstructions,
+	pruneLegacyOpenAgentsMcpServers,
 } from "./opencode-config.ts";
 
 describe("mergeInstructions", () => {
@@ -37,47 +37,25 @@ describe("mergeInstructions", () => {
 	});
 });
 
-describe("applyMcpToggles", () => {
-	it("enables chrome-devtools and browsermcp entries", () => {
-		const config = applyMcpToggles(
-			{ mcp: buildMcpConfig() },
-			{ chromeDevtoolsMcp: true, browserMcp: true },
-		);
-
-		const mcp = config["mcp"] as Record<string, unknown>;
-		expect(mcp["chrome-devtools"]).toEqual({
-			type: "local",
-			command: ["bunx", "-y", "chrome-devtools-mcp@latest"],
-			enabled: true,
-		});
-		expect(mcp["browsermcp"]).toEqual({
-			type: "local",
-			command: ["bunx", "-y", "@browsermcp/mcp@latest"],
-			enabled: true,
-		});
-	});
-
-	it("disables chrome-devtools and browsermcp entries", () => {
-		const config = applyMcpToggles(
-			{
-				mcp: {
-					...buildMcpConfig(),
-					"chrome-devtools": {
-						type: "local",
-						command: ["bunx", "-y", "chrome-devtools-mcp@latest"],
-						enabled: true,
-					},
-					browsermcp: {
-						type: "local",
-						command: ["bunx", "-y", "@browsermcp/mcp@latest"],
-						enabled: true,
-					},
+describe("pruneLegacyOpenAgentsMcpServers", () => {
+	it("removes legacy chrome-devtools and browsermcp entries without touching core MCP", () => {
+		const pruned = pruneLegacyOpenAgentsMcpServers({
+			mcp: {
+				...buildMcpConfig(),
+				"chrome-devtools": {
+					type: "local",
+					command: ["bunx", "-y", "chrome-devtools-mcp@latest"],
+					enabled: true,
+				},
+				browsermcp: {
+					type: "local",
+					command: ["bunx", "-y", "@browsermcp/mcp@latest"],
+					enabled: true,
 				},
 			},
-			{ chromeDevtoolsMcp: false, browserMcp: false },
-		);
+		});
 
-		const mcp = config["mcp"] as Record<string, unknown>;
+		const mcp = pruned["mcp"] as Record<string, unknown>;
 		expect(mcp["chrome-devtools"]).toBeUndefined();
 		expect(mcp["browsermcp"]).toBeUndefined();
 		expect(mcp["context7"]).toBeTruthy();

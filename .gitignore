@@ -1,6 +1,29 @@
 # Build output
 dist/
 build/
+.build/
+
+# Generated platform artifacts (built at install/build time)
+claude/agents/
+claude/skills/
+claude/templates/CLAUDE.md
+claude/hooks/HOOKS.md
+claude/hooks/policy-map.json
+
+codex/agents/
+codex/templates/AGENTS.md
+codex/hooks/HOOKS.md
+codex/hooks/policy-map.json
+codex/plugin/openagentsbtw/skills/
+
+opencode/templates/
+
+copilot/templates/
+copilot/hooks/HOOKS.md
+copilot/hooks/policy-map.json
+
+bin/oabtw-codex
+bin/openagentsbtw-codex
 
 # Python
 __pycache__/

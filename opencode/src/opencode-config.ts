@@ -74,22 +74,6 @@ export function buildMcpConfig(): Record<string, unknown> {
 	};
 }
 
-function buildChromeDevtoolsMcpConfig(): Record<string, unknown> {
-	return {
-		type: "local",
-		command: ["bunx", "-y", "chrome-devtools-mcp@latest"],
-		enabled: true,
-	};
-}
-
-function buildBrowserMcpConfig(): Record<string, unknown> {
-	return {
-		type: "local",
-		command: ["bunx", "-y", "@browsermcp/mcp@latest"],
-		enabled: true,
-	};
-}
-
 function deepMerge(
 	target: Record<string, unknown>,
 	source: Record<string, unknown>,
@@ -153,29 +137,35 @@ export function mergeMcpConfig(
 	return { ...existing, mcp: mcpConfig };
 }
 
-export function applyMcpToggles(
+export function pruneLegacyOpenAgentsMcpServers(
 	existing: Record<string, unknown>,
-	toggles: { chromeDevtoolsMcp?: boolean; browserMcp?: boolean },
 ): Record<string, unknown> {
-	if (
-		typeof toggles.chromeDevtoolsMcp !== "boolean" &&
-		typeof toggles.browserMcp !== "boolean"
-	) {
+	const currentMcp = (existing["mcp"] as Record<string, unknown>) ?? {};
+	if (!currentMcp || typeof currentMcp !== "object") {
 		return existing;
 	}
 
-	const currentMcp = (existing["mcp"] as Record<string, unknown>) ?? {};
 	const nextMcp: Record<string, unknown> = { ...currentMcp };
 
-	if (toggles.chromeDevtoolsMcp === true) {
-		nextMcp["chrome-devtools"] = buildChromeDevtoolsMcpConfig();
-	} else if (toggles.chromeDevtoolsMcp === false) {
+	const chrome = nextMcp["chrome-devtools"];
+	if (
+		chrome &&
+		typeof chrome === "object" &&
+		(chrome as Record<string, unknown>)["type"] === "local" &&
+		JSON.stringify((chrome as Record<string, unknown>)["command"]) ===
+			JSON.stringify(["bunx", "-y", "chrome-devtools-mcp@latest"])
+	) {
 		delete nextMcp["chrome-devtools"];
 	}
 
-	if (toggles.browserMcp === true) {
-		nextMcp["browsermcp"] = buildBrowserMcpConfig();
-	} else if (toggles.browserMcp === false) {
+	const browser = nextMcp["browsermcp"];
+	if (
+		browser &&
+		typeof browser === "object" &&
+		(browser as Record<string, unknown>)["type"] === "local" &&
+		JSON.stringify((browser as Record<string, unknown>)["command"]) ===
+			JSON.stringify(["bunx", "-y", "@browsermcp/mcp@latest"])
+	) {
 		delete nextMcp["browsermcp"];
 	}
 

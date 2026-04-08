@@ -12,7 +12,9 @@ REPO_DIR="$SCRIPT_DIR"
 REMOVE_CLAUDE="false"
 REMOVE_OPENCODE="false"
 REMOVE_CODEX="false"
+REMOVE_COPILOT="false"
 OPENCODE_SCOPE="global"
+COPILOT_SCOPE="global"
 
 die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }
@@ -32,10 +34,12 @@ System toggles (allow multiple):
   --claude
   --opencode
   --codex
+  --copilot
   --all
 
 Options:
   --opencode-scope project|global
+  --copilot-scope global|project|both
   -h, --help
 EOF
     exit 0
@@ -47,13 +51,19 @@ parse_args() {
             --claude) REMOVE_CLAUDE="true" ;;
             --opencode) REMOVE_OPENCODE="true" ;;
             --codex) REMOVE_CODEX="true" ;;
+            --copilot) REMOVE_COPILOT="true" ;;
             --all)
                 REMOVE_CLAUDE="true"
                 REMOVE_OPENCODE="true"
                 REMOVE_CODEX="true"
+                REMOVE_COPILOT="true"
                 ;;
             --opencode-scope)
                 OPENCODE_SCOPE="${2:-}"
+                shift
+                ;;
+            --copilot-scope)
+                COPILOT_SCOPE="${2:-}"
                 shift
                 ;;
             -h|--help) usage ;;
@@ -64,10 +74,11 @@ parse_args() {
 }
 
 ensure_selection() {
-    if [[ "$REMOVE_CLAUDE" == "false" && "$REMOVE_OPENCODE" == "false" && "$REMOVE_CODEX" == "false" ]]; then
+    if [[ "$REMOVE_CLAUDE" == "false" && "$REMOVE_OPENCODE" == "false" && "$REMOVE_CODEX" == "false" && "$REMOVE_COPILOT" == "false" ]]; then
         REMOVE_CLAUDE="true"
         REMOVE_OPENCODE="true"
         REMOVE_CODEX="true"
+        REMOVE_COPILOT="true"
     fi
 }
 
@@ -134,6 +145,94 @@ remove_opencode() {
 
     info "Removed OpenCode files from $target"
     warn "OpenCode config keys in opencode.json/jsonc were not edited automatically"
+}
+
+remove_copilot() {
+    [[ "$REMOVE_COPILOT" == "true" ]] || return 0
+
+    echo -e "\n${GREEN}Removing GitHub Copilot support${NC}"
+    check_python3
+
+    case "$COPILOT_SCOPE" in
+        global|project|both) ;;
+        *) die "Unsupported Copilot scope: $COPILOT_SCOPE (expected global, project, or both)" ;;
+    esac
+
+    local template_root="$REPO_DIR/copilot/templates/.github"
+    local skill_dirs=()
+    if [[ -d "$template_root/skills" ]]; then
+        while IFS= read -r d; do
+            skill_dirs+=("$d")
+        done < <(find "$template_root/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \;)
+    else
+        skill_dirs=(decide desloppify docs errors debug explore handoff openagentsbtw perf review security ship style test trace)
+    fi
+
+    if [[ "$COPILOT_SCOPE" == "global" || "$COPILOT_SCOPE" == "both" ]]; then
+        local copilot_home="$HOME/.copilot"
+        local agent
+        for agent in athena hephaestus nemesis atalanta calliope hermes odysseus; do
+            rm -f "$copilot_home/agents/$agent.md"
+            rm -f "$copilot_home/agents/$agent.agent.md"
+        done
+        local skill
+        for skill in "${skill_dirs[@]}"; do
+            rm -rf "$copilot_home/skills/$skill"
+        done
+        info "Removed Copilot global agents + skills from ~/.copilot/"
+    fi
+
+    if [[ "$COPILOT_SCOPE" == "project" || "$COPILOT_SCOPE" == "both" ]]; then
+        local gh_root="$PWD/.github"
+        local agent
+        for agent in athena hephaestus nemesis atalanta calliope hermes odysseus; do
+            rm -f "$gh_root/agents/$agent.md"
+            rm -f "$gh_root/agents/$agent.agent.md"
+        done
+        local skill
+        for skill in "${skill_dirs[@]}"; do
+            rm -rf "$gh_root/skills/$skill"
+        done
+
+        if [[ -d "$template_root/prompts" ]]; then
+            while IFS= read -r prompt_file; do
+                rm -f "$gh_root/prompts/$prompt_file"
+            done < <(find "$template_root/prompts" -type f -maxdepth 1 -exec basename {} \;)
+        else
+            rm -f "$gh_root/prompts/oabtw-"*.prompt.md 2>/dev/null || true
+        fi
+
+        rm -f "$gh_root/hooks/openagentsbtw.json"
+        rm -f "$gh_root/hooks/openagesbtw.json"
+        rm -rf "$gh_root/hooks/scripts/openagentsbtw"
+
+        COPILOT_MD_TARGET="$gh_root/copilot-instructions.md" python3 - <<'PY'
+import os
+from pathlib import Path
+
+target = Path(os.environ["COPILOT_MD_TARGET"])
+if not target.exists():
+    raise SystemExit(0)
+
+start = "<!-- >>> openagentsbtw copilot >>> -->"
+end = "<!-- <<< openagentsbtw copilot <<< -->"
+text = target.read_text()
+if start in text and end in text:
+    before, _, rest = text.partition(start)
+    _, _, after = rest.partition(end)
+    text = before.rstrip()
+    after = after.lstrip("\n")
+    if text and after:
+        text = text + "\n\n" + after
+    elif after:
+        text = after
+    if text and not text.endswith("\n"):
+        text += "\n"
+    target.write_text(text)
+PY
+
+        info "Removed Copilot repo assets from .github/"
+    fi
 }
 
 remove_codex() {
@@ -253,6 +352,7 @@ main() {
 
     remove_claude
     remove_opencode
+    remove_copilot
     remove_codex
 
     echo -e "\n${GREEN}openagentsbtw uninstall complete${NC}"

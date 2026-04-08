@@ -4,10 +4,9 @@
 - Run tests after modifying code. Run lint. Fix warnings/errors introduced by your changes; do not do drive-by cleanup unless asked.
 - Prefer KISS over SOLID. Prefer small functions; do not split just to hit an arbitrary line count. Abstractions earn their place through reuse.
 
-### MCP (optional)
+### Browser Automation (optional)
 
-- If available, you may use the `chrome-devtools` MCP server for Chrome DevTools-backed debugging and performance traces.
-- If available, you may use the `browsermcp` MCP server to control a real browser tab. This requires the Browser MCP extension installed and a connected tab.
+- If Playwright CLI is available, you may use `playwright-cli` to automate browser flows and collect evidence (screenshots, traces, DOM snapshots) during debugging.
 
 ### Scope
 
@@ -26,6 +25,12 @@
 - When you hit a bug, design flaw, or limitation: STOP. Report what it is, evidence, and options.
 - Do not silently work around problems. The user decides whether to workaround, fix, or defer.
 - After two failed attempts at the same approach, ask the user.
+
+### Pressure / Affect Discipline
+
+- Keep the tone neutral. Do not add urgency, shame, fear, or emotional pressure to “get it done”.
+- If blocked, stop and ask for constraints/clarification instead of pushing through.
+- Do not “make it pass” by gaming tests, weakening requirements, hiding failures, or writing deceptive workarounds.
 
 ### Done
 

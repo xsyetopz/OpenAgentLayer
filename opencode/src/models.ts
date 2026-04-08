@@ -4,8 +4,9 @@ export const MODELS = {
 	COPILOT_GPT_5_MINI: "github-copilot/gpt-5-mini",
 	OPENCODE_BIG_PICKLE: "opencode/big-pickle",
 	OPENCODE_GPT_5_NANO: "opencode/gpt-5-nano",
-	OPENCODE_TRINITY_LARGE_PREVIEW_FREE: "opencode/trinity-large-preview-free",
 	OPENCODE_MINIMAX_M2_5_FREE: "opencode/minimax-m2.5-free",
+	OPENCODE_NEMOTRON_3_SUPER_FREE: "opencode/nemotron-3-super-free",
+	OPENCODE_QWEN3_6_PLUS_FREE: "opencode/qwen3.6-plus-free",
 } as const;
 
 export type ModelId = (typeof MODELS)[keyof typeof MODELS];
@@ -38,21 +39,21 @@ const COPILOT_FALLBACK: Record<AgentRole, ModelConfig> = {
 
 const FREE_FALLBACK: Record<AgentRole, ModelConfig> = {
 	build: { model: MODELS.OPENCODE_BIG_PICKLE, temperature: 0.7 },
-	plan: { model: MODELS.OPENCODE_TRINITY_LARGE_PREVIEW_FREE, temperature: 0.8 },
+	plan: { model: MODELS.OPENCODE_QWEN3_6_PLUS_FREE, temperature: 0.8 },
 	explore: {
-		model: MODELS.OPENCODE_TRINITY_LARGE_PREVIEW_FREE,
+		model: MODELS.OPENCODE_QWEN3_6_PLUS_FREE,
 		temperature: 0.8,
 	},
 	review: {
-		model: MODELS.OPENCODE_TRINITY_LARGE_PREVIEW_FREE,
+		model: MODELS.OPENCODE_QWEN3_6_PLUS_FREE,
 		temperature: 0.7,
 	},
 	implement: { model: MODELS.OPENCODE_BIG_PICKLE, temperature: 0.7 },
 	document: {
-		model: MODELS.OPENCODE_TRINITY_LARGE_PREVIEW_FREE,
+		model: MODELS.OPENCODE_QWEN3_6_PLUS_FREE,
 		temperature: 1.0,
 	},
-	test: { model: MODELS.OPENCODE_TRINITY_LARGE_PREVIEW_FREE, temperature: 0.7 },
+	test: { model: MODELS.OPENCODE_QWEN3_6_PLUS_FREE, temperature: 0.7 },
 };
 
 export interface ModelAssignment {

@@ -85,17 +85,3 @@ enabled = true
 # [mcp_servers.deepwiki]
 # url = "https://mcp.deepwiki.com/mcp"
 # enabled = true
-
-# Optional: Chrome DevTools MCP (DevTools-backed debugging/perf tracing).
-#
-# [mcp_servers.chrome-devtools]
-# command = "bunx"
-# args = ["-y", "chrome-devtools-mcp@latest"]
-# enabled = true
-
-# Optional: Browser MCP (controls a real browser tab; requires installing the extension).
-#
-# [mcp_servers.browsermcp]
-# command = "bunx"
-# args = ["-y", "@browsermcp/mcp@latest"]
-# enabled = true

@@ -1,6 +1,8 @@
-# openagentsbtw For Codex
+# openagentsbtw Role System + Nano Workflow
 
-Use this skill when the task benefits from the openagentsbtw role split while operating inside Codex.
+Use this skill when the task benefits from explicit role routing plus a compact, repeatable workflow:
+
+Research → Plan → Execute → Review → Ship
 
 ## Role Map
 
@@ -12,20 +14,23 @@ Use this skill when the task benefits from the openagentsbtw role split while op
 - `hermes`: codebase exploration, tracing, evidence gathering
 - `odysseus`: multi-step coordination across several agents
 
+## Hard Rules (All Tools)
+
+- Keep tone neutral. Do not add urgency, shame, fear, or emotional pressure.
+- If blocked, stop and ask for constraints/clarification instead of pushing through.
+- Do not “make it pass” by gaming tests, weakening requirements, hiding failures, or writing deceptive workarounds.
+
+Reference workflow: `docs/method/nano-bmad.md`
+
 ## Codex Mapping
 
-- Keep the immediate blocking task in the main thread when it is faster than delegating.
-- Use custom agents by name when the work is clearly specialized.
-- Use the built-in `explorer` and `worker` agents only when the custom role split is not important for the task.
-- Prefer repo `AGENTS.md` files for project-specific constraints; use this skill for the openagentsbtw operating model.
-- Plugin install makes the skills discoverable; `AGENTS.md`, config, hooks, and wrapper commands are what shape default behavior.
+- Use the custom agents by name when the work is clearly specialized.
+- Prefer repo `AGENTS.md` files for project-specific constraints.
+- Plugin install makes skills discoverable; `AGENTS.md`, config, hooks, and wrapper commands shape default behavior.
 
-## Optional MCP Servers
+## Optional Browser Automation
 
-Some installs also configure optional MCP servers. Do not assume they exist; if they're configured, prefer them where appropriate:
-
-- `chrome-devtools`: Chrome DevTools-backed debugging and performance traces.
-- `browsermcp`: controls a real browser tab (requires the Browser MCP extension installed and a connected tab).
+Some installs also configure Playwright CLI. Do not assume it exists; if it is available, prefer it for browser automation and evidence capture (screenshots, traces, DOM snapshots) instead of “hand-waving” about UI state.
 
 ## Routing Matrix
 
@@ -74,6 +79,16 @@ These wrappers do not hard-bind a native Codex mode like `/plan` to a custom age
 Prefer the specific research routes (`explore`, `trace`, `debug`, `deepwiki`) when the intent is known. Keep `triage` as the generic fallback for bounded search that does not yet fit one of the narrower research patterns.
 
 The `accept` route is an openagentsbtw convenience mode, not a native Codex collaboration mode. It maps to `approval_policy = "never"` plus `sandbox_mode = "workspace-write"` so edits auto-apply inside the sandbox without turning on full access.
+
+## Copilot Mapping
+
+- Repo installs generate `.github/agents/`, `.github/skills/`, `.github/prompts/`, and `.github/hooks/`.
+- Prefer the phase prompts in `.github/prompts/` (research/plan/implement/review/test/docs/orchestrate) to keep runs task-shaped and low-pressure.
+
+## Claude Code + OpenCode Mapping
+
+- Route to the matching role for the phase (`athena` for planning, `hephaestus` for implementation, `nemesis` for review, etc.).
+- Keep the same workflow shape (Research → Plan → Execute → Review → Ship) even if the UI differs.
 
 ## Default Flow
 

@@ -22,8 +22,7 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 - Code is truth. Do not restate how code works in docs; link to file:line.
 - Use /clear between unrelated tasks. Start fresh at 90-95% context utilization.
 - Run git diff --stat before git diff; raw diff can dump too much context.
-
-@RTK.md`,
+`,
 			},
 		],
 	},
@@ -94,6 +93,37 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 - Never run git commit, git push, or git add unless the user explicitly requests it.
 - Never delete files without explicit confirmation.
 - Respect the agent permission profile; do not route around it with alternate tools or shell tricks.`,
+			},
+		],
+	},
+	copilot: {
+		title: "openagentsbtw Copilot Instructions",
+		sections: [
+			{
+				title: "Role Map",
+				body: `| Task | Agent |
+| --- | --- |
+| Research, exploration, tracing | \`hermes\` |
+| Architecture, planning, sequencing | \`athena\` |
+| Code changes and refactors | \`hephaestus\` |
+| Review, security, regressions | \`nemesis\` |
+| Test execution and failure analysis | \`atalanta\` |
+| Documentation | \`calliope\` |
+| Multi-step coordination | \`odysseus\` |`,
+			},
+			{
+				title: "Nano Workflow",
+				body: `Research → Plan → Execute → Review → Ship.
+
+Keep the tone neutral. If blocked, stop and ask; do not game tests or weaken requirements.`,
+			},
+			{
+				title: "Working Rules",
+				body: `- Keep this file short and task-shaping. Link to detailed docs instead of inlining.
+- No urgency, shame, or pressure language. Neutral, factual collaboration.
+- Do not hide failures, weaken requirements, or “make tests pass” by cheating.
+- Prefer small, direct edits and verify outcomes.
+`,
 			},
 		],
 	},

@@ -6,7 +6,12 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAUDE_DIR="$SCRIPT_DIR/claude"
+BUILD_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t openagentsbtw-build)"
+trap 'rm -rf "$BUILD_DIR" 2>/dev/null || true' EXIT
+
+node "$SCRIPT_DIR/scripts/build.mjs" --out "$BUILD_DIR" --platform claude
+
+CLAUDE_DIR="$BUILD_DIR/claude"
 DIST_DIR="$SCRIPT_DIR/dist/openagentsbtw-claude-plugin"
 die()  { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }

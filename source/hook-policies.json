@@ -9,6 +9,10 @@
     "codex": {
       "event": "UserPromptSubmit",
       "timeout": 10
+    },
+    "copilot": {
+      "event": "userPromptSubmitted",
+      "timeout": 5
     }
   },
   {
@@ -22,6 +26,10 @@
       "event": "SessionStart",
       "matcher": "startup|resume",
       "timeout": 10
+    },
+    "copilot": {
+      "event": "sessionStart",
+      "timeout": 5
     }
   },
   {
@@ -47,6 +55,10 @@
     "codex": {
       "event": "PreToolUse",
       "matcher": "Bash",
+      "timeout": 10
+    },
+    "copilot": {
+      "event": "preToolUse",
       "timeout": 10
     },
     "opencode": {
@@ -92,6 +104,10 @@
       "event": "PostToolUse",
       "matcher": "Bash",
       "timeout": 10
+    },
+    "copilot": {
+      "event": "postToolUse",
+      "timeout": 10
     }
   },
   {
@@ -99,6 +115,10 @@
     "script": "post/failure-circuit.mjs",
     "claude": {
       "event": "PostToolUseFailure",
+      "timeout": 5
+    },
+    "copilot": {
+      "event": "postToolUse",
       "timeout": 5
     },
     "unsupported": {
@@ -128,6 +148,10 @@
     },
     "codex": {
       "event": "Stop",
+      "timeout": 15
+    },
+    "copilot": {
+      "event": "sessionEnd",
       "timeout": 15
     }
   },

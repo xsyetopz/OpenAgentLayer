@@ -35,11 +35,10 @@ If you use a specific tier, repeat it:
 ./install.sh --claude --claude-tier 20x
 ```
 
-Optional MCP servers (writes `mcpServers` entries into `~/.claude/settings.json`):
+Optional browser automation (Playwright CLI):
 
 ```bash
-./install.sh --claude --chrome-devtools-mcp
-./install.sh --claude --browsermcp
+./install.sh --playwright-cli
 ```
 
 Important:
@@ -126,5 +125,3 @@ tests/           node:test tests for all hooks
 install.sh       Bootstrap: marketplace registration, user-level extras, plugin install
 build-plugin.sh  Builds marketplace-ready dist from source
 ```
-
-@RTK.md

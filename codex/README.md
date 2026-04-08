@@ -16,8 +16,7 @@ This package ports openagentsbtw onto Codex’s native extension surfaces: custo
 ./install.sh --codex --codex-tier plus
 ./install.sh --codex --codex-tier pro
 ./install.sh --codex --codex-deepwiki
-./install.sh --codex --chrome-devtools-mcp
-./install.sh --codex --browsermcp
+./install.sh --playwright-cli
 ```
 
 Wrapper command after install:
@@ -43,7 +42,6 @@ The installer:
 - appends managed openagentsbtw guidance to `~/.codex/AGENTS.md`
 - appends managed `openagentsbtw-plus`, `openagentsbtw-pro`, `openagentsbtw-codex-mini`, `openagentsbtw`, and `openagentsbtw-accept-edits` profiles to `~/.codex/config.toml`
 - optionally appends a managed `mcp_servers.deepwiki` block to `~/.codex/config.toml`
-- optionally appends managed `mcp_servers.chrome-devtools` and `mcp_servers.browsermcp` blocks to `~/.codex/config.toml`
 - optionally runs `rtk init -g --codex`
 
 ## Updating

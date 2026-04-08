@@ -2,13 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-`openagentsbtw` is the umbrella repo for three distinct agent systems:
+`openagentsbtw` is the umbrella repo for four distinct agent systems:
 
 - `claude/`: the existing Claude Code plugin package, now published as `openagentsbtw`
 - `opencode/`: the imported OpenCode framework, installed from this repo instead of as a separate manual setup
 - `codex/`: a Codex-native system with a plugin manifest, custom agents, hooks, templates, and research docs
+- `copilot/`: generated GitHub Copilot assets (agents, skills, prompts, hooks config, and repo instructions)
 
-Shared agent, skill, command, and hook-manifest content now lives in `source/`. The platform directories are generated outputs that should be regenerated after editing the shared source.
+Shared agent, skill, command, and hook-manifest content lives in `source/`. Platform artifacts are generated deterministically at install/build time (into a temp build dir or `.build/generated/`) rather than being hand-maintained across multiple platform folders.
 
 Each platform now also gets a generated hook mapping artifact from the shared policy source:
 
@@ -25,23 +26,22 @@ The root installer now supports multiple systems in one run.
 ```bash
 ./install.sh --claude --opencode
 ./install.sh --codex
+./install.sh --copilot
 ./install.sh --all
 ```
 
 If no system flags are passed, the installer prompts for each system as a toggle.
 
-### MCP options
+### Playwright CLI (optional)
 
-These flags apply to any selected systems (Claude, OpenCode, Codex):
+This optionally installs Playwright CLI for browser automation (screenshots, traces, DOM snapshots) during debugging:
 
 ```bash
-./install.sh --chrome-devtools-mcp
-./install.sh --no-chrome-devtools-mcp
-./install.sh --browsermcp
-./install.sh --no-browsermcp
+./install.sh --playwright-cli
+./install.sh --no-playwright-cli
 ```
 
-If you run `./install.sh` interactively without these flags, it prompts per MCP server as `keep/enable/disable` (default: `keep`).
+On project-scoped installs, the installer can also run `playwright-cli install --skills` in the current repo.
 
 ### Claude options
 
@@ -61,7 +61,7 @@ Claude installs:
 ```bash
 ./install.sh --opencode --opencode-default-model opencode/gpt-5-nano
 ./install.sh --opencode --opencode-model build=github-copilot/gpt-5-mini
-./install.sh --opencode --opencode-model plan=opencode/trinity-large-preview-free
+./install.sh --opencode --opencode-model plan=opencode/qwen3.6-plus-free
 ```
 
 OpenCode no longer injects the old Bailian defaults into your config. You can supply one default model for all roles or per-role overrides.
@@ -142,8 +142,9 @@ Important:
 
 ```text
 claude/     Claude Code plugin package, hooks, skills, tests
-opencode/   OpenCode framework source and templates
-codex/      Codex-native plugin, agents, hooks, templates
+copilot/    GitHub Copilot assets + runtime hook scripts (generated installable `.github/` assets are build-time)
+opencode/   OpenCode framework source (generated templates are build-time)
+codex/      Codex-native plugin + hook scripts (generated agents/skills/docs are build-time)
 docs/       Research notes, including docs/openai/ and docs/opencode/
 bin/        Shared helper scripts
 source/     Shared source-of-truth for prompt schemas, skills, commands, hook policies, and guidance assets
@@ -157,13 +158,12 @@ Contributor workflow details live in `CONTRIBUTING.md`.
 ```bash
 bun install --frozen-lockfile
 bun run generate
-bun run check:generated
 bun run test
 cd opencode && bun install --frozen-lockfile && bun run test && bun run typecheck
 ./build-plugin.sh
 ```
 
-`bun run bootstrap:source` is now a no-op reminder: `source/` is the canonical layer, so edit `source/` directly and regenerate outputs.
+`bun run generate` writes generated artifacts under `.build/generated/` (and the installer generates into a temp dir automatically).
 
 Build output for the Claude plugin lands in `dist/openagentsbtw-claude-plugin/`.
 

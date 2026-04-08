@@ -17,8 +17,6 @@ interface ParseState {
 	dryRun: boolean;
 	noOverrides: boolean;
 	plugins: string[];
-	chromeDevtoolsMcp: boolean | undefined;
-	browserMcp: boolean | undefined;
 	defaultModel: string;
 	modelOverrides: Record<string, string>;
 }
@@ -113,22 +111,6 @@ const FLAG_HANDLERS: Record<string, ArgHandler> = {
 		s.plugins = [];
 		return i;
 	},
-	"--chrome-devtools-mcp": (_a, i, s) => {
-		s.chromeDevtoolsMcp = true;
-		return i;
-	},
-	"--no-chrome-devtools-mcp": (_a, i, s) => {
-		s.chromeDevtoolsMcp = false;
-		return i;
-	},
-	"--browsermcp": (_a, i, s) => {
-		s.browserMcp = true;
-		return i;
-	},
-	"--no-browsermcp": (_a, i, s) => {
-		s.browserMcp = false;
-		return i;
-	},
 	"--help": () => {
 		printHelp();
 		process.exit(0);
@@ -151,8 +133,6 @@ function parseArgs(argv: string[]): ParseState & {
 		dryRun: false,
 		noOverrides: false,
 		plugins: [],
-		chromeDevtoolsMcp: undefined,
-		browserMcp: undefined,
 		defaultModel: "",
 		modelOverrides: {},
 	};
@@ -210,10 +190,6 @@ function printHelp(): void {
   --provider auto|copilot|free
   --default-model MODEL      one model id for all roles
   --model ROLE=MODEL         per-role model override
-  --chrome-devtools-mcp      enable Chrome DevTools MCP server
-  --no-chrome-devtools-mcp   disable Chrome DevTools MCP server
-  --browsermcp               enable Browser MCP server
-  --no-browsermcp            disable Browser MCP server
   --clean                    remove existing files first
   --dry-run                  preview without writing
   --no-overrides             skip primary agent overrides
@@ -290,12 +266,6 @@ async function main(): Promise<void> {
 		dryRun: parsed.dryRun,
 		noOverrides: parsed.noOverrides,
 		plugins: parsed.plugins,
-		...(typeof parsed.chromeDevtoolsMcp === "boolean"
-			? { chromeDevtoolsMcp: parsed.chromeDevtoolsMcp }
-			: {}),
-		...(typeof parsed.browserMcp === "boolean"
-			? { browserMcp: parsed.browserMcp }
-			: {}),
 		providers,
 		...(parsed.defaultModel ? { defaultModel: parsed.defaultModel } : {}),
 		...(Object.keys(parsed.modelOverrides).length > 0

@@ -9,22 +9,27 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$SCRIPT_DIR"
 CLAUDE_DIR="$REPO_DIR/claude"
+CODEX_DIR="$REPO_DIR/codex"
+COPILOT_DIR="$REPO_DIR/copilot"
+OPENCODE_TEMPLATES_DIR="$REPO_DIR/opencode/templates"
+BIN_DIR="$REPO_DIR/bin"
+BUILD_DIR=""
 
 INSTALL_CLAUDE="false"
 INSTALL_OPENCODE="false"
 INSTALL_CODEX="false"
+INSTALL_COPILOT="false"
 SKIP_RTK="false"
 CLAUDE_TIER="5x"
 OPENCODE_SCOPE="global"
 OPENCODE_DEFAULT_MODEL=""
 OPENCODE_MODEL_OVERRIDES=()
+COPILOT_SCOPE="global"
 CODEX_TIER=""
 CODEX_DEEPWIKI="false"
 CODEX_SET_TOP_PROFILE="auto"
-MCP_CHROME_DEVTOOLS="keep"
-MCP_BROWSERMCP="keep"
-MCP_CHROME_DEVTOOLS_SET="false"
-MCP_BROWSERMCP_SET="false"
+PLAYWRIGHT_CLI="false"
+PLAYWRIGHT_CLI_SET="false"
 
 die() { echo -e "${RED}Error: $1${NC}" >&2; exit 1; }
 info() { echo -e "  ${GREEN}✓${NC} $1"; }
@@ -40,6 +45,7 @@ System toggles (allow multiple):
   --claude                Install Claude Code support
   --opencode              Install OpenCode support
   --codex                 Install Codex support
+  --copilot               Install GitHub Copilot support
   --all                   Install all supported systems
 
 Options:
@@ -51,16 +57,15 @@ Options:
                           Use one model id for all OpenCode agents
   --opencode-model ROLE=MODEL
                           Override a specific OpenCode role model
+  --copilot-scope global|project|both
+                          Copilot install target (default: global)
   --codex-tier plus|pro   Codex model routing preset
     --codex-set-top-profile Force setting top-level Codex profile in ~/.codex/config.toml
     --no-codex-set-top-profile
                                                     Do not set top-level Codex profile in ~/.codex/config.toml
   --codex-deepwiki        Configure DeepWiki MCP for Codex
-  --chrome-devtools-mcp   Enable Chrome DevTools MCP server (all selected systems)
-  --no-chrome-devtools-mcp
-                          Disable Chrome DevTools MCP server (all selected systems)
-  --browsermcp            Enable Browser MCP server (all selected systems)
-  --no-browsermcp         Disable Browser MCP server (all selected systems)
+  --playwright-cli        Install Playwright CLI (browser automation)
+  --no-playwright-cli     Do not install Playwright CLI
   -h, --help              Show this help
 EOF
     exit 0
@@ -72,10 +77,12 @@ parse_args() {
             --claude) INSTALL_CLAUDE="true" ;;
             --opencode) INSTALL_OPENCODE="true" ;;
             --codex) INSTALL_CODEX="true" ;;
+            --copilot) INSTALL_COPILOT="true" ;;
             --all)
                 INSTALL_CLAUDE="true"
                 INSTALL_OPENCODE="true"
                 INSTALL_CODEX="true"
+                INSTALL_COPILOT="true"
                 ;;
             --skip-rtk) SKIP_RTK="true" ;;
             --claude-tier)
@@ -94,6 +101,10 @@ parse_args() {
                 OPENCODE_MODEL_OVERRIDES+=("${2:-}")
                 shift
                 ;;
+            --copilot-scope)
+                COPILOT_SCOPE="${2:-}"
+                shift
+                ;;
             --codex-tier)
                 CODEX_TIER="${2:-}"
                 shift
@@ -107,21 +118,13 @@ parse_args() {
             --codex-deepwiki)
                 CODEX_DEEPWIKI="true"
                 ;;
-            --chrome-devtools-mcp)
-                MCP_CHROME_DEVTOOLS="enable"
-                MCP_CHROME_DEVTOOLS_SET="true"
+            --playwright-cli)
+                PLAYWRIGHT_CLI="true"
+                PLAYWRIGHT_CLI_SET="true"
                 ;;
-            --no-chrome-devtools-mcp)
-                MCP_CHROME_DEVTOOLS="disable"
-                MCP_CHROME_DEVTOOLS_SET="true"
-                ;;
-            --browsermcp)
-                MCP_BROWSERMCP="enable"
-                MCP_BROWSERMCP_SET="true"
-                ;;
-            --no-browsermcp)
-                MCP_BROWSERMCP="disable"
-                MCP_BROWSERMCP_SET="true"
+            --no-playwright-cli)
+                PLAYWRIGHT_CLI="false"
+                PLAYWRIGHT_CLI_SET="true"
                 ;;
             -h|--help) usage ;;
             *) die "Unknown argument: $1" ;;
@@ -146,39 +149,21 @@ prompt_toggle() {
     [[ "$answer" =~ ^[Yy]$ ]]
 }
 
-prompt_tri_state() {
-    local label="$1"
-    local default_choice="$2" # keep|enable|disable
-    local answer
-
-    echo -e "\n${GREEN}${label}${NC}" >&2
-    echo "  [1] keep    (no changes)" >&2
-    echo "  [2] enable" >&2
-    echo "  [3] disable" >&2
-
-    read -rp "  > " answer
-    case "${answer:-}" in
-        2) echo "enable" ;;
-        3) echo "disable" ;;
-        1|"") echo "$default_choice" ;;
-        *) echo "$default_choice" ;;
-    esac
-}
-
-prompt_mcp_toggles() {
+prompt_playwright_cli() {
     [[ "${CI:-}" == "true" ]] && return 0
-    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" ]] || return 0
+    [[ "$PLAYWRIGHT_CLI_SET" == "true" ]] && return 0
+    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" || "$INSTALL_COPILOT" == "true" ]] || return 0
 
-    if [[ "$MCP_CHROME_DEVTOOLS_SET" != "true" ]]; then
-        MCP_CHROME_DEVTOOLS="$(prompt_tri_state "Chrome DevTools MCP" "keep")"
-    fi
-    if [[ "$MCP_BROWSERMCP_SET" != "true" ]]; then
-        MCP_BROWSERMCP="$(prompt_tri_state "Browser MCP" "keep")"
+    echo ""
+    if prompt_toggle "Install Playwright CLI support (browser automation)?" "N"; then
+        PLAYWRIGHT_CLI="true"
+    else
+        PLAYWRIGHT_CLI="false"
     fi
 }
 
 ensure_selection() {
-    if [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" ]]; then
+    if [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" || "$INSTALL_COPILOT" == "true" ]]; then
         return
     fi
 
@@ -186,8 +171,9 @@ ensure_selection() {
     prompt_toggle "Install Claude Code support?" "Y" && INSTALL_CLAUDE="true"
     prompt_toggle "Install OpenCode support?" "Y" && INSTALL_OPENCODE="true"
     prompt_toggle "Install Codex support?" "Y" && INSTALL_CODEX="true"
+    prompt_toggle "Install GitHub Copilot support?" "Y" && INSTALL_COPILOT="true"
 
-    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" ]] || die "No systems selected"
+    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" || "$INSTALL_COPILOT" == "true" ]] || die "No systems selected"
 }
 
 configure_claude_models() {
@@ -257,6 +243,69 @@ validate_codex_tier() {
     esac
 }
 
+validate_copilot_scope() {
+    [[ "$INSTALL_COPILOT" == "true" ]] || return 0
+    case "$COPILOT_SCOPE" in
+        global|project|both) ;;
+        *) die "Unsupported Copilot scope: $COPILOT_SCOPE (expected global, project, or both)" ;;
+    esac
+}
+
+install_playwright_cli() {
+    [[ "$PLAYWRIGHT_CLI" == "true" ]] || return 0
+    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" || "$INSTALL_COPILOT" == "true" ]] || return 0
+
+    echo -e "\n${GREEN}Playwright CLI${NC}"
+    if [[ "${CI:-}" == "true" ]]; then
+        info "CI mode - skipping Playwright CLI install"
+        return 0
+    fi
+
+    if command -v playwright-cli &>/dev/null; then
+        info "playwright-cli already installed"
+    else
+        info "Installing Playwright CLI (preferred: bun/bunx; falls back to pnpm/yarn/npx)"
+        # Prefer global install when possible, but fall back to runner execution if global bin is not on PATH.
+        if command -v bun &>/dev/null; then
+            bun add -g "@playwright/cli@latest" || true
+        elif command -v pnpm &>/dev/null; then
+            pnpm add -g "@playwright/cli@latest" || true
+        elif command -v yarn &>/dev/null; then
+            yarn global add "@playwright/cli@latest" || true
+        elif command -v npm &>/dev/null; then
+            npm install -g "@playwright/cli@latest" || true
+        else
+            ensure_js_runner
+        fi
+    fi
+
+    local should_install_skills="false"
+    if [[ "$OPENCODE_SCOPE" == "project" && "$INSTALL_OPENCODE" == "true" ]]; then
+        should_install_skills="true"
+    fi
+    if [[ "$INSTALL_COPILOT" == "true" && ( "$COPILOT_SCOPE" == "project" || "$COPILOT_SCOPE" == "both" ) ]]; then
+        should_install_skills="true"
+    fi
+
+    if [[ "$should_install_skills" == "true" ]]; then
+        if command -v playwright-cli &>/dev/null; then
+            if playwright-cli install --skills; then
+                info "playwright-cli skills installed into this repo"
+            else
+                warn "playwright-cli skills install failed; try manually: playwright-cli install --skills"
+            fi
+        else
+            if run_js_package "@playwright/cli@latest" "install" "--skills"; then
+                info "playwright-cli skills installed into this repo (via package runner)"
+            else
+                warn "playwright-cli skills install failed; try manually: bunx -y @playwright/cli@latest install --skills"
+            fi
+        fi
+    else
+        info "Skipping playwright-cli skills install (no project-scope install selected)"
+    fi
+}
+
 check_node() {
     command -v node &>/dev/null || die "node not found. Claude and Codex hook scripts require Node.js >= 24.14.1."
     local node_ver
@@ -265,19 +314,165 @@ check_node() {
     info "Node.js $(node --version 2>&1)"
 }
 
+is_windows() {
+    case "$(uname -s 2>/dev/null || echo unknown)" in
+        MINGW*|MSYS*|CYGWIN*) return 0 ;;
+        *) ;;
+    esac
+    command -v powershell &>/dev/null && return 0
+    command -v pwsh &>/dev/null && return 0
+    return 1
+}
+
+ensure_bun() {
+    if command -v bun &>/dev/null; then
+        info "bun $(bun --version 2>/dev/null)"
+        return 0
+    fi
+
+    echo -e "\n${GREEN}bun${NC}"
+    if [[ "${CI:-}" == "true" ]]; then
+        die "bun not found and CI mode is enabled. Install bun first."
+    fi
+
+    warn "bun not found; attempting to install bun (required for OpenCode support and preferred for JS tooling)"
+
+    if is_windows; then
+        if command -v pwsh &>/dev/null; then
+            pwsh -c "irm bun.sh/install.ps1 | iex" || die "bun install failed"
+        else
+            powershell -c "irm bun.sh/install.ps1 | iex" || die "bun install failed"
+        fi
+    else
+        command -v curl &>/dev/null || die "curl not found; cannot install bun automatically"
+        curl -fsSL https://bun.sh/install | bash || die "bun install failed"
+    fi
+
+    local bun_bin="$HOME/.bun/bin"
+    if [[ -d "$bun_bin" ]]; then
+        export PATH="$bun_bin:$PATH"
+    fi
+
+    command -v bun &>/dev/null || die "bun install did not make bun available in PATH. Restart your shell and re-run installer."
+    info "bun $(bun --version 2>/dev/null)"
+    return 0
+}
+
+resolve_js_runner() {
+    if command -v bunx &>/dev/null; then
+        echo "bunx"
+        return 0
+    fi
+    if command -v bun &>/dev/null; then
+        echo "bunx-fallback"
+        return 0
+    fi
+    if command -v pnpm &>/dev/null; then
+        echo "pnpm"
+        return 0
+    fi
+    if command -v yarn &>/dev/null; then
+        echo "yarn"
+        return 0
+    fi
+    if command -v npx &>/dev/null; then
+        echo "npx"
+        return 0
+    fi
+    if command -v npm &>/dev/null; then
+        echo "npm-npx"
+        return 0
+    fi
+    echo "none"
+    return 0
+}
+
+ensure_js_runner() {
+    local runner
+    runner="$(resolve_js_runner)"
+    if [[ "$runner" != "none" ]]; then
+        return 0
+    fi
+    ensure_bun
+    runner="$(resolve_js_runner)"
+    [[ "$runner" != "none" ]] || die "No JS package runner found (bun/pnpm/yarn/npm)."
+}
+
+run_js_package() {
+    local package="$1"
+    shift
+
+    ensure_js_runner
+    local runner
+    runner="$(resolve_js_runner)"
+
+    case "$runner" in
+        bunx)
+            bunx -y "$package" "$@"
+            ;;
+        bunx-fallback)
+            bun x -y "$package" "$@"
+            ;;
+        pnpm)
+            pnpm dlx "$package" "$@"
+            ;;
+        yarn)
+            # Works on Yarn 2+ (Berry). Yarn Classic will fail; we fall back to npx there.
+            if yarn dlx --help >/dev/null 2>&1; then
+                yarn dlx "$package" "$@"
+            elif command -v npx &>/dev/null; then
+                npx -y "$package" "$@"
+            else
+                die "yarn found but yarn dlx is unavailable and npx is missing"
+            fi
+            ;;
+        npx)
+            npx -y "$package" "$@"
+            ;;
+        npm-npx)
+            if command -v npx &>/dev/null; then
+                npx -y "$package" "$@"
+            else
+                die "npm found but npx is missing"
+            fi
+            ;;
+        *)
+            die "No JS package runner found"
+            ;;
+    esac
+}
+
 check_jq() {
     command -v jq &>/dev/null || die "jq is required for Claude settings.json merging. Install with: brew install jq"
     info "jq found"
 }
 
 check_bun() {
-    command -v bun &>/dev/null || die "bun is required for OpenCode installation."
-    info "bun $(bun --version 2>/dev/null)"
+    ensure_bun
 }
 
 check_python3() {
     command -v python3 &>/dev/null || die "python3 is required for Codex installation."
     info "python3 $(python3 --version 2>/dev/null)"
+}
+
+prepare_build_artifacts() {
+    [[ "$INSTALL_CLAUDE" == "true" || "$INSTALL_OPENCODE" == "true" || "$INSTALL_CODEX" == "true" || "$INSTALL_COPILOT" == "true" ]] || return 0
+    [[ -n "${BUILD_DIR:-}" ]] && return 0
+
+    check_node
+
+    BUILD_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t openagentsbtw-build)"
+    node "$REPO_DIR/scripts/build.mjs" --out "$BUILD_DIR"
+
+    CLAUDE_DIR="$BUILD_DIR/claude"
+    CODEX_DIR="$BUILD_DIR/codex"
+    COPILOT_DIR="$BUILD_DIR/copilot"
+    OPENCODE_TEMPLATES_DIR="$BUILD_DIR/opencode/templates"
+    BIN_DIR="$BUILD_DIR/bin"
+
+    trap 'rm -rf "${BUILD_DIR:-}" 2>/dev/null || true' EXIT
+    info "Generated install artifacts -> $BUILD_DIR"
 }
 
 check_claude_version() {
@@ -348,42 +543,24 @@ merge_claude_global_settings() {
     info "Claude plugin settings merged"
 }
 
-configure_claude_mcp_server() {
+cleanup_claude_legacy_mcp_servers() {
     local settings_file="$HOME/.claude/settings.json"
-    local key="$1"
-    local action="$2" # keep|enable|disable
-    local args_json="$3"
-
     [[ -f "$settings_file" ]] || return 0
-    [[ "$action" == "keep" ]] && return 0
+    jq '
+        def is_legacy(command; args):
+            (.command? == command) and ((.args? // []) == args);
+        def drop_if_legacy(key; command; args):
+            if (.mcpServers? | type == "object") and (.mcpServers[key]? | type == "object") and (.mcpServers[key] | is_legacy(command; args)) then
+                .mcpServers |= del(. [key])
+            else
+                .
+            end;
 
-    if [[ "$action" == "enable" ]]; then
-        jq --arg key "$key" --arg cmd "bunx" --argjson args "$args_json" '
-            .mcpServers = (.mcpServers // {}) |
-            .mcpServers[$key] = {command: $cmd, args: $args}
-        ' "$settings_file" > "${settings_file}.tmp" && mv "${settings_file}.tmp" "$settings_file"
-        return 0
-    fi
-
-    jq --arg key "$key" '
-        if (.mcpServers? | type == "object") then
-            .mcpServers |= del(.[$key]) |
-            if ((.mcpServers | length) == 0) then del(.mcpServers) else . end
-        else
-            .
-        end
+        .mcpServers = (.mcpServers // {}) |
+        drop_if_legacy("chrome-devtools"; "bunx"; ["-y","chrome-devtools-mcp@latest"]) |
+        drop_if_legacy("browsermcp"; "bunx"; ["-y","@browsermcp/mcp@latest"]) |
+        if (.mcpServers | length) == 0 then del(.mcpServers) else . end
     ' "$settings_file" > "${settings_file}.tmp" && mv "${settings_file}.tmp" "$settings_file"
-}
-
-configure_claude_mcp_servers() {
-    [[ "$INSTALL_CLAUDE" == "true" ]] || return 0
-
-    configure_claude_mcp_server "chrome-devtools" "$MCP_CHROME_DEVTOOLS" '["-y","chrome-devtools-mcp@latest"]'
-    configure_claude_mcp_server "browsermcp" "$MCP_BROWSERMCP" '["-y","@browsermcp/mcp@latest"]'
-
-    if [[ "$MCP_BROWSERMCP" == "enable" ]]; then
-        info "Browser MCP requires the Chrome extension + a connected tab: https://docs.browsermcp.io/setup-extension"
-    fi
 }
 
 install_claude_user_files() {
@@ -524,20 +701,10 @@ install_ctx7() {
         return
     fi
 
-    if command -v bun &>/dev/null; then
-        if bun x ctx7 setup --claude; then
-            info "ctx7 configured via bun"
-        else
-            warn "ctx7 setup failed - run manually: bunx ctx7 setup --claude"
-        fi
-    elif command -v npx &>/dev/null; then
-        if npx ctx7 setup --claude; then
-            info "ctx7 configured via npx"
-        else
-            warn "ctx7 setup failed - run manually: npx ctx7 setup --claude"
-        fi
+    if run_js_package "ctx7@latest" "setup" "--claude"; then
+        info "ctx7 configured"
     else
-        warn "Neither bun nor npx found - skip ctx7 setup"
+        warn "ctx7 setup failed - run manually: bunx ctx7 setup --claude"
     fi
 }
 
@@ -551,7 +718,7 @@ install_claude() {
     configure_claude_models
     register_claude_marketplace
     merge_claude_global_settings
-    configure_claude_mcp_servers
+    cleanup_claude_legacy_mcp_servers
     install_claude_user_files
     install_claude_plugin
     install_ctx7
@@ -582,123 +749,86 @@ install_opencode() {
         info "OpenCode override: $override"
     done
 
-    if [[ "$MCP_CHROME_DEVTOOLS" == "enable" ]]; then
-        cmd+=(--chrome-devtools-mcp)
-    elif [[ "$MCP_CHROME_DEVTOOLS" == "disable" ]]; then
-        cmd+=(--no-chrome-devtools-mcp)
-    fi
-
-    if [[ "$MCP_BROWSERMCP" == "enable" ]]; then
-        cmd+=(--browsermcp)
-    elif [[ "$MCP_BROWSERMCP" == "disable" ]]; then
-        cmd+=(--no-browsermcp)
-    fi
-
-    "${cmd[@]}"
+    OABTW_OPENCODE_TEMPLATES_DIR="$OPENCODE_TEMPLATES_DIR" "${cmd[@]}"
     info "OpenCode support installed"
 }
 
-configure_codex_mcp_servers() {
-    [[ "$INSTALL_CODEX" == "true" ]] || return 0
-    [[ "$MCP_CHROME_DEVTOOLS" == "keep" && "$MCP_BROWSERMCP" == "keep" ]] && return 0
+install_copilot() {
+    [[ "$INSTALL_COPILOT" == "true" ]] || return 0
 
-    local config_target="$HOME/.codex/config.toml"
-    if [[ "$MCP_CHROME_DEVTOOLS" == "enable" && -f "$config_target" ]]; then
-        if grep -Eq '^[[:space:]]*\[mcp_servers\.chrome-devtools\]' "$config_target" && ! grep -q '# >>> openagentsbtw mcp chrome-devtools >>>' "$config_target"; then
-            warn "Codex config already defines mcp_servers.chrome-devtools; leaving it untouched."
+    echo -e "\n${GREEN}GitHub Copilot${NC}"
+    check_node
+
+    local template_root="$COPILOT_DIR/templates/.github"
+    [[ -d "$template_root" ]] || die "Copilot templates missing at $template_root. Re-run installer; it should generate artifacts via scripts/build.mjs."
+
+    if [[ "$COPILOT_SCOPE" == "global" || "$COPILOT_SCOPE" == "both" ]]; then
+        local copilot_home="$HOME/.copilot"
+        mkdir -p "$copilot_home/agents" "$copilot_home/skills"
+        local legacy_agent
+        for legacy_agent in athena hephaestus nemesis atalanta calliope hermes odysseus; do
+            rm -f "$copilot_home/agents/$legacy_agent.md"
+        done
+        if [[ -d "$template_root/agents" ]]; then
+            rsync -a "$template_root/agents/" "$copilot_home/agents/"
         fi
-    fi
-    if [[ "$MCP_BROWSERMCP" == "enable" && -f "$config_target" ]]; then
-        if grep -Eq '^[[:space:]]*\[mcp_servers\.browsermcp\]' "$config_target" && ! grep -q '# >>> openagentsbtw mcp browsermcp >>>' "$config_target"; then
-            warn "Codex config already defines mcp_servers.browsermcp; leaving it untouched."
+        if [[ -d "$template_root/skills" ]]; then
+            rsync -a "$template_root/skills/" "$copilot_home/skills/"
         fi
+        info "Copilot agents + skills -> ~/.copilot/"
     fi
 
-    MCP_CHROME_DEVTOOLS="$MCP_CHROME_DEVTOOLS" MCP_BROWSERMCP="$MCP_BROWSERMCP" CONFIG_TARGET="$config_target" python3 - <<'PY'
+    if [[ "$COPILOT_SCOPE" == "project" || "$COPILOT_SCOPE" == "both" ]]; then
+        check_python3
+        local gh_root="$PWD/.github"
+        mkdir -p "$gh_root/agents" "$gh_root/skills" "$gh_root/prompts" "$gh_root/hooks" "$gh_root/hooks/scripts"
+
+        local legacy_agent
+        for legacy_agent in athena hephaestus nemesis atalanta calliope hermes odysseus; do
+            rm -f "$gh_root/agents/$legacy_agent.md"
+        done
+        rsync -a "$template_root/agents/" "$gh_root/agents/"
+        rsync -a "$template_root/skills/" "$gh_root/skills/"
+        rsync -a "$template_root/prompts/" "$gh_root/prompts/"
+        cp "$template_root/hooks/openagentsbtw.json" "$gh_root/hooks/openagentsbtw.json"
+        rm -f "$gh_root/hooks/openagesbtw.json"
+
+        rsync -a --delete "$COPILOT_DIR/hooks/scripts/openagentsbtw/" "$gh_root/hooks/scripts/openagentsbtw/"
+        find "$gh_root/hooks/scripts/openagentsbtw" -type f -name '*.mjs' -exec chmod +x {} \;
+
+        COPILOT_TARGET="$gh_root/copilot-instructions.md" COPILOT_TEMPLATE="$template_root/copilot-instructions.md" python3 - <<'PY'
 import os
-import re
 from pathlib import Path
 
-target = Path(os.environ["CONFIG_TARGET"])
+target = Path(os.environ["COPILOT_TARGET"])
+template = Path(os.environ["COPILOT_TEMPLATE"])
 target.parent.mkdir(parents=True, exist_ok=True)
 
-action_chrome = os.environ.get("MCP_CHROME_DEVTOOLS", "keep")
-action_browser = os.environ.get("MCP_BROWSERMCP", "keep")
+start = "<!-- >>> openagentsbtw copilot >>> -->"
+end = "<!-- <<< openagentsbtw copilot <<< -->"
+body = template.read_text().rstrip() + "\n"
+block = f"{start}\n{body}{end}\n"
 
-chrome_start = "# >>> openagentsbtw mcp chrome-devtools >>>"
-chrome_end = "# <<< openagentsbtw mcp chrome-devtools <<<"
-browser_start = "# >>> openagentsbtw mcp browsermcp >>>"
-browser_end = "# <<< openagentsbtw mcp browsermcp <<<"
-
-chrome_body = """[mcp_servers.chrome-devtools]
-command = "bunx"
-args = ["-y", "chrome-devtools-mcp@latest"]
-enabled = true
-"""
-
-browser_body = """[mcp_servers.browsermcp]
-command = "bunx"
-args = ["-y", "@browsermcp/mcp@latest"]
-enabled = true
-"""
-
-def remove_block(text: str, start: str, end: str) -> str:
-    if start in text and end in text:
-        before, _, rest = text.partition(start)
-        _, _, after = rest.partition(end)
-        out = before.rstrip()
-        after = after.lstrip("\n")
-        if out and after:
-            out += "\n\n" + after
-        elif after:
-            out = after
-        return out
-    return text
-
-def append_block(text: str, start: str, end: str, body: str) -> str:
-    block = f"{start}\n{body.rstrip()}\n{end}\n"
+text = target.read_text() if target.exists() else ""
+if start in text and end in text:
+    before, _, rest = text.partition(start)
+    _, _, after = rest.partition(end)
+    text = before.rstrip()
+    if text:
+        text += "\n\n"
+    text += block
+    after = after.lstrip("\n")
+    if after:
+        text += "\n" + after
+else:
     text = text.rstrip()
     if text:
         text += "\n\n"
     text += block
-    return text
-
-def manage(text: str, action: str, start: str, end: str, body: str, header_re: str) -> str:
-    if action == "keep":
-        return text
-    text_without_managed = remove_block(text, start, end)
-    if action == "disable":
-        return text_without_managed
-    if re.search(header_re, text_without_managed, flags=re.M):
-        return text_without_managed
-    return append_block(text_without_managed, start, end, body)
-
-existed = target.exists()
-text = target.read_text() if existed else ""
-text = manage(
-    text,
-    action_chrome,
-    chrome_start,
-    chrome_end,
-    chrome_body,
-    r"^[\s]*\[mcp_servers\.chrome-devtools\][\s]*$",
-)
-text = manage(
-    text,
-    action_browser,
-    browser_start,
-    browser_end,
-    browser_body,
-    r"^[\s]*\[mcp_servers\.browsermcp\][\s]*$",
-)
-
-if not existed and not text.strip():
-    raise SystemExit(0)
 
 target.write_text(text if text.endswith("\n") else text + "\n")
 PY
-    if [[ "$MCP_BROWSERMCP" == "enable" ]]; then
-        info "Browser MCP requires the Chrome extension + a connected tab: https://docs.browsermcp.io/setup-extension"
+        info "Copilot repo assets -> .github/"
     fi
 }
 
@@ -721,10 +851,10 @@ install_codex() {
 
     mkdir -p "$plugin_target" "$codex_home/agents" "$hooks_root/scripts" "$bin_root" "$agents_home/plugins"
 
-    rsync -a --delete "$REPO_DIR/codex/plugin/openagentsbtw/" "$plugin_target/"
+    rsync -a --delete "$CODEX_DIR/plugin/openagentsbtw/" "$plugin_target/"
     info "Codex plugin -> ~/.codex/plugins/openagentsbtw"
 
-    rsync -a --delete "$REPO_DIR/codex/agents/" "$codex_home/agents/"
+    rsync -a --delete "$CODEX_DIR/agents/" "$codex_home/agents/"
     CODEX_AGENTS_DIR="$codex_home/agents" CODEX_TIER="$CODEX_TIER" python3 - <<'PY'
 import os
 import re
@@ -771,12 +901,12 @@ for path in agents_dir.glob("*.toml"):
 PY
     info "Codex custom agents -> ~/.codex/agents/"
 
-    rsync -a --delete "$REPO_DIR/codex/hooks/scripts/" "$hooks_root/scripts/"
+    rsync -a --delete "$CODEX_DIR/hooks/scripts/" "$hooks_root/scripts/"
     find "$hooks_root/scripts" -type f -name '*.mjs' -exec chmod +x {} \;
     info "Codex hook scripts -> ~/.codex/openagentsbtw/hooks/scripts/"
 
-    cp "$REPO_DIR/bin/openagentsbtw-codex" "$bin_root/openagentsbtw-codex"
-    cp "$REPO_DIR/bin/oabtw-codex" "$bin_root/oabtw-codex"
+    cp "$BIN_DIR/openagentsbtw-codex" "$bin_root/openagentsbtw-codex"
+    cp "$BIN_DIR/oabtw-codex" "$bin_root/oabtw-codex"
     chmod +x "$bin_root/openagentsbtw-codex" "$bin_root/oabtw-codex"
     info "Codex wrapper commands -> ~/.codex/openagentsbtw/bin/openagentsbtw-codex and ~/.codex/openagentsbtw/bin/oabtw-codex"
 
@@ -821,7 +951,7 @@ target.write_text(json.dumps(payload, indent=2) + "\n")
 PY
     info "Codex marketplace entry -> ~/.agents/plugins/marketplace.json"
 
-    HOOKS_SOURCE="$REPO_DIR/codex/hooks/hooks.json" HOOKS_TARGET="$hooks_target" python3 - <<'PY'
+    HOOKS_SOURCE="$CODEX_DIR/hooks/hooks.json" HOOKS_TARGET="$hooks_target" python3 - <<'PY'
 import json
 import os
 from pathlib import Path
@@ -861,27 +991,16 @@ target.write_text(json.dumps(current, indent=2) + "\n")
 PY
     info "Codex hooks merged into ~/.codex/hooks.json"
 
-    AGENTS_MD_TARGET="$agents_md_target" python3 - <<'PY'
+    AGENTS_MD_TARGET="$agents_md_target" AGENTS_MD_TEMPLATE="$CODEX_DIR/templates/AGENTS.md" python3 - <<'PY'
 import os
 from pathlib import Path
 
 target = Path(os.environ["AGENTS_MD_TARGET"])
+template = Path(os.environ["AGENTS_MD_TEMPLATE"])
 target.parent.mkdir(parents=True, exist_ok=True)
 start = "<!-- >>> openagentsbtw codex >>> -->"
 end = "<!-- <<< openagentsbtw codex <<< -->"
-body = """## openagentsbtw
-
-- Use the custom agents `athena`, `hephaestus`, `nemesis`, `atalanta`, `calliope`, `hermes`, and `odysseus`.
-- Prefer `athena` before non-trivial multi-file implementation.
-- Prefer `nemesis` for review and `atalanta` for targeted validation before closing substantial changes.
-- Keep Fast mode off for this workflow.
-- Use `gpt-5.2` for high-reasoning main work, `gpt-5.3-codex` for implementation, and `gpt-5.3-codex-spark` for the lightweight mini profile.
-- Use real `AGENTS.md` files in projects instead of symlinked `CLAUDE.md`.
-- Prefer `oabtw-codex triage` or `oabtw-codex deepwiki` before broad repo exploration. Use DeepWiki only for public GitHub repos, then verify local file:line claims in the repo.
-- Start with the answer, decision, or action. Do not restate the prompt or narrate intent.
-- Match detail to the task. No praise, apology, therapist tone, or trailing optional-offer boilerplate.
-- If something is uncertain, say `UNKNOWN` and state what would resolve it.
-"""
+body = template.read_text()
 block = f"{start}\n{body.rstrip()}\n{end}\n"
 text = target.read_text() if target.exists() else ""
 
@@ -969,6 +1088,13 @@ def remove_block(text: str, start: str, end: str) -> str:
 
 existing_text = target.read_text() if target.exists() else ""
 text_without_managed = remove_block(existing_text, start, end)
+
+# Legacy cleanup: remove old installer-managed MCP blocks (these are no longer supported).
+for legacy_start, legacy_end in [
+    ("# >>> openagentsbtw mcp chrome-devtools >>>", "# <<< openagentsbtw mcp chrome-devtools <<<"),
+    ("# >>> openagentsbtw mcp browsermcp >>>", "# <<< openagentsbtw mcp browsermcp <<<"),
+]:
+    text_without_managed = remove_block(text_without_managed, legacy_start, legacy_end)
 
 has_existing_profile = (
     re.search(r"^[\s]*profile[\s]*=", text_without_managed, flags=re.M) is not None
@@ -1123,8 +1249,6 @@ PY
     if [[ "$CODEX_DEEPWIKI" == "true" ]]; then
         info "DeepWiki MCP configured in ~/.codex/config.toml"
     fi
-
-    configure_codex_mcp_servers
 }
 
 validate_claude() {
@@ -1170,11 +1294,28 @@ validate_codex() {
     return $errors
 }
 
+validate_copilot() {
+    [[ "$INSTALL_COPILOT" == "true" ]] || return 0
+
+    local errors=0
+    if [[ "$COPILOT_SCOPE" == "global" || "$COPILOT_SCOPE" == "both" ]]; then
+        [[ -f "$HOME/.copilot/agents/athena.agent.md" ]] && info "Copilot global agents installed" || errors=$((errors + 1))
+        [[ -d "$HOME/.copilot/skills/review" ]] && info "Copilot global skills installed" || errors=$((errors + 1))
+    fi
+    if [[ "$COPILOT_SCOPE" == "project" || "$COPILOT_SCOPE" == "both" ]]; then
+        [[ -f "$PWD/.github/agents/athena.agent.md" ]] && info "Copilot repo agents installed" || errors=$((errors + 1))
+        [[ -f "$PWD/.github/hooks/openagentsbtw.json" ]] && info "Copilot repo hooks installed" || errors=$((errors + 1))
+        [[ -f "$PWD/.github/copilot-instructions.md" ]] && info "Copilot instructions installed" || errors=$((errors + 1))
+    fi
+    return $errors
+}
+
 report_summary() {
     echo -e "\n${GREEN}openagentsbtw install complete${NC}"
     echo ""
     [[ "$INSTALL_CLAUDE" == "true" ]] && echo "  Claude:   openagentsbtw@openagentsbtw (tier ${CLAUDE_TIER})"
     [[ "$INSTALL_OPENCODE" == "true" ]] && echo "  OpenCode: ${OPENCODE_SCOPE} install"
+    [[ "$INSTALL_COPILOT" == "true" ]] && echo "  Copilot:  ${COPILOT_SCOPE} install"
     [[ "$INSTALL_CODEX" == "true" ]] && echo "  Codex:    ~/.codex/plugins/openagentsbtw + ~/.codex/agents (${CODEX_TIER})"
 }
 
@@ -1184,19 +1325,24 @@ main() {
     prompt_opencode_models
     prompt_codex_tier
     validate_codex_tier
+    validate_copilot_scope
     prompt_codex_profile_top
-    prompt_mcp_toggles
+    prompt_playwright_cli
 
     echo -e "${GREEN}openagentsbtw installer${NC}"
+    prepare_build_artifacts
 
     install_claude
     install_opencode
+    install_copilot
+    install_playwright_cli
     install_rtk
     install_codex
 
     local errors=0
     validate_claude || errors=$((errors + $?))
     validate_opencode || errors=$((errors + $?))
+    validate_copilot || errors=$((errors + $?))
     validate_codex || errors=$((errors + $?))
 
     report_summary
