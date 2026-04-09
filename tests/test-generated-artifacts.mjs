@@ -116,6 +116,8 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /model = "gpt-5\.2"/);
 		assert.match(config, /model = "gpt-5\.3-codex"/);
 		assert.match(config, /model = "gpt-5\.3-codex-spark"/);
+		assert.match(config, /model = "gpt-5\.4"/);
+		assert.match(config, /model = "gpt-5\.4-mini"/);
 		assert.match(config, /personality = "none"/);
 		assert.equal(config.includes('personality = "pragmatic"'), false);
 		assert.match(config, /\[profiles\.openagentsbtw-accept-edits\]/);
@@ -134,6 +136,10 @@ describe("generated Codex defaults", () => {
 		assert.match(guidance, /oabtw-codex explore/);
 		assert.match(guidance, /`deepwiki`/);
 		assert.match(guidance, /Default to role routing:/);
+		assert.match(guidance, /Multi-agent safety:/);
+		assert.match(guidance, /Subagents: Codex only spawns subagents when explicitly asked\./);
+		assert.match(guidance, /Prompt contracts:/);
+		assert.match(guidance, /Avoid slop \+ god objects:/);
 		assert.equal(
 			guidance.includes("Keep responses terse and peer-like."),
 			false,
@@ -147,6 +153,12 @@ describe("generated Codex defaults", () => {
 		assert.match(wrapper, /explore\s+Generated openagentsbtw Codex route/);
 		assert.match(wrapper, /trace\s+Generated openagentsbtw Codex route/);
 		assert.match(wrapper, /debug\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /plan-fast\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /implement-fast\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /review-fast\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /swarm\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /CODEX_CONFIG_ARGS\+=\(-c "features\.fast_mode = true"\)/);
+		assert.match(wrapper, /CODEX_CONFIG_ARGS\+=\(-c "service_tier = \\"fast\\""\)/);
 		assert.match(
 			wrapper,
 			/Route planning through athena-style architecture analysis/,

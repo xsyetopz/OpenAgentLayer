@@ -2,6 +2,30 @@
 
 commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"
 
+[agents.athena]
+description = "Architecture and planning agent. Produces decision-complete plans, sequencing, and tradeoff analysis."
+
+[agents.hephaestus]
+description = "Implementation agent. Makes focused code changes and refactors with minimal diffs."
+
+[agents.nemesis]
+description = "Review agent. Audits correctness, regressions, security, and missing tests."
+
+[agents.atalanta]
+description = "Test agent. Runs tests, analyzes failures, and reports evidence-heavy root causes."
+
+[agents.calliope]
+description = "Documentation agent. Updates docs precisely and avoids filler."
+
+[agents.hermes]
+description = "Exploration/tracing agent. Maps repo architecture and follows dependencies end-to-end."
+
+[agents.odysseus]
+description = "Orchestration agent. Coordinates multi-step work and delegates bounded subtasks with disjoint ownership."
+
+agents.max_threads = 6
+agents.max_depth = 1
+
 [profiles.openagentsbtw-plus]
 model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
@@ -10,6 +34,7 @@ model_verbosity = "medium"
 personality = "none"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+service_tier = "flex"
 
 [profiles.openagentsbtw-plus.features]
 codex_hooks = true
@@ -19,14 +44,47 @@ fast_mode = false
 
 [profiles.openagentsbtw-pro]
 model = "gpt-5.2"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+model_verbosity = "medium"
+personality = "none"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+service_tier = "flex"
+
+[profiles.openagentsbtw-pro.features]
+codex_hooks = true
+sqlite = true
+multi_agent = true
+fast_mode = false
+
+[profiles.openagentsbtw-frontier]
+model = "gpt-5.4"
 model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "medium"
 personality = "none"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+service_tier = "flex"
 
-[profiles.openagentsbtw-pro.features]
+[profiles.openagentsbtw-frontier.features]
+codex_hooks = true
+sqlite = true
+multi_agent = true
+fast_mode = false
+
+[profiles.openagentsbtw-frontier-mini]
+model = "gpt-5.4-mini"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "medium"
+model_verbosity = "low"
+personality = "none"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+service_tier = "flex"
+
+[profiles.openagentsbtw-frontier-mini.features]
 codex_hooks = true
 sqlite = true
 multi_agent = true
@@ -40,6 +98,7 @@ model_verbosity = "low"
 personality = "none"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+service_tier = "flex"
 
 [profiles.openagentsbtw-codex-mini.features]
 codex_hooks = true
@@ -49,12 +108,13 @@ fast_mode = false
 
 [profiles.openagentsbtw]
 model = "gpt-5.2"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "medium"
 personality = "none"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+service_tier = "flex"
 
 [profiles.openagentsbtw.features]
 codex_hooks = true

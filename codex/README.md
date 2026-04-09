@@ -26,6 +26,7 @@ Wrapper command after install:
 ~/.codex/openagentsbtw/bin/oabtw-codex deepwiki "map the auth subsystem before editing it"
 ~/.codex/openagentsbtw/bin/oabtw-codex implement "fix the auth race in src/auth.ts"
 ~/.codex/openagentsbtw/bin/oabtw-codex review "audit the current diff for regressions"
+~/.codex/openagentsbtw/bin/oabtw-codex swarm "investigate, implement, test, and review this change"
 ~/.codex/openagentsbtw/bin/oabtw-codex memory show
 ```
 
@@ -78,7 +79,7 @@ The plugin package gives Codex the skills and install surface. Default behavior 
 
 openagentsbtw installs a `UserPromptSubmit` hook that injects lightweight git context plus a compact project-memory hint during active work. Prefix a prompt with `!raw` to opt out for that one turn. Hooks do not “run” skills; reliable role routing comes from `AGENTS.md` guidance and the wrapper commands.
 
-Wrappers still prepend `$openagentsbtw` for mode-specific flows.
+Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plugin via `~/.codex/config.toml`, and hooks inject git/memory context automatically.
 
 ## Model Presets
 

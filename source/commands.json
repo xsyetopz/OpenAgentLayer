@@ -117,12 +117,21 @@
     {
       "mode": "plan",
       "profile": "openagentsbtw",
-      "prompt": "Use openagentsbtw. Route planning through athena-style architecture analysis on the main profile. Treat native /plan as reasoning mode only, not role selection. Lead with the recommendation and keep the plan concrete."
+      "prompt": "Use openagentsbtw. Route planning through athena-style architecture analysis on the main profile. Treat native /plan as reasoning mode only, not role selection. Default to multi-agent routing when it materially improves outcomes (disjoint ownership; avoid parallel edits). Use prompt contracts: explicit step order, explicit ask-vs-proceed rules, and crisp completion criteria. Lead with the recommendation and keep the plan concrete."
+    },
+    {
+      "mode": "plan-fast",
+      "profile": "openagentsbtw",
+      "prompt": "Use openagentsbtw. Route planning through athena-style architecture analysis on the main profile with Fast mode enabled (higher quota burn for speed). Treat native /plan as reasoning mode only, not role selection. Default to multi-agent routing when it materially improves outcomes (disjoint ownership; avoid parallel edits). Use prompt contracts: explicit step order, explicit ask-vs-proceed rules, and crisp completion criteria. Lead with the recommendation and keep the plan concrete.",
+      "configOverrides": [
+        "features.fast_mode = true",
+        "service_tier = \"fast\""
+      ]
     },
     {
       "mode": "accept",
       "profile": "openagentsbtw-accept-edits",
-      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the sandboxed auto-accept profile. This mode keeps workspace-write sandboxing but does not pause for edit approvals. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
+      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the sandboxed auto-accept profile. This mode keeps workspace-write sandboxing but does not pause for edit approvals. Prefer small cohesive diffs; avoid big rewrites and god-object files. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
       "configOverrides": [
         "model = \"gpt-5.3-codex\"",
         "model_reasoning_effort = \"high\""
@@ -131,8 +140,19 @@
     {
       "mode": "implement",
       "profile": "openagentsbtw",
-      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
+      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile. Default to multi-agent routing when it materially improves outcomes (disjoint ownership; avoid parallel edits). Prefer small cohesive diffs; avoid big rewrites and god-object files. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
       "configOverrides": [
+        "model = \"gpt-5.3-codex\"",
+        "model_reasoning_effort = \"high\""
+      ]
+    },
+    {
+      "mode": "implement-fast",
+      "profile": "openagentsbtw",
+      "prompt": "Use openagentsbtw. Route implementation through hephaestus-style execution on the main profile with Fast mode enabled (higher quota burn for speed). Default to multi-agent routing when it materially improves outcomes (disjoint ownership; avoid parallel edits). Prefer small cohesive diffs; avoid big rewrites and god-object files. Complete the requested work, avoid placeholders, avoid unnecessary fallbacks, and keep comments to non-obvious why.",
+      "configOverrides": [
+        "features.fast_mode = true",
+        "service_tier = \"fast\"",
         "model = \"gpt-5.3-codex\"",
         "model_reasoning_effort = \"high\""
       ]
@@ -140,12 +160,26 @@
     {
       "mode": "review",
       "profile": "openagentsbtw",
-      "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests."
+      "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests. Flag slop risk (god objects, muddy boundaries, over-broad diffs) as first-class review issues."
+    },
+    {
+      "mode": "review-fast",
+      "profile": "openagentsbtw",
+      "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile with Fast mode enabled (higher quota burn for speed). Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests. Flag slop risk (god objects, muddy boundaries, over-broad diffs) as first-class review issues.",
+      "configOverrides": [
+        "features.fast_mode = true",
+        "service_tier = \"fast\""
+      ]
+    },
+    {
+      "mode": "swarm",
+      "profile": "openagentsbtw",
+      "prompt": "Use openagentsbtw. Spawn subagents by default for any non-trivial request (unless the user explicitly asks for single-agent work). Assign disjoint ownership (paths/modules) per agent. Suggested split: hermes for repo exploration/tracing, hephaestus for edits, atalanta for tests, nemesis for review, calliope for docs. Wait for all agents and then produce one consolidated answer with a short section per agent plus next actions."
     },
     {
       "mode": "orchestrate",
       "profile": "openagentsbtw",
-      "prompt": "Use openagentsbtw. Route multi-step coordination through odysseus-style orchestration on the main profile. Delegate only bounded work and track step ownership explicitly."
+      "prompt": "Use openagentsbtw. Route multi-step coordination through odysseus-style orchestration on the main profile. Default to multi-agent routing when it materially improves outcomes. Delegate only bounded work, assign disjoint ownership (paths/modules), avoid parallel edits unless scopes are separated, and track step ownership explicitly."
     }
   ]
 }

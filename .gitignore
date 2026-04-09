@@ -63,3 +63,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Local research corpus (do not track)
+docs/reddit-*

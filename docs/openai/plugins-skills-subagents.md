@@ -54,11 +54,13 @@ The Codex memory feature follows that same split. Native Codex SQLite/session pe
 
 openagentsbtw installs a `UserPromptSubmit` hook that injects lightweight git context plus a compact project-memory hint on normal interactive prompts. Prefix a prompt with `!raw` to opt out for that one turn. Hooks do not “run” skills; role routing is driven by `AGENTS.md` guidance and the wrapper commands.
 
-Wrappers still prepend `$openagentsbtw` as a belt-and-suspenders path for mode-specific flows.
+Wrappers do not prepend `$openagentsbtw`. The managed profiles enable the plugin via `~/.codex/config.toml`, and hooks inject git/memory context automatically.
 
 The wrapper also exposes `memory show`, `memory forget-project`, and `memory prune` so users can inspect or clear the openagentsbtw memory layer without touching SQLite directly.
 
 `deepwiki` is intentionally explicit instead of silently changing `triage`. It depends on an opt-in `mcp_servers.deepwiki` config block and is meant for GitHub repo exploration, not as a universal replacement for local repo reads.
+
+Codex only spawns subagents when explicitly asked, so openagentsbtw provides `oabtw-codex swarm "<task>"` as the “always delegate” route for multi-workstream requests.
 
 That wrapper contract is more reliable than implying the plugin can hard-bind native `/plan` or `/review` to a custom agent. Native `/plan` remains useful, but it is documented as a reasoning mode, not as an agent selector.
 

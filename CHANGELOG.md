@@ -2,6 +2,22 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.4] - 2026-04-09
+
+### Fixed
+
+- Codex: wrappers no longer prepend `$openagentsbtw`, avoiding prompt/context concatenation artifacts when hooks inject git/memory context.
+
+### Added
+
+- Codex: `plan-fast`, `implement-fast`, and `review-fast` wrapper modes (Fast mode enabled per-run).
+- Codex: `swarm` wrapper mode (explicit subagent spawning by default).
+- Codex guidance: prompt contracts, reasoning-activation scaffolding, and explicit anti–god-object rules.
+
+### Changed
+
+- Ignore `docs/reddit-*` by default (local research corpuses stay untracked).
+
 ## [1.2.3] - 2026-04-09
 
 ### Fixed
