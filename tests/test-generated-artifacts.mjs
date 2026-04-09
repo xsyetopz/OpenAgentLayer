@@ -138,6 +138,7 @@ describe("generated Codex defaults", () => {
 		assert.match(guidance, /Default to role routing:/);
 		assert.match(guidance, /Multi-agent safety:/);
 		assert.match(guidance, /Subagents: Codex only spawns subagents when explicitly asked\./);
+		assert.match(guidance, /spawn subagents” by default/);
 		assert.match(guidance, /Prompt contracts:/);
 		assert.match(guidance, /Avoid slop \+ god objects:/);
 		assert.equal(

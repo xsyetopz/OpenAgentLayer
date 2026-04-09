@@ -2,7 +2,7 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.2.4] - 2026-04-09
+## [1.2.5] - 2026-04-09
 
 ### Fixed
 
@@ -13,6 +13,7 @@ All notable changes to openagentsbtw are documented here. Format follows [Keep a
 - Codex: `plan-fast`, `implement-fast`, and `review-fast` wrapper modes (Fast mode enabled per-run).
 - Codex: `swarm` wrapper mode (explicit subagent spawning by default).
 - Codex guidance: prompt contracts, reasoning-activation scaffolding, and explicit anti–god-object rules.
+- Codex guidance: swarm-by-default instruction in `AGENTS.md` (Codex only spawns subagents when explicitly asked).
 
 ### Changed
 

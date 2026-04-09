@@ -51,7 +51,7 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 - Default to role routing: explicitly use the custom agents by name when the task clearly benefits (don’t wait for the user to ask). Keep it proportional; skip spawning for trivial edits.
 - Multi-agent safety: when delegating, assign disjoint ownership (paths/modules) so two agents don’t edit the same files. Avoid parallel edits unless the write scopes are clearly separated.
 - Default delegation heuristics: hermes for exploration/tracing, athena for planning, hephaestus for edits, nemesis for review, atalanta for tests, calliope for docs.
-- Subagents: Codex only spawns subagents when explicitly asked. For non-trivial work, explicitly instruct it to “spawn subagents” and assign disjoint ownership.
+- Subagents: Codex only spawns subagents when explicitly asked. For non-trivial work, explicitly instruct it to “spawn subagents” by default (unless the user requests single-agent), assign disjoint ownership, wait for all agents, then merge results into one cohesive output.
 - Prompt contracts: put critical rules first; specify step order; define ambiguity behavior (ask vs proceed); separate “do the action” from “report the action”; specify output packaging (length, section order, follow-up questions) and include one correct example when output format is strict.
 - Reasoning activation: for non-trivial tasks, force structure before the final answer (2–3 options, assumptions, and what evidence would change the conclusion). Prefer permission to be uncertain over pressure to always answer.
 - Avoid slop + god objects: prefer small cohesive modules and targeted diffs. If a file grows into a grab-bag, split it before it calcifies.
