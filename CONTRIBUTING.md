@@ -1,95 +1,168 @@
 # Contributing
 
-This repo is the source of truth for `openagentsbtw` across three targets:
+openagentsbtw generates platform-specific artifacts for four targets from a single canonical source:
 
-- `claude/` for Claude Code
-- `codex/` for Codex
-- `opencode/` for OpenCode
+| Target | Directory | What gets generated |
+|--------|-----------|-------------------|
+| Claude Code | `claude/` | Plugin, hooks, skills, templates, tests |
+| Codex CLI | `codex/` | Plugin, custom agents, hooks, templates |
+| OpenCode | `opencode/` | Framework integration, templates |
+| GitHub Copilot | `copilot/` | VS Code assets, hook scripts |
 
-Most of the repo is generated. The canonical layer lives under `source/`, with generation handled by `scripts/generate.mjs`.
+Canonical source lives in `source/`. Generation is handled by `scripts/generate.mjs`.
 
-## For Humans
+## Prerequisites
 
-### Setup
+- [Node.js](https://nodejs.org/) >= 24.14.1 LTS
+- [Bun](https://bun.sh/)
+- Git
+
+## Setup
 
 ```bash
+git clone https://github.com/xsyetopz/openagentsbtw.git
+cd openagentsbtw
 bun install --frozen-lockfile
 bun run generate
 ```
 
-If you touch `opencode/`, also install its local dependencies:
+If you touch `opencode/`:
 
 ```bash
-cd opencode
-bun install --frozen-lockfile
+cd opencode && bun install --frozen-lockfile
 ```
 
-### Workflow
+## Workflow
 
-1. Edit the canonical source first.
-2. Regenerate artifacts.
-3. Run the relevant checks.
+1. Edit the canonical source.
+2. Regenerate artifacts: `bun run generate`.
+3. Run checks (see [Validation](#validation)).
 4. Review the generated diff before committing.
 
-Canonical sources:
+### Canonical Sources
 
-- `source/agents.json`
-- `source/agent-prompts.mjs`
-- `source/skills.json`
-- `source/skills/*`
-- `source/commands.json`
-- `source/hook-policies.json`
-- `source/project-guidance.mjs`
+| File | Controls |
+|------|----------|
+| `source/agents.json` | Agent definitions (7 agents) |
+| `source/agent-prompts.mjs` | Agent prompt templates |
+| `source/skills.json` | Skill metadata (14 skills) |
+| `source/skills/*/body.md` | Skill content |
+| `source/commands.json` | Command definitions |
+| `source/hook-policies.json` | Hook policies (10 hooks) |
+| `source/project-guidance.mjs` | Shared project guidance |
 
-Generated outputs:
+### Generated Outputs
 
-- `claude/`
-- `codex/`
+Do not hand-edit these unless you are also changing the generator or intentionally patching and then backfilling the source.
+
+- `claude/` (agents, skills, hooks, CLAUDE.md)
+- `codex/` (agents, hooks, config)
 - `opencode/templates/`
+- `copilot/` (agents, skills, prompts, hooks)
 
-### Validation
+## Validation
 
 Root checks:
 
 ```bash
 bun run generate
 bun run check:generated
-bun run test
+bun test tests claude/tests codex/tests
+node scripts/ci/install-smoke.mjs
 ```
 
-OpenCode checks:
+OpenCode checks (if you touched `opencode/`):
 
 ```bash
-cd opencode
-bun run test
-bun run typecheck
+cd opencode && bun test && bun run typecheck
 ```
 
-### Contribution Rules
+CI runs Linux validation for generated outputs, tests, and release packaging. Both Linux and Windows validate native install/config/uninstall entrypoints.
 
-- Do not hand-edit generated files unless you are also changing the generator or intentionally patching generated output and then backfilling the source.
-- Keep platform differences honest. Shared policy should be centralized, but emitted artifacts may differ when the underlying CLIs expose different surfaces.
-- When changing Codex behavior, update the implementation under `codex/` and the supporting notes under `docs/openai/`.
-- When changing OpenCode behavior, update `opencode/` and the supporting notes under `docs/opencode/`.
-- Keep commits scoped and use Conventional Commits.
+## Adding an Agent
+
+1. Add the entry in `source/agents.json` and prompt in `source/agent-prompts.mjs`.
+2. Adjust platform overlays only when a system needs different wording or constraints.
+3. Run `bun run generate`.
+4. Add or update tests if the generated behavior changes.
+5. Update docs if the agent affects public guidance.
+
+## Adding a Skill
+
+1. Add the entry in `source/skills.json`.
+2. Add the body in `source/skills/<name>/body.md`.
+3. Add any references under `source/skills/<name>/reference/`.
+4. Run `bun run generate`.
+
+## Adding a Hook
+
+1. Add or update the policy in `source/hook-policies.json`.
+2. Update the renderer in `scripts/generate.mjs` only if the policy model needs a new surface.
+3. Regenerate and confirm the platform hook manifests changed as expected.
+4. Add tests for the new behavior.
+
+## Commit Messages
+
+[Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat(agents): add pre-planning checklist to athena
+fix(hooks): handle edge case in bash-guard regex
+docs: update README with architecture diagram
+test: add hook unit tests for post-write
+chore(ci): add shellcheck to CI pipeline
+```
+
+Scopes: `agents`, `skills`, `hooks`, `install`, `ci`, `docs`
+
+## Pull Requests
+
+Use the PR template at `.github/PULL_REQUEST_TEMPLATE.md`. It covers:
+
+- Summary (1-3 bullet points)
+- Component checklist (which part of the system)
+- Testing checklist (which checks you ran)
+- Quality checklist (no placeholders, no secrets, artifacts refreshed, docs updated)
+
+## Reporting Issues
+
+Open an issue at [github.com/xsyetopz/openagentsbtw/issues](https://github.com/xsyetopz/openagentsbtw/issues). Include:
+
+- What you did
+- What happened
+- What you expected
+- Platform (Claude/Codex/OpenCode/Copilot) and OS
+
+## Code Style
+
+- **JavaScript**: Node.js ESM (`.mjs`), stdlib-only, no external dependencies beyond devDependencies
+- **Bash**: Pass [shellcheck](https://www.shellcheck.net/)
+- **JSON**: Valid, validated in CI
+- **Markdown**: Clear structure, no filler adjectives, no hype copy
+- **Comments**: Non-obvious "why" only. No narrating comments ("Get the user", "Increment counter").
+- **Naming**: Descriptive nouns for variables, `is_`/`has_`/`can_` for booleans, verb phrases for functions. Avoid: `data`, `result`, `temp`, `info`, `handle`, `process`, `manager`, `helper`, `util`.
+- **Functions**: Max 3 parameters, max 30 lines. One reason to change (SRP).
+
+## Contribution Rules
+
+- Do not hand-edit generated files without also updating the source or generator.
+- Keep platform differences honest. Shared policy is centralized; emitted artifacts may differ when the underlying CLIs expose different surfaces.
+- When changing Codex behavior, update `codex/` and `docs/openai/`.
+- When changing OpenCode behavior, update `opencode/` and `docs/opencode/`.
+- When changing Copilot behavior, update `copilot/` and relevant `.github/` assets.
+- If you change hook behavior, check both the shared policy source and the generated hook mappings.
+- If you change contributor-facing workflow, keep `.github/`, this file, and `AGENTS.md` aligned.
+- Preserve the split architecture. Platform assets stay isolated by directory.
 
 ## For AI Agents
 
-### Operating Model
+See `AGENTS.md` for operating instructions. Key rules:
 
 - Treat `source/` as canonical unless the task is explicitly platform-local.
-- Preserve the split architecture. Claude, Codex, and OpenCode assets stay isolated by directory.
 - Prefer generated fixes over manual drift. If you change generated outputs directly, bring the generator or source back into sync in the same task.
-- Do not copy Claude-specific assumptions into Codex or OpenCode without checking the actual supported surface.
-
-### Practical Rules
-
-- Read local context before changing code.
-- Prefer `rg` for search.
-- Keep comments limited to non-obvious why.
+- Do not copy platform-specific assumptions across targets without checking the actual supported surface.
+- Read local context before changing code. Use `rg` for search.
 - Do not leave placeholders, deferred core work, or fake compatibility notes unless the user explicitly narrows scope.
-- If you change hook behavior, check the shared policy source and the generated hook mapping artifacts together.
-- If you change contributor-facing workflow, keep `.github/`, this file, and `AGENTS.md` aligned.
 
 ### Minimum Close-Out
 
@@ -98,11 +171,3 @@ Before finishing a substantial change:
 1. Regenerate artifacts if source changed.
 2. Run the smallest relevant verification set.
 3. Report what changed, what was verified, and what remains unverified.
-
-## Related Docs
-
-- `README.md`
-- `AGENTS.md`
-- `.github/CONTRIBUTING.md`
-
-Repository: <https://github.com/xsyetopz/openagentsbtw>

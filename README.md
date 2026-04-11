@@ -2,26 +2,41 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Deterministic, multi-platform agents/skills/hooks for:
-- Claude Code
-- Codex CLI
-- OpenCode
-- GitHub Copilot (VS Code)
+7 agents, 14 skills, and 10 safety hooks for Claude Code, Codex CLI, OpenCode, and GitHub Copilot -- generated from a single canonical source.
 
-Everything is generated from `source/` at install/build time so we don’t maintain duplicate agent/skill/hook files per platform.
+Edit once in `source/`. Run the generator. Get deterministic, platform-correct artifacts for all four targets. No duplicate files to maintain.
 
-## Shared Surfaces
+## Prerequisites
 
-openagentsbtw treats these as shared cross-platform surfaces:
+- [Node.js](https://nodejs.org/) >= 24.14.1 LTS
+- [Bun](https://bun.sh/) (build/test toolchain)
+- Git
 
-- `ctx7` CLI for external library/API/setup/config docs lookups
-- RTK enforcement via `rtk rewrite` when RTK policy is active
-- Playwright CLI for browser automation tasks
-- DeepWiki MCP plus explicit DeepWiki-assisted exploration routing
+## Architecture
+
+```
+source/                          Canonical definitions
+  agents.json                    7 agents (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
+  skills.json                    14 skills (review, test, desloppify, explore, ...)
+  hook-policies.json             10 hook policies (pre-bash guard, post-write scan, ...)
+  agent-prompts.mjs              Prompt templates
+  project-guidance.mjs           Shared project guidance
+  skills/*/body.md               Skill content
+       |
+       v
+scripts/generate.mjs             Renders platform-specific artifacts
+       |
+       +---> claude/              Claude Code plugin + hooks + tests
+       +---> codex/               Codex plugin + custom agents + research docs
+       +---> opencode/            OpenCode integration + templates
+       +---> copilot/             Copilot/VS Code assets + hook scripts
+```
+
+Each platform gets a generated hook support map showing what ports cleanly vs what's unsupported.
 
 ## Quickstart
 
-Install one system:
+Install one platform:
 
 ```bash
 ./install.sh --claude
@@ -37,33 +52,37 @@ Install one system:
 ./install.ps1 --copilot
 ```
 
-Install everything (or run with no flags to get prompts):
+Install all (or run with no flags to get interactive prompts):
 
 ```bash
 ./install.sh --all
 ./install.sh
 ```
 
-Optional browser automation (Playwright CLI):
+## Shared Surfaces
 
-```bash
-./install.sh --playwright-cli
-```
+These tools are available across all four platforms when installed:
 
-Optional external-doc tooling (Context7 CLI):
+| Surface | What it does | Install flag |
+|---------|-------------|--------------|
+| **ctx7** | CLI for external library/API doc lookups ([Context7](https://context7.com/)) | `--ctx7-cli` / `--no-ctx7-cli` |
+| **RTK** | Rewrites dangerous shell commands to safer equivalents | `--rtk` / `--skip-rtk` |
+| **Playwright CLI** | Browser automation (screenshots, traces, DOM snapshots) | `--playwright-cli` |
+| **DeepWiki MCP** | Indexed exploration of public GitHub repos | `--deepwiki` / `--no-deepwiki` |
 
-```bash
-./install.sh --ctx7-cli
-./install.sh --no-ctx7-cli
-```
+RTK enforcement activates only when both `rtk` is on PATH and an `RTK.md` policy file exists (repo tree or `~/.config/openagentsbtw/RTK.md`).
 
-Post-install configuration:
+## Post-Install Configuration
+
+Update an existing install without re-running full setup:
 
 ```bash
 ./config.sh --ctx7
 ./config.sh --ctx7-api-key
 ./config.sh --deepwiki
 ./config.sh --rtk
+./config.sh --claude-plan pro-20
+./config.sh --codex-plan plus
 ```
 
 ```powershell
@@ -72,14 +91,14 @@ Post-install configuration:
 ./config.ps1 --rtk
 ```
 
-Update later:
+## Update
 
 ```bash
 git pull
 ./install.sh --claude --codex --opencode --copilot
 ```
 
-Uninstall:
+## Uninstall
 
 ```bash
 ./uninstall.sh --all
@@ -89,47 +108,105 @@ Uninstall:
 ./uninstall.ps1 --all
 ```
 
-## What this repo is
+Per-platform uninstall also works: `./uninstall.sh --claude --codex`.
 
-This repo packages the four platform-specific surfaces:
+## Platform Details
 
-- `claude/`: Claude Code plugin package + tests
-- `codex/`: Codex-native plugin package + Codex research docs in `docs/openai/`
-- `opencode/`: OpenCode framework integration + generator inputs
-- `copilot/`: Copilot/VS Code assets + runtime hook scripts
+### Claude
 
-Shared source-of-truth content lives in `source/`. The installer generates platform artifacts into a temporary build dir (and `bun run generate` can write into `.build/generated/`).
+Installs the `xsyetopz@openagentsbtw` plugin, user-level hooks, and output style under `~/.claude/`.
 
-Installer/generator decomposition (no god script):
+```bash
+./install.sh --claude --claude-plan pro-20
+./install.sh --claude --skip-rtk
+```
 
-- `install.sh` is a thin Bash compatibility wrapper over `scripts/install/cli.mjs`
-- `config.sh` is a thin Bash compatibility wrapper over `scripts/install/config-cli.mjs`
-- `uninstall.sh` is a thin Bash compatibility wrapper over `scripts/install/uninstall-cli.mjs`
-- `build-plugin.sh` is a thin Bash compatibility wrapper over `scripts/build-plugin-cli.mjs`
-- `install.ps1`, `config.ps1`, `uninstall.ps1`, and `build-plugin.ps1` are matching PowerShell wrappers over the same shared Node CLIs
-- `scripts/build.mjs` assembles build output for packaging
-- `scripts/generate.mjs` orchestrates focused render modules under `scripts/generate/`
+### Codex
 
-Each platform also gets a generated “hook support map” so it’s explicit what ports cleanly vs what’s unsupported.
+Installs the plugin into `~/.codex/plugins/openagentsbtw`, custom agents into `~/.codex/agents/`, and merges hooks into `~/.codex/hooks.json`.
+
+```bash
+./install.sh --codex --codex-plan plus
+```
+
+Plan presets: `go`, `plus`, `pro-5`, `pro-20`. See `docs/install.md` for model routing per preset.
+
+Installed helper commands (available on PATH after install):
+
+- `oabtw-codex qa` / `longrun` / `resume --last`
+- `oabtw-codex plan` / `implement` / `review` / `test`
+- `oabtw-codex explore` / `docs` / `trace` / `debug` / `deepwiki`
+- `oabtw-codex-peer batch` / `tmux`
+
+### OpenCode
+
+Writes managed instruction files and merges into `opencode.json`.
+
+```bash
+./install.sh --opencode --opencode-default-model opencode/gpt-5-nano
+```
+
+### Copilot
+
+Writes to `.github/` (project scope) or `~/.copilot/` (global scope): agents, skills, prompts, hooks, and instruction files.
+
+```bash
+./install.sh --copilot
+```
+
+## Installer Decomposition
+
+No god script. Each shell wrapper delegates to a shared Node CLI:
+
+| Wrapper | Delegates to |
+|---------|-------------|
+| `install.sh` / `install.ps1` | `scripts/install/cli.mjs` |
+| `config.sh` / `config.ps1` | `scripts/install/config-cli.mjs` |
+| `uninstall.sh` / `uninstall.ps1` | `scripts/install/uninstall-cli.mjs` |
+| `build-plugin.sh` / `build-plugin.ps1` | `scripts/build-plugin-cli.mjs` |
+
+Generation: `scripts/generate.mjs` orchestrates focused render modules under `scripts/generate/`.
+
+## Generated Output Example
+
+A generated agent definition (from `source/agents.json`):
+
+```json
+{
+  "name": "hephaestus",
+  "claude": {
+    "displayName": "Hephaestus",
+    "description": "Use for code implementation, bug fixes, and refactors once the plan is clear.",
+    "model": "sonnet",
+    "tools": ["Read", "Edit", "MultiEdit", "Write", "Grep", "Glob", "Bash"],
+    "skills": ["cca:review", "cca:test", "cca:style"],
+    "permissionMode": "acceptEdits",
+    "maxTurns": 80
+  },
+  "codex": {
+    "model": "gpt-5.3-codex",
+    "reasoning": "high",
+    "sandboxMode": "workspace-write"
+  }
+}
+```
+
+Same source, different platform artifacts. The generator handles the translation.
 
 ## Docs
 
-- Full installer flags + per-platform details: `docs/install.md`
-- Codex notes (models, hooks, porting): `docs/openai/README.md`
-- OpenCode notes (rules/plugins): `docs/opencode/README.md`
-- “Nano BMAD” method notes: `docs/method/nano-bmad.md`
-
-Codex installs also add PATH-managed `oabtw-codex`, `openagentsbtw-codex`, `oabtw-codex-peer`, and `openagentsbtw-codex-peer` shims, so `oabtw-codex qa`, `oabtw-codex longrun`, `oabtw-codex resume --last`, and `oabtw-codex-peer batch|tmux` are directly invocable after install on correctly configured shells.
-
-RTK enforcement is only active when both of the following are true:
-- `rtk` is installed
-- an `RTK.md` policy file exists in the repo tree (nearest ancestor wins) or at the managed global openagentsbtw config path (`~/.config/openagentsbtw/RTK.md` on Unix, `%APPDATA%\openagentsbtw\RTK.md` on Windows; legacy fallback paths are also checked)
-
-When active, openagentsbtw uses `rtk rewrite` as the source of truth and enforces RTK-prefixed Bash forms for commands RTK can rewrite.
+| Doc | Contents |
+|-----|----------|
+| `docs/install.md` | Full installer flags, per-platform options, RTK details |
+| `docs/openai/README.md` | Codex research: models, hooks, porting decisions |
+| `docs/opencode/README.md` | OpenCode rules and plugin integration |
+| `docs/method/nano-bmad.md` | Nano BMAD workflow (Research > Plan > Execute > Review > Ship) |
+| `CONTRIBUTING.md` | Development setup, workflow, contribution rules |
+| `AGENTS.md` | Agent operating instructions |
+| `SECURITY.md` | Security policy and reporting |
+| `CHANGELOG.md` | Release history |
 
 ## Development
-
-Contributor workflow details live in `CONTRIBUTING.md`.
 
 ```bash
 bun install --frozen-lockfile
@@ -140,14 +217,7 @@ node scripts/ci/install-smoke.mjs
 ./build-plugin.sh
 ```
 
-```powershell
-bun install --frozen-lockfile
-bun run generate
-bun test tests claude/tests codex/tests
-./build-plugin.ps1
-```
-
-Local Claude plugin build output lands in `dist/openagentsbtw-claude-plugin/`. Tag releases also publish a combined generated-assets archive for Codex, Copilot, OpenCode, and shared templates.
+Build output lands in `dist/openagentsbtw-claude-plugin/`. Tag releases publish a combined archive for all platforms.
 
 ## License
 
