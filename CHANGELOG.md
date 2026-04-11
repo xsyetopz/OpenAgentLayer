@@ -2,22 +2,28 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.2.9] - 2026-04-11
+## [1.3.0] - 2026-04-11
 
 ### Added
 
+- Shared: integrated Caveman across Claude, Codex, OpenCode, and Copilot with managed default modes (`off`, `lite`, `full`, `ultra`, `wenyan-lite`, `wenyan`, `wenyan-ultra`).
+- Shared: added Caveman skills across all four platforms: `caveman`, `caveman-help`, `caveman-commit`, `caveman-review`, and `caveman-compress`.
+- Shared: added local `caveman-compress` tooling that preserves code blocks, links, paths, headings, lists, tables, and writes `.original.md` backups.
 - Claude: added route-contract metadata generation plus `SubagentStart` route-context injection for openagentsbtw agents.
 - Claude: added route-aware stop-gate tests covering `edit-required`, `execution-required`, and strict `BLOCKED:` behavior.
 - OpenCode: added native route classification, task-tool subagent tracking, compaction context injection, and final-response completion gating through documented plugin hooks.
 
 ### Changed
 
+- Shared: installer/config now manage `OABTW_CAVEMAN_MODE`, and new sessions seed platform-local Caveman state from that shared default.
+- Claude/Codex/Copilot: session hooks now apply Caveman response shaping without rewriting code, docs, commit messages, or review findings.
+- Claude: statusline now shows the active Caveman mode when enabled.
 - Claude: default continuity now stays native via persisted hook context, transcript resume, and memory; `/cca:handoff` is explicit export-only.
 - Claude: `Stop` and `SubagentStop` now reject explanation-only completions, docs-only churn on implementation routes, and prototype/demo scaffolding.
 - OpenCode: native `plan`, `explore`, and `general` agents now remain enabled by default; openagentsbtw roles are additive and continuity is native-first via `--continue`, `/sessions`, `/compact`, and `task_id`.
-- OpenCode: runtime dependency alignment moved `@opencode-ai/plugin` onto the upstream `1.4.3` line while keeping the openagentsbtw OpenCode package on the shared `1.2.9` framework release.
+- OpenCode: runtime dependency alignment moved `@opencode-ai/plugin` onto the upstream `1.4.3` line while keeping the openagentsbtw OpenCode package on the shared `1.3.0` framework release.
 - Shared guardrails: tightened affect-discipline rules so user frustration cannot downgrade effort or push agents into tutorial/prototype fallbacks.
-- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `1.2.9`.
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `1.3.0`.
 
 ## [1.2.8] - 2026-04-09
 

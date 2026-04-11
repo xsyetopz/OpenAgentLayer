@@ -4,6 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
+import {
+	DEFAULT_CAVEMAN_MODE,
+	resolveCavemanMode,
+} from "../../source/caveman.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 export const ROOT = path.resolve(path.dirname(__filename), "..", "..");
@@ -224,6 +228,11 @@ export async function writeConfigEnv(values) {
 	}
 	if (next.OABTW_COPILOT_PLAN) {
 		lines.push(`OABTW_COPILOT_PLAN=${next.OABTW_COPILOT_PLAN}`);
+	}
+	const cavemanMode =
+		resolveCavemanMode(next.OABTW_CAVEMAN_MODE || "") || DEFAULT_CAVEMAN_MODE;
+	if (cavemanMode) {
+		lines.push(`OABTW_CAVEMAN_MODE=${cavemanMode}`);
 	}
 	await writeText(PATHS.configEnvFile, `${lines.join("\n")}\n`);
 }

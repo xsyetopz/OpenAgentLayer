@@ -1,6 +1,6 @@
 # openagentsbtw Claude
 
-7 agents, 14 skills, 10 hooks, custom output style + statusline. Targets CC v2.1.76+.
+7 agents, 19 skills, 10 hooks, custom output style + statusline. Targets CC v2.1.76+.
 
 ## Agents
 
@@ -117,7 +117,7 @@ make validate  # lint + test + build
 .claude-plugin/  plugin.json (marketplace manifest)
 .github/         workflows/ (ci.yml, release.yml), ISSUE_TEMPLATE/, CONTRIBUTING.md
 agents/          7 agent definitions (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
-skills/          14 skill directories (review, explore, trace, debug, ship, test, etc.)
+skills/          19 skill directories (review, explore, trace, debug, caveman, ship, test, etc.)
 hooks/           configs/ (base.json)
                  user/ (pre-secrets.mjs, rtk-rewrite.sh)
                  scripts/ (_lib.mjs, pre/, post/, session/)

@@ -1,6 +1,10 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import {
+	DEFAULT_CAVEMAN_MODE,
+	resolveCavemanMode,
+} from "../../source/caveman.mjs";
+import {
 	DEFAULT_CLAUDE_PLAN,
 	DEFAULT_CODEX_PLAN,
 	DEFAULT_COPILOT_PLAN,
@@ -80,6 +84,8 @@ Usage: ./config.sh [options]
   --claude-plan PLAN     Set Claude plan: plus|max5|max20
   --codex-plan PLAN      Set Codex plan: go|plus|pro-5|pro-20
   --copilot-plan PLAN    Set Copilot plan: pro|pro-plus
+  --caveman-mode MODE   Set Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
+  --no-caveman          Alias for --caveman-mode off
   --rtk                  Install RTK if needed and write the managed global RTK.md
   --no-rtk               Remove the managed global RTK.md
   --yes                  Accept default prompts without asking
@@ -456,6 +462,8 @@ function parseArgs(argv) {
 		claudePlanIndex: argv.indexOf("--claude-plan"),
 		codexPlanIndex: argv.indexOf("--codex-plan"),
 		copilotPlanIndex: argv.indexOf("--copilot-plan"),
+		cavemanModeIndex: argv.indexOf("--caveman-mode"),
+		noCaveman: argv.includes("--no-caveman"),
 		argv,
 	};
 }
@@ -477,6 +485,9 @@ async function main() {
 	let copilotPlan =
 		resolveCopilotPlan(existingEnv.OABTW_COPILOT_PLAN || "") ||
 		DEFAULT_COPILOT_PLAN;
+	let cavemanMode =
+		resolveCavemanMode(existingEnv.OABTW_CAVEMAN_MODE || "") ||
+		DEFAULT_CAVEMAN_MODE;
 
 	if (args.ctx7ApiKeyIndex !== -1) {
 		const explicit = args.argv[args.ctx7ApiKeyIndex + 1];
@@ -519,12 +530,25 @@ async function main() {
 		await applyOpenCodeCopilotPlan(copilotPlan);
 		logInfo(`Stored Copilot plan ${copilotPlan} for future installs`);
 	}
+	if (args.cavemanModeIndex !== -1 || args.noCaveman) {
+		const rawValue = args.noCaveman
+			? "off"
+			: (args.argv[args.cavemanModeIndex + 1] ?? "");
+		cavemanMode = resolveCavemanMode(rawValue);
+		if (!cavemanMode) {
+			throw new Error(
+				`Unsupported Caveman mode: ${rawValue} (expected off, lite, full, ultra, wenyan-lite, wenyan, or wenyan-ultra)`,
+			);
+		}
+		logInfo(`Stored Caveman mode ${cavemanMode} for future sessions`);
+	}
 
 	await writeConfigEnv({
 		CONTEXT7_API_KEY: context7ApiKey,
 		OABTW_CLAUDE_PLAN: claudePlan,
 		OABTW_CODEX_PLAN: codexPlan,
 		OABTW_COPILOT_PLAN: copilotPlan,
+		OABTW_CAVEMAN_MODE: cavemanMode,
 	});
 	logInfo(`Updated ${PATHS.configEnvFile}`);
 
@@ -558,7 +582,9 @@ async function main() {
 		args.ctx7ApiKeyIndex === -1 &&
 		args.claudePlanIndex === -1 &&
 		args.codexPlanIndex === -1 &&
-		args.copilotPlanIndex === -1
+		args.copilotPlanIndex === -1 &&
+		args.cavemanModeIndex === -1 &&
+		!args.noCaveman
 	) {
 		usage();
 		return;

@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { passthrough, readStdin } from "../_lib.mjs";
 import { loadProjectMemory, renderMemoryContext } from "../_memory.mjs";
+import { renderCavemanContext, seedSessionMode } from "./_caveman.mjs";
 
 const TARGETS = [
 	["AGENTS.md", 120],
@@ -115,7 +116,10 @@ function commandExists(command) {
 	}
 
 	const memory = await loadProjectMemory(cwd);
-	const additionalContext = renderMemoryContext(memory, true);
+	const cavemanContext = renderCavemanContext(seedSessionMode());
+	const additionalContext = [renderMemoryContext(memory, true), cavemanContext]
+		.filter(Boolean)
+		.join("\n\n");
 	if (!warnings.length && !additionalContext) passthrough();
 
 	process.stdout.write(

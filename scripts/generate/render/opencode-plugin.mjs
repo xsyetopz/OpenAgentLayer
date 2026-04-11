@@ -134,6 +134,16 @@ const TEST_PATH_PATTERNS = [
   /(^|\\/).*\\.(test|spec)\\.[^/]+$/i,
 ];
 const RTK_HOME_PATHS = [".config/openagentsbtw/RTK.md", ".codex/RTK.md", ".claude/RTK.md"];
+const DEFAULT_CAVEMAN_MODE = "full";
+const VALID_CAVEMAN_MODES = new Set([
+  "off",
+  "lite",
+  "full",
+  "ultra",
+  "wenyan-lite",
+  "wenyan",
+  "wenyan-ultra",
+]);
 
 function routeContract(routeKind) {
   switch (routeKind) {
@@ -190,9 +200,54 @@ function getSessionState(sessionID) {
     agent: undefined,
     command: undefined,
     taskIDs: [],
+    cavemanMode: undefined,
   };
   SESSION_STATE.set(sessionID, state);
   return state;
+}
+
+function readConfigEnvValue(key) {
+  const home = process.env.HOME || "";
+  const configHome = process.env.XDG_CONFIG_HOME || join(home, ".config");
+  const configPath = join(configHome, "openagentsbtw", "config.env");
+  if (!existsSync(configPath)) return "";
+  const lines = readFileSync(configPath, "utf8").split("\\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const [name, ...valueParts] = trimmed.split("=");
+    if (name === key) return valueParts.join("=");
+  }
+  return "";
+}
+
+function normalizeCavemanMode(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "";
+  if (VALID_CAVEMAN_MODES.has(normalized)) return normalized;
+  if (normalized === "wenyan-full") return "wenyan";
+  if (normalized === "normal") return "off";
+  return "";
+}
+
+function defaultCavemanMode() {
+  return normalizeCavemanMode(readConfigEnvValue("OABTW_CAVEMAN_MODE")) || DEFAULT_CAVEMAN_MODE;
+}
+
+function resolvePromptCavemanMode(prompt, fallback) {
+  const text = String(prompt || "").trim().toLowerCase();
+  if (!text) return fallback;
+  if (/\\b(stop caveman|normal mode)\\b/i.test(text)) return "off";
+  const explicit = text.match(
+    /(?:^|\\s)(?:\\/)?caveman(?:\\s+mode)?(?:\\s+|:)?(off|lite|full|ultra|wenyan-lite|wenyan|wenyan-full|wenyan-ultra)?\\b/i,
+  );
+  if (explicit) {
+    return normalizeCavemanMode(explicit[1] || "") || fallback;
+  }
+  if (/\\b(caveman mode|use caveman|talk like caveman|less tokens|be brief)\\b/i.test(text)) {
+    return fallback === "off" ? DEFAULT_CAVEMAN_MODE : fallback;
+  }
+  return fallback;
 }
 
 function mergeContract(state, route, next) {
@@ -452,6 +507,10 @@ function routeFromAgent(agent) {
 const openAgentsPlugin = async () => ({
   "chat.message": async (input, output) => {
     const state = getSessionState(input.sessionID);
+    if (!state.cavemanMode) {
+      state.cavemanMode = defaultCavemanMode();
+    }
+    state.cavemanMode = resolvePromptCavemanMode(input.message?.content || "", state.cavemanMode);
     if (input.agent) {
       state.agent = input.agent;
       mergeContract(state, input.agent, routeFromAgent(input.agent));
@@ -536,6 +595,11 @@ const openAgentsPlugin = async () => ({
     output.context.push(
       "Preserve objective execution state. Keep the user goal, active route contract, concrete edits/tests/commands performed, blockers, remaining next actions, and relevant files. Drop emotional framing, tutorial filler, placeholders, and speculative TODO plans."
     );
+    if (state.cavemanMode && state.cavemanMode !== "off") {
+      output.context.push(
+        \`Active Caveman mode: \${state.cavemanMode}. Compress assistant prose only. Keep code, commands, docs, review findings, and commit messages normal unless an explicit Caveman skill was requested.\`,
+      );
+    }
     if (state.route && state.contract) {
       output.context.push(
         \`Active route: \${state.route} (contract: \${state.contract.routeKind})\`,

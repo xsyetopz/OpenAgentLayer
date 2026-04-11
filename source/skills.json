@@ -182,6 +182,76 @@
     "codexLead": ""
   },
   {
+    "name": "caveman",
+    "description": "Ultra-terse response mode that compresses assistant prose while preserving technical substance. Supports off, lite, full, ultra, wenyan-lite, wenyan, and wenyan-ultra. Use when the user wants fewer tokens, shorter answers, or Caveman mode.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode",
+      "copilot"
+    ],
+    "claudeContract": "readonly",
+    "copilotContract": "readonly",
+    "codexLead": ""
+  },
+  {
+    "name": "caveman-help",
+    "description": "Explain Caveman modes, boundaries, and escape hatches without changing code or repo state.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode",
+      "copilot"
+    ],
+    "claudeContract": "readonly",
+    "copilotContract": "readonly",
+    "codexLead": ""
+  },
+  {
+    "name": "caveman-commit",
+    "description": "Draft terse commit messages in Caveman style without changing git state.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode",
+      "copilot"
+    ],
+    "claudeContract": "readonly",
+    "copilotContract": "readonly",
+    "codexLead": ""
+  },
+  {
+    "name": "caveman-review",
+    "description": "Produce one-line or ultra-terse code review verdicts when the user explicitly asks for Caveman review output.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode",
+      "copilot"
+    ],
+    "claudeContract": "readonly",
+    "copilotContract": "readonly",
+    "codexLead": ""
+  },
+  {
+    "name": "caveman-compress",
+    "description": "Compress prose-first memory/docs files into Caveman style, preserving code, links, and structure while saving a .original.md backup.",
+    "userInvocable": true,
+    "platforms": [
+      "claude",
+      "codex",
+      "opencode",
+      "copilot"
+    ],
+    "claudeContract": "edit-required",
+    "copilotContract": "edit-required",
+    "codexLead": ""
+  },
+  {
     "name": "test",
     "description": "Test design patterns, strategies, and coverage guidance for writing effective tests. Triggers: write tests, test patterns, testing strategy, test coverage, unit test, integration test, mock, fixture, test architecture, TDD, test-driven.",
     "userInvocable": true,

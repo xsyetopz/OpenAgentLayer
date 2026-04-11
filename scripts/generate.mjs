@@ -159,6 +159,12 @@ async function generateSkills(skills) {
 			skill.name,
 			"reference",
 		);
+		const sourceScriptsDir = path.join(
+			SOURCE_DIR,
+			"skills",
+			skill.name,
+			"scripts",
+		);
 		const claudeBody = renderSkillBody(body, "claude");
 		const claudeContent =
 			renderFrontmatter([
@@ -219,6 +225,18 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			if (
+				await fs
+					.stat(sourceScriptsDir)
+					.then((stat) => stat.isDirectory())
+					.catch(() => false)
+			) {
+				await fs.cp(
+					sourceScriptsDir,
+					path.join(OUTPUT_ROOT, claudeSkillDir, "scripts"),
+					{ recursive: true },
+				);
+			}
 		}
 		if (skill.platforms.includes("codex")) {
 			const codexSkillDir = path.join(
@@ -258,6 +276,18 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			if (
+				await fs
+					.stat(sourceScriptsDir)
+					.then((stat) => stat.isDirectory())
+					.catch(() => false)
+			) {
+				await fs.cp(
+					sourceScriptsDir,
+					path.join(OUTPUT_ROOT, codexSkillDir, "scripts"),
+					{ recursive: true },
+				);
+			}
 		}
 		if (skill.platforms.includes("opencode")) {
 			const opencodeSkillDir = path.join(
@@ -279,6 +309,18 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			if (
+				await fs
+					.stat(sourceScriptsDir)
+					.then((stat) => stat.isDirectory())
+					.catch(() => false)
+			) {
+				await fs.cp(
+					sourceScriptsDir,
+					path.join(OUTPUT_ROOT, opencodeSkillDir, "scripts"),
+					{ recursive: true },
+				);
+			}
 		}
 		if (skill.platforms.includes("copilot")) {
 			for (const root of [
@@ -295,6 +337,18 @@ async function generateSkills(skills) {
 					await fs.cp(
 						sourceReferenceDir,
 						path.join(OUTPUT_ROOT, root, "reference"),
+						{ recursive: true },
+					);
+				}
+				if (
+					await fs
+						.stat(sourceScriptsDir)
+						.then((stat) => stat.isDirectory())
+						.catch(() => false)
+				) {
+					await fs.cp(
+						sourceScriptsDir,
+						path.join(OUTPUT_ROOT, root, "scripts"),
 						{ recursive: true },
 					);
 				}

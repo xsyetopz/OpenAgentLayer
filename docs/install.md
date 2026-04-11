@@ -23,6 +23,7 @@ PowerShell: `./install.ps1` accepts the same flags.
 ./install.sh --claude-plan <plus|max5|max20>
 ./install.sh --codex-plan <go|plus|pro-5|pro-20>
 ./install.sh --copilot-plan <pro|pro-plus>
+./install.sh --caveman-mode <off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra>
 ./install.sh --opencode-default-model <MODEL_ID>
 ./install.sh --opencode-model <ROLE>=<MODEL_ID>
 ```
@@ -233,6 +234,7 @@ Update without re-running full setup:
 ./config.sh --claude-plan max20
 ./config.sh --codex-plan plus
 ./config.sh --copilot-plan pro-plus
+./config.sh --caveman-mode off
 ./config.sh --ctx7 / --no-ctx7
 ./config.sh --ctx7-api-key
 ./config.sh --deepwiki / --no-deepwiki

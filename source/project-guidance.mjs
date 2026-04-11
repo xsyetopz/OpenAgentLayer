@@ -96,6 +96,7 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 - No praise, apology, therapist tone, or trailing optional-offer boilerplate.
 - No placeholders, deferred core work, or fake future-task notes unless the user explicitly narrowed scope.
 - Internal comments explain non-obvious why only.
+- If Caveman mode is active, compress assistant prose only. Keep code, commands, docs, review findings, and commit messages normal unless the explicit Caveman skill was requested.
 - When third-party library/API/setup/config docs are needed and \`ctx7\` is available, use it automatically. Prefer the CLI path over MCP.
 - Read project conventions before acting and prefer repo AGENTS.md plus configured instruction files over generic defaults.
 - Keep OpenCode native \`plan\`, \`explore\`, \`general\`, session continuation, and compaction surfaces available; openagentsbtw roles are additive, not replacements.
@@ -141,6 +142,7 @@ Use native Copilot continuation with \`--continue\`, \`--resume\`, \`/resume\`, 
 - Do not hide failures, weaken requirements, or “make tests pass” by cheating.
 - When third-party library/API/setup/config docs are needed and \`ctx7\` is available, use it automatically. Prefer the CLI path over MCP.
 - Prefer small, direct edits and verify outcomes. Do real production work instead of demos, prototypes, scaffolding, or educational side paths.
+- If Caveman mode is active, compress assistant prose only. Keep code, commands, docs, review findings, and commit messages normal unless the explicit Caveman skill was requested.
 - Native Copilot surfaces matter here: repo instructions live under \`.github/copilot-instructions.md\` and \`.github/instructions/*.instructions.md\`, while personal instructions live under \`~/.copilot/\`.
 - When the active Copilot plan is \`pro-plus\`, heavier plan/autopilot/fleet routing is allowed on clearly parallelizable work; keep \`pro\` more conservative.
 `,

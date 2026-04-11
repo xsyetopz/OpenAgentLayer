@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, it } from "node:test";
@@ -61,6 +61,27 @@ describe("Claude route context hooks", () => {
 		assert.match(
 			output.hookSpecificOutput.additionalContext,
 			/OPENAGENTSBTW_CONTRACT=readonly/,
+		);
+	});
+
+	it("injects Caveman mode from managed config", () => {
+		const home = mkdtempSync(join(tmpdir(), "cca-caveman-home-"));
+		tempDirs.push(home);
+		mkdirSync(join(home, ".config", "openagentsbtw"), { recursive: true });
+		writeFileSync(
+			join(home, ".config", "openagentsbtw", "config.env"),
+			"OABTW_CAVEMAN_MODE=ultra\n",
+			"utf8",
+		);
+		const result = runHook(
+			"session/prompt-git-context.mjs",
+			{ prompt: "/cca:review inspect the change" },
+			{ HOME: home, XDG_CONFIG_HOME: join(home, ".config") },
+		);
+		const output = parseHookOutput(result);
+		assert.match(
+			output.hookSpecificOutput.additionalContext,
+			/OPENAGENTSBTW_CAVEMAN_MODE=ultra/,
 		);
 	});
 

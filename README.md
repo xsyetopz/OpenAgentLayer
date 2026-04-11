@@ -78,6 +78,7 @@ Install with your plan:
 ./install.sh --claude --claude-plan max5
 ./install.sh --codex --codex-plan plus
 ./install.sh --copilot --copilot-plan pro
+./install.sh --all --caveman-mode full
 ./install.sh --opencode
 ```
 
@@ -103,6 +104,7 @@ No need to reinstall. Use `config.sh`:
 ./config.sh --claude-plan max20
 ./config.sh --codex-plan pro-5
 ./config.sh --copilot-plan pro-plus
+./config.sh --caveman-mode off
 ```
 
 ## Shared Surfaces
@@ -117,6 +119,7 @@ Optional tools available across all four platforms:
 | **DeepWiki MCP**   | Indexed exploration of public GitHub repos                                   | `--deepwiki`           |
 
 Configure these post-install with `./config.sh --ctx7`, `./config.sh --deepwiki`, etc.
+Managed Caveman defaults are shared through `./config.sh --caveman-mode <off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra>`.
 
 ## Update / Uninstall
 

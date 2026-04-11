@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import "../suppress-stderr.mjs";
 import { auditLog, hiddenContext, passthrough, readStdin } from "../_lib.mjs";
+import { renderCavemanContext, updateSessionMode } from "./_caveman.mjs";
 import {
 	buildRouteContext,
 	getGitContext,
@@ -20,10 +21,11 @@ import {
 
 		const gitCtx = getGitContext();
 		const contract = resolveSkillRoute(prompt);
-		const routeContext = buildRouteContext(
-			contract,
-			gitCtx ? [`Git context:\n${gitCtx}`] : [],
-		);
+		const cavemanContext = renderCavemanContext(updateSessionMode(prompt));
+		const routeContext = buildRouteContext(contract, [
+			...(gitCtx ? [`Git context:\n${gitCtx}`] : []),
+			...(cavemanContext ? [cavemanContext] : []),
+		]);
 		if (routeContext) {
 			hiddenContext(routeContext, "UserPromptSubmit");
 		} else {

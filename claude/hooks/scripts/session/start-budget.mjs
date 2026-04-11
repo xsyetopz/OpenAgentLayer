@@ -3,6 +3,7 @@ import "../suppress-stderr.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { passthrough, readStdin, warn } from "../_lib.mjs";
+import { seedSessionMode } from "./_caveman.mjs";
 
 const TARGETS = [
 	["CLAUDE.md", 150],
@@ -71,6 +72,7 @@ function checkPermissionsDeny(projectDir) {
 		if (!data || Object.keys(data).length === 0) process.exit(0);
 
 		const projectDir = data.cwd ?? process.cwd();
+		seedSessionMode();
 		const warnings = collectLineBudgetWarnings(projectDir);
 
 		const denyWarning = checkPermissionsDeny(projectDir);

@@ -73,6 +73,17 @@ describe("public entrypoints", () => {
 		assert.match(readRepo("build-plugin.sh"), /scripts\/build-plugin-cli\.mjs/);
 	});
 
+	it("exposes Caveman config flags through install and config entrypoints", () => {
+		const installer = readRepo("scripts/install/cli.mjs");
+		const configCli = readRepo("scripts/install/config-cli.mjs");
+		const shared = readRepo("scripts/install/shared.mjs");
+		assert.match(installer, /--caveman-mode MODE/);
+		assert.match(installer, /--no-caveman/);
+		assert.match(configCli, /--caveman-mode MODE/);
+		assert.match(configCli, /--no-caveman/);
+		assert.match(shared, /OABTW_CAVEMAN_MODE/);
+	});
+
 	it("uses caller workspace targets for project-scoped install paths", () => {
 		const installer = readRepo("scripts/install/cli.mjs");
 		const uninstaller = readRepo("scripts/install/uninstall-cli.mjs");

@@ -5,6 +5,7 @@ import {
 	readStdin,
 	resolveCwd,
 } from "../_lib.mjs";
+import { renderCavemanContext, updateSessionMode } from "./_caveman.mjs";
 import {
 	buildRouteContext,
 	getGitContext,
@@ -17,10 +18,11 @@ import {
 	const prompt = String(data.prompt ?? "").trim();
 	const gitContext = getGitContext(cwd);
 	const contract = resolveSkillRoute(prompt);
-	const routeContext = buildRouteContext(
-		contract,
-		gitContext ? [`Git context:\n${gitContext}`] : [],
-	);
+	const cavemanContext = renderCavemanContext(updateSessionMode(prompt));
+	const routeContext = buildRouteContext(contract, [
+		...(gitContext ? [`Git context:\n${gitContext}`] : []),
+		...(cavemanContext ? [cavemanContext] : []),
+	]);
 	if (!routeContext) passthrough();
 	additionalContext(routeContext);
 })();

@@ -17,6 +17,7 @@ This package ports openagentsbtw onto Codex’s native extension surfaces: custo
 ./install.sh --codex --codex-plan plus
 ./install.sh --codex --codex-plan pro-5
 ./install.sh --codex --codex-plan pro-20
+./install.sh --codex --caveman-mode full
 ./install.sh --deepwiki-mcp
 ./install.sh --playwright-cli
 ```
@@ -93,6 +94,8 @@ Important:
 The plugin package gives Codex the skills and install surface. Default behavior comes from `AGENTS.md`, the managed profiles, enabled hooks, and the `openagentsbtw-codex` wrapper.
 
 openagentsbtw installs a `UserPromptSubmit` hook that injects lightweight git context plus a compact project-memory hint during active work. Prefix a prompt with `!raw` to opt out for that one turn. Hooks do not “run” skills; reliable role routing comes from `AGENTS.md` guidance and the wrapper commands.
+
+If managed Caveman mode is enabled, Codex also gets terse response shaping through the session hooks. That compression applies to assistant prose only; code, commands, docs, review findings, and commit messages stay normal unless the explicit Caveman skill is invoked. Change the shared default with `./config.sh --caveman-mode <mode>`, or disable future sessions with `./config.sh --caveman-mode off`.
 
 Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plugin via `~/.codex/config.toml`, and hooks inject git/memory context automatically.
 

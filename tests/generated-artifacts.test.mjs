@@ -104,6 +104,30 @@ describe("generated skills", () => {
 			assert.match(readBuild(relativePath), /# /);
 		}
 	});
+
+	it("ships the Caveman skills and local compressor across all platforms", () => {
+		for (const relativePath of [
+			"claude/skills/caveman/SKILL.md",
+			"claude/skills/caveman-compress/SKILL.md",
+			"claude/skills/caveman-compress/scripts/compress.mjs",
+			"codex/plugin/openagentsbtw/skills/caveman/SKILL.md",
+			"codex/plugin/openagentsbtw/skills/caveman-compress/SKILL.md",
+			"codex/plugin/openagentsbtw/skills/caveman-compress/scripts/compress.mjs",
+			"opencode/templates/skills/caveman/SKILL.md",
+			"opencode/templates/skills/caveman-compress/SKILL.md",
+			"opencode/templates/skills/caveman-compress/scripts/compress.mjs",
+			"copilot/templates/.github/skills/caveman/SKILL.md",
+			"copilot/templates/.github/skills/caveman-compress/SKILL.md",
+			"copilot/templates/.github/skills/caveman-compress/scripts/compress.mjs",
+		]) {
+			const content = readBuild(relativePath);
+			if (relativePath.endsWith("compress.mjs")) {
+				assert.match(content, /(compressText|ALLOWED_EXTENSIONS|original\.md)/);
+				continue;
+			}
+			assert.match(content, /(Caveman|assistant prose|original\.md)/);
+		}
+	});
 });
 
 describe("generated Codex defaults", () => {

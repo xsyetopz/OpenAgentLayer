@@ -2,6 +2,7 @@
 import { spawnSync } from "node:child_process";
 import { passthrough, readStdin } from "../_lib.mjs";
 import { loadProjectMemory, renderMemoryContext } from "../_memory.mjs";
+import { renderCavemanContext, updateSessionMode } from "./_caveman.mjs";
 
 function runGit(args) {
 	try {
@@ -27,6 +28,7 @@ function runGit(args) {
 	const recent = runGit(["log", "--oneline", "-5", "--no-decorate"]);
 	const diffStat = runGit(["diff", "--stat", "--no-color", "HEAD"]);
 	const memory = data?.cwd ? await loadProjectMemory(data.cwd) : null;
+	const cavemanContext = renderCavemanContext(updateSessionMode(prompt));
 	const parts = [];
 
 	if (branch) parts.push(`Branch: ${branch}`);
@@ -34,6 +36,7 @@ function runGit(args) {
 	if (diffStat) parts.push(`Uncommitted changes:\n${diffStat}`);
 	const memoryContext = memory ? renderMemoryContext(memory, false) : "";
 	if (memoryContext) parts.push(memoryContext);
+	if (cavemanContext) parts.push(cavemanContext);
 
 	if (!parts.length) passthrough();
 

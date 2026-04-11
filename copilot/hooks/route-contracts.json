@@ -104,11 +104,59 @@
       "allowTestsOnly": true,
       "rejectPrototypeScaffolding": false
     },
+    "caveman": {
+      "route": "caveman",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "caveman-help": {
+      "route": "caveman-help",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "caveman-commit": {
+      "route": "caveman-commit",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "caveman-review": {
+      "route": "caveman-review",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "caveman-compress": {
+      "route": "caveman-compress",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
     "test": {
       "route": "test",
       "routeKind": "execution-required",
       "allowBlocked": true,
       "allowDocsOnly": false,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "onboard": {
+      "route": "onboard",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
       "allowTestsOnly": true,
       "rejectPrototypeScaffolding": false
     },

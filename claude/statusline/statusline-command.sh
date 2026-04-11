@@ -26,6 +26,15 @@ fi
 
 COST_FMT=$(printf '$%.2f' "$COST")
 
+CAVEMAN_FILE="${HOME}/.claude/.openagentsbtw-caveman-mode"
+CAVEMAN_INFO=""
+if [ -f "$CAVEMAN_FILE" ]; then
+    CAVEMAN_MODE=$(tr -d '\r\n' < "$CAVEMAN_FILE")
+    if [ -n "$CAVEMAN_MODE" ] && [ "$CAVEMAN_MODE" != "off" ]; then
+        CAVEMAN_INFO=" | ${DIM}CAVEMAN:${CAVEMAN_MODE}${RESET}"
+    fi
+fi
+
 GIT_INFO=""
 if git rev-parse --git-dir > /dev/null 2>&1; then
     BRANCH=$(git branch --show-current 2>/dev/null)
@@ -36,4 +45,4 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     [ "$MODIFIED" -gt 0 ] && GIT_INFO="${GIT_INFO} ${YELLOW}~${MODIFIED}${RESET}"
 fi
 
-echo -e "[${MODEL}] | ${COLOR}${BAR}${RESET} ${PCT}% | ${DIM}${COST_FMT}${RESET}${GIT_INFO}"
+echo -e "[${MODEL}] | ${COLOR}${BAR}${RESET} ${PCT}% | ${DIM}${COST_FMT}${RESET}${GIT_INFO}${CAVEMAN_INFO}"

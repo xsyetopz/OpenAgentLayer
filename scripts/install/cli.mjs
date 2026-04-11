@@ -3,6 +3,10 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import {
+	DEFAULT_CAVEMAN_MODE,
+	resolveCavemanMode,
+} from "../../source/caveman.mjs";
+import {
 	getClaudePlan,
 	resolveClaudePlan,
 	resolveCodexPlan,
@@ -139,6 +143,8 @@ Options:
                           Copilot install target (default: global)
   --copilot-plan pro|pro-plus
                           Copilot capability preset (default: pro)
+  --caveman-mode MODE     Set managed Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
+  --no-caveman            Alias for --caveman-mode off
   --codex-plan go|plus|pro-5|pro-20
                           Codex capability preset (default: pro-5)
   --codex-tier plus|pro   Legacy alias for --codex-plan
@@ -169,6 +175,8 @@ function parseArgs(argv) {
 		copilotScope: "global",
 		copilotPlan: "pro",
 		copilotPlanSet: false,
+		cavemanMode: "",
+		cavemanModeSet: false,
 		codexPlan: "",
 		codexPlanSet: false,
 		deepwikiMcp: false,
@@ -228,6 +236,14 @@ function parseArgs(argv) {
 			case "--copilot-plan":
 				args.copilotPlan = argv[++index] ?? "";
 				args.copilotPlanSet = true;
+				break;
+			case "--caveman-mode":
+				args.cavemanMode = argv[++index] ?? "";
+				args.cavemanModeSet = true;
+				break;
+			case "--no-caveman":
+				args.cavemanMode = "off";
+				args.cavemanModeSet = true;
 				break;
 			case "--codex-tier":
 				args.codexPlan = resolveCodexPlan(argv[++index] ?? "");
@@ -381,6 +397,28 @@ async function promptOptionalSurfaces(args, existingEnv) {
 			) || "pro";
 	}
 	if (
+		!args.cavemanModeSet &&
+		(args.installClaude ||
+			args.installOpenCode ||
+			args.installCodex ||
+			args.installCopilot)
+	) {
+		args.cavemanMode = isCi()
+			? resolveCavemanMode(existingEnv.OABTW_CAVEMAN_MODE || "") ||
+				DEFAULT_CAVEMAN_MODE
+			: resolveCavemanMode(
+					(await promptText(
+						"Caveman mode [off/lite/full/ultra/wenyan-lite/wenyan/wenyan-ultra]:",
+						false,
+						args.cavemanMode ||
+							existingEnv.OABTW_CAVEMAN_MODE ||
+							DEFAULT_CAVEMAN_MODE,
+					)) || DEFAULT_CAVEMAN_MODE,
+				) ||
+				resolveCavemanMode(existingEnv.OABTW_CAVEMAN_MODE || "") ||
+				DEFAULT_CAVEMAN_MODE;
+	}
+	if (
 		!args.ctx7CliSet &&
 		(args.installClaude ||
 			args.installOpenCode ||
@@ -444,6 +482,26 @@ function validateArgs(args) {
 	if (!args.copilotPlan) {
 		fail(
 			`Unsupported Copilot plan: ${args.copilotPlan} (expected pro or pro-plus)`,
+		);
+	}
+	args.cavemanMode = resolveCavemanMode(
+		args.cavemanMode ||
+			(args.installClaude ||
+			args.installOpenCode ||
+			args.installCodex ||
+			args.installCopilot
+				? DEFAULT_CAVEMAN_MODE
+				: ""),
+	);
+	if (
+		(args.installClaude ||
+			args.installOpenCode ||
+			args.installCodex ||
+			args.installCopilot) &&
+		!args.cavemanMode
+	) {
+		fail(
+			`Unsupported Caveman mode: ${args.cavemanMode} (expected off, lite, full, ultra, wenyan-lite, wenyan, or wenyan-ultra)`,
 		);
 	}
 	if (!["global", "project", "both"].includes(args.copilotScope)) {
@@ -1320,6 +1378,7 @@ async function main() {
 		OABTW_CLAUDE_PLAN: args.claudePlan,
 		OABTW_CODEX_PLAN: args.codexPlan || "pro-5",
 		OABTW_COPILOT_PLAN: args.copilotPlan,
+		OABTW_CAVEMAN_MODE: args.cavemanMode || DEFAULT_CAVEMAN_MODE,
 	});
 	console.log("\x1b[0;32mopenagentsbtw installer\x1b[0m");
 	const artifacts = await buildArtifacts();
