@@ -23,6 +23,7 @@ import {
 	PATHS,
 	pathExists,
 	promptText,
+	ROOT,
 	run,
 	writeConfigEnv,
 	writeText,
@@ -387,16 +388,17 @@ async function applyOpenCodeCopilotPlan(planName) {
 		logInfo("Skipping OpenCode Copilot plan update (bun not installed)");
 		return;
 	}
-	const repoRoot = process.cwd();
-	const projectInstall = `${repoRoot}/.opencode`;
+	const workspaceRoot = process.cwd();
+	const projectInstall = `${workspaceRoot}/.opencode`;
 	const globalInstall = PATHS.opencodeConfigDir;
+	const opencodeCli = path.join(ROOT, "opencode", "src", "cli.ts");
 
 	if (await pathExists(projectInstall)) {
 		await run(
 			"bun",
 			[
 				"run",
-				"opencode/src/cli.ts",
+				opencodeCli,
 				"--scope",
 				"project",
 				"--provider",
@@ -405,7 +407,7 @@ async function applyOpenCodeCopilotPlan(planName) {
 				"inject-preamble,openagentsbtw-core,conventions,safety-guard",
 			],
 			{
-				cwd: repoRoot,
+				cwd: workspaceRoot,
 				env: {
 					...process.env,
 					OABTW_COPILOT_PLAN: planName,
@@ -420,7 +422,7 @@ async function applyOpenCodeCopilotPlan(planName) {
 			"bun",
 			[
 				"run",
-				"opencode/src/cli.ts",
+				opencodeCli,
 				"--scope",
 				"global",
 				"--provider",
@@ -429,7 +431,7 @@ async function applyOpenCodeCopilotPlan(planName) {
 				"inject-preamble,openagentsbtw-core,conventions,safety-guard",
 			],
 			{
-				cwd: repoRoot,
+				cwd: workspaceRoot,
 				env: {
 					...process.env,
 					OABTW_COPILOT_PLAN: planName,

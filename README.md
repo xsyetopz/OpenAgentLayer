@@ -134,19 +134,20 @@ Contributor workflow details live in `CONTRIBUTING.md`.
 ```bash
 bun install --frozen-lockfile
 bun run generate
-bun run test
-cd opencode && bun install --frozen-lockfile && bun run test && bun run typecheck
+bun test tests claude/tests codex/tests
+cd opencode && bun install --frozen-lockfile && bun test && bun run typecheck
+node scripts/ci/install-smoke.mjs
 ./build-plugin.sh
 ```
 
 ```powershell
 bun install --frozen-lockfile
 bun run generate
-bun run test
+bun test tests claude/tests codex/tests
 ./build-plugin.ps1
 ```
 
-Build output for the Claude plugin lands in `dist/openagentsbtw-claude-plugin/`.
+Local Claude plugin build output lands in `dist/openagentsbtw-claude-plugin/`. Tag releases also publish a combined generated-assets archive for Codex, Copilot, OpenCode, and shared templates.
 
 ## License
 

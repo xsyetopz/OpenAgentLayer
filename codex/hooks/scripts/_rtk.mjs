@@ -46,6 +46,7 @@ export function findRtkMd(cwd = process.cwd()) {
 export function hasRtkBinary() {
 	try {
 		const result = spawnSync("rtk", ["--version"], {
+			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
 		});
@@ -63,6 +64,7 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 	try {
 		const result = spawnSync("rtk", ["rewrite", command], {
 			cwd,
+			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
 		});

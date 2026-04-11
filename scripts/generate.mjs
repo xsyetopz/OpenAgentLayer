@@ -589,12 +589,7 @@ fi
 			return `if [ -f "package.json" ] && grep -q '"test"' package.json; then
   echo ${q(rule.label)}
   if command -v bun >/dev/null 2>&1; then
-    if ! bun test 2>/dev/null && ! npm test; then
-      echo ${q(rule.message)}
-      exit 1
-    fi
-  elif command -v npm >/dev/null 2>&1; then
-    if ! npm test; then
+    if ! bun test 2>/dev/null; then
       echo ${q(rule.message)}
       exit 1
     fi

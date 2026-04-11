@@ -14,7 +14,6 @@ const TEST_RUNNER_BASH: AgentPermission["bash"] = {
 	"npm test*": "allow",
 	"npm run test*": "allow",
 	"bun test*": "allow",
-	"bun run test*": "allow",
 	"pnpm test*": "allow",
 	"yarn test*": "allow",
 	"pytest*": "allow",

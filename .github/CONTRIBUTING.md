@@ -7,8 +7,9 @@ git clone https://github.com/xsyetopz/openagentsbtw.git
 cd openagentsbtw
 bun install --frozen-lockfile
 bun run generate
-bun run test
-cd opencode && bun install --frozen-lockfile && bun run test && bun run typecheck
+bun test tests claude/tests codex/tests
+cd opencode && bun install --frozen-lockfile && bun test && bun run typecheck
+node scripts/ci/install-smoke.mjs
 ./build-plugin.sh
 ```
 
@@ -17,7 +18,7 @@ cd opencode && bun install --frozen-lockfile && bun run test && bun run typechec
 1. Fork and clone the repo
 2. Create a feature branch: `git checkout -b feat/my-feature`
 3. Make changes
-4. Run `bun run generate`, `bun run check:generated`, `bun run test`, and the OpenCode validation commands if you touched `opencode/`
+4. Run `bun run generate`, `bun run check:generated`, `bun test tests claude/tests codex/tests`, `node scripts/ci/install-smoke.mjs`, and `cd opencode && bun test && bun run typecheck` if you touched `opencode/`
 5. Commit with conventional format: `feat(agents): add new constraint to athena`
 6. Open a PR
 
@@ -39,7 +40,7 @@ Scopes: `agents`, `skills`, `hooks`, `install`, `ci`, `docs`
 
 1. Update the canonical source in `source/agents.json` and `source/agent-prompts.mjs`
 2. Adjust platform overlays only when a system needs different wording or constraints
-3. Run `bun run generate` to emit Claude, Codex, and OpenCode artifacts
+3. Run `bun run generate` to emit Claude, Codex, OpenCode, and Copilot artifacts
 4. Add or update tests if the generated behavior changes
 5. Update docs if the new agent affects public guidance
 
@@ -63,3 +64,4 @@ Scopes: `agents`, `skills`, `hooks`, `install`, `ci`, `docs`
 - **Bash**: shellcheck
 - **JSON**: valid JSON (validated in CI)
 - **Markdown**: clear structure, no filler adjectives
+- **CI reality**: Linux validates generated outputs, tests, OpenCode, and release packaging; Linux and Windows both validate native install/config/uninstall entrypoints

@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import {
-	chmodSync,
 	mkdirSync,
 	mkdtempSync,
 	rmSync,
@@ -9,6 +8,10 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
+import {
+	prependBinToPath,
+	writeExecutableSync,
+} from "../../tests/support/fake-command.mjs";
 
 import {
 	matchPlaceholders,
@@ -60,9 +63,8 @@ function withFakeRtk(options = {}) {
 	mkdirSync(repoDir, { recursive: true });
 	mkdirSync(join(homeDir, ".config", "openagentsbtw"), { recursive: true });
 
-	writeFileSync(
-		join(binDir, "rtk"),
-		`#!/bin/sh
+	writeExecutableSync(binDir, "rtk", {
+		unix: `#!/bin/sh
 set -eu
 if [ "$1" = "--version" ]; then
   printf '%s\\n' 'rtk 0.23.0'
@@ -76,8 +78,8 @@ if [ "$1" = "rewrite" ]; then
 fi
 exit 1
 `,
-	);
-	chmodSync(join(binDir, "rtk"), 0o755);
+		windows: `@echo off\r\nif "%1"=="--version" (\r\necho rtk 0.23.0\r\nexit /b 0\r\n)\r\nif "%1"=="rewrite" (\r\nshift\r\nif /I "%*"=="cargo test" (\r\n  echo rtk cargo test\r\n  exit /b 0\r\n)\r\nexit /b 1\r\n)\r\nexit /b 1\r\n`,
+	});
 
 	if (options.repoRtk !== false) {
 		writeFileSync(join(repoDir, "RTK.md"), "# RTK\nAlways use rtk.\n");
@@ -105,7 +107,7 @@ describe("codex RTK helper", () => {
 		const originalHome = process.env.HOME;
 		const originalPath = process.env.PATH;
 		process.env.HOME = fixture.homeDir;
-		process.env.PATH = `${fixture.binDir}:${originalPath || ""}`;
+		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
 		try {
 			const rewrite = getRtkRewrite("cargo test", fixture.repoDir);
 			assert.deepEqual(rewrite, {
@@ -124,7 +126,7 @@ describe("codex RTK helper", () => {
 		const originalHome = process.env.HOME;
 		const originalPath = process.env.PATH;
 		process.env.HOME = fixture.homeDir;
-		process.env.PATH = `${fixture.binDir}:${originalPath || ""}`;
+		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
 		try {
 			const rewrite = getRtkRewrite("cargo test", fixture.repoDir);
 			assert.deepEqual(rewrite, {

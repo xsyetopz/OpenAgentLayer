@@ -35,6 +35,8 @@ try {
 	}
 }
 
+const schemaIt = Ajv ? it : it.skip;
+
 function captureExit(fn, ...args) {
 	let captured = "";
 	const origWrite = process.stdout.write.bind(process.stdout);
@@ -80,7 +82,7 @@ describe("PostWarn", () => {
 		);
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(postWarn, "test");
@@ -95,7 +97,7 @@ describe("GenericWarn", () => {
 		assert.equal(output.hookSpecificOutput.additionalContext, "warning text");
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(genericWarn, "test");
@@ -111,7 +113,7 @@ describe("GenericBlock", () => {
 		assert.equal(output.hookSpecificOutput.permissionDecisionReason, "blocked");
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(genericBlock, "test");
@@ -128,7 +130,7 @@ describe("Deny", () => {
 		assert.equal(hso.permissionDecisionReason, "reason");
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(deny, "reason");
@@ -142,7 +144,7 @@ describe("Warn", () => {
 		assert.equal(output.hookSpecificOutput.hookEventName, "PostToolUse");
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(warn, "msg");
@@ -167,7 +169,7 @@ describe("HiddenContext", () => {
 		assert.equal(output.hookSpecificOutput.hookEventName, "SubagentStart");
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(
@@ -195,7 +197,7 @@ describe("Allow", () => {
 		assert.deepEqual(hso.updatedInput, { command: "rtk cargo test" });
 	});
 
-	it("should validate against schema", { skip: !Ajv }, () => {
+	schemaIt("should validate against schema", () => {
 		const ajv = new Ajv();
 		const validate = ajv.compile(loadSchema());
 		const output = captureExit(allow, "allowed", "PreToolUse", {

@@ -13,6 +13,12 @@ import {
 	renderClaudeSettingsTemplate,
 } from "./claude-settings.mjs";
 import {
+	CODEX_WRAPPER_NAMES,
+	renderCodexWrapperCmd,
+	renderCodexWrapperPs1,
+	renderCodexWrapperShim,
+} from "./codex-wrapper-shims.mjs";
+import {
 	mergeCodexConfig,
 	mergeCodexHooks,
 	mergeTaggedMarkdown,
@@ -77,46 +83,9 @@ function renderCtx7Cmd() {
 	].join("\r\n");
 }
 
-function renderCodexWrapperShim(name) {
-	const target = path.join(PATHS.codexWrapperBinDir, name);
-	return `#!/bin/bash
-set -euo pipefail
-exec "${target}" "$@"
-`;
-}
-
-function renderCodexWrapperPs1(name) {
-	const target = path
-		.join(PATHS.codexWrapperBinDir, name)
-		.replaceAll("\\", "\\\\");
-	return [
-		"Set-StrictMode -Version Latest",
-		"$ErrorActionPreference = 'Stop'",
-		"$bash = Get-Command bash -ErrorAction SilentlyContinue",
-		"if (-not $bash) {",
-		"  Write-Error 'bash is required for openagentsbtw Codex wrapper shims on Windows.'",
-		"}",
-		`& $bash.Source "${target}" @args`,
-		"exit $LASTEXITCODE",
-	].join("\n");
-}
-
-function renderCodexWrapperCmd(name) {
-	return [
-		"@echo off",
-		`powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0${name}.ps1" %*`,
-	].join("\r\n");
-}
-
 async function installCodexWrapperShims() {
-	const wrappers = [
-		"openagentsbtw-codex",
-		"oabtw-codex",
-		"openagentsbtw-codex-peer",
-		"oabtw-codex-peer",
-	];
 	if (process.platform === "win32") {
-		for (const name of wrappers) {
+		for (const name of CODEX_WRAPPER_NAMES) {
 			await writeText(
 				path.join(PATHS.managedBinDir, `${name}.ps1`),
 				renderCodexWrapperPs1(name),
@@ -133,7 +102,7 @@ async function installCodexWrapperShims() {
 		);
 		return;
 	}
-	for (const name of wrappers) {
+	for (const name of CODEX_WRAPPER_NAMES) {
 		await writeText(
 			path.join(PATHS.managedBinDir, name),
 			renderCodexWrapperShim(name),

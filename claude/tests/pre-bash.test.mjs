@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import {
-	chmodSync,
 	mkdirSync,
 	mkdtempSync,
 	rmSync,
@@ -10,6 +9,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { parseHookOutput, runHook } from "./helpers.mjs";
+import {
+	prependBinToPath,
+	writeExecutableSync,
+} from "../../tests/support/fake-command.mjs";
 
 function makeBashInput(command) {
 	return { tool_name: "Bash", tool_input: { command } };
@@ -27,10 +30,15 @@ function withFakeRtk(options = {}) {
 				`    ${JSON.stringify(command)}) printf '%s\\n' ${JSON.stringify(rewritten)} ;;`,
 		)
 		.join("\n");
+	const windowsRewriteCases = Object.entries(rewriteMap)
+		.map(
+			([command, rewritten]) =>
+				`if /I "%all%"=="${command}" (\r\n  echo ${rewritten}\r\n  exit /b 0\r\n)`,
+		)
+		.join("\r\n");
 
-	writeFileSync(
-		join(binDir, "rtk"),
-		`#!/bin/sh
+	writeExecutableSync(binDir, "rtk", {
+		unix: `#!/bin/sh
 set -eu
 if [ "$1" = "--version" ]; then
   printf '%s\\n' 'rtk 0.23.0'
@@ -46,8 +54,8 @@ ${rewriteCases}
 fi
 exit 1
 `,
-	);
-	chmodSync(join(binDir, "rtk"), 0o755);
+		windows: `@echo off\r\nif "%1"=="--version" (\r\necho rtk 0.23.0\r\nexit /b 0\r\n)\r\nif "%1"=="rewrite" (\r\nshift\r\nset "all=%*"\r\n${windowsRewriteCases}\r\nexit /b 1\r\n)\r\nexit /b 1\r\n`,
+	});
 
 	const repoDir = join(tempRoot, "repo");
 	mkdirSync(repoDir, { recursive: true });
@@ -70,7 +78,7 @@ exit 1
 		},
 		env: {
 			HOME: homeDir,
-			PATH: `${binDir}:${process.env.PATH || ""}`,
+			PATH: prependBinToPath(binDir, process.env.PATH || ""),
 		},
 		repoDir,
 	};

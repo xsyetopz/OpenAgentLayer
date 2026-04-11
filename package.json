@@ -9,7 +9,7 @@
     "generate": "node scripts/build.mjs --out .build/generated",
     "generate:repo": "node scripts/generate.mjs",
     "check:generated": "node scripts/check-generated.mjs",
-    "test": "node --test tests/test-*.mjs claude/tests/test-*.mjs codex/tests/test-*.mjs"
+    "test": "bun test tests claude/tests codex/tests"
   },
   "devDependencies": {
     "ajv": "^8.18.0"

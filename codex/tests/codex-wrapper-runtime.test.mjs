@@ -6,6 +6,10 @@ import path from "node:path";
 import { describe, it } from "node:test";
 
 import { renderCodexWrapper } from "../../scripts/generate/render/codex-wrapper.mjs";
+import {
+	prependBinToPath,
+	writeExecutableSync,
+} from "../../tests/support/fake-command.mjs";
 
 function run(command, args, { cwd, env = {} } = {}) {
 	return new Promise((resolve, reject) => {
@@ -30,7 +34,9 @@ function run(command, args, { cwd, env = {} } = {}) {
 }
 
 describe("generated codex wrapper", () => {
-	it("runs modes with and without config args under nounset", async () => {
+	const testFn = process.platform === "win32" ? it.skip : it;
+
+	testFn("runs modes with and without config args under nounset", async () => {
 		const tmp = await mkdtemp(path.join(os.tmpdir(), "oabtw-codex-wrapper-"));
 		try {
 			const binDir = path.join(tmp, "bin");
@@ -57,17 +63,16 @@ describe("generated codex wrapper", () => {
 			);
 			await chmod(wrapperPath, 0o755);
 
-			const codexStub = path.join(binDir, "codex");
-			await writeFile(
-				codexStub,
-				`#!/bin/bash
+			const codexStub = writeExecutableSync(binDir, "codex", {
+				unix: `#!/bin/bash
 set -euo pipefail
 printf '%s\\n' "$@"
 `,
-			);
+				windows: "@echo off\r\n",
+			});
 			await chmod(codexStub, 0o755);
 
-			const env = { PATH: `${binDir}:${process.env.PATH ?? ""}` };
+			const env = { PATH: prependBinToPath(binDir, process.env.PATH ?? "") };
 
 			const orchestrate = await run(wrapperPath, ["orchestrate", "fix stars"], {
 				env,

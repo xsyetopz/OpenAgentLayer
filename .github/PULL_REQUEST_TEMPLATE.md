@@ -19,8 +19,8 @@
 <!-- How did you verify this works? -->
 - [ ] `bun run generate` passes
 - [ ] `bun run check:generated` passes
-- [ ] `bun run test` passes
-- [ ] `cd opencode && bun run test && bun run typecheck` passes
+- [ ] `bun test tests claude/tests codex/tests` passes
+- [ ] `cd opencode && bun test && bun run typecheck` passes
 - [ ] Tested install with `CI=true ./install.sh`
 - [ ] Tested in a live CLI session
 

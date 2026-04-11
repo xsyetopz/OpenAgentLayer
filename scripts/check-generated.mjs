@@ -16,7 +16,7 @@ function run(command, args, options = {}) {
 async function main() {
 	const outDir = ".build/check-generated";
 	await run("node", ["scripts/build.mjs", "--out", outDir]);
-	await run("node", ["--test", "tests/test-generated-artifacts.mjs"], {
+	await run("bun", ["test", "tests/generated-artifacts.test.mjs"], {
 		env: {
 			...process.env,
 			OABTW_TEST_BUILD_ROOT: outDir,
