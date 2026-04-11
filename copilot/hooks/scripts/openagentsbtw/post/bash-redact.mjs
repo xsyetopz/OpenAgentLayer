@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { loadSecrets } from "../_env-loader.mjs";
 import {
+	additionalContext,
 	PII_PATTERNS,
 	passthrough,
 	readStdin,
 	resolveCwd,
 	SECRET_PATTERNS,
-	systemMessage,
 } from "../_lib.mjs";
 
 function categorize(text) {
@@ -57,7 +57,7 @@ function categorize(text) {
 		parts.push(categories.join(", "));
 	}
 
-	systemMessage(
+	additionalContext(
 		`[openagentsbtw:redact] Sensitive command output detected (${parts.join("; ")}). Do not repeat secret values. Use [REDACTED] and refer to env vars by name only.`,
 	);
 })();

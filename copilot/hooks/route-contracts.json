@@ -1,0 +1,182 @@
+{
+  "skills": {
+    "decide": {
+      "route": "decide",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "desloppify": {
+      "route": "desloppify",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "docs": {
+      "route": "docs",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "errors": {
+      "route": "errors",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "debug": {
+      "route": "debug",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "explore": {
+      "route": "explore",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "handoff": {
+      "route": "handoff",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "openagentsbtw": {
+      "route": "openagentsbtw",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "perf": {
+      "route": "perf",
+      "routeKind": "execution-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "review": {
+      "route": "review",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "security": {
+      "route": "security",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "ship": {
+      "route": "ship",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "style": {
+      "route": "style",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "test": {
+      "route": "test",
+      "routeKind": "execution-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "trace": {
+      "route": "trace",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    }
+  },
+  "agents": {
+    "athena": {
+      "route": "athena",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "hephaestus": {
+      "route": "hephaestus",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "nemesis": {
+      "route": "nemesis",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "atalanta": {
+      "route": "atalanta",
+      "routeKind": "execution-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "calliope": {
+      "route": "calliope",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "hermes": {
+      "route": "hermes",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
+    "odysseus": {
+      "route": "odysseus",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    }
+  }
+}

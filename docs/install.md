@@ -192,6 +192,23 @@ git pull
 
 Re-running `install.sh` is the supported way to pick up additions/removals in generated assets.
 
+## Copilot notes
+
+Copilot installs now split along native harness lines:
+
+- project scope writes `.github/agents`, `.github/skills`, `.github/prompts`, `.github/hooks`, `.github/copilot-instructions.md`, and `.github/instructions/*.instructions.md`
+- global scope writes `~/.copilot/agents`, `~/.copilot/skills`, `~/.copilot/hooks`, `~/.copilot/copilot-instructions.md`, and `~/.copilot/instructions/*.instructions.md`
+
+For Copilot continuity, prefer the native session surfaces:
+
+- `copilot --continue`
+- `copilot --resume`
+- `/resume`
+- `/instructions`
+- `/fleet`
+
+The old repo-root `copilot-instructions.md` is treated as a legacy compatibility path and is migrated out of the managed flow.
+
 ## Installer/generator decomposition
 
 openagentsbtw keeps install-time and generation-time responsibilities separate:

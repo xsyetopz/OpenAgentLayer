@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-import { extname } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const PLACEHOLDER_HARD = [
 	/\bTODO\b(?!\s*\(.*test)/,
@@ -31,6 +36,17 @@ export const PLACEHOLDER_SOFT = [
 	/\bout of scope\b/i,
 	/\bfuture pr\b/i,
 	/\bdefer(?:red)?\b/i,
+];
+
+export const PROTOTYPE_SCAFFOLDING = [
+	/\bprototype\b/i,
+	/\bdemo\b/i,
+	/\btoy\b/i,
+	/\bexample\b/i,
+	/\bsample app\b/i,
+	/for demo(?:nstration)?/i,
+	/mock implementation/i,
+	/simplified version/i,
 ];
 
 export const SECRET_PATTERNS = [
@@ -86,35 +102,40 @@ function printJson(payload) {
 }
 
 export function passthrough() {
-	printJson({ continue: true });
+	printJson({});
 }
 
 export function deny(reason) {
 	printJson({
-		continue: true,
-		hookSpecificOutput: {
-			hookEventName: "PreToolUse",
-			permissionDecision: "deny",
-			permissionDecisionReason: reason,
-		},
 		permissionDecision: "deny",
 		permissionDecisionReason: reason,
 	});
 }
 
+export function allowModifiedArgs(modifiedArgs) {
+	printJson({
+		permissionDecision: "allow",
+		modifiedArgs,
+	});
+}
+
+export function additionalContext(message) {
+	printJson({
+		additionalContext: message,
+	});
+}
+
 export function systemMessage(message, extra = {}) {
 	printJson({
-		continue: true,
-		systemMessage: message,
+		additionalContext: message,
 		...extra,
 	});
 }
 
 export function stopBlock(message) {
 	printJson({
-		continue: false,
-		stopReason: "openagentsbtw completion check failed",
-		systemMessage: message,
+		decision: "block",
+		reason: message,
 	});
 }
 
@@ -177,6 +198,20 @@ export function matchPlaceholders(filepath, lines, includeEmptyBody = false) {
 	return { hard, soft };
 }
 
+export function matchPrototypeScaffolding(filepath, lines) {
+	const hits = [];
+	lines.forEach((line, index) => {
+		if (hasSuppression(line)) return;
+		if (!PROTOTYPE_SCAFFOLDING.some((pattern) => pattern.test(line))) return;
+		if (!isCommentLine(line) && !isProseFile(filepath)) {
+			hits.push(`  ${filepath}:${index + 1}: ${line.trim().slice(0, 100)}`);
+			return;
+		}
+		hits.push(`  ${filepath}:${index + 1}: ${line.trim().slice(0, 100)}`);
+	});
+	return hits;
+}
+
 export function resolveToolName(payload) {
 	return (
 		payload?.tool_name ||
@@ -212,4 +247,22 @@ export function resolveCwd(payload) {
 	return (
 		payload?.cwd || payload?.workspacePath || payload?.repoPath || process.cwd()
 	);
+}
+
+export function resolveTranscriptPath(payload) {
+	return (
+		payload?.transcriptPath ||
+		payload?.transcript_path ||
+		payload?.agent_transcript_path ||
+		""
+	);
+}
+
+export function loadRouteContracts() {
+	try {
+		const path = join(__dirname, "..", "..", "route-contracts.json");
+		return JSON.parse(readFileSync(path, "utf8"));
+	} catch {
+		return { skills: {}, agents: {} };
+	}
 }

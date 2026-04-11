@@ -23,6 +23,15 @@ describe("subscription presets", () => {
 		assert.equal(getCodexPlan("pro-20").utility.model, "gpt-5.3-codex-spark");
 	});
 
+	it("uses low verbosity across all managed Codex profiles", () => {
+		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
+			const plan = getCodexPlan(planName);
+			assert.equal(plan.main.verbosity, "low");
+			assert.equal(plan.utility.verbosity, "low");
+			assert.equal(plan.implement.verbosity, "low");
+		}
+	});
+
 	it("maps Claude plus away from Opus by default", () => {
 		const plus = getClaudePlan("plus");
 		assert.equal(plus.models.ccaModel, "claude-sonnet-4-6");

@@ -29,7 +29,8 @@ enabled = true
 The managed profiles share the same model/style defaults unless noted otherwise:
 
 - `plan_mode_reasoning_effort = "high"` except the codex-mini profile, which stays low
-- `model_verbosity = "medium"` except the codex-mini profile, which stays low
+- `model_verbosity = "low"` across every managed profile
+- top-level `model_reasoning_summary = "none"` in the managed Codex block
 - `personality = "none"`
 - `sandbox_mode = "workspace-write"` across every managed profile
 - `codex_hooks = true`

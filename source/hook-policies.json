@@ -44,6 +44,10 @@
       "event": "PreToolUse",
       "timeout": 5
     },
+    "copilot": {
+      "event": "preToolUse",
+      "timeout": 5
+    },
     "unsupported": {
       "codex": "Codex PreToolUse currently intercepts Bash only; Claude's richer multi-tool input validation does not map cleanly.",
       "opencode": "OpenCode's documented plugin events do not expose the same pre-tool structured input contract this hook expects."
@@ -121,6 +125,10 @@
       "timeout": 15,
       "prompt": "After modifying a file, note any LSP diagnostics in your response. Continue with your current task."
     },
+    "copilot": {
+      "event": "postToolUse",
+      "timeout": 15
+    },
     "unsupported": {
       "codex": "Codex PostToolUse is currently Bash-only, so there is no documented file-write hook payload for this policy.",
       "opencode": "OpenCode plugins can intercept tool execution, but this repo does not have a documented write-diagnostics equivalent wired into the shared policy."
@@ -152,7 +160,7 @@
       "timeout": 5
     },
     "copilot": {
-      "event": "postToolUse",
+      "event": "postToolUseFailure",
       "timeout": 5
     },
     "unsupported": {
@@ -165,6 +173,11 @@
     "script": "session/subagent-route-context.mjs",
     "claude": {
       "event": "SubagentStart",
+      "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
+      "timeout": 5
+    },
+    "copilot": {
+      "event": "subagentStart",
       "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
       "timeout": 5
     },
@@ -186,6 +199,11 @@
     "script": "post/subagent-scan.mjs",
     "claude": {
       "event": "SubagentStop",
+      "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
+      "timeout": 15
+    },
+    "copilot": {
+      "event": "subagentStop",
       "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
       "timeout": 15
     },
@@ -213,7 +231,7 @@
       "timeout": 15
     },
     "copilot": {
-      "event": "sessionEnd",
+      "event": "agentStop",
       "timeout": 15
     },
     "opencode": {
@@ -224,6 +242,11 @@
   },
   {
     "id": "secret-path-guard",
+    "script": "pre/secret-path-guard.mjs",
+    "copilot": {
+      "event": "preToolUse",
+      "timeout": 10
+    },
     "opencode": {
       "plugin": {
         "event": "tool.execute.before",

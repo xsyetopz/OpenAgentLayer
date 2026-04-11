@@ -148,6 +148,7 @@ prevent_idle_sleep = true`;
 		"",
 		'sqlite_home = "~/.codex/openagentsbtw/sqlite"',
 		"hide_agent_reasoning = true",
+		'model_reasoning_summary = "none"',
 		"tool_output_token_limit = 12000",
 		"",
 		"[history]",

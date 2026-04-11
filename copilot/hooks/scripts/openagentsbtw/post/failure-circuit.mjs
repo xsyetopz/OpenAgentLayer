@@ -4,11 +4,11 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+	additionalContext,
 	passthrough,
 	readStdin,
 	resolveCwd,
 	resolveToolName,
-	systemMessage,
 } from "../_lib.mjs";
 
 const MAX_CONSECUTIVE = 3;
@@ -100,7 +100,7 @@ function logFailure(logPath, toolName, error) {
 	const consecutive = getRecentFailures(logPath, toolName);
 	if (consecutive < MAX_CONSECUTIVE) passthrough();
 
-	systemMessage(
+	additionalContext(
 		[
 			`[openagentsbtw:fail] Tool '${toolName}' failed ${consecutive} times consecutively.`,
 			"Stop retrying the same approach. Prefer: (1) a different tool, (2) a different approach, or (3) asking the user for constraints/clarification.",

@@ -130,15 +130,19 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 				title: "Nano Workflow",
 				body: `Research → Plan → Execute → Review → Ship.
 
-Keep the tone neutral. If blocked, stop and ask; do not game tests or weaken requirements.`,
+Keep the tone neutral. If blocked, stop and ask; do not game tests or weaken requirements.
+Use native Copilot continuation with \`--continue\`, \`--resume\`, \`/resume\`, \`/instructions\`, and \`/fleet\` instead of handoff-style exports.`,
 			},
 			{
 				title: "Working Rules",
 				body: `- Keep this file short and task-shaping. Link to detailed docs instead of inlining.
 - No urgency, shame, or pressure language. Neutral, factual collaboration.
+- Follow objective facts, explicit requests, and repository evidence over user affect.
 - Do not hide failures, weaken requirements, or “make tests pass” by cheating.
 - When third-party library/API/setup/config docs are needed and \`ctx7\` is available, use it automatically. Prefer the CLI path over MCP.
-- Prefer small, direct edits and verify outcomes. When the active Copilot plan is \`pro-plus\`, heavier review/implementation routing is allowed; keep \`pro\` more conservative.
+- Prefer small, direct edits and verify outcomes. Do real production work instead of demos, prototypes, scaffolding, or educational side paths.
+- Native Copilot surfaces matter here: repo instructions live under \`.github/copilot-instructions.md\` and \`.github/instructions/*.instructions.md\`, while personal instructions live under \`~/.copilot/\`.
+- When the active Copilot plan is \`pro-plus\`, heavier plan/autopilot/fleet routing is allowed on clearly parallelizable work; keep \`pro\` more conservative.
 `,
 			},
 		],

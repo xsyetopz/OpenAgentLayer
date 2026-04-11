@@ -78,6 +78,64 @@
       "promptTemplate": "End-to-end delivery of the following feature or fix:\n1. Read current state and confirm understanding of the specification\n2. Implement using @hephaestus\n3. Run tests using @atalanta — do not proceed if tests fail\n4. Review code using @nemesis — resolve all BLOCKING findings before proceeding\n5. Update documentation using @calliope\n6. Report: files changed, test status, review verdict, and any remaining manual steps\n7. Remind the user to commit manually — auto-commit is forbidden\n\nFeature or fix:"
     }
   ],
+  "copilotPrompts": [
+    {
+      "name": "oabtw-research",
+      "agent": "hermes",
+      "routeKind": "readonly",
+      "description": "openagentsbtw research (Hermes)",
+      "title": "Research",
+      "body": "Follow the nano workflow: Research → Plan → Execute → Review → Ship."
+    },
+    {
+      "name": "oabtw-plan",
+      "agent": "athena",
+      "routeKind": "readonly",
+      "description": "openagentsbtw planning (Athena)",
+      "title": "Plan",
+      "body": "Produce a decision-complete plan for implementation."
+    },
+    {
+      "name": "oabtw-implement",
+      "agent": "hephaestus",
+      "routeKind": "edit-required",
+      "description": "openagentsbtw implementation (Hephaestus)",
+      "title": "Implement",
+      "body": "Implement the requested work in real production code with minimal, targeted edits."
+    },
+    {
+      "name": "oabtw-review",
+      "agent": "nemesis",
+      "routeKind": "readonly",
+      "description": "openagentsbtw review (Nemesis)",
+      "title": "Review",
+      "body": "Audit for correctness, regressions, and security issues."
+    },
+    {
+      "name": "oabtw-test",
+      "agent": "atalanta",
+      "routeKind": "execution-required",
+      "description": "openagentsbtw validation (Atalanta)",
+      "title": "Test",
+      "body": "Run targeted checks and report exact failures with concrete execution evidence."
+    },
+    {
+      "name": "oabtw-docs",
+      "agent": "calliope",
+      "routeKind": "readonly",
+      "description": "openagentsbtw docs (Calliope)",
+      "title": "Docs",
+      "body": "Update documentation to match actual code behavior."
+    },
+    {
+      "name": "oabtw-orchestrate",
+      "agent": "odysseus",
+      "routeKind": "edit-required",
+      "description": "openagentsbtw orchestration (Odysseus)",
+      "title": "Orchestrate",
+      "body": "Coordinate multi-step work across roles and carry the requested delivery to completion."
+    }
+  ],
   "codexModes": [
     {
       "mode": "triage",

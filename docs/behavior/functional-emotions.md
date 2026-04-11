@@ -18,3 +18,4 @@ openagentsbtw treats this as an **interaction risk**: we can reduce bad outcomes
 - Claude failure loop message: `claude/hooks/scripts/post/failure-circuit.mjs`
 - Claude route-aware stop hooks: `claude/hooks/scripts/post/stop-scan.mjs` and `claude/hooks/scripts/post/subagent-scan.mjs`
 - Copilot failure loop hook: `copilot/hooks/scripts/openagentsbtw/post/failure-circuit.mjs`
+- Copilot route/context and stop gates: `copilot/hooks/scripts/openagentsbtw/session/_route-context.mjs`, `copilot/hooks/scripts/openagentsbtw/post/_stop-shared.mjs`

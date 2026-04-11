@@ -251,8 +251,9 @@ async function removeOpenCode(scope) {
 
 async function removeCopilot(scope) {
 	console.log("\n\x1b[0;32mRemoving GitHub Copilot support\x1b[0m");
-	const templateRoot = path.join(ROOT, "copilot", "templates", ".github");
-	const skillsRoot = path.join(templateRoot, "skills");
+	const repoTemplateRoot = path.join(ROOT, "copilot", "templates", ".github");
+	const userTemplateRoot = path.join(ROOT, "copilot", "templates", ".copilot");
+	const skillsRoot = path.join(repoTemplateRoot, "skills");
 	const skillDirs = (await pathExists(skillsRoot))
 		? (await fs.readdir(skillsRoot, { withFileTypes: true }))
 				.filter((entry) => entry.isDirectory())
@@ -298,7 +299,45 @@ async function removeCopilot(scope) {
 				force: true,
 			});
 		}
-		logInfo(`Removed Copilot global agents + skills from ${PATHS.copilotHome}`);
+		await fs.rm(path.join(PATHS.copilotHome, "hooks", "openagentsbtw.json"), {
+			force: true,
+		});
+		await fs.rm(path.join(PATHS.copilotHome, "hooks", "route-contracts.json"), {
+			force: true,
+		});
+		await fs.rm(
+			path.join(PATHS.copilotHome, "hooks", "scripts", "openagentsbtw"),
+			{
+				recursive: true,
+				force: true,
+			},
+		);
+		const userInstructionsRoot = path.join(userTemplateRoot, "instructions");
+		if (await pathExists(userInstructionsRoot)) {
+			for (const entry of await fs.readdir(userInstructionsRoot, {
+				withFileTypes: true,
+			})) {
+				if (!entry.isFile()) continue;
+				await fs.rm(path.join(PATHS.copilotHome, "instructions", entry.name), {
+					force: true,
+				});
+			}
+		}
+		const globalInstructionsTarget = path.join(
+			PATHS.copilotHome,
+			"copilot-instructions.md",
+		);
+		if (await pathExists(globalInstructionsTarget)) {
+			const next = removeManagedBlock(
+				await readText(globalInstructionsTarget, ""),
+				"<!-- >>> openagentsbtw copilot >>> -->",
+				"<!-- <<< openagentsbtw copilot <<< -->",
+			);
+			await writeText(globalInstructionsTarget, next);
+		}
+		logInfo(
+			`Removed Copilot global agents, skills, hooks, and instructions from ${PATHS.copilotHome}`,
+		);
 	}
 
 	if (scope === "project" || scope === "both") {
@@ -324,7 +363,7 @@ async function removeCopilot(scope) {
 				force: true,
 			});
 		}
-		const promptsRoot = path.join(templateRoot, "prompts");
+		const promptsRoot = path.join(repoTemplateRoot, "prompts");
 		if (await pathExists(promptsRoot)) {
 			for (const entry of await fs.readdir(promptsRoot, {
 				withFileTypes: true,
@@ -339,10 +378,24 @@ async function removeCopilot(scope) {
 		await fs.rm(path.join(ghRoot, "hooks", "openagesbtw.json"), {
 			force: true,
 		});
+		await fs.rm(path.join(ghRoot, "hooks", "route-contracts.json"), {
+			force: true,
+		});
 		await fs.rm(path.join(ghRoot, "hooks", "scripts", "openagentsbtw"), {
 			recursive: true,
 			force: true,
 		});
+		const repoInstructionsRoot = path.join(repoTemplateRoot, "instructions");
+		if (await pathExists(repoInstructionsRoot)) {
+			for (const entry of await fs.readdir(repoInstructionsRoot, {
+				withFileTypes: true,
+			})) {
+				if (!entry.isFile()) continue;
+				await fs.rm(path.join(ghRoot, "instructions", entry.name), {
+					force: true,
+				});
+			}
+		}
 
 		const instructionsTarget = path.join(ghRoot, "copilot-instructions.md");
 		if (await pathExists(instructionsTarget)) {
@@ -352,6 +405,18 @@ async function removeCopilot(scope) {
 				"<!-- <<< openagentsbtw copilot <<< -->",
 			);
 			await writeText(instructionsTarget, next);
+		}
+		const legacyInstructionsTarget = path.join(
+			workspacePaths.workspaceRoot,
+			"copilot-instructions.md",
+		);
+		if (await pathExists(legacyInstructionsTarget)) {
+			const next = removeManagedBlock(
+				await readText(legacyInstructionsTarget, ""),
+				"<!-- >>> openagentsbtw copilot >>> -->",
+				"<!-- <<< openagentsbtw copilot <<< -->",
+			);
+			await writeText(legacyInstructionsTarget, next);
 		}
 		logInfo("Removed Copilot repo assets from .github/");
 	}

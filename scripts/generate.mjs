@@ -87,6 +87,9 @@ async function cleanGeneratedDirs() {
 		recursive: true,
 		force: true,
 	});
+	await fs.rm(path.join(OUTPUT_ROOT, "copilot", "route-contracts.json"), {
+		force: true,
+	});
 	await fs.rm(path.join(OUTPUT_ROOT, "codex", "agents"), {
 		recursive: true,
 		force: true,
@@ -278,25 +281,23 @@ async function generateSkills(skills) {
 			}
 		}
 		if (skill.platforms.includes("copilot")) {
-			const copilotSkillDir = path.join(
-				"copilot",
-				"templates",
-				".github",
-				"skills",
-				skill.name,
-			);
-			await writeFile(path.join(copilotSkillDir, "SKILL.md"), copilotContent);
-			if (
-				await fs
-					.stat(sourceReferenceDir)
-					.then((stat) => stat.isDirectory())
-					.catch(() => false)
-			) {
-				await fs.cp(
-					sourceReferenceDir,
-					path.join(OUTPUT_ROOT, copilotSkillDir, "reference"),
-					{ recursive: true },
-				);
+			for (const root of [
+				path.join("copilot", "templates", ".github", "skills", skill.name),
+				path.join("copilot", "templates", ".copilot", "skills", skill.name),
+			]) {
+				await writeFile(path.join(root, "SKILL.md"), copilotContent);
+				if (
+					await fs
+						.stat(sourceReferenceDir)
+						.then((stat) => stat.isDirectory())
+						.catch(() => false)
+				) {
+					await fs.cp(
+						sourceReferenceDir,
+						path.join(OUTPUT_ROOT, root, "reference"),
+						{ recursive: true },
+					);
+				}
 			}
 		}
 	}
@@ -395,6 +396,16 @@ async function generateAgents(agents) {
 				"copilot",
 				"templates",
 				".github",
+				"agents",
+				`${agent.name}.agent.md`,
+			),
+			renderCopilotAgent(agent, prompt, copilotOverlay),
+		);
+		await writeFile(
+			path.join(
+				"copilot",
+				"templates",
+				".copilot",
 				"agents",
 				`${agent.name}.agent.md`,
 			),
@@ -631,7 +642,8 @@ async function generateHooks(policies, commandData, agents) {
 	const claudeProject = { hooks: {} };
 	const claudePlugin = { hooks: {} };
 	const codex = { hooks: {} };
-	const copilot = { version: 1, hooks: {} };
+	const copilotProject = { version: 1, hooks: {} };
+	const copilotGlobal = { version: 1, hooks: {} };
 
 	const opencodeGitRules = {
 		"pre-commit": [],
@@ -696,13 +708,21 @@ async function generateHooks(policies, commandData, agents) {
 		}
 
 		if (policy.copilot) {
-			const hook = {
+			const timeoutSec = policy.copilot.timeout;
+			const projectHook = {
 				type: "command",
 				bash: `node ".github/hooks/scripts/openagentsbtw/${policy.script}"`,
 				powershell: `node ".github/hooks/scripts/openagentsbtw/${policy.script}"`,
-				timeoutSec: policy.copilot.timeout,
+				timeoutSec,
 			};
-			addHookGroup(copilot.hooks, policy.copilot.event, hook);
+			const globalHook = {
+				type: "command",
+				bash: `node "$HOME/.copilot/hooks/scripts/openagentsbtw/${policy.script}"`,
+				powershell: `node "$HOME/.copilot/hooks/scripts/openagentsbtw/${policy.script}"`,
+				timeoutSec,
+			};
+			addHookGroup(copilotProject.hooks, policy.copilot.event, projectHook);
+			addHookGroup(copilotGlobal.hooks, policy.copilot.event, globalHook);
 		}
 
 		for (const gitRule of policy.opencode?.gitHooks ?? []) {
@@ -725,7 +745,17 @@ async function generateHooks(policies, commandData, agents) {
 
 	await writeFile(
 		path.join("copilot", "templates", ".github", "hooks", "openagentsbtw.json"),
-		`${JSON.stringify(copilot, null, 2)}\n`,
+		`${JSON.stringify(copilotProject, null, 2)}\n`,
+	);
+	await writeFile(
+		path.join(
+			"copilot",
+			"templates",
+			".copilot",
+			"hooks",
+			"openagentsbtw.json",
+		),
+		`${JSON.stringify(copilotGlobal, null, 2)}\n`,
 	);
 
 	await writeFile(
@@ -882,6 +912,33 @@ function buildClaudeRouteContracts(skills, agents) {
 	};
 }
 
+function buildCopilotRouteContracts(skills, agents) {
+	return {
+		skills: Object.fromEntries(
+			skills
+				.filter((skill) => skill.platforms.includes("copilot"))
+				.map((skill) => [
+					skill.name,
+					{
+						route: skill.name,
+						...expandRouteContract(
+							skill.copilotContract ?? skill.claudeContract,
+						),
+					},
+				]),
+		),
+		agents: Object.fromEntries(
+			agents.map((agent) => [
+				agent.name,
+				{
+					route: agent.name,
+					...expandRouteContract(agent.copilotContract ?? agent.claudeContract),
+				},
+			]),
+		),
+	};
+}
+
 async function generateCommands(commandData) {
 	await writeFile(
 		path.join("opencode", "src", "commands.ts"),
@@ -916,6 +973,38 @@ async function generateClaudeRouteContracts(skills, agents) {
 	);
 }
 
+async function generateCopilotRouteContracts(skills, agents) {
+	const payload = `${JSON.stringify(
+		buildCopilotRouteContracts(skills, agents),
+		null,
+		2,
+	)}\n`;
+	await writeFile(
+		path.join("copilot", "hooks", "route-contracts.json"),
+		payload,
+	);
+	await writeFile(
+		path.join(
+			"copilot",
+			"templates",
+			".github",
+			"hooks",
+			"route-contracts.json",
+		),
+		payload,
+	);
+	await writeFile(
+		path.join(
+			"copilot",
+			"templates",
+			".copilot",
+			"hooks",
+			"route-contracts.json",
+		),
+		payload,
+	);
+}
+
 async function generateProjectInstructionAssets() {
 	await writeFile(
 		path.join("claude", "templates", "CLAUDE.md"),
@@ -933,6 +1022,70 @@ async function generateProjectInstructionAssets() {
 		path.join("copilot", "templates", ".github", "copilot-instructions.md"),
 		renderProjectGuidance(PROJECT_GUIDANCE.copilot),
 	);
+	await writeFile(
+		path.join("copilot", "templates", ".copilot", "copilot-instructions.md"),
+		renderProjectGuidance(PROJECT_GUIDANCE.copilot),
+	);
+}
+
+function renderCopilotInstructionFile(description, body) {
+	return (
+		renderFrontmatter([["description", q(description)]]) + body.trim() + "\n"
+	);
+}
+
+async function generateCopilotInstructionFiles() {
+	const files = [
+		{
+			name: "openagentsbtw-general.instructions.md",
+			description: "General openagentsbtw Copilot instructions",
+			body: `# openagentsbtw General Instructions
+
+- Follow objective facts, explicit requirements, and repository evidence over user affect.
+- Complete real production work. Do not substitute demos, toy code, scaffolding, or tutorials.
+- If blocked, stop with a concrete blocker instead of weakening requirements or pretending the work is done.
+- Prefer native continuation with \`--continue\`, \`--resume\`, \`/resume\`, and \`/instructions\`.`,
+		},
+		{
+			name: "openagentsbtw-codeGeneration.instructions.md",
+			description: "Code generation rules for openagentsbtw Copilot sessions",
+			body: `# openagentsbtw Code Generation
+
+- Modify existing production paths when possible; avoid sidecar architecture unless the repo already uses it.
+- Do not leave placeholders, mock implementations, tutorial comments, or “for now” scaffolding in real code.
+- Keep diffs cohesive and verify outcomes with concrete evidence when the task requires execution.`,
+		},
+		{
+			name: "openagentsbtw-testGeneration.instructions.md",
+			description: "Test generation rules for openagentsbtw Copilot sessions",
+			body: `# openagentsbtw Test Generation
+
+- Prefer tests that validate actual behavior in this repo, not generic examples.
+- When a route requires execution evidence, report the exact command or tool run and the result.
+- Do not present hypothetical or unrun test plans as completed validation.`,
+		},
+		{
+			name: "openagentsbtw-review.instructions.md",
+			description: "Review rules for openagentsbtw Copilot sessions",
+			body: `# openagentsbtw Review
+
+- Lead with concrete findings and evidence.
+- Treat prototype/demo code, placeholder logic, educational comments, and docs-only churn on implementation routes as first-class issues.
+- Prefer exact file references and behavior-level risks over generic advice.`,
+		},
+	];
+
+	for (const file of files) {
+		for (const root of [
+			path.join("copilot", "templates", ".github", "instructions"),
+			path.join("copilot", "templates", ".copilot", "instructions"),
+		]) {
+			await writeFile(
+				path.join(root, file.name),
+				renderCopilotInstructionFile(file.description, file.body),
+			);
+		}
+	}
 }
 
 function renderCopilotPrompt({ description, body }) {
@@ -943,59 +1096,34 @@ function renderCopilotPrompt({ description, body }) {
 	return [frontmatter.trimEnd(), body.trim(), ""].join("\n\n");
 }
 
-async function generateCopilotPromptFiles() {
+async function generateCopilotPromptFiles(commandData) {
 	const shared = [
 		"- Keep tone neutral; do not add urgency, shame, or pressure.",
-		"- If blocked, stop and ask; do not game tests or weaken requirements.",
-		"- Prefer small, direct changes and verify outcomes.",
+		"- Follow objective facts, explicit requests, and repository evidence over user affect.",
+		"- Do real production work instead of demos, toy scaffolding, or educational detours.",
+		"- If blocked, stop with a concrete blocker; do not game tests or weaken requirements.",
 	].join("\n");
 
-	const prompts = [
-		{
-			name: "oabtw-research",
-			agent: "hermes",
-			description: "openagentsbtw research (Hermes)",
-			body: `# Research\n\nFollow the nano workflow: Research → Plan → Execute → Review → Ship.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-plan",
-			agent: "athena",
-			description: "openagentsbtw planning (Athena)",
-			body: `# Plan\n\nProduce a decision-complete plan for implementation.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-implement",
-			agent: "hephaestus",
-			description: "openagentsbtw implementation (Hephaestus)",
-			body: `# Implement\n\nImplement the plan with minimal, targeted edits.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-review",
-			agent: "nemesis",
-			description: "openagentsbtw review (Nemesis)",
-			body: `# Review\n\nAudit for correctness, regressions, and security issues.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-test",
-			agent: "atalanta",
-			description: "openagentsbtw validation (Atalanta)",
-			body: `# Test\n\nRun targeted checks and report exact failures.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-docs",
-			agent: "calliope",
-			description: "openagentsbtw docs (Calliope)",
-			body: `# Docs\n\nUpdate documentation to match code behavior.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-		{
-			name: "oabtw-orchestrate",
-			agent: "odysseus",
-			description: "openagentsbtw orchestration (Odysseus)",
-			body: `# Orchestrate\n\nCoordinate multi-step work across roles.\n\n${shared}\n\nTask:\n{{prompt}}`,
-		},
-	];
+	for (const prompt of commandData.copilotPrompts ?? []) {
+		const contract = expandRouteContract(prompt.routeKind);
+		const routeLines = [
+			`OPENAGENTSBTW_ROUTE=${prompt.name.replace(/^oabtw-/, "")}`,
+			`OPENAGENTSBTW_CONTRACT=${contract.routeKind}`,
+			`OPENAGENTSBTW_ALLOW_BLOCKED=${String(contract.allowBlocked)}`,
+			`OPENAGENTSBTW_ALLOW_DOCS_ONLY=${String(contract.allowDocsOnly)}`,
+			`OPENAGENTSBTW_ALLOW_TESTS_ONLY=${String(contract.allowTestsOnly)}`,
+			`OPENAGENTSBTW_REJECT_PROTOTYPE_SCAFFOLDING=${String(contract.rejectPrototypeScaffolding)}`,
+		].join("\n");
+		const body = `# ${prompt.title}
 
-	for (const prompt of prompts) {
+${routeLines}
+
+${prompt.body}
+
+${shared}
+
+Task:
+{{prompt}}`;
 		await writeFile(
 			path.join(
 				"copilot",
@@ -1004,7 +1132,11 @@ async function generateCopilotPromptFiles() {
 				"prompts",
 				`${prompt.name}.prompt.md`,
 			),
-			renderCopilotPrompt(prompt),
+			renderCopilotPrompt({
+				agent: prompt.agent,
+				description: prompt.description,
+				body,
+			}),
 		);
 	}
 }
@@ -1029,9 +1161,11 @@ async function main() {
 	await generateAgents(agents);
 	await generateHooks(policies, commandData, agents);
 	await generateClaudeRouteContracts(skills, agents);
+	await generateCopilotRouteContracts(skills, agents);
 	await generateCommands(commandData);
 	await generateProjectInstructionAssets();
-	await generateCopilotPromptFiles();
+	await generateCopilotInstructionFiles();
+	await generateCopilotPromptFiles(commandData);
 
 	console.log(
 		"Generated Claude, Copilot, Codex, and OpenCode artifacts from source/",

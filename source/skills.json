@@ -10,6 +10,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -23,6 +24,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -36,6 +38,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": "Recommended routing: `oabtw-codex docs \"<task>\"` for routine docs edits, or `oabtw-codex desloppify \"<task>\"` for cleanup-heavy passes. `openagentsbtw-codex` remains the canonical equivalent."
   },
   {
@@ -49,6 +52,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -62,6 +66,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": "Recommended routing: `oabtw-codex debug \"<failure or symptom>\"` for read-only bug investigation, or `oabtw-codex test \"<scope>\"` when you specifically need test execution evidence."
   },
   {
@@ -75,6 +80,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": "Recommended routing: `oabtw-codex explore \"<target>\"` for local repo exploration, or `oabtw-codex deepwiki \"<target>\"` for public GitHub repos when you want indexed background first."
   },
   {
@@ -88,6 +94,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": "Recommended routing: `oabtw-codex handoff \"<focus>\"` for compact session exports. `openagentsbtw-codex` remains the canonical equivalent."
   },
   {
@@ -101,6 +108,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -114,6 +122,7 @@
       "copilot"
     ],
     "claudeContract": "execution-required",
+    "copilotContract": "execution-required",
     "codexLead": ""
   },
   {
@@ -127,6 +136,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -140,6 +150,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -153,6 +164,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -166,6 +178,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": ""
   },
   {
@@ -179,6 +192,7 @@
       "copilot"
     ],
     "claudeContract": "execution-required",
+    "copilotContract": "execution-required",
     "codexLead": ""
   },
   {
@@ -192,6 +206,7 @@
       "copilot"
     ],
     "claudeContract": "readonly",
+    "copilotContract": "readonly",
     "codexLead": "Recommended routing: `oabtw-codex trace \"<symbol or path>\"` for local dependency and data-flow tracing."
   }
 ]

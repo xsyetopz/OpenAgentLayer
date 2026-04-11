@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -16,6 +16,7 @@ import {
 	mergeCodexConfig,
 	mergeCodexHooks,
 	mergeTaggedMarkdown,
+	removeManagedBlock,
 	updateCodexAgents,
 	updateCodexMarketplace,
 } from "./managed-files.mjs";
@@ -956,34 +957,146 @@ async function writeCopilotDeepwiki(target) {
 	await writeText(target, JSON.stringify(payload, null, 2));
 }
 
+async function removeManagedCopilotLegacyInstruction(workspaceRoot) {
+	const legacyTarget = path.join(workspaceRoot, "copilot-instructions.md");
+	if (!(await pathExists(legacyTarget))) return;
+	const next = removeManagedBlock(
+		await readText(legacyTarget, ""),
+		"<!-- >>> openagentsbtw copilot >>> -->",
+		"<!-- <<< openagentsbtw copilot <<< -->",
+	);
+	await writeText(legacyTarget, next);
+}
+
+function runVersionCheck(command, args) {
+	try {
+		const result = spawnSync(command, args, {
+			encoding: "utf8",
+			timeout: 3000,
+		});
+		if (result.status === 0) {
+			return { ok: true, output: result.stdout.trim() || result.stderr.trim() };
+		}
+		return { ok: false, output: result.stderr.trim() || result.stdout.trim() };
+	} catch (error) {
+		return { ok: false, output: String(error.message || error) };
+	}
+}
+
+async function logCopilotRuntimeDiagnostics() {
+	const copilotBinary = commandExists("copilot");
+	const ghBinary = commandExists("gh");
+	const copilotCheck = copilotBinary
+		? runVersionCheck("copilot", ["--version"])
+		: { ok: false, output: "" };
+	if (!copilotBinary) {
+		logWarn(
+			"Copilot CLI is not on PATH; native CLI continuation features will be unavailable until it is installed",
+		);
+	} else if (!copilotCheck.ok) {
+		logWarn(
+			`Copilot CLI is installed but not healthy in this environment: ${copilotCheck.output || "version check failed"}`,
+		);
+	}
+
+	if (!ghBinary) {
+		logWarn(
+			"GitHub CLI is not on PATH; gh copilot fallback entrypoints are unavailable",
+		);
+	} else {
+		const ghCheck = runVersionCheck("gh", ["copilot", "--help"]);
+		if (!ghCheck.ok) {
+			logWarn(
+				`gh copilot is present but not healthy in this environment: ${ghCheck.output || "help check failed"}`,
+			);
+		}
+	}
+
+	const vscodeExtensionsDir =
+		process.platform === "darwin"
+			? path.join(PATHS.homeDir, ".vscode", "extensions")
+			: process.platform === "linux"
+				? path.join(PATHS.homeDir, ".vscode", "extensions")
+				: path.join(PATHS.appDataDir, "Code", "extensions");
+	if (await pathExists(vscodeExtensionsDir)) {
+		const entries = await fs.readdir(vscodeExtensionsDir).catch(() => []);
+		const copilotChatInstalled = entries.some((entry) =>
+			entry.startsWith("github.copilot-chat-"),
+		);
+		if (!copilotChatInstalled) {
+			logWarn(
+				"VS Code Copilot Chat extension was not detected; editor-side instructions/hooks may not be active until it is installed",
+			);
+		}
+	}
+}
+
 async function installCopilot(args, artifacts) {
 	if (!args.installCopilot) return;
 	console.log("\n\x1b[0;32mGitHub Copilot\x1b[0m");
 	await ensureNode();
-	const templateRoot = path.join(artifacts.copilotDir, "templates", ".github");
+	const repoTemplateRoot = path.join(
+		artifacts.copilotDir,
+		"templates",
+		".github",
+	);
+	const userTemplateRoot = path.join(
+		artifacts.copilotDir,
+		"templates",
+		".copilot",
+	);
+	await logCopilotRuntimeDiagnostics();
 	if (args.copilotScope === "global" || args.copilotScope === "both") {
 		const home = PATHS.copilotHome;
 		await fs.mkdir(path.join(home, "agents"), { recursive: true });
 		await fs.mkdir(path.join(home, "skills"), { recursive: true });
-		if (await pathExists(path.join(templateRoot, "agents"))) {
+		await fs.mkdir(path.join(home, "hooks", "scripts"), { recursive: true });
+		await fs.mkdir(path.join(home, "instructions"), { recursive: true });
+		if (await pathExists(path.join(userTemplateRoot, "agents"))) {
 			await fs.cp(
-				path.join(templateRoot, "agents"),
+				path.join(userTemplateRoot, "agents"),
 				path.join(home, "agents"),
 				{
 					recursive: true,
 				},
 			);
 		}
-		if (await pathExists(path.join(templateRoot, "skills"))) {
+		if (await pathExists(path.join(userTemplateRoot, "skills"))) {
 			await fs.cp(
-				path.join(templateRoot, "skills"),
+				path.join(userTemplateRoot, "skills"),
 				path.join(home, "skills"),
 				{
 					recursive: true,
 				},
 			);
 		}
-		logInfo(`Copilot agents + skills -> ${PATHS.copilotHome}`);
+		await fs.copyFile(
+			path.join(userTemplateRoot, "hooks", "openagentsbtw.json"),
+			path.join(home, "hooks", "openagentsbtw.json"),
+		);
+		await fs.copyFile(
+			path.join(userTemplateRoot, "hooks", "route-contracts.json"),
+			path.join(home, "hooks", "route-contracts.json"),
+		);
+		await fs.cp(
+			path.join(artifacts.copilotDir, "hooks", "scripts", "openagentsbtw"),
+			path.join(home, "hooks", "scripts", "openagentsbtw"),
+			{ recursive: true },
+		);
+		await fs.cp(
+			path.join(userTemplateRoot, "instructions"),
+			path.join(home, "instructions"),
+			{ recursive: true },
+		);
+		await mergeTaggedMarkdown({
+			target: path.join(home, "copilot-instructions.md"),
+			template: path.join(userTemplateRoot, "copilot-instructions.md"),
+			start: "<!-- >>> openagentsbtw copilot >>> -->",
+			end: "<!-- <<< openagentsbtw copilot <<< -->",
+		});
+		logInfo(
+			`Copilot user agents, skills, hooks, and instructions -> ${PATHS.copilotHome}`,
+		);
 		if (args.deepwikiMcp) {
 			const vscodeUserMcp = PATHS.vscodeUserMcp;
 			if (vscodeUserMcp) {
@@ -995,33 +1108,48 @@ async function installCopilot(args, artifacts) {
 	if (args.copilotScope === "project" || args.copilotScope === "both") {
 		const workspacePaths = resolveWorkspacePaths();
 		const githubRoot = workspacePaths.projectGithubDir;
+		await removeManagedCopilotLegacyInstruction(workspacePaths.workspaceRoot);
 		await fs.mkdir(path.join(githubRoot, "hooks", "scripts"), {
 			recursive: true,
 		});
+		await fs.mkdir(path.join(githubRoot, "instructions"), {
+			recursive: true,
+		});
 		await fs.cp(
-			path.join(templateRoot, "agents"),
+			path.join(repoTemplateRoot, "agents"),
 			path.join(githubRoot, "agents"),
 			{
 				recursive: true,
 			},
 		);
 		await fs.cp(
-			path.join(templateRoot, "skills"),
+			path.join(repoTemplateRoot, "skills"),
 			path.join(githubRoot, "skills"),
 			{
 				recursive: true,
 			},
 		);
 		await fs.cp(
-			path.join(templateRoot, "prompts"),
+			path.join(repoTemplateRoot, "prompts"),
 			path.join(githubRoot, "prompts"),
 			{
 				recursive: true,
 			},
 		);
+		await fs.cp(
+			path.join(repoTemplateRoot, "instructions"),
+			path.join(githubRoot, "instructions"),
+			{
+				recursive: true,
+			},
+		);
 		await fs.copyFile(
-			path.join(templateRoot, "hooks", "openagentsbtw.json"),
+			path.join(repoTemplateRoot, "hooks", "openagentsbtw.json"),
 			path.join(githubRoot, "hooks", "openagentsbtw.json"),
+		);
+		await fs.copyFile(
+			path.join(repoTemplateRoot, "hooks", "route-contracts.json"),
+			path.join(githubRoot, "hooks", "route-contracts.json"),
 		);
 		await fs.cp(
 			path.join(artifacts.copilotDir, "hooks", "scripts", "openagentsbtw"),
@@ -1030,7 +1158,7 @@ async function installCopilot(args, artifacts) {
 		);
 		await mergeTaggedMarkdown({
 			target: path.join(githubRoot, "copilot-instructions.md"),
-			template: path.join(templateRoot, "copilot-instructions.md"),
+			template: path.join(repoTemplateRoot, "copilot-instructions.md"),
 			start: "<!-- >>> openagentsbtw copilot >>> -->",
 			end: "<!-- <<< openagentsbtw copilot <<< -->",
 		});

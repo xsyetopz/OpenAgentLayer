@@ -115,6 +115,7 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(config, /sqlite_home = "~\/\.codex\/openagentsbtw\/sqlite"/);
 		assert.match(config, /hide_agent_reasoning = true/);
+		assert.match(config, /model_reasoning_summary = "none"/);
 		assert.match(config, /tool_output_token_limit = 12000/);
 		assert.match(config, /\[history\]/);
 		assert.match(config, /persistence = "save-all"/);
@@ -144,6 +145,7 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /prevent_idle_sleep = true/);
 		assert.match(config, /approval_policy = "never"/);
 		assert.match(config, /sqlite = true/);
+		assert.equal(config.includes('model_verbosity = "medium"'), false);
 	});
 
 	it("ports the CCA-style response contract into Codex guidance", () => {
@@ -291,20 +293,38 @@ describe("generated Codex defaults", () => {
 describe("generated Copilot assets", () => {
 	it("generates VS Code-compatible agent frontmatter", () => {
 		const agent = readBuild("copilot/templates/.github/agents/athena.agent.md");
+		const globalAgent = readBuild(
+			"copilot/templates/.copilot/agents/athena.agent.md",
+		);
 		assert.match(agent, /^---\n/m);
 		assert.match(agent, /^name:\s+athena$/m);
 		assert.match(agent, /^description:\s+/m);
 		assert.equal(agent.includes("displayName:"), false);
+		assert.equal(globalAgent.includes("displayName:"), false);
 	});
 
 	it("generates Copilot hook config entries with required shell fields", () => {
 		const hooks = JSON.parse(
 			readBuild("copilot/templates/.github/hooks/openagentsbtw.json"),
 		);
+		const globalHooks = JSON.parse(
+			readBuild("copilot/templates/.copilot/hooks/openagentsbtw.json"),
+		);
 		assert.equal(hooks.version, 1);
 		assert.ok(hooks.hooks?.preToolUse?.length);
+		assert.ok(hooks.hooks?.agentStop?.length);
+		assert.ok(hooks.hooks?.subagentStart?.length);
+		assert.ok(hooks.hooks?.subagentStop?.length);
+		assert.ok(hooks.hooks?.postToolUseFailure?.length);
 		assert.match(JSON.stringify(hooks), /rtk-enforce\.mjs/);
-		for (const entries of Object.values(hooks.hooks)) {
+		assert.match(
+			JSON.stringify(globalHooks),
+			/\.copilot\/hooks\/scripts\/openagentsbtw/,
+		);
+		for (const entries of [
+			...Object.values(hooks.hooks),
+			...Object.values(globalHooks.hooks),
+		]) {
 			for (const entry of entries) {
 				assert.equal(entry.type, "command");
 				assert.ok(typeof entry.bash === "string" && entry.bash.length > 0);
@@ -318,7 +338,41 @@ describe("generated Copilot assets", () => {
 
 	it("does not emit unsupported Copilot skill frontmatter keys", () => {
 		const skill = readBuild("copilot/templates/.github/skills/review/SKILL.md");
+		const globalSkill = readBuild(
+			"copilot/templates/.copilot/skills/review/SKILL.md",
+		);
 		assert.equal(skill.includes("compatibility:"), false);
+		assert.equal(globalSkill.includes("compatibility:"), false);
+	});
+
+	it("ships native Copilot instruction files and route contracts", () => {
+		const repoInstructions = readBuild(
+			"copilot/templates/.github/instructions/openagentsbtw-general.instructions.md",
+		);
+		const globalInstructions = readBuild(
+			"copilot/templates/.copilot/instructions/openagentsbtw-general.instructions.md",
+		);
+		const routeContracts = JSON.parse(
+			readBuild("copilot/templates/.github/hooks/route-contracts.json"),
+		);
+		const prompt = readBuild(
+			"copilot/templates/.github/prompts/oabtw-implement.prompt.md",
+		);
+		assert.match(
+			repoInstructions,
+			/Follow objective facts, explicit requirements, and repository evidence over user affect\./,
+		);
+		assert.match(
+			globalInstructions,
+			/Prefer native continuation with `--continue`/,
+		);
+		assert.equal(routeContracts.agents.hephaestus.routeKind, "edit-required");
+		assert.equal(
+			routeContracts.agents.atalanta.routeKind,
+			"execution-required",
+		);
+		assert.match(prompt, /OPENAGENTSBTW_ROUTE=implement/);
+		assert.match(prompt, /OPENAGENTSBTW_CONTRACT=edit-required/);
 	});
 });
 
@@ -387,7 +441,10 @@ describe("generated OpenCode assets", () => {
 			/third-party library\/API\/setup\/config docs are needed and `ctx7` is available, use it automatically/,
 		);
 		assert.match(instructions, /openagentsbtw roles are additive/);
-		assert.match(instructions, /`opencode --continue`, `\/sessions`, `\/compact`, and `task_id` reuse/);
+		assert.match(
+			instructions,
+			/`opencode --continue`, `\/sessions`, `\/compact`, and `task_id` reuse/,
+		);
 	});
 
 	it("ships an OpenCode hook manifest that includes plugin and git-hook surfaces", () => {
@@ -458,14 +515,12 @@ describe("generated hook manifests", () => {
 		);
 		assert.ok(
 			opencode.some(
-				(entry) =>
-					entry.id === "subagent-scan" && entry.status === "supported",
+				(entry) => entry.id === "subagent-scan" && entry.status === "supported",
 			),
 		);
 		assert.ok(
 			opencode.some(
-				(entry) =>
-					entry.id === "stop-scan" && entry.status === "supported",
+				(entry) => entry.id === "stop-scan" && entry.status === "supported",
 			),
 		);
 	});
