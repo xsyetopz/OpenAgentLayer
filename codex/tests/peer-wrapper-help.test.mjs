@@ -30,7 +30,7 @@ function run(command, args, { cwd, env = {} } = {}) {
 }
 
 describe("generated codex peer wrapper", () => {
-	it("prints help without exploding on empty optional args", async () => {
+	it("prints help without exploding on empty optional args", { skip: process.platform === "win32" && "peer wrapper is a Bash script" }, async () => {
 		const tmp = await mkdtemp(path.join(os.tmpdir(), "oabtw-peer-help-"));
 		try {
 			const wrapperPath = path.join(tmp, "oabtw-codex-peer");

@@ -55,7 +55,7 @@ describe("shared install paths", () => {
 	});
 
 	it("resolves project-scoped outputs under the caller workspace", () => {
-		const paths = resolveWorkspacePaths("/tmp/consumer-repo");
+		const paths = resolveWorkspacePaths("/tmp/consumer-repo", "linux");
 		assert.equal(paths.projectOpenCodeDir, "/tmp/consumer-repo/.opencode");
 		assert.equal(paths.projectGithubDir, "/tmp/consumer-repo/.github");
 		assert.equal(paths.projectVscodeMcp, "/tmp/consumer-repo/.vscode/mcp.json");

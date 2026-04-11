@@ -152,6 +152,9 @@ jobs:
           bun-version: "1.3.12"
       - name: Install root deps
         run: bun install --frozen-lockfile
+      - name: Install OpenCode deps
+        working-directory: opencode
+        run: bun install --frozen-lockfile
       - name: Run install/config/uninstall smoke
         run: node scripts/ci/install-smoke.mjs
 
@@ -167,6 +170,9 @@ jobs:
         with:
           bun-version: "1.3.12"
       - name: Install root deps
+        run: bun install --frozen-lockfile
+      - name: Install OpenCode deps
+        working-directory: opencode
         run: bun install --frozen-lockfile
       - name: Run install/config/uninstall smoke
         run: node scripts/ci/install-smoke.mjs

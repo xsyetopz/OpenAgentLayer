@@ -49,6 +49,7 @@ export function hasRtkBinary() {
 			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
+			shell: process.platform === "win32",
 		});
 		return result.status === 0;
 	} catch {
@@ -67,6 +68,7 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
+			shell: process.platform === "win32",
 		});
 		const rewritten = (result.stdout || "").trim();
 		if (result.status === 0 && rewritten && rewritten !== command) {

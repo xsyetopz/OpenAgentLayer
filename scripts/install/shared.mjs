@@ -78,12 +78,16 @@ export function resolvePaths({
 
 export const PATHS = resolvePaths();
 
-export function resolveWorkspacePaths(workspaceRoot = process.cwd()) {
+export function resolveWorkspacePaths(
+	workspaceRoot = process.cwd(),
+	platform = process.platform,
+) {
+	const pathLib = platform === "win32" ? path.win32 : path.posix;
 	return {
 		workspaceRoot,
-		projectOpenCodeDir: path.join(workspaceRoot, ".opencode"),
-		projectGithubDir: path.join(workspaceRoot, ".github"),
-		projectVscodeMcp: path.join(workspaceRoot, ".vscode", "mcp.json"),
+		projectOpenCodeDir: pathLib.join(workspaceRoot, ".opencode"),
+		projectGithubDir: pathLib.join(workspaceRoot, ".github"),
+		projectVscodeMcp: pathLib.join(workspaceRoot, ".vscode", "mcp.json"),
 	};
 }
 
