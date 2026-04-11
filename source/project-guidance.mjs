@@ -98,6 +98,8 @@ Built-in subagents disabled: use @hermes (explore), @athena (plan), @odysseus (g
 - Internal comments explain non-obvious why only.
 - When third-party library/API/setup/config docs are needed and \`ctx7\` is available, use it automatically. Prefer the CLI path over MCP.
 - Read project conventions before acting and prefer repo AGENTS.md plus configured instruction files over generic defaults.
+- Keep OpenCode native \`plan\`, \`explore\`, \`general\`, session continuation, and compaction surfaces available; openagentsbtw roles are additive, not replacements.
+- Prefer native continuation with \`opencode --continue\`, \`/sessions\`, \`/compact\`, and \`task_id\` reuse instead of handoff-style exports.
 - Run targeted validation before closing significant code changes and route review-heavy work through nemesis.`,
 			},
 			{

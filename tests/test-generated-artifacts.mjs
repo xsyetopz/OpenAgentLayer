@@ -361,12 +361,19 @@ describe("installer docs", () => {
 });
 
 describe("generated OpenCode assets", () => {
-	it("uses documented instruction files instead of system transform injection", () => {
+	it("uses native OpenCode plugin hooks for route tracking and completion gates", () => {
 		const plugin = readBuild("opencode/templates/plugins/openagentsbtw.ts");
+		assert.match(plugin, /"chat\.message"/);
+		assert.match(plugin, /"command\.execute\.before"/);
 		assert.match(plugin, /"tool\.execute\.before"/);
+		assert.match(plugin, /"tool\.execute\.after"/);
+		assert.match(plugin, /"experimental\.session\.compacting"/);
+		assert.match(plugin, /"experimental\.text\.complete"/);
 		assert.match(plugin, /kind: "rtk-rewrite"/);
 		assert.match(plugin, /resolveCommandCwd/);
-		assert.equal(plugin.includes("experimental.chat.system.transform"), false);
+		assert.match(plugin, /const COMMAND_CONTRACTS =/);
+		assert.match(plugin, /const AGENT_CONTRACTS =/);
+		assert.match(plugin, /BLOCKED:/);
 	});
 
 	it("ships a managed OpenCode instruction file", () => {
@@ -379,11 +386,16 @@ describe("generated OpenCode assets", () => {
 			instructions,
 			/third-party library\/API\/setup\/config docs are needed and `ctx7` is available, use it automatically/,
 		);
+		assert.match(instructions, /openagentsbtw roles are additive/);
+		assert.match(instructions, /`opencode --continue`, `\/sessions`, `\/compact`, and `task_id` reuse/);
 	});
 
 	it("ships an OpenCode hook manifest that includes plugin and git-hook surfaces", () => {
 		const manifest = readBuild("opencode/templates/hooks/HOOKS.md");
+		assert.match(manifest, /plugin: event `chat\.message`/);
 		assert.match(manifest, /plugin: event `tool\.execute\.before`/);
+		assert.match(manifest, /plugin: event `tool\.execute\.after`/);
+		assert.match(manifest, /plugin: event `experimental\.text\.complete`/);
 		assert.match(manifest, /git-hook: `pre-commit`/);
 		assert.match(manifest, /git-hook: `pre-push`/);
 	});
@@ -393,6 +405,8 @@ describe("generated OpenCode assets", () => {
 		assert.match(commands, /name: "openagents-explore"/);
 		assert.match(commands, /name: "openagents-trace"/);
 		assert.match(commands, /name: "openagents-debug"/);
+		assert.match(commands, /routeKind: "edit-required"/);
+		assert.match(commands, /routeKind: "execution-required"/);
 		assert.equal(commands.includes('name: "openagents-deps"'), false);
 		assert.equal(commands.includes('name: "openagents-explain"'), false);
 	});
@@ -439,7 +453,19 @@ describe("generated hook manifests", () => {
 		assert.ok(
 			opencode.some(
 				(entry) =>
-					entry.id === "prompt-git-context" && entry.status === "unsupported",
+					entry.id === "prompt-git-context" && entry.status === "supported",
+			),
+		);
+		assert.ok(
+			opencode.some(
+				(entry) =>
+					entry.id === "subagent-scan" && entry.status === "supported",
+			),
+		);
+		assert.ok(
+			opencode.some(
+				(entry) =>
+					entry.id === "stop-scan" && entry.status === "supported",
 			),
 		);
 	});

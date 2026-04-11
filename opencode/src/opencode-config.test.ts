@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
-	buildAgentDisableConfig,
 	buildMcpConfig,
+	buildOpenCodeJsonc,
 	mergeInstructions,
 	pruneLegacyOpenAgentsMcpServers,
 } from "./opencode-config.ts";
@@ -12,7 +12,6 @@ describe("mergeInstructions", () => {
 			{
 				instructions: ["docs/team-rules.md"],
 				mcp: buildMcpConfig(),
-				agent: buildAgentDisableConfig(),
 			},
 			[".opencode/instructions/openagentsbtw.md"],
 		);
@@ -59,5 +58,13 @@ describe("pruneLegacyOpenAgentsMcpServers", () => {
 		expect(mcp["chrome-devtools"]).toBeUndefined();
 		expect(mcp["browsermcp"]).toBeUndefined();
 		expect(mcp["deepwiki"]).toBeTruthy();
+	});
+});
+
+describe("buildOpenCodeJsonc", () => {
+	it("keeps native OpenCode agents enabled by default", () => {
+		const parsed = JSON.parse(buildOpenCodeJsonc()) as Record<string, unknown>;
+		expect(parsed["agent"]).toBeUndefined();
+		expect(parsed["instructions"]).toEqual([]);
 	});
 });

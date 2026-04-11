@@ -13,6 +13,11 @@
     "copilot": {
       "event": "userPromptSubmitted",
       "timeout": 5
+    },
+    "opencode": {
+      "plugin": {
+        "event": "chat.message"
+      }
     }
   },
   {
@@ -163,9 +168,17 @@
       "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
       "timeout": 5
     },
+    "opencode": {
+      "plugin": {
+        "event": "tool.execute.before",
+        "tools": [
+          "task"
+        ],
+        "field": "subagent_type"
+      }
+    },
     "unsupported": {
-      "codex": "Codex does not expose a Claude-style SubagentStart hook event in the documented hook surface used by this repo.",
-      "opencode": "OpenCode does not expose a Claude-style subagent-start hook surface in the documented plugin and git-hook interfaces used here."
+      "codex": "Codex does not expose a Claude-style SubagentStart hook event in the documented hook surface used by this repo."
     }
   },
   {
@@ -176,9 +189,16 @@
       "matcher": "athena|hephaestus|nemesis|atalanta|calliope|hermes|odysseus",
       "timeout": 15
     },
+    "opencode": {
+      "plugin": {
+        "event": "tool.execute.after",
+        "tools": [
+          "task"
+        ]
+      }
+    },
     "unsupported": {
-      "codex": "Codex has multi-agent support, but the documented hook surface used here does not expose Claude's SubagentStop event contract.",
-      "opencode": "OpenCode does not expose a Claude-style subagent-stop hook surface in the documented plugin and git-hook interfaces used here."
+      "codex": "Codex has multi-agent support, but the documented hook surface used here does not expose Claude's SubagentStop event contract."
     }
   },
   {
@@ -195,6 +215,11 @@
     "copilot": {
       "event": "sessionEnd",
       "timeout": 15
+    },
+    "opencode": {
+      "plugin": {
+        "event": "experimental.text.complete"
+      }
     }
   },
   {

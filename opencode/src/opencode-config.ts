@@ -3,18 +3,7 @@ import type { InstallScope } from "./types.ts";
 export interface OpenCodeConfig {
 	$schema: string;
 	mcp?: Record<string, unknown>;
-	agent?: Record<string, unknown>;
 	instructions?: string[];
-}
-
-const DISABLE_BUILTIN_AGENTS = ["build", "plan", "explore", "general"] as const;
-
-export function buildAgentDisableConfig(): Record<string, unknown> {
-	const config: Record<string, unknown> = {};
-	for (const role of DISABLE_BUILTIN_AGENTS) {
-		config[role] = { disable: true };
-	}
-	return config;
 }
 
 export async function resolveConfigPath(scope: InstallScope): Promise<string> {
@@ -97,7 +86,6 @@ export function buildOpenCodeJsonc(): string {
 	const config = {
 		$schema: "https://opencode.ai/config.json",
 		mcp: buildMcpConfig(),
-		agent: buildAgentDisableConfig(),
 		instructions: [],
 	};
 	return JSON.stringify(config, undefined, 2);
@@ -164,18 +152,6 @@ export function pruneLegacyOpenAgentsMcpServers(
 	}
 
 	return { ...existing, mcp: nextMcp };
-}
-
-export function mergeAgentDisableConfig(
-	existing: Record<string, unknown>,
-	agentDisableConfig: Record<string, unknown>,
-): Record<string, unknown> {
-	const existingAgent = (existing["agent"] as Record<string, unknown>) ?? {};
-	if (Object.keys(existingAgent).length > 0) {
-		return { ...existing, agent: deepMerge(existingAgent, agentDisableConfig) };
-	}
-
-	return { ...existing, agent: agentDisableConfig };
 }
 
 export function parseJsonc(text: string): Record<string, unknown> {

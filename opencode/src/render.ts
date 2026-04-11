@@ -42,6 +42,9 @@ export function renderAgentFile(agent: AgentDefinition): string {
 		`mode: ${agent.mode}`,
 		`model: ${agent.model}`,
 	];
+	if (agent.routeKind) {
+		frontmatter.push(`routeKind: ${agent.routeKind}`);
+	}
 
 	if (agent.hidden !== undefined) {
 		frontmatter.push(`hidden: ${agent.hidden}`);
@@ -75,6 +78,9 @@ export function renderCommandFile(command: CommandDefinition): string {
 		`description: ${command.description}`,
 		`agent: ${command.agent}`,
 	];
+	if (command.routeKind) {
+		lines.push(`routeKind: ${command.routeKind}`);
+	}
 	if (command.model) {
 		lines.push(`model: ${command.model}`);
 	}

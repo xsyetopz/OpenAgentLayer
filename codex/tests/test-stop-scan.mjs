@@ -170,13 +170,13 @@ describe("codex stop scan", () => {
 			const transcriptPath = path.join(root, "transcript.jsonl");
 			await writeFile(
 				transcriptPath,
-				'{"tool_name":"Bash","stdout":"PASS\\ncommand: npm test"}\n',
+				'{"tool_name":"Bash","stdout":"PASS\\ncommand: bun test"}\n',
 			);
 			const result = await invokeHook(root, {
 				cwd: root,
 				prompt:
 					"OPENAGENTSBTW_ROUTE=qa\nOPENAGENTSBTW_CONTRACT=execution-required",
-				last_assistant_message: "PASS: npm test",
+				last_assistant_message: "PASS: bun test",
 				transcript_path: transcriptPath,
 			});
 			assert.equal(result.stdout, "");

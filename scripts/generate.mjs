@@ -522,8 +522,12 @@ function renderHookManifestMarkdown(platformLabel, records) {
 				continue;
 			}
 			if (surface.type === "plugin") {
+				const tools =
+					surface.tools && surface.tools.length > 0
+						? `, tools ${surface.tools.map((tool) => `\`${tool}\``).join(", ")}`
+						: "";
 				lines.push(
-					`  plugin: event \`${surface.event}\`, tools ${surface.tools.map((tool) => `\`${tool}\``).join(", ")}${surface.field ? `, field \`${surface.field}\`` : ""}`,
+					`  plugin: event \`${surface.event}\`${tools}${surface.field ? `, field \`${surface.field}\`` : ""}`,
 				);
 				continue;
 			}
@@ -623,7 +627,7 @@ function renderOpenCodeGitHook(name, rules) {
 	].join("\n");
 }
 
-async function generateHooks(policies) {
+async function generateHooks(policies, commandData, agents) {
 	const claudeProject = { hooks: {} };
 	const claudePlugin = { hooks: {} };
 	const codex = { hooks: {} };
@@ -726,7 +730,7 @@ async function generateHooks(policies) {
 
 	await writeFile(
 		path.join("opencode", "templates", "plugins", "openagentsbtw.ts"),
-		renderOpenCodePlugin(policies),
+		renderOpenCodePlugin(policies, commandData.opencodeCommands, agents),
 	);
 	await writeFile(
 		path.join("opencode", "templates", "hooks", "pre-commit"),
@@ -795,6 +799,7 @@ function renderOpenCodeCommands(commands) {
 				`    name: ${q(command.name)},`,
 				`    description: ${q(command.description)},`,
 				`    agent: ${q(command.agent)},`,
+				`    routeKind: ${q(command.routeKind ?? "readonly")},`,
 				`    promptTemplate: ${q(command.promptTemplate)},`,
 				"  },",
 			];
@@ -813,6 +818,17 @@ function renderOpenCodeCommands(commands) {
 }
 
 function expandClaudeContract(routeKind) {
+	const expanded = expandRouteContract(routeKind);
+	if (expanded.routeKind === "execution-required") {
+		return {
+			...expanded,
+			allowDocsOnly: true,
+		};
+	}
+	return expanded;
+}
+
+function expandRouteContract(routeKind) {
 	switch (routeKind) {
 		case "edit-required":
 			return {
@@ -826,7 +842,7 @@ function expandClaudeContract(routeKind) {
 			return {
 				routeKind,
 				allowBlocked: true,
-				allowDocsOnly: true,
+				allowDocsOnly: false,
 				allowTestsOnly: true,
 				rejectPrototypeScaffolding: false,
 			};
@@ -1011,7 +1027,7 @@ async function main() {
 	await cleanGeneratedDirs();
 	await generateSkills(skills);
 	await generateAgents(agents);
-	await generateHooks(policies);
+	await generateHooks(policies, commandData, agents);
 	await generateClaudeRouteContracts(skills, agents);
 	await generateCommands(commandData);
 	await generateProjectInstructionAssets();

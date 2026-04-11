@@ -37,6 +37,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/pre/rtk-enforce.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}\"/hooks/scripts/pre/bash-guard.mjs; [ -f \"$H\" ] && node \"$H\" || exit 0",
             "timeout": 10
           }

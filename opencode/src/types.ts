@@ -23,12 +23,14 @@ export interface AgentPermission {
 }
 
 export type AgentMode = "primary" | "subagent" | "all";
+export type RouteKind = "readonly" | "edit-required" | "execution-required";
 
 export interface AgentDefinition {
 	name: string;
 	description: string;
 	mode: AgentMode;
 	model: string;
+	routeKind?: RouteKind;
 	hidden?: boolean;
 	temperature?: number;
 	top_p?: number;
@@ -44,6 +46,7 @@ export interface CommandDefinition {
 	name: string;
 	description: string;
 	agent: string;
+	routeKind?: RouteKind;
 	model?: string;
 	subtask?: boolean;
 	promptTemplate: string;

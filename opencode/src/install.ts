@@ -11,9 +11,7 @@ import {
 	resolveModel,
 } from "./models.ts";
 import {
-	buildAgentDisableConfig,
 	buildMcpConfig,
-	mergeAgentDisableConfig,
 	mergeInstructions,
 	mergeMcpConfig,
 	parseJsonc,
@@ -182,6 +180,7 @@ async function writeAgents(
 				description: meta.description,
 				mode: meta.mode,
 				model: assignment.model,
+				routeKind: meta.routeKind,
 				color: meta.color,
 				permission: meta.permission,
 				systemPrompt,
@@ -329,13 +328,11 @@ async function writeOpenCodeJsonc(
 			config = parseJsonc(text);
 			config = mergeMcpConfig(config, buildMcpConfig({ deepwikiEnabled }));
 			config = pruneLegacyOpenAgentsMcpServers(config);
-			config = mergeAgentDisableConfig(config, buildAgentDisableConfig());
 			config = mergeInstructions(config, instructionPaths);
 		} catch {
 			config = {
 				$schema: "https://opencode.ai/config.json",
 				mcp: buildMcpConfig({ deepwikiEnabled }),
-				agent: buildAgentDisableConfig(),
 				instructions: instructionPaths,
 			};
 		}
@@ -343,7 +340,6 @@ async function writeOpenCodeJsonc(
 		config = {
 			$schema: "https://opencode.ai/config.json",
 			mcp: buildMcpConfig({ deepwikiEnabled }),
-			agent: buildAgentDisableConfig(),
 			instructions: instructionPaths,
 		};
 	}

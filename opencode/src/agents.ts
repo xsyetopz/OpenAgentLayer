@@ -1,11 +1,12 @@
 import type { AgentRole } from "./models.ts";
-import type { AgentMode, AgentPermission } from "./types.ts";
+import type { AgentMode, AgentPermission, RouteKind } from "./types.ts";
 
 export interface AgentMeta {
 	greekName: string;
 	description: string;
 	color: string;
 	mode: AgentMode;
+	routeKind: RouteKind;
 	permission: AgentPermission;
 }
 
@@ -117,6 +118,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Senior engineering lead — end-to-end task ownership, multi-agent orchestration, and delivery",
 		color: `"#1B5E4B"`,
 		mode: "primary",
+		routeKind: "edit-required",
 		permission: ORCHESTRATOR_PERMISSION,
 	},
 	plan: {
@@ -125,6 +127,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Senior solution architect — breaks goals into concrete, dependency-mapped implementation plans",
 		color: `"#2F5D8C"`,
 		mode: "primary",
+		routeKind: "readonly",
 		permission: PLANNER_PERMISSION,
 	},
 	implement: {
@@ -133,6 +136,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Precision code implementer — writes and modifies production code per specification",
 		color: `"#8C4A2F"`,
 		mode: "subagent",
+		routeKind: "edit-required",
 		permission: IMPLEMENTER_PERMISSION,
 	},
 	review: {
@@ -141,6 +145,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Code quality analyst — reviews correctness, security, and standards compliance",
 		color: `"#4B2E83"`,
 		mode: "subagent",
+		routeKind: "readonly",
 		permission: REVIEWER_PERMISSION,
 	},
 	test: {
@@ -149,6 +154,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Test execution specialist — runs test suites and diagnoses failures",
 		color: `"#0E1A2B"`,
 		mode: "subagent",
+		routeKind: "execution-required",
 		permission: TEST_RUNNER_PERMISSION,
 	},
 	document: {
@@ -157,6 +163,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Technical writer — creates and maintains documentation, changelogs, and API references",
 		color: `"#C76B7B"`,
 		mode: "subagent",
+		routeKind: "readonly",
 		permission: DOCS_SCOPED_PERMISSION,
 	},
 	explore: {
@@ -165,6 +172,7 @@ export const AGENT_META: Record<AgentRole, AgentMeta> = {
 			"Research and exploration specialist — deep codebase analysis and information retrieval",
 		color: `"#1CA7A6"`,
 		mode: "subagent",
+		routeKind: "readonly",
 		permission: EXPLORER_PERMISSION,
 	},
 };
