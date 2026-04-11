@@ -8,6 +8,7 @@ import {
 } from "../../source/caveman.mjs";
 import {
 	getClaudePlan,
+	migrateClaudePlan,
 	resolveClaudePlan,
 	resolveCodexPlan,
 	resolveCopilotPlan,
@@ -130,9 +131,8 @@ System toggles (allow multiple):
 
 Options:
   --skip-rtk              Skip RTK install for Claude Code, Codex, OpenCode, and Copilot
-  --claude-plan plus|max5|max20
-                          Claude capability preset (default: max5)
-  --claude-tier 5x|20x    Legacy alias for --claude-plan
+  --claude-plan pro|max-5|max-20
+                          Claude capability preset (default: max-5)
   --opencode-scope project|global
                           OpenCode install target (default: global)
   --opencode-default-model MODEL
@@ -167,7 +167,7 @@ function parseArgs(argv) {
 		installCodex: false,
 		installCopilot: false,
 		skipRtk: false,
-		claudePlan: "max5",
+		claudePlan: "max-5",
 		claudePlanSet: false,
 		opencodeScope: "global",
 		opencodeDefaultModel: "",
@@ -212,10 +212,6 @@ function parseArgs(argv) {
 				break;
 			case "--skip-rtk":
 				args.skipRtk = true;
-				break;
-			case "--claude-tier":
-				args.claudePlan = resolveClaudePlan(argv[++index] ?? "");
-				args.claudePlanSet = true;
 				break;
 			case "--claude-plan":
 				args.claudePlan = argv[++index] ?? "";
@@ -343,18 +339,25 @@ async function ensureSelection(args) {
 }
 
 async function promptOptionalSurfaces(args, existingEnv) {
+	if (args.installClaude && !args.claudePlanSet) {
+		args.claudePlan =
+			resolveStoredClaudePlan(existingEnv.OABTW_CLAUDE_PLAN || "") ||
+			args.claudePlan;
+	}
 	if (args.installClaude && !args.claudePlanSet && !isCi()) {
 		args.claudePlan =
 			resolveClaudePlan(
 				(await promptText(
-					"Claude plan preset [plus/max5/max20]:",
+					"Claude plan preset [pro/max-5/max-20]:",
 					false,
-					args.claudePlan || existingEnv.OABTW_CLAUDE_PLAN || "max5",
+					args.claudePlan ||
+						resolveStoredClaudePlan(existingEnv.OABTW_CLAUDE_PLAN || "") ||
+						"max-5",
 				)) ||
 					args.claudePlan ||
-					existingEnv.OABTW_CLAUDE_PLAN ||
-					"max5",
-			) || "max5";
+					resolveStoredClaudePlan(existingEnv.OABTW_CLAUDE_PLAN || "") ||
+					"max-5",
+			) || "max-5";
 	}
 	if (args.installOpenCode && !args.opencodeDefaultModel && !isCi()) {
 		args.opencodeDefaultModel = await promptText(
@@ -464,7 +467,7 @@ function validateArgs(args) {
 	args.claudePlan = resolveClaudePlan(args.claudePlan);
 	if (!args.claudePlan) {
 		fail(
-			`Unsupported Claude plan: ${args.claudePlan} (expected plus, max5, or max20)`,
+			`Unsupported Claude plan: ${args.claudePlan} (expected pro, max-5, or max-20)`,
 		);
 	}
 	if (!["global", "project"].includes(args.opencodeScope)) {
@@ -1404,3 +1407,6 @@ await main().catch((error) => {
 	console.error(`Error: ${error.message}`);
 	process.exitCode = 1;
 });
+function resolveStoredClaudePlan(value = "") {
+	return migrateClaudePlan(value) || "";
+}

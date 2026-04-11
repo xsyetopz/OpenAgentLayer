@@ -13,12 +13,12 @@ As of April 9, 2026, openagentsbtw treats ChatGPT/Codex plans as framework prese
 
 ## Plan Presets
 
-| Plan     | Main Model    | Implementation | Utility             | Reasoning                  | Swarm        |
-| -------- | ------------- | -------------- | ------------------- | -------------------------- | ------------ |
-| `go`     | gpt-5.4-mini  | gpt-5.3-codex  | gpt-5.4-mini        | high                       | conservative |
-| `plus`   | gpt-5.3-codex | gpt-5.3-codex  | gpt-5.4-mini        | xhigh main, medium utility | standard     |
-| `pro-5`  | gpt-5.2       | gpt-5.3-codex  | gpt-5.3-codex-spark | xhigh                      | aggressive   |
-| `pro-20` | gpt-5.2       | gpt-5.3-codex  | gpt-5.3-codex-spark | xhigh main, medium utility | max          |
+| Plan     | Main Model    | Implementation | Utility             | Edit Mode | Plan Mode                  | Swarm        |
+| -------- | ------------- | -------------- | ------------------- | --------- | -------------------------- | ------------ |
+| `go`     | gpt-5.4-mini  | gpt-5.3-codex  | gpt-5.4-mini        | medium    | high main, medium utility  | conservative |
+| `plus`   | gpt-5.3-codex | gpt-5.3-codex  | gpt-5.4-mini        | medium    | xhigh main, medium utility | standard     |
+| `pro-5`  | gpt-5.2       | gpt-5.3-codex  | gpt-5.3-codex-spark | medium    | xhigh main, medium utility | aggressive   |
+| `pro-20` | gpt-5.2       | gpt-5.3-codex  | gpt-5.3-codex-spark | medium    | xhigh main, medium utility | max          |
 
 `gpt-5.3-codex-spark` is reserved for `pro-5` and `pro-20`. `go` and `plus` never materialize Spark.
 

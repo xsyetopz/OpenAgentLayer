@@ -20,86 +20,67 @@ SELECT * FROM orders WHERE user_id = 3;
 
 ### Raw SQL Fix
 
-```python
-# Problem: 1 query for users + N queries for orders
-for user in users:
-    orders = db.execute("SELECT * FROM orders WHERE user_id = ?", [user.id])
-
-# Fix: single JOIN
-users_with_orders = db.execute("""
-    SELECT u.*, o.id as order_id, o.total
-    FROM users u
-    LEFT JOIN orders o ON o.user_id = u.id
-""")
+```diff
+- for user in users:
+-     orders = db.execute("SELECT * FROM orders WHERE user_id = ?", [user.id])
++ users_with_orders = db.execute("""
++     SELECT u.*, o.id as order_id, o.total
++     FROM users u
++     LEFT JOIN orders o ON o.user_id = u.id
++ """)
 ```
 
 ### Prisma (TypeScript)
 
-```typescript
-// N+1
-const users = await prisma.user.findMany();
-for (const user of users) {
-    const orders = await prisma.order.findMany({ where: { userId: user.id } });
-}
-
-// Fixed: include
-const users = await prisma.user.findMany({
-    include: { orders: true },
-});
-
-// Or: select specific fields
-const users = await prisma.user.findMany({
-    include: { orders: { select: { id: true, total: true } } },
-});
+```diff
+- const users = await prisma.user.findMany();
+- for (const user of users) {
+-     const orders = await prisma.order.findMany({ where: { userId: user.id } });
+- }
++ const users = await prisma.user.findMany({
++     include: { orders: true },
++ });
++
++ const users = await prisma.user.findMany({
++     include: { orders: { select: { id: true, total: true } } },
++ });
 ```
 
 ### SQLAlchemy (Python)
 
-```python
-# N+1: lazy loading triggers separate query per user
-users = session.query(User).all()
-for user in users:
-    print(user.orders)  # query fires here
-
-# Fixed: eager load with joinedload
-from sqlalchemy.orm import joinedload
-
-users = session.query(User).options(joinedload(User.orders)).all()
-
-# For large collections, use subqueryload instead
-from sqlalchemy.orm import subqueryload
-users = session.query(User).options(subqueryload(User.orders)).all()
+```diff
+- users = session.query(User).all()
+- for user in users:
+-     print(user.orders)  # query fires here
++ from sqlalchemy.orm import joinedload
++
++ users = session.query(User).options(joinedload(User.orders)).all()
++
++ from sqlalchemy.orm import subqueryload
++ users = session.query(User).options(subqueryload(User.orders)).all()
 ```
 
 ### GORM (Go)
 
-```go
-// N+1
-var users []User
-db.Find(&users)
-for _, user := range users {
-    db.Find(&user.Orders)  // separate query each iteration
-}
-
-// Fixed: Preload
-var users []User
-db.Preload("Orders").Find(&users)
-
-// Multiple associations
-db.Preload("Orders").Preload("Profile").Find(&users)
-
-// Conditional preload
-db.Preload("Orders", "status = ?", "shipped").Find(&users)
+```diff
+- var users []User
+- db.Find(&users)
+- for _, user := range users {
+-     db.Find(&user.Orders)  // separate query each iteration
+- }
++ var users []User
++ db.Preload("Orders").Find(&users)
++
++ db.Preload("Orders").Preload("Profile").Find(&users)
++
++ db.Preload("Orders", "status = ?", "shipped").Find(&users)
 ```
 
 ### ActiveRecord / Rails pattern (for reference)
 
-```ruby
-# N+1
-User.all.each { |u| u.orders.count }
-
-# Fixed: includes
-User.includes(:orders).each { |u| u.orders.count }
+```diff
+- User.all.each { |u| u.orders.count }
++ User.includes(:orders).each { |u| u.orders.count }
 ```
 
 ---
@@ -112,67 +93,59 @@ Profiler shows allocation functions (malloc, new) in tight loops. GC pressure vi
 
 ### Rust
 
-```rust
-// Problem: new Vec per iteration
-for item in &items {
-    let mut buffer: Vec<u8> = Vec::new();
-    encode_item(&mut buffer, item);
-    send(&buffer);
-}
-
-// Fix: allocate once, reuse
-let mut buffer: Vec<u8> = Vec::with_capacity(1024);
-for item in &items {
-    buffer.clear();
-    encode_item(&mut buffer, item);
-    send(&buffer);
-}
+```diff
+- for item in &items {
+-     let mut buffer: Vec<u8> = Vec::new();
+-     encode_item(&mut buffer, item);
+-     send(&buffer);
+- }
++ let mut buffer: Vec<u8> = Vec::with_capacity(1024);
++ for item in &items {
++     buffer.clear();
++     encode_item(&mut buffer, item);
++     send(&buffer);
++ }
 ```
 
 ### Go
 
-```go
-// Problem: new map per request in hot path
-func handleRequest(items []Item) {
-    seen := make(map[string]bool)  // allocates on heap each call
-    for _, item := range items {
-        seen[item.ID] = true
-    }
-}
-
-// Fix: sync.Pool for reusable allocations
-var pool = sync.Pool{
-    New: func() any { return make(map[string]bool) },
-}
-
-func handleRequest(items []Item) {
-    seen := pool.Get().(map[string]bool)
-    defer func() {
-        for k := range seen { delete(seen, k) }
-        pool.Put(seen)
-    }()
-    for _, item := range items {
-        seen[item.ID] = true
-    }
-}
+```diff
+- func handleRequest(items []Item) {
+-     seen := make(map[string]bool)  // allocates on heap each call
+-     for _, item := range items {
+-         seen[item.ID] = true
+-     }
+- }
++ var pool = sync.Pool{
++     New: func() any { return make(map[string]bool) },
++ }
++
++ func handleRequest(items []Item) {
++     seen := pool.Get().(map[string]bool)
++     defer func() {
++         for k := range seen { delete(seen, k) }
++         pool.Put(seen)
++     }()
++     for _, item := range items {
++         seen[item.ID] = true
++     }
++ }
 ```
 
 ### TypeScript
 
-```typescript
-// Problem: array spread creates new array each iteration
-const results: Result[] = [];
-for (const item of items) {
-    results.push(...processItem(item));  // spread allocates new array
-}
-
-// Fix: push individual items
-for (const item of items) {
-    const processed = processItem(item);
-    for (const r of processed) results.push(r);
-}
-// Or: flat map if not in hot path
-const results = items.flatMap(processItem);
+```diff
+- const results: Result[] = [];
+- for (const item of items) {
+-     results.push(...processItem(item));  // spread allocates new array
+- }
++ const results: Result[] = [];
++ for (const item of items) {
++     const processed = processItem(item);
++     for (const r of processed) results.push(r);
++ }
++
++ const flatResults = items.flatMap(processItem);
 ```
 
 ---
@@ -185,70 +158,56 @@ Node.js: high event loop lag (`clinic doctor` shows "Your process is unresponsiv
 
 ### TypeScript -- Sequential vs Parallel
 
-```typescript
-// Problem: sequential when operations are independent
-for (const userId of userIds) {
-    const user = await fetchUser(userId);   // waits for each
-    results.push(user);
-}
-
-// Fix: parallel
-const users = await Promise.all(userIds.map(fetchUser));
-
-// Fix with concurrency limit (avoid overwhelming the service)
-import pLimit from 'p-limit';
-const limit = pLimit(10);
-const users = await Promise.all(
-    userIds.map(id => limit(() => fetchUser(id)))
-);
+```diff
+- for (const userId of userIds) {
+-     const user = await fetchUser(userId);   // waits for each
+-     results.push(user);
+- }
++ const users = await Promise.all(userIds.map(fetchUser));
++
++ import pLimit from 'p-limit';
++ const limit = pLimit(10);
++ const limitedUsers = await Promise.all(
++     userIds.map(id => limit(() => fetchUser(id)))
++ );
 ```
 
 ### TypeScript -- Sync work on event loop
 
-```typescript
-// Problem: heavy CPU work blocks event loop
-app.get('/compute', (req, res) => {
-    const result = heavyComputation(req.body);  // blocks all other requests
-    res.json(result);
-});
-
-// Fix: offload to worker thread
-import { Worker, isMainThread, workerData, parentPort } from 'worker_threads';
-
-// Or use existing thread pool libraries: piscina, workerpool
-import Piscina from 'piscina';
-const piscina = new Piscina({ filename: './worker.js' });
-
-app.get('/compute', async (req, res) => {
-    const result = await piscina.run(req.body);
-    res.json(result);
-});
+```diff
+- app.get('/compute', (req, res) => {
+-     const result = heavyComputation(req.body);  // blocks all other requests
+-     res.json(result);
+- });
++ import Piscina from 'piscina';
++ const piscina = new Piscina({ filename: './worker.js' });
++
++ app.get('/compute', async (req, res) => {
++     const result = await piscina.run(req.body);
++     res.json(result);
++ });
 ```
 
 ### Python asyncio
 
-```python
-# Problem: sync I/O inside async function
-async def process_user(user_id: str):
-    data = requests.get(f"/api/users/{user_id}")  # blocks event loop!
+```diff
+- async def process_user(user_id: str):
+-     data = requests.get(f"/api/users/{user_id}")  # blocks event loop!
++ import httpx
++
++ async def process_user(user_id: str):
++     async with httpx.AsyncClient() as client:
++         data = await client.get(f"/api/users/{user_id}")
+```
 
-# Fix: use async HTTP client
-import httpx
-
-async def process_user(user_id: str):
-    async with httpx.AsyncClient() as client:
-        data = await client.get(f"/api/users/{user_id}")
-
-# Problem: sequential awaits
-async def process_all(ids: list[str]):
-    results = []
-    for id in ids:
-        result = await fetch(id)
-        results.append(result)
-
-# Fix: gather
-async def process_all(ids: list[str]):
-    results = await asyncio.gather(*[fetch(id) for id in ids])
+```diff
+- async def process_all(ids: list[str]):
+-     results = []
+-     for id in ids:
+-         result = await fetch(id)
+-         results.append(result)
++ async def process_all(ids: list[str]):
++     results = await asyncio.gather(*[fetch(id) for id in ids])
 ```
 
 ---

@@ -10,21 +10,18 @@ Attack descriptions, vulnerable patterns, detection heuristics, and mitigations 
 
 An authenticated user accesses or modifies another user's resources by changing an ID in the request.
 
-```typescript
-// Vulnerable: trusts client-supplied ID
-app.get('/api/invoices/:id', auth, async (req, res) => {
-  const invoice = await db.invoices.find(req.params.id);
-  res.json(invoice);  // any user can read any invoice
-});
-
-// Fixed: enforce ownership
-app.get('/api/invoices/:id', auth, async (req, res) => {
-  const invoice = await db.invoices.find(req.params.id);
-  if (!invoice || invoice.ownerId !== req.user.id) {
-    return res.status(404).json({ error: 'not found' });
-  }
-  res.json(invoice);
-});
+```diff
+- app.get('/api/invoices/:id', auth, async (req, res) => {
+-   const invoice = await db.invoices.find(req.params.id);
+-   res.json(invoice);  // any user can read any invoice
+- });
++ app.get('/api/invoices/:id', auth, async (req, res) => {
++   const invoice = await db.invoices.find(req.params.id);
++   if (!invoice || invoice.ownerId !== req.user.id) {
++     return res.status(404).json({ error: 'not found' });
++   }
++   res.json(invoice);
++ });
 ```
 
 **Detection**: Search for `findById`, `findOne`, `db.get(Model, id)` without ownership check. Also check bulk endpoints (`/users/bulk-delete`, `/orders?ids=...`).
@@ -37,28 +34,22 @@ app.get('/api/invoices/:id', auth, async (req, res) => {
 
 Request body bound directly to model, allowing users to set fields they shouldn't (e.g., `role`, `isAdmin`, `price`).
 
-```typescript
-// Vulnerable
-app.post('/users', async (req, res) => {
-  const user = await User.create(req.body);  // attacker sends { role: 'admin' }
-  res.json(user);
-});
-
-// Fixed: explicit allowlist
-app.post('/users', async (req, res) => {
-  const { name, email, password } = req.body;  // only accept known safe fields
-  const user = await User.create({ name, email, password });
-  res.json(user);
-});
+```diff
+- app.post('/users', async (req, res) => {
+-   const user = await User.create(req.body);  // attacker sends { role: 'admin' }
+-   res.json(user);
+- });
++ app.post('/users', async (req, res) => {
++   const { name, email, password } = req.body;  // only accept known safe fields
++   const user = await User.create({ name, email, password });
++   res.json(user);
++ });
 ```
 
-```python
-# Bad
-user = User(**request.json)
-
-# Good
-allowed = {'name', 'email', 'password'}
-user = User(**{k: v for k, v in request.json.items() if k in allowed})
+```diff
+- user = User(**request.json)
++ allowed = {'name', 'email', 'password'}
++ user = User(**{k: v for k, v in request.json.items() if k in allowed})
 ```
 
 **Detection**: `Object.assign(entity, req.body)`, `**request.json` without filtering, ORM `create(req.body)`.
@@ -72,7 +63,6 @@ user = User(**{k: v for k, v in request.json.items() if k in allowed})
 Server fetches a URL controlled by the attacker, enabling access to internal services or cloud metadata.
 
 ```python
-# Vulnerable
 @app.post('/webhook/test')
 def test_webhook(url: str):
     response = requests.get(url)  # attacker sends http://169.254.169.254/...
@@ -109,20 +99,17 @@ Deserializing attacker-controlled data using formats that execute arbitrary code
 | Ruby          | `Marshal.load(data)`        | JSON + strict schema     |
 | Node.js       | `serialize-javascript` eval | JSON.parse + schema      |
 
-```python
-# Bad
-import pickle
-obj = pickle.loads(request.get_data())
-
-# Good: JSON + schema
-import json
-from pydantic import BaseModel
-
-class Payload(BaseModel):
-    action: str
-    target_id: int
-
-payload = Payload(**json.loads(request.get_data()))
+```diff
+- import pickle
+- obj = pickle.loads(request.get_data())
++ import json
++ from pydantic import BaseModel
++
++ class Payload(BaseModel):
++     action: str
++     target_id: int
++
++ payload = Payload(**json.loads(request.get_data()))
 ```
 
 ---
@@ -182,19 +169,15 @@ Attackers exhaust resources, enumerate data, or brute-force credentials by bypas
 - Account enumeration: limit per IP, not per account
 - Header spoofing: `X-Forwarded-For`, `X-Real-IP` manipulation
 
-```typescript
-// Bad: rate limit by IP only
-rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-
-// Better: rate limit by IP + account
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  keyGenerator: (req) => `${req.ip}:${req.body?.email ?? 'anonymous'}`,
-});
-
-// Don't trust X-Forwarded-For unless behind a known proxy
-app.set('trust proxy', ['loopback', '10.0.0.0/8']);
+```diff
+- rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
++ const limiter = rateLimit({
++   windowMs: 15 * 60 * 1000,
++   max: 10,
++   keyGenerator: (req) => `${req.ip}:${req.body?.email ?? 'anonymous'}`,
++ });
++
++ app.set('trust proxy', ['loopback', '10.0.0.0/8']);
 ```
 
 Endpoints requiring rate limits:
@@ -216,15 +199,11 @@ Endpoints requiring rate limits:
 | Missing expiry      | No `exp` claim                            | Set `exp`, reject tokens without it           |
 | No audience check   | Token for service A accepted by service B | Validate `aud` claim matches expected service |
 
-```typescript
-// Bad: implicit algorithm acceptance
-const payload = jwt.verify(token, secret);
-
-// Good: explicit algorithm + claims
-const payload = jwt.verify(token, secret, {
-  algorithms: ['HS256'],
-  audience: 'api.myapp.com',
-  issuer: 'auth.myapp.com',
-});
-// payload.exp is checked automatically by verify()
+```diff
+- const payload = jwt.verify(token, secret);
++ const payload = jwt.verify(token, secret, {
++   algorithms: ['HS256'],
++   audience: 'api.myapp.com',
++   issuer: 'auth.myapp.com',
++ });
 ```

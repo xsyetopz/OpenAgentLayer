@@ -10,19 +10,24 @@ One source of truth, four platform targets. Edit once, regenerate, and every pla
 
 ## Architecture
 
-```
-source/
-  agents.json        -> 7 agents
-  skills.json        -> skills (see source/skills.json for current list)
-  hook-policies.json -> safety hooks
-       |
-       v
-  scripts/generate.mjs
-       |
-       +---> claude/    (Claude Code plugin)
-       +---> codex/     (Codex CLI plugin)
-       +---> opencode/  (OpenCode integration)
-       +---> copilot/   (GitHub Copilot assets)
+```mermaid
+graph TD
+    A["agents.json<br/>(7 agents)"]
+    B["skills.json<br/>(see source/skills.json)"]
+    C["hook-policies.json<br/>(safety hooks)"]
+    D["scripts/generate.mjs"]
+    E["claude/<br/>(Claude Code plugin)"]
+    F["codex/<br/>(Codex CLI plugin)"]
+    G["opencode/<br/>(OpenCode integration)"]
+    H["copilot/<br/>(GitHub Copilot assets)"]
+
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    D --> F
+    D --> G
+    D --> H
 ```
 
 ## The 7 Agents
@@ -132,7 +137,7 @@ These are guardrails, not walls. They catch common mistakes but are not a securi
 | Clean up AI-sounding text  | `/cca:desloppify` / `oabtw-codex desloppify` |
 | Make a technical decision  | `/cca:decide`                                |
 | Commit and ship            | `/cca:ship`                                  |
-| Change your plan preset    | `./config.sh --claude-plan max20`            |
+| Change your plan preset    | `./config.sh --claude-plan max-20`           |
 
 ## Further Reading
 

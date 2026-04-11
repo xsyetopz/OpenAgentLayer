@@ -26,21 +26,21 @@ export async function mergeTaggedMarkdown({ target, template, start, end }) {
 function buildCodexAgentProfiles(planName) {
 	const plan = getCodexPlan(planName);
 	return {
-		athena: [plan.main.model, plan.main.reasoning],
-		hephaestus: [plan.implement.model, plan.implement.reasoning],
-		nemesis: [plan.main.model, plan.main.reasoning],
-		odysseus: [plan.main.model, plan.main.reasoning],
-		hermes: [plan.utility.model, plan.utility.reasoning],
-		atalanta: [plan.utility.model, plan.utility.reasoning],
-		calliope: [plan.utility.model, plan.utility.reasoning],
+		athena: plan.agentAssignments.athena,
+		hephaestus: plan.agentAssignments.hephaestus,
+		nemesis: plan.agentAssignments.nemesis,
+		odysseus: plan.agentAssignments.odysseus,
+		hermes: plan.agentAssignments.hermes,
+		atalanta: plan.agentAssignments.atalanta,
+		calliope: plan.agentAssignments.calliope,
 	};
 }
 
 function renderCodexProfile(name, config, extra = "") {
 	return `[profiles.${name}]
 model = "${config.model}"
-model_reasoning_effort = "${config.reasoning}"
-plan_mode_reasoning_effort = "${config.reasoning}"
+model_reasoning_effort = "${config.modelReasoning}"
+plan_mode_reasoning_effort = "${config.planReasoning}"
 model_verbosity = "${config.verbosity}"
 personality = "none"
 approval_policy = "on-request"
@@ -99,22 +99,22 @@ function buildManagedCodexBody({
 		: "";
 	const aliasProfile = renderCodexProfile(
 		`openagentsbtw-${plan.id}`,
-		plan.main,
+		plan.profiles.main,
 	);
-	const mainProfile = renderCodexProfile("openagentsbtw", plan.main);
+	const mainProfile = renderCodexProfile("openagentsbtw", plan.profiles.main);
 	const implementProfile = renderCodexProfile(
 		"openagentsbtw-implement",
-		plan.implement,
+		plan.profiles.acceptEdits,
 	);
 	const utilityProfile = renderCodexProfile(
 		"openagentsbtw-codex-mini",
-		plan.utility,
+		plan.profiles.utility,
 	);
 	const acceptEditsProfile = `[profiles.openagentsbtw-accept-edits]
-model = "${plan.implement.model}"
-model_reasoning_effort = "${plan.implement.reasoning}"
-plan_mode_reasoning_effort = "${plan.implement.reasoning}"
-model_verbosity = "${plan.implement.verbosity}"
+model = "${plan.profiles.acceptEdits.model}"
+model_reasoning_effort = "${plan.profiles.acceptEdits.modelReasoning}"
+plan_mode_reasoning_effort = "${plan.profiles.acceptEdits.planReasoning}"
+model_verbosity = "${plan.profiles.acceptEdits.verbosity}"
 personality = "none"
 approval_policy = "never"
 sandbox_mode = "workspace-write"
@@ -125,10 +125,10 @@ sqlite = true
 multi_agent = true
 fast_mode = false`;
 	const longrunProfile = `[profiles.openagentsbtw-longrun]
-model = "${plan.implement.model}"
-model_reasoning_effort = "${plan.implement.reasoning}"
-plan_mode_reasoning_effort = "${plan.implement.reasoning}"
-model_verbosity = "${plan.implement.verbosity}"
+model = "${plan.profiles.longrun.model}"
+model_reasoning_effort = "${plan.profiles.longrun.modelReasoning}"
+plan_mode_reasoning_effort = "${plan.profiles.longrun.planReasoning}"
+model_verbosity = "${plan.profiles.longrun.verbosity}"
 personality = "none"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"

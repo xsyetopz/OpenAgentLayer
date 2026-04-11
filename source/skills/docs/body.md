@@ -86,6 +86,17 @@ Creates a user account.
 | 422    | Invalid email format     |
 ```
 
+## Contrastive Examples
+
+When documentation shows a wrong-vs-right, before-vs-after, or vulnerable-vs-fixed example, use one `diff` block instead of two separate code fences or inline `Bad:` / `Good:` pairs.
+
+```diff
+- const payload = jwt.verify(token, secret);
++ const payload = jwt.verify(token, secret, { algorithms: ['HS256'] });
+```
+
+Use `-` for the rejected pattern and `+` for the recommended pattern. Add a short prose label above the block if language or context would otherwise be unclear.
+
 See `/cca:review` for inline documentation and comments policy.
 
 See `/cca:desloppify` for prohibited language patterns.

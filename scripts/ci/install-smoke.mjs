@@ -150,7 +150,7 @@ async function main() {
 				"--all",
 				"--skip-rtk",
 				"--claude-plan",
-				"max5",
+				"max-5",
 				"--codex-plan",
 				"pro-5",
 				"--no-codex-set-top-profile",

@@ -105,6 +105,22 @@ describe("generated skills", () => {
 		}
 	});
 
+	it("renders contrastive examples as diff blocks in generated skills", () => {
+		for (const relativePath of [
+			"claude/skills/security/reference/owasp-checklist.md",
+			"claude/skills/review/reference/refactoring-catalog.md",
+			"codex/plugin/openagentsbtw/skills/security/reference/api-attacks.md",
+			"codex/plugin/openagentsbtw/skills/review/reference/anti-patterns.md",
+		]) {
+			const content = readBuild(relativePath);
+			assert.match(content, /```diff/);
+			assert.doesNotMatch(
+				content,
+				/^\s*(?:#|\/\/)\s*(?:Bad|Good|Vulnerable|Fixed|Before|After|Problem|Fix)\b/m,
+			);
+		}
+	});
+
 	it("ships the Caveman skills and local compressor across all platforms", () => {
 		for (const relativePath of [
 			"claude/skills/caveman/SKILL.md",
@@ -170,6 +186,22 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /approval_policy = "never"/);
 		assert.match(config, /sqlite = true/);
 		assert.equal(config.includes('model_verbosity = "medium"'), false);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw-go\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+		);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw-plus\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "xhigh"/,
+		);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw-accept-edits\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "xhigh"/,
+		);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw-longrun\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "xhigh"/,
+		);
 	});
 
 	it("ports the CCA-style response contract into Codex guidance", () => {

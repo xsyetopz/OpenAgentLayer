@@ -14,21 +14,24 @@ Edit once in `source/`. Run the generator. Get deterministic, platform-correct a
 
 ## Architecture
 
-```
-source/                          Canonical definitions
-  agents.json                    7 agents (athena, hephaestus, nemesis, atalanta, calliope, hermes, odysseus)
-  skills.json                    16 skills (review, test, desloppify, explore, ...)
-  hook-policies.json             10 hook policies (pre-bash guard, post-write scan, ...)
-  agent-prompts.mjs              Prompt templates
-  skills/*/body.md               Skill content
-       |
-       v
-scripts/generate.mjs             Renders platform-specific artifacts
-       |
-       +---> claude/              Claude Code plugin + hooks + tests
-       +---> codex/               Codex plugin + custom agents + research docs
-       +---> opencode/            OpenCode integration + templates
-       +---> copilot/             Copilot/VS Code assets + hook scripts
+```mermaid
+graph TD
+    A["source/"] --> B["agents.json<br/>7 agents"]
+    A --> C["skills.json<br/>16 skills"]
+    A --> D["hook-policies.json<br/>10 hook policies"]
+    A --> E["agent-prompts.mjs<br/>Prompt templates"]
+    A --> F["skills/*/body.md<br/>Skill content"]
+
+    B --> G["scripts/generate.mjs<br/>Renders artifacts"]
+    C --> G
+    D --> G
+    E --> G
+    F --> G
+
+    G --> H["claude/<br/>Code plugin + hooks + tests"]
+    G --> I["codex/<br/>Plugin + custom agents + docs"]
+    G --> J["opencode/<br/>Integration + templates"]
+    G --> K["copilot/<br/>VS Code assets + scripts"]
 ```
 
 ## Getting Started
@@ -46,11 +49,11 @@ Each platform has plan presets that control which models route to which agents. 
 
 **Claude Code:**
 
-| Plan    | Flag                  | Subscription | What you get                                                            |
-| ------- | --------------------- | ------------ | ----------------------------------------------------------------------- |
-| `plus`  | `--claude-plan plus`  | Claude Plus  | Sonnet-only. Budget-conscious, no Opus routing.                         |
-| `max5`  | `--claude-plan max5`  | Claude Pro   | **Default.** Opus for planning/review, Sonnet for implementation.       |
-| `max20` | `--claude-plan max20` | Claude Max   | Full Opus orchestration, Sonnet for lightweight tasks, max parallelism. |
+| Plan     | Flag                   | Subscription   | What you get                                                            |
+| -------- | ---------------------- | -------------- | ----------------------------------------------------------------------- |
+| `pro`    | `--claude-plan pro`    | Claude Pro     | Sonnet-only. Budget-conscious, no Opus routing.                         |
+| `max-5`  | `--claude-plan max-5`  | Claude Max 5x  | **Default.** Opus for planning/review, Sonnet for implementation.       |
+| `max-20` | `--claude-plan max-20` | Claude Max 20x | Full Opus orchestration, Sonnet for lightweight tasks, max parallelism. |
 
 **Codex CLI:**
 
@@ -63,10 +66,10 @@ Each platform has plan presets that control which models route to which agents. 
 
 **GitHub Copilot:**
 
-| Plan       | Flag                      | What you get                                                   |
-| ---------- | ------------------------- | -------------------------------------------------------------- |
-| `pro`      | `--copilot-plan pro`      | **Default.** GPT-5.2 for planning/review, Mini for build/test. |
-| `pro-plus` | `--copilot-plan pro-plus` | Codex for build/implement, heavier parallelism.                |
+| Plan   | Flag                      | What you get                                                   |
+| ------ | ------------------------- | -------------------------------------------------------------- |
+| `pro`  | `--copilot-plan pro`      | **Default.** GPT-5.2 for planning/review, Mini for build/test. |
+| `Pro+` | `--copilot-plan pro-plus` | Codex for build/implement, heavier parallelism.                |
 
 **OpenCode:** No preset plans. Uses `--opencode-default-model <MODEL>` or per-role overrides with `--opencode-model <ROLE>=<MODEL>`.
 
@@ -75,7 +78,7 @@ Each platform has plan presets that control which models route to which agents. 
 Install with your plan:
 
 ```bash
-./install.sh --claude --claude-plan max5
+./install.sh --claude --claude-plan max-5
 ./install.sh --codex --codex-plan plus
 ./install.sh --copilot --copilot-plan pro
 ./install.sh --all --caveman-mode full
@@ -94,14 +97,14 @@ Or run with no flags for interactive prompts that walk you through each choice:
 ./install.sh
 ```
 
-PowerShell works the same way: `./install.ps1 --claude --claude-plan max5`.
+PowerShell works the same way: `./install.ps1 --claude --claude-plan max-5`.
 
 ### 4. Change your plan later
 
 No need to reinstall. Use `config.sh`:
 
 ```bash
-./config.sh --claude-plan max20
+./config.sh --claude-plan max-20
 ./config.sh --codex-plan pro-5
 ./config.sh --copilot-plan pro-plus
 ./config.sh --caveman-mode off

@@ -41,9 +41,9 @@ Good error messages include:
 3. **Why** it matters (what operation was interrupted)
 4. **How** to fix it (when possible)
 
-```text
-Bad:  "Error: invalid input"
-Good: "Failed to parse config at line 42: expected integer for 'port', got 'abc'"
+```diff
+- "Error: invalid input"
++ "Failed to parse config at line 42: expected integer for 'port', got 'abc'"
 ```
 
 See `/cca:review` for language-specific anti-patterns (no unwrap in prod, no any, etc.).

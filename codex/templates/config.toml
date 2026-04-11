@@ -72,7 +72,7 @@ agents.max_depth = 1
 
 [profiles.openagentsbtw-go]
 model = "gpt-5.4-mini"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "low"
 personality = "none"
@@ -87,7 +87,7 @@ fast_mode = false
 
 [profiles.openagentsbtw-plus]
 model = "gpt-5.3-codex"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
@@ -102,7 +102,7 @@ fast_mode = false
 
 [profiles.openagentsbtw-pro-5]
 model = "gpt-5.2"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
@@ -117,7 +117,7 @@ fast_mode = false
 
 [profiles.openagentsbtw-pro-20]
 model = "gpt-5.2"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
@@ -132,7 +132,7 @@ fast_mode = false
 
 [profiles.openagentsbtw]
 model = "gpt-5.2"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
@@ -147,8 +147,8 @@ fast_mode = false
 
 [profiles.openagentsbtw-implement]
 model = "gpt-5.3-codex"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
 approval_policy = "on-request"
@@ -177,8 +177,8 @@ fast_mode = false
 
 [profiles.openagentsbtw-accept-edits]
 model = "gpt-5.3-codex"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
 approval_policy = "never"
@@ -192,8 +192,8 @@ fast_mode = false
 
 [profiles.openagentsbtw-longrun]
 model = "gpt-5.3-codex"
-model_reasoning_effort = "high"
-plan_mode_reasoning_effort = "high"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "xhigh"
 model_verbosity = "low"
 personality = "none"
 approval_policy = "on-request"

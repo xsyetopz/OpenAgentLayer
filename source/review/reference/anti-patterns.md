@@ -21,14 +21,11 @@ Changes beyond what was requested. Finishing what WAS requested is not scope cre
 
 Logic differences in restructured code.
 
-```python
-# Before (correct)
-def discount(price, rate):
-    return price * (1 - rate)
-
-# After refactor (broken -- order changed)
-def discount(rate, price):     # param order swapped -- silent bug
-    return price * (1 - rate)
+```diff
+- def discount(price, rate):
+-     return price * (1 - rate)
++ def discount(rate, price):     # param order swapped -- silent bug
++     return price * (1 - rate)
 ```
 
 Detection: diff the logic path, not just the structure.
@@ -52,19 +49,12 @@ Stub implementations that reach production.
 
 Duplicated knowledge (not just similar-looking code).
 
-```typescript
-// Violation: same validation rule in 3 places
-// UserService.ts
-if (email.length > 255 || !email.includes('@')) throw new Error('invalid');
-// AuthService.ts
-if (email.length > 255 || !email.includes('@')) return false;
-// ProfileService.ts
-if (email.length > 255 || !email.includes('@')) reject(email);
-
-// Fix: one source of truth
-// validators.ts
-export const isValidEmail = (email: string) =>
-  email.length <= 255 && email.includes('@');
+```diff
+- if (email.length > 255 || !email.includes('@')) throw new Error('invalid');
+- if (email.length > 255 || !email.includes('@')) return false;
+- if (email.length > 255 || !email.includes('@')) reject(email);
++ export const isValidEmail = (email: string) =>
++   email.length <= 255 && email.includes('@');
 ```
 
 ---
@@ -73,19 +63,13 @@ export const isValidEmail = (email: string) =>
 
 Comments that narrate what the code already says.
 
-```python
-# BAD
-# Loop through users
-for user in users:
-    # Check if user is active
-    if user.is_active:
-        # Add to result list
-        result.append(user)
-
-# GOOD -- no comments needed; code is self-explanatory
-for user in users:
-    if user.is_active:
-        result.append(user)
+```diff
+- # Loop through users
+  for user in users:
+-     # Check if user is active
+      if user.is_active:
+-         # Add to result list
+          result.append(user)
 ```
 
 Internal comments are for non-obvious "why", never "what".
@@ -96,19 +80,16 @@ Internal comments are for non-obvious "why", never "what".
 
 Multiple reasons to change in one module.
 
-```go
-// Violation: user creation + email sending in one service
-type UserService struct { db DB; smtp SMTP }
-
-func (s *UserService) Register(email string) error {
-    user := s.db.Create(email)          // reason 1: persistence
-    s.smtp.SendWelcome(user.Email)       // reason 2: notifications
-    return nil
-}
-
-// Fix: separate services, compose at the use-case layer
-type UserService struct { db DB }
-type NotificationService struct { smtp SMTP }
+```diff
+- type UserService struct { db DB; smtp SMTP }
+-
+- func (s *UserService) Register(email string) error {
+-     user := s.db.Create(email)          // reason 1: persistence
+-     s.smtp.SendWelcome(user.Email)       // reason 2: notifications
+-     return nil
+- }
++ type UserService struct { db DB }
++ type NotificationService struct { smtp SMTP }
 ```
 
 ---
@@ -117,15 +98,12 @@ type NotificationService struct { smtp SMTP }
 
 Abstractions used once, premature generalization.
 
-```typescript
-// Over-engineered for one use case
-interface DataProcessor<T, R> {
-  process(input: T, options: ProcessorOptions<T>): Promise<Result<R>>;
-}
-class UserDataProcessor implements DataProcessor<RawUser, User> { ... }
-
-// When you have exactly one processor and no planned variants:
-async function processUser(raw: RawUser): Promise<User> { ... }
+```diff
+- interface DataProcessor<T, R> {
+-   process(input: T, options: ProcessorOptions<T>): Promise<Result<R>>;
+- }
+- class UserDataProcessor implements DataProcessor<RawUser, User> { ... }
++ async function processUser(raw: RawUser): Promise<User> { ... }
 ```
 
 Rule: generalize when the second real use case appears, not before.
@@ -181,35 +159,25 @@ fn handle_request(req: Request) -> Response {
 
 Errors silently dropped or panicked.
 
-```rust
-// Bad
-let config = std::fs::read_to_string("config.toml").unwrap();
-
-// Bad
-let _ = db.execute(query);
-
-// Good
-let config = std::fs::read_to_string("config.toml")
-    .context("failed to read config.toml")?;
+```diff
+- let config = std::fs::read_to_string("config.toml").unwrap();
+-
+- let _ = db.execute(query);
++ let config = std::fs::read_to_string("config.toml")
++     .context("failed to read config.toml")?;
 ```
 
-```typescript
-// Bad: swallowed catch
-try { await risky(); } catch {}
-
-// Good
-try { await risky(); } catch (e) { log.error('risky failed', e); throw e; }
+```diff
+- try { await risky(); } catch {}
++ try { await risky(); } catch (e) { log.error('risky failed', e); throw e; }
 ```
 
-```go
-// Bad
-rows, _ := db.Query(query)
-
-// Good
-rows, err := db.Query(query)
-if err != nil {
-    return fmt.Errorf("querying users: %w", err)
-}
+```diff
+- rows, _ := db.Query(query)
++ rows, err := db.Query(query)
++ if err != nil {
++     return fmt.Errorf("querying users: %w", err)
++ }
 ```
 
 ---
@@ -226,14 +194,11 @@ Flag when: the problem has obvious trade-offs, the approach is costly to reverse
 
 Silencing warnings instead of fixing root causes.
 
-```rust
-// Bad: suppressing without explanation
-#[allow(unused_variables)]
-let result = expensive_computation();
-
-// OK: verified false positive with explanation
-#[allow(clippy::too_many_arguments)]  // config struct is deliberately explicit
-fn create_component(a: &str, b: &str, c: u32, d: bool, e: u32, f: &str) {}
+```diff
+- #[allow(unused_variables)]
+- let result = expensive_computation();
++ #[allow(clippy::too_many_arguments)]  // config struct is deliberately explicit
++ fn create_component(a: &str, b: &str, c: u32, d: bool, e: u32, f: &str) {}
 ```
 
 Acceptable only for verified false positives with an explanatory comment.

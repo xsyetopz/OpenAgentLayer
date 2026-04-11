@@ -8,21 +8,18 @@ Per-category: what to look for, vulnerable pattern, fix pattern, verification.
 
 **What to look for**: Resource ownership not verified at the data layer. Auth checked at route only.
 
-```python
-# Vulnerable: checks login but not ownership
-@app.get("/documents/{doc_id}")
-@login_required
-def get_document(doc_id: int):
-    return db.get(Document, doc_id)  # any authenticated user gets any doc
-
-# Fixed
-@app.get("/documents/{doc_id}")
-@login_required
-def get_document(doc_id: int):
-    doc = db.get(Document, doc_id)
-    if doc.owner_id != current_user.id:
-        raise HTTPException(403)
-    return doc
+```diff
+- @app.get("/documents/{doc_id}")
+- @login_required
+- def get_document(doc_id: int):
+-     return db.get(Document, doc_id)  # any authenticated user gets any doc
++ @app.get("/documents/{doc_id}")
++ @login_required
++ def get_document(doc_id: int):
++     doc = db.get(Document, doc_id)
++     if doc.owner_id != current_user.id:
++         raise HTTPException(403)
++     return doc
 ```
 
 **Check**: RBAC/ABAC permissions enforced at service/data layer, not UI/route only.
@@ -33,22 +30,23 @@ def get_document(doc_id: int):
 
 **What to look for**: Sensitive data unencrypted at rest, weak algorithms, secrets in transit.
 
-| Pattern            | Bad                    | Good                               |
-| ------------------ | ---------------------- | ---------------------------------- |
-| Password hashing   | MD5, SHA-1, SHA-256    | bcrypt, scrypt, argon2             |
-| Encryption at rest | none, ROT13, base64    | AES-256-GCM, ChaCha20              |
-| Transport          | HTTP, TLS 1.0/1.1      | TLS 1.2+ only                      |
-| Token signing      | HS256 with weak secret | RS256, ES256 or long random secret |
+```diff
+- Password hashing: MD5, SHA-1, SHA-256
++ Password hashing: bcrypt, scrypt, argon2
+- Encryption at rest: none, ROT13, base64
++ Encryption at rest: AES-256-GCM, ChaCha20
+- Transport: HTTP, TLS 1.0/1.1
++ Transport: TLS 1.2+ only
+- Token signing: HS256 with weak secret
++ Token signing: RS256, ES256, or a long random secret
+```
 
-```python
-# Bad
-import hashlib
-password_hash = hashlib.md5(password.encode()).hexdigest()
-
-# Good
-from passlib.hash import argon2
-password_hash = argon2.hash(password)
-verified = argon2.verify(input_password, password_hash)
+```diff
+- import hashlib
+- password_hash = hashlib.md5(password.encode()).hexdigest()
++ from passlib.hash import argon2
++ password_hash = argon2.hash(password)
++ verified = argon2.verify(input_password, password_hash)
 ```
 
 ---
@@ -57,51 +55,40 @@ verified = argon2.verify(input_password, password_hash)
 
 ### SQL
 
-```python
-# Vulnerable
-def get_user(username):
-    query = f"SELECT * FROM users WHERE username = '{username}'"
-    return db.execute(query)
-
-# Fixed: parameterized
-def get_user(username):
-    return db.execute("SELECT * FROM users WHERE username = ?", [username])
+```diff
+- def get_user(username):
+-     query = f"SELECT * FROM users WHERE username = '{username}'"
+-     return db.execute(query)
++ def get_user(username):
++     return db.execute("SELECT * FROM users WHERE username = ?", [username])
 ```
 
 ### Command Injection
 
-```python
-# Vulnerable
-import subprocess
-subprocess.run(f"convert {user_filename} output.png", shell=True)
-
-# Fixed: list args, no shell
-subprocess.run(["convert", user_filename, "output.png"], shell=False)
+```diff
+- import subprocess
+- subprocess.run(f"convert {user_filename} output.png", shell=True)
++ import subprocess
++ subprocess.run(["convert", user_filename, "output.png"], shell=False)
 ```
 
 ### XSS
 
-```typescript
-// Vulnerable
-element.innerHTML = userInput;
-
-// Fixed: text only, or sanitize
-element.textContent = userInput;
-// or: DOMPurify.sanitize(userInput) for HTML content
+```diff
+- element.innerHTML = userInput;
++ element.textContent = userInput;
++ // or: DOMPurify.sanitize(userInput) for HTML content
 ```
 
 ### Path Traversal
 
-```python
-# Vulnerable
-with open(f"/uploads/{user_path}") as f: ...
-
-# Fixed
-import os
-safe_root = "/uploads"
-candidate = os.path.realpath(os.path.join(safe_root, user_path))
-if not candidate.startswith(safe_root + os.sep):
-    raise PermissionError("path traversal")
+```diff
+- with open(f"/uploads/{user_path}") as f: ...
++ import os
++ safe_root = "/uploads"
++ candidate = os.path.realpath(os.path.join(safe_root, user_path))
++ if not candidate.startswith(safe_root + os.sep):
++     raise PermissionError("path traversal")
 ```
 
 ---
@@ -123,17 +110,14 @@ Checklist:
 
 **What to look for**: Debug mode in production. Default credentials. Verbose error messages.
 
-```python
-# Bad: debug info in prod error response
-@app.errorhandler(500)
-def server_error(e):
-    return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
-
-# Good
-@app.errorhandler(500)
-def server_error(e):
-    log.exception("Internal error")
-    return jsonify({"error": "Internal server error"}), 500
+```diff
+- @app.errorhandler(500)
+- def server_error(e):
+-     return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
++ @app.errorhandler(500)
++ def server_error(e):
++     log.exception("Internal error")
++     return jsonify({"error": "Internal server error"}), 500
 ```
 
 Checklist:
@@ -169,13 +153,10 @@ Checklist:
 
 ## A07 -- Identification and Authentication Failures
 
-```typescript
-// Bad: predictable session token
-const sessionToken = `session_${userId}_${Date.now()}`;
-
-// Good: cryptographically random
-import { randomBytes } from 'crypto';
-const sessionToken = randomBytes(32).toString('hex');  // 256 bits
+```diff
+- const sessionToken = `session_${userId}_${Date.now()}`;
++ import { randomBytes } from 'crypto';
++ const sessionToken = randomBytes(32).toString('hex');  // 256 bits
 ```
 
 Checklist:
@@ -192,26 +173,20 @@ Checklist:
 
 **What to look for**: Deserializing untrusted data. CI/CD pipelines that run arbitrary code from third parties.
 
-```python
-# Vulnerable: pickle deserializes arbitrary code
-import pickle
-obj = pickle.loads(user_data)  # RCE possible
-
-# Vulnerable: yaml.load without Loader
-import yaml
-data = yaml.load(user_data)
-
-# Fixed
-data = yaml.safe_load(user_data)
+```diff
+- import pickle
+- obj = pickle.loads(user_data)  # RCE possible
+-
+- import yaml
+- data = yaml.load(user_data)
++ import yaml
++ data = yaml.safe_load(user_data)
 ```
 
-```typescript
-// Vulnerable: JSON reviver with eval-like behavior
-JSON.parse(data, (key, value) => eval(value));
-
-// Fixed: validate schema after parse
-const raw = JSON.parse(data);
-const validated = schema.parse(raw);  // zod/joi/yup
+```diff
+- JSON.parse(data, (key, value) => eval(value));
++ const raw = JSON.parse(data);
++ const validated = schema.parse(raw);  // zod/joi/yup
 ```
 
 ---
@@ -230,25 +205,21 @@ Checklist:
 
 ## A10 -- Server-Side Request Forgery (SSRF)
 
-```python
-# Vulnerable: user controls target URL
-import requests
-def fetch_url(user_url):
-    return requests.get(user_url).text  # can hit 169.254.169.254, internal services
-
-# Fixed: allowlist + block metadata endpoints
-import ipaddress, socket
-ALLOWED_HOSTS = {"api.example.com", "cdn.example.com"}
-
-def fetch_url(user_url):
-    parsed = urllib.parse.urlparse(user_url)
-    if parsed.hostname not in ALLOWED_HOSTS:
-        raise ValueError("host not allowed")
-    # Also resolve and check IP
-    ip = ipaddress.ip_address(socket.gethostbyname(parsed.hostname))
-    if ip.is_private or ip.is_loopback or ip.is_link_local:
-        raise ValueError("private/metadata IPs not allowed")
-    return requests.get(user_url).text
+```diff
+- import requests
+- def fetch_url(user_url):
+-     return requests.get(user_url).text  # can hit 169.254.169.254, internal services
++ import ipaddress, socket
++ ALLOWED_HOSTS = {"api.example.com", "cdn.example.com"}
++
++ def fetch_url(user_url):
++     parsed = urllib.parse.urlparse(user_url)
++     if parsed.hostname not in ALLOWED_HOSTS:
++         raise ValueError("host not allowed")
++     ip = ipaddress.ip_address(socket.gethostbyname(parsed.hostname))
++     if ip.is_private or ip.is_loopback or ip.is_link_local:
++         raise ValueError("private/metadata IPs not allowed")
++     return requests.get(user_url).text
 ```
 
 Block: `169.254.169.254` (AWS/GCP metadata), RFC-1918 ranges (10.x, 172.16-31.x, 192.168.x), `localhost`, `0.0.0.0`.

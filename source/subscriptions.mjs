@@ -18,15 +18,18 @@ export const SWARM_POLICIES = {
 	},
 };
 
-export const DEFAULT_CLAUDE_PLAN = "max5";
+export const DEFAULT_CLAUDE_PLAN = "max-5";
 export const DEFAULT_CODEX_PLAN = "pro-5";
 export const DEFAULT_COPILOT_PLAN = "pro";
 
-export const CLAUDE_PLAN_ALIASES = {
-	"5x": "max5",
-	"20x": "max20",
-	"pro-5": "max5",
-	"pro-20": "max20",
+export const LEGACY_CLAUDE_PLAN_MIGRATIONS = {
+	plus: "pro",
+	max5: "max-5",
+	max20: "max-20",
+	"5x": "max-5",
+	"20x": "max-20",
+	"pro-5": "max-5",
+	"pro-20": "max-20",
 };
 
 export const CODEX_PLAN_ALIASES = {
@@ -57,7 +60,7 @@ export const CODEX_PLANS = {
 		profiles: {
 			main: {
 				model: "gpt-5.4-mini",
-				modelReasoning: "high",
+				modelReasoning: "medium",
 				planReasoning: "high",
 				verbosity: "low",
 				approval: "on-request",
@@ -75,7 +78,7 @@ export const CODEX_PLANS = {
 			},
 			acceptEdits: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
+				modelReasoning: "medium",
 				planReasoning: "high",
 				verbosity: "low",
 				approval: "never",
@@ -84,7 +87,7 @@ export const CODEX_PLANS = {
 			},
 			longrun: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
+				modelReasoning: "medium",
 				planReasoning: "high",
 				verbosity: "low",
 				approval: "on-request",
@@ -114,7 +117,7 @@ export const CODEX_PLANS = {
 		profiles: {
 			main: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "xhigh",
+				modelReasoning: "medium",
 				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
@@ -132,8 +135,8 @@ export const CODEX_PLANS = {
 			},
 			acceptEdits: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "never",
 				sandbox: "workspace-write",
@@ -141,8 +144,8 @@ export const CODEX_PLANS = {
 			},
 			longrun: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
 				sandbox: "workspace-write",
@@ -171,7 +174,7 @@ export const CODEX_PLANS = {
 		profiles: {
 			main: {
 				model: "gpt-5.2",
-				modelReasoning: "xhigh",
+				modelReasoning: "medium",
 				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
@@ -189,8 +192,8 @@ export const CODEX_PLANS = {
 			},
 			acceptEdits: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "never",
 				sandbox: "workspace-write",
@@ -198,8 +201,8 @@ export const CODEX_PLANS = {
 			},
 			longrun: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
 				sandbox: "workspace-write",
@@ -228,7 +231,7 @@ export const CODEX_PLANS = {
 		profiles: {
 			main: {
 				model: "gpt-5.2",
-				modelReasoning: "xhigh",
+				modelReasoning: "medium",
 				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
@@ -246,8 +249,8 @@ export const CODEX_PLANS = {
 			},
 			acceptEdits: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "never",
 				sandbox: "workspace-write",
@@ -255,8 +258,8 @@ export const CODEX_PLANS = {
 			},
 			longrun: {
 				model: "gpt-5.3-codex",
-				modelReasoning: "high",
-				planReasoning: "high",
+				modelReasoning: "medium",
+				planReasoning: "xhigh",
 				verbosity: "low",
 				approval: "on-request",
 				sandbox: "workspace-write",
@@ -280,9 +283,9 @@ function profileToRoute(profile) {
 }
 
 export const CLAUDE_PLANS = {
-	plus: {
-		name: "plus",
-		displayName: "Plus",
+	pro: {
+		name: "pro",
+		displayName: "Pro",
 		swarmPolicy: "conservative",
 		models: {
 			ccaModel: "claude-sonnet-4-6",
@@ -291,8 +294,8 @@ export const CLAUDE_PLANS = {
 			haikuModel: "claude-haiku-4-5",
 		},
 	},
-	max5: {
-		name: "max5",
+	"max-5": {
+		name: "max-5",
 		displayName: "Max 5x",
 		swarmPolicy: "aggressive",
 		models: {
@@ -302,8 +305,8 @@ export const CLAUDE_PLANS = {
 			haikuModel: "claude-haiku-4-5",
 		},
 	},
-	max20: {
-		name: "max20",
+	"max-20": {
+		name: "max-20",
 		displayName: "Max 20x",
 		swarmPolicy: "max",
 		models: {
@@ -354,7 +357,12 @@ export const COPILOT_PLANS = {
 };
 
 export function normalizeClaudePlan(value = "") {
-	const normalized = CLAUDE_PLAN_ALIASES[value] ?? value ?? "";
+	const normalized = value ?? "";
+	return CLAUDE_PLANS[normalized] ? normalized : "";
+}
+
+export function migrateClaudePlan(value = "") {
+	const normalized = LEGACY_CLAUDE_PLAN_MIGRATIONS[value] ?? value ?? "";
 	return CLAUDE_PLANS[normalized] ? normalized : "";
 }
 
@@ -378,6 +386,8 @@ export function getCodexPlan(value = "") {
 		id: plan.name,
 		displayName: plan.displayName,
 		swarm: SWARM_POLICIES[plan.swarmPolicy],
+		agentAssignments: plan.agentAssignments,
+		profiles: plan.profiles,
 		main: profileToRoute(plan.profiles.main),
 		implement: profileToRoute(plan.profiles.acceptEdits),
 		utility: profileToRoute(plan.profiles.utility),

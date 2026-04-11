@@ -2,6 +2,15 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.1] - 2026-04-11
+
+### Changed
+
+- Claude: renamed the supported plan contract to `pro`, `max-5`, and `max-20`, with installer/config migration for legacy stored values and updated references to Claude Pro, Claude Max 5x, and Claude Max 20x.
+- Copilot: normalized human-facing plan references to `Pro` and `Pro+` while keeping the CLI/config flags `pro` and `pro-plus`.
+- Codex: split managed config reasoning so `model_reasoning_effort` stays `medium` on all managed profiles while `plan_mode_reasoning_effort` remains plan-shaped.
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `1.3.1`.
+
 ## [1.3.0] - 2026-04-11
 
 ### Added

@@ -32,7 +32,7 @@ git pull
 If you use a specific plan, repeat it:
 
 ```bash
-./install.sh --claude --claude-plan pro-20
+./install.sh --claude --claude-plan max-20
 ```
 
 Optional browser automation (Playwright CLI):
@@ -89,9 +89,9 @@ Lifecycle-organized in `hooks/scripts/{pre,post,session}/`.
 
 ## Model Strategy
 
-Three plans, set at install time via `./install.sh --claude-plan <plus|pro-5|pro-20>`:
+Three plans, set at install time via `./install.sh --claude-plan <pro|max-5|max-20>`:
 
-| Role                       | Plus                | Pro 5x              | Pro 20x             |
+| Role                       | Pro                 | Max 5x              | Max 20x             |
 | -------------------------- | ------------------- | ------------------- | ------------------- |
 | Orchestrator (`CCA_MODEL`) | `claude-sonnet-4-6` | `opusplan`          | `opus[1m]`          |
 | Opus slot                  | `claude-sonnet-4-6` | `claude-opus-4-6`   | `claude-opus-4-6`   |

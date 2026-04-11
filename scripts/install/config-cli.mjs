@@ -9,6 +9,7 @@ import {
 	DEFAULT_CODEX_PLAN,
 	DEFAULT_COPILOT_PLAN,
 	getClaudePlan,
+	migrateClaudePlan,
 	resolveClaudePlan,
 	resolveCodexPlan,
 	resolveCopilotPlan,
@@ -81,7 +82,7 @@ Usage: ./config.sh [options]
   --ctx7-api-key [KEY]   Set or update CONTEXT7_API_KEY (prompt if omitted)
   --deepwiki             Enable managed DeepWiki config on installed surfaces
   --no-deepwiki          Disable managed DeepWiki config on installed surfaces
-  --claude-plan PLAN     Set Claude plan: plus|max5|max20
+  --claude-plan PLAN     Set Claude plan: pro|max-5|max-20
   --codex-plan PLAN      Set Codex plan: go|plus|pro-5|pro-20
   --copilot-plan PLAN    Set Copilot plan: pro|pro-plus
   --caveman-mode MODE   Set Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
@@ -468,6 +469,10 @@ function parseArgs(argv) {
 	};
 }
 
+function resolveStoredClaudePlan(value = "") {
+	return migrateClaudePlan(value) || "";
+}
+
 async function main() {
 	const args = parseArgs(process.argv.slice(2));
 	if (args.help) {
@@ -478,7 +483,7 @@ async function main() {
 	const existingEnv = await loadConfigEnv();
 	let context7ApiKey = existingEnv.CONTEXT7_API_KEY || "";
 	let claudePlan =
-		resolveClaudePlan(existingEnv.OABTW_CLAUDE_PLAN || "") ||
+		resolveStoredClaudePlan(existingEnv.OABTW_CLAUDE_PLAN || "") ||
 		DEFAULT_CLAUDE_PLAN;
 	let codexPlan =
 		resolveCodexPlan(existingEnv.OABTW_CODEX_PLAN || "") || DEFAULT_CODEX_PLAN;
@@ -502,7 +507,7 @@ async function main() {
 		claudePlan = resolveClaudePlan(rawValue);
 		if (!claudePlan) {
 			throw new Error(
-				`Unsupported Claude plan: ${rawValue} (expected plus, max5, or max20)`,
+				`Unsupported Claude plan: ${rawValue} (expected pro, max-5, or max-20)`,
 			);
 		}
 		await applyClaudePlan(claudePlan);

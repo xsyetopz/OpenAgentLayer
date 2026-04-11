@@ -33,7 +33,8 @@ All managed profiles use:
 - `sqlite = true`
 - `multi_agent = true`
 - `fast_mode = false`
-- `plan_mode_reasoning_effort = "high"` (except codex-mini: low)
+- `model_reasoning_effort = "medium"`
+- tier-shaped `plan_mode_reasoning_effort` (`high` on `go`; `xhigh` on `plus`, `pro-5`, and `pro-20`; `medium` on codex-mini)
 - `model_reasoning_summary = "none"` (top-level)
 
 ### Approval Policy

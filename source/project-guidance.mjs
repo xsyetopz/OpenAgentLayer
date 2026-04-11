@@ -144,7 +144,7 @@ Use native Copilot continuation with \`--continue\`, \`--resume\`, \`/resume\`, 
 - Prefer small, direct edits and verify outcomes. Do real production work instead of demos, prototypes, scaffolding, or educational side paths.
 - If Caveman mode is active, compress assistant prose only. Keep code, commands, docs, review findings, and commit messages normal unless the explicit Caveman skill was requested.
 - Native Copilot surfaces matter here: repo instructions live under \`.github/copilot-instructions.md\` and \`.github/instructions/*.instructions.md\`, while personal instructions live under \`~/.copilot/\`.
-- When the active Copilot plan is \`pro-plus\`, heavier plan/autopilot/fleet routing is allowed on clearly parallelizable work; keep \`pro\` more conservative.
+- When the active Copilot plan is \`Pro+\` (\`pro-plus\`), heavier plan/autopilot/fleet routing is allowed on clearly parallelizable work; keep \`Pro\` (\`pro\`) more conservative.
 `,
 			},
 		],

@@ -105,7 +105,7 @@ CI runs Linux validation for generated outputs, tests, and release packaging. Bo
 
 [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 feat(agents): add pre-planning checklist to athena
 fix(hooks): handle edge case in bash-guard regex
 docs: update README with architecture diagram
@@ -139,6 +139,7 @@ Open an issue at [github.com/xsyetopz/openagentsbtw/issues](https://github.com/x
 - **Bash**: Pass [shellcheck](https://www.shellcheck.net/)
 - **JSON**: Valid, validated in CI
 - **Markdown**: Clear structure, no filler adjectives, no hype copy
+- **Contrastive examples**: Use one `diff` fence for before/after, bad/good, vulnerable/fixed, or invalid/valid examples. Do not split them across two code blocks.
 - **Comments**: Non-obvious "why" only. No narrating comments ("Get the user", "Increment counter").
 - **Naming**: Descriptive nouns for variables, `is_`/`has_`/`can_` for booleans, verb phrases for functions. Avoid: `data`, `result`, `temp`, `info`, `handle`, `process`, `manager`, `helper`, `util`.
 - **Functions**: Max 3 parameters, max 30 lines. One reason to change (SRP).

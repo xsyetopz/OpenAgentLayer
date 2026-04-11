@@ -20,7 +20,7 @@ PowerShell: `./install.ps1` accepts the same flags.
 ### Plan Flags
 
 ```bash
-./install.sh --claude-plan <plus|max5|max20>
+./install.sh --claude-plan <pro|max-5|max-20>
 ./install.sh --codex-plan <go|plus|pro-5|pro-20>
 ./install.sh --copilot-plan <pro|pro-plus>
 ./install.sh --caveman-mode <off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra>
@@ -28,7 +28,7 @@ PowerShell: `./install.ps1` accepts the same flags.
 ./install.sh --opencode-model <ROLE>=<MODEL_ID>
 ```
 
-Claude aliases: `5x` and `pro-5` map to `max5`, `20x` and `pro-20` map to `max20`. Codex alias: `pro` maps to `pro-5`.
+Codex alias: `pro` maps to `pro-5`.
 
 ### Scope Flags
 
@@ -51,7 +51,7 @@ Claude aliases: `5x` and `pro-5` map to `max5`, `20x` and `pro-20` map to `max20
 Running `./install.sh` with no flags prompts for each choice:
 
 1. **System selection** -- install Claude? Codex? OpenCode? Copilot? (all default yes)
-2. **Plan selection** -- per-platform plan preset (defaults to `max5` / `pro-5` / `pro`)
+2. **Plan selection** -- per-platform plan preset (defaults to `max-5` / `pro-5` / `pro`)
 3. **Optional surfaces** -- Context7 CLI (default yes), DeepWiki MCP (default no), Playwright CLI (default no)
 
 Selections are saved to `~/.config/openagentsbtw/config.env` and reused on future installs.
@@ -72,21 +72,21 @@ openagentsbtw treats the following as shared surfaces across Claude, Codex, Open
 Installs the `xsyetopz@openagentsbtw` plugin, user-level hooks, and output style under `~/.claude/`.
 
 ```bash
-./install.sh --claude --claude-plan max5
+./install.sh --claude --claude-plan max-5
 ./install.sh --claude --skip-rtk
 ```
 
 ### Claude Plan Details
 
-| Plan    | Default Model    | Opus Slot     | Sonnet Slot | Haiku Slot | Swarm Threads |
-| ------- | ---------------- | ------------- | ----------- | ---------- | ------------- |
-| `plus`  | Sonnet 4.6       | Sonnet 4.6    | Sonnet 4.6  | Haiku 4.5  | 3             |
-| `max5`  | Opus (plan mode) | Opus 4.6 (1M) | Sonnet 4.6  | Haiku 4.5  | 5             |
-| `max20` | Opus (1M)        | Opus 4.6 (1M) | Sonnet 4.6  | Sonnet 4.6 | 6             |
+| Plan     | Default Model    | Opus Slot     | Sonnet Slot | Haiku Slot | Swarm Threads |
+| -------- | ---------------- | ------------- | ----------- | ---------- | ------------- |
+| `pro`    | Sonnet 4.6       | Sonnet 4.6    | Sonnet 4.6  | Haiku 4.5  | 3             |
+| `max-5`  | Opus (plan mode) | Opus 4.6 (1M) | Sonnet 4.6  | Haiku 4.5  | 5             |
+| `max-20` | Opus (1M)        | Opus 4.6 (1M) | Sonnet 4.6  | Sonnet 4.6 | 6             |
 
-- **plus**: Sonnet-only. No Opus routing. Keep payloads narrow.
-- **max5**: Default. Opus for planning/review, Sonnet for implementation. Balanced.
-- **max20**: Full Opus orchestration. Sonnet replaces Haiku for lightweight tasks. Quality-first.
+- **pro**: Sonnet-only. No Opus routing. Keep payloads narrow.
+- **max-5**: Default. Opus for planning/review, Sonnet for implementation. Balanced.
+- **max-20**: Full Opus orchestration. Sonnet replaces Haiku for lightweight tasks. Quality-first.
 
 Context windows: Opus agents get 1M context. Sonnet and Haiku agents get 200K.
 
@@ -184,10 +184,10 @@ Writes platform assets to project scope (`.github/`) or global scope (`~/.copilo
 
 ### Copilot Plan Details
 
-| Plan       | Plan/Review Model | Build/Test Model | Implement Model | Swarm Threads |
-| ---------- | ----------------- | ---------------- | --------------- | ------------- |
-| `pro`      | gpt-5.2           | gpt-5-mini       | gpt-5.2         | 3             |
-| `pro-plus` | gpt-5.2           | gpt-5.3-codex    | gpt-5.3-codex   | 5             |
+| Plan   | Plan/Review Model | Build/Test Model | Implement Model | Swarm Threads |
+| ------ | ----------------- | ---------------- | --------------- | ------------- |
+| `pro`  | gpt-5.2           | gpt-5-mini       | gpt-5.2         | 3             |
+| `Pro+` | gpt-5.2           | gpt-5.3-codex    | gpt-5.3-codex   | 5             |
 
 ### Copilot Install Locations
 
@@ -231,7 +231,7 @@ Behavior per platform:
 Update without re-running full setup:
 
 ```bash
-./config.sh --claude-plan max20
+./config.sh --claude-plan max-20
 ./config.sh --codex-plan plus
 ./config.sh --copilot-plan pro-plus
 ./config.sh --caveman-mode off
