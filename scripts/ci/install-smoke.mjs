@@ -189,7 +189,8 @@ async function main() {
 		assert.match(configEnv, /OABTW_COPILOT_PLAN=pro-plus/);
 		assert.match(configEnv, /OABTW_CODEX_PLAN=plus/);
 		const codexConfig = await readFile(paths.codexConfig, "utf8");
-		assert.match(codexConfig, /openagentsbtw-plus/);
+		assert.match(codexConfig, /^profile = "openagentsbtw"$/m);
+		assert.equal(codexConfig.includes("openagentsbtw-plus"), false);
 
 		const uninstall = wrapperInvocation("uninstall");
 		await run(

@@ -102,13 +102,13 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
 ## Model Presets
 
 - `go`
-  Budget-first preset. Keeps the main route on `gpt-5.4-mini`, uses `gpt-5.3-codex` for implementation, and stays conservative about swarming.
+  Budget-first installer preset. It rewrites the managed `openagentsbtw*` profiles for lower cost routing while keeping the default profile name `openagentsbtw`.
 - `plus`
-  Code-specialized preset. Uses `gpt-5.3-codex` for the main route and `gpt-5.4-mini` for bounded utility work.
+  Code-specialized installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-5`
-  High-reasoning preset. Uses `gpt-5.3-codex` for the main working routes and `gpt-5.4-mini` for bounded utility work.
+  High-reasoning installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-20`
-  Same model split as `pro-5`, with more aggressive swarming.
+  Same model split as `pro-5`, with more aggressive swarming. It is an installer preset, not a profile name.
 - `openagentsbtw-utility`
   A lightweight profile for bounded utility tasks. It uses `gpt-5.4-mini`.
 - `openagentsbtw-approval-auto`
@@ -148,6 +148,7 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
 
 - Codex already has native SQLite-backed state persistence and saved sessions.
 - openagentsbtw installs native continuity defaults so `codex resume` and `oabtw-codex resume` continue from the same persisted thread state by default.
+- The top-level Codex profile remains `openagentsbtw` across plan presets. `go|plus|pro-5|pro-20` change the contents of the managed profiles; they do not create `openagentsbtw-go`, `openagentsbtw-plus`, `openagentsbtw-pro-5`, or `openagentsbtw-pro-20`.
 - openagentsbtw adds a second, explicit project-memory DB at `~/.codex/openagentsbtw/state/memory.sqlite`.
 - SessionStart loads the current project's recap and recent session notes.
 - UserPromptSubmit adds lightweight git context during active work.

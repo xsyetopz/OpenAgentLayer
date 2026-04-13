@@ -1259,7 +1259,7 @@ async function installCodex(args, artifacts) {
 		start: "<!-- >>> openagentsbtw codex >>> -->",
 		end: "<!-- <<< openagentsbtw codex <<< -->",
 	});
-	const profileName = `openagentsbtw-${args.codexPlan}`;
+	const profileName = "openagentsbtw";
 	const configExisting = await readText(configTarget, "");
 	const existingProfile = /^[\s]*profile[\s]*=/m.test(configExisting);
 	const willSetTopProfile =
@@ -1275,9 +1275,7 @@ async function installCodex(args, artifacts) {
 	if (willSetTopProfile) {
 		logInfo(`Codex default profile set to ${profileName}`);
 	} else {
-		logWarn(
-			`Existing Codex default profile preserved; use --profile ${profileName} to activate this system.`,
-		);
+		logWarn(`Existing Codex default profile preserved; use --profile ${profileName} to activate this system.`);
 	}
 	logInfo(`Codex profile merged into ${configTarget}`);
 }

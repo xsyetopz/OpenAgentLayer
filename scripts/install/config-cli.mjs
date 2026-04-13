@@ -376,7 +376,7 @@ async function applyCodexPlan(planName) {
 	await mergeCodexConfig({
 		target: PATHS.codexConfig,
 		profileAction: "true",
-		profileName: `openagentsbtw-${planName}`,
+		profileName: "openagentsbtw",
 		planName,
 		deepwiki: /(^|\n)\[mcp_servers\.deepwiki\]/.test(
 			await fs.readFile(PATHS.codexConfig, "utf8").catch(() => ""),
