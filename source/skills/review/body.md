@@ -89,6 +89,8 @@ Pre-refactor: tests pass, scope defined, commit before starting.
 
 See `reference/refactoring-catalog.md` for complete moves with before/after examples.
 
+For ownership boundaries, public API width, naming discipline, table-driven wiring, shared-state ownership, or god-file splits, also apply `elegance`.
+
 ## Collaboration Protocol
 
 For any non-trivial design decision during implementation or review, see `/cca:decide` for the full protocol.

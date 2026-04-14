@@ -19,6 +19,7 @@ openagentsbtw adds role prompts, shared skills, generated commands, and plugin g
 - skills under `opencode/templates/skills/`
 - commands under `opencode/src/commands.ts`
 - plugin guardrails under `opencode/templates/plugins/openagentsbtw.ts`
+- shared structural skill `elegance` ships through the generated skills set for ownership, API-shape, naming, and state-organization review
 
 ## Public Command Set
 

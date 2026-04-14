@@ -80,6 +80,14 @@
       "allowTestsOnly": true,
       "rejectPrototypeScaffolding": false
     },
+    "elegance": {
+      "route": "elegance",
+      "routeKind": "readonly",
+      "allowBlocked": true,
+      "allowDocsOnly": true,
+      "allowTestsOnly": true,
+      "rejectPrototypeScaffolding": false
+    },
     "errors": {
       "route": "errors",
       "routeKind": "readonly",

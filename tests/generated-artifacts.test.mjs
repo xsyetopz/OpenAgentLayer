@@ -107,6 +107,25 @@ describe("generated skills", () => {
 		}
 	});
 
+	it("ships the elegance skill, references, and Codex metadata across generated outputs", () => {
+		for (const relativePath of [
+			"claude/skills/elegance/SKILL.md",
+			"claude/skills/elegance/reference/micropython-py.md",
+			"codex/plugin/openagentsbtw/skills/elegance/SKILL.md",
+			"codex/plugin/openagentsbtw/skills/elegance/reference/micropython-py.md",
+			"codex/plugin/openagentsbtw/skills/elegance/openai.yaml",
+			"opencode/templates/skills/elegance/SKILL.md",
+			"opencode/templates/skills/elegance/reference/micropython-py.md",
+			"copilot/templates/.github/skills/elegance/SKILL.md",
+			"copilot/templates/.github/skills/elegance/reference/micropython-py.md",
+		]) {
+			assert.match(
+				readBuild(relativePath),
+				/elegance|ownership|MicroPython|structural/i,
+			);
+		}
+	});
+
 	it("renders handoff skill paths relative to each platform tooling directory", () => {
 		const claudeHandoff = readBuild("claude/skills/handoff/SKILL.md");
 		const codexHandoff = readBuild(
@@ -225,6 +244,25 @@ describe("generated skills", () => {
 				/Do not use adversarial prompt tricks, hidden coercion, or policy-bypass tactics\./,
 			);
 		}
+	});
+
+	it("ships structural-discipline guidance in core planning, implementation, and review prompts", () => {
+		const athena = readBuild("opencode/templates/agents/athena.md");
+		const hephaestus = readBuild("opencode/templates/agents/hephaestus.md");
+		const nemesis = readBuild("opencode/templates/agents/nemesis.md");
+
+		assert.match(
+			athena,
+			/obvious ownership, thin public surfaces, explicit state owners/i,
+		);
+		assert.match(
+			hephaestus,
+			/owner-revealing names, thin public facades, explicit shared-state owners/i,
+		);
+		assert.match(
+			nemesis,
+			/overly wide public surfaces, ownerless shared state, generic naming/i,
+		);
 	});
 
 	it("ships self-contained Caveman runtime helpers for managed hooks", () => {
