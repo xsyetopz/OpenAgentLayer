@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
@@ -30,9 +30,9 @@ function run(command, args, { cwd, env = {} } = {}) {
 }
 
 describe("generated codex peer wrapper", () => {
-	it("prints help without exploding on empty optional args", {
-		skip: process.platform === "win32" && "peer wrapper is a Bash script",
-	}, async () => {
+	const testFn = process.platform === "win32" ? it.skip : it;
+
+	testFn("prints help without exploding on empty optional args", async () => {
 		const tmp = await mkdtemp(path.join(os.tmpdir(), "oabtw-peer-help-"));
 		try {
 			const wrapperPath = path.join(tmp, "oabtw-codex-peer");

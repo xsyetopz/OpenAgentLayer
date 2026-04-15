@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import {
 	DEFAULT_CAVEMAN_MODE,
@@ -398,53 +399,75 @@ async function applyOpenCodeCopilotPlan(planName) {
 	const projectInstall = `${workspaceRoot}/.opencode`;
 	const globalInstall = PATHS.opencodeConfigDir;
 	const opencodeCli = path.join(ROOT, "opencode", "src", "cli.ts");
-
-	if (await pathExists(projectInstall)) {
-		await run(
-			"bun",
-			[
-				"run",
-				opencodeCli,
-				"--scope",
-				"project",
-				"--provider",
-				"copilot",
-				"--plugins",
-				"inject-preamble,openagentsbtw-core,conventions,safety-guard",
-			],
-			{
-				cwd: workspaceRoot,
-				env: {
-					...process.env,
-					OABTW_COPILOT_PLAN: planName,
-				},
-			},
-		);
-		logInfo(`Applied Copilot plan ${planName} to project OpenCode install`);
+	const hasProjectInstall = await pathExists(projectInstall);
+	const hasGlobalInstall = await pathExists(globalInstall);
+	if (!hasProjectInstall && !hasGlobalInstall) {
+		return;
 	}
-
-	if (await pathExists(globalInstall)) {
+	const buildDir = await fs.mkdtemp(
+		path.join(os.tmpdir(), "openagentsbtw-config-"),
+	);
+	try {
 		await run(
-			"bun",
-			[
-				"run",
-				opencodeCli,
-				"--scope",
-				"global",
-				"--provider",
-				"copilot",
-				"--plugins",
-				"inject-preamble,openagentsbtw-core,conventions,safety-guard",
-			],
+			"node",
+			[path.join(ROOT, "scripts", "build.mjs"), "--out", buildDir],
 			{
-				cwd: workspaceRoot,
-				env: {
-					...process.env,
-					OABTW_COPILOT_PLAN: planName,
-				},
+				cwd: ROOT,
 			},
 		);
-		logInfo(`Applied Copilot plan ${planName} to global OpenCode install`);
+		const opencodeTemplatesDir = path.join(buildDir, "opencode", "templates");
+
+		if (hasProjectInstall) {
+			await run(
+				"bun",
+				[
+					"run",
+					opencodeCli,
+					"--scope",
+					"project",
+					"--provider",
+					"copilot",
+					"--plugins",
+					"inject-preamble,openagentsbtw-core,conventions,safety-guard",
+				],
+				{
+					cwd: workspaceRoot,
+					env: {
+						...process.env,
+						OABTW_COPILOT_PLAN: planName,
+						OABTW_OPENCODE_TEMPLATES_DIR: opencodeTemplatesDir,
+					},
+				},
+			);
+			logInfo(`Applied Copilot plan ${planName} to project OpenCode install`);
+		}
+
+		if (hasGlobalInstall) {
+			await run(
+				"bun",
+				[
+					"run",
+					opencodeCli,
+					"--scope",
+					"global",
+					"--provider",
+					"copilot",
+					"--plugins",
+					"inject-preamble,openagentsbtw-core,conventions,safety-guard",
+				],
+				{
+					cwd: workspaceRoot,
+					env: {
+						...process.env,
+						OABTW_COPILOT_PLAN: planName,
+						OABTW_OPENCODE_TEMPLATES_DIR: opencodeTemplatesDir,
+					},
+				},
+			);
+			logInfo(`Applied Copilot plan ${planName} to global OpenCode install`);
+		}
+	} finally {
+		await fs.rm(buildDir, { recursive: true, force: true });
 	}
 }
 

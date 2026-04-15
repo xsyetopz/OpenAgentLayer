@@ -79,19 +79,28 @@ describe("generated skills", () => {
 		const opencodeShip = readBuild(
 			"opencode/templates/skills/git-workflow/SKILL.md",
 		);
+		const copilotRepoShip = readBuild(
+			"copilot/templates/.github/skills/git-workflow/SKILL.md",
+		);
+		const copilotGlobalShip = readBuild(
+			"copilot/templates/.copilot/skills/git-workflow/SKILL.md",
+		);
 		assert.match(
 			claudeShip,
-			/Co-Authored-By: Claude <claude@users\.noreply\.github\.com>/,
+			/Claude\/Claude CLI supplied model-specific `Co-Authored-By` trailer/,
 		);
-		assert.equal(
-			claudeShip.includes("Co-Authored-By: Codex via openagentsbtw"),
-			false,
+		assert.equal(claudeShip.includes("claude@users.noreply.github.com"), false);
+		assert.match(codexShip, /Co-Authored-By: GPT 5\.4 <noreply@openai\.com>/);
+		assert.equal(codexShip.includes("codex@users.noreply.github.com"), false);
+		assert.equal(opencodeShip.includes("Co-Authored-By:"), false);
+		assert.match(
+			copilotRepoShip,
+			/Co-Authored-By: GitHub Copilot <copilot@github\.com>/,
 		);
 		assert.match(
-			codexShip,
-			/Co-Authored-By: Codex <codex@users\.noreply\.github\.com>/,
+			copilotGlobalShip,
+			/Co-Authored-By: GitHub Copilot <copilot@github\.com>/,
 		);
-		assert.equal(opencodeShip.includes("Co-Authored-By:"), false);
 	});
 
 	it("ships the shared research skills across all platforms", () => {
@@ -292,12 +301,10 @@ describe("generated skills", () => {
 });
 
 describe("generated Codex defaults", () => {
-	it("uses native commit attribution and ships the plan-aware Codex profile split", () => {
+	it("leaves native commit attribution unset and ships the plan-aware Codex profile split", () => {
 		const config = readBuild("codex/templates/config.toml");
-		assert.match(
-			config,
-			/commit_attribution = "Co-Authored-By: Codex <codex@users\.noreply\.github\.com>"/,
-		);
+		assert.equal(config.includes("commit_attribution"), false);
+		assert.equal(config.includes("codex@users.noreply.github.com"), false);
 		assert.match(config, /sqlite_home = "~\/\.codex\/openagentsbtw\/sqlite"/);
 		assert.match(config, /hide_agent_reasoning = true/);
 		assert.match(config, /model_reasoning_summary = "none"/);

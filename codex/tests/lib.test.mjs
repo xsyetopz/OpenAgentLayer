@@ -73,7 +73,28 @@ if [ "$1" = "rewrite" ]; then
 fi
 exit 1
 `,
-		windows: `@echo off\r\nif "%1"=="--version" (\r\necho rtk 0.23.0\r\nexit /b 0\r\n)\r\nif "%1"=="rewrite" (\r\nshift\r\nif /I "%*"=="cargo test" (\r\n  echo rtk cargo test\r\n  exit /b 0\r\n)\r\nexit /b 1\r\n)\r\nexit /b 1\r\n`,
+		windows: [
+			"@echo off",
+			"setlocal EnableDelayedExpansion",
+			'if "%1"=="--version" (',
+			"  echo rtk 0.23.0",
+			"  exit /b 0",
+			")",
+			'if not "%1"=="rewrite" exit /b 1',
+			"shift",
+			'set "all=%1"',
+			":collect",
+			"shift",
+			'if "%1"=="" goto rewritten',
+			'set "all=!all! %1"',
+			"goto collect",
+			":rewritten",
+			'if /I "!all!"=="cargo test" (',
+			"  echo rtk cargo test",
+			"  exit /b 0",
+			")",
+			"exit /b 1",
+		].join("\r\n"),
 	});
 
 	if (options.repoRtk !== false) {

@@ -18,7 +18,7 @@ async function isDirectory(filepath) {
 }
 
 function parseMarkdownSections(markdown) {
-	const lines = markdown.trim().split("\n");
+	const lines = markdown.trim().split(/\r?\n/u);
 	const titleLine = lines[0]?.startsWith("# ") ? lines[0].slice(2).trim() : "";
 	const sections = [];
 	let current = null;

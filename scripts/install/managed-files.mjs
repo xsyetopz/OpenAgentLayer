@@ -84,12 +84,7 @@ Do not include:
 Be terse, operational, and continuation-ready.`;
 }
 
-function buildManagedCodexBody({
-	planName,
-	deepwiki,
-	includeCommitAttribution,
-	includePluginEntry,
-}) {
+function buildManagedCodexBody({ planName, deepwiki, includePluginEntry }) {
 	const plan = getCodexPlan(planName);
 	const compactPrompt = renderCodexCompactPrompt();
 	const pluginEntry = includePluginEntry
@@ -141,10 +136,6 @@ fast_mode = false
 unified_exec = true
 prevent_idle_sleep = true`;
 	return [
-		includeCommitAttribution
-			? 'commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"'
-			: "",
-		"",
 		'sqlite_home = "~/.codex/openagentsbtw/sqlite"',
 		"hide_agent_reasoning = true",
 		'model_reasoning_summary = "none"',
@@ -303,29 +294,19 @@ export async function mergeCodexConfig({
 		while (prefixLines[0]?.trim() === "") prefixLines.shift();
 		prefixLines.unshift(`profile = "${profileName}"`);
 	}
-	const prefixText = prefixLines.join("\n");
 	const managedBody = buildManagedCodexBody({
 		planName: planName || profileName.replace(/^openagentsbtw-/, ""),
 		deepwiki,
-		includeCommitAttribution: !/^[\s]*commit_attribution[\s]*=/m.test(
-			prefixText,
-		),
 		includePluginEntry:
 			!/\[plugins\."openagentsbtw@openagentsbtw-local"\]/.test(text),
 	});
-	const finalManagedBody = /^[\s]*commit_attribution[\s]*=/m.test(prefixText)
-		? managedBody.replace(
-				/^commit_attribution = "Co-Authored-By: Codex <codex@users\.noreply\.github\.com>"\n\n?/,
-				"",
-			)
-		: managedBody;
 
 	await writeText(
 		target,
 		[
 			prefixLines.join("\n").trim(),
 			restLines.join("\n").trim(),
-			`${start}\n${finalManagedBody}\n${end}`,
+			`${start}\n${managedBody}\n${end}`,
 		]
 			.filter(Boolean)
 			.join("\n\n"),

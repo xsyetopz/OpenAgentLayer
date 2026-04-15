@@ -133,14 +133,13 @@ async function generateSkills(skills) {
 	const skillBodyTokens = {
 		claude: {
 			SHIP_COMMIT_ATTRIBUTION_POLICY:
-				"- Claude: add `Co-Authored-By: Claude <claude@users.noreply.github.com>` in the commit footer.",
-			SHIP_COMMIT_FOOTER_BLOCK:
-				"Co-Authored-By: Claude <claude@users.noreply.github.com>",
+				"- Claude: preserve the Claude/Claude CLI supplied model-specific `Co-Authored-By` trailer; do not invent or remove it.",
+			SHIP_COMMIT_FOOTER_BLOCK: "",
 			TOOLING_DIR: ".claude",
 		},
 		codex: {
 			SHIP_COMMIT_ATTRIBUTION_POLICY:
-				'- Codex: managed profiles use native `commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"`; if managed config is not active, add `Co-Authored-By: Codex <codex@users.noreply.github.com>` manually once.',
+				"- Codex: preserve Codex/OpenAI supplied model-specific attribution, such as `Co-Authored-By: GPT 5.4 <noreply@openai.com>`; do not set a fixed `commit_attribution` override.",
 			SHIP_COMMIT_FOOTER_BLOCK: "",
 			TOOLING_DIR: ".agents",
 		},
@@ -150,8 +149,10 @@ async function generateSkills(skills) {
 			TOOLING_DIR: ".opencode",
 		},
 		copilot: {
-			SHIP_COMMIT_ATTRIBUTION_POLICY: "- Copilot: emit no AI author block.",
-			SHIP_COMMIT_FOOTER_BLOCK: "",
+			SHIP_COMMIT_ATTRIBUTION_POLICY:
+				"- Copilot: add the official GitHub Copilot trailer in the commit footer.",
+			SHIP_COMMIT_FOOTER_BLOCK:
+				"Co-Authored-By: GitHub Copilot <copilot@github.com>",
 			TOOLING_DIR: ".github",
 		},
 	};

@@ -54,7 +54,15 @@ printf '\n'
 printf '%s\n' 'warning: keep this'
 printf '%s\n' 'normal line'
 `,
-			windows: "@echo off\r\n",
+			windows: [
+				"@echo off",
+				"echo SessionStart hook (completed)",
+				"echo   hook context: openagentsbtw memory:",
+				"echo Project recap: too noisy",
+				"echo.",
+				"echo warning: keep this",
+				"echo normal line",
+			].join("\r\n"),
 		});
 		chmodSync(codexStub, 0o755);
 		const result = runFiltered({

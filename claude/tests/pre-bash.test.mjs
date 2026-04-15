@@ -28,7 +28,7 @@ function withFakeRtk(options = {}) {
 	const windowsRewriteCases = Object.entries(rewriteMap)
 		.map(
 			([command, rewritten]) =>
-				`if /I "%all%"=="${command}" (\r\n  echo ${rewritten}\r\n  exit /b 0\r\n)`,
+				`if /I "!all!"=="${command}" (\r\n  echo ${rewritten}\r\n  exit /b 0\r\n)`,
 		)
 		.join("\r\n");
 
@@ -49,7 +49,7 @@ ${rewriteCases}
 fi
 exit 1
 `,
-		windows: `@echo off\r\nif "%1"=="--version" (\r\necho rtk 0.23.0\r\nexit /b 0\r\n)\r\nif "%1"=="rewrite" (\r\nshift\r\nset "all=%*"\r\n${windowsRewriteCases}\r\nexit /b 1\r\n)\r\nexit /b 1\r\n`,
+		windows: `@echo off\r\nsetlocal EnableDelayedExpansion\r\nif "%1"=="--version" (\r\necho rtk 0.23.0\r\nexit /b 0\r\n)\r\nif not "%1"=="rewrite" exit /b 1\r\nshift\r\nset "all=%1"\r\n:collect\r\nshift\r\nif "%1"=="" goto rewritten\r\nset "all=!all! %1"\r\ngoto collect\r\n:rewritten\r\n${windowsRewriteCases}\r\nexit /b 1\r\n`,
 	});
 
 	const repoDir = join(tempRoot, "repo");

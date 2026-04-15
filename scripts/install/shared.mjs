@@ -17,7 +17,7 @@ export function resolvePaths({
 	env = process.env,
 	homeDir = os.homedir(),
 } = {}) {
-	const pathLib = platform === "win32" ? path.win32 : path;
+	const pathLib = platform === "win32" ? path.win32 : path.posix;
 	const appDataDir =
 		platform === "win32"
 			? (env.APPDATA ?? pathLib.join(homeDir, "AppData", "Roaming"))

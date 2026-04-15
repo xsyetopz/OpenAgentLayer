@@ -1,6 +1,5 @@
 # openagentsbtw sample Codex profiles
 
-commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"
 sqlite_home = "~/.codex/openagentsbtw/sqlite"
 hide_agent_reasoning = true
 model_reasoning_summary = "none"

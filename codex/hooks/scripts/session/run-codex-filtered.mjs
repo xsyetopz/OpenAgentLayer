@@ -61,6 +61,7 @@ function pipeStream(stream, sink) {
 const child = spawn("codex", args, {
 	stdio: ["inherit", "pipe", "pipe"],
 	env: process.env,
+	shell: process.platform === "win32",
 });
 
 pipeStream(child.stdout, process.stdout);
