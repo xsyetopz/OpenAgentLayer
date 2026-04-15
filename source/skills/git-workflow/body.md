@@ -138,7 +138,9 @@ Present a commit message draft for the user to review before proceeding.
 
 ### Phase 2 - Commit
 
-Human runs the commit, or AI runs it only after explicit approval. Apply the platform-specific attribution policy when the AI executes the commit: Claude uses a trailer, Codex uses native `commit_attribution`, and OpenCode emits no AI author block.
+Human runs the commit, or AI runs it only after explicit approval. Apply the platform-specific attribution policy when the AI executes the commit:
+
+__SHIP_COMMIT_ATTRIBUTION_POLICY__
 
 ```bash
 git commit -m "$(cat <<'EOF'

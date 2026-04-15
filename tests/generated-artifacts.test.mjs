@@ -87,7 +87,10 @@ describe("generated skills", () => {
 			claudeShip.includes("Co-Authored-By: Codex via openagentsbtw"),
 			false,
 		);
-		assert.equal(codexShip.includes("Co-Authored-By:"), false);
+		assert.match(
+			codexShip,
+			/Co-Authored-By: Codex <codex@users\.noreply\.github\.com>/,
+		);
 		assert.equal(opencodeShip.includes("Co-Authored-By:"), false);
 	});
 

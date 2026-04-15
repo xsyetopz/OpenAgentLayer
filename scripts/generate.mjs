@@ -26,12 +26,6 @@ function q(value) {
 	return JSON.stringify(value);
 }
 
-async function readJson(relativePath) {
-	return JSON.parse(
-		await fs.readFile(path.join(SOURCE_DIR, relativePath), "utf8"),
-	);
-}
-
 async function readText(...segments) {
 	return fs.readFile(path.join(SOURCE_DIR, ...segments), "utf8");
 }
@@ -138,19 +132,25 @@ async function cleanGeneratedDirs() {
 async function generateSkills(skills) {
 	const skillBodyTokens = {
 		claude: {
+			SHIP_COMMIT_ATTRIBUTION_POLICY:
+				"- Claude: add `Co-Authored-By: Claude <claude@users.noreply.github.com>` in the commit footer.",
 			SHIP_COMMIT_FOOTER_BLOCK:
 				"Co-Authored-By: Claude <claude@users.noreply.github.com>",
 			TOOLING_DIR: ".claude",
 		},
 		codex: {
+			SHIP_COMMIT_ATTRIBUTION_POLICY:
+				'- Codex: managed profiles use native `commit_attribution = "Co-Authored-By: Codex <codex@users.noreply.github.com>"`; if managed config is not active, add `Co-Authored-By: Codex <codex@users.noreply.github.com>` manually once.',
 			SHIP_COMMIT_FOOTER_BLOCK: "",
 			TOOLING_DIR: ".agents",
 		},
 		opencode: {
+			SHIP_COMMIT_ATTRIBUTION_POLICY: "- OpenCode: emit no AI author block.",
 			SHIP_COMMIT_FOOTER_BLOCK: "",
 			TOOLING_DIR: ".opencode",
 		},
 		copilot: {
+			SHIP_COMMIT_ATTRIBUTION_POLICY: "- Copilot: emit no AI author block.",
 			SHIP_COMMIT_FOOTER_BLOCK: "",
 			TOOLING_DIR: ".github",
 		},

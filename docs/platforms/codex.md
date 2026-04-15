@@ -52,6 +52,7 @@ Supported modifiers:
 
 - `resume` uses native Codex resume flow under the managed profile.
 - Codex plan presets (`go`, `plus`, `pro-5`, `pro-20`) rewrite the managed `openagentsbtw*` profiles and keep the default profile name `openagentsbtw`.
+- Managed Codex profiles set native `commit_attribution` to `Co-Authored-By: Codex <codex@users.noreply.github.com>` so Codex-assisted commits disclose Codex use.
 - `--source deepwiki` is for public GitHub repos only.
 - `--approval auto` maps to the sandboxed auto-accept implementation profile.
 - `--runtime long` maps to the long-running execution profile.
