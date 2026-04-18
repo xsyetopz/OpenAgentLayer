@@ -10,7 +10,7 @@ const LEGACY_HOME_PATHS = [
 ];
 
 function homeDir() {
-	return process.env.HOME || "";
+	return process.env.HOME || process.env.USERPROFILE || "";
 }
 
 function pathExists(filepath) {
@@ -46,8 +46,10 @@ export function findRtkMd(cwd = process.cwd()) {
 export function hasRtkBinary() {
 	try {
 		const result = spawnSync("rtk", ["--version"], {
+			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
+			shell: process.platform === "win32",
 		});
 		return result.status === 0;
 	} catch {
@@ -63,8 +65,10 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 	try {
 		const result = spawnSync("rtk", ["rewrite", command], {
 			cwd,
+			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
+			shell: process.platform === "win32",
 		});
 		const rewritten = (result.stdout || "").trim();
 		if (result.status === 0 && rewritten && rewritten !== command) {

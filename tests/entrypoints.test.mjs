@@ -1,11 +1,24 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+	removeChildrenWithMarker,
+	removeClaudePluginCache,
+	removeCodexPluginCaches,
+	removeCopilotPluginCaches,
 	resolvePaths,
 	resolveWorkspacePaths,
+	syncManagedTree,
 } from "../scripts/install/shared.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -59,6 +72,136 @@ describe("shared install paths", () => {
 		assert.equal(paths.projectOpenCodeDir, "/tmp/consumer-repo/.opencode");
 		assert.equal(paths.projectGithubDir, "/tmp/consumer-repo/.github");
 		assert.equal(paths.projectVscodeMcp, "/tmp/consumer-repo/.vscode/mcp.json");
+	});
+});
+
+describe("managed install cleanup", () => {
+	it("removes stale files from previous managed-tree manifests", async () => {
+		const root = mkdtempSync(path.join(os.tmpdir(), "oabtw-clean-"));
+		try {
+			const source = path.join(root, "source");
+			const target = path.join(root, "target");
+			await mkdir(source, { recursive: true });
+			await writeFile(path.join(source, "current.md"), "openagentsbtw current");
+			await mkdir(target, { recursive: true });
+			await writeFile(path.join(target, "old.md"), "openagentsbtw stale");
+			await writeFile(
+				path.join(target, ".openagentsbtw-install-manifest.json"),
+				JSON.stringify(["old.md"]),
+			);
+
+			await syncManagedTree(source, target);
+
+			assert.equal(
+				await readFile(path.join(target, "current.md"), "utf8"),
+				"openagentsbtw current",
+			);
+			assert.equal(existsSync(path.join(target, "old.md")), false);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
+
+	it("removes openagentsbtw plugin caches without touching unrelated cache entries", async () => {
+		const root = mkdtempSync(path.join(os.tmpdir(), "oabtw-cache-"));
+		try {
+			const codexHome = path.join(root, ".codex");
+			const claudeHome = path.join(root, ".claude");
+			const copilotHome = path.join(root, ".copilot");
+			const staleCodex = path.join(
+				codexHome,
+				"plugins",
+				"cache",
+				"openagentsbtw-local",
+				"openagentsbtw",
+				"1.4.0",
+			);
+			const otherCodex = path.join(
+				codexHome,
+				"plugins",
+				"cache",
+				"openagentsbtw-local",
+				"other-plugin",
+			);
+			await mkdir(staleCodex, { recursive: true });
+			await mkdir(otherCodex, { recursive: true });
+			await mkdir(path.join(claudeHome, "plugins", "cache", "anything"), {
+				recursive: true,
+			});
+			await mkdir(
+				path.join(copilotHome, "installed-plugins", "openagentsbtw"),
+				{
+					recursive: true,
+				},
+			);
+			await mkdir(path.join(copilotHome, "installed-plugins", "other"), {
+				recursive: true,
+			});
+			writeFileSync(path.join(otherCodex, "keep.txt"), "keep");
+			writeFileSync(
+				path.join(
+					copilotHome,
+					"installed-plugins",
+					"openagentsbtw",
+					"plugin.json",
+				),
+				JSON.stringify({ name: "openagentsbtw" }),
+			);
+			writeFileSync(
+				path.join(copilotHome, "installed-plugins", "other", "plugin.json"),
+				JSON.stringify({ name: "other" }),
+			);
+
+			await removeCodexPluginCaches(codexHome);
+			await removeClaudePluginCache(claudeHome);
+			await removeCopilotPluginCaches(copilotHome);
+
+			assert.equal(existsSync(staleCodex), false);
+			assert.equal(
+				readFileSync(path.join(otherCodex, "keep.txt"), "utf8"),
+				"keep",
+			);
+			assert.equal(
+				existsSync(path.join(claudeHome, "plugins", "cache")),
+				false,
+			);
+			assert.equal(
+				existsSync(
+					path.join(copilotHome, "installed-plugins", "openagentsbtw"),
+				),
+				false,
+			);
+			assert.equal(
+				existsSync(path.join(copilotHome, "installed-plugins", "other")),
+				true,
+			);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
+	});
+
+	it("removes marker-owned children from shared install directories", async () => {
+		const root = mkdtempSync(path.join(os.tmpdir(), "oabtw-marker-"));
+		try {
+			const dir = path.join(root, "skills");
+			await mkdir(path.join(dir, "old-openagentsbtw"), { recursive: true });
+			await mkdir(path.join(dir, "user-skill"), { recursive: true });
+			await writeFile(
+				path.join(dir, "old-openagentsbtw", "SKILL.md"),
+				"openagentsbtw stale",
+			);
+			await writeFile(path.join(dir, "user-skill", "SKILL.md"), "personal");
+
+			await removeChildrenWithMarker(dir);
+
+			assert.equal(existsSync(path.join(dir, "old-openagentsbtw")), false);
+			assert.equal(
+				readFileSync(path.join(dir, "user-skill", "SKILL.md"), "utf8"),
+				"personal",
+			);
+		} finally {
+			rmSync(root, { recursive: true, force: true });
+		}
 	});
 });
 
@@ -116,6 +259,18 @@ describe("public entrypoints", () => {
 		assert.match(installer, /installCodexWrapperShims/);
 		assert.match(installer, /PATHS\.managedBinDir/);
 		assert.match(uninstaller, /PATHS\.managedBinDir/);
+	});
+
+	it("keeps Claude and Codex RTK helpers Windows-safe", () => {
+		for (const relativePath of [
+			"claude/hooks/scripts/_rtk.mjs",
+			"codex/hooks/scripts/_rtk.mjs",
+		]) {
+			const helper = readRepo(relativePath);
+			assert.match(helper, /process\.env\.USERPROFILE/);
+			assert.match(helper, /env: process\.env/);
+			assert.match(helper, /shell: process\.platform === "win32"/);
+		}
 	});
 
 	it("ships matching PowerShell wrappers for all root entrypoints", () => {

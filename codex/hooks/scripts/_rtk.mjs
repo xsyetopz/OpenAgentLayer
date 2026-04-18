@@ -10,7 +10,7 @@ const LEGACY_HOME_PATHS = [
 ];
 
 function homeDir() {
-	return process.env.HOME || "";
+	return process.env.HOME || process.env.USERPROFILE || "";
 }
 
 function pathExists(filepath) {

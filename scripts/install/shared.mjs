@@ -139,6 +139,144 @@ export async function writeText(filepath, content, executable = false) {
 	}
 }
 
+export const INSTALL_MANIFEST_FILENAME = ".openagentsbtw-install-manifest.json";
+
+async function listRelativeFiles(root, base = root) {
+	let entries = [];
+	for (const entry of await fs
+		.readdir(root, { withFileTypes: true })
+		.catch(() => [])) {
+		const fullPath = path.join(root, entry.name);
+		if (entry.isDirectory()) {
+			entries = entries.concat(await listRelativeFiles(fullPath, base));
+			continue;
+		}
+		if (entry.name === INSTALL_MANIFEST_FILENAME) continue;
+		entries.push(path.relative(base, fullPath).split(path.sep).join("/"));
+	}
+	return entries.sort();
+}
+
+async function removeEmptyParents(root, filepath) {
+	let current = path.dirname(filepath);
+	while (current.startsWith(root) && current !== root) {
+		try {
+			await fs.rmdir(current);
+			current = path.dirname(current);
+		} catch {
+			return;
+		}
+	}
+}
+
+export async function replaceManagedTree(source, target) {
+	await fs.rm(target, { recursive: true, force: true });
+	await fs.mkdir(path.dirname(target), { recursive: true });
+	await fs.cp(source, target, { recursive: true });
+}
+
+export async function syncManagedTree(source, target) {
+	const sourceFiles = new Set(await listRelativeFiles(source));
+	const manifestPath = path.join(target, INSTALL_MANIFEST_FILENAME);
+	let previous = [];
+	try {
+		previous = JSON.parse(await readText(manifestPath, "[]")).filter(
+			(entry) => typeof entry === "string",
+		);
+	} catch {}
+	for (const relativePath of previous) {
+		if (sourceFiles.has(relativePath)) continue;
+		const targetPath = path.join(target, relativePath);
+		await fs.rm(targetPath, { recursive: true, force: true });
+		await removeEmptyParents(target, targetPath);
+	}
+	await fs.mkdir(target, { recursive: true });
+	await fs.cp(source, target, { recursive: true });
+	await writeText(manifestPath, JSON.stringify([...sourceFiles], null, 2));
+}
+
+async function pathContainsMarker(filepath, marker) {
+	try {
+		const stat = await fs.stat(filepath);
+		if (!stat.isFile() || stat.size > 512 * 1024) return false;
+		return (await fs.readFile(filepath, "utf8")).includes(marker);
+	} catch {
+		return false;
+	}
+}
+
+async function treeContainsMarker(root, marker) {
+	if (await pathContainsMarker(root, marker)) return true;
+	for (const entry of await fs
+		.readdir(root, { withFileTypes: true })
+		.catch(() => [])) {
+		const fullPath = path.join(root, entry.name);
+		if (entry.isDirectory()) {
+			if (await treeContainsMarker(fullPath, marker)) return true;
+			continue;
+		}
+		if (await pathContainsMarker(fullPath, marker)) return true;
+	}
+	return false;
+}
+
+export async function removeChildrenWithMarker(dir, marker = "openagentsbtw") {
+	for (const entry of await fs
+		.readdir(dir, { withFileTypes: true })
+		.catch(() => [])) {
+		if (entry.name === INSTALL_MANIFEST_FILENAME) continue;
+		const fullPath = path.join(dir, entry.name);
+		if (await treeContainsMarker(fullPath, marker)) {
+			await fs.rm(fullPath, { recursive: true, force: true });
+		}
+	}
+}
+
+export async function removeClaudePluginCache(claudeHome = PATHS.claudeHome) {
+	await fs.rm(path.join(claudeHome, "plugins", "cache"), {
+		recursive: true,
+		force: true,
+	});
+}
+
+export async function removeCodexPluginCaches(
+	codexHome = PATHS.codexHome,
+	pluginName = "openagentsbtw",
+) {
+	const cacheRoot = path.join(codexHome, "plugins", "cache");
+	for (const marketplace of await fs.readdir(cacheRoot).catch(() => [])) {
+		await fs.rm(path.join(cacheRoot, marketplace, pluginName), {
+			recursive: true,
+			force: true,
+		});
+	}
+	await fs.rm(path.join(cacheRoot, pluginName), {
+		recursive: true,
+		force: true,
+	});
+}
+
+export async function removeCopilotPluginCaches(
+	copilotHome = PATHS.copilotHome,
+	pluginName = "openagentsbtw",
+) {
+	const cacheRoot = path.join(copilotHome, "installed-plugins");
+	for (const entry of await fs.readdir(cacheRoot).catch(() => [])) {
+		const pluginRoot = path.join(cacheRoot, entry);
+		for (const manifestName of ["plugin.json", "manifest.json"]) {
+			try {
+				const manifest = JSON.parse(
+					await fs.readFile(path.join(pluginRoot, manifestName), "utf8"),
+				);
+				if (manifest?.name === pluginName) {
+					await fs.rm(pluginRoot, { recursive: true, force: true });
+					break;
+				}
+			} catch {}
+		}
+	}
+}
+
 export function commandExists(command) {
 	const result =
 		process.platform === "win32"

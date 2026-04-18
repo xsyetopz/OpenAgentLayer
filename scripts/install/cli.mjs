@@ -44,8 +44,14 @@ import {
 	promptToggle,
 	ROOT,
 	readText,
+	removeChildrenWithMarker,
+	removeClaudePluginCache,
+	removeCodexPluginCaches,
+	removeCopilotPluginCaches,
+	replaceManagedTree,
 	resolveWorkspacePaths,
 	run,
+	syncManagedTree,
 	writeConfigEnv,
 	writeText,
 } from "./shared.mjs";
@@ -918,9 +924,8 @@ async function installClaude(args, artifacts) {
 			"marketplaces",
 			"openagentsbtw",
 		);
-		await fs.rm(marketplaceDir, { recursive: true, force: true });
-		await fs.mkdir(path.dirname(marketplaceDir), { recursive: true });
-		await fs.cp(artifacts.claudeDir, marketplaceDir, { recursive: true });
+		await removeClaudePluginCache();
+		await replaceManagedTree(artifacts.claudeDir, marketplaceDir);
 		await run("claude", ["plugin", "install", "openagentsbtw"], {
 			cwd: ROOT,
 		}).catch(() =>
@@ -928,6 +933,7 @@ async function installClaude(args, artifacts) {
 				"Claude plugin install failed - run manually: make install-claude-plugin",
 			),
 		);
+		logInfo("Claude plugin cache refreshed");
 	}
 }
 
@@ -1057,6 +1063,7 @@ async function installCopilot(args, artifacts) {
 		".copilot",
 	);
 	await logCopilotRuntimeDiagnostics();
+	await removeCopilotPluginCaches();
 	if (args.copilotScope === "global" || args.copilotScope === "both") {
 		const home = PATHS.copilotHome;
 		await fs.mkdir(path.join(home, "agents"), { recursive: true });
@@ -1064,21 +1071,17 @@ async function installCopilot(args, artifacts) {
 		await fs.mkdir(path.join(home, "hooks", "scripts"), { recursive: true });
 		await fs.mkdir(path.join(home, "instructions"), { recursive: true });
 		if (await pathExists(path.join(userTemplateRoot, "agents"))) {
-			await fs.cp(
+			await removeChildrenWithMarker(path.join(home, "agents"));
+			await syncManagedTree(
 				path.join(userTemplateRoot, "agents"),
 				path.join(home, "agents"),
-				{
-					recursive: true,
-				},
 			);
 		}
 		if (await pathExists(path.join(userTemplateRoot, "skills"))) {
-			await fs.cp(
+			await removeChildrenWithMarker(path.join(home, "skills"));
+			await syncManagedTree(
 				path.join(userTemplateRoot, "skills"),
 				path.join(home, "skills"),
-				{
-					recursive: true,
-				},
 			);
 		}
 		await fs.copyFile(
@@ -1089,15 +1092,14 @@ async function installCopilot(args, artifacts) {
 			path.join(userTemplateRoot, "hooks", "route-contracts.json"),
 			path.join(home, "hooks", "route-contracts.json"),
 		);
-		await fs.cp(
+		await replaceManagedTree(
 			path.join(artifacts.copilotDir, "hooks", "scripts", "openagentsbtw"),
 			path.join(home, "hooks", "scripts", "openagentsbtw"),
-			{ recursive: true },
 		);
-		await fs.cp(
+		await removeChildrenWithMarker(path.join(home, "instructions"));
+		await syncManagedTree(
 			path.join(userTemplateRoot, "instructions"),
 			path.join(home, "instructions"),
-			{ recursive: true },
 		);
 		await mergeTaggedMarkdown({
 			target: path.join(home, "copilot-instructions.md"),
@@ -1125,33 +1127,25 @@ async function installCopilot(args, artifacts) {
 		await fs.mkdir(path.join(githubRoot, "instructions"), {
 			recursive: true,
 		});
-		await fs.cp(
+		await removeChildrenWithMarker(path.join(githubRoot, "agents"));
+		await syncManagedTree(
 			path.join(repoTemplateRoot, "agents"),
 			path.join(githubRoot, "agents"),
-			{
-				recursive: true,
-			},
 		);
-		await fs.cp(
+		await removeChildrenWithMarker(path.join(githubRoot, "skills"));
+		await syncManagedTree(
 			path.join(repoTemplateRoot, "skills"),
 			path.join(githubRoot, "skills"),
-			{
-				recursive: true,
-			},
 		);
-		await fs.cp(
+		await removeChildrenWithMarker(path.join(githubRoot, "prompts"));
+		await syncManagedTree(
 			path.join(repoTemplateRoot, "prompts"),
 			path.join(githubRoot, "prompts"),
-			{
-				recursive: true,
-			},
 		);
-		await fs.cp(
+		await removeChildrenWithMarker(path.join(githubRoot, "instructions"));
+		await syncManagedTree(
 			path.join(repoTemplateRoot, "instructions"),
 			path.join(githubRoot, "instructions"),
-			{
-				recursive: true,
-			},
 		);
 		await fs.copyFile(
 			path.join(repoTemplateRoot, "hooks", "openagentsbtw.json"),
@@ -1161,10 +1155,9 @@ async function installCopilot(args, artifacts) {
 			path.join(repoTemplateRoot, "hooks", "route-contracts.json"),
 			path.join(githubRoot, "hooks", "route-contracts.json"),
 		);
-		await fs.cp(
+		await replaceManagedTree(
 			path.join(artifacts.copilotDir, "hooks", "scripts", "openagentsbtw"),
 			path.join(githubRoot, "hooks", "scripts", "openagentsbtw"),
-			{ recursive: true },
 		);
 		await mergeTaggedMarkdown({
 			target: path.join(githubRoot, "copilot-instructions.md"),
@@ -1198,6 +1191,7 @@ async function installCodex(args, artifacts) {
 	const configTarget = path.join(codexHome, "config.toml");
 	const agentsMdTarget = path.join(codexHome, "AGENTS.md");
 
+	await removeCodexPluginCaches(codexHome);
 	await fs.rm(pluginTarget, { recursive: true, force: true });
 	await fs.rm(path.join(codexHome, "agents"), { recursive: true, force: true });
 	await fs.rm(path.join(hooksRoot, "scripts"), {
@@ -1210,30 +1204,21 @@ async function installCodex(args, artifacts) {
 	await fs.mkdir(binRoot, { recursive: true });
 	await fs.mkdir(path.dirname(marketplaceTarget), { recursive: true });
 
-	await fs.cp(
+	await replaceManagedTree(
 		path.join(artifacts.codexDir, "plugin", "openagentsbtw"),
 		pluginTarget,
-		{
-			recursive: true,
-		},
 	);
-	await fs.cp(
+	await replaceManagedTree(
 		path.join(artifacts.codexDir, "agents"),
 		path.join(codexHome, "agents"),
-		{
-			recursive: true,
-		},
 	);
 	await updateCodexAgents({
 		agentsDir: path.join(codexHome, "agents"),
 		tier: args.codexPlan,
 	});
-	await fs.cp(
+	await replaceManagedTree(
 		path.join(artifacts.codexDir, "hooks", "scripts"),
 		path.join(hooksRoot, "scripts"),
-		{
-			recursive: true,
-		},
 	);
 	for (const wrapper of [
 		"openagentsbtw-codex",
@@ -1275,9 +1260,12 @@ async function installCodex(args, artifacts) {
 	if (willSetTopProfile) {
 		logInfo(`Codex default profile set to ${profileName}`);
 	} else {
-		logWarn(`Existing Codex default profile preserved; use --profile ${profileName} to activate this system.`);
+		logWarn(
+			`Existing Codex default profile preserved; use --profile ${profileName} to activate this system.`,
+		);
 	}
 	logInfo(`Codex profile merged into ${configTarget}`);
+	logInfo("Codex plugin cache refreshed");
 }
 
 async function validateInstall(args) {

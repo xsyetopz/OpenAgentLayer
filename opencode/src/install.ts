@@ -96,6 +96,41 @@ async function copyDir(
 	await cp(source, destination, { recursive: true });
 }
 
+async function replaceDir(
+	source: string,
+	destination: string,
+	dryRun: boolean,
+): Promise<void> {
+	await removeDir(destination, dryRun);
+	await copyDir(source, destination, dryRun);
+}
+
+async function fileContains(path: string, marker: string): Promise<boolean> {
+	try {
+		const file = Bun.file(path);
+		if (!(await file.exists()) || file.size > 512 * 1024) return false;
+		return (await file.text()).includes(marker);
+	} catch {
+		return false;
+	}
+}
+
+async function removeChildrenWithMarker(
+	dir: string,
+	marker: string,
+	dryRun: boolean,
+): Promise<void> {
+	for (const target of await glob(join(dir, "*")).catch(() => [])) {
+		if (
+			(await fileContains(target, marker)) ||
+			(await fileContains(join(target, "SKILL.md"), marker)) ||
+			(await fileContains(join(target, "openai.yaml"), marker))
+		) {
+			await removeDir(target, dryRun);
+		}
+	}
+}
+
 function runValidation(
 	agentNames: string[],
 	commandNames: string[],
@@ -223,7 +258,7 @@ async function writeSkills(
 		skillPaths.map(async (skillPath) => {
 			const skillDir = skillPath.slice(0, skillPath.lastIndexOf("/"));
 			const skillName = skillDir.slice(skillDir.lastIndexOf("/") + 1);
-			await copyDir(skillDir, `${skillsDir}/${skillName}`, dryRun);
+			await replaceDir(skillDir, `${skillsDir}/${skillName}`, dryRun);
 		}),
 	);
 	return skillPaths.length;
@@ -257,6 +292,40 @@ async function writeInstructionFiles(
 		dryRun,
 	);
 	return 1;
+}
+
+async function removeManagedOutputs(
+	dirs: InstallDirs,
+	scope: InstallScope,
+	dryRun: boolean,
+): Promise<void> {
+	await Promise.all([
+		...ALL_AGENT_ROLES.map((role) =>
+			removeDir(`${dirs.agentsDir}/${AGENT_META[role].greekName}.md`, dryRun),
+		),
+		...COMMAND_DEFINITIONS.map((command) =>
+			removeDir(`${dirs.commandsDir}/${command.name}.md`, dryRun),
+		),
+		removeDir(`${dirs.pluginsDir}/openagentsbtw.ts`, dryRun),
+		removeDir(`${dirs.instructionsDir}/openagentsbtw.md`, dryRun),
+		removeChildrenWithMarker(dirs.skillsDir, "openagentsbtw", dryRun),
+	]);
+
+	if (scope !== "project") return;
+	const proc = Bun.spawnSync(["git", "rev-parse", "--git-dir"], {
+		cwd: process.cwd(),
+		stderr: "ignore",
+	});
+	if (proc.exitCode !== 0) return;
+	const gitDir = proc.stdout.toString().trim();
+	const hooksDir = gitDir.startsWith("/")
+		? join(gitDir, "hooks")
+		: join(process.cwd(), gitDir, "hooks");
+	await Promise.all(
+		HOOK_FILENAMES.map((filename) =>
+			removeDir(join(hooksDir, filename), dryRun),
+		),
+	);
 }
 
 async function writeHooks(
@@ -389,6 +458,8 @@ export async function install(options: InstallOptions): Promise<InstallReport> {
 
 	if (clean) {
 		await removeDir(opencodeDir, dryRun);
+	} else {
+		await removeManagedOutputs(dirs, scope, dryRun);
 	}
 
 	await Promise.all([
