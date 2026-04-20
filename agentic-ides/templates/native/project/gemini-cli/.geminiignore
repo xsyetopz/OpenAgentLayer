@@ -1,8 +1,0 @@
-# openagentsbtw gemini-cli ignore additions
-.env
-.env.*
-*.pem
-*.key
-*.p12
-*.pfx
-.openagentsbtw-install-manifest.json

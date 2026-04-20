@@ -1,2 +1,0 @@
-description = "Trace a symbol, dependency edge, or data flow"
-prompt = "Trace the following symbol, file, or interface end-to-end. Report upstream callers or dependencies, downstream consumers or effects, and the main impact points.\n\nTarget:\n\n{{args}}"

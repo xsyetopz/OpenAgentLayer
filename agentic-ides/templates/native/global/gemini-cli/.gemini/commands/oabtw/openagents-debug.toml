@@ -1,2 +1,0 @@
-description = "Investigate a failure without drifting into implementation"
-prompt = "Debug the following failure or symptom. Reproduce the likely path from available evidence, narrow the root cause, and report the strongest verified or suspected explanation without changing code. Explicitly separate verified evidence, assumptions, contradictory signals, and the single best next check.\n\nFailure:\n\n{{args}}"

@@ -1,9 +1,0 @@
-# openagents-plan-refactor
-
-Plan a refactoring with impact analysis
-
-Plan the following refactoring. Analyze impact, identify affected files, and outline a migration path with rollback strategy. Before the recommendation, name the key assumptions, the likeliest failure mode, and what evidence would materially change the plan.
-
-Refactoring:
-
-{{args}}

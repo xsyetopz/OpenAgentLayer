@@ -1,5 +1,0 @@
-{
-  "name": "openagentsbtw-guard",
-  "event": "preToolUse",
-  "command": "node __OPENAGENTIC_GUARD__"
-}
