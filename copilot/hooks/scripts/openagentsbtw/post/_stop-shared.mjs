@@ -15,6 +15,9 @@ import { readSessionMode } from "../session/_caveman.mjs";
 import { parseRouteMarkers } from "../session/_route-context.mjs";
 
 const BLOCKED_RE = /(?:^|\n)BLOCKED:\s+\S/m;
+const BLOCKED_ATTEMPTED_RE = /(?:^|\n)Attempted:\s+\S/im;
+const BLOCKED_EVIDENCE_RE = /(?:^|\n)Evidence:\s+\S/im;
+const BLOCKED_NEED_RE = /(?:^|\n)Need:\s+\S/im;
 const EXECUTION_SIGNAL_RE =
 	/(?:^|\n)(?:\$ |>|PASS|FAIL|stderr|stdout|exit code|command:|running |ran |executed |test(?:s)? passed|benchmark)/im;
 const TOOL_EVENT_RE =
@@ -121,6 +124,20 @@ function hasBlockedResult(data, transcript) {
 	return BLOCKED_RE.test(assistant) || BLOCKED_RE.test(transcript);
 }
 
+function parseBlockedResult(data, transcript) {
+	const assistant = String(
+		data.finalResponse ?? data.response ?? data.last_assistant_message ?? "",
+	);
+	const combined = `${assistant}\n${String(transcript || "")}`;
+	const blocked = BLOCKED_RE.test(combined);
+	if (!blocked) return { blocked: false, valid: false, missing: [] };
+	const missing = [];
+	if (!BLOCKED_ATTEMPTED_RE.test(combined)) missing.push("Attempted");
+	if (!BLOCKED_EVIDENCE_RE.test(combined)) missing.push("Evidence");
+	if (!BLOCKED_NEED_RE.test(combined)) missing.push("Need");
+	return { blocked: true, valid: missing.length === 0, missing };
+}
+
 function hasExecutionEvidence(data, transcript) {
 	const assistant = String(
 		data.finalResponse ?? data.response ?? data.last_assistant_message ?? "",
@@ -162,7 +179,8 @@ export function runStopChecks(data) {
 	const contract = resolveContract(data, transcript);
 	const files = modifiedFiles(cwd);
 	const buckets = classifyFiles(files);
-	const blocked = hasBlockedResult(data, transcript);
+	const blockedResult = parseBlockedResult(data, transcript);
+	const blocked = blockedResult.blocked;
 	const executionEvidence = hasExecutionEvidence(data, transcript);
 	const explanationOnly = isExplanationOnly(data, transcript);
 	const cavemanMode = readSessionMode();
@@ -200,6 +218,18 @@ export function runStopChecks(data) {
 			message:
 				"openagentsbtw completion check found prototype/demo scaffolding in modified files:\n" +
 				prototypeHits.slice(0, 12).join("\n"),
+		};
+	}
+
+	if (blocked && !blockedResult.valid) {
+		return {
+			type: "block",
+			message:
+				`openagentsbtw completion check rejected weak BLOCKED result: missing ${blockedResult.missing.join(", ")} lines. Use:\n` +
+				"BLOCKED: <single blocker>\n" +
+				"Attempted: <steps already tried>\n" +
+				"Evidence: <exact error/output/path:line>\n" +
+				"Need: <specific missing dependency/input/decision>",
 		};
 	}
 

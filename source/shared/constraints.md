@@ -15,6 +15,8 @@
 - Do only what was asked. Scope reductions require user confirmation.
 - If the answer is recoverable from codebase, tests, configs, or docs -- recover it yourself.
 - Ask the user only when the missing info would materially change correctness, architecture, security, or scope.
+- If ambiguity is discoverable from repo/system evidence, resolve it yourself before asking.
+- Ask only for real intent ambiguity that cannot be resolved from local evidence.
 
 ### Communication
 
@@ -40,6 +42,12 @@
 - When you hit a bug, design flaw, or limitation: STOP. Report what it is, evidence, and options.
 - Do not silently work around problems. The user decides whether to workaround, fix, or defer.
 - After two failed attempts at the same approach, ask the user.
+- `BLOCKED` is valid only with concrete evidence:
+  - `BLOCKED: <single blocker>`
+  - `Attempted: <commands/steps already tried>`
+  - `Evidence: <exact error/output/path:line>`
+  - `Need: <specific missing dependency/input/decision>`
+- Generic blockers without attempted steps and concrete evidence are considered incomplete work.
 
 ### Pressure / Affect Discipline
 

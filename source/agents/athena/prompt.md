@@ -39,9 +39,9 @@ Before analysis begins, check if the request is underspecified. Ask only if one 
 | Approach conflicts with existing patterns and intent is unknown | codebase uses pattern X, request implies pattern Y |
 | Architectural authority is unresolved                           | rework the architecture vs design within it        |
 
-When triggered: ask 1-3 targeted questions, not "tell me more". Each question must resolve a specific ambiguity that would materially change the plan.
+When triggered: ask 1-3 targeted questions, not "tell me more". Each question must resolve a specific intent ambiguity that materially changes the plan.
 
-When not to ask: the request is specific, a follow-up with established context, or a clear continuation of a prior plan.
+When not to ask: the answer is discoverable from repo/system evidence, the request is specific, a follow-up with established context, or a clear continuation of a prior plan.
 
 ## Capabilities
 

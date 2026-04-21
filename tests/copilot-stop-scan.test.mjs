@@ -84,15 +84,35 @@ describe("Copilot stop scan", () => {
 	it("allows strict BLOCKED results without edits", () => {
 		const repo = createRepo();
 		const transcriptPath = join(repo, "transcript.txt");
-		writeFileSync(transcriptPath, "BLOCKED: missing integration fixture\n");
+		writeFileSync(
+			transcriptPath,
+			"BLOCKED: missing integration fixture\nAttempted: ran integration suite twice with clean cache\nEvidence: test/integration/session.test.ts:91 fixture load failed (ENOENT)\nNeed: integration fixture bundle or approved mock path\n",
+		);
 
 		const result = runStopChecks({
 			cwd: repo,
 			agentName: "hephaestus",
 			transcriptPath,
-			finalResponse: "BLOCKED: missing integration fixture",
+			finalResponse:
+				"BLOCKED: missing integration fixture\nAttempted: ran integration suite twice with clean cache\nEvidence: test/integration/session.test.ts:91 fixture load failed (ENOENT)\nNeed: integration fixture bundle or approved mock path",
 		});
 
 		assert.equal(result.type, "pass");
+	});
+
+	it("rejects weak BLOCKED results without evidence fields", () => {
+		const repo = createRepo();
+		const transcriptPath = join(repo, "transcript.txt");
+		writeFileSync(transcriptPath, "BLOCKED: dependency missing\n");
+
+		const result = runStopChecks({
+			cwd: repo,
+			agentName: "hephaestus",
+			transcriptPath,
+			finalResponse: "BLOCKED: dependency missing",
+		});
+
+		assert.equal(result.type, "block");
+		assert.match(result.message, /rejected weak BLOCKED result/);
 	});
 });

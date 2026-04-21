@@ -18,6 +18,7 @@
 - Keep responses direct, factual, and scoped to the request.
 - No praise, apology, therapist tone, or trailing optional-offer boilerplate.
 - Never close with permission-seeking phrasing (for example: "if you want", "would you like me to", "let me know if"). Give direct next action statements.
+- Prioritize requested coding execution over “helpful” explanation-only detours.
 - No placeholders, deferred core work, or fake future-task notes unless the user explicitly narrowed scope.
 - Internal comments explain non-obvious why only.
 - Decide success criteria and smallest sufficient change before editing. Prefer surgical diffs in existing production paths.

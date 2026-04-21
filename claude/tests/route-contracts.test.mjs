@@ -199,13 +199,38 @@ describe("Claude stop gates", () => {
 			{
 				cwd: dir,
 				transcript_path: transcriptPath,
-				last_assistant_message: "BLOCKED: missing private SDK fixture",
+				last_assistant_message:
+					"BLOCKED: missing private SDK fixture\nAttempted: ran target integration suite twice\nEvidence: tests/integration/auth.test.ts:77 fixture import failed (ENOENT)\nNeed: private SDK fixture bundle or mocked replacement policy",
 			},
 			{},
 			{ cwd: dir },
 		);
 		assert.equal(result.status, 0);
 		assert.equal(result.stdout.trim(), "");
+	});
+
+	it("rejects weak BLOCKED results on edit-required routes", () => {
+		const dir = makeRepo();
+		const transcriptPath = makeTranscript(dir, {
+			route: "hephaestus",
+			routeKind: "edit-required",
+			allowDocsOnly: false,
+			allowTestsOnly: false,
+			rejectPrototypeScaffolding: true,
+		});
+		const result = runHook(
+			"post/stop-scan.mjs",
+			{
+				cwd: dir,
+				transcript_path: transcriptPath,
+				last_assistant_message: "BLOCKED: dependency missing",
+			},
+			{},
+			{ cwd: dir },
+		);
+		assert.equal(result.status, 2);
+		const output = JSON.parse(result.stdout.trim());
+		assert.match(output.reason, /rejected weak BLOCKED result/);
 	});
 
 	it("blocks execution-required completion without evidence", () => {

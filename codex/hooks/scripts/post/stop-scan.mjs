@@ -22,6 +22,9 @@ import {
 
 const ROUTE_MARKER_RE = /^OPENAGENTSBTW_([A-Z_]+)=(.+)$/gm;
 const BLOCKED_RE = /(?:^|\n)BLOCKED:\s+\S/m;
+const BLOCKED_ATTEMPTED_RE = /(?:^|\n)Attempted:\s+\S/im;
+const BLOCKED_EVIDENCE_RE = /(?:^|\n)Evidence:\s+\S/im;
+const BLOCKED_NEED_RE = /(?:^|\n)Need:\s+\S/im;
 const EXECUTION_SIGNAL_RE =
 	/(?:^|\n)(?:\$ |>|PASS|FAIL|stderr|stdout|exit code|command:|running |ran |executed )/im;
 const TOOL_EVENT_RE =
@@ -169,6 +172,26 @@ function scanFiles(files, rejectPrototypeScaffolding) {
 	return { hard, hardProse, soft, prototypeHits };
 }
 
+function readAssistantText(data) {
+	return String(
+		data?.finalResponse ?? data?.response ?? data?.last_assistant_message ?? "",
+	);
+}
+
+function parseBlockedResult(data, transcript) {
+	const assistant = readAssistantText(data);
+	const combined = `${assistant}\n${String(transcript || "")}`;
+	const blocked = BLOCKED_RE.test(combined);
+	if (!blocked) {
+		return { blocked: false, valid: false, missing: [] };
+	}
+	const missing = [];
+	if (!BLOCKED_ATTEMPTED_RE.test(combined)) missing.push("Attempted");
+	if (!BLOCKED_EVIDENCE_RE.test(combined)) missing.push("Evidence");
+	if (!BLOCKED_NEED_RE.test(combined)) missing.push("Need");
+	return { blocked: true, valid: missing.length === 0, missing };
+}
+
 function hasBlockedResult(data, transcript) {
 	const assistant = String(data?.last_assistant_message ?? "");
 	return BLOCKED_RE.test(assistant) || BLOCKED_RE.test(transcript);
@@ -235,7 +258,8 @@ function buildDiffFailure(contract, buckets) {
 	const files = modifiedFiles(cwd);
 	const transcript = readTranscript(data.transcript_path);
 	const buckets = classifyFiles(files);
-	const blocked = hasBlockedResult(data, transcript);
+	const blockedResult = parseBlockedResult(data, transcript);
+	const blocked = blockedResult.blocked;
 	const executionEvidence = hasExecutionEvidence(data, transcript);
 	const explanationOnly = isExplanationOnly(data, transcript);
 	const cavemanMode = readSessionMode();
@@ -263,6 +287,12 @@ function buildDiffFailure(contract, buckets) {
 	if (prototypeHits.length) {
 		stopBlock(
 			`openagentsbtw completion check found prototype/demo scaffolding in modified files:\n${prototypeHits.slice(0, 12).join("\n")}`,
+		);
+	}
+
+	if (blocked && !blockedResult.valid) {
+		stopBlock(
+			`openagentsbtw completion check rejected weak BLOCKED result: missing ${blockedResult.missing.join(", ")} lines. Use:\nBLOCKED: <single blocker>\nAttempted: <steps already tried>\nEvidence: <exact error/output/path:line>\nNeed: <specific missing dependency/input/decision>`,
 		);
 	}
 

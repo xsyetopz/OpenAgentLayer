@@ -165,6 +165,24 @@ describe("codex stop scan", () => {
 		}
 	});
 
+	it("rejects weak BLOCKED results without evidence fields", async () => {
+		const root = await initRepo();
+		try {
+			const result = await invokeHook(root, {
+				cwd: root,
+				prompt:
+					"OPENAGENTSBTW_ROUTE=implement\nOPENAGENTSBTW_CONTRACT=edit-required",
+				last_assistant_message: "BLOCKED: missing dependency",
+			});
+			assert.equal(result.code, 0);
+			const payload = JSON.parse(result.stdout);
+			assert.equal(payload.continue, false);
+			assert.match(payload.systemMessage, /rejected weak BLOCKED result/);
+		} finally {
+			await rm(root, { recursive: true, force: true });
+		}
+	});
+
 	it("blocks execution-required completions without execution evidence", async () => {
 		const root = await initRepo();
 		try {

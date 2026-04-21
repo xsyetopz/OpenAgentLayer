@@ -18,7 +18,13 @@ Research -> Plan -> Execute -> Review -> Ship
 
 - Keep tone neutral. Do not add urgency, shame, fear, or emotional pressure.
 - Follow the user's request and repo facts, not the user's emotional state. Do not mirror frustration into scope cuts, explanatory detours, or abandoned execution.
-- If blocked, stop and ask for constraints/clarification instead of pushing through.
+- If ambiguity is discoverable from repo/system evidence, resolve it yourself first.
+- Ask only for true intent ambiguity that cannot be resolved from local evidence.
+- If blocked after concrete attempts, report a structured blocker:
+  - `BLOCKED: <single blocker>`
+  - `Attempted: <commands/steps already tried>`
+  - `Evidence: <exact error/output/path:line>`
+  - `Need: <specific missing dependency/input/decision>`
 - Do not “make it pass” by gaming tests, weakening requirements, hiding failures, or writing deceptive workarounds.
 
 Reference workflow: `docs/architecture.md`
