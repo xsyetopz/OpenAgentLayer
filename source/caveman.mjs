@@ -17,9 +17,10 @@ export const CAVEMAN_MODE_ALIASES = {
 
 export const CAVEMAN_UPSTREAM = {
 	repo: "https://github.com/JuliusBrussee/caveman",
-	ref: "63e797cd753b301374947a5ed975c21775d962b9",
-	mirroredAt: "2026-04-13T00:00:00Z",
+	ref: "84cc3c14fa1e10182adaced856e003406ccd250d",
+	pinnedAt: "2026-04-21T12:23:31.540Z",
 	files: ["README.md", ".codex/hooks.json", ".github/copilot-instructions.md"],
+	sourcePath: "third_party/caveman",
 };
 
 export const CAVEMAN_ALWAYS_ON_SNIPPET = [
@@ -47,7 +48,7 @@ export const CAVEMAN_PROTECTED_SURFACE_LINE =
 export const CAVEMAN_CLARITY_OVERRIDE_LINE =
 	"Temporarily answer normally for security warnings, destructive confirmations, and ambiguity-sensitive instructions or repeated user confusion.";
 
-export const CAVEMAN_VIOLATION_RULES = [
+export const CAVEMAN_DRIFT_PATTERNS = [
 	{
 		label: "sycophantic opener",
 		pattern:
@@ -68,11 +69,14 @@ export const CAVEMAN_VIOLATION_RULES = [
 	},
 ];
 
+// Back-compat alias for existing imports in generated/runtime surfaces.
+export const CAVEMAN_VIOLATION_RULES = CAVEMAN_DRIFT_PATTERNS;
+
 export function matchCavemanViolations(text = "") {
 	const content = String(text || "").trim();
 	if (!content) return [];
 	const hits = [];
-	for (const rule of CAVEMAN_VIOLATION_RULES) {
+	for (const rule of CAVEMAN_DRIFT_PATTERNS) {
 		const regex = new RegExp(rule.pattern, rule.flags);
 		const match = content.match(regex);
 		if (match) hits.push(`${rule.label}: ${match[0].trim().slice(0, 80)}`);
@@ -142,7 +146,7 @@ const CAVEMAN_MODE_ALIASES = ${JSON.stringify(CAVEMAN_MODE_ALIASES, null, 2)};
 const CAVEMAN_RULE_LINES = ${JSON.stringify(CAVEMAN_RULE_LINES, null, 2)};
 const CAVEMAN_PROTECTED_SURFACE_LINE = ${JSON.stringify(CAVEMAN_PROTECTED_SURFACE_LINE)};
 const CAVEMAN_CLARITY_OVERRIDE_LINE = ${JSON.stringify(CAVEMAN_CLARITY_OVERRIDE_LINE)};
-const CAVEMAN_VIOLATION_RULES = ${JSON.stringify(CAVEMAN_VIOLATION_RULES, null, 2)};
+const CAVEMAN_DRIFT_PATTERNS = ${JSON.stringify(CAVEMAN_DRIFT_PATTERNS, null, 2)};
 
 export function resolveCavemanMode(value = "") {
 \tconst normalized = String(value || "")
@@ -169,7 +173,7 @@ export function matchCavemanViolations(text = "") {
 \tconst content = String(text || "").trim();
 \tif (!content) return [];
 \tconst hits = [];
-\tfor (const rule of CAVEMAN_VIOLATION_RULES) {
+\tfor (const rule of CAVEMAN_DRIFT_PATTERNS) {
 \t\tconst regex = new RegExp(rule.pattern, rule.flags);
 \t\tconst match = content.match(regex);
 \t\tif (match) hits.push(\`\${rule.label}: \${match[0].trim().slice(0, 80)}\`);

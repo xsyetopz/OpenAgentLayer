@@ -1,5 +1,5 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
 import {
 	COPILOT_MODELS,
 	getClaudePlan,
@@ -28,6 +28,16 @@ describe("subscription presets", () => {
 		assert.equal(getCodexPlan("pro-20").utility.model, "gpt-5.4-mini");
 	});
 
+	it("uses gpt-5.4 as top-level default only on eligible plans", () => {
+		assert.equal(getCodexPlan("go").main.model, "gpt-5.4-mini");
+		assert.equal(getCodexPlan("plus").main.model, "gpt-5.4");
+		assert.equal(getCodexPlan("pro-5").main.model, "gpt-5.4");
+		assert.equal(getCodexPlan("pro-20").main.model, "gpt-5.4");
+		assert.equal(getCodexPlan("plus").implement.model, "gpt-5.3-codex");
+		assert.equal(getCodexPlan("pro-5").approvalAuto.model, "gpt-5.3-codex");
+		assert.equal(getCodexPlan("pro-20").runtimeLong.model, "gpt-5.3-codex");
+	});
+
 	it("uses low verbosity across all managed Codex profiles", () => {
 		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
@@ -43,7 +53,7 @@ describe("subscription presets", () => {
 		assert.equal(pro.models.opusModel, "claude-sonnet-4-6");
 	});
 
-	it("keeps Codex edit turns at medium while plan mode stays tier-shaped", () => {
+	it("keeps Codex edit turns at medium and normalizes gpt-5.4 top-level plan effort", () => {
 		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
 			assert.equal(plan.profiles.main.modelReasoning, "medium");
@@ -51,7 +61,7 @@ describe("subscription presets", () => {
 			assert.equal(plan.profiles.runtimeLong.modelReasoning, "medium");
 		}
 		assert.equal(getCodexPlan("go").profiles.main.planReasoning, "high");
-		assert.equal(getCodexPlan("plus").profiles.main.planReasoning, "xhigh");
+		assert.equal(getCodexPlan("plus").profiles.main.planReasoning, "high");
 		assert.equal(
 			getCodexPlan("pro-5").profiles.approvalAuto.planReasoning,
 			"high",

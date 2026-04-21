@@ -17,5 +17,6 @@
     "plugin": {
       "event": "chat.message"
     }
-  }
+  },
+  "category": "session_context"
 }

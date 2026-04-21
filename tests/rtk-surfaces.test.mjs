@@ -1,9 +1,9 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { describe, it } from "node:test";
 import {
 	installSelectionToRtkReferences,
 	removeRtkSurfaces,

@@ -1,7 +1,8 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { validateUpstreamFile } from "../scripts/sync-caveman-upstream.mjs";
 import { CAVEMAN_UPSTREAM } from "../source/caveman.mjs";
@@ -13,29 +14,39 @@ function readRepo(relativePath) {
 	return readFileSync(resolve(ROOT, relativePath), "utf8");
 }
 
-describe("caveman upstream mirror", () => {
-	it("keeps metadata aligned with the canonical upstream ref", () => {
-		const metadata = JSON.parse(
-			readRepo("source/upstream/caveman/metadata.json"),
-		);
-		assert.equal(metadata.repo, CAVEMAN_UPSTREAM.repo);
-		assert.equal(metadata.ref, CAVEMAN_UPSTREAM.ref);
-		assert.deepEqual(
-			metadata.files.map((file) => file.path),
-			CAVEMAN_UPSTREAM.files,
-		);
+function submoduleHead() {
+	return execFileSync(
+		"git",
+		["-C", resolve(ROOT, CAVEMAN_UPSTREAM.sourcePath), "rev-parse", "HEAD"],
+		{
+			encoding: "utf8",
+		},
+	).trim();
+}
+
+describe("caveman upstream reference", () => {
+	it("requires an initialized caveman submodule at the configured source path", () => {
+		const status = execFileSync(
+			"git",
+			["submodule", "status", "--", CAVEMAN_UPSTREAM.sourcePath],
+			{
+				cwd: ROOT,
+				encoding: "utf8",
+			},
+		).trim();
+		assert.equal(status.startsWith("-"), false, "submodule is not initialized");
 	});
 
-	it("stores the expected upstream Caveman markers", () => {
-		for (const relativePath of [
-			"README.md",
-			".codex/hooks.json",
-			".github/copilot-instructions.md",
-		]) {
+	it("pins caveman submodule to the configured upstream ref", () => {
+		assert.equal(submoduleHead(), CAVEMAN_UPSTREAM.ref);
+	});
+
+	it("validates required upstream Caveman markers from submodule files", () => {
+		for (const relativePath of CAVEMAN_UPSTREAM.files) {
 			assert.equal(
 				validateUpstreamFile(
 					relativePath,
-					readRepo(`source/upstream/caveman/${relativePath}`),
+					readRepo(`${CAVEMAN_UPSTREAM.sourcePath}/${relativePath}`),
 				),
 				true,
 			);

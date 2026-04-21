@@ -1,13 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-	loadAgents,
-	loadCommands,
-	loadHookPolicies,
-	loadProjectGuidance,
-	loadSkills,
-} from "../source/catalog/loaders.mjs";
+import { loadCatalog } from "../source/catalog/items.mjs";
 import {
 	renderCavemanPromptBullet,
 	renderCavemanRuntimeModule,
@@ -15,13 +9,6 @@ import {
 import { renderCodexPeerWrapper } from "./generate/render/codex-peer-wrapper.mjs";
 import { renderCodexWrapper } from "./generate/render/codex-wrapper.mjs";
 import { renderOpenCodePlugin } from "./generate/render/opencode-plugin.mjs";
-import {
-	AGENTIC_FULL_HOOKS,
-	AGENTIC_FULL_MARKDOWN,
-	AGENTIC_FULL_SCOPES,
-	AGENTIC_FULL_SETTINGS,
-	relativeTemplatePath,
-} from "./install/agentic-ide-surfaces.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,10 +111,6 @@ async function cleanGeneratedDirs() {
 		force: true,
 	});
 	await fs.rm(path.join(OUTPUT_ROOT, "opencode", "templates", "instructions"), {
-		recursive: true,
-		force: true,
-	});
-	await fs.rm(path.join(OUTPUT_ROOT, "agentic-ides", "templates"), {
 		recursive: true,
 		force: true,
 	});
@@ -509,6 +492,7 @@ function buildPlatformHookRecord(policy, platform) {
 	if (platform === "claude" && policy.claude) {
 		return {
 			id: policy.id,
+			category: policy.category ?? "uncategorized",
 			status: "supported",
 			surfaces: [
 				{
@@ -536,6 +520,7 @@ function buildPlatformHookRecord(policy, platform) {
 
 		return {
 			id: policy.id,
+			category: policy.category ?? "uncategorized",
 			status: "supported",
 			surfaces: [surface],
 		};
@@ -560,6 +545,7 @@ function buildPlatformHookRecord(policy, platform) {
 		}
 		return {
 			id: policy.id,
+			category: policy.category ?? "uncategorized",
 			status: "supported",
 			surfaces,
 		};
@@ -573,15 +559,26 @@ function buildPlatformHookRecord(policy, platform) {
 			timeout: policy.copilot.timeout ?? null,
 			script: policy.script ?? null,
 		};
+		const fallbackSurfaces = (policy.copilot.fallbackEvents ?? []).map(
+			(event) => ({
+				type: "hook-fallback",
+				event,
+				matcher: policy.copilot.matcher ?? null,
+				timeout: policy.copilot.timeout ?? null,
+				script: policy.script ?? null,
+			}),
+		);
 		return {
 			id: policy.id,
+			category: policy.category ?? "uncategorized",
 			status: "supported",
-			surfaces: [surface],
+			surfaces: [surface, ...fallbackSurfaces],
 		};
 	}
 
 	return {
 		id: policy.id,
+		category: policy.category ?? "uncategorized",
 		status: "unsupported",
 		reason:
 			policy.unsupported?.[platform] ??
@@ -599,7 +596,7 @@ function renderHookManifestMarkdown(platformLabel, records) {
 
 	lines.push("## Supported Policies", "");
 	for (const record of supported) {
-		lines.push(`- \`${record.id}\``);
+		lines.push(`- \`${record.id}\` (\`${record.category}\`)`);
 		for (const surface of record.surfaces) {
 			if (surface.type === "hook") {
 				const matcher = surface.matcher
@@ -607,6 +604,15 @@ function renderHookManifestMarkdown(platformLabel, records) {
 					: "";
 				lines.push(
 					`  ${surface.type}: event \`${surface.event}\`${matcher}${surface.script ? `, script \`${surface.script}\`` : ""}`,
+				);
+				continue;
+			}
+			if (surface.type === "hook-fallback") {
+				const matcher = surface.matcher
+					? `, matcher \`${surface.matcher}\``
+					: "";
+				lines.push(
+					`  fallback: event \`${surface.event}\`${matcher}${surface.script ? `, script \`${surface.script}\`` : ""}`,
 				);
 				continue;
 			}
@@ -626,7 +632,7 @@ function renderHookManifestMarkdown(platformLabel, records) {
 
 	lines.push("", "## Unsupported Policies", "");
 	for (const record of unsupported) {
-		lines.push(`- \`${record.id}\`: ${record.reason}`);
+		lines.push(`- \`${record.id}\` (\`${record.category}\`): ${record.reason}`);
 	}
 
 	lines.push("");
@@ -794,8 +800,14 @@ async function generateHooks(policies, commandData, agents) {
 				powershell: `node "$HOME/.copilot/hooks/scripts/openagentsbtw/${policy.script}"`,
 				timeoutSec,
 			};
-			addHookGroup(copilotProject.hooks, policy.copilot.event, projectHook);
-			addHookGroup(copilotGlobal.hooks, policy.copilot.event, globalHook);
+			const events = [
+				policy.copilot.event,
+				...(policy.copilot.fallbackEvents ?? []),
+			].filter(Boolean);
+			for (const event of [...new Set(events)]) {
+				addHookGroup(copilotProject.hooks, event, projectHook);
+				addHookGroup(copilotGlobal.hooks, event, globalHook);
+			}
 		}
 
 		for (const gitRule of policy.opencode?.gitHooks ?? []) {
@@ -1101,421 +1113,6 @@ async function generateProjectInstructionAssets(projectGuidance) {
 	);
 }
 
-function renderAgenticIdeBody(projectGuidance) {
-	return [
-		"# openagentsbtw Agentic IDE Instructions",
-		"",
-		projectGuidance.sections
-			.map((section) => formatSection(section.title, section.body))
-			.join("\n\n"),
-		"",
-	].join("\n");
-}
-
-function renderCursorRule(body) {
-	return [
-		"---",
-		"description: openagentsbtw working rules and role routing",
-		"alwaysApply: true",
-		"---",
-		"",
-		body.trim(),
-		"",
-	].join("\n");
-}
-
-function renderKiroSteering(body) {
-	return ["---", "inclusion: always", "---", "", body.trim(), ""].join("\n");
-}
-
-function renderGeminiBody(body) {
-	return [
-		"# openagentsbtw Gemini CLI Instructions",
-		"",
-		"Read this file as persistent project guidance. If an `AGENTS.md` file also exists, treat both as active instruction surfaces and prefer more specific project rules.",
-		"",
-		body.trim().replace(/^# openagentsbtw Agentic IDE Instructions\n\n/, ""),
-		"",
-	].join("\n");
-}
-
-function renderAgenticAgentPrompt(agent, sharedConstraints) {
-	return renderPromptSections(agent.promptSections, sharedConstraints);
-}
-
-function renderAgenticMarkdownAgent(agent, sharedConstraints) {
-	return [
-		"---",
-		`name: ${agent.name}`,
-		`description: ${q(agent.codex?.description ?? agent.claude?.description ?? agent.name)}`,
-		"---",
-		"",
-		`# ${agent.claude?.displayName ?? agent.name}`,
-		"",
-		agent.codex?.description ??
-			agent.claude?.description ??
-			"openagentsbtw agent role.",
-		"",
-		renderAgenticAgentPrompt(agent, sharedConstraints).trim(),
-		"",
-	].join("\n");
-}
-
-function renderKiroAgent(agent, sharedConstraints) {
-	return `${JSON.stringify(
-		{
-			name: agent.name,
-			description:
-				agent.codex?.description ?? agent.claude?.description ?? agent.name,
-			prompt: renderAgenticAgentPrompt(agent, sharedConstraints).trim(),
-			resources: [],
-			includeMcpJson: false,
-		},
-		null,
-		2,
-	)}\n`;
-}
-
-function renderGeminiCommand(command) {
-	return [
-		`description = ${q(command.description)}`,
-		`prompt = ${q(`${command.promptTemplate}\n\n{{args}}`)}`,
-		"",
-	].join("\n");
-}
-
-function renderAugmentCommand(command) {
-	return [
-		`# ${command.name}`,
-		"",
-		command.description,
-		"",
-		command.promptTemplate,
-		"",
-		"{{args}}",
-		"",
-	].join("\n");
-}
-
-async function renderAgenticSkill(skill) {
-	const body = await readText("skills", skill.name, "body.md");
-	return [
-		renderFrontmatter([
-			["name", skill.name],
-			["description", `>\n  ${skill.description}`],
-		]),
-		body
-			.trim()
-			.replaceAll("__TOOLING_DIR__", ".agents")
-			.replaceAll(
-				"__SHIP_COMMIT_ATTRIBUTION_POLICY__",
-				"- Preserve the current tool's official attribution behavior; do not invent fixed commit trailers.",
-			)
-			.replaceAll("__SHIP_COMMIT_FOOTER_BLOCK__", ""),
-		"",
-	].join("\n");
-}
-
-function renderIgnoreTemplate(toolName) {
-	return [
-		`# openagentsbtw ${toolName} ignore additions`,
-		".env",
-		".env.*",
-		"*.pem",
-		"*.key",
-		"*.p12",
-		"*.pfx",
-		".openagentsbtw-install-manifest.json",
-		"",
-	].join("\n");
-}
-
-function renderKiloModesNotice() {
-	return [
-		"# openagentsbtw Kilo mode merge note",
-		"",
-		"Kilo custom modes are user/project settings. openagentsbtw does not overwrite an existing `.kilocodemodes` file.",
-		"Use the generated rules and skills as the stable native surface for this 2.2.x slice.",
-		"",
-	].join("\n");
-}
-
-async function buildAgenticNativeWrites({
-	agents,
-	skills,
-	commandData,
-	sharedConstraints,
-}) {
-	const writes = [];
-	const nativeScopes = ["project", "global"];
-	for (const scope of nativeScopes) {
-		const prefix = `native/${scope}`;
-		for (const agent of agents) {
-			const agentMarkdown = renderAgenticMarkdownAgent(
-				agent,
-				sharedConstraints,
-			);
-			writes.push([
-				`${prefix}/gemini-cli/.gemini/agents/openagentsbtw-${agent.name}.md`,
-				agentMarkdown,
-			]);
-			writes.push([
-				`${prefix}/augment/.augment/agents/openagentsbtw-${agent.name}.md`,
-				agentMarkdown,
-			]);
-			writes.push([
-				`${prefix}/kiro/.kiro/agents/openagentsbtw-${agent.name}.json`,
-				renderKiroAgent(agent, sharedConstraints),
-			]);
-		}
-		for (const command of commandData.opencodeCommands) {
-			writes.push([
-				`${prefix}/gemini-cli/.gemini/commands/oabtw/${command.name}.toml`,
-				renderGeminiCommand(command),
-			]);
-			writes.push([
-				`${prefix}/augment/.augment/commands/oabtw/${command.name}.md`,
-				renderAugmentCommand(command),
-			]);
-		}
-		for (const skill of skills) {
-			const skillBody = await renderAgenticSkill(skill);
-			writes.push([
-				`${prefix}/augment/.augment/skills/${skill.name}/SKILL.md`,
-				skillBody,
-			]);
-			writes.push([
-				`${prefix}/kilo/.kilocode/skills/${skill.name}/SKILL.md`,
-				skillBody,
-			]);
-			writes.push([
-				`${prefix}/cline/.cline/skills/${skill.name}/SKILL.md`,
-				skillBody,
-			]);
-		}
-		writes.push([
-			`${prefix}/roo/.roo/rules-code/openagentsbtw.md`,
-			"# openagentsbtw Code Mode\n\nUse hephaestus for implementation and atalanta for validation. Follow project rules before editing.\n",
-		]);
-		writes.push([
-			`${prefix}/roo/.roo/rules-architect/openagentsbtw.md`,
-			"# openagentsbtw Architect Mode\n\nUse athena for planning and odysseus for coordination. Prefer evidence-backed plans before edits.\n",
-		]);
-		writes.push([
-			`${prefix}/roo/.roo/rules-debug/openagentsbtw.md`,
-			"# openagentsbtw Debug Mode\n\nUse hermes for tracing and atalanta for reproduction. Separate verified evidence from assumptions.\n",
-		]);
-		writes.push([
-			`${prefix}/kilo/.kilocodemodes.openagentsbtw.md`,
-			renderKiloModesNotice(),
-		]);
-	}
-
-	const ignoreFiles = {
-		cursor: [".cursorignore", ".cursorindexingignore"],
-		"gemini-cli": [".geminiignore"],
-		junie: [".aiignore"],
-		kiro: [".kiroignore"],
-		kilo: [".kilocodeignore"],
-		roo: [".rooignore"],
-		cline: [".clineignore"],
-		augment: [".augmentignore"],
-	};
-	for (const [tool, files] of Object.entries(ignoreFiles)) {
-		for (const file of files) {
-			writes.push([
-				`native/project/${tool}/${file}`,
-				renderIgnoreTemplate(tool),
-			]);
-		}
-	}
-	return writes;
-}
-
-function renderFullMcpTemplate(serverShape = "mcpServers") {
-	return `${JSON.stringify(
-		{
-			[serverShape]: {
-				deepwiki: {
-					type: "http",
-					url: "https://mcp.deepwiki.com/mcp",
-				},
-				ctx7: {
-					command: "__CTX7_WRAPPER__",
-				},
-			},
-			openagentsbtw: {
-				managed: true,
-				depth: "full",
-				managedMcpServers: ["deepwiki", "ctx7"],
-			},
-		},
-		null,
-		2,
-	)}\n`;
-}
-
-function renderAgenticHookAdapter() {
-	return `#!/usr/bin/env node
-import { readFileSync } from "node:fs";
-
-const input = readFileSync(0, "utf8");
-const text = input.toLowerCase();
-const blocked = [
-  "rm -rf /",
-  "rm -rf ~",
-  "cat .env",
-  "source .env",
-  "printenv",
-  "aws_secret_access_key",
-  "-----begin private key-----",
-];
-
-if (blocked.some((pattern) => text.includes(pattern))) {
-  console.error("openagentsbtw: blocked high-risk secret/destructive operation");
-  process.exit(2);
-}
-
-process.exit(0);
-`;
-}
-
-function renderClineWorkflow(command) {
-	return [
-		`# ${command.name}`,
-		"",
-		command.description,
-		"",
-		"## Prompt",
-		"",
-		command.promptTemplate,
-		"",
-		"{{input}}",
-		"",
-	].join("\n");
-}
-
-function renderAmpCheck() {
-	return [
-		"# openagentsbtw Check",
-		"",
-		"Before completion, verify that the response satisfies openagentsbtw constraints: real work, no placeholders, concrete blocker if blocked, and evidence for execution-required tasks.",
-		"",
-	].join("\n");
-}
-
-function renderAirReviewPrompt() {
-	return [
-		"# openagentsbtw Air Review Prompt",
-		"",
-		"Review the current changes using openagentsbtw discipline.",
-		"",
-		"- Lead with concrete findings and file references.",
-		"- Treat placeholders, demos, docs-only churn on implementation tasks, and missing validation as issues.",
-		"- Separate blocking defects from follow-up suggestions.",
-		"- Do not rewrite the implementation unless explicitly asked.",
-		"",
-	].join("\n");
-}
-
-async function buildAgenticFullWrites({ skills, commandData }) {
-	const writes = [];
-	for (const scope of AGENTIC_FULL_SCOPES) {
-		const prefix = `full/${scope}`;
-		for (const surface of AGENTIC_FULL_SETTINGS) {
-			if (scope === "global" && !surface.globalHome) continue;
-			writes.push([
-				`${prefix}/${relativeTemplatePath(surface.templatePath)}`,
-				renderFullMcpTemplate(surface.serverKey),
-			]);
-		}
-		for (const surface of AGENTIC_FULL_MARKDOWN) {
-			if (scope === "global" && !surface.globalHome) continue;
-			writes.push([
-				`${prefix}/${relativeTemplatePath(surface.templatePath)}`,
-				renderAirReviewPrompt(),
-			]);
-		}
-		for (const command of commandData.opencodeCommands) {
-			writes.push([
-				`${prefix}/cline/workflows/${command.name}.md`,
-				renderClineWorkflow(command),
-			]);
-		}
-		writes.push([
-			`${prefix}/cline/hooks/openagentsbtw.md`,
-			"# openagentsbtw Hook\n\nUse the managed openagentsbtw agentic guard for non-mutating secret/destructive-command checks.\n",
-		]);
-		for (const surface of AGENTIC_FULL_HOOKS) {
-			if (scope === "global" && !surface.globalHome) continue;
-			writes.push([
-				`${prefix}/${relativeTemplatePath(surface.templatePath)}`,
-				`${JSON.stringify({ name: "openagentsbtw-guard", event: "preToolUse", command: "node __OPENAGENTIC_GUARD__" }, null, 2)}\n`,
-			]);
-		}
-		writes.push([`${prefix}/amp/checks/openagentsbtw.md`, renderAmpCheck()]);
-		for (const skill of skills) {
-			const skillBody = await renderAgenticSkill(skill);
-			writes.push([`${prefix}/amp/skills/${skill.name}/SKILL.md`, skillBody]);
-		}
-	}
-	writes.push([
-		"full/hooks/openagentsbtw-agentic-guard.mjs",
-		renderAgenticHookAdapter(),
-	]);
-	return writes;
-}
-
-async function generateAgenticIdeAssets(
-	projectGuidance,
-	agents,
-	skills,
-	commandData,
-) {
-	const sharedConstraints = await readText("shared", "constraints.md");
-	const body = renderAgenticIdeBody(projectGuidance["agentic-ides"]);
-	const geminiBody = renderGeminiBody(body);
-	const writes = [
-		["project/cursor/.cursor/rules/openagentsbtw.mdc", renderCursorRule(body)],
-		["project/junie/.junie/AGENTS.md", body],
-		["project/shared/AGENTS.md", body],
-		["project/gemini-cli/GEMINI.md", geminiBody],
-		["project/kiro/.kiro/steering/openagentsbtw.md", renderKiroSteering(body)],
-		["project/kilo/.kilocode/rules/openagentsbtw.md", body],
-		["project/roo/.roo/rules/openagentsbtw.md", body],
-		["project/cline/.clinerules/openagentsbtw.md", body],
-		["project/augment/.augment/rules/openagentsbtw.md", body],
-		["global/gemini-cli/GEMINI.md", geminiBody],
-		["global/kiro/steering/openagentsbtw.md", renderKiroSteering(body)],
-		["global/kilo/rules/openagentsbtw.md", body],
-		["global/kilo/AGENTS.md", body],
-		["global/roo/rules/openagentsbtw.md", body],
-		["global/cline/Rules/openagentsbtw.md", body],
-		["global/amp/AGENTS.md", body],
-		["global/augment/rules/openagentsbtw.md", body],
-	];
-	for (const [relativePath, content] of await buildAgenticNativeWrites({
-		agents,
-		skills,
-		commandData,
-		sharedConstraints,
-	})) {
-		writes.push([relativePath, content]);
-	}
-	for (const [relativePath, content] of await buildAgenticFullWrites({
-		skills,
-		commandData,
-	})) {
-		writes.push([relativePath, content]);
-	}
-	for (const [relativePath, content] of writes) {
-		await writeFile(
-			path.join("agentic-ides", "templates", relativePath),
-			content,
-		);
-	}
-}
-
 function renderCopilotInstructionFile(description, body) {
 	return `${renderFrontmatter([["description", q(description)]]) + body.trim()}\n`;
 }
@@ -1659,11 +1256,13 @@ async function main() {
 		OUTPUT_ROOT = path.resolve(process.argv[outShortIdx + 1]);
 	}
 
-	const skills = await loadSkills();
-	const agents = await loadAgents();
-	const commandData = await loadCommands();
-	const policies = await loadHookPolicies();
-	const projectGuidance = await loadProjectGuidance();
+	const {
+		agents,
+		skills,
+		commands: commandData,
+		hookPolicies: policies,
+		projectGuidance,
+	} = await loadCatalog();
 
 	await cleanGeneratedDirs();
 	await generateSkills(skills);
@@ -1673,13 +1272,12 @@ async function main() {
 	await generateCopilotRouteContracts(skills, agents);
 	await generateCommands(commandData);
 	await generateProjectInstructionAssets(projectGuidance);
-	await generateAgenticIdeAssets(projectGuidance, agents, skills, commandData);
 	await generateCopilotInstructionFiles();
 	await generateCopilotPromptFiles(commandData);
 	await generateCavemanRuntimeHelpers();
 
 	console.log(
-		"Generated Claude, Copilot, Codex, OpenCode, and agentic IDE artifacts from source/",
+		"Generated Claude, Copilot, Codex, and OpenCode artifacts from source/",
 	);
 }
 

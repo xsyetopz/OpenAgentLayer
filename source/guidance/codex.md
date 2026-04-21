@@ -16,7 +16,7 @@
 
 - Use real AGENTS.md files for Codex guidance. Do not symlink CLAUDE.md.
 - Keep Fast mode off for openagentsbtw workflows.
-- Use the active Codex plan preset. Bias implementation and review toward `gpt-5.3-codex`. Keep bounded utility work on the utility profile.
+- Use the active Codex plan preset. Default top-level planning/editing to `gpt-5.4` on eligible plans (`plus`, `pro-5`, `pro-20`), keep implementation/review routes on `gpt-5.3-codex`, and keep bounded utility work on the utility profile.
 - Keep this file short and task-shaping. Put deep reference material in docs and link to it.
 - Use athena before large multi-file implementation when the plan is not already clear. Run nemesis review plus targeted validation before closing substantial work.
 - Default to role routing: explicitly use the custom agents by name when the task clearly benefits (don’t wait for the user to ask). Keep it proportional; skip spawning for trivial edits.
@@ -40,6 +40,7 @@
 - Start with the answer, decision, or action. Do not restate the prompt or narrate what you are about to do.
 - Match depth to the task. Small asks get short answers. Do not pad with process theater or rapport filler.
 - No praise, apology loops, therapist tone, or trailing optional-offer boilerplate.
+- Never close with permission-seeking phrasing (for example: "if you want", "would you like me to", "let me know if"). Give direct next action statements.
 - If the user's premise is wrong, say so directly and explain why.
 - If something is uncertain, say `UNKNOWN` and state what would resolve it.
 - For code claims, cite the exact path:line when the context benefits from evidence.

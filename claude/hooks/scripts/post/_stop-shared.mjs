@@ -230,10 +230,11 @@ export function runStopChecks(data) {
 
 	if (cavemanHits.length > 0) {
 		return {
-			type: "block",
+			type: "warn",
 			message:
-				`openagentsbtw Caveman mode (${cavemanMode}) rejected verbose assistant prose:\n` +
-				cavemanHits.slice(0, 6).join("\n"),
+				`openagentsbtw Caveman mode (${cavemanMode}) detected prose drift (advisory):\n` +
+				`${cavemanHits.slice(0, 6).join("\n")}\n\n` +
+				"Apply the response contract directly (action first, no permission-seeking closer).",
 		};
 	}
 

@@ -1,3 +1,4 @@
+import { afterEach, describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import {
 	mkdirSync,
@@ -8,7 +9,6 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { afterEach, describe, it } from "node:test";
 import {
 	applySharedVersion,
 	bumpSemver,

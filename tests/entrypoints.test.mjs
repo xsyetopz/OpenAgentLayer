@@ -1,3 +1,4 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import {
 	existsSync,
@@ -9,7 +10,6 @@ import {
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
 	removeChildrenWithMarker,
@@ -236,18 +236,6 @@ describe("public entrypoints", () => {
 		);
 		assert.match(readRepo("build-plugin.sh"), /scripts\/build-plugin-cli\.mjs/);
 		assert.match(readRepo("version.sh"), /scripts\/version-cli\.mjs/);
-	});
-
-	it("exposes agentic IDE install flags through install and uninstall entrypoints", () => {
-		const installer = readRepo("scripts/install/cli.mjs");
-		const uninstaller = readRepo("scripts/install/uninstall-cli.mjs");
-		assert.match(installer, /--agentic-ides/);
-		assert.match(installer, /--agentic-ide-scope project\|global\|both/);
-		assert.match(installer, /--agentic-ide-depth rules\|native\|full/);
-		assert.match(installer, /--cursor/);
-		assert.match(installer, /--antigravity/);
-		assert.match(uninstaller, /--agentic-ides/);
-		assert.match(uninstaller, /--agentic-ide-scope project\|global\|both/);
 	});
 
 	it("exposes Caveman config flags through install and config entrypoints", () => {

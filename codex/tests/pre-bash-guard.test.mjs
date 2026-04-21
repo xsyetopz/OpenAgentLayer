@@ -1,6 +1,6 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { describe, it } from "node:test";
 
 const SCRIPT = "codex/hooks/scripts/pre/bash-guard.mjs";
 

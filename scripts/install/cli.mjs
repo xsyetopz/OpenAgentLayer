@@ -13,12 +13,6 @@ import {
 	resolveCopilotPlan,
 } from "../../source/subscriptions.mjs";
 import {
-	AGENTIC_FULL_HOOKS,
-	AGENTIC_FULL_MARKDOWN,
-	AGENTIC_FULL_SETTINGS,
-	AGENTIC_FULL_TREES,
-} from "./agentic-ide-surfaces.mjs";
-import {
 	mergeClaudeSettings,
 	renderClaudeSettingsTemplate,
 } from "./claude-settings.mjs";
@@ -73,31 +67,6 @@ import {
 	writeConfigEnv,
 	writeText,
 } from "./shared.mjs";
-
-const AGENTIC_IDES = [
-	"cursor",
-	"junie",
-	"air",
-	"gemini-cli",
-	"kiro",
-	"kilo",
-	"roo",
-	"cline",
-	"amp",
-	"augment",
-	"antigravity",
-];
-const AGENTS_MD_IDES = new Set(["air", "amp", "kilo"]);
-const GEMINI_MD_IDES = new Set(["gemini-cli"]);
-const GLOBAL_AGENTIC_IDES = new Set([
-	"gemini-cli",
-	"kiro",
-	"kilo",
-	"roo",
-	"cline",
-	"amp",
-	"augment",
-]);
 
 function renderCtx7Ps1() {
 	const [runner, runnerArgs] = ctx7RunnerCommand();
@@ -175,18 +144,6 @@ System toggles (allow multiple):
   --opencode              Install OpenCode support
   --codex                 Install Codex support
   --copilot               Install GitHub Copilot support
-  --agentic-ides          Install agentic IDE rules/instruction support
-  --cursor                Install Cursor rules support
-  --junie                 Install JetBrains Junie rules support
-  --air                   Install JetBrains Air instruction support
-  --gemini-cli            Install Gemini CLI instruction support
-  --kiro                  Install Kiro steering support
-  --kilo                  Install Kilo Code instruction support
-  --roo                   Install Roo Code rules support
-  --cline                 Install Cline rules support
-  --amp                   Install Amp instruction support
-  --augment               Install Augment/Auggie rules support
-  --antigravity           Install experimental Antigravity instruction support
   --all                   Install all supported systems
 
 Options:
@@ -203,10 +160,6 @@ Options:
                           Copilot install target (default: global)
   --copilot-plan pro|pro-plus
                           Copilot capability preset (default: pro)
-  --agentic-ide-scope project|global|both
-                          Agentic IDE install target (default: project)
-  --agentic-ide-depth rules|native|full
-                          Agentic IDE surface depth (default: rules)
   --caveman-mode MODE     Set managed Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
   --no-caveman            Alias for --caveman-mode off
   --codex-plan go|plus|pro-5|pro-20
@@ -228,10 +181,6 @@ function parseArgs(argv) {
 		installOpenCode: false,
 		installCodex: false,
 		installCopilot: false,
-		installAgenticIdes: false,
-		agenticIdeTargets: [],
-		agenticIdeScope: "project",
-		agenticIdeDepth: "rules",
 		skipRtk: false,
 		claudePlan: "max-5",
 		claudePlanSet: false,
@@ -270,28 +219,11 @@ function parseArgs(argv) {
 			case "--copilot":
 				args.installCopilot = true;
 				break;
-			case "--agentic-ides":
-				args.installAgenticIdes = true;
-				break;
-			case "--cursor":
-			case "--junie":
-			case "--air":
-			case "--gemini-cli":
-			case "--kiro":
-			case "--kilo":
-			case "--roo":
-			case "--cline":
-			case "--amp":
-			case "--augment":
-			case "--antigravity":
-				args.agenticIdeTargets.push(token.slice(2));
-				break;
 			case "--all":
 				args.installClaude = true;
 				args.installOpenCode = true;
 				args.installCodex = true;
 				args.installCopilot = true;
-				args.installAgenticIdes = true;
 				break;
 			case "--skip-rtk":
 				args.skipRtk = true;
@@ -315,12 +247,6 @@ function parseArgs(argv) {
 			case "--copilot-plan":
 				args.copilotPlan = argv[++index] ?? "";
 				args.copilotPlanSet = true;
-				break;
-			case "--agentic-ide-scope":
-				args.agenticIdeScope = argv[++index] ?? "";
-				break;
-			case "--agentic-ide-depth":
-				args.agenticIdeDepth = argv[++index] ?? "";
 				break;
 			case "--caveman-mode":
 				args.cavemanMode = argv[++index] ?? "";
@@ -385,9 +311,7 @@ async function ensureSelection(args) {
 		args.installClaude ||
 		args.installOpenCode ||
 		args.installCodex ||
-		args.installCopilot ||
-		args.installAgenticIdes ||
-		args.agenticIdeTargets.length > 0
+		args.installCopilot
 	) {
 		return;
 	}
@@ -413,18 +337,12 @@ async function ensureSelection(args) {
 		true,
 		isCi(),
 	);
-	args.installAgenticIdes = await promptToggle(
-		"Install agentic IDE rules/instruction support?",
-		false,
-		isCi(),
-	);
 
 	if (
 		!args.installClaude &&
 		!args.installOpenCode &&
 		!args.installCodex &&
-		!args.installCopilot &&
-		!args.installAgenticIdes
+		!args.installCopilot
 	) {
 		fail("No systems selected");
 	}
@@ -598,22 +516,6 @@ function validateArgs(args) {
 			`Unsupported Copilot scope: ${args.copilotScope} (expected global, project, or both)`,
 		);
 	}
-	if (!["global", "project", "both"].includes(args.agenticIdeScope)) {
-		fail(
-			`Unsupported agentic IDE scope: ${args.agenticIdeScope} (expected global, project, or both)`,
-		);
-	}
-	if (!["rules", "native", "full"].includes(args.agenticIdeDepth)) {
-		fail(
-			`Unsupported agentic IDE depth: ${args.agenticIdeDepth} (expected rules, native, or full)`,
-		);
-	}
-	const unknownTargets = args.agenticIdeTargets.filter(
-		(target) => !AGENTIC_IDES.includes(target),
-	);
-	if (unknownTargets.length > 0) {
-		fail(`Unsupported agentic IDE target: ${unknownTargets.join(", ")}`);
-	}
 }
 
 async function ensureNode() {
@@ -712,7 +614,6 @@ async function buildArtifacts() {
 		codexDir: path.join(buildDir, "codex"),
 		copilotDir: path.join(buildDir, "copilot"),
 		opencodeTemplatesDir: path.join(buildDir, "opencode", "templates"),
-		agenticIdeTemplatesDir: path.join(buildDir, "agentic-ides", "templates"),
 		binDir: path.join(buildDir, "bin"),
 	};
 }
@@ -1266,638 +1167,6 @@ async function installCopilot(args, artifacts) {
 	}
 }
 
-function selectedAgenticIdes(args) {
-	return args.installAgenticIdes
-		? AGENTIC_IDES
-		: [...new Set(args.agenticIdeTargets)];
-}
-
-async function copyAgenticTemplate({ source, target }) {
-	await writeText(target, await readText(source, ""));
-}
-
-async function mergeAgenticMarkdown({ source, target, name }) {
-	await mergeTaggedMarkdown({
-		target,
-		template: source,
-		start: `<!-- >>> openagentsbtw ${name} >>> -->`,
-		end: `<!-- <<< openagentsbtw ${name} <<< -->`,
-	});
-}
-
-async function copyAgenticTree({ source, target }) {
-	if (!(await pathExists(source))) return;
-	await syncManagedTree(source, target);
-}
-
-async function mergeAgenticIgnore({ source, target, name }) {
-	if (!(await pathExists(source))) return;
-	await mergeTaggedMarkdown({
-		target,
-		template: source,
-		start: `# >>> openagentsbtw ${name} >>>`,
-		end: `# <<< openagentsbtw ${name} <<<`,
-	});
-}
-
-async function maybeCopyKiloModesNotice({ source, target }) {
-	if (!(await pathExists(source))) return;
-	if (await pathExists(target)) {
-		logWarn(`${target} exists; leaving Kilo custom mode merge manual`);
-		return;
-	}
-	await copyAgenticTemplate({ source, target: `${target}.openagentsbtw.md` });
-	logWarn(
-		`Kilo custom modes are docs-only; merge guidance -> ${target}.openagentsbtw.md`,
-	);
-}
-
-async function installNativeProjectAgenticIdes(targets, artifacts) {
-	const workspacePaths = resolveWorkspacePaths();
-	const root = path.join(artifacts.agenticIdeTemplatesDir, "native", "project");
-	if (targets.includes("gemini-cli")) {
-		await copyAgenticTree({
-			source: path.join(root, "gemini-cli", ".gemini", "agents"),
-			target: path.join(workspacePaths.workspaceRoot, ".gemini", "agents"),
-		});
-		await copyAgenticTree({
-			source: path.join(root, "gemini-cli", ".gemini", "commands", "oabtw"),
-			target: path.join(
-				workspacePaths.workspaceRoot,
-				".gemini",
-				"commands",
-				"oabtw",
-			),
-		});
-		await mergeAgenticIgnore({
-			source: path.join(root, "gemini-cli", ".geminiignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".geminiignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("augment")) {
-		for (const dir of ["agents", "commands", "skills"]) {
-			await copyAgenticTree({
-				source: path.join(root, "augment", ".augment", dir),
-				target: path.join(workspacePaths.workspaceRoot, ".augment", dir),
-			});
-		}
-		await mergeAgenticIgnore({
-			source: path.join(root, "augment", ".augmentignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".augmentignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("kiro")) {
-		await copyAgenticTree({
-			source: path.join(root, "kiro", ".kiro", "agents"),
-			target: path.join(workspacePaths.workspaceRoot, ".kiro", "agents"),
-		});
-		await mergeAgenticIgnore({
-			source: path.join(root, "kiro", ".kiroignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".kiroignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("kilo")) {
-		await copyAgenticTree({
-			source: path.join(root, "kilo", ".kilocode", "skills"),
-			target: path.join(workspacePaths.workspaceRoot, ".kilocode", "skills"),
-		});
-		await maybeCopyKiloModesNotice({
-			source: path.join(root, "kilo", ".kilocodemodes.openagentsbtw.md"),
-			target: path.join(workspacePaths.workspaceRoot, ".kilocodemodes"),
-		});
-		await mergeAgenticIgnore({
-			source: path.join(root, "kilo", ".kilocodeignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".kilocodeignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("cline")) {
-		await copyAgenticTree({
-			source: path.join(root, "cline", ".cline", "skills"),
-			target: path.join(workspacePaths.workspaceRoot, ".cline", "skills"),
-		});
-		await mergeAgenticIgnore({
-			source: path.join(root, "cline", ".clineignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".clineignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("roo")) {
-		for (const dir of ["rules-code", "rules-architect", "rules-debug"]) {
-			await copyAgenticTree({
-				source: path.join(root, "roo", ".roo", dir),
-				target: path.join(workspacePaths.workspaceRoot, ".roo", dir),
-			});
-		}
-		await mergeAgenticIgnore({
-			source: path.join(root, "roo", ".rooignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".rooignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("cursor")) {
-		for (const file of [".cursorignore", ".cursorindexingignore"]) {
-			await mergeAgenticIgnore({
-				source: path.join(root, "cursor", file),
-				target: path.join(workspacePaths.workspaceRoot, file),
-				name: "agentic-ides ignore",
-			});
-		}
-	}
-	if (targets.includes("junie")) {
-		await mergeAgenticIgnore({
-			source: path.join(root, "junie", ".aiignore"),
-			target: path.join(workspacePaths.workspaceRoot, ".aiignore"),
-			name: "agentic-ides ignore",
-		});
-	}
-	if (targets.includes("antigravity")) {
-		logWarn(
-			"Antigravity native surfaces remain disabled until official paths are verified",
-		);
-	}
-	logInfo("Agentic IDE native project files installed where supported");
-}
-
-async function installNativeGlobalAgenticIdes(targets, artifacts) {
-	const root = path.join(artifacts.agenticIdeTemplatesDir, "native", "global");
-	if (targets.includes("gemini-cli")) {
-		await copyAgenticTree({
-			source: path.join(root, "gemini-cli", ".gemini", "agents"),
-			target: path.join(PATHS.geminiHome, "agents"),
-		});
-		await copyAgenticTree({
-			source: path.join(root, "gemini-cli", ".gemini", "commands", "oabtw"),
-			target: path.join(PATHS.geminiHome, "commands", "oabtw"),
-		});
-	}
-	if (targets.includes("augment")) {
-		for (const dir of ["agents", "commands", "skills"]) {
-			await copyAgenticTree({
-				source: path.join(root, "augment", ".augment", dir),
-				target: path.join(PATHS.augmentHome, dir),
-			});
-		}
-	}
-	if (targets.includes("kiro")) {
-		await copyAgenticTree({
-			source: path.join(root, "kiro", ".kiro", "agents"),
-			target: path.join(PATHS.kiroHome, "agents"),
-		});
-	}
-	if (targets.includes("kilo")) {
-		await copyAgenticTree({
-			source: path.join(root, "kilo", ".kilocode", "skills"),
-			target: path.join(PATHS.kiloRulesHome, "skills"),
-		});
-		await maybeCopyKiloModesNotice({
-			source: path.join(root, "kilo", ".kilocodemodes.openagentsbtw.md"),
-			target: path.join(PATHS.kiloRulesHome, ".kilocodemodes"),
-		});
-	}
-	if (targets.includes("cline")) {
-		await copyAgenticTree({
-			source: path.join(root, "cline", ".cline", "skills"),
-			target: path.join(PATHS.clineHome, "Skills"),
-		});
-	}
-	if (targets.includes("roo")) {
-		for (const dir of ["rules-code", "rules-architect", "rules-debug"]) {
-			await copyAgenticTree({
-				source: path.join(root, "roo", ".roo", dir),
-				target: path.join(PATHS.rooHome, dir),
-			});
-		}
-	}
-	logInfo("Agentic IDE native global files installed where supported");
-}
-
-async function copyAgenticExecutable({ source, target }) {
-	if (!(await pathExists(source))) return;
-	await writeText(target, await readText(source, ""), true);
-}
-
-async function readJsonObject(target) {
-	try {
-		const payload = JSON.parse(await readText(target, "{}"));
-		return payload && typeof payload === "object" && !Array.isArray(payload)
-			? payload
-			: {};
-	} catch {
-		return {};
-	}
-}
-
-function buildAgenticMcpServers(args) {
-	const servers = {};
-	if (args.deepwikiMcp) {
-		servers.deepwiki = {
-			type: "http",
-			url: "https://mcp.deepwiki.com/mcp",
-		};
-	}
-	if (args.ctx7Cli) {
-		servers.ctx7 = {
-			command:
-				process.platform === "win32" ? PATHS.ctx7CmdWrapper : PATHS.ctx7Wrapper,
-		};
-	}
-	return servers;
-}
-
-async function mergeAgenticSettings({
-	target,
-	args,
-	serverKey = "mcpServers",
-	extra = {},
-}) {
-	const servers = buildAgenticMcpServers(args);
-	const payload = await readJsonObject(target);
-	const next = { ...payload, ...extra };
-	if (Object.keys(servers).length > 0) {
-		next[serverKey] = {
-			...(next[serverKey] && typeof next[serverKey] === "object"
-				? next[serverKey]
-				: {}),
-			...servers,
-		};
-	}
-	next.openagentsbtw = {
-		...(next.openagentsbtw && typeof next.openagentsbtw === "object"
-			? next.openagentsbtw
-			: {}),
-		managed: true,
-		depth: "full",
-		managedMcpServers: Object.keys(servers),
-	};
-	await writeText(target, JSON.stringify(next, null, 2));
-}
-
-async function installAgenticGuard({ sourceRoot, targetRoot }) {
-	await copyAgenticExecutable({
-		source: path.join(sourceRoot, "hooks", "openagentsbtw-agentic-guard.mjs"),
-		target: path.join(targetRoot, "hooks", "openagentsbtw-agentic-guard.mjs"),
-	});
-	return path.join(targetRoot, "hooks", "openagentsbtw-agentic-guard.mjs");
-}
-
-async function writeHookConfig({ target, name, guardPath }) {
-	await writeText(
-		target,
-		`${JSON.stringify(
-			{
-				name,
-				event: "preToolUse",
-				command: `node ${JSON.stringify(guardPath)}`,
-			},
-			null,
-			2,
-		)}\n`,
-	);
-}
-
-function selectedFullHookSurfaces(targets, scope) {
-	return AGENTIC_FULL_HOOKS.filter(
-		(surface) =>
-			targets.includes(surface.tool) &&
-			(scope === "project" ? surface.projectTarget : surface.globalHome),
-	);
-}
-
-function fullSurfaceTemplate(root, surface) {
-	return path.join(root, ...surface.templatePath);
-}
-
-function fullProjectTarget(workspacePaths, surface) {
-	return path.join(workspacePaths.workspaceRoot, ...surface.projectTarget);
-}
-
-function fullGlobalTarget(surface) {
-	return path.join(PATHS[surface.globalHome], ...surface.globalTarget);
-}
-
-async function installFullProjectAgenticIdes(targets, artifacts, args) {
-	const workspacePaths = resolveWorkspacePaths();
-	const root = path.join(artifacts.agenticIdeTemplatesDir, "full", "project");
-	const hookSurfaces = selectedFullHookSurfaces(targets, "project");
-	const guardPath = hookSurfaces.length
-		? await installAgenticGuard({
-				sourceRoot: path.join(artifacts.agenticIdeTemplatesDir, "full"),
-				targetRoot: path.join(
-					workspacePaths.workspaceRoot,
-					".openagentsbtw",
-					"agentic",
-				),
-			})
-		: "";
-
-	for (const surface of AGENTIC_FULL_SETTINGS) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await mergeAgenticSettings({
-			target: fullProjectTarget(workspacePaths, surface),
-			args,
-			serverKey: surface.serverKey,
-		});
-	}
-	for (const surface of AGENTIC_FULL_TREES) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await copyAgenticTree({
-			source: fullSurfaceTemplate(root, surface),
-			target: fullProjectTarget(workspacePaths, surface),
-		});
-	}
-	for (const surface of hookSurfaces) {
-		await writeHookConfig({
-			target: fullProjectTarget(workspacePaths, surface),
-			name: "openagentsbtw-guard",
-			guardPath,
-		});
-	}
-	for (const surface of AGENTIC_FULL_MARKDOWN) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await mergeAgenticMarkdown({
-			source: fullSurfaceTemplate(root, surface),
-			target: fullProjectTarget(workspacePaths, surface),
-			name: surface.markerName,
-		});
-	}
-	if (targets.includes("antigravity")) {
-		logWarn(
-			"Antigravity full surfaces remain disabled until official paths are verified",
-		);
-	}
-	logInfo("Agentic IDE full project files installed where supported");
-}
-
-async function installFullGlobalAgenticIdes(targets, artifacts, args) {
-	const root = path.join(artifacts.agenticIdeTemplatesDir, "full", "global");
-	const hookSurfaces = selectedFullHookSurfaces(targets, "global");
-	const guardPath = hookSurfaces.length
-		? await installAgenticGuard({
-				sourceRoot: path.join(artifacts.agenticIdeTemplatesDir, "full"),
-				targetRoot: path.join(PATHS.configDir, "agentic"),
-			})
-		: "";
-
-	for (const surface of AGENTIC_FULL_SETTINGS) {
-		if (!targets.includes(surface.tool) || !surface.globalHome) continue;
-		await mergeAgenticSettings({
-			target: fullGlobalTarget(surface),
-			args,
-			serverKey: surface.serverKey,
-		});
-	}
-	for (const surface of AGENTIC_FULL_TREES) {
-		if (!targets.includes(surface.tool) || !surface.globalHome) continue;
-		await copyAgenticTree({
-			source: fullSurfaceTemplate(root, surface),
-			target: fullGlobalTarget(surface),
-		});
-	}
-	for (const surface of hookSurfaces) {
-		await writeHookConfig({
-			target: fullGlobalTarget(surface),
-			name: "openagentsbtw-guard",
-			guardPath,
-		});
-	}
-	logInfo("Agentic IDE full global files installed where supported");
-}
-
-async function installProjectAgenticIdes(targets, artifacts, depth, args) {
-	const workspacePaths = resolveWorkspacePaths();
-	const templateRoot = path.join(artifacts.agenticIdeTemplatesDir, "project");
-	const hasAgentsMdTarget = targets.some((target) =>
-		AGENTS_MD_IDES.has(target),
-	);
-	const hasGeminiTarget = targets.some((target) => GEMINI_MD_IDES.has(target));
-
-	if (targets.includes("cursor")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"cursor",
-				".cursor",
-				"rules",
-				"openagentsbtw.mdc",
-			),
-			target: path.join(
-				workspacePaths.projectCursorRulesDir,
-				"openagentsbtw.mdc",
-			),
-		});
-	}
-	if (targets.includes("junie")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "junie", ".junie", "AGENTS.md"),
-			target: path.join(workspacePaths.projectJunieDir, "AGENTS.md"),
-		});
-	}
-	if (hasAgentsMdTarget) {
-		await mergeAgenticMarkdown({
-			source: path.join(templateRoot, "shared", "AGENTS.md"),
-			target: path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
-			name: "agentic-ides",
-		});
-	}
-	if (hasGeminiTarget) {
-		await mergeAgenticMarkdown({
-			source: path.join(templateRoot, "gemini-cli", "GEMINI.md"),
-			target: path.join(workspacePaths.workspaceRoot, "GEMINI.md"),
-			name: "agentic-ides gemini",
-		});
-	}
-	if (targets.includes("kiro")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"kiro",
-				".kiro",
-				"steering",
-				"openagentsbtw.md",
-			),
-			target: path.join(
-				workspacePaths.projectKiroSteeringDir,
-				"openagentsbtw.md",
-			),
-		});
-	}
-	if (targets.includes("kilo")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"kilo",
-				".kilocode",
-				"rules",
-				"openagentsbtw.md",
-			),
-			target: path.join(workspacePaths.projectKiloRulesDir, "openagentsbtw.md"),
-		});
-	}
-	if (targets.includes("roo")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"roo",
-				".roo",
-				"rules",
-				"openagentsbtw.md",
-			),
-			target: path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
-		});
-	}
-	if (targets.includes("cline")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"cline",
-				".clinerules",
-				"openagentsbtw.md",
-			),
-			target: path.join(
-				workspacePaths.projectClineRulesDir,
-				"openagentsbtw.md",
-			),
-		});
-	}
-	if (targets.includes("augment")) {
-		await copyAgenticTemplate({
-			source: path.join(
-				templateRoot,
-				"augment",
-				".augment",
-				"rules",
-				"openagentsbtw.md",
-			),
-			target: path.join(
-				workspacePaths.projectAugmentRulesDir,
-				"openagentsbtw.md",
-			),
-		});
-	}
-	if (targets.includes("kilo")) {
-		logWarn(
-			depth === "native" || depth === "full"
-				? "Kilo Code native support adds skills and merge guidance; native agents/modes remain manual"
-				: "Kilo Code project support writes .kilocode/rules and shared AGENTS.md only; use --agentic-ide-depth native for skills",
-		);
-	}
-	if (targets.includes("air")) {
-		logWarn(
-			"JetBrains Air support uses the shared AGENTS.md surface in this release",
-		);
-	}
-	if (targets.includes("amp")) {
-		logWarn(
-			"Amp project support uses the shared AGENTS.md surface in this release",
-		);
-	}
-	if (targets.includes("antigravity")) {
-		logWarn(
-			"Antigravity support is experimental; verify rule loading in the IDE",
-		);
-	}
-	logInfo("Agentic IDE project rules/instructions installed");
-	if (depth === "native" || depth === "full") {
-		await installNativeProjectAgenticIdes(targets, artifacts);
-	}
-	if (depth === "full") {
-		await installFullProjectAgenticIdes(targets, artifacts, args);
-	}
-}
-
-async function installGlobalAgenticIdes(targets, artifacts, depth, args) {
-	const templateRoot = path.join(artifacts.agenticIdeTemplatesDir, "global");
-	const unsupported = targets.filter(
-		(target) => !GLOBAL_AGENTIC_IDES.has(target),
-	);
-	for (const target of unsupported) {
-		logWarn(`${target} global install is unsupported or unverified; skipping`);
-	}
-	if (targets.includes("gemini-cli")) {
-		await mergeAgenticMarkdown({
-			source: path.join(templateRoot, "gemini-cli", "GEMINI.md"),
-			target: path.join(PATHS.geminiHome, "GEMINI.md"),
-			name: "agentic-ides gemini",
-		});
-	}
-	if (targets.includes("kiro")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "kiro", "steering", "openagentsbtw.md"),
-			target: path.join(PATHS.kiroHome, "steering", "openagentsbtw.md"),
-		});
-	}
-	if (targets.includes("kilo")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "kilo", "rules", "openagentsbtw.md"),
-			target: path.join(PATHS.kiloRulesHome, "rules", "openagentsbtw.md"),
-		});
-		await mergeAgenticMarkdown({
-			source: path.join(templateRoot, "kilo", "AGENTS.md"),
-			target: path.join(PATHS.kiloConfigDir, "AGENTS.md"),
-			name: "agentic-ides",
-		});
-	}
-	if (targets.includes("roo")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "roo", "rules", "openagentsbtw.md"),
-			target: path.join(PATHS.rooHome, "rules", "openagentsbtw.md"),
-		});
-	}
-	if (targets.includes("cline")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "cline", "Rules", "openagentsbtw.md"),
-			target: path.join(PATHS.clineRulesDir, "openagentsbtw.md"),
-		});
-	}
-	if (targets.includes("amp")) {
-		await mergeAgenticMarkdown({
-			source: path.join(templateRoot, "amp", "AGENTS.md"),
-			target: path.join(PATHS.ampConfigDir, "AGENTS.md"),
-			name: "agentic-ides",
-		});
-	}
-	if (targets.includes("augment")) {
-		await copyAgenticTemplate({
-			source: path.join(templateRoot, "augment", "rules", "openagentsbtw.md"),
-			target: path.join(PATHS.augmentHome, "rules", "openagentsbtw.md"),
-		});
-	}
-	logInfo("Agentic IDE global rules/instructions installed where supported");
-	if (depth === "native" || depth === "full") {
-		await installNativeGlobalAgenticIdes(targets, artifacts);
-	}
-	if (depth === "full") {
-		await installFullGlobalAgenticIdes(targets, artifacts, args);
-	}
-}
-
-async function installAgenticIdes(args, artifacts) {
-	const targets = selectedAgenticIdes(args);
-	if (targets.length === 0) return;
-	console.log("\n\x1b[0;32mAgentic IDEs\x1b[0m");
-	await ensureNode();
-	if (args.agenticIdeScope === "project" || args.agenticIdeScope === "both") {
-		await installProjectAgenticIdes(
-			targets,
-			artifacts,
-			args.agenticIdeDepth,
-			args,
-		);
-	}
-	if (args.agenticIdeScope === "global" || args.agenticIdeScope === "both") {
-		await installGlobalAgenticIdes(
-			targets,
-			artifacts,
-			args.agenticIdeDepth,
-			args,
-		);
-	}
-}
-
 async function installCodex(args, artifacts) {
 	if (!args.installCodex) return;
 	console.log("\n\x1b[0;32mCodex\x1b[0m");
@@ -2025,10 +1294,12 @@ async function validateInstall(args) {
 			path.join(PATHS.claudeHome, "hooks", "pre-secrets.mjs"),
 			"Claude pre-secrets hook",
 		);
-		await required(
-			path.join(PATHS.claudeHome, "hooks", "rtk-rewrite.sh"),
-			"Claude RTK hook",
-		);
+		if (!args.skipRtk) {
+			await required(
+				path.join(PATHS.claudeHome, "hooks", "rtk-rewrite.sh"),
+				"Claude RTK hook",
+			);
+		}
 		await required(
 			path.join(PATHS.claudeHome, "output-styles", "cca.md"),
 			"Claude output style",
@@ -2114,31 +1385,6 @@ async function validateInstall(args) {
 		}
 	}
 
-	const agenticTargets = selectedAgenticIdes(args);
-	if (agenticTargets.length > 0) {
-		const workspacePaths = resolveWorkspacePaths();
-		if (args.agenticIdeScope === "project" || args.agenticIdeScope === "both") {
-			if (agenticTargets.includes("cursor")) {
-				await required(
-					path.join(workspacePaths.projectCursorRulesDir, "openagentsbtw.mdc"),
-					"Cursor project rule",
-				);
-			}
-			if (agenticTargets.includes("gemini-cli")) {
-				await required(
-					path.join(workspacePaths.workspaceRoot, "GEMINI.md"),
-					"Gemini project instructions",
-				);
-			}
-			if (agenticTargets.includes("amp")) {
-				await required(
-					path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
-					"Amp project AGENTS.md",
-				);
-			}
-		}
-	}
-
 	if (args.installCodex) {
 		const codexPluginTarget = path.join(
 			PATHS.codexHome,
@@ -2195,11 +1441,13 @@ async function validateInstall(args) {
 			),
 			"Codex PATH shim",
 		);
-		await requiredText(
-			PATHS.codexConfig,
-			/^profile\s*=\s*"openagentsbtw"/m,
-			"Codex default profile",
-		);
+		if (args.codexSetTopProfile !== "false") {
+			await requiredText(
+				PATHS.codexConfig,
+				/^profile\s*=\s*"openagentsbtw"/m,
+				"Codex default profile",
+			);
+		}
 		await requiredText(
 			PATHS.codexConfig,
 			/\[plugins\."openagentsbtw@openagentsbtw-local"\]\s*\nenabled\s*=\s*true/m,
@@ -2340,12 +1588,6 @@ function reportSummary(args) {
 			`  Codex:    ${path.join(PATHS.codexHome, "plugins", "openagentsbtw")} + ${path.join(PATHS.codexHome, "agents")} (${args.codexPlan})`,
 		);
 	}
-	const agenticTargets = selectedAgenticIdes(args);
-	if (agenticTargets.length > 0) {
-		console.log(
-			`  Agentic IDEs: ${args.agenticIdeScope} ${args.agenticIdeDepth} install (${agenticTargets.join(", ")})`,
-		);
-	}
 }
 
 async function main() {
@@ -2371,7 +1613,6 @@ async function main() {
 		await installClaude(args, artifacts);
 		await installOpenCode(args, artifacts);
 		await installCopilot(args, artifacts);
-		await installAgenticIdes(args, artifacts);
 		await maybeInstallCtx7(args);
 		await maybeInstallPlaywright(args);
 		await maybeInstallRtk(args);

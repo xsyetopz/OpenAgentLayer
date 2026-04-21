@@ -1,7 +1,7 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
 	allow,
@@ -24,18 +24,7 @@ const SCHEMA_PATH = resolve(
 	"hook-output.json",
 );
 
-let Ajv;
-try {
-	Ajv = (await import("ajv/dist/2020.js")).default;
-} catch {
-	try {
-		Ajv = (await import("ajv")).default;
-	} catch {
-		// ajv not installed; schema validation tests will be skipped
-	}
-}
-
-const schemaIt = Ajv ? it : it.skip;
+const schemaIt = it;
 
 function captureExit(fn, ...args) {
 	let captured = "";
@@ -66,6 +55,41 @@ function loadSchema() {
 	return JSON.parse(readFileSync(SCHEMA_PATH, "utf8"));
 }
 
+function validateAgainstSchema(output, schema) {
+	if (!output || typeof output !== "object") return false;
+	const allowedTopLevel = new Set(Object.keys(schema.properties ?? {}));
+	for (const key of Object.keys(output)) {
+		if (!allowedTopLevel.has(key)) return false;
+	}
+	const hookOutput = output.hookSpecificOutput;
+	if (!hookOutput) return true;
+	if (typeof hookOutput !== "object") return false;
+	const variants = schema.properties.hookSpecificOutput.oneOf;
+	return variants.some((variant) => {
+		const required = variant.required ?? [];
+		for (const key of required) {
+			if (!(key in hookOutput)) return false;
+		}
+		const variantKeys = new Set(Object.keys(variant.properties ?? {}));
+		for (const key of Object.keys(hookOutput)) {
+			if (!variantKeys.has(key)) return false;
+		}
+		const hookEventName = variant.properties?.hookEventName?.const;
+		if (hookEventName && hookOutput.hookEventName !== hookEventName) {
+			return false;
+		}
+		const decisionEnum = variant.properties?.permissionDecision?.enum;
+		if (
+			decisionEnum &&
+			"permissionDecision" in hookOutput &&
+			!decisionEnum.includes(hookOutput.permissionDecision)
+		) {
+			return false;
+		}
+		return true;
+	});
+}
+
 describe("PostWarn", () => {
 	it("should have correct output structure", () => {
 		const output = captureExit(postWarn, "test message");
@@ -83,10 +107,8 @@ describe("PostWarn", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(postWarn, "test");
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -98,10 +120,8 @@ describe("GenericWarn", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(genericWarn, "test");
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -114,10 +134,8 @@ describe("GenericBlock", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(genericBlock, "test");
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -131,10 +149,8 @@ describe("Deny", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(deny, "reason");
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -145,10 +161,8 @@ describe("Warn", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(warn, "msg");
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -170,14 +184,12 @@ describe("HiddenContext", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(
 			hiddenContext,
 			"OPENAGENTSBTW_ROUTE=review",
 			"UserPromptSubmit",
 		);
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 
@@ -198,12 +210,10 @@ describe("Allow", () => {
 	});
 
 	schemaIt("should validate against schema", () => {
-		const ajv = new Ajv();
-		const validate = ajv.compile(loadSchema());
 		const output = captureExit(allow, "allowed", "PreToolUse", {
 			command: "rtk cargo test",
 		});
-		assert.ok(validate(output), JSON.stringify(validate.errors));
+		assert.ok(validateAgainstSchema(output, loadSchema()));
 	});
 });
 

@@ -1,9 +1,9 @@
+import { afterEach, describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, it } from "node:test";
 import { parseHookOutput, runHook } from "./helpers.mjs";
 
 const tempDirs = [];
@@ -112,7 +112,7 @@ describe("Claude route context hooks", () => {
 });
 
 describe("Claude stop gates", () => {
-	it("blocks obvious non-Caveman assistant prose when mode is active", () => {
+	it("warns on obvious non-Caveman assistant prose when mode is active", () => {
 		const dir = makeRepo();
 		const result = runHook(
 			"post/stop-scan.mjs",
@@ -124,9 +124,16 @@ describe("Claude stop gates", () => {
 			{},
 			{ cwd: dir },
 		);
-		assert.equal(result.status, 2);
+		assert.equal(result.status, 0);
 		const output = JSON.parse(result.stdout.trim());
-		assert.match(output.reason, /Caveman mode/);
+		const reason = String(
+			output.systemMessage ??
+				output.hookSpecificOutput?.permissionDecisionReason ??
+				output.reason ??
+				"",
+		);
+		assert.match(reason, /Caveman mode/);
+		assert.match(reason, /advisory/);
 	});
 
 	it("blocks edit-required completion when no production code changed", () => {

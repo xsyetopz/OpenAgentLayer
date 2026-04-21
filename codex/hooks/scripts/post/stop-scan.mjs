@@ -249,8 +249,8 @@ function buildDiffFailure(contract, buckets) {
 	);
 
 	if (cavemanHits.length) {
-		stopBlock(
-			`openagentsbtw Caveman mode (${cavemanMode}) rejected verbose assistant prose:\n${cavemanHits.slice(0, 6).join("\n")}`,
+		systemMessage(
+			`openagentsbtw Caveman mode (${cavemanMode}) detected prose drift (advisory):\n${cavemanHits.slice(0, 6).join("\n")}\n\nApply the response contract directly (action first, no permission-seeking closer).`,
 		);
 	}
 

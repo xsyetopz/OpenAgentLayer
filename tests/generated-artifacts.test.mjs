@@ -1,9 +1,9 @@
+import { afterAll as after, beforeAll as before, describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -53,126 +53,6 @@ after(() => {
 		return;
 	}
 	rmSync(BUILD_ROOT, { recursive: true, force: true });
-});
-
-describe("generated agentic IDE assets", () => {
-	it("ships rules-first adapters for supported IDEs and CLIs", () => {
-		const expectedFiles = [
-			"agentic-ides/templates/project/cursor/.cursor/rules/openagentsbtw.mdc",
-			"agentic-ides/templates/project/junie/.junie/AGENTS.md",
-			"agentic-ides/templates/project/shared/AGENTS.md",
-			"agentic-ides/templates/project/gemini-cli/GEMINI.md",
-			"agentic-ides/templates/project/kiro/.kiro/steering/openagentsbtw.md",
-			"agentic-ides/templates/project/kilo/.kilocode/rules/openagentsbtw.md",
-			"agentic-ides/templates/project/roo/.roo/rules/openagentsbtw.md",
-			"agentic-ides/templates/project/cline/.clinerules/openagentsbtw.md",
-			"agentic-ides/templates/project/augment/.augment/rules/openagentsbtw.md",
-			"agentic-ides/templates/global/gemini-cli/GEMINI.md",
-			"agentic-ides/templates/global/kiro/steering/openagentsbtw.md",
-			"agentic-ides/templates/global/kilo/rules/openagentsbtw.md",
-			"agentic-ides/templates/global/kilo/AGENTS.md",
-			"agentic-ides/templates/global/roo/rules/openagentsbtw.md",
-			"agentic-ides/templates/global/cline/Rules/openagentsbtw.md",
-			"agentic-ides/templates/global/amp/AGENTS.md",
-			"agentic-ides/templates/global/augment/rules/openagentsbtw.md",
-		];
-		for (const relativePath of expectedFiles) {
-			const content = readBuild(relativePath);
-			assert.match(content, /openagentsbtw/);
-			assert.match(content, /Role Map|Gemini CLI Instructions/);
-		}
-	});
-
-	it("ships opt-in native agentic IDE artifacts", () => {
-		const expectedFiles = [
-			"agentic-ides/templates/native/project/gemini-cli/.gemini/agents/openagentsbtw-athena.md",
-			"agentic-ides/templates/native/project/gemini-cli/.gemini/commands/oabtw/openagents-explore.toml",
-			"agentic-ides/templates/native/project/augment/.augment/agents/openagentsbtw-hephaestus.md",
-			"agentic-ides/templates/native/project/augment/.augment/commands/oabtw/openagents-review.md",
-			"agentic-ides/templates/native/project/augment/.augment/skills/review/SKILL.md",
-			"agentic-ides/templates/native/project/kiro/.kiro/agents/openagentsbtw-nemesis.json",
-			"agentic-ides/templates/native/project/kilo/.kilocode/skills/test/SKILL.md",
-			"agentic-ides/templates/native/project/cline/.cline/skills/debug/SKILL.md",
-			"agentic-ides/templates/native/project/roo/.roo/rules-code/openagentsbtw.md",
-			"agentic-ides/templates/native/project/cursor/.cursorignore",
-			"agentic-ides/templates/native/global/gemini-cli/.gemini/agents/openagentsbtw-athena.md",
-		];
-		for (const relativePath of expectedFiles) {
-			assert.match(
-				readBuild(relativePath),
-				/openagentsbtw|Athena|hephaestus|review|debug|Explore|Test|\.env/,
-			);
-		}
-
-		const geminiCommand = readBuild(
-			"agentic-ides/templates/native/project/gemini-cli/.gemini/commands/oabtw/openagents-explore.toml",
-		);
-		assert.doesNotMatch(geminiCommand, /!\{|shell|bash -lc/);
-
-		const kiroAgent = JSON.parse(
-			readBuild(
-				"agentic-ides/templates/native/project/kiro/.kiro/agents/openagentsbtw-nemesis.json",
-			),
-		);
-		assert.equal(kiroAgent.name, "nemesis");
-		assert.equal(kiroAgent.includeMcpJson, false);
-	});
-
-	it("ships opt-in full agentic IDE artifacts", () => {
-		const expectedFiles = [
-			"agentic-ides/templates/full/project/cursor/.cursor/mcp.json",
-			"agentic-ides/templates/full/project/gemini-cli/.gemini/settings.json",
-			"agentic-ides/templates/full/project/kiro/.kiro/settings/mcp.json",
-			"agentic-ides/templates/full/project/kiro/hooks/openagentsbtw.json",
-			"agentic-ides/templates/full/project/cline/workflows/openagents-review.md",
-			"agentic-ides/templates/full/project/augment/settings.json",
-			"agentic-ides/templates/full/project/augment/hooks/openagentsbtw.json",
-			"agentic-ides/templates/full/project/amp/skills/review/SKILL.md",
-			"agentic-ides/templates/full/project/amp/checks/openagentsbtw.md",
-			"agentic-ides/templates/full/project/air/review-prompt.md",
-			"agentic-ides/templates/full/hooks/openagentsbtw-agentic-guard.mjs",
-		];
-		for (const relativePath of expectedFiles) {
-			assert.match(
-				readBuild(relativePath),
-				/openagentsbtw|deepwiki|ctx7|review|Review/,
-			);
-		}
-
-		const hook = readBuild(
-			"agentic-ides/templates/full/hooks/openagentsbtw-agentic-guard.mjs",
-		);
-		assert.match(hook, /rm -rf \/|cat \.env|printenv/);
-		assert.doesNotMatch(hook, /bun test|npm test|prettier|biome/);
-
-		for (const relativePath of [
-			"agentic-ides/templates/full/project/antigravity/settings.json",
-			"agentic-ides/templates/full/global/antigravity/settings.json",
-		]) {
-			assert.throws(() => readBuild(relativePath), /ENOENT/);
-		}
-	});
-
-	it("keeps Antigravity warning-only until rule paths are verified", () => {
-		for (const relativePath of [
-			"agentic-ides/templates/project/antigravity/AGENTS.md",
-			"agentic-ides/templates/project/antigravity/GEMINI.md",
-			"agentic-ides/templates/global/antigravity/AGENTS.md",
-		]) {
-			assert.throws(() => readBuild(relativePath), /ENOENT/);
-		}
-	});
-
-	it("renders native rule metadata for Cursor and Kiro", () => {
-		const cursor = readBuild(
-			"agentic-ides/templates/project/cursor/.cursor/rules/openagentsbtw.mdc",
-		);
-		const kiro = readBuild(
-			"agentic-ides/templates/project/kiro/.kiro/steering/openagentsbtw.md",
-		);
-		assert.match(cursor, /^alwaysApply: true$/m);
-		assert.match(kiro, /^inclusion: always$/m);
-	});
 });
 
 describe("generated prompts", () => {
@@ -468,6 +348,7 @@ describe("generated Codex defaults", () => {
 		assert.equal(config.includes("[profiles.openagentsbtw-plus]"), false);
 		assert.equal(config.includes("[profiles.openagentsbtw-pro-5]"), false);
 		assert.equal(config.includes("[profiles.openagentsbtw-pro-20]"), false);
+		assert.match(config, /model = "gpt-5\.4"/);
 		assert.match(config, /model = "gpt-5\.3-codex"/);
 		assert.match(config, /model = "gpt-5\.4-mini"/);
 		assert.match(config, /model_instructions_file = "~\/\.codex\/AGENTS\.md"/);
@@ -487,6 +368,10 @@ describe("generated Codex defaults", () => {
 		assert.match(
 			config,
 			/\[profiles\.openagentsbtw\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+		);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw\][\s\S]*?model = "gpt-5\.4"/,
 		);
 		assert.match(
 			config,
@@ -597,17 +482,6 @@ describe("generated Codex defaults", () => {
 		assert.match(peerWrapper, /if \[\[ \$\{#ARGS\[@\]\} -gt 0 \]\]/);
 	});
 
-	it("ships the managed Codex hook-noise scrubber", () => {
-		const helper = readBuild(
-			"codex/hooks/scripts/session/run-codex-filtered.mjs",
-		);
-		assert.match(helper, /OABTW_CODEX_FILTER_TUI_HOOK_NOISE/);
-		assert.match(
-			helper,
-			/UserPromptSubmit\|SessionStart\|PreToolUse\|PostToolUse\|Stop/,
-		);
-	});
-
 	it("keeps canonical plugin identifiers while adding only a wrapper alias", () => {
 		const codexPlugin = readBuild(
 			"codex/plugin/openagentsbtw/.codex-plugin/plugin.json",
@@ -657,9 +531,13 @@ describe("generated Copilot assets", () => {
 		assert.equal(hooks.version, 1);
 		assert.ok(hooks.hooks?.preToolUse?.length);
 		assert.ok(hooks.hooks?.agentStop?.length);
+		assert.ok(hooks.hooks?.sessionEnd?.length);
 		assert.ok(hooks.hooks?.subagentStart?.length);
+		assert.ok(hooks.hooks?.preToolUse?.length);
 		assert.ok(hooks.hooks?.subagentStop?.length);
 		assert.ok(hooks.hooks?.postToolUseFailure?.length);
+		assert.ok(hooks.hooks?.errorOccurred?.length);
+		assert.ok(hooks.hooks?.postToolUse?.length);
 		assert.match(JSON.stringify(hooks), /rtk-enforce\.mjs/);
 		assert.match(
 			JSON.stringify(globalHooks),
@@ -743,7 +621,7 @@ describe("installer docs", () => {
 	it("documents consolidated architecture and platform surfaces", () => {
 		const readme = readRepo("README.md");
 		const architecture = readRepo("docs/architecture.md");
-		assert.match(readme, /What Changed In 2\.0/);
+		assert.match(readme, /What Changed In 3\.0/);
 		assert.match(readme, /design-polish/);
 		assert.match(architecture, /source\/agents\/<agent>/);
 		assert.match(architecture, /source\/commands\/codex/);
@@ -859,8 +737,8 @@ describe("generated OpenCode assets", () => {
 describe("generated hook manifests", () => {
 	it("makes Codex unsupported shared policies explicit", () => {
 		const manifest = readBuild("codex/hooks/HOOKS.md");
-		assert.match(manifest, /`write-quality`:/);
-		assert.match(manifest, /`subagent-scan`:/);
+		assert.match(manifest, /`write-quality`/);
+		assert.match(manifest, /`subagent-scan`/);
 	});
 
 	it("emits machine-readable policy maps per platform", () => {

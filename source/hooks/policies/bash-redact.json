@@ -14,5 +14,6 @@
   "copilot": {
     "event": "postToolUse",
     "timeout": 10
-  }
+  },
+  "category": "output_safety"
 }

@@ -111,6 +111,8 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
   High-reasoning installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-20`
   Same model split as `pro-5`, with more aggressive swarming. It is an installer preset, not a profile name.
+- For `plus`, `pro-5`, and `pro-20`, top-level `openagentsbtw` defaults to `gpt-5.4` with `model_reasoning_effort = "medium"` and `plan_mode_reasoning_effort = "high"`. `go` keeps `gpt-5.4-mini` at top-level.
+- Implementation/autopilot/long-runtime profiles stay on `gpt-5.3-codex`.
 - `openagentsbtw-utility`
   A lightweight profile for bounded utility tasks. It uses `gpt-5.4-mini`.
 - `openagentsbtw-approval-auto`

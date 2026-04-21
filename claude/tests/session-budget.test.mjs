@@ -1,8 +1,8 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, it } from "node:test";
 import { runHook } from "./helpers.mjs";
 
 describe("SessionBudget", () => {

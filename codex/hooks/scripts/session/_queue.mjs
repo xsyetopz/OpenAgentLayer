@@ -221,7 +221,7 @@ export function summarizePendingQueue(options = {}) {
 		(record, index) =>
 			`${index + 1}. ${record.id} [${record.state}] ${record.message}`,
 	);
-	return `Queued openagentsbtw messages pending:\n${lines.join("\n")}\n\nRun \`/queue next\` or \`oabtw-codex queue next\` after this task if you want to process one manually.`;
+	return `Queued openagentsbtw messages pending:\n${lines.join("\n")}\n\nAfter this task, run \`/queue next\` or \`oabtw-codex queue next\` to process one manually.`;
 }
 
 export function parseQueueCommand(prompt = "") {

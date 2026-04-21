@@ -25,5 +25,6 @@
       "kind": "rtk-rewrite",
       "message": "openagentsbtw requires RTK for this bash command when RTK.md is present"
     }
-  }
+  },
+  "category": "execution_guard"
 }

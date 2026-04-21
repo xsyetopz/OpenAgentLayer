@@ -15,9 +15,12 @@ It does not rely on undocumented “override the hidden system prompt” hacks.
 
 Bias deterministic coding and review toward `gpt-5.3-codex`.
 
-- main implementation and review routes: `gpt-5.3-codex`
-- utility routes: `gpt-5.4-mini`
-- reasoning defaults: `medium` or `high`, not blanket `xhigh`
+| Codex plan | Top-level `openagentsbtw` | `model_reasoning_effort` | `plan_mode_reasoning_effort` | Implementation/auto/runtime | Utility        |
+| ---------- | ------------------------- | ------------------------ | ---------------------------- | --------------------------- | -------------- |
+| `go`       | `gpt-5.4-mini`            | `medium`                 | `high`                       | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `plus`     | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `pro-5`    | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `pro-20`   | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             | `gpt-5.4-mini` |
 
 ## Wrapper Shape
 

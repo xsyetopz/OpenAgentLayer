@@ -24,7 +24,7 @@ const CAVEMAN_PROTECTED_SURFACE_LINE =
 	"Code, commands, paths, URLs, inline code, fenced code, exact errors, commit messages, review findings, docs, comments, and file contents stay normal unless the matching explicit Caveman skill was invoked.";
 const CAVEMAN_CLARITY_OVERRIDE_LINE =
 	"Temporarily answer normally for security warnings, destructive confirmations, and ambiguity-sensitive instructions or repeated user confusion.";
-const CAVEMAN_VIOLATION_RULES = [
+const CAVEMAN_DRIFT_PATTERNS = [
 	{
 		label: "sycophantic opener",
 		pattern:
@@ -70,7 +70,7 @@ export function matchCavemanViolations(text = "") {
 	const content = String(text || "").trim();
 	if (!content) return [];
 	const hits = [];
-	for (const rule of CAVEMAN_VIOLATION_RULES) {
+	for (const rule of CAVEMAN_DRIFT_PATTERNS) {
 		const regex = new RegExp(rule.pattern, rule.flags);
 		const match = content.match(regex);
 		if (match) hits.push(`${rule.label}: ${match[0].trim().slice(0, 80)}`);

@@ -1,11 +1,5 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import {
-	AGENTIC_FULL_HOOKS,
-	AGENTIC_FULL_MARKDOWN,
-	AGENTIC_FULL_SETTINGS,
-	AGENTIC_FULL_TREES,
-} from "./agentic-ide-surfaces.mjs";
 import { removeManagedBlock } from "./managed-files.mjs";
 import {
 	removeRtkSurfaces,
@@ -26,20 +20,6 @@ import {
 	writeText,
 } from "./shared.mjs";
 
-const AGENTIC_IDES = [
-	"cursor",
-	"junie",
-	"air",
-	"gemini-cli",
-	"kiro",
-	"kilo",
-	"roo",
-	"cline",
-	"amp",
-	"augment",
-	"antigravity",
-];
-
 function usage() {
 	console.log(`openagentsbtw uninstaller
 
@@ -50,24 +30,11 @@ System toggles (allow multiple):
   --opencode
   --codex
   --copilot
-  --agentic-ides
-  --cursor
-  --junie
-  --air
-  --gemini-cli
-  --kiro
-  --kilo
-  --roo
-  --cline
-  --amp
-  --augment
-  --antigravity
   --all
 
 Options:
   --opencode-scope project|global
   --copilot-scope global|project|both
-  --agentic-ide-scope project|global|both
   -h, --help`);
 }
 
@@ -77,11 +44,8 @@ function parseArgs(argv) {
 		removeOpenCode: false,
 		removeCodex: false,
 		removeCopilot: false,
-		removeAgenticIdes: false,
-		agenticIdeTargets: [],
 		opencodeScope: "global",
 		copilotScope: "global",
-		agenticIdeScope: "project",
 		help: false,
 	};
 
@@ -100,37 +64,17 @@ function parseArgs(argv) {
 			case "--copilot":
 				args.removeCopilot = true;
 				break;
-			case "--agentic-ides":
-				args.removeAgenticIdes = true;
-				break;
-			case "--cursor":
-			case "--junie":
-			case "--air":
-			case "--gemini-cli":
-			case "--kiro":
-			case "--kilo":
-			case "--roo":
-			case "--cline":
-			case "--amp":
-			case "--augment":
-			case "--antigravity":
-				args.agenticIdeTargets.push(token.slice(2));
-				break;
 			case "--all":
 				args.removeClaude = true;
 				args.removeOpenCode = true;
 				args.removeCodex = true;
 				args.removeCopilot = true;
-				args.removeAgenticIdes = true;
 				break;
 			case "--opencode-scope":
 				args.opencodeScope = argv[++index] ?? "";
 				break;
 			case "--copilot-scope":
 				args.copilotScope = argv[++index] ?? "";
-				break;
-			case "--agentic-ide-scope":
-				args.agenticIdeScope = argv[++index] ?? "";
 				break;
 			case "-h":
 			case "--help":
@@ -151,33 +95,17 @@ function parseArgs(argv) {
 			`Unsupported Copilot scope: ${args.copilotScope} (expected global, project, or both)`,
 		);
 	}
-	if (!["global", "project", "both"].includes(args.agenticIdeScope)) {
-		throw new Error(
-			`Unsupported agentic IDE scope: ${args.agenticIdeScope} (expected global, project, or both)`,
-		);
-	}
-	const unknownTargets = args.agenticIdeTargets.filter(
-		(target) => !AGENTIC_IDES.includes(target),
-	);
-	if (unknownTargets.length > 0) {
-		throw new Error(
-			`Unsupported agentic IDE target: ${unknownTargets.join(", ")}`,
-		);
-	}
 
 	if (
 		!args.removeClaude &&
 		!args.removeOpenCode &&
 		!args.removeCodex &&
-		!args.removeCopilot &&
-		!args.removeAgenticIdes &&
-		args.agenticIdeTargets.length === 0
+		!args.removeCopilot
 	) {
 		args.removeClaude = true;
 		args.removeOpenCode = true;
 		args.removeCodex = true;
 		args.removeCopilot = true;
-		args.removeAgenticIdes = true;
 	}
 
 	return args;
@@ -513,472 +441,6 @@ async function removeCopilot(scope) {
 	}
 }
 
-function selectedAgenticIdes(args) {
-	return args.removeAgenticIdes
-		? AGENTIC_IDES
-		: [...new Set(args.agenticIdeTargets)];
-}
-
-async function removeManagedMarkdown(target, name) {
-	if (!(await pathExists(target))) return;
-	const next = removeManagedBlock(
-		await readText(target, ""),
-		`<!-- >>> openagentsbtw ${name} >>> -->`,
-		`<!-- <<< openagentsbtw ${name} <<< -->`,
-	);
-	await writeText(target, next);
-}
-
-async function listFiles(root, base = root) {
-	let files = [];
-	for (const entry of await fs
-		.readdir(root, { withFileTypes: true })
-		.catch(() => [])) {
-		const fullPath = path.join(root, entry.name);
-		if (entry.isDirectory()) {
-			files = files.concat(await listFiles(fullPath, base));
-			continue;
-		}
-		files.push(path.relative(base, fullPath));
-	}
-	return files;
-}
-
-async function removeTemplateTree({ source, target }) {
-	for (const relativePath of await listFiles(source)) {
-		await fs.rm(path.join(target, relativePath), { force: true });
-	}
-	await fs.rm(path.join(target, ".openagentsbtw-install-manifest.json"), {
-		force: true,
-	});
-}
-
-async function removeManagedIgnore(target, name) {
-	if (!(await pathExists(target))) return;
-	const next = removeManagedBlock(
-		await readText(target, ""),
-		`# >>> openagentsbtw ${name} >>>`,
-		`# <<< openagentsbtw ${name} <<<`,
-	);
-	await writeText(target, next);
-}
-
-async function removeAgenticSettings(target, serverKey = "mcpServers") {
-	if (!(await pathExists(target))) return;
-	const payload = await readJson(target, {});
-	if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
-	const metadata =
-		payload.openagentsbtw && typeof payload.openagentsbtw === "object"
-			? payload.openagentsbtw
-			: null;
-	if (!metadata?.managed) return;
-	const next = { ...payload };
-	const managedServers = Array.isArray(metadata.managedMcpServers)
-		? metadata.managedMcpServers.filter((name) => typeof name === "string")
-		: [];
-	delete next.openagentsbtw;
-	if (next[serverKey] && typeof next[serverKey] === "object") {
-		for (const server of managedServers) {
-			delete next[serverKey][server];
-		}
-		if (Object.keys(next[serverKey]).length === 0) {
-			delete next[serverKey];
-		}
-	}
-	await writeJson(target, next);
-}
-
-async function removeAgenticGuardIfUnused({ guardPath, hookPaths }) {
-	for (const hookPath of hookPaths) {
-		if (await pathExists(hookPath)) return;
-	}
-	await fs.rm(guardPath, { force: true });
-}
-
-function fullSurfaceTemplate(root, surface) {
-	return path.join(root, ...surface.templatePath);
-}
-
-function fullProjectTarget(workspacePaths, surface) {
-	return path.join(workspacePaths.workspaceRoot, ...surface.projectTarget);
-}
-
-function fullGlobalTarget(surface) {
-	return path.join(PATHS[surface.globalHome], ...surface.globalTarget);
-}
-
-function selectedFullHookTargets({ targets, scope, workspacePaths }) {
-	return AGENTIC_FULL_HOOKS.filter(
-		(surface) =>
-			targets.includes(surface.tool) &&
-			(scope === "project" ? surface.projectTarget : surface.globalHome),
-	).map((surface) =>
-		scope === "project"
-			? fullProjectTarget(workspacePaths, surface)
-			: fullGlobalTarget(surface),
-	);
-}
-
-function allFullHookTargets({ scope, workspacePaths }) {
-	return AGENTIC_FULL_HOOKS.filter((surface) =>
-		scope === "project" ? surface.projectTarget : surface.globalHome,
-	).map((surface) =>
-		scope === "project"
-			? fullProjectTarget(workspacePaths, surface)
-			: fullGlobalTarget(surface),
-	);
-}
-
-async function removeFullProjectAgenticIdes(targets) {
-	const workspacePaths = resolveWorkspacePaths();
-	const root = path.join(ROOT, "agentic-ides", "templates", "full", "project");
-	const guardPath = path.join(
-		workspacePaths.workspaceRoot,
-		".openagentsbtw",
-		"agentic",
-		"hooks",
-		"openagentsbtw-agentic-guard.mjs",
-	);
-	for (const surface of AGENTIC_FULL_SETTINGS) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await removeAgenticSettings(
-			fullProjectTarget(workspacePaths, surface),
-			surface.serverKey,
-		);
-	}
-	for (const surface of AGENTIC_FULL_TREES) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await removeTemplateTree({
-			source: fullSurfaceTemplate(root, surface),
-			target: fullProjectTarget(workspacePaths, surface),
-		});
-	}
-	for (const hookTarget of selectedFullHookTargets({
-		targets,
-		scope: "project",
-		workspacePaths,
-	})) {
-		await fs.rm(hookTarget, { force: true });
-	}
-	for (const surface of AGENTIC_FULL_MARKDOWN) {
-		if (!targets.includes(surface.tool) || !surface.projectTarget) continue;
-		await removeManagedMarkdown(
-			fullProjectTarget(workspacePaths, surface),
-			surface.markerName,
-		);
-	}
-	await removeAgenticGuardIfUnused({
-		guardPath,
-		hookPaths: allFullHookTargets({ scope: "project", workspacePaths }),
-	});
-}
-
-async function removeFullGlobalAgenticIdes(targets) {
-	const root = path.join(ROOT, "agentic-ides", "templates", "full", "global");
-	const guardPath = path.join(
-		PATHS.configDir,
-		"agentic",
-		"hooks",
-		"openagentsbtw-agentic-guard.mjs",
-	);
-	for (const surface of AGENTIC_FULL_SETTINGS) {
-		if (!targets.includes(surface.tool) || !surface.globalHome) continue;
-		await removeAgenticSettings(fullGlobalTarget(surface), surface.serverKey);
-	}
-	for (const surface of AGENTIC_FULL_TREES) {
-		if (!targets.includes(surface.tool) || !surface.globalHome) continue;
-		await removeTemplateTree({
-			source: fullSurfaceTemplate(root, surface),
-			target: fullGlobalTarget(surface),
-		});
-	}
-	for (const hookTarget of selectedFullHookTargets({
-		targets,
-		scope: "global",
-	})) {
-		await fs.rm(hookTarget, { force: true });
-	}
-	await removeAgenticGuardIfUnused({
-		guardPath,
-		hookPaths: allFullHookTargets({ scope: "global" }),
-	});
-}
-
-async function removeNativeProjectAgenticIdes(targets) {
-	const workspacePaths = resolveWorkspacePaths();
-	const root = path.join(
-		ROOT,
-		"agentic-ides",
-		"templates",
-		"native",
-		"project",
-	);
-	if (targets.includes("gemini-cli")) {
-		await removeTemplateTree({
-			source: path.join(root, "gemini-cli", ".gemini", "agents"),
-			target: path.join(workspacePaths.workspaceRoot, ".gemini", "agents"),
-		});
-		await removeTemplateTree({
-			source: path.join(root, "gemini-cli", ".gemini", "commands", "oabtw"),
-			target: path.join(
-				workspacePaths.workspaceRoot,
-				".gemini",
-				"commands",
-				"oabtw",
-			),
-		});
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".geminiignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("augment")) {
-		for (const dir of ["agents", "commands", "skills"]) {
-			await removeTemplateTree({
-				source: path.join(root, "augment", ".augment", dir),
-				target: path.join(workspacePaths.workspaceRoot, ".augment", dir),
-			});
-		}
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".augmentignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("kiro")) {
-		await removeTemplateTree({
-			source: path.join(root, "kiro", ".kiro", "agents"),
-			target: path.join(workspacePaths.workspaceRoot, ".kiro", "agents"),
-		});
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".kiroignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("kilo")) {
-		await removeTemplateTree({
-			source: path.join(root, "kilo", ".kilocode", "skills"),
-			target: path.join(workspacePaths.workspaceRoot, ".kilocode", "skills"),
-		});
-		await fs.rm(
-			path.join(
-				workspacePaths.workspaceRoot,
-				".kilocodemodes.openagentsbtw.md",
-			),
-			{ force: true },
-		);
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".kilocodeignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("cline")) {
-		await removeTemplateTree({
-			source: path.join(root, "cline", ".cline", "skills"),
-			target: path.join(workspacePaths.workspaceRoot, ".cline", "skills"),
-		});
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".clineignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("roo")) {
-		for (const dir of ["rules-code", "rules-architect", "rules-debug"]) {
-			await removeTemplateTree({
-				source: path.join(root, "roo", ".roo", dir),
-				target: path.join(workspacePaths.workspaceRoot, ".roo", dir),
-			});
-		}
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".rooignore"),
-			"agentic-ides ignore",
-		);
-	}
-	if (targets.includes("cursor")) {
-		for (const file of [".cursorignore", ".cursorindexingignore"]) {
-			await removeManagedIgnore(
-				path.join(workspacePaths.workspaceRoot, file),
-				"agentic-ides ignore",
-			);
-		}
-	}
-	if (targets.includes("junie")) {
-		await removeManagedIgnore(
-			path.join(workspacePaths.workspaceRoot, ".aiignore"),
-			"agentic-ides ignore",
-		);
-	}
-}
-
-async function removeNativeGlobalAgenticIdes(targets) {
-	const root = path.join(ROOT, "agentic-ides", "templates", "native", "global");
-	if (targets.includes("gemini-cli")) {
-		await removeTemplateTree({
-			source: path.join(root, "gemini-cli", ".gemini", "agents"),
-			target: path.join(PATHS.geminiHome, "agents"),
-		});
-		await removeTemplateTree({
-			source: path.join(root, "gemini-cli", ".gemini", "commands", "oabtw"),
-			target: path.join(PATHS.geminiHome, "commands", "oabtw"),
-		});
-	}
-	if (targets.includes("augment")) {
-		for (const dir of ["agents", "commands", "skills"]) {
-			await removeTemplateTree({
-				source: path.join(root, "augment", ".augment", dir),
-				target: path.join(PATHS.augmentHome, dir),
-			});
-		}
-	}
-	if (targets.includes("kiro")) {
-		await removeTemplateTree({
-			source: path.join(root, "kiro", ".kiro", "agents"),
-			target: path.join(PATHS.kiroHome, "agents"),
-		});
-	}
-	if (targets.includes("kilo")) {
-		await removeTemplateTree({
-			source: path.join(root, "kilo", ".kilocode", "skills"),
-			target: path.join(PATHS.kiloRulesHome, "skills"),
-		});
-		await fs.rm(
-			path.join(PATHS.kiloRulesHome, ".kilocodemodes.openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("cline")) {
-		await removeTemplateTree({
-			source: path.join(root, "cline", ".cline", "skills"),
-			target: path.join(PATHS.clineHome, "Skills"),
-		});
-	}
-	if (targets.includes("roo")) {
-		for (const dir of ["rules-code", "rules-architect", "rules-debug"]) {
-			await removeTemplateTree({
-				source: path.join(root, "roo", ".roo", dir),
-				target: path.join(PATHS.rooHome, dir),
-			});
-		}
-	}
-}
-
-async function removeProjectAgenticIdes(targets) {
-	await removeFullProjectAgenticIdes(targets);
-	await removeNativeProjectAgenticIdes(targets);
-	const workspacePaths = resolveWorkspacePaths();
-	if (targets.includes("cursor")) {
-		await fs.rm(
-			path.join(workspacePaths.projectCursorRulesDir, "openagentsbtw.mdc"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("junie")) {
-		await fs.rm(path.join(workspacePaths.projectJunieDir, "AGENTS.md"), {
-			force: true,
-		});
-	}
-	if (targets.some((target) => ["air", "amp", "kilo"].includes(target))) {
-		await removeManagedMarkdown(
-			path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
-			"agentic-ides",
-		);
-	}
-	if (targets.some((target) => ["gemini-cli"].includes(target))) {
-		await removeManagedMarkdown(
-			path.join(workspacePaths.workspaceRoot, "GEMINI.md"),
-			"agentic-ides gemini",
-		);
-	}
-	if (targets.includes("kiro")) {
-		await fs.rm(
-			path.join(workspacePaths.projectKiroSteeringDir, "openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("kilo")) {
-		await fs.rm(
-			path.join(workspacePaths.projectKiloRulesDir, "openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("roo")) {
-		await fs.rm(
-			path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("cline")) {
-		await fs.rm(
-			path.join(workspacePaths.projectClineRulesDir, "openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-	if (targets.includes("augment")) {
-		await fs.rm(
-			path.join(workspacePaths.projectAugmentRulesDir, "openagentsbtw.md"),
-			{ force: true },
-		);
-	}
-}
-
-async function removeGlobalAgenticIdes(targets) {
-	await removeFullGlobalAgenticIdes(targets);
-	await removeNativeGlobalAgenticIdes(targets);
-	if (targets.includes("gemini-cli")) {
-		await removeManagedMarkdown(
-			path.join(PATHS.geminiHome, "GEMINI.md"),
-			"agentic-ides gemini",
-		);
-	}
-	if (targets.includes("kiro")) {
-		await fs.rm(path.join(PATHS.kiroHome, "steering", "openagentsbtw.md"), {
-			force: true,
-		});
-	}
-	if (targets.includes("kilo")) {
-		await fs.rm(path.join(PATHS.kiloRulesHome, "rules", "openagentsbtw.md"), {
-			force: true,
-		});
-		await removeManagedMarkdown(
-			path.join(PATHS.kiloConfigDir, "AGENTS.md"),
-			"agentic-ides",
-		);
-	}
-	if (targets.includes("roo")) {
-		await fs.rm(path.join(PATHS.rooHome, "rules", "openagentsbtw.md"), {
-			force: true,
-		});
-	}
-	if (targets.includes("cline")) {
-		await fs.rm(path.join(PATHS.clineRulesDir, "openagentsbtw.md"), {
-			force: true,
-		});
-	}
-	if (targets.includes("amp")) {
-		await removeManagedMarkdown(
-			path.join(PATHS.ampConfigDir, "AGENTS.md"),
-			"agentic-ides",
-		);
-	}
-	if (targets.includes("augment")) {
-		await fs.rm(path.join(PATHS.augmentHome, "rules", "openagentsbtw.md"), {
-			force: true,
-		});
-	}
-}
-
-async function removeAgenticIdes(args) {
-	const targets = selectedAgenticIdes(args);
-	if (targets.length === 0) return;
-	console.log("\n\x1b[0;32mRemoving agentic IDE support\x1b[0m");
-	if (args.agenticIdeScope === "project" || args.agenticIdeScope === "both") {
-		await removeProjectAgenticIdes(targets);
-	}
-	if (args.agenticIdeScope === "global" || args.agenticIdeScope === "both") {
-		await removeGlobalAgenticIdes(targets);
-	}
-	logInfo("Removed agentic IDE rules/instructions");
-}
-
 async function removeCodex() {
 	console.log("\n\x1b[0;32mRemoving Codex support\x1b[0m");
 	const rtkPaths = rtkPolicyPathMap();
@@ -1100,7 +562,6 @@ async function main() {
 	if (args.removeClaude) await removeClaude();
 	if (args.removeOpenCode) await removeOpenCode(args.opencodeScope);
 	if (args.removeCopilot) await removeCopilot(args.copilotScope);
-	await removeAgenticIdes(args);
 	if (args.removeCodex) await removeCodex();
 
 	console.log("\n\x1b[0;32mopenagentsbtw uninstall complete\x1b[0m");

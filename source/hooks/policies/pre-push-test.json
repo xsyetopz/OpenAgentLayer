@@ -9,5 +9,6 @@
         "message": "Tests failed. Fix them before pushing."
       }
     ]
-  }
+  },
+  "category": "vcs_gate"
 }

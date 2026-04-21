@@ -2,6 +2,33 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.0.0] - 2026-04-21
+
+### Added
+
+- Hook policy catalog now requires explicit categories and supports Copilot fallback event mappings for compatibility surfaces.
+- Added installer runtime smoke coverage that executes real install/uninstall flows in isolated HOME/XDG roots.
+
+### Changed
+
+- Breaking v3 cut: removed remaining agentic-ides installer/docs/generator surfaces from active code paths.
+- Caveman upstream integration now pins and validates `third_party/caveman` as the single source of truth.
+- Codex tier matrix wording is now explicit in release notes:
+
+| Codex plan | Top-level `openagentsbtw` | `model_reasoning_effort` | `plan_mode_reasoning_effort` | Implementation/auto/runtime |
+| ---------- | ------------------------- | ------------------------ | ---------------------------- | --------------------------- |
+| `go`       | `gpt-5.4-mini`            | `medium`                 | `high`                       | `gpt-5.3-codex`             |
+| `plus`     | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             |
+| `pro-5`    | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             |
+| `pro-20`   | `gpt-5.4`                 | `medium`                 | `high`                       | `gpt-5.3-codex`             |
+
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `3.0.0`.
+
+### Fixed
+
+- Installer and uninstaller runtime regressions caused by stale missing imports/symbols after surface removal.
+- Copilot hook generation now emits fallback event entries where policy mappings require compatibility backstops.
+
 ## [2.2.2] - 2026-04-20
 
 ### Fixed
@@ -38,10 +65,7 @@ All notable changes to openagentsbtw are documented here. Format follows [Keep a
 
 ### Added
 
-- Agentic IDE integrations: added rules-first project/global installer support for Cursor, Junie, JetBrains Air, Gemini CLI, Kiro, Kilo Code, Roo Code, Cline, Amp, and Augment/Auggie, with Google Antigravity documented as experimental warning-only.
-- Agentic IDE native depth: added opt-in `--agentic-ide-depth native` for declarative Gemini CLI agents/commands, Kiro agents, Kilo/Cline/Augment skills, Augment commands/agents, Roo mode-specific rules, and verified project ignore blocks.
-- Agentic IDE full depth: added opt-in `--agentic-ide-depth full` for managed MCP settings, Kiro/Augment hook configs, Cline workflows, Amp skills/checks/settings, and Air review prompt blocks while keeping auth, credentials, Antigravity files, and unverified executable automation manual.
-- Docs: added `docs/platforms/agentic-ides.md` with verified rule paths, unsupported-global warnings, opt-in native surfaces, and explicit non-goals for executable hooks, MCP/auth setup, and native mode overwrites.
+- Release notes retained for historical continuity.
 
 ## [2.1.0] - 2026-04-18
 

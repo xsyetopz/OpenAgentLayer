@@ -13,5 +13,6 @@
   "copilot": {
     "event": "sessionStart",
     "timeout": 5
-  }
+  },
+  "category": "session_context"
 }

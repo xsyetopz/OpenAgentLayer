@@ -71,7 +71,7 @@ agents.max_threads = 6
 agents.max_depth = 1
 
 [profiles.openagentsbtw]
-model = "gpt-5.3-codex"
+model = "gpt-5.4"
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "low"

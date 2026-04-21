@@ -10,5 +10,6 @@
         "message": "Potential placeholder comments detected in staged files. Resolve or remove them before committing."
       }
     ]
-  }
+  },
+  "category": "vcs_gate"
 }

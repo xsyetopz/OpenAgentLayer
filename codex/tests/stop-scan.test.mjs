@@ -1,9 +1,9 @@
+import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -71,7 +71,7 @@ async function invokeHook(root, payload) {
 }
 
 describe("codex stop scan", () => {
-	it("blocks obvious non-Caveman assistant prose when mode is active", async () => {
+	it("warns on obvious non-Caveman assistant prose when mode is active", async () => {
 		const root = await initRepo();
 		try {
 			const result = await invokeHook(root, {
@@ -81,8 +81,9 @@ describe("codex stop scan", () => {
 			});
 			assert.equal(result.code, 0);
 			const output = JSON.parse(result.stdout.trim());
-			assert.equal(output.continue, false);
+			assert.equal(output.continue, true);
 			assert.match(output.systemMessage, /Caveman mode/);
+			assert.match(output.systemMessage, /advisory/);
 		} finally {
 			await rm(root, { recursive: true, force: true });
 		}

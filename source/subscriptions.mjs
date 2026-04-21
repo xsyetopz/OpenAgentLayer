@@ -111,9 +111,9 @@ export const CODEX_PLANS = {
 		},
 		profiles: {
 			main: {
-				model: "gpt-5.3-codex",
+				model: "gpt-5.4",
 				modelReasoning: "medium",
-				planReasoning: "xhigh",
+				planReasoning: "high",
 				verbosity: "low",
 				approval: "on-request",
 				sandbox: "workspace-write",
@@ -177,7 +177,7 @@ export const CODEX_PLANS = {
 		},
 		profiles: {
 			main: {
-				model: "gpt-5.3-codex",
+				model: "gpt-5.4",
 				modelReasoning: "medium",
 				planReasoning: "high",
 				verbosity: "low",
@@ -243,7 +243,7 @@ export const CODEX_PLANS = {
 		},
 		profiles: {
 			main: {
-				model: "gpt-5.3-codex",
+				model: "gpt-5.4",
 				modelReasoning: "medium",
 				planReasoning: "high",
 				verbosity: "low",
