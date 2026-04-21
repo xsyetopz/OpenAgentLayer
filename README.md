@@ -2,9 +2,15 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Cross-platform agent scaffolding for Claude Code, Codex CLI, OpenCode, and GitHub Copilot.
+Cross-platform agent scaffolding for Claude Code, Codex CLI, OpenCode, GitHub Copilot, and detected IDE agent surfaces.
 
 One canonical source tree. Generated platform artifacts. Tight prompts, strict routing, and fewer chances for models to drift into garbage architecture or generic AI UI.
+
+## What Changed In 3.1
+
+- optional IDE support for Roo Code, Cline, Cursor, JetBrains Junie, and Antigravity
+- `./install.sh --all` auto-detects optional IDEs and skips missing systems without writing files
+- project-native rule/instruction assets for optional IDEs, with Cline prompt hooks where supported
 
 ## What Changed In 3.0
 
@@ -53,6 +59,8 @@ Common presets:
 ./install.sh --claude --claude-plan max-5
 ./install.sh --copilot --copilot-plan pro
 ./install.sh --all --caveman-mode full
+./install.sh --all --no-optional-ides
+./install.sh --optional-ides
 ```
 
 ## Codex Surface

@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "beforeTask": [
+      {
+        "type": "prompt",
+        "text": "Use openagentsbtw: discover repo facts before asking; implement requested production work; no demos/placeholders."
+      }
+    ],
+    "afterTask": [
+      {
+        "type": "prompt",
+        "text": "Before final answer, verify blockers use BLOCKED/Attempted/Evidence/Need and completed implementation routes changed production code."
+      }
+    ]
+  }
+}

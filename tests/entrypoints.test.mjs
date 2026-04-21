@@ -29,34 +29,48 @@ function readRepo(relativePath) {
 
 describe("shared install paths", () => {
 	it("resolves Windows managed paths under AppData and user home", () => {
+		const homeDir = "C:\\Users\\test-user";
+		const appDataDir = "C:\\Users\\test-user\\AppData\\Roaming";
 		const paths = resolvePaths({
 			platform: "win32",
-			env: { APPDATA: "C:\\Users\\krystian\\AppData\\Roaming" },
-			homeDir: "C:\\Users\\krystian",
+			env: { APPDATA: appDataDir },
+			homeDir,
 		});
 		assert.equal(
 			paths.configDir,
-			"C:\\Users\\krystian\\AppData\\Roaming\\openagentsbtw",
+			"C:\\Users\\test-user\\AppData\\Roaming\\openagentsbtw",
 		);
 		assert.equal(
 			paths.opencodeConfigDir,
-			"C:\\Users\\krystian\\AppData\\Roaming\\opencode",
+			"C:\\Users\\test-user\\AppData\\Roaming\\opencode",
 		);
 		assert.equal(
 			paths.vscodeUserMcp,
-			"C:\\Users\\krystian\\AppData\\Roaming\\Code\\User\\mcp.json",
+			"C:\\Users\\test-user\\AppData\\Roaming\\Code\\User\\mcp.json",
 		);
-		assert.equal(paths.claudeHome, "C:\\Users\\krystian\\.claude");
-		assert.equal(paths.codexHome, "C:\\Users\\krystian\\.codex");
-		assert.equal(paths.copilotHome, "C:\\Users\\krystian\\.copilot");
-		assert.equal(paths.geminiHome, "C:\\Users\\krystian\\.gemini");
+		assert.equal(paths.claudeHome, "C:\\Users\\test-user\\.claude");
+		assert.equal(paths.codexHome, "C:\\Users\\test-user\\.codex");
+		assert.equal(paths.copilotHome, "C:\\Users\\test-user\\.copilot");
+		assert.equal(paths.geminiHome, "C:\\Users\\test-user\\.gemini");
+		assert.equal(
+			paths.cursorConfigDir,
+			"C:\\Users\\test-user\\AppData\\Roaming\\Cursor",
+		);
+		assert.equal(
+			paths.jetbrainsConfigDir,
+			"C:\\Users\\test-user\\AppData\\Roaming\\JetBrains",
+		);
+		assert.equal(
+			paths.antigravityConfigDir,
+			"C:\\Users\\test-user\\AppData\\Roaming\\Antigravity",
+		);
 		assert.equal(
 			paths.kiloConfigDir,
-			"C:\\Users\\krystian\\AppData\\Roaming\\kilo",
+			"C:\\Users\\test-user\\AppData\\Roaming\\kilo",
 		);
 		assert.equal(
 			paths.ampConfigDir,
-			"C:\\Users\\krystian\\AppData\\Roaming\\amp",
+			"C:\\Users\\test-user\\AppData\\Roaming\\amp",
 		);
 	});
 
@@ -64,17 +78,20 @@ describe("shared install paths", () => {
 		const paths = resolvePaths({
 			platform: "linux",
 			env: { XDG_CONFIG_HOME: "/tmp/xdg" },
-			homeDir: "/home/krystian",
+			homeDir: "/home/test-user",
 		});
 		assert.equal(paths.configDir, "/tmp/xdg/openagentsbtw");
-		assert.equal(paths.managedBinDir, "/home/krystian/.local/bin");
-		assert.equal(paths.ctx7Wrapper, "/home/krystian/.local/bin/ctx7");
+		assert.equal(paths.managedBinDir, "/home/test-user/.local/bin");
+		assert.equal(paths.ctx7Wrapper, "/home/test-user/.local/bin/ctx7");
 		assert.equal(
 			paths.codexWrapperBinDir,
-			"/home/krystian/.codex/openagentsbtw/bin",
+			"/home/test-user/.codex/openagentsbtw/bin",
 		);
 		assert.equal(paths.opencodeConfigDir, "/tmp/xdg/opencode");
-		assert.equal(paths.geminiHome, "/home/krystian/.gemini");
+		assert.equal(paths.geminiHome, "/home/test-user/.gemini");
+		assert.equal(paths.cursorConfigDir, "/tmp/xdg/Cursor");
+		assert.equal(paths.jetbrainsConfigDir, "/tmp/xdg/JetBrains");
+		assert.equal(paths.antigravityConfigDir, "/tmp/xdg/Antigravity");
 		assert.equal(paths.kiloConfigDir, "/tmp/xdg/kilo");
 		assert.equal(paths.ampConfigDir, "/tmp/xdg/amp");
 	});
@@ -93,6 +110,13 @@ describe("shared install paths", () => {
 			"/tmp/consumer-repo/.kiro/steering",
 		);
 		assert.equal(paths.projectRooRulesDir, "/tmp/consumer-repo/.roo/rules");
+		assert.equal(paths.projectRooModes, "/tmp/consumer-repo/.roomodes");
+		assert.equal(paths.projectClineRulesDir, "/tmp/consumer-repo/.clinerules");
+		assert.equal(paths.projectClineDir, "/tmp/consumer-repo/.cline");
+		assert.equal(
+			paths.projectAntigravityDir,
+			"/tmp/consumer-repo/.antigravity",
+		);
 	});
 });
 
@@ -244,6 +268,9 @@ describe("public entrypoints", () => {
 		const shared = readRepo("scripts/install/shared.mjs");
 		assert.match(installer, /--caveman-mode MODE/);
 		assert.match(installer, /--no-caveman/);
+		assert.match(installer, /--optional-ides/);
+		assert.match(installer, /--roo/);
+		assert.match(installer, /--antigravity/);
 		assert.match(configCli, /--caveman-mode MODE/);
 		assert.match(configCli, /--no-caveman/);
 		assert.match(shared, /OABTW_CAVEMAN_MODE/);
@@ -256,8 +283,12 @@ describe("public entrypoints", () => {
 		assert.match(installer, /workspacePaths\.projectGithubDir/);
 		assert.match(installer, /workspacePaths\.projectVscodeMcp/);
 		assert.match(installer, /workspacePaths\.projectOpenCodeDir/);
+		assert.match(installer, /workspacePaths\.projectRooRulesDir/);
+		assert.match(installer, /workspacePaths\.projectCursorRulesDir/);
+		assert.match(installer, /workspacePaths\.projectJunieDir/);
 		assert.match(uninstaller, /workspacePaths\.projectGithubDir/);
 		assert.match(uninstaller, /workspacePaths\.projectOpenCodeDir/);
+		assert.match(uninstaller, /workspacePaths\.projectClineRulesDir/);
 		assert.equal(installer.includes('path.join(ROOT, ".github")'), false);
 		assert.equal(
 			installer.includes('path.join(ROOT, ".vscode", "mcp.json")'),

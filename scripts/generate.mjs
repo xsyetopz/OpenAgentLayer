@@ -9,6 +9,7 @@ import {
 import { renderCodexPeerWrapper } from "./generate/render/codex-peer-wrapper.mjs";
 import { renderCodexWrapper } from "./generate/render/codex-wrapper.mjs";
 import { renderOpenCodePlugin } from "./generate/render/opencode-plugin.mjs";
+import { renderOptionalIdeFiles } from "./generate/render/optional-ides.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -121,6 +122,16 @@ async function cleanGeneratedDirs() {
 	await fs.rm(path.join(OUTPUT_ROOT, "copilot", "hooks", "policy-map.json"), {
 		force: true,
 	});
+	await fs.rm(path.join(OUTPUT_ROOT, "optional-ides"), {
+		recursive: true,
+		force: true,
+	});
+}
+
+async function generateOptionalIdeAssets() {
+	for (const file of renderOptionalIdeFiles()) {
+		await writeFile(file.relativePath, file.content);
+	}
 }
 
 async function generateSkills(skills) {
@@ -1275,9 +1286,10 @@ async function main() {
 	await generateCopilotInstructionFiles();
 	await generateCopilotPromptFiles(commandData);
 	await generateCavemanRuntimeHelpers();
+	await generateOptionalIdeAssets();
 
 	console.log(
-		"Generated Claude, Copilot, Codex, and OpenCode artifacts from source/",
+		"Generated Claude, Copilot, Codex, OpenCode, and optional IDE artifacts from source/",
 	);
 }
 

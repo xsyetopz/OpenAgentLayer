@@ -17,6 +17,11 @@ openagentsbtw now treats canonical source as small authored catalogs plus per-sk
 - `source/catalog/items.mjs`
   Unified catalog entrypoint for agents, skills, commands, hook policies, and guidance.
 
+## Generated Targets
+
+- `optional-ides/`
+  Generated optional IDE rules/instructions for Roo Code, Cline, Cursor, Junie, and Antigravity.
+
 ## Generator Rule
 
 `scripts/generate.mjs` should stay thin orchestrator.

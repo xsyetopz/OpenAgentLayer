@@ -30,6 +30,12 @@ System toggles (allow multiple):
   --opencode
   --codex
   --copilot
+  --roo
+  --cline
+  --cursor
+  --junie
+  --antigravity
+  --optional-ides
   --all
 
 Options:
@@ -44,6 +50,11 @@ function parseArgs(argv) {
 		removeOpenCode: false,
 		removeCodex: false,
 		removeCopilot: false,
+		removeRoo: false,
+		removeCline: false,
+		removeCursor: false,
+		removeJunie: false,
+		removeAntigravity: false,
 		opencodeScope: "global",
 		copilotScope: "global",
 		help: false,
@@ -64,11 +75,38 @@ function parseArgs(argv) {
 			case "--copilot":
 				args.removeCopilot = true;
 				break;
+			case "--roo":
+				args.removeRoo = true;
+				break;
+			case "--cline":
+				args.removeCline = true;
+				break;
+			case "--cursor":
+				args.removeCursor = true;
+				break;
+			case "--junie":
+				args.removeJunie = true;
+				break;
+			case "--antigravity":
+				args.removeAntigravity = true;
+				break;
+			case "--optional-ides":
+				args.removeRoo = true;
+				args.removeCline = true;
+				args.removeCursor = true;
+				args.removeJunie = true;
+				args.removeAntigravity = true;
+				break;
 			case "--all":
 				args.removeClaude = true;
 				args.removeOpenCode = true;
 				args.removeCodex = true;
 				args.removeCopilot = true;
+				args.removeRoo = true;
+				args.removeCline = true;
+				args.removeCursor = true;
+				args.removeJunie = true;
+				args.removeAntigravity = true;
 				break;
 			case "--opencode-scope":
 				args.opencodeScope = argv[++index] ?? "";
@@ -100,12 +138,22 @@ function parseArgs(argv) {
 		!args.removeClaude &&
 		!args.removeOpenCode &&
 		!args.removeCodex &&
-		!args.removeCopilot
+		!args.removeCopilot &&
+		!args.removeRoo &&
+		!args.removeCline &&
+		!args.removeCursor &&
+		!args.removeJunie &&
+		!args.removeAntigravity
 	) {
 		args.removeClaude = true;
 		args.removeOpenCode = true;
 		args.removeCodex = true;
 		args.removeCopilot = true;
+		args.removeRoo = true;
+		args.removeCline = true;
+		args.removeCursor = true;
+		args.removeJunie = true;
+		args.removeAntigravity = true;
 	}
 
 	return args;
@@ -552,6 +600,101 @@ async function removeCodex() {
 	logInfo("Removed Codex plugin, agents, hooks, and managed profile blocks");
 }
 
+async function removeOptionalIdes(args) {
+	if (
+		!(
+			args.removeRoo ||
+			args.removeCline ||
+			args.removeCursor ||
+			args.removeJunie ||
+			args.removeAntigravity
+		)
+	) {
+		return;
+	}
+	console.log("\n\x1b[0;32mRemoving optional IDE support\x1b[0m");
+	const workspacePaths = resolveWorkspacePaths();
+	if (args.removeRoo) {
+		await fs.rm(
+			path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
+			{
+				force: true,
+			},
+		);
+		await fs.rm(workspacePaths.projectRooModes, { force: true });
+		logInfo("Removed Roo Code files");
+	}
+	if (args.removeCline) {
+		await fs.rm(
+			path.join(workspacePaths.projectClineRulesDir, "openagentsbtw.md"),
+			{
+				force: true,
+			},
+		);
+		await fs.rm(
+			path.join(
+				workspacePaths.projectClineRulesDir,
+				"hooks",
+				"openagentsbtw.json",
+			),
+			{
+				force: true,
+			},
+		);
+		await fs.rm(
+			path.join(workspacePaths.projectClineDir, "skills", "openagentsbtw"),
+			{
+				recursive: true,
+				force: true,
+			},
+		);
+		await fs.rm(
+			path.join(
+				workspacePaths.projectClineDir,
+				"workflows",
+				"openagentsbtw.md",
+			),
+			{
+				force: true,
+			},
+		);
+		logInfo("Removed Cline files");
+	}
+	if (args.removeCursor) {
+		await fs.rm(
+			path.join(workspacePaths.projectCursorRulesDir, "openagentsbtw.mdc"),
+			{
+				force: true,
+			},
+		);
+		logInfo("Removed Cursor files");
+	}
+	if (args.removeJunie) {
+		await fs.rm(path.join(workspacePaths.projectJunieDir, "AGENTS.md"), {
+			force: true,
+		});
+		await fs.rm(path.join(workspacePaths.projectJunieDir, "mcp", "mcp.json"), {
+			force: true,
+		});
+		logInfo("Removed Junie files");
+	}
+	if (args.removeAntigravity) {
+		for (const target of [
+			path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
+			path.join(workspacePaths.workspaceRoot, "GEMINI.md"),
+		]) {
+			if (!(await pathExists(target))) continue;
+			const next = removeManagedBlock(
+				await readText(target, ""),
+				"<!-- >>> openagentsbtw antigravity >>> -->",
+				"<!-- <<< openagentsbtw antigravity <<< -->",
+			);
+			await writeText(target, next);
+		}
+		logInfo("Removed Antigravity managed blocks");
+	}
+}
+
 async function main() {
 	const args = parseArgs(process.argv.slice(2));
 	if (args.help) {
@@ -563,6 +706,7 @@ async function main() {
 	if (args.removeOpenCode) await removeOpenCode(args.opencodeScope);
 	if (args.removeCopilot) await removeCopilot(args.copilotScope);
 	if (args.removeCodex) await removeCodex();
+	await removeOptionalIdes(args);
 
 	console.log("\n\x1b[0;32mopenagentsbtw uninstall complete\x1b[0m");
 }

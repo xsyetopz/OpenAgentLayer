@@ -47,6 +47,33 @@ export function resolvePaths({
 	const kiloRulesHome = pathLib.join(homeDir, ".kilocode");
 	const ampConfigDir = pathLib.join(appDataDir, "amp");
 	const clineRulesDir = pathLib.join(clineHome, "Rules");
+	const cursorConfigDir =
+		platform === "win32"
+			? pathLib.join(appDataDir, "Cursor")
+			: pathLib.join(
+					platform === "darwin"
+						? pathLib.join(homeDir, "Library", "Application Support")
+						: (env.XDG_CONFIG_HOME ?? pathLib.join(homeDir, ".config")),
+					"Cursor",
+				);
+	const jetbrainsConfigDir =
+		platform === "win32"
+			? pathLib.join(appDataDir, "JetBrains")
+			: platform === "darwin"
+				? pathLib.join(homeDir, "Library", "Application Support", "JetBrains")
+				: pathLib.join(
+						env.XDG_CONFIG_HOME ?? pathLib.join(homeDir, ".config"),
+						"JetBrains",
+					);
+	const antigravityConfigDir =
+		platform === "win32"
+			? pathLib.join(appDataDir, "Antigravity")
+			: platform === "darwin"
+				? pathLib.join(homeDir, "Library", "Application Support", "Antigravity")
+				: pathLib.join(
+						env.XDG_CONFIG_HOME ?? pathLib.join(homeDir, ".config"),
+						"Antigravity",
+					);
 	const vscodeUserMcp =
 		platform === "darwin"
 			? pathLib.join(
@@ -94,6 +121,9 @@ export function resolvePaths({
 		kiloRulesHome,
 		ampConfigDir,
 		clineRulesDir,
+		cursorConfigDir,
+		jetbrainsConfigDir,
+		antigravityConfigDir,
 		vscodeUserMcp,
 	};
 }
@@ -112,10 +142,13 @@ export function resolveWorkspacePaths(
 		projectVscodeMcp: pathLib.join(workspaceRoot, ".vscode", "mcp.json"),
 		projectCursorRulesDir: pathLib.join(workspaceRoot, ".cursor", "rules"),
 		projectJunieDir: pathLib.join(workspaceRoot, ".junie"),
+		projectAntigravityDir: pathLib.join(workspaceRoot, ".antigravity"),
 		projectKiroSteeringDir: pathLib.join(workspaceRoot, ".kiro", "steering"),
 		projectKiloRulesDir: pathLib.join(workspaceRoot, ".kilocode", "rules"),
 		projectRooRulesDir: pathLib.join(workspaceRoot, ".roo", "rules"),
+		projectRooModes: pathLib.join(workspaceRoot, ".roomodes"),
 		projectClineRulesDir: pathLib.join(workspaceRoot, ".clinerules"),
+		projectClineDir: pathLib.join(workspaceRoot, ".cline"),
 		projectAugmentRulesDir: pathLib.join(workspaceRoot, ".augment", "rules"),
 	};
 }

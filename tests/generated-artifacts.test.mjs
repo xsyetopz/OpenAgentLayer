@@ -734,6 +734,49 @@ describe("generated OpenCode assets", () => {
 	});
 });
 
+describe("generated optional IDE assets", () => {
+	it("ships rules and native descriptors for optional IDEs", () => {
+		const rooRules = readBuild("optional-ides/roo/rules/openagentsbtw.md");
+		const rooModes = JSON.parse(readBuild("optional-ides/roo/.roomodes"));
+		const clineRules = readBuild(
+			"optional-ides/cline/.clinerules/openagentsbtw.md",
+		);
+		const clineHooks = JSON.parse(
+			readBuild("optional-ides/cline/.clinerules/hooks/openagentsbtw.json"),
+		);
+		const cursorRule = readBuild(
+			"optional-ides/cursor/rules/openagentsbtw.mdc",
+		);
+		const junieAgents = readBuild("optional-ides/junie/AGENTS.md");
+		const antigravityAgents = readBuild("optional-ides/antigravity/AGENTS.md");
+
+		assert.match(rooRules, /Roo Code/);
+		assert.ok(
+			rooModes.customModes.some(
+				(mode) => mode.slug === "openagentsbtw-hephaestus",
+			),
+		);
+		assert.match(clineRules, /Cline/);
+		assert.ok(Array.isArray(clineHooks.hooks.beforeTask));
+		assert.match(cursorRule, /alwaysApply: true/);
+		assert.match(junieAgents, /JetBrains Junie/);
+		assert.match(antigravityAgents, /UNKNOWN official hook surface/);
+	});
+
+	it("ships generated optional IDE platform docs", () => {
+		for (const relativePath of [
+			"docs/platforms/roo.md",
+			"docs/platforms/cline.md",
+			"docs/platforms/cursor.md",
+			"docs/platforms/junie.md",
+			"docs/platforms/antigravity.md",
+		]) {
+			assert.match(readBuild(relativePath), /## Surfaces/);
+			assert.match(readBuild(relativePath), /## Hook Status/);
+		}
+	});
+});
+
 describe("generated hook manifests", () => {
 	it("makes Codex unsupported shared policies explicit", () => {
 		const manifest = readBuild("codex/hooks/HOOKS.md");

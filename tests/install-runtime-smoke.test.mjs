@@ -70,6 +70,9 @@ describe("installer runtime smoke", () => {
 				existsSync(path.join(appDataDir, "openagentsbtw", "agentic", "hooks")),
 				false,
 			);
+			assert.equal(existsSync(path.join(workspace, ".roo")), false);
+			assert.equal(existsSync(path.join(workspace, ".cursor")), false);
+			assert.equal(existsSync(path.join(workspace, ".clinerules")), false);
 
 			const uninstall = runNode(
 				path.join(ROOT, "scripts", "install", "uninstall-cli.mjs"),
@@ -87,6 +90,93 @@ describe("installer runtime smoke", () => {
 						"openagentsbtw",
 						".codex-plugin",
 					),
+				),
+				false,
+			);
+		} finally {
+			rmSync(tempRoot, { recursive: true, force: true });
+		}
+	});
+
+	it("installs detected optional IDE surfaces only", () => {
+		const tempRoot = mkdtempSync(
+			path.join(os.tmpdir(), "oabtw-optional-ides-"),
+		);
+		const homeDir = path.join(tempRoot, "home");
+		const appDataDir =
+			process.platform === "win32"
+				? path.join(tempRoot, "appdata")
+				: path.join(tempRoot, "xdg");
+		const workspace = path.join(tempRoot, "workspace");
+		const env = {
+			HOME: homeDir,
+			USERPROFILE: homeDir,
+			APPDATA: appDataDir,
+			XDG_CONFIG_HOME: appDataDir,
+			CI: "true",
+			OABTW_TEST_PRESENT_IDES: "roo,cline,cursor,junie,antigravity",
+		};
+		mkdirSync(workspace, { recursive: true });
+		mkdirSync(homeDir, { recursive: true });
+		mkdirSync(appDataDir, { recursive: true });
+
+		try {
+			const install = runNode(
+				path.join(ROOT, "scripts", "install", "cli.mjs"),
+				[
+					"--optional-ides",
+					"--skip-rtk",
+					"--caveman-mode",
+					"full",
+					"--no-ctx7-cli",
+					"--no-playwright-cli",
+				],
+				env,
+				workspace,
+			);
+			assert.equal(install.status, 0, install.stderr || install.stdout);
+			assert.equal(
+				existsSync(path.join(workspace, ".roo", "rules", "openagentsbtw.md")),
+				true,
+			);
+			assert.equal(existsSync(path.join(workspace, ".roomodes")), true);
+			assert.equal(
+				existsSync(path.join(workspace, ".clinerules", "openagentsbtw.md")),
+				true,
+			);
+			assert.equal(
+				existsSync(
+					path.join(workspace, ".cline", "skills", "openagentsbtw", "SKILL.md"),
+				),
+				true,
+			);
+			assert.equal(
+				existsSync(
+					path.join(workspace, ".cursor", "rules", "openagentsbtw.mdc"),
+				),
+				true,
+			);
+			assert.equal(
+				existsSync(path.join(workspace, ".junie", "AGENTS.md")),
+				true,
+			);
+			assert.equal(existsSync(path.join(workspace, "AGENTS.md")), true);
+			assert.equal(existsSync(path.join(workspace, "GEMINI.md")), true);
+
+			const uninstall = runNode(
+				path.join(ROOT, "scripts", "install", "uninstall-cli.mjs"),
+				["--optional-ides"],
+				env,
+				workspace,
+			);
+			assert.equal(uninstall.status, 0, uninstall.stderr || uninstall.stdout);
+			assert.equal(
+				existsSync(path.join(workspace, ".roo", "rules", "openagentsbtw.md")),
+				false,
+			);
+			assert.equal(
+				existsSync(
+					path.join(workspace, ".cursor", "rules", "openagentsbtw.mdc"),
 				),
 				false,
 			);

@@ -10,7 +10,7 @@ describe("Claude settings merge", () => {
 		const rendered = renderClaudeSettingsTemplate(
 			'{"statusLine":{"command":"bash __HOME__/.claude/statusline-command.sh"},"env":{"ANTHROPIC_DEFAULT_OPUS_MODEL":"__OPUS_MODEL__"}}',
 			{
-				homeDir: String.raw`C:\Users\krystian`,
+				homeDir: String.raw`C:\Users\test-user`,
 				models: {
 					opusModel: "claude-opus-4-6[1m]",
 					sonnetModel: "claude-sonnet-4-6",
@@ -20,7 +20,7 @@ describe("Claude settings merge", () => {
 		);
 		assert.equal(
 			rendered.statusLine.command,
-			String.raw`bash C:\Users\krystian/.claude/statusline-command.sh`,
+			String.raw`bash C:\Users\test-user/.claude/statusline-command.sh`,
 		);
 		assert.equal(
 			rendered.env.ANTHROPIC_DEFAULT_OPUS_MODEL,

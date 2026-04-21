@@ -144,6 +144,13 @@ System toggles (allow multiple):
   --opencode              Install OpenCode support
   --codex                 Install Codex support
   --copilot               Install GitHub Copilot support
+  --roo                   Install Roo Code support when detected
+  --cline                 Install Cline support when detected
+  --cursor                Install Cursor support when detected
+  --junie                 Install JetBrains Junie support when detected
+  --antigravity           Install Antigravity support when detected
+  --optional-ides         Auto-detect and install optional IDE support
+  --no-optional-ides      Disable optional IDE auto-detection
   --all                   Install all supported systems
 
 Options:
@@ -181,6 +188,13 @@ function parseArgs(argv) {
 		installOpenCode: false,
 		installCodex: false,
 		installCopilot: false,
+		installRoo: false,
+		installCline: false,
+		installCursor: false,
+		installJunie: false,
+		installAntigravity: false,
+		optionalIdes: false,
+		optionalIdesSet: false,
 		skipRtk: false,
 		claudePlan: "max-5",
 		claudePlanSet: false,
@@ -219,11 +233,37 @@ function parseArgs(argv) {
 			case "--copilot":
 				args.installCopilot = true;
 				break;
+			case "--roo":
+				args.installRoo = true;
+				break;
+			case "--cline":
+				args.installCline = true;
+				break;
+			case "--cursor":
+				args.installCursor = true;
+				break;
+			case "--junie":
+				args.installJunie = true;
+				break;
+			case "--antigravity":
+				args.installAntigravity = true;
+				break;
+			case "--optional-ides":
+				args.optionalIdes = true;
+				args.optionalIdesSet = true;
+				break;
+			case "--no-optional-ides":
+				args.optionalIdes = false;
+				args.optionalIdesSet = true;
+				break;
 			case "--all":
 				args.installClaude = true;
 				args.installOpenCode = true;
 				args.installCodex = true;
 				args.installCopilot = true;
+				if (!args.optionalIdesSet) {
+					args.optionalIdes = true;
+				}
 				break;
 			case "--skip-rtk":
 				args.skipRtk = true;
@@ -306,12 +346,33 @@ function repoPath(...segments) {
 	return path.join(ROOT, ...segments);
 }
 
+function installsAnySystem(args) {
+	return Boolean(
+		args.installClaude ||
+			args.installOpenCode ||
+			args.installCodex ||
+			args.installCopilot ||
+			args.installRoo ||
+			args.installCline ||
+			args.installCursor ||
+			args.installJunie ||
+			args.installAntigravity ||
+			args.optionalIdes,
+	);
+}
+
 async function ensureSelection(args) {
 	if (
 		args.installClaude ||
 		args.installOpenCode ||
 		args.installCodex ||
-		args.installCopilot
+		args.installCopilot ||
+		args.installRoo ||
+		args.installCline ||
+		args.installCursor ||
+		args.installJunie ||
+		args.installAntigravity ||
+		args.optionalIdes
 	) {
 		return;
 	}
@@ -342,7 +403,8 @@ async function ensureSelection(args) {
 		!args.installClaude &&
 		!args.installOpenCode &&
 		!args.installCodex &&
-		!args.installCopilot
+		!args.installCopilot &&
+		!args.optionalIdes
 	) {
 		fail("No systems selected");
 	}
@@ -403,13 +465,7 @@ async function promptOptionalSurfaces(args, existingEnv) {
 					"pro",
 			) || "pro";
 	}
-	if (
-		!args.cavemanModeSet &&
-		(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot)
-	) {
+	if (!args.cavemanModeSet && installsAnySystem(args)) {
 		args.cavemanMode = isCi()
 			? resolveCavemanMode(existingEnv.OABTW_CAVEMAN_MODE || "") ||
 				DEFAULT_CAVEMAN_MODE
@@ -425,39 +481,21 @@ async function promptOptionalSurfaces(args, existingEnv) {
 				resolveCavemanMode(existingEnv.OABTW_CAVEMAN_MODE || "") ||
 				DEFAULT_CAVEMAN_MODE;
 	}
-	if (
-		!args.ctx7CliSet &&
-		(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot)
-	) {
+	if (!args.ctx7CliSet && installsAnySystem(args)) {
 		args.ctx7Cli = await promptToggle(
 			"Install Context7 CLI support?",
 			true,
 			isCi(),
 		);
 	}
-	if (
-		!args.deepwikiMcpSet &&
-		(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot)
-	) {
+	if (!args.deepwikiMcpSet && installsAnySystem(args)) {
 		args.deepwikiMcp = await promptToggle(
 			"Configure DeepWiki MCP where supported?",
 			false,
 			isCi(),
 		);
 	}
-	if (
-		!args.playwrightCliSet &&
-		(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot)
-	) {
+	if (!args.playwrightCliSet && installsAnySystem(args)) {
 		args.playwrightCli = await promptToggle(
 			"Install Playwright CLI support (browser automation)?",
 			false,
@@ -492,21 +530,9 @@ function validateArgs(args) {
 		);
 	}
 	args.cavemanMode = resolveCavemanMode(
-		args.cavemanMode ||
-			(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot
-				? DEFAULT_CAVEMAN_MODE
-				: ""),
+		args.cavemanMode || (installsAnySystem(args) ? DEFAULT_CAVEMAN_MODE : ""),
 	);
-	if (
-		(args.installClaude ||
-			args.installOpenCode ||
-			args.installCodex ||
-			args.installCopilot) &&
-		!args.cavemanMode
-	) {
+	if (installsAnySystem(args) && !args.cavemanMode) {
 		fail(
 			`Unsupported Caveman mode: ${args.cavemanMode} (expected off, lite, full, ultra, wenyan-lite, wenyan, or wenyan-ultra)`,
 		);
@@ -614,6 +640,7 @@ async function buildArtifacts() {
 		codexDir: path.join(buildDir, "codex"),
 		copilotDir: path.join(buildDir, "copilot"),
 		opencodeTemplatesDir: path.join(buildDir, "opencode", "templates"),
+		optionalIdeDir: path.join(buildDir, "optional-ides"),
 		binDir: path.join(buildDir, "bin"),
 	};
 }
@@ -781,7 +808,13 @@ async function maybeInstallRtk(args) {
 			args.installClaude ||
 			args.installOpenCode ||
 			args.installCodex ||
-			args.installCopilot
+			args.installCopilot ||
+			args.installRoo ||
+			args.installCline ||
+			args.installCursor ||
+			args.installJunie ||
+			args.installAntigravity ||
+			args.optionalIdes
 		)
 	)
 		return;
@@ -1167,6 +1200,165 @@ async function installCopilot(args, artifacts) {
 	}
 }
 
+const OPTIONAL_IDES = [
+	{
+		id: "roo",
+		label: "Roo Code",
+		flag: "installRoo",
+		markers: () => [
+			PATHS.rooHome,
+			path.join(PATHS.homeDir, ".vscode", "extensions"),
+			path.join(PATHS.homeDir, ".cursor", "extensions"),
+		],
+		matchExtension: /roo|roo-cline/i,
+	},
+	{
+		id: "cline",
+		label: "Cline",
+		flag: "installCline",
+		markers: () => [
+			PATHS.clineHome,
+			PATHS.clineRulesDir,
+			path.join(PATHS.homeDir, ".vscode", "extensions"),
+			path.join(PATHS.homeDir, ".cursor", "extensions"),
+		],
+		matchExtension: /cline|claude-dev/i,
+	},
+	{
+		id: "cursor",
+		label: "Cursor",
+		flag: "installCursor",
+		markers: () => [
+			PATHS.cursorConfigDir,
+			path.join(PATHS.homeDir, ".cursor"),
+			...(process.platform === "darwin" ? ["/Applications/Cursor.app"] : []),
+		],
+	},
+	{
+		id: "junie",
+		label: "JetBrains Junie",
+		flag: "installJunie",
+		markers: () => [
+			PATHS.jetbrainsConfigDir,
+			path.join(PATHS.homeDir, ".junie"),
+		],
+		matchExtension: /junie/i,
+	},
+	{
+		id: "antigravity",
+		label: "Antigravity",
+		flag: "installAntigravity",
+		markers: () => [
+			PATHS.antigravityConfigDir,
+			PATHS.geminiHome,
+			...(process.platform === "darwin"
+				? ["/Applications/Antigravity.app"]
+				: []),
+		],
+	},
+];
+
+function testPresentIdes() {
+	return new Set(
+		String(process.env.OABTW_TEST_PRESENT_IDES || "")
+			.split(",")
+			.map((value) => value.trim().toLowerCase())
+			.filter(Boolean),
+	);
+}
+
+async function optionalIdeInstalled(definition) {
+	const forced = testPresentIdes();
+	if (forced.has(definition.id)) return true;
+	for (const marker of definition.markers()) {
+		if (!(await pathExists(marker))) continue;
+		if (!definition.matchExtension) return true;
+		try {
+			const entries = await fs.readdir(marker);
+			if (entries.some((entry) => definition.matchExtension.test(entry))) {
+				return true;
+			}
+		} catch {
+			return true;
+		}
+	}
+	return false;
+}
+
+async function installOptionalIde(definition, artifacts, workspacePaths, args) {
+	const source = path.join(artifacts.optionalIdeDir, definition.id);
+	switch (definition.id) {
+		case "roo":
+			await syncManagedTree(
+				path.join(source, "rules"),
+				workspacePaths.projectRooRulesDir,
+			);
+			await fs.copyFile(
+				path.join(source, ".roomodes"),
+				workspacePaths.projectRooModes,
+			);
+			break;
+		case "cline":
+			await syncManagedTree(
+				path.join(source, ".clinerules"),
+				workspacePaths.projectClineRulesDir,
+			);
+			await syncManagedTree(
+				path.join(source, ".cline"),
+				workspacePaths.projectClineDir,
+			);
+			break;
+		case "cursor":
+			await syncManagedTree(
+				path.join(source, "rules"),
+				workspacePaths.projectCursorRulesDir,
+			);
+			break;
+		case "junie":
+			await syncManagedTree(source, workspacePaths.projectJunieDir);
+			if (!args.deepwikiMcp) {
+				await fs.rm(path.join(workspacePaths.projectJunieDir, "mcp"), {
+					recursive: true,
+					force: true,
+				});
+			}
+			break;
+		case "antigravity":
+			await mergeTaggedMarkdown({
+				target: path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
+				template: path.join(source, "AGENTS.md"),
+				start: "<!-- >>> openagentsbtw antigravity >>> -->",
+				end: "<!-- <<< openagentsbtw antigravity <<< -->",
+			});
+			await mergeTaggedMarkdown({
+				target: path.join(workspacePaths.workspaceRoot, "GEMINI.md"),
+				template: path.join(source, "GEMINI.md"),
+				start: "<!-- >>> openagentsbtw antigravity >>> -->",
+				end: "<!-- <<< openagentsbtw antigravity <<< -->",
+			});
+			break;
+		default:
+			fail(`Unsupported optional IDE: ${definition.id}`);
+	}
+	logInfo(`${definition.label} support installed`);
+}
+
+async function installOptionalIdes(args, artifacts) {
+	const workspacePaths = resolveWorkspacePaths();
+	const targets = OPTIONAL_IDES.filter(
+		(definition) => args.optionalIdes || args[definition.flag],
+	);
+	if (targets.length === 0) return;
+	console.log("\n\x1b[0;32mOptional IDEs\x1b[0m");
+	for (const definition of targets) {
+		if (await optionalIdeInstalled(definition)) {
+			await installOptionalIde(definition, artifacts, workspacePaths, args);
+			continue;
+		}
+		logWarn(`${definition.label} not detected; skipping install`);
+	}
+}
+
 async function installCodex(args, artifacts) {
 	if (!args.installCodex) return;
 	console.log("\n\x1b[0;32mCodex\x1b[0m");
@@ -1486,6 +1678,55 @@ async function validateInstall(args) {
 		}
 	}
 
+	for (const definition of OPTIONAL_IDES.filter(
+		(entry) => args.optionalIdes || args[entry.flag],
+	)) {
+		if (!(await optionalIdeInstalled(definition))) continue;
+		const workspacePaths = resolveWorkspacePaths();
+		switch (definition.id) {
+			case "roo":
+				await required(
+					path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
+					"Roo Code rules",
+				);
+				break;
+			case "cline":
+				await required(
+					path.join(workspacePaths.projectClineRulesDir, "openagentsbtw.md"),
+					"Cline rules",
+				);
+				await required(
+					path.join(
+						workspacePaths.projectClineDir,
+						"skills",
+						"openagentsbtw",
+						"SKILL.md",
+					),
+					"Cline skill",
+				);
+				break;
+			case "cursor":
+				await required(
+					path.join(workspacePaths.projectCursorRulesDir, "openagentsbtw.mdc"),
+					"Cursor rule",
+				);
+				break;
+			case "junie":
+				await required(
+					path.join(workspacePaths.projectJunieDir, "AGENTS.md"),
+					"Junie AGENTS.md",
+				);
+				break;
+			case "antigravity":
+				await requiredText(
+					path.join(workspacePaths.workspaceRoot, "AGENTS.md"),
+					/openagentsbtw Antigravity Instructions/,
+					"Antigravity AGENTS.md",
+				);
+				break;
+		}
+	}
+
 	if (
 		!args.skipRtk &&
 		(args.installClaude ||
@@ -1588,6 +1829,12 @@ function reportSummary(args) {
 			`  Codex:    ${path.join(PATHS.codexHome, "plugins", "openagentsbtw")} + ${path.join(PATHS.codexHome, "agents")} (${args.codexPlan})`,
 		);
 	}
+	const optional = OPTIONAL_IDES.filter(
+		(definition) => args.optionalIdes || args[definition.flag],
+	).map((definition) => definition.label);
+	if (optional.length > 0) {
+		console.log(`  Optional: ${optional.join(", ")} (detected installs only)`);
+	}
 }
 
 async function main() {
@@ -1613,6 +1860,7 @@ async function main() {
 		await installClaude(args, artifacts);
 		await installOpenCode(args, artifacts);
 		await installCopilot(args, artifacts);
+		await installOptionalIdes(args, artifacts);
 		await maybeInstallCtx7(args);
 		await maybeInstallPlaywright(args);
 		await maybeInstallRtk(args);

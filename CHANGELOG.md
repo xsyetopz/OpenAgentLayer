@@ -2,6 +2,19 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.1.0] - 2026-04-21
+
+### Added
+
+- Optional IDE support for Roo Code, Cline, Cursor, JetBrains Junie, and Antigravity.
+- `./install.sh --all` now auto-detects optional IDEs and skips missing systems without writing their files.
+- New explicit installer flags: `--roo`, `--cline`, `--cursor`, `--junie`, `--antigravity`, `--optional-ides`, and `--no-optional-ides`.
+- Generated optional IDE artifacts under `optional-ides/`, with project-native rules/instructions, Roo modes, Cline skills/workflows/hooks, Cursor MDC rules, Junie `AGENTS.md`, and conservative Antigravity `AGENTS.md`/`GEMINI.md` blocks.
+
+### Changed
+
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `3.1.0`.
+
 ## [3.0.0] - 2026-04-21
 
 ### Added
