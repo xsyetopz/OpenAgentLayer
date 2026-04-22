@@ -11,6 +11,7 @@ One canonical source tree. Generated platform artifacts. Tight prompts, strict r
 - optional IDE support for Roo Code, Cline, Cursor, JetBrains Junie, and Antigravity
 - `./install.sh --all` auto-detects optional IDEs and skips missing systems without writing files
 - project-native rule/instruction assets for optional IDEs, with Cline prompt hooks where supported
+- Taste Skill variants are vendored from `Leonxlnx/taste-skill` under local `taste*` names across Claude, Codex, OpenCode, and Copilot
 
 ## What Changed In 3.0
 
@@ -106,6 +107,7 @@ cd opencode && bun install --frozen-lockfile && bun test && bun run typecheck
 
 - Caveman mode draws from [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman).
 - `design-polish` incorporates ideas from [cyxzdev/Uncodixfy](https://github.com/cyxzdev/Uncodixfy), [anthropics/skills frontend-design](https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md), and [pbakaus/impeccable](https://github.com/pbakaus/impeccable).
+- `taste*` skills vendor exact upstream `SKILL.md` content from [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) at the pinned submodule commit, wrapped with local openagentsbtw names and routing metadata.
 
 ## License
 

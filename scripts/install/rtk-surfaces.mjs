@@ -9,18 +9,27 @@ export const RTK_BLOCK_END = "<!-- <<< openagentsbtw rtk <<< -->";
 export function renderRtkPolicy() {
 	return `# RTK - Rust Token Killer
 
-Always prefix RTK-supported shell commands with \`rtk\`.
+Always prefix RTK-supported shell commands with \`rtk\`. Prefer the most specific RTK filter available; use \`rtk proxy\` only when no specialized filter preserves command semantics.
 
-Examples:
+High-gain examples:
 
 \`\`\`bash
 rtk git status
+rtk diff
+rtk read package.json
+rtk grep -R "pattern" -n source tests
+rtk find source -maxdepth 3 -type f -name '*.json'
 rtk cargo test
+rtk test bun test tests claude/tests codex/tests
+rtk test bun run test
+rtk tsc --noEmit
 rtk npm run build
 rtk pytest -q
 \`\`\`
 
-When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw will enforce RTK-prefixed forms where RTK can rewrite the command.
+For Bun projects, do not run raw \`bun test\`, \`bun run test\`, or \`bunx tsc\`; use \`rtk test bun ...\` and \`rtk tsc\` so output is filtered instead of merely proxied.
+
+When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw will enforce RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite.
 `;
 }
 
@@ -51,11 +60,11 @@ function platformReference(tool, paths = PATHS) {
 		case "claude":
 			return "@RTK.md";
 		case "codex":
-			return `## RTK\nRTK policy is installed at \`${map.codex}\`. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
+			return `## RTK\nRTK policy is installed at \`${map.codex}\`. Always use rtk for supported shell commands. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
 		case "copilot":
-			return `## RTK\nRTK policy is installed at \`${map.copilot}\`. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
+			return `## RTK\nRTK policy is installed at \`${map.copilot}\`. Always use rtk for supported shell commands. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
 		case "opencode":
-			return `## RTK\nRTK policy is installed at \`${map.opencode}\`. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
+			return `## RTK\nRTK policy is installed at \`${map.opencode}\`. Always use rtk for supported shell commands. When RTK is active, shell commands must use \`rtk\` or the RTK hook-provided rewrite.`;
 		default:
 			throw new Error(`Unsupported RTK reference tool: ${tool}`);
 	}

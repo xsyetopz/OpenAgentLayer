@@ -58,6 +58,8 @@ Canonical equivalent: `openagentsbtw-codex`
   `calliope`-shaped routing on the utility profile for prose cleanup, comment cleanup, and anti-slop passes.
 - `oabtw-codex design-polish`
   UI and frontend refinement routing for cleaning up generic AI-looking interface work.
+- `oabtw-codex taste|taste-gpt|taste-images|taste-redesign|taste-soft|taste-output|taste-minimalist|taste-brutalist|taste-stitch|taste-imagegen`
+  Taste Skill routes vendored from upstream `Leonxlnx/taste-skill`; GPT/image-first variants prefer GPT Image 2-capable image generation when available.
 - `oabtw-codex test`
   `atalanta`-shaped routing on the utility profile for targeted validation.
 - `oabtw-codex validate`

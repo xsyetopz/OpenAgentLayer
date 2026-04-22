@@ -170,8 +170,67 @@ async function generateSkills(skills) {
 		return rendered;
 	}
 
+	async function readSkillBody(skill) {
+		if (!skill.upstreamTaste) {
+			return readText("skills", skill.name, "body.md");
+		}
+		const upstreamContent = await fs.readFile(
+			path.join(
+				REPO_ROOT,
+				"third_party",
+				"taste-skill",
+				skill.upstreamTaste.path,
+			),
+			"utf8",
+		);
+		const gptImage2Block = skill.upstreamTaste.gptImage2
+			? [
+					"",
+					"## GPT / Codex Image Generation Note",
+					"",
+					"- When OpenAI image generation is available, prefer `gpt-image-2` for image generation and editing through the Images API.",
+					"- When using the Responses API, use a text-capable model such as `gpt-5.4` or `gpt-5` with the hosted `image_generation` tool; do not set the Responses `model` to `gpt-image-2`.",
+					"- For visual frontend work: generate the reference image, inspect it deeply, extract the layout/type/spacing/color/component system, then implement faithfully.",
+					"- If the tool cannot generate images, write the exact image-generation prompt/spec first, then implement from that spec.",
+				].join("\n")
+			: "";
+		return [
+			`# openagentsbtw Taste Mapping: ${skill.name}`,
+			"",
+			`Local name: \`${skill.name}\``,
+			`Upstream name: \`${skill.upstreamTaste.name}\``,
+			`Upstream path: \`${skill.upstreamTaste.path}\``,
+			`Upstream repo: ${skill.upstreamTaste.repo}`,
+			`Pinned commit: \`${skill.upstreamTaste.commit}\``,
+			gptImage2Block,
+			"",
+			"## Exact Upstream SKILL.md",
+			"",
+			upstreamContent,
+		].join("\n");
+	}
+
+	async function copyTasteCompanionFiles(skill, skillDir) {
+		if (!skill.upstreamTaste?.companionFiles?.length) {
+			return;
+		}
+		const companionRoot = path.join(
+			OUTPUT_ROOT,
+			skillDir,
+			"reference",
+			"upstream",
+		);
+		await ensureDir(companionRoot);
+		for (const companionFile of skill.upstreamTaste.companionFiles) {
+			await fs.copyFile(
+				path.join(REPO_ROOT, "third_party", "taste-skill", companionFile),
+				path.join(companionRoot, path.basename(companionFile)),
+			);
+		}
+	}
+
 	for (const skill of skills) {
-		const body = await readText("skills", skill.name, "body.md");
+		const body = await readSkillBody(skill);
 		const sourceReferenceDir = path.join(
 			SOURCE_DIR,
 			"skills",
@@ -256,6 +315,7 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			await copyTasteCompanionFiles(skill, claudeSkillDir);
 		}
 		if (skill.platforms.includes("codex")) {
 			const codexSkillDir = path.join(
@@ -282,6 +342,31 @@ async function generateSkills(skills) {
 					codexMetadataPath,
 					path.join(OUTPUT_ROOT, codexSkillDir, "openai.yaml"),
 				);
+			} else if (skill.upstreamTaste) {
+				const metadata = [
+					"interface:",
+					`  display_name: ${skill.name}`,
+					`  short_description: ${skill.description}`,
+					"  default_prompt:",
+					`    - Apply the ${skill.name} Taste Skill to this frontend task.`,
+					"    - Preserve existing architecture and complete production UI code.",
+					skill.upstreamTaste.gptImage2
+						? "    - Use GPT Image 2 for image-first frontend references when image generation is available."
+						: null,
+					"policy:",
+					"  allow_implicit_invocation: false",
+					"upstream:",
+					`  repo: ${skill.upstreamTaste.repo}`,
+					`  commit: ${skill.upstreamTaste.commit}`,
+					`  path: ${skill.upstreamTaste.path}`,
+					`  name: ${skill.upstreamTaste.name}`,
+				]
+					.filter(Boolean)
+					.join("\n");
+				await writeFile(
+					path.join(codexSkillDir, "openai.yaml"),
+					`${metadata}\n`,
+				);
 			}
 			if (
 				await fs
@@ -307,6 +392,7 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			await copyTasteCompanionFiles(skill, codexSkillDir);
 		}
 		if (skill.platforms.includes("opencode")) {
 			const opencodeSkillDir = path.join(
@@ -340,6 +426,7 @@ async function generateSkills(skills) {
 					{ recursive: true },
 				);
 			}
+			await copyTasteCompanionFiles(skill, opencodeSkillDir);
 		}
 		if (skill.platforms.includes("copilot")) {
 			for (const root of [
@@ -371,6 +458,7 @@ async function generateSkills(skills) {
 						{ recursive: true },
 					);
 				}
+				await copyTasteCompanionFiles(skill, root);
 			}
 		}
 	}

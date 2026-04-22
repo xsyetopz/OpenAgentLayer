@@ -41,6 +41,12 @@ describe("managed RTK surfaces", () => {
 	it("renders one canonical policy body for every platform-local RTK.md", () => {
 		assert.match(renderRtkPolicy(), /# RTK - Rust Token Killer/);
 		assert.match(renderRtkPolicy(), /rtk cargo test/);
+		assert.match(renderRtkPolicy(), /rtk test bun test/);
+		assert.match(renderRtkPolicy(), /rtk tsc --noEmit/);
+		assert.match(
+			renderRtkPolicy(),
+			/rtk proxy` only when no specialized filter/,
+		);
 	});
 
 	it("selects generated tooling config locations for RTK.md", () => {
@@ -109,6 +115,7 @@ describe("managed RTK surfaces", () => {
 			await writeRtkReferences(references, paths);
 			const agents = path.join(paths.codexHome, "AGENTS.md");
 			assert.match(readFileSync(agents, "utf8"), /RTK\.md/);
+			assert.match(readFileSync(agents, "utf8"), /Always use rtk/);
 
 			await removeRtkSurfaces({
 				policyTargets: [rtkPolicyPathMap(paths).codex],

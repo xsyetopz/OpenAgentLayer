@@ -32,6 +32,7 @@ Heavy logic belongs in focused renderers or loaders. If file becomes grab-bag, s
 
 - `third_party/caveman` is pinned git submodule reference to upstream caveman.
 - `source/caveman.mjs` stores pinned ref metadata used by generation/runtime checks.
+- `third_party/taste-skill` is pinned to upstream Taste Skill. `source/taste-skill-map.json` maps upstream variant names and paths to local `taste*` skill names while preserving exact upstream `SKILL.md` content in generated outputs.
 
 ## Naming Rule
 

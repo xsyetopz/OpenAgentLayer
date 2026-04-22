@@ -1,0 +1,82 @@
+{
+  "repo": "https://github.com/Leonxlnx/taste-skill",
+  "commit": "f0eea3f4409c7de76118be0149dafcf2a0031e50",
+  "entries": [
+    {
+      "upstreamPath": "skills/taste-skill/SKILL.md",
+      "upstreamName": "design-taste-frontend",
+      "localName": "taste",
+      "description": "Default all-rounder for premium frontend output without forcing one narrow visual style.",
+      "codexRoute": "taste"
+    },
+    {
+      "upstreamPath": "skills/gpt-tasteskill/SKILL.md",
+      "upstreamName": "gpt-taste",
+      "localName": "taste-gpt",
+      "description": "GPT/Codex-oriented premium frontend skill with stricter layout, motion, and anti-slop rules.",
+      "codexRoute": "taste-gpt",
+      "gptImage2": true
+    },
+    {
+      "upstreamPath": "skills/images-taste-skill/SKILL.md",
+      "upstreamName": "image-taste-frontend",
+      "localName": "taste-images",
+      "description": "Image-first frontend reference skill: generate premium website images, analyze them, then implement faithfully.",
+      "codexRoute": "taste-images",
+      "gptImage2": true
+    },
+    {
+      "upstreamPath": "skills/redesign-skill/SKILL.md",
+      "upstreamName": "redesign-existing-projects",
+      "localName": "taste-redesign",
+      "description": "Upgrade existing websites and apps by auditing current UI, then improving layout, hierarchy, and polish.",
+      "codexRoute": "taste-redesign"
+    },
+    {
+      "upstreamPath": "skills/soft-skill/SKILL.md",
+      "upstreamName": "high-end-visual-design",
+      "localName": "taste-soft",
+      "description": "Soft, expensive-looking UI direction with calmer contrast, generous whitespace, premium fonts, and smooth motion.",
+      "codexRoute": "taste-soft"
+    },
+    {
+      "upstreamPath": "skills/output-skill/SKILL.md",
+      "upstreamName": "full-output-enforcement",
+      "localName": "taste-output",
+      "description": "Complete-output enforcement for frontend work: no skipped steps, placeholder comments, or abridged implementation.",
+      "codexRoute": "taste-output"
+    },
+    {
+      "upstreamPath": "skills/minimalist-skill/SKILL.md",
+      "upstreamName": "minimalist-ui",
+      "localName": "taste-minimalist",
+      "description": "Minimalist editorial product UI with restrained palettes, clean typography, and crisp structure.",
+      "codexRoute": "taste-minimalist"
+    },
+    {
+      "upstreamPath": "skills/brutalist-skill/SKILL.md",
+      "upstreamName": "industrial-brutalist-ui",
+      "localName": "taste-brutalist",
+      "description": "Industrial brutalist UI direction with Swiss typography, mechanical structure, high contrast, and tactical visual language.",
+      "codexRoute": "taste-brutalist"
+    },
+    {
+      "upstreamPath": "skills/stitch-skill/SKILL.md",
+      "upstreamName": "stitch-design-taste",
+      "localName": "taste-stitch",
+      "description": "Google Stitch-compatible semantic design rules with upstream DESIGN.md export guidance.",
+      "codexRoute": "taste-stitch",
+      "companionFiles": [
+        "skills/stitch-skill/DESIGN.md"
+      ]
+    },
+    {
+      "upstreamPath": "imagegenskills/frontendwebsiteimageskill/SKILL.md",
+      "upstreamName": "image-taste-frontend",
+      "localName": "taste-imagegen",
+      "description": "Dedicated image-generation-first workflow for premium, implementation-friendly website design references.",
+      "codexRoute": "taste-imagegen",
+      "gptImage2": true
+    }
+  ]
+}

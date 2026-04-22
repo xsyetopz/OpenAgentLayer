@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const SOURCE_DIR = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(SOURCE_DIR, "..");
 
 async function readJson(filepath) {
 	return JSON.parse(await fs.readFile(filepath, "utf8"));
@@ -92,7 +93,65 @@ export async function loadAgents() {
 }
 
 export async function loadSkills() {
-	return readNamedJsonChildren(path.join("skills"), "skill.json");
+	const authoredSkills = await readNamedJsonChildren(
+		path.join("skills"),
+		"skill.json",
+	);
+	const tasteSkills = await loadTasteSkills();
+	return [...authoredSkills, ...tasteSkills].sort((left, right) =>
+		left.name.localeCompare(right.name),
+	);
+}
+
+async function loadTasteSkills() {
+	const mapPath = path.join(SOURCE_DIR, "taste-skill-map.json");
+	const map = await readJson(mapPath).catch((error) => {
+		if (error.code === "ENOENT") {
+			return null;
+		}
+		throw error;
+	});
+	if (!map) {
+		return [];
+	}
+
+	return Promise.all(
+		map.entries.map(async (entry) => {
+			const upstreamFile = path.join(
+				REPO_ROOT,
+				"third_party",
+				"taste-skill",
+				entry.upstreamPath,
+			);
+			const upstreamContent = await fs.readFile(upstreamFile, "utf8");
+			const upstreamName = upstreamContent
+				.match(/^name:\s*(.+)$/m)?.[1]
+				?.trim();
+			if (upstreamName !== entry.upstreamName) {
+				throw new Error(
+					`Taste skill map mismatch for ${entry.localName}: expected ${entry.upstreamName}, found ${upstreamName ?? "UNKNOWN"}`,
+				);
+			}
+			return {
+				name: entry.localName,
+				description: entry.description,
+				userInvocable: true,
+				platforms: ["claude", "codex", "opencode", "copilot"],
+				claudeContract: "edit-required",
+				copilotContract: "edit-required",
+				codexLead: `Recommended routing: \`oabtw-codex ${entry.codexRoute} "<frontend task>"\`. Uses upstream \`${entry.upstreamName}\` content from Leonxlnx/taste-skill under the local openagentsbtw name \`${entry.localName}\`.`,
+				upstreamTaste: {
+					repo: map.repo,
+					commit: map.commit,
+					path: entry.upstreamPath,
+					name: entry.upstreamName,
+					localName: entry.localName,
+					gptImage2: entry.gptImage2 === true,
+					companionFiles: entry.companionFiles ?? [],
+				},
+			};
+		}),
+	);
 }
 
 export async function loadCommands() {

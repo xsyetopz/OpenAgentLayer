@@ -71,6 +71,7 @@ Available skills (invoke with `/cca:<name>`):
 - `/cca:document` -- documentation standards
 - `/cca:deslop` -- remove AI writing patterns
 - `/cca:design-polish` -- frontend and UI refinement
+- `taste*` skills -- upstream Taste Skill variants under local openagentsbtw names
 - `/cca:decide` -- decision protocol for tradeoffs
 - `/cca:onboard` -- this guide
 
@@ -87,6 +88,8 @@ oabtw-codex test "<scope>"         # atalanta
 oabtw-codex document "<task>"      # calliope
 oabtw-codex validate "<scope>"     # atalanta (broader)
 oabtw-codex design-polish "<ui>"   # UI/frontend refinement
+oabtw-codex taste-gpt "<ui>"       # upstream Taste variant for GPT/Codex
+oabtw-codex taste-images "<site>"  # image-first Taste workflow
 oabtw-codex resume --last          # resume previous session
 ```
 
@@ -137,6 +140,7 @@ These are guardrails, not walls. They catch common mistakes but are not a securi
 | Coordinate multi-step work | `@odysseus` / `oabtw-codex orchestrate`            |
 | Clean up AI-sounding text  | `/cca:deslop` / `oabtw-codex deslop`               |
 | Polish AI-looking UI       | `/cca:design-polish` / `oabtw-codex design-polish` |
+| Use Taste Skill variants   | `taste*` skills / `oabtw-codex taste-gpt`          |
 | Make a technical decision  | `/cca:decide`                                      |
 | Git workflow rules         | `/cca:git-workflow`                                |
 | Change your plan preset    | `./config.sh --claude-plan max-20`                 |

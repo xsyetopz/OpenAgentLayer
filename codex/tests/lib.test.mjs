@@ -156,17 +156,60 @@ describe("codex RTK helper", () => {
 		}
 	});
 
-	it("falls back to rtk proxy for unsupported commands", () => {
+	it("applies high-gain rewrites before proxy fallback", () => {
 		const fixture = withFakeRtk();
 		const originalHome = process.env.HOME;
 		const originalPath = process.env.PATH;
 		process.env.HOME = fixture.homeDir;
 		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
 		try {
-			const rewrite = getRtkRewrite("sed -n '1,5p' README.md", fixture.repoDir);
+			assert.deepEqual(getRtkRewrite("bun test tests", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk test bun test tests",
+			});
+			assert.deepEqual(
+				getRtkRewrite("bun run test:unit --watch", fixture.repoDir),
+				{
+					policyPath: join(fixture.repoDir, "RTK.md"),
+					rewritten: "rtk test bun run test:unit --watch",
+				},
+			);
+			assert.deepEqual(getRtkRewrite("bunx tsc --noEmit", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk tsc --noEmit",
+			});
+			assert.deepEqual(getRtkRewrite("cat package.json", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk read package.json",
+			});
+			assert.deepEqual(
+				getRtkRewrite("sed -n '1,5p' README.md", fixture.repoDir),
+				{
+					policyPath: join(fixture.repoDir, "RTK.md"),
+					rewritten: "rtk read --max-lines 5 README.md",
+				},
+			);
+		} finally {
+			process.env.HOME = originalHome;
+			process.env.PATH = originalPath;
+			fixture.cleanup();
+		}
+	});
+
+	it("falls back to rtk proxy for unsupported complex commands", () => {
+		const fixture = withFakeRtk();
+		const originalHome = process.env.HOME;
+		const originalPath = process.env.PATH;
+		process.env.HOME = fixture.homeDir;
+		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
+		try {
+			const rewrite = getRtkRewrite(
+				"bun test tests && echo done",
+				fixture.repoDir,
+			);
 			assert.equal(rewrite.policyPath, join(fixture.repoDir, "RTK.md"));
 			assert.match(rewrite.rewritten, /^rtk proxy -- /);
-			assert.match(rewrite.rewritten, /sed -n/);
+			assert.match(rewrite.rewritten, /bun test/);
 		} finally {
 			process.env.HOME = originalHome;
 			process.env.PATH = originalPath;

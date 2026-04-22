@@ -1,3 +1,6 @@
 [submodule "third_party/caveman"]
 	path = third_party/caveman
 	url = https://github.com/juliusbrussee/caveman.git
+[submodule "third_party/taste-skill"]
+	path = third_party/taste-skill
+	url = https://github.com/Leonxlnx/taste-skill.git

@@ -2,6 +2,20 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.0] - 2026-04-22
+
+### Added
+
+- Vendored upstream `Leonxlnx/taste-skill` as a pinned submodule and mapped every upstream Taste variant to local `taste*` skill names across Claude, Codex, OpenCode, and Copilot.
+- Added Codex routes for `taste`, `taste-gpt`, `taste-images`, `taste-redesign`, `taste-soft`, `taste-output`, `taste-minimalist`, `taste-brutalist`, `taste-stitch`, and `taste-imagegen`.
+- Added GPT Image 2 guidance for GPT/Codex image-first Taste workflows, including the Images API vs Responses API hosted-tool split.
+
+### Changed
+
+- RTK enforcement now applies high-gain openagentsbtw rewrites before falling back to `rtk proxy`, including Bun test/typecheck and simple file-read commands.
+- Managed RTK policy text now prefers specialized `rtk-ai/rtk` filters such as `rtk test`, `rtk tsc`, `rtk read`, `rtk grep`, `rtk find`, and `rtk diff`.
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `3.2.0`.
+
 ## [3.1.0] - 2026-04-21
 
 ### Added

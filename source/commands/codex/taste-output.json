@@ -1,0 +1,10 @@
+{
+  "mode": "taste-output",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "edit-required",
+  "allowBlocked": true,
+  "allowDocsOnly": false,
+  "allowTestsOnly": false,
+  "rejectPrototypeScaffolding": true,
+  "prompt": "Use openagentsbtw plus the taste-output skill, sourced from upstream full-output-enforcement in Leonxlnx/taste-skill. Route this through hephaestus-style frontend implementation on the utility profile. Apply the upstream Taste rules exactly while preserving existing app architecture and completing real production frontend changes. Resolve discoverable ambiguity from repo/system evidence before asking questions; ask only for intent ambiguity that materially changes correctness or scope. Do not return scaffolding, prototypes, toy/demo code, placeholder comments, or docs-only churn in place of implementation."
+}

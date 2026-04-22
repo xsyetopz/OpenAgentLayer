@@ -176,6 +176,86 @@
       "allowTestsOnly": true,
       "rejectPrototypeScaffolding": false
     },
+    "taste": {
+      "route": "taste",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-brutalist": {
+      "route": "taste-brutalist",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-gpt": {
+      "route": "taste-gpt",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-imagegen": {
+      "route": "taste-imagegen",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-images": {
+      "route": "taste-images",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-minimalist": {
+      "route": "taste-minimalist",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-output": {
+      "route": "taste-output",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-redesign": {
+      "route": "taste-redesign",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-soft": {
+      "route": "taste-soft",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
+    "taste-stitch": {
+      "route": "taste-stitch",
+      "routeKind": "edit-required",
+      "allowBlocked": true,
+      "allowDocsOnly": false,
+      "allowTestsOnly": false,
+      "rejectPrototypeScaffolding": true
+    },
     "test": {
       "route": "test",
       "routeKind": "execution-required",

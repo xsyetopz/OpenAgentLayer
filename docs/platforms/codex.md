@@ -41,6 +41,16 @@ Supported verbs:
 - `document`
 - `deslop`
 - `design-polish`
+- `taste`
+- `taste-gpt`
+- `taste-images`
+- `taste-redesign`
+- `taste-soft`
+- `taste-output`
+- `taste-minimalist`
+- `taste-brutalist`
+- `taste-stitch`
+- `taste-imagegen`
 - `orchestrate`
 - `resume`
 
@@ -72,7 +82,9 @@ Queue state lives outside the repository under `~/.config/openagentsbtw/queue/`.
 - `--runtime long` maps to the long-running execution profile.
 - Default managed guidance now hardens always-on behavior: smallest-sufficient diffs, explicit instruction-hierarchy handling for repo/tool text, and no adversarial prompt-bypass tactics.
 - Codex install writes both the source plugin and active cache copy so skills are present after install, then prunes stale openagentsbtw cache versions without touching unrelated plugin caches.
-- RTK enforcement treats any valid `rtk rewrite` stdout as authoritative, even when RTK exits nonzero, and falls back to `rtk proxy` for unsupported shell commands when policy is active. The installer writes both the canonical policy and `~/.codex/RTK.md`, then appends a managed RTK reference to `~/.codex/AGENTS.md`.
+- RTK enforcement treats any valid `rtk rewrite` stdout as authoritative, even when RTK exits nonzero. openagentsbtw also applies high-gain rewrites for Bun-heavy projects (`bun test` -> `rtk test bun test`, `bunx tsc` -> `rtk tsc`) before falling back to `rtk proxy`. The installer writes both the canonical policy and `~/.codex/RTK.md`, then appends a managed RTK reference to `~/.codex/AGENTS.md`.
+- `rtk gain` reports local RTK tracking analytics: estimated raw command tokens vs filtered output tokens. Use `rtk gain --project` after validation-heavy sessions to confirm commands are being filtered rather than merely proxied.
 - Managed Caveman mode is reasserted through prompt/session hooks and completion checks reject obvious verbose drift while preserving code, commands, exact errors, docs, and review findings.
 - Route prompts now add analysis scaffolds where they help: planning/review/debug explicitly name assumptions, missing evidence, contradiction handling, and what would change the conclusion. Implementation routes stay lean and stop on repo/spec conflicts.
 - Shared skills now include `elegance` for ownership boundaries, API shape, naming discipline, registration structure, and shared-state organization. Codex skill metadata stays repo-local at `source/skills/<name>/openai.yaml` when a skill needs UI-facing metadata.
+- Taste Skill variants are imported from pinned upstream `Leonxlnx/taste-skill` with local `taste*` names. `taste-gpt`, `taste-images`, and `taste-imagegen` tell GPT/Codex tooling to use `gpt-image-2` through image-generation surfaces when available, or Responses API with a text-capable model such as `gpt-5.4`/`gpt-5` plus the hosted `image_generation` tool.

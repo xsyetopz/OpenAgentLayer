@@ -71,6 +71,48 @@ describe("generated prompts", () => {
 });
 
 describe("generated skills", () => {
+	it("ships exact upstream Taste Skill variants under local openagentsbtw names", () => {
+		const localNames = [
+			"taste",
+			"taste-gpt",
+			"taste-images",
+			"taste-redesign",
+			"taste-soft",
+			"taste-output",
+			"taste-minimalist",
+			"taste-brutalist",
+			"taste-stitch",
+			"taste-imagegen",
+		];
+		for (const localName of localNames) {
+			for (const relativePath of [
+				`claude/skills/${localName}/SKILL.md`,
+				`codex/plugin/openagentsbtw/skills/${localName}/SKILL.md`,
+				`opencode/templates/skills/${localName}/SKILL.md`,
+				`copilot/templates/.github/skills/${localName}/SKILL.md`,
+				`copilot/templates/.copilot/skills/${localName}/SKILL.md`,
+			]) {
+				const content = readBuild(relativePath);
+				assert.match(content, new RegExp(`Local name: \`${localName}\``));
+				assert.match(content, /## Exact Upstream SKILL\.md/);
+			}
+		}
+		assert.match(
+			readBuild("codex/plugin/openagentsbtw/skills/taste-gpt/SKILL.md"),
+			/name: gpt-taste/,
+		);
+		assert.match(
+			readBuild("codex/plugin/openagentsbtw/skills/taste-gpt/SKILL.md"),
+			/gpt-image-2/,
+		);
+		assert.match(
+			readBuild(
+				"codex/plugin/openagentsbtw/skills/taste-stitch/reference/upstream/DESIGN.md",
+			),
+			/Design System|DESIGN/i,
+		);
+	});
+
 	it("renders platform-specific git-workflow co-author trailers", () => {
 		const claudeShip = readBuild("claude/skills/git-workflow/SKILL.md");
 		const codexShip = readBuild(
@@ -423,6 +465,14 @@ describe("generated Codex defaults", () => {
 		assert.match(wrapper, /debug\s+Generated openagentsbtw Codex route/);
 		assert.match(wrapper, /validate\s+Generated openagentsbtw Codex route/);
 		assert.match(wrapper, /resume\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /taste\s+Generated openagentsbtw Codex route/);
+		assert.match(wrapper, /taste-gpt\s+Generated openagentsbtw Codex route/);
+		assert.match(
+			wrapper,
+			/taste-imagegen\s+Generated openagentsbtw Codex route/,
+		);
+		assert.match(wrapper, /OPENAGENTSBTW_ROUTE=taste-gpt/);
+		assert.match(wrapper, /GPT Image 2/);
 		assert.match(
 			wrapper,
 			/CODEX_CONFIG_ARGS\+=\(-c "features\.fast_mode = true"\)/,
@@ -604,6 +654,8 @@ describe("generated Codex docs", () => {
 		assert.match(codex, /documented Codex surfaces only/);
 		assert.match(codex, /model_instructions_file/);
 		assert.match(codex, /--source deepwiki/);
+		assert.match(codex, /rtk gain/);
+		assert.match(codex, /bun test` -> `rtk test bun test/);
 	});
 
 	it("documents peer threads as openagentsbtw-managed instead of native Codex behavior", () => {
@@ -662,6 +714,9 @@ describe("generated OpenCode assets", () => {
 		assert.match(plugin, /const COMMAND_CONTRACTS =/);
 		assert.match(plugin, /const AGENT_CONTRACTS =/);
 		assert.match(plugin, /BLOCKED:/);
+		assert.match(plugin, /highGainRewrite/);
+		assert.match(plugin, /rtk test /);
+		assert.match(plugin, /rtk tsc /);
 	});
 
 	it("keeps the OpenCode runtime preamble aligned with evidence-first guardrails", () => {
@@ -778,6 +833,20 @@ describe("generated optional IDE assets", () => {
 });
 
 describe("generated hook manifests", () => {
+	it("ships high-gain RTK rewrites across generated hook helpers", () => {
+		for (const relativePath of [
+			"claude/hooks/scripts/_rtk.mjs",
+			"codex/hooks/scripts/_rtk.mjs",
+			"copilot/hooks/scripts/openagentsbtw/_rtk.mjs",
+		]) {
+			const helper = readBuild(relativePath);
+			assert.match(helper, /function highGainRewrite/);
+			assert.match(helper, /rtk test/);
+			assert.match(helper, /rtk tsc/);
+			assert.match(helper, /rtk read --max-lines/);
+		}
+	});
+
 	it("makes Codex unsupported shared policies explicit", () => {
 		const manifest = readBuild("codex/hooks/HOOKS.md");
 		assert.match(manifest, /`write-quality`/);

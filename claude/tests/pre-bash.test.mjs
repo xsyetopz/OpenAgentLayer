@@ -220,12 +220,31 @@ describe("RTK enforce", () => {
 		}
 	});
 
-	it("should proxy unsupported commands when RTK policy is active", () => {
+	it("should apply high-gain rewrites when RTK policy is active", () => {
 		const fixture = withFakeRtk({ repoRtk: false, homeRtk: true });
 		try {
 			const result = runHook(
 				"pre/rtk-enforce.mjs",
 				makeBashInput("sed -n '1,5p' README.md"),
+				fixture.env,
+			);
+			const output = parseHookOutput(result);
+			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
+			assert.equal(
+				output?.hookSpecificOutput?.updatedInput.command,
+				"rtk read --max-lines 5 README.md",
+			);
+		} finally {
+			fixture.cleanup();
+		}
+	});
+
+	it("should proxy unsupported complex commands when RTK policy is active", () => {
+		const fixture = withFakeRtk({ repoRtk: false, homeRtk: true });
+		try {
+			const result = runHook(
+				"pre/rtk-enforce.mjs",
+				makeBashInput("bun test tests && echo done"),
 				fixture.env,
 			);
 			const output = parseHookOutput(result);

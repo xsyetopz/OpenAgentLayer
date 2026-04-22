@@ -76,6 +76,47 @@ function proxyRewrite(command) {
 	return `rtk proxy -- bash -lc ${shellQuote(command)}`;
 }
 
+function hasShellOperators(command) {
+	return /[\n;&|<>`$()]/.test(command);
+}
+
+function simpleArgs(command) {
+	if (hasShellOperators(command) || /["']/.test(command)) return null;
+	return command.split(/\s+/).filter(Boolean);
+}
+
+function highGainRewrite(command) {
+	const args = simpleArgs(command);
+	if (args?.[0] === "bun" && args[1] === "test") {
+		return `rtk test ${args.join(" ")}`;
+	}
+	if (
+		args?.[0] === "bun" &&
+		args[1] === "run" &&
+		/^test(?::|$)/.test(args[2] || "")
+	) {
+		return `rtk test ${args.join(" ")}`;
+	}
+	if (args?.[0] === "bunx" && args[1] === "tsc") {
+		return `rtk tsc ${args.slice(2).join(" ")}`.trim();
+	}
+	if (
+		args?.[0] === "cat" &&
+		args.length > 1 &&
+		!args.slice(1).some((arg) => arg.startsWith("-"))
+	) {
+		return `rtk read ${args.slice(1).join(" ")}`;
+	}
+
+	const headSed = command.match(
+		/^sed\s+-n\s+['"]1,(\d+)p['"]\s+([^\s'";&|<>`$()]+)$/,
+	);
+	if (headSed) {
+		return `rtk read --max-lines ${headSed[1]} ${headSed[2]}`;
+	}
+	return "";
+}
+
 export function getRtkRewrite(command, cwd = process.cwd()) {
 	const normalized = String(command || "").trim();
 	if (!normalized || /^\s*rtk\b/.test(normalized)) return null;
@@ -96,6 +137,11 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 		}
 	} catch {
 		// Fall back to proxy rewrite below.
+	}
+
+	const highGain = highGainRewrite(normalized);
+	if (highGain) {
+		return { policyPath, rewritten: highGain };
 	}
 
 	return { policyPath, rewritten: proxyRewrite(normalized) };
