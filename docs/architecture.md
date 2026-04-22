@@ -20,7 +20,7 @@ openagentsbtw now treats canonical source as small authored catalogs plus per-sk
 ## Generated Targets
 
 - `optional-ides/`
-  Generated optional IDE rules/instructions for Roo Code, Cline, Cursor, Junie, and Antigravity.
+  Generated optional IDE rules/instructions for Cline, Cursor, Junie, and Antigravity.
 
 ## Generator Rule
 

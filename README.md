@@ -8,7 +8,7 @@ One canonical source tree. Generated platform artifacts. Tight prompts, strict r
 
 ## What Changed In 3.1
 
-- optional IDE support for Roo Code, Cline, Cursor, JetBrains Junie, and Antigravity
+- optional IDE support for Cline, Cursor, JetBrains Junie, and Antigravity
 - `./install.sh --all` auto-detects optional IDEs and skips missing systems without writing files
 - project-native rule/instruction assets for optional IDEs, with Cline prompt hooks where supported
 - Taste Skill variants are vendored from `Leonxlnx/taste-skill` under local `taste*` names across Claude, Codex, OpenCode, and Copilot

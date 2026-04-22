@@ -438,6 +438,13 @@ function proxyRewrite(command) {
   return "rtk proxy -- bash -lc " + shellQuote(command);
 }
 
+function cdRtkRewrite(directory, command) {
+  if (process.platform === "win32") {
+    return proxyRewrite("cd " + directory + " && " + command);
+  }
+  return "rtk proxy -- bash -lc " + shellQuote("cd " + directory + " && " + command);
+}
+
 function hasShellOperators(command) {
   return /[\\n;&|<>$()]/.test(command) || command.includes(String.fromCharCode(96));
 }
@@ -457,6 +464,39 @@ function highGainRewrite(command) {
   }
   if (args?.[0] === "bunx" && args[1] === "tsc") {
     return ("rtk tsc " + args.slice(2).join(" ")).trim();
+  }
+  if (args?.[0] === "bunx" && args[1] === "--cwd" && args[2] && args[3] === "tsc") {
+    return cdRtkRewrite(args[2], ("rtk tsc " + args.slice(4).join(" ")).trim());
+  }
+  if (args?.[0] === "npm" && args[1] === "test") {
+    return "rtk test " + args.join(" ");
+  }
+  if (args?.[0] === "pnpm" && args[1] === "test") {
+    return "rtk test " + args.join(" ");
+  }
+  if (args?.[0] === "dotnet" && ["test", "restore", "format"].includes(args[1])) {
+    return "rtk dotnet " + args.slice(1).join(" ");
+  }
+  if (args?.[0] === "node" && args[1] === "--test") {
+    return "rtk test " + args.join(" ");
+  }
+  if (args?.[0] === "flutter" && args[1] === "test") {
+    return "rtk test " + args.join(" ");
+  }
+  if (args?.[0] === "flutter" && args[1] === "analyze") {
+    return "rtk summary " + args.join(" ");
+  }
+  if (args?.length === 1 && ["env", "printenv"].includes(args[0])) {
+    return "rtk env";
+  }
+  if (args?.[0] === "jq" && args.length === 3 && ![".", "-S"].includes(args[1]) && !args[1].startsWith("-") && args[2].endsWith(".json")) {
+    return "rtk json " + args[2];
+  }
+  if (args?.[0] === "jq" && args.length === 3 && [".", "-S"].includes(args[1]) && args[2].endsWith(".json")) {
+    return "rtk json " + args[2];
+  }
+  if (args?.[0] === "jq" && args.length === 4 && args[1] === "-r" && !args[2].startsWith("-") && args[3].endsWith(".json")) {
+    return "rtk json " + args[3];
   }
   if (args?.[0] === "cat" && args.length > 1 && !args.slice(1).some((arg) => arg.startsWith("-"))) {
     return "rtk read " + args.slice(1).join(" ");

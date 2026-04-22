@@ -40,7 +40,6 @@ export function resolvePaths({
 				);
 	const geminiHome = pathLib.join(homeDir, ".gemini");
 	const kiroHome = pathLib.join(homeDir, ".kiro");
-	const rooHome = pathLib.join(homeDir, ".roo");
 	const augmentHome = pathLib.join(homeDir, ".augment");
 	const clineHome = pathLib.join(homeDir, "Documents", "Cline");
 	const kiloConfigDir = pathLib.join(appDataDir, "kilo");
@@ -114,7 +113,6 @@ export function resolvePaths({
 		opencodeConfigDir,
 		geminiHome,
 		kiroHome,
-		rooHome,
 		augmentHome,
 		clineHome,
 		kiloConfigDir,
@@ -145,8 +143,6 @@ export function resolveWorkspacePaths(
 		projectAntigravityDir: pathLib.join(workspaceRoot, ".antigravity"),
 		projectKiroSteeringDir: pathLib.join(workspaceRoot, ".kiro", "steering"),
 		projectKiloRulesDir: pathLib.join(workspaceRoot, ".kilocode", "rules"),
-		projectRooRulesDir: pathLib.join(workspaceRoot, ".roo", "rules"),
-		projectRooModes: pathLib.join(workspaceRoot, ".roomodes"),
 		projectClineRulesDir: pathLib.join(workspaceRoot, ".clinerules"),
 		projectClineDir: pathLib.join(workspaceRoot, ".cline"),
 		projectAugmentRulesDir: pathLib.join(workspaceRoot, ".augment", "rules"),

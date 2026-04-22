@@ -43,6 +43,9 @@ describe("managed RTK surfaces", () => {
 		assert.match(renderRtkPolicy(), /rtk cargo test/);
 		assert.match(renderRtkPolicy(), /rtk test bun test/);
 		assert.match(renderRtkPolicy(), /rtk tsc --noEmit/);
+		assert.match(renderRtkPolicy(), /rtk test npm test/);
+		assert.match(renderRtkPolicy(), /rtk dotnet test/);
+		assert.match(renderRtkPolicy(), /rtk json package\.json/);
 		assert.match(
 			renderRtkPolicy(),
 			/rtk proxy` only when no specialized filter/,

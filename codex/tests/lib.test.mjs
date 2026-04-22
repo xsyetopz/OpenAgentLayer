@@ -178,6 +178,42 @@ describe("codex RTK helper", () => {
 				policyPath: join(fixture.repoDir, "RTK.md"),
 				rewritten: "rtk tsc --noEmit",
 			});
+			assert.match(
+				getRtkRewrite("bunx --cwd opencode tsc --noEmit", fixture.repoDir)
+					.rewritten,
+				/^rtk proxy -- bash -lc 'cd opencode && rtk tsc --noEmit'$/,
+			);
+			assert.deepEqual(getRtkRewrite("npm test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk test npm test",
+			});
+			assert.deepEqual(getRtkRewrite("pnpm test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk test pnpm test",
+			});
+			assert.deepEqual(
+				getRtkRewrite("dotnet test --no-build", fixture.repoDir),
+				{
+					policyPath: join(fixture.repoDir, "RTK.md"),
+					rewritten: "rtk dotnet test --no-build",
+				},
+			);
+			assert.deepEqual(getRtkRewrite("node --test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk test node --test",
+			});
+			assert.deepEqual(getRtkRewrite("flutter test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk test flutter test",
+			});
+			assert.deepEqual(getRtkRewrite("env", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk env",
+			});
+			assert.deepEqual(getRtkRewrite("jq . package.json", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk json package.json",
+			});
 			assert.deepEqual(getRtkRewrite("cat package.json", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
 				rewritten: "rtk read package.json",

@@ -23,11 +23,18 @@ rtk cargo test
 rtk test bun test tests claude/tests codex/tests
 rtk test bun run test
 rtk tsc --noEmit
+rtk test npm test
+rtk test pnpm test
+rtk dotnet test
+rtk test node --test
+rtk test flutter test
+rtk env
+rtk json package.json
 rtk npm run build
 rtk pytest -q
 \`\`\`
 
-For Bun projects, do not run raw \`bun test\`, \`bun run test\`, or \`bunx tsc\`; use \`rtk test bun ...\` and \`rtk tsc\` so output is filtered instead of merely proxied.
+For Bun projects, do not run raw \`bun test\`, \`bun run test\`, or \`bunx tsc\`; use \`rtk test bun ...\` and \`rtk tsc\` so output is filtered instead of merely proxied. For missing upstream rewrites such as \`npm test\`, \`pnpm test\`, \`dotnet test\`, \`node --test\`, \`flutter test\`, simple \`jq\`, and \`env\`, use the closest specialized RTK command above.
 
 When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw will enforce RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite.
 `;

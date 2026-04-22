@@ -1,7 +1,13 @@
 import { describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -137,9 +143,9 @@ describe("installer runtime smoke", () => {
 			assert.equal(install.status, 0, install.stderr || install.stdout);
 			assert.equal(
 				existsSync(path.join(workspace, ".roo", "rules", "openagentsbtw.md")),
-				true,
+				false,
 			);
-			assert.equal(existsSync(path.join(workspace, ".roomodes")), true);
+			assert.equal(existsSync(path.join(workspace, ".roomodes")), false);
 			assert.equal(
 				existsSync(path.join(workspace, ".clinerules", "openagentsbtw.md")),
 				true,
@@ -162,6 +168,12 @@ describe("installer runtime smoke", () => {
 			);
 			assert.equal(existsSync(path.join(workspace, "AGENTS.md")), true);
 			assert.equal(existsSync(path.join(workspace, "GEMINI.md")), true);
+			mkdirSync(path.join(workspace, ".roo", "rules"), { recursive: true });
+			writeFileSync(
+				path.join(workspace, ".roo", "rules", "openagentsbtw.md"),
+				"legacy Roo Code rules",
+			);
+			writeFileSync(path.join(workspace, ".roomodes"), "{}");
 
 			const uninstall = runNode(
 				path.join(ROOT, "scripts", "install", "uninstall-cli.mjs"),
@@ -174,6 +186,7 @@ describe("installer runtime smoke", () => {
 				existsSync(path.join(workspace, ".roo", "rules", "openagentsbtw.md")),
 				false,
 			);
+			assert.equal(existsSync(path.join(workspace, ".roomodes")), false);
 			assert.equal(
 				existsSync(
 					path.join(workspace, ".cursor", "rules", "openagentsbtw.mdc"),

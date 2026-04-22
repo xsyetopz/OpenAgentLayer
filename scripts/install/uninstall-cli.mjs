@@ -615,13 +615,19 @@ async function removeOptionalIdes(args) {
 	console.log("\n\x1b[0;32mRemoving optional IDE support\x1b[0m");
 	const workspacePaths = resolveWorkspacePaths();
 	if (args.removeRoo) {
-		await fs.rm(
-			path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
-			{
-				force: true,
-			},
+		const projectRooRulesDir = path.join(
+			workspacePaths.workspaceRoot,
+			".roo",
+			"rules",
 		);
-		await fs.rm(workspacePaths.projectRooModes, { force: true });
+		const projectRooModes = path.join(
+			workspacePaths.workspaceRoot,
+			".roomodes",
+		);
+		await fs.rm(path.join(projectRooRulesDir, "openagentsbtw.md"), {
+			force: true,
+		});
+		await fs.rm(projectRooModes, { force: true });
 		logInfo("Removed Roo Code files");
 	}
 	if (args.removeCline) {

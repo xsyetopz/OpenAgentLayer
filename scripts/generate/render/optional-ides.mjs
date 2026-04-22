@@ -97,49 +97,6 @@ export function renderOptionalIdeFiles() {
 	const files = [];
 	const add = (relativePath, content) => files.push({ relativePath, content });
 
-	const rooGuidance = renderOptionalIdeGuidance({
-		title: "Roo Code",
-		platform: "Roo Code",
-		capabilities: [
-			"Project rules live in `.roo/rules/`.",
-			"Managed modes live in `.roomodes` and map openagentsbtw roles to Roo Code modes.",
-		],
-		hookStatus:
-			"Roo Code hook parity is unavailable; guardrails are rule/mode based.",
-	});
-	add(
-		path.join("optional-ides", "roo", "rules", "openagentsbtw.md"),
-		rooGuidance,
-	);
-	add(
-		path.join("optional-ides", "roo", ".roomodes"),
-		renderJson({
-			customModes: [
-				{
-					slug: "openagentsbtw-hephaestus",
-					name: "openagentsbtw Hephaestus",
-					roleDefinition:
-						"Production implementation and refactor agent. Edit real code; no demos or placeholders.",
-					groups: ["read", "edit", "browser", "command", "mcp"],
-				},
-				{
-					slug: "openagentsbtw-athena",
-					name: "openagentsbtw Athena",
-					roleDefinition:
-						"Architecture and sequencing agent. Explore first, plan decision-complete changes.",
-					groups: ["read", "browser", "command", "mcp"],
-				},
-				{
-					slug: "openagentsbtw-nemesis",
-					name: "openagentsbtw Nemesis",
-					roleDefinition:
-						"Review and regression-risk agent. Find concrete issues with evidence.",
-					groups: ["read", "browser", "command", "mcp"],
-				},
-			],
-		}),
-	);
-
 	const clineGuidance = renderOptionalIdeGuidance({
 		title: "Cline",
 		platform: "Cline",
@@ -274,20 +231,6 @@ export function renderOptionalIdeFiles() {
 }
 
 const OPTIONAL_IDE_DOCS = [
-	{
-		id: "roo",
-		title: "Roo Code",
-		install: {
-			detected: "Roo Code is detected or tests explicitly set a fake detector",
-			exists: "Roo Code exists on the system",
-		},
-		surfaces: [
-			"Project rules: `.roo/rules/openagentsbtw.md`",
-			"Managed modes: `.roomodes`",
-		],
-		hookStatus:
-			"Roo Code hook parity is not documented as a stable native surface here. openagentsbtw uses rules and modes only.",
-	},
 	{
 		id: "cline",
 		title: "Cline",

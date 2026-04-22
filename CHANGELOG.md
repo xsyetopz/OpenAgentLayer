@@ -2,6 +2,16 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.1] - 2026-04-22
+
+### Removed
+
+- Removed active Roo Code installer, generator, generated artifact, and platform documentation support after Roo Code announced shutdown.
+
+### Changed
+
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `3.2.1`.
+
 ## [3.2.0] - 2026-04-22
 
 ### Added

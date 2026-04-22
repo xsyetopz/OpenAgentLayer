@@ -144,7 +144,6 @@ System toggles (allow multiple):
   --opencode              Install OpenCode support
   --codex                 Install Codex support
   --copilot               Install GitHub Copilot support
-  --roo                   Install Roo Code support when detected
   --cline                 Install Cline support when detected
   --cursor                Install Cursor support when detected
   --junie                 Install JetBrains Junie support when detected
@@ -188,7 +187,6 @@ function parseArgs(argv) {
 		installOpenCode: false,
 		installCodex: false,
 		installCopilot: false,
-		installRoo: false,
 		installCline: false,
 		installCursor: false,
 		installJunie: false,
@@ -232,9 +230,6 @@ function parseArgs(argv) {
 				break;
 			case "--copilot":
 				args.installCopilot = true;
-				break;
-			case "--roo":
-				args.installRoo = true;
 				break;
 			case "--cline":
 				args.installCline = true;
@@ -352,7 +347,6 @@ function installsAnySystem(args) {
 			args.installOpenCode ||
 			args.installCodex ||
 			args.installCopilot ||
-			args.installRoo ||
 			args.installCline ||
 			args.installCursor ||
 			args.installJunie ||
@@ -367,7 +361,6 @@ async function ensureSelection(args) {
 		args.installOpenCode ||
 		args.installCodex ||
 		args.installCopilot ||
-		args.installRoo ||
 		args.installCline ||
 		args.installCursor ||
 		args.installJunie ||
@@ -809,7 +802,6 @@ async function maybeInstallRtk(args) {
 			args.installOpenCode ||
 			args.installCodex ||
 			args.installCopilot ||
-			args.installRoo ||
 			args.installCline ||
 			args.installCursor ||
 			args.installJunie ||
@@ -1202,17 +1194,6 @@ async function installCopilot(args, artifacts) {
 
 const OPTIONAL_IDES = [
 	{
-		id: "roo",
-		label: "Roo Code",
-		flag: "installRoo",
-		markers: () => [
-			PATHS.rooHome,
-			path.join(PATHS.homeDir, ".vscode", "extensions"),
-			path.join(PATHS.homeDir, ".cursor", "extensions"),
-		],
-		matchExtension: /roo|roo-cline/i,
-	},
-	{
 		id: "cline",
 		label: "Cline",
 		flag: "installCline",
@@ -1288,16 +1269,6 @@ async function optionalIdeInstalled(definition) {
 async function installOptionalIde(definition, artifacts, workspacePaths, args) {
 	const source = path.join(artifacts.optionalIdeDir, definition.id);
 	switch (definition.id) {
-		case "roo":
-			await syncManagedTree(
-				path.join(source, "rules"),
-				workspacePaths.projectRooRulesDir,
-			);
-			await fs.copyFile(
-				path.join(source, ".roomodes"),
-				workspacePaths.projectRooModes,
-			);
-			break;
 		case "cline":
 			await syncManagedTree(
 				path.join(source, ".clinerules"),
@@ -1684,12 +1655,6 @@ async function validateInstall(args) {
 		if (!(await optionalIdeInstalled(definition))) continue;
 		const workspacePaths = resolveWorkspacePaths();
 		switch (definition.id) {
-			case "roo":
-				await required(
-					path.join(workspacePaths.projectRooRulesDir, "openagentsbtw.md"),
-					"Roo Code rules",
-				);
-				break;
 			case "cline":
 				await required(
 					path.join(workspacePaths.projectClineRulesDir, "openagentsbtw.md"),

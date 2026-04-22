@@ -223,12 +223,24 @@ describe("RTK enforce", () => {
 	it("should apply high-gain rewrites when RTK policy is active", () => {
 		const fixture = withFakeRtk({ repoRtk: false, homeRtk: true });
 		try {
-			const result = runHook(
+			let result = runHook(
+				"pre/rtk-enforce.mjs",
+				makeBashInput("npm test"),
+				fixture.env,
+			);
+			let output = parseHookOutput(result);
+			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
+			assert.equal(
+				output?.hookSpecificOutput?.updatedInput.command,
+				"rtk test npm test",
+			);
+
+			result = runHook(
 				"pre/rtk-enforce.mjs",
 				makeBashInput("sed -n '1,5p' README.md"),
 				fixture.env,
 			);
-			const output = parseHookOutput(result);
+			output = parseHookOutput(result);
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.equal(
 				output?.hookSpecificOutput?.updatedInput.command,

@@ -1,7 +1,7 @@
 import { afterAll as after, beforeAll as before, describe, it } from "bun:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { readFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -717,6 +717,9 @@ describe("generated OpenCode assets", () => {
 		assert.match(plugin, /highGainRewrite/);
 		assert.match(plugin, /rtk test /);
 		assert.match(plugin, /rtk tsc /);
+		assert.match(plugin, /rtk dotnet /);
+		assert.match(plugin, /rtk json /);
+		assert.match(plugin, /cdRtkRewrite/);
 	});
 
 	it("keeps the OpenCode runtime preamble aligned with evidence-first guardrails", () => {
@@ -791,8 +794,6 @@ describe("generated OpenCode assets", () => {
 
 describe("generated optional IDE assets", () => {
 	it("ships rules and native descriptors for optional IDEs", () => {
-		const rooRules = readBuild("optional-ides/roo/rules/openagentsbtw.md");
-		const rooModes = JSON.parse(readBuild("optional-ides/roo/.roomodes"));
 		const clineRules = readBuild(
 			"optional-ides/cline/.clinerules/openagentsbtw.md",
 		);
@@ -805,11 +806,15 @@ describe("generated optional IDE assets", () => {
 		const junieAgents = readBuild("optional-ides/junie/AGENTS.md");
 		const antigravityAgents = readBuild("optional-ides/antigravity/AGENTS.md");
 
-		assert.match(rooRules, /Roo Code/);
-		assert.ok(
-			rooModes.customModes.some(
-				(mode) => mode.slug === "openagentsbtw-hephaestus",
+		assert.equal(
+			existsSync(
+				resolve(BUILD_ROOT, "optional-ides/roo/rules/openagentsbtw.md"),
 			),
+			false,
+		);
+		assert.equal(
+			existsSync(resolve(BUILD_ROOT, "optional-ides/roo/.roomodes")),
+			false,
 		);
 		assert.match(clineRules, /Cline/);
 		assert.ok(Array.isArray(clineHooks.hooks.beforeTask));
@@ -820,7 +825,6 @@ describe("generated optional IDE assets", () => {
 
 	it("ships generated optional IDE platform docs", () => {
 		for (const relativePath of [
-			"docs/platforms/roo.md",
 			"docs/platforms/cline.md",
 			"docs/platforms/cursor.md",
 			"docs/platforms/junie.md",
@@ -829,6 +833,10 @@ describe("generated optional IDE assets", () => {
 			assert.match(readBuild(relativePath), /## Surfaces/);
 			assert.match(readBuild(relativePath), /## Hook Status/);
 		}
+		assert.equal(
+			existsSync(resolve(BUILD_ROOT, "docs/platforms/roo.md")),
+			false,
+		);
 	});
 });
 
@@ -844,6 +852,9 @@ describe("generated hook manifests", () => {
 			assert.match(helper, /rtk test/);
 			assert.match(helper, /rtk tsc/);
 			assert.match(helper, /rtk read --max-lines/);
+			assert.match(helper, /rtk dotnet/);
+			assert.match(helper, /rtk json/);
+			assert.match(helper, /cdRtkRewrite/);
 		}
 	});
 

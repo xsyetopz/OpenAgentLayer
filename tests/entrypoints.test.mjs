@@ -109,8 +109,6 @@ describe("shared install paths", () => {
 			paths.projectKiroSteeringDir,
 			"/tmp/consumer-repo/.kiro/steering",
 		);
-		assert.equal(paths.projectRooRulesDir, "/tmp/consumer-repo/.roo/rules");
-		assert.equal(paths.projectRooModes, "/tmp/consumer-repo/.roomodes");
 		assert.equal(paths.projectClineRulesDir, "/tmp/consumer-repo/.clinerules");
 		assert.equal(paths.projectClineDir, "/tmp/consumer-repo/.cline");
 		assert.equal(
@@ -269,7 +267,8 @@ describe("public entrypoints", () => {
 		assert.match(installer, /--caveman-mode MODE/);
 		assert.match(installer, /--no-caveman/);
 		assert.match(installer, /--optional-ides/);
-		assert.match(installer, /--roo/);
+		assert.equal(installer.includes("--roo"), false);
+		assert.match(readRepo("scripts/install/uninstall-cli.mjs"), /--roo/);
 		assert.match(installer, /--antigravity/);
 		assert.match(configCli, /--caveman-mode MODE/);
 		assert.match(configCli, /--no-caveman/);
@@ -283,7 +282,6 @@ describe("public entrypoints", () => {
 		assert.match(installer, /workspacePaths\.projectGithubDir/);
 		assert.match(installer, /workspacePaths\.projectVscodeMcp/);
 		assert.match(installer, /workspacePaths\.projectOpenCodeDir/);
-		assert.match(installer, /workspacePaths\.projectRooRulesDir/);
 		assert.match(installer, /workspacePaths\.projectCursorRulesDir/);
 		assert.match(installer, /workspacePaths\.projectJunieDir/);
 		assert.match(uninstaller, /workspacePaths\.projectGithubDir/);
