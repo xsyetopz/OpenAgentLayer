@@ -87,6 +87,17 @@ export function rtkCodexDatabasePath(paths = PATHS) {
 	return path.join(paths.codexHome, "memories", "rtk", "history.db");
 }
 
+function rtkConfigPathForPaths(paths = PATHS) {
+	return rtkConfigPath({
+		platform: paths.platform,
+		env: {
+			APPDATA: paths.appDataDir,
+			XDG_CONFIG_HOME: paths.appDataDir,
+		},
+		homeDir: paths.homeDir,
+	});
+}
+
 function mergeTrackingDatabasePath(existing, databasePath) {
 	const line = `database_path = ${JSON.stringify(databasePath)}`;
 	if (/^\[tracking\]\s*$/m.test(existing)) {
@@ -118,7 +129,7 @@ function mergeTrackingDatabasePath(existing, databasePath) {
 }
 
 export async function writeRtkCodexTrackingConfig(paths = PATHS) {
-	const configPath = rtkConfigPath({ homeDir: paths.homeDir });
+	const configPath = rtkConfigPathForPaths(paths);
 	const databasePath = rtkCodexDatabasePath(paths);
 	await fs.mkdir(path.dirname(databasePath), { recursive: true });
 	const existing = await readText(configPath, "");

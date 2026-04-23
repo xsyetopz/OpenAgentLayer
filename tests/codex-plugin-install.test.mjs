@@ -17,6 +17,10 @@ import {
 	writeCodexMarketplace,
 } from "../scripts/install/codex-plugin-install.mjs";
 
+function normalizePathSeparators(filepath) {
+	return filepath.replaceAll("\\", "/");
+}
+
 async function writePlugin(root, version = "9.9.9") {
 	await mkdir(path.join(root, ".codex-plugin"), { recursive: true });
 	writeFileSync(
@@ -90,7 +94,7 @@ describe("Codex plugin install payload", () => {
 			assert.equal(validation.version, "9.9.9");
 			assert.equal(validation.missing.length, 4);
 			assert.match(
-				validation.missing[0],
+				normalizePathSeparators(validation.missing[0]),
 				/plugins\/cache\/openagentsbtw-local/,
 			);
 		} finally {

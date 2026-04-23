@@ -1,5 +1,5 @@
 import { chmod, cp, mkdir, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { glob } from "glob";
 import { AGENT_META, ALL_AGENT_ROLES, SUBAGENT_ROLES } from "./agents.ts";
 import { COMMAND_DEFINITIONS } from "./commands.ts";
@@ -256,8 +256,8 @@ async function writeSkills(
 	);
 	await Promise.all(
 		skillPaths.map(async (skillPath) => {
-			const skillDir = skillPath.slice(0, skillPath.lastIndexOf("/"));
-			const skillName = skillDir.slice(skillDir.lastIndexOf("/") + 1);
+			const skillDir = dirname(skillPath);
+			const skillName = basename(skillDir);
 			await replaceDir(skillDir, `${skillsDir}/${skillName}`, dryRun);
 		}),
 	);

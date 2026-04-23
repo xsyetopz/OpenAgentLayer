@@ -967,6 +967,18 @@ async function installOpenCode(args, artifacts) {
 	console.log("\n\x1b[0;32mOpenCode\x1b[0m");
 	await ensureBun();
 	const workspacePaths = resolveWorkspacePaths();
+	const opencodeDir = repoPath("opencode");
+	if (
+		!(await pathExists(
+			path.join(opencodeDir, "node_modules", "@opencode-ai", "plugin"),
+		)) ||
+		!(await pathExists(path.join(opencodeDir, "node_modules", "glob"))) ||
+		!(await pathExists(path.join(opencodeDir, "node_modules", "zod")))
+	) {
+		await run("bun", ["install", "--frozen-lockfile"], {
+			cwd: opencodeDir,
+		});
+	}
 	const commandArgs = [
 		"run",
 		repoPath("opencode", "src", "cli.ts"),

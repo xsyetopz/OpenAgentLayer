@@ -95,6 +95,7 @@ export function resolvePaths({
 					: "";
 
 	return {
+		platform,
 		homeDir,
 		appDataDir,
 		configDir,

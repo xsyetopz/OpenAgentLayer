@@ -14,6 +14,13 @@ import {
 } from "../hooks/scripts/_lib.mjs";
 import { getRtkRewrite } from "../hooks/scripts/_rtk.mjs";
 
+function expectedCwdTscRewrite() {
+	if (process.platform === "win32") {
+		return /^rtk --ultra-compact proxy -- cd opencode && rtk --ultra-compact tsc --noEmit$/;
+	}
+	return /^rtk --ultra-compact proxy -- bash -lc 'cd opencode && rtk --ultra-compact tsc --noEmit'$/;
+}
+
 describe("codex hook lib", () => {
 	it("matches soft hedges in prose lines", () => {
 		const { hard, soft } = matchPlaceholders("README.md", [
@@ -181,7 +188,7 @@ describe("codex RTK helper", () => {
 			assert.match(
 				getRtkRewrite("bunx --cwd opencode tsc --noEmit", fixture.repoDir)
 					.rewritten,
-				/^rtk --ultra-compact proxy -- bash -lc 'cd opencode && rtk --ultra-compact tsc --noEmit'$/,
+				expectedCwdTscRewrite(),
 			);
 			assert.deepEqual(getRtkRewrite("npm test", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),

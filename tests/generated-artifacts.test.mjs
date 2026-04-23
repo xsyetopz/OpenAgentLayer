@@ -672,8 +672,10 @@ describe("generated Codex docs", () => {
 describe("installer docs", () => {
 	it("documents consolidated architecture and platform surfaces", () => {
 		const readme = readRepo("README.md");
+		const changelog = readRepo("CHANGELOG.md");
 		const architecture = readRepo("docs/architecture.md");
-		assert.match(readme, /What Changed In 3\.0/);
+		assert.doesNotMatch(readme, /What Changed In 3\.0/);
+		assert.match(changelog, /## \[3\.2\.2\]/);
 		assert.match(readme, /design-polish/);
 		assert.match(architecture, /source\/agents\/<agent>/);
 		assert.match(architecture, /source\/commands\/codex/);
