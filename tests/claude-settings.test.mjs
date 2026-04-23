@@ -12,7 +12,7 @@ describe("Claude settings merge", () => {
 			{
 				homeDir: String.raw`C:\Users\test-user`,
 				models: {
-					opusModel: "claude-opus-4-6[1m]",
+					opusModel: "claude-opus-4-7",
 					sonnetModel: "claude-sonnet-4-6",
 					haikuModel: "claude-haiku-4-5",
 				},
@@ -22,10 +22,7 @@ describe("Claude settings merge", () => {
 			rendered.statusLine.command,
 			String.raw`bash C:\Users\test-user/.claude/statusline-command.sh`,
 		);
-		assert.equal(
-			rendered.env.ANTHROPIC_DEFAULT_OPUS_MODEL,
-			"claude-opus-4-6[1m]",
-		);
+		assert.equal(rendered.env.ANTHROPIC_DEFAULT_OPUS_MODEL, "claude-opus-4-7");
 	});
 
 	it("preserves unknown keys and merges managed Claude settings objects", () => {
@@ -56,7 +53,7 @@ describe("Claude settings merge", () => {
 					custom: { type: "http", url: "https://example.test" },
 				},
 			},
-			model: "opusplan",
+			model: "claude-opus-4-7",
 			deepwiki: true,
 		});
 
@@ -75,6 +72,6 @@ describe("Claude settings merge", () => {
 			url: "https://mcp.deepwiki.com/mcp",
 			enabled: true,
 		});
-		assert.equal(merged.model, "opusplan");
+		assert.equal(merged.model, "claude-opus-4-7");
 	});
 });

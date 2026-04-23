@@ -6,6 +6,10 @@ import {
 	renderCavemanPromptBullet,
 	renderCavemanRuntimeModule,
 } from "../source/caveman.mjs";
+import {
+	assertSupportedCodexModel,
+	SUPPORTED_CODEX_MODEL_IDS,
+} from "../source/subscriptions.mjs";
 import { renderCodexPeerWrapper } from "./generate/render/codex-peer-wrapper.mjs";
 import { renderCodexWrapper } from "./generate/render/codex-wrapper.mjs";
 import { renderOpenCodePlugin } from "./generate/render/opencode-plugin.mjs";
@@ -20,6 +24,10 @@ let OUTPUT_ROOT = REPO_ROOT;
 function q(value) {
 	return JSON.stringify(value);
 }
+
+const CODEX_SUPPORTED_MODEL_LIST = SUPPORTED_CODEX_MODEL_IDS.map(
+	(model) => `\`${model}\``,
+).join(", ");
 
 async function readText(...segments) {
 	return fs.readFile(path.join(SOURCE_DIR, ...segments), "utf8");
@@ -188,8 +196,8 @@ async function generateSkills(skills) {
 					"",
 					"## GPT / Codex Image Generation Note",
 					"",
-					"- When OpenAI image generation is available, prefer `gpt-image-2` for image generation and editing through the Images API.",
-					"- When using the Responses API, use a text-capable model such as `gpt-5.4` or `gpt-5` with the hosted `image_generation` tool; do not set the Responses `model` to `gpt-image-2`.",
+					`- For Codex CLI 0.123.0, stay on supported Codex text models only: ${CODEX_SUPPORTED_MODEL_LIST}.`,
+					"- When using hosted image generation through Codex-compatible surfaces, keep the Responses `model` on one of those supported text models and use the hosted `image_generation` tool instead of switching to a separate image-only model id.",
 					"- For visual frontend work: generate the reference image, inspect it deeply, extract the layout/type/spacing/color/component system, then implement faithfully.",
 					"- If the tool cannot generate images, write the exact image-generation prompt/spec first, then implement from that spec.",
 				].join("\n")
@@ -502,6 +510,10 @@ function renderCopilotAgent(agent, prompt, copilotOverlay) {
 }
 
 function renderCodexAgent(agent, prompt, codexOverlay) {
+	assertSupportedCodexModel(
+		agent.codex.model,
+		`source/agents/${agent.name}/agent.json codex.model`,
+	);
 	const instructions = [
 		`You are ${agent.claude.displayName}, the openagentsbtw ${agent.name} agent for Codex.`,
 		"",

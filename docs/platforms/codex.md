@@ -15,6 +15,14 @@ It does not rely on undocumented “override the hidden system prompt” hacks.
 
 Bias deterministic coding and review toward `gpt-5.3-codex`.
 
+Codex CLI 0.123.0 supported model set for openagentsbtw:
+
+- `gpt-5.4`
+- `gpt-5.4-mini`
+- `gpt-5.3-codex`
+- `gpt-5.3-codex-spark`
+- `gpt-5.2`
+
 | Codex plan | Top-level `openagentsbtw` | `model_reasoning_effort` | `plan_mode_reasoning_effort` | Implementation/auto/runtime | Utility        |
 | ---------- | ------------------------- | ------------------------ | ---------------------------- | --------------------------- | -------------- |
 | `go`       | `gpt-5.4-mini`            | `medium`                 | `high`                       | `gpt-5.3-codex`             | `gpt-5.4-mini` |
@@ -87,5 +95,5 @@ Queue state lives outside the repository under `~/.config/openagentsbtw/queue/`.
 - Managed Caveman mode is reasserted through prompt/session hooks and completion checks reject obvious verbose drift while preserving code, commands, exact errors, docs, and review findings.
 - Route prompts now add analysis scaffolds where they help: planning/review/debug explicitly name assumptions, missing evidence, contradiction handling, and what would change the conclusion. Implementation routes stay lean and stop on repo/spec conflicts.
 - Shared skills now include `elegance` for ownership boundaries, API shape, naming discipline, registration structure, and shared-state organization. Codex skill metadata stays repo-local at `source/skills/<name>/openai.yaml` when a skill needs UI-facing metadata.
-- Taste Skill variants are imported from pinned upstream `Leonxlnx/taste-skill` with local `taste*` names. `taste-gpt`, `taste-images`, and `taste-imagegen` tell GPT/Codex tooling to use `gpt-image-2` through image-generation surfaces when available, or Responses API with a text-capable model such as `gpt-5.4`/`gpt-5` plus the hosted `image_generation` tool.
+- Taste Skill variants are imported from pinned upstream `Leonxlnx/taste-skill` with local `taste*` names. `taste-gpt`, `taste-images`, and `taste-imagegen` keep Codex on the supported text-capable model set above and use the hosted `image_generation` tool when image generation is available.
 - RTK efficiency target: use `rtk --ultra-compact` plus specialized filters before `rtk proxy`. Validation-heavy sessions should exceed 70% project-scope savings; supported high-output commands should normally exceed 80%. Audit with `rtk gain --project --history`, `rtk gain --failures`, and `rtk hook-audit --since 30`.

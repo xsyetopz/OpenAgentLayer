@@ -4,7 +4,7 @@
   "claude": {
     "displayName": "Hermes",
     "description": "Use for exploration, repo tracing, dependency analysis, and research-heavy read-only tasks.",
-    "model": "sonnet",
+    "model": "claude-sonnet-4-6",
     "color": "cyan",
     "tools": [
       "Read",

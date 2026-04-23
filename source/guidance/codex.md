@@ -16,7 +16,8 @@
 
 - Use real AGENTS.md files for Codex guidance. Do not symlink CLAUDE.md.
 - Keep Fast mode off for openagentsbtw workflows.
-- Use the active Codex plan preset. Default top-level planning/editing to `gpt-5.4` on eligible plans (`plus`, `pro-5`, `pro-20`), keep implementation/review routes on `gpt-5.3-codex`, and keep bounded utility work on the utility profile.
+- Codex model ids must stay within the current Codex CLI set only: `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex`, `gpt-5.3-codex-spark`, `gpt-5.2`.
+- Use the active Codex plan preset. Default top-level planning/editing to `gpt-5.4` on eligible plans (`plus`, `pro-5`, `pro-20`), keep implementation/review routes on `gpt-5.3-codex`, and keep bounded utility work on `gpt-5.4-mini`.
 - Keep this file short and task-shaping. Put deep reference material in docs and link to it.
 - Use athena before large multi-file implementation when the plan is not already clear. Run nemesis review plus targeted validation before closing substantial work.
 - Default to role routing: explicitly use the custom agents by name when the task clearly benefits (don’t wait for the user to ask). Keep it proportional; skip spawning for trivial edits.

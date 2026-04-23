@@ -145,6 +145,31 @@ describe("AllowedCommands", () => {
 		assert.notEqual(result.status, 2);
 	});
 
+	it("blocks raw detailed git diff and includes the blocked command", () => {
+		const result = runHook(
+			"pre/bash-guard.mjs",
+			makeBashInput("git diff src/index.ts"),
+		);
+		const output = parseHookOutput(result);
+		assert.equal(output?.hookSpecificOutput?.permissionDecision, "deny");
+		assert.match(
+			output?.hookSpecificOutput?.permissionDecisionReason || "",
+			/Command: git diff src\/index\.ts/,
+		);
+	});
+
+	it("allows detailed git diff after an inline preflight", () => {
+		const result = runHook(
+			"pre/bash-guard.mjs",
+			makeBashInput("git diff --stat && git diff src/index.ts"),
+		);
+		const output = parseHookOutput(result);
+		assert.notEqual(result.status, 2);
+		if (output?.hookSpecificOutput) {
+			assert.notEqual(output.hookSpecificOutput.permissionDecision, "deny");
+		}
+	});
+
 	it("auto-adds Claude co-author trailer when git commit is missing one", () => {
 		const result = runHook(
 			"pre/bash-guard.mjs",

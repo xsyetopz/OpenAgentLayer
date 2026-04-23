@@ -4,7 +4,7 @@
   "claude": {
     "displayName": "Calliope",
     "description": "Use for docs, changelogs, ADRs, and precise written artifacts that must match the codebase.",
-    "model": "haiku",
+    "model": "claude-haiku-4-5",
     "color": "pink",
     "tools": [
       "Read",

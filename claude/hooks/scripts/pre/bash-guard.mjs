@@ -21,10 +21,6 @@ const LARGE_OUTPUT_RULES = [
 		"Use `tail -n 200` or `grep` instead of catting large files into context.",
 	],
 	[
-		/\bgit\s+diff\b(?!.*--stat)(?!.*--name)(?!.*HEAD\s+HEAD)/,
-		"Use `git diff --stat` or `git diff --name-only` first.",
-	],
-	[
 		/\bgrep\b\s+-[a-zA-Z]*[rR][a-zA-Z]*\s+["']?[^"'\s]+["']?\s+\.$/,
 		"Unbounded `grep -r ... .` dumps everything. Add --include or pipe to head.",
 	],
@@ -44,6 +40,62 @@ const MALFORMED_CANONICAL_EMAILS = new Map([
 	["noreply@anthropic", "noreply@anthropic.com"],
 ]);
 const CLAUDE_DEFAULT_TRAILER = "Co-Authored-By: Claude <noreply@anthropic.com>";
+
+function splitTopLevelSegments(command) {
+	const segments = [];
+	let current = "";
+	let quote = "";
+	let escape = false;
+	for (let i = 0; i < command.length; i += 1) {
+		const char = command[i];
+		const next = command[i + 1] || "";
+		if (escape) {
+			current += char;
+			escape = false;
+			continue;
+		}
+		if (char === "\\") {
+			current += char;
+			escape = true;
+			continue;
+		}
+		if (quote) {
+			current += char;
+			if (char === quote) quote = "";
+			continue;
+		}
+		if (char === "'" || char === '"') {
+			current += char;
+			quote = char;
+			continue;
+		}
+		if ((char === "&" && next === "&") || (char === "|" && next === "|")) {
+			if (current.trim()) segments.push(current.trim());
+			current = "";
+			i += 1;
+			continue;
+		}
+		if (char === ";" || char === "|") {
+			if (current.trim()) segments.push(current.trim());
+			current = "";
+			continue;
+		}
+		current += char;
+	}
+	if (current.trim()) segments.push(current.trim());
+	return segments;
+}
+
+function summarizeCommand(command) {
+	const singleLine = command.replace(/\s+/g, " ").trim();
+	return singleLine.length > 180
+		? `${singleLine.slice(0, 177)}...`
+		: singleLine;
+}
+
+function denyForCommand(reason, command) {
+	deny(`${reason}\nCommand: ${summarizeCommand(command)}`);
+}
 
 function getStagedFiles() {
 	try {
@@ -117,8 +169,23 @@ function fileIssues(filepath) {
 }
 
 function checkLargeOutput(cmd) {
-	for (const [pattern, message] of LARGE_OUTPUT_RULES) {
-		if (pattern.test(cmd)) return message;
+	let diffPreflightSeen = false;
+	for (const segment of splitTopLevelSegments(cmd)) {
+		if (/\bgit\s+diff\b/.test(segment)) {
+			if (segment.includes("--stat") || segment.includes("--name-only")) {
+				diffPreflightSeen = true;
+				continue;
+			}
+			if (!diffPreflightSeen) {
+				return {
+					message: "Use `git diff --stat` or `git diff --name-only` first.",
+					command: segment,
+				};
+			}
+		}
+		for (const [pattern, message] of LARGE_OUTPUT_RULES) {
+			if (pattern.test(segment)) return { message, command: segment };
+		}
 	}
 	return null;
 }
@@ -178,13 +245,24 @@ function withDefaultClaudeTrailer(command) {
 		const command = (data.tool_input?.command ?? "").trim();
 
 		const largeOutputMsg = checkLargeOutput(command);
-		if (largeOutputMsg) deny(`[guard] ${largeOutputMsg}`);
+		if (largeOutputMsg) {
+			denyForCommand(
+				`[guard] ${largeOutputMsg.message}`,
+				largeOutputMsg.command,
+			);
+		}
 
 		if (forbiddenGitAdd(command))
-			deny("Use `git add <specific files>` - review what you're staging.");
+			denyForCommand(
+				"Use `git add <specific files>` - review what you're staging.",
+				command,
+			);
 
 		if (forbiddenRm(command))
-			deny("Blocked: rm -rf on broad path. Be more specific.");
+			denyForCommand(
+				"Blocked: rm -rf on broad path. Be more specific.",
+				command,
+			);
 
 		const { blockers, warnings } = precommitCheck(command);
 		if (warnings.length > 0) {
@@ -198,21 +276,23 @@ function withDefaultClaudeTrailer(command) {
 			);
 		}
 		if (blockers.length > 0) {
-			deny(
+			denyForCommand(
 				"Pre-commit checks failed:\n" +
 					blockers
 						.slice(0, 10)
 						.map((b) => `  - ${b}`)
 						.join("\n") +
 					"\nFix these issues before committing.",
+				command,
 			);
 		}
 
 		if (/\bgit\s+commit\b(?!-tree)/.test(command)) {
 			const malformed = malformedTrailerEmail(command);
 			if (malformed) {
-				deny(
+				denyForCommand(
 					`Malformed Co-Authored-By trailer email: ${malformed.invalid}. Use ${malformed.fixed}.`,
+					command,
 				);
 			}
 			if (!hasCoAuthorTrailer(command)) {
@@ -224,8 +304,9 @@ function withDefaultClaudeTrailer(command) {
 		}
 
 		if (DNS_EXFIL.test(command)) {
-			deny(
+			denyForCommand(
 				"[guard] DNS/ICMP tools can exfiltrate data (CVE-2025-55284). Use curl for connectivity checks.",
+				command,
 			);
 		}
 

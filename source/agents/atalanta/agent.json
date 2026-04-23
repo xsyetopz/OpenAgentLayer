@@ -14,7 +14,7 @@
   "claude": {
     "displayName": "Atalanta",
     "description": "Use for focused test execution, failure analysis, and regression validation. Report exact failures and root-cause evidence without drifting into implementation.",
-    "model": "haiku",
+    "model": "claude-haiku-4-5",
     "color": "green",
     "tools": [
       "Read",

@@ -202,10 +202,9 @@
 	},
 	"autoUpdatesChannel": "latest",
 	"availableModels": [
-		"opusplan",
-		"opus[1m]",
-		"sonnet",
-		"haiku"
+		"claude-opus-4-7",
+		"claude-sonnet-4-6",
+		"claude-haiku-4-5"
 	],
 	"skipWebFetchPreflight": true,
 	"alwaysThinkingEnabled": true,

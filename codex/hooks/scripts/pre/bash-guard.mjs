@@ -9,10 +9,6 @@ const LARGE_OUTPUT_RULES = [
 		"Use `tail -n 200` or `rg` instead of dumping large files into context.",
 	],
 	[
-		/\bgit\s+diff\b(?!.*--stat)(?!.*--name-only)/,
-		"Use `git diff --stat` or `git diff --name-only` first.",
-	],
-	[
 		/\bfind\b\s+\.(?:\s+\S+)*$/m,
 		"Unbounded `find .` is noisy. Add `-maxdepth`, `-name`, or pipe to `head`.",
 	],
@@ -28,6 +24,62 @@ const MALFORMED_CANONICAL_EMAILS = new Map([
 	["noreply@anthropic", "noreply@anthropic.com"],
 ]);
 const CODEX_DEFAULT_TRAILER = "Co-Authored-By: Codex <noreply@openai.com>";
+
+function splitTopLevelSegments(command) {
+	const segments = [];
+	let current = "";
+	let quote = "";
+	let escape = false;
+	for (let i = 0; i < command.length; i += 1) {
+		const char = command[i];
+		const next = command[i + 1] || "";
+		if (escape) {
+			current += char;
+			escape = false;
+			continue;
+		}
+		if (char === "\\") {
+			current += char;
+			escape = true;
+			continue;
+		}
+		if (quote) {
+			current += char;
+			if (char === quote) quote = "";
+			continue;
+		}
+		if (char === "'" || char === '"') {
+			current += char;
+			quote = char;
+			continue;
+		}
+		if ((char === "&" && next === "&") || (char === "|" && next === "|")) {
+			if (current.trim()) segments.push(current.trim());
+			current = "";
+			i += 1;
+			continue;
+		}
+		if (char === ";" || char === "|") {
+			if (current.trim()) segments.push(current.trim());
+			current = "";
+			continue;
+		}
+		current += char;
+	}
+	if (current.trim()) segments.push(current.trim());
+	return segments;
+}
+
+function summarizeCommand(command) {
+	const singleLine = command.replace(/\s+/g, " ").trim();
+	return singleLine.length > 180
+		? `${singleLine.slice(0, 177)}...`
+		: singleLine;
+}
+
+function denyForCommand(reason, command) {
+	deny(`${reason}\nCommand: ${summarizeCommand(command)}`);
+}
 
 function getStagedFiles() {
 	try {
@@ -63,8 +115,23 @@ function stagedEnvFile(files) {
 }
 
 function checkLargeOutput(command) {
-	for (const [pattern, message] of LARGE_OUTPUT_RULES) {
-		if (pattern.test(command)) return message;
+	let diffPreflightSeen = false;
+	for (const segment of splitTopLevelSegments(command)) {
+		if (/\bgit\s+diff\b/.test(segment)) {
+			if (segment.includes("--stat") || segment.includes("--name-only")) {
+				diffPreflightSeen = true;
+				continue;
+			}
+			if (!diffPreflightSeen) {
+				return {
+					message: "Use `git diff --stat` or `git diff --name-only` first.",
+					command: segment,
+				};
+			}
+		}
+		for (const [pattern, message] of LARGE_OUTPUT_RULES) {
+			if (pattern.test(segment)) return { message, command: segment };
+		}
 	}
 	return null;
 }
@@ -102,35 +169,47 @@ function withDefaultCodexTrailer(command) {
 	if (!command) passthrough();
 
 	const largeOutput = checkLargeOutput(command);
-	if (largeOutput) deny(`[openagentsbtw:guard] ${largeOutput}`);
+	if (largeOutput) {
+		denyForCommand(
+			`[openagentsbtw:guard] ${largeOutput.message}`,
+			largeOutput.command,
+		);
+	}
 	if (BLANKET_STAGE.test(command)) {
-		deny("Use `git add <specific files>` so staging stays reviewable.");
+		denyForCommand(
+			"Use `git add <specific files>` so staging stays reviewable.",
+			command,
+		);
 	}
 	if (BROAD_RM.test(command)) {
-		deny("Blocked broad `rm -rf`. Narrow the target path.");
+		denyForCommand("Blocked broad `rm -rf`. Narrow the target path.", command);
 	}
 	if (DNS_EXFIL.test(command)) {
-		deny(
+		denyForCommand(
 			"Blocked DNS or ICMP networking tool. Use `curl` or a safer check instead.",
+			command,
 		);
 	}
 
 	if (/\bgit\s+commit\b/.test(command)) {
 		const stagedIssue = stagedEnvFile(getStagedFiles());
 		if (stagedIssue) {
-			deny(
+			denyForCommand(
 				`Commit blocked because staged content looks unsafe: ${stagedIssue}`,
+				command,
 			);
 		}
 		const malformed = malformedTrailerEmail(command);
 		if (malformed) {
-			deny(
+			denyForCommand(
 				`Malformed Co-Authored-By trailer email: ${malformed.invalid}. Use ${malformed.fixed}.`,
+				command,
 			);
 		}
 		if (!hasCoAuthorTrailer(command)) {
-			deny(
+			denyForCommand(
 				`Co-Authored-By trailer is required for AI-authored commits. Use: ${withDefaultCodexTrailer(command)}`,
+				command,
 			);
 		}
 	}

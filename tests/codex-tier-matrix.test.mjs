@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getCodexPlan } from "../source/subscriptions.mjs";
+import {
+	getCodexPlan,
+	SUPPORTED_CODEX_MODEL_IDS,
+} from "../source/subscriptions.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -22,6 +25,9 @@ describe("codex tier matrix wording", () => {
 			const row = new RegExp(`\\|\\s*${plan}\\s*\\|`);
 			assert.match(changelog, row);
 			assert.match(codexDocs, row);
+		}
+		for (const model of SUPPORTED_CODEX_MODEL_IDS) {
+			assert.match(codexDocs, new RegExp(model.replaceAll(".", "\\.")));
 		}
 	});
 

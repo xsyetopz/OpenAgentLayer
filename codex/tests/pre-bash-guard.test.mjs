@@ -23,6 +23,23 @@ function parseOutput(result) {
 }
 
 describe("codex pre bash-guard co-author enforcement", () => {
+	it("blocks raw detailed git diff and includes the blocked command", () => {
+		const result = run("git diff src/index.ts");
+		const output = parseOutput(result);
+		assert.equal(output?.hookSpecificOutput?.permissionDecision, "deny");
+		assert.match(
+			output?.hookSpecificOutput?.permissionDecisionReason || "",
+			/Command: git diff src\/index\.ts/,
+		);
+	});
+
+	it("allows detailed git diff after an inline preflight", () => {
+		const result = run("git diff --stat && git diff src/index.ts");
+		const output = parseOutput(result);
+		assert.equal(result.status, 0);
+		assert.equal(output?.hookSpecificOutput?.permissionDecision, undefined);
+	});
+
 	it("blocks git commit when co-author trailer is missing", () => {
 		const result = run("git commit -m 'feat: add x'");
 		const output = parseOutput(result);

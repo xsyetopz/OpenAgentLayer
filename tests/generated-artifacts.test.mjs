@@ -5,11 +5,17 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+	SUPPORTED_CLAUDE_MODEL_IDS,
+	SUPPORTED_CODEX_MODEL_IDS,
+} from "../source/subscriptions.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 let BUILD_ROOT = "";
 let CLEANUP_BUILD_ROOT = false;
+const SUPPORTED_CLAUDE_MODELS = new Set(SUPPORTED_CLAUDE_MODEL_IDS);
+const SUPPORTED_CODEX_MODELS = new Set(SUPPORTED_CODEX_MODEL_IDS);
 
 function run(command, args) {
 	return new Promise((resolvePromise, reject) => {
@@ -68,6 +74,40 @@ describe("generated prompts", () => {
 		const matches = prompt.match(/^## Shared Constraints$/gm) ?? [];
 		assert.equal(matches.length, 1);
 	});
+
+	it("keeps Claude agents and settings on supported Claude model ids only", () => {
+		for (const agent of [
+			"athena",
+			"hephaestus",
+			"nemesis",
+			"atalanta",
+			"calliope",
+			"hermes",
+			"odysseus",
+		]) {
+			const content = readBuild(`claude/agents/${agent}.md`);
+			const model = content.match(/^model: ([^\n]+)$/m)?.[1]?.trim();
+			assert.ok(model, agent);
+			assert.equal(
+				SUPPORTED_CLAUDE_MODELS.has(model),
+				true,
+				`${agent}: ${model}`,
+			);
+		}
+		const settings = readBuild("claude/templates/settings-global.json");
+		for (const model of SUPPORTED_CLAUDE_MODEL_IDS) {
+			assert.match(settings, new RegExp(model.replaceAll(".", "\\.")));
+		}
+		assert.doesNotMatch(settings, /opusplan/);
+		assert.doesNotMatch(settings, /opus\[1m\]/);
+		assert.doesNotMatch(settings, /"sonnet"/);
+		assert.doesNotMatch(settings, /"haiku"/);
+		const claudeDocs = readRepo("claude/CLAUDE.md");
+		assert.match(claudeDocs, /claude-opus-4-7/);
+		assert.doesNotMatch(claudeDocs, /claude-opus-4-6/);
+		assert.doesNotMatch(claudeDocs, /opusplan/);
+		assert.doesNotMatch(claudeDocs, /opus\[1m\]/);
+	});
 });
 
 describe("generated skills", () => {
@@ -101,9 +141,13 @@ describe("generated skills", () => {
 			readBuild("codex/plugin/openagentsbtw/skills/taste-gpt/SKILL.md"),
 			/name: gpt-taste/,
 		);
-		assert.match(
+		assert.doesNotMatch(
 			readBuild("codex/plugin/openagentsbtw/skills/taste-gpt/SKILL.md"),
-			/gpt-image-2/,
+			/\bgpt-image-2\b/,
+		);
+		assert.doesNotMatch(
+			readBuild("codex/plugin/openagentsbtw/skills/taste-gpt/SKILL.md"),
+			/\bgpt-5\b(?![.-])/,
 		);
 		assert.match(
 			readBuild(
@@ -423,6 +467,13 @@ describe("generated Codex defaults", () => {
 			config,
 			/\[profiles\.openagentsbtw-runtime-long\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
 		);
+		const modelMatches = [...config.matchAll(/^model = "([^"]+)"$/gm)].map(
+			(match) => match[1],
+		);
+		for (const model of modelMatches) {
+			assert.equal(SUPPORTED_CODEX_MODELS.has(model), true, model);
+		}
+		assert.equal(/\bgpt-5\b(?![.-])/.test(config), false);
 	});
 
 	it("ports the CCA-style response contract into Codex guidance", () => {
@@ -434,6 +485,9 @@ describe("generated Codex defaults", () => {
 		assert.match(guidance, /--source deepwiki/);
 		assert.match(guidance, /Default to role routing:/);
 		assert.match(guidance, /Multi-agent safety:/);
+		assert.match(guidance, /gpt-5\.3-codex-spark/);
+		assert.match(guidance, /gpt-5\.2/);
+		assert.doesNotMatch(guidance, /\bgpt-5\b(?![.-])/);
 		assert.match(
 			guidance,
 			/Subagents: Codex only spawns subagents when explicitly asked\./,
@@ -449,6 +503,31 @@ describe("generated Codex defaults", () => {
 			guidance.includes("Keep responses terse and peer-like."),
 			false,
 		);
+	});
+
+	it("keeps generated Codex agents and docs on supported model ids only", () => {
+		for (const agent of [
+			"athena",
+			"hephaestus",
+			"nemesis",
+			"atalanta",
+			"calliope",
+			"hermes",
+			"odysseus",
+		]) {
+			const content = readBuild(`codex/agents/${agent}.toml`);
+			const model = content.match(/^model = "([^"]+)"$/m)?.[1];
+			assert.ok(model, agent);
+			assert.equal(
+				SUPPORTED_CODEX_MODELS.has(model),
+				true,
+				`${agent}: ${model}`,
+			);
+		}
+		const codexDocs = readRepo("docs/platforms/codex.md");
+		assert.match(codexDocs, /Codex CLI 0\.123\.0 supported model set/);
+		assert.doesNotMatch(codexDocs, /\bgpt-image-2\b/);
+		assert.doesNotMatch(codexDocs, /\bgpt-5\b(?![.-])/);
 	});
 
 	it("ships wrapper prompts that route through explicit specialist paths", () => {

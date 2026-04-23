@@ -21,6 +21,21 @@ export const SWARM_POLICIES = {
 export const DEFAULT_CLAUDE_PLAN = "max-5";
 export const DEFAULT_CODEX_PLAN = "pro-5";
 export const DEFAULT_COPILOT_PLAN = "pro";
+export const SUPPORTED_CLAUDE_MODEL_IDS = [
+	"claude-opus-4-7",
+	"claude-sonnet-4-6",
+	"claude-haiku-4-5",
+];
+export const SUPPORTED_CODEX_MODEL_IDS = [
+	"gpt-5.4",
+	"gpt-5.4-mini",
+	"gpt-5.3-codex",
+	"gpt-5.3-codex-spark",
+	"gpt-5.2",
+];
+
+const SUPPORTED_CODEX_MODELS = new Set(SUPPORTED_CODEX_MODEL_IDS);
+const SUPPORTED_CLAUDE_MODELS = new Set(SUPPORTED_CLAUDE_MODEL_IDS);
 
 const commonFeatureFlags = {
 	codexHooks: true,
@@ -28,6 +43,32 @@ const commonFeatureFlags = {
 	multiAgent: true,
 	fastMode: false,
 };
+
+export function isSupportedCodexModel(model) {
+	return SUPPORTED_CODEX_MODELS.has(model);
+}
+
+export function assertSupportedCodexModel(model, context = "Codex model") {
+	if (!isSupportedCodexModel(model)) {
+		throw new Error(
+			`${context} must be one of: ${SUPPORTED_CODEX_MODEL_IDS.join(", ")}. Received: ${model}`,
+		);
+	}
+	return model;
+}
+
+export function isSupportedClaudeModel(model) {
+	return SUPPORTED_CLAUDE_MODELS.has(model);
+}
+
+export function assertSupportedClaudeModel(model, context = "Claude model") {
+	if (!isSupportedClaudeModel(model)) {
+		throw new Error(
+			`${context} must be one of: ${SUPPORTED_CLAUDE_MODEL_IDS.join(", ")}. Received: ${model}`,
+		);
+	}
+	return model;
+}
 
 export const CODEX_PLANS = {
 	go: {
@@ -296,6 +337,21 @@ export const CODEX_PLANS = {
 	},
 };
 
+for (const [planName, plan] of Object.entries(CODEX_PLANS)) {
+	for (const [agentName, [model]] of Object.entries(plan.agentAssignments)) {
+		assertSupportedCodexModel(
+			model,
+			`CODEX_PLANS.${planName}.agentAssignments.${agentName}`,
+		);
+	}
+	for (const [profileName, profile] of Object.entries(plan.profiles)) {
+		assertSupportedCodexModel(
+			profile.model,
+			`CODEX_PLANS.${planName}.profiles.${profileName}.model`,
+		);
+	}
+}
+
 function profileToRoute(profile) {
 	return {
 		model: profile.model,
@@ -321,8 +377,8 @@ export const CLAUDE_PLANS = {
 		displayName: "Max 5x",
 		swarmPolicy: "aggressive",
 		models: {
-			ccaModel: "opusplan",
-			opusModel: "claude-opus-4-6[1m]",
+			ccaModel: "claude-opus-4-7",
+			opusModel: "claude-opus-4-7",
 			sonnetModel: "claude-sonnet-4-6",
 			haikuModel: "claude-haiku-4-5",
 		},
@@ -332,13 +388,22 @@ export const CLAUDE_PLANS = {
 		displayName: "Max 20x",
 		swarmPolicy: "max",
 		models: {
-			ccaModel: "opus[1m]",
-			opusModel: "claude-opus-4-6[1m]",
+			ccaModel: "claude-opus-4-7",
+			opusModel: "claude-opus-4-7",
 			sonnetModel: "claude-sonnet-4-6",
 			haikuModel: "claude-sonnet-4-6",
 		},
 	},
 };
+
+for (const [planName, plan] of Object.entries(CLAUDE_PLANS)) {
+	for (const [modelName, model] of Object.entries(plan.models)) {
+		assertSupportedClaudeModel(
+			model,
+			`CLAUDE_PLANS.${planName}.models.${modelName}`,
+		);
+	}
+}
 
 export const COPILOT_MODELS = {
 	gpt5Mini: "github-copilot/gpt-5-mini",

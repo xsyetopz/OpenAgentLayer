@@ -4,7 +4,7 @@
   "claude": {
     "displayName": "Athena",
     "description": "Use proactively when the task involves system design, breaking down complex problems, evaluating trade-offs between approaches, or planning multi-file changes. Route here BEFORE @hephaestus for any non-trivial feature. Use instead of Plan for any implementation planning or design tasks.",
-    "model": "opus",
+    "model": "claude-opus-4-7",
     "color": "blue",
     "tools": [
       "Read",

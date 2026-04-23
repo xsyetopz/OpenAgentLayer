@@ -18,7 +18,7 @@
   "claude": {
     "displayName": "Odysseus",
     "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents. Owns sequencing, delivery, and final verification.",
-    "model": "opus",
+    "model": "claude-opus-4-7",
     "color": "gold",
     "tools": [
       "Read",

@@ -103,6 +103,7 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
 
 ## Model Presets
 
+- Codex CLI 0.123.0 supported model set for openagentsbtw: `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex`, `gpt-5.3-codex-spark`, `gpt-5.2`.
 - `go`
   Budget-first installer preset. It rewrites the managed `openagentsbtw*` profiles for lower cost routing while keeping the default profile name `openagentsbtw`.
 - `plus`

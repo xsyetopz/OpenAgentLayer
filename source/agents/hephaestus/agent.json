@@ -4,7 +4,7 @@
   "claude": {
     "displayName": "Hephaestus",
     "description": "Use for code implementation, bug fixes, and refactors once the plan is clear. Focus on changing production code and carrying the work to completion.",
-    "model": "sonnet",
+    "model": "claude-sonnet-4-6",
     "color": "orange",
     "tools": [
       "Read",

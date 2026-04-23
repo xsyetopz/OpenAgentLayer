@@ -4,15 +4,15 @@
 
 ## Agents
 
-| Agent       | File          | Model      | Context | maxTurns | Purpose                                  |
-| ----------- | ------------- | ---------- | ------- | -------- | ---------------------------------------- |
-| @odysseus   | odysseus.md   | `opusplan` | 1M      | 100      | Multi-step delegation, progress tracking |
-| @athena     | athena.md     | `opus`     | 1M      | 50       | Design, plan, architect                  |
-| @hephaestus | hephaestus.md | `sonnet`   | 200K    | 100      | Write code, fix bugs, build features     |
-| @nemesis    | nemesis.md    | `sonnet`   | 200K    | 50       | Review code, security audit              |
-| @hermes     | hermes.md     | `sonnet`   | 200K    | 50       | Research, explore codebase, cite sources |
-| @atalanta   | atalanta.md   | `haiku`    | 200K    | 30       | Run tests, parse failures, root causes   |
-| @calliope   | calliope.md   | `haiku`    | 200K    | 30       | Write/edit documentation (markdown only) |
+| Agent       | File          | Model             | Context | maxTurns | Purpose                                  |
+| ----------- | ------------- | ----------------- | ------- | -------- | ---------------------------------------- |
+| @odysseus   | odysseus.md   | `claude-opus-4-7` | 1M      | 100      | Multi-step delegation, progress tracking |
+| @athena     | athena.md     | `opus`            | 1M      | 50       | Design, plan, architect                  |
+| @hephaestus | hephaestus.md | `sonnet`          | 200K    | 100      | Write code, fix bugs, build features     |
+| @nemesis    | nemesis.md    | `sonnet`          | 200K    | 50       | Review code, security audit              |
+| @hermes     | hermes.md     | `sonnet`          | 200K    | 50       | Research, explore codebase, cite sources |
+| @atalanta   | atalanta.md   | `haiku`           | 200K    | 30       | Run tests, parse failures, root causes   |
+| @calliope   | calliope.md   | `haiku`           | 200K    | 30       | Write/edit documentation (markdown only) |
 
 **Built-in subagents disabled**: `Explore`, `Plan`, and `general-purpose` are denied via `permissions.deny`. Use `@hermes` (explore), `@athena` (plan), `@odysseus` (general-purpose) instead.
 
@@ -94,8 +94,8 @@ Three plans, set at install time via `./install.sh --claude-plan <pro|max-5|max-
 
 | Role                       | Pro                 | Max 5x              | Max 20x             |
 | -------------------------- | ------------------- | ------------------- | ------------------- |
-| Orchestrator (`CCA_MODEL`) | `claude-sonnet-4-6` | `opusplan`          | `opus[1m]`          |
-| Opus slot                  | `claude-sonnet-4-6` | `claude-opus-4-6`   | `claude-opus-4-6`   |
+| Orchestrator (`CCA_MODEL`) | `claude-sonnet-4-6` | `claude-opus-4-7`   | `claude-opus-4-7`   |
+| Opus slot                  | `claude-sonnet-4-6` | `claude-opus-4-7`   | `claude-opus-4-7`   |
 | Sonnet slot                | `claude-sonnet-4-6` | `claude-sonnet-4-6` | `claude-sonnet-4-6` |
 | Haiku slot                 | `claude-haiku-4-5`  | `claude-haiku-4-5`  | `claude-sonnet-4-6` |
 

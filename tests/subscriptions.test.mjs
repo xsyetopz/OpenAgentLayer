@@ -7,6 +7,8 @@ import {
 	getCopilotPlan,
 	resolveClaudePlan,
 	resolveCodexPlan,
+	SUPPORTED_CLAUDE_MODEL_IDS,
+	SUPPORTED_CODEX_MODEL_IDS,
 } from "../source/subscriptions.mjs";
 
 describe("subscription presets", () => {
@@ -38,6 +40,35 @@ describe("subscription presets", () => {
 		assert.equal(getCodexPlan("pro-20").runtimeLong.model, "gpt-5.3-codex");
 	});
 
+	it("keeps every managed Codex route on the supported Codex CLI model set", () => {
+		const supported = new Set(SUPPORTED_CODEX_MODEL_IDS);
+		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
+			const plan = getCodexPlan(planName);
+			for (const route of [
+				plan.main,
+				plan.utility,
+				plan.implement,
+				plan.approvalAuto,
+				plan.runtimeLong,
+			]) {
+				assert.equal(
+					supported.has(route.model),
+					true,
+					`${planName}: ${route.model}`,
+				);
+			}
+			for (const [agentName, [model]] of Object.entries(
+				plan.agentAssignments,
+			)) {
+				assert.equal(
+					supported.has(model),
+					true,
+					`${planName}.${agentName}: ${model}`,
+				);
+			}
+		}
+	});
+
 	it("uses low verbosity across all managed Codex profiles", () => {
 		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
@@ -51,6 +82,20 @@ describe("subscription presets", () => {
 		const pro = getClaudePlan("pro");
 		assert.equal(pro.models.ccaModel, "claude-sonnet-4-6");
 		assert.equal(pro.models.opusModel, "claude-sonnet-4-6");
+	});
+
+	it("keeps managed Claude plans on the supported Claude model set", () => {
+		const supported = new Set(SUPPORTED_CLAUDE_MODEL_IDS);
+		for (const planName of ["pro", "max-5", "max-20"]) {
+			const plan = getClaudePlan(planName);
+			for (const model of Object.values(plan.models)) {
+				assert.equal(supported.has(model), true, `${planName}: ${model}`);
+			}
+		}
+		assert.equal(getClaudePlan("max-5").models.ccaModel, "claude-opus-4-7");
+		assert.equal(getClaudePlan("max-5").models.opusModel, "claude-opus-4-7");
+		assert.equal(getClaudePlan("max-20").models.ccaModel, "claude-opus-4-7");
+		assert.equal(getClaudePlan("max-20").models.opusModel, "claude-opus-4-7");
 	});
 
 	it("keeps Codex edit turns at medium and normalizes gpt-5.4 top-level plan effort", () => {

@@ -14,7 +14,7 @@
   "claude": {
     "displayName": "Nemesis",
     "description": "Use for code review, security review, regression hunting, and risk assessment. Findings-first, with exact citations and specific fixes.",
-    "model": "sonnet",
+    "model": "claude-sonnet-4-6",
     "color": "purple",
     "tools": [
       "Read",
