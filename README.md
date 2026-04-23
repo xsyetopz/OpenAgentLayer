@@ -6,25 +6,6 @@ Cross-platform agent scaffolding for Claude Code, Codex CLI, OpenCode, GitHub Co
 
 One canonical source tree. Generated platform artifacts. Tight prompts, strict routing, and fewer chances for models to drift into garbage architecture or generic AI UI.
 
-## What Changed In 3.1
-
-- optional IDE support for Cline, Cursor, JetBrains Junie, and Antigravity
-- `./install.sh --all` auto-detects optional IDEs and skips missing systems without writing files
-- project-native rule/instruction assets for optional IDEs, with Cline prompt hooks where supported
-- Taste Skill variants are vendored from `Leonxlnx/taste-skill` under local `taste*` names across Claude, Codex, OpenCode, and Copilot
-
-## What Changed In 3.0
-
-- canonical source split into smaller catalogs instead of one giant registry blob
-- SRP command and skill names
-- Codex wrapper surface moved toward verb + modifier routing
-- deterministic Codex defaults now use `gpt-5.4` for top-level plan/edit on eligible plans (`plus`, `pro-5`, `pro-20`) while implementation routes stay on `gpt-5.3-codex`
-- new cross-platform `design-polish` skill for frontend/UI refinement
-- old scattered docs replaced by a smaller consolidated doc set
-- agentic-ides surfaces removed from installer and generated assets
-- Caveman now references upstream via pinned submodule at `third_party/caveman`
-- Copilot hooks now emit fallback events for documented compatibility surfaces
-
 ## Architecture
 
 Canonical authored source lives under `source/`:

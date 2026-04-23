@@ -2,6 +2,22 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.2.2] - 2026-04-23
+
+### Fixed
+
+- CI/release/build workflows now checkout Git submodules recursively, fixing missing `third_party/taste-skill` and other pinned upstream content during generated-asset checks, install smoke runs, and plugin builds.
+- Installer/build validation now succeeds in clean CI environments where pinned upstream submodules are not pre-populated by the runner.
+
+### Changed
+
+- RTK enforcement now prefers higher-efficiency `rtk --ultra-compact` rewrites across Claude, Codex, Copilot, and OpenCode-generated helpers.
+- openagentsbtw high-gain RTK rewrites now cover more noisy commands, including Bun test/build/typecheck flows, Biome checks, raw search/read commands, and selected `make` targets.
+- Managed RTK policy, shared constraints, and Codex agent guidance now explicitly prioritize specialized RTK filters over `rtk proxy` and set stronger efficiency expectations.
+- Codex RTK install/config now writes RTK tracking into the Codex-writable memories tree so `rtk gain --project` works reliably in sandboxed sessions.
+- README no longer carries per-version “What Changed” sections; release history belongs in `CHANGELOG.md`.
+- Release: aligned Claude plugin, Claude marketplace, Codex plugin, and OpenCode package versions to `3.2.2`.
+
 ## [3.2.1] - 2026-04-22
 
 ### Removed
