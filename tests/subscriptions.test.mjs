@@ -21,28 +21,28 @@ describe("subscription presets", () => {
 		assert.equal(resolveClaudePlan("pro-5"), "");
 		assert.equal(resolveClaudePlan("pro-20"), "");
 		assert.equal(resolveCodexPlan("pro"), "");
+		assert.equal(resolveCodexPlan("go"), "");
 	});
 
 	it("keeps utility work on the small profile across Codex plans", () => {
-		assert.equal(getCodexPlan("go").utility.model, "gpt-5.4-mini");
 		assert.equal(getCodexPlan("plus").utility.model, "gpt-5.4-mini");
 		assert.equal(getCodexPlan("pro-5").utility.model, "gpt-5.4-mini");
 		assert.equal(getCodexPlan("pro-20").utility.model, "gpt-5.4-mini");
 	});
 
-	it("uses gpt-5.4 as top-level default only on eligible plans", () => {
-		assert.equal(getCodexPlan("go").main.model, "gpt-5.4-mini");
+	it("uses reddit-derived model split across Codex plans", () => {
 		assert.equal(getCodexPlan("plus").main.model, "gpt-5.4");
 		assert.equal(getCodexPlan("pro-5").main.model, "gpt-5.4");
 		assert.equal(getCodexPlan("pro-20").main.model, "gpt-5.4");
 		assert.equal(getCodexPlan("plus").implement.model, "gpt-5.3-codex");
 		assert.equal(getCodexPlan("pro-5").approvalAuto.model, "gpt-5.3-codex");
 		assert.equal(getCodexPlan("pro-20").runtimeLong.model, "gpt-5.3-codex");
+		assert.equal(getCodexPlan("plus").utility.model, "gpt-5.4-mini");
 	});
 
 	it("keeps every managed Codex route on the supported Codex CLI model set", () => {
 		const supported = new Set(SUPPORTED_CODEX_MODEL_IDS);
-		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
+		for (const planName of ["plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
 			for (const route of [
 				plan.main,
@@ -70,11 +70,36 @@ describe("subscription presets", () => {
 	});
 
 	it("uses low verbosity across all managed Codex profiles", () => {
-		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
+		for (const planName of ["plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
 			assert.equal(plan.main.verbosity, "low");
 			assert.equal(plan.utility.verbosity, "low");
 			assert.equal(plan.implement.verbosity, "low");
+		}
+	});
+
+	it("assigns planner and review specialists to gpt-5.4 and implementer to gpt-5.3-codex", () => {
+		for (const planName of ["plus", "pro-5", "pro-20"]) {
+			const plan = getCodexPlan(planName);
+			assert.deepEqual(plan.agentAssignments.athena, ["gpt-5.4", "high"]);
+			assert.deepEqual(plan.agentAssignments.nemesis, ["gpt-5.4", "high"]);
+			assert.deepEqual(plan.agentAssignments.odysseus, ["gpt-5.4", "high"]);
+			assert.deepEqual(plan.agentAssignments.hephaestus, [
+				"gpt-5.3-codex",
+				"medium",
+			]);
+			assert.deepEqual(plan.agentAssignments.hermes, [
+				"gpt-5.4-mini",
+				"medium",
+			]);
+			assert.deepEqual(plan.agentAssignments.atalanta, [
+				"gpt-5.4-mini",
+				"high",
+			]);
+			assert.deepEqual(plan.agentAssignments.calliope, [
+				"gpt-5.4-mini",
+				"high",
+			]);
 		}
 	});
 
@@ -98,23 +123,20 @@ describe("subscription presets", () => {
 		assert.equal(getClaudePlan("max-20").models.opusModel, "claude-opus-4-7");
 	});
 
-	it("keeps Codex edit turns at medium and normalizes gpt-5.4 top-level plan effort", () => {
-		for (const planName of ["go", "plus", "pro-5", "pro-20"]) {
+	it("uses tier-aware reasoning split across managed Codex profiles", () => {
+		for (const planName of ["plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
-			assert.equal(plan.profiles.main.modelReasoning, "medium");
+			assert.equal(plan.profiles.main.modelReasoning, "high");
+			assert.equal(plan.profiles.main.planReasoning, "high");
+			assert.equal(plan.profiles.utility.modelReasoning, "high");
+			assert.equal(plan.profiles.utility.planReasoning, "high");
 			assert.equal(plan.profiles.approvalAuto.modelReasoning, "medium");
+			assert.equal(plan.profiles.approvalAuto.planReasoning, "medium");
 			assert.equal(plan.profiles.runtimeLong.modelReasoning, "medium");
+			assert.equal(plan.profiles.runtimeLong.planReasoning, "medium");
+			assert.equal(plan.profiles.implementation.modelReasoning, "medium");
+			assert.equal(plan.profiles.implementation.planReasoning, "medium");
 		}
-		assert.equal(getCodexPlan("go").profiles.main.planReasoning, "high");
-		assert.equal(getCodexPlan("plus").profiles.main.planReasoning, "high");
-		assert.equal(
-			getCodexPlan("pro-5").profiles.approvalAuto.planReasoning,
-			"high",
-		);
-		assert.equal(
-			getCodexPlan("pro-20").profiles.runtimeLong.planReasoning,
-			"high",
-		);
 	});
 
 	it("uses heavier Copilot defaults on Pro+", () => {

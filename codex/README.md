@@ -13,7 +13,6 @@ This package ports openagentsbtw onto Codex’s native extension surfaces: custo
 
 ```bash
 ./install.sh --codex
-./install.sh --codex --codex-plan go
 ./install.sh --codex --codex-plan plus
 ./install.sh --codex --codex-plan pro-5
 ./install.sh --codex --codex-plan pro-20
@@ -59,7 +58,7 @@ The installer:
 - installs PATH-managed wrapper shims into `~/.local/bin/` on Unix or `%APPDATA%\\openagentsbtw\\bin\\` on Windows
 - keeps openagentsbtw memory state in `~/.codex/openagentsbtw/state/`
 - appends managed openagentsbtw guidance to `~/.codex/AGENTS.md`
-- appends global native continuity defaults (`sqlite_home`, `history`, `memories`, `compact_prompt`, `hide_agent_reasoning`, `tool_output_token_limit`) plus the managed `openagentsbtw`, `openagentsbtw-implement`, `openagentsbtw-utility`, `openagentsbtw-approval-auto`, and `openagentsbtw-runtime-long` profiles to `~/.codex/config.toml`
+- appends global native continuity defaults (`sqlite_home`, `project_doc_max_bytes`, `history`, `memories`, `compact_prompt`, `hide_agent_reasoning`, `tool_output_token_limit`) plus the managed `openagentsbtw`, `openagentsbtw-implement`, `openagentsbtw-utility`, `openagentsbtw-approval-auto`, and `openagentsbtw-runtime-long` profiles to `~/.codex/config.toml`
 - optionally appends a managed `mcp_servers.deepwiki` block to `~/.codex/config.toml`
 - optionally installs RTK, managed policy files at `~/.config/openagentsbtw/RTK.md` and `~/.codex/RTK.md`, and a managed `~/.codex/AGENTS.md` RTK reference
 
@@ -104,22 +103,21 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
 ## Model Presets
 
 - Codex CLI 0.123.0 supported model set for openagentsbtw: `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.3-codex`, `gpt-5.3-codex-spark`, `gpt-5.2`.
-- `go`
-  Budget-first installer preset. It rewrites the managed `openagentsbtw*` profiles for lower cost routing while keeping the default profile name `openagentsbtw`.
 - `plus`
   Code-specialized installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-5`
   High-reasoning installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-20`
   Same model split as `pro-5`, with more aggressive swarming. It is an installer preset, not a profile name.
-- For `plus`, `pro-5`, and `pro-20`, top-level `openagentsbtw` defaults to `gpt-5.4` with `model_reasoning_effort = "medium"` and `plan_mode_reasoning_effort = "high"`. `go` keeps `gpt-5.4-mini` at top-level.
-- Implementation/autopilot/long-runtime profiles stay on `gpt-5.3-codex`.
+- For `plus`, `pro-5`, and `pro-20`, top-level `openagentsbtw` defaults to `gpt-5.4` with `model_reasoning_effort = "high"` and `plan_mode_reasoning_effort = "high"`.
+- Implementation/autopilot/long-runtime profiles stay on `gpt-5.3-codex` with `model_reasoning_effort = "medium"` and `plan_mode_reasoning_effort = "medium"`.
 - `openagentsbtw-utility`
-  A lightweight profile for bounded utility tasks. It uses `gpt-5.4-mini`.
+  A lightweight profile for bounded utility tasks. It uses `gpt-5.4-mini` with `high` reasoning.
 - `openagentsbtw-approval-auto`
   A sandboxed auto-accept profile for implementation work. It keeps `sandbox_mode = "workspace-write"` but switches to `approval_policy = "never"`.
 - `openagentsbtw-runtime-long`
   A patient long-running execution profile. It keeps the implementation route, enables `unified_exec`, prevents idle sleep, and raises the background terminal timeout for long builds and test suites.
+- Managed config export details live in `docs/platforms/codex-config-export.md`.
 
 ## Behavior Policy
 
@@ -154,7 +152,7 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
 
 - Codex already has native SQLite-backed state persistence and saved sessions.
 - openagentsbtw installs native continuity defaults so `codex resume` and `oabtw-codex resume` continue from the same persisted thread state by default.
-- The top-level Codex profile remains `openagentsbtw` across plan presets. `go|plus|pro-5|pro-20` change the contents of the managed profiles; they do not create `openagentsbtw-go`, `openagentsbtw-plus`, `openagentsbtw-pro-5`, or `openagentsbtw-pro-20`.
+- The top-level Codex profile remains `openagentsbtw` across plan presets. `plus|pro-5|pro-20` change the contents of the managed profiles; they do not create `openagentsbtw-plus`, `openagentsbtw-pro-5`, or `openagentsbtw-pro-20`.
 - openagentsbtw adds a second, explicit project-memory DB at `~/.codex/openagentsbtw/state/memory.sqlite`.
 - SessionStart loads the current project's recap and recent session notes.
 - UserPromptSubmit adds lightweight git context during active work.

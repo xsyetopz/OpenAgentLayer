@@ -94,7 +94,7 @@ Usage: ./config.sh [options]
   --deepwiki             Enable managed DeepWiki config on installed surfaces
   --no-deepwiki          Disable managed DeepWiki config on installed surfaces
   --claude-plan PLAN     Set Claude plan: pro|max-5|max-20
-  --codex-plan PLAN      Set Codex plan: go|plus|pro-5|pro-20
+  --codex-plan PLAN      Set Codex plan: plus|pro-5|pro-20
   --copilot-plan PLAN    Set Copilot plan: pro|pro-plus
   --caveman-mode MODE   Set Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
   --no-caveman          Alias for --caveman-mode off
@@ -596,7 +596,7 @@ async function main() {
 		codexPlan = resolveCodexPlan(rawValue);
 		if (!codexPlan) {
 			throw new Error(
-				`Unsupported Codex plan: ${rawValue} (expected go, plus, pro-5, or pro-20)`,
+				`Unsupported Codex plan: ${rawValue} (expected plus, pro-5, or pro-20)`,
 			);
 		}
 		await applyCodexPlan(codexPlan);

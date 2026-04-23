@@ -43,7 +43,7 @@ model = "${config.model}"
 model_reasoning_effort = "${config.modelReasoning}"
 plan_mode_reasoning_effort = "${config.planReasoning}"
 model_verbosity = "${config.verbosity}"
-personality = "none"
+personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"${extra}
@@ -85,8 +85,30 @@ Do not include:
 Be terse, operational, and continuation-ready.`;
 }
 
+function codexExportBudgets(planName) {
+	switch (planName) {
+		case "plus":
+			return {
+				projectDocMaxBytes: 12000,
+				toolOutputTokenLimit: 1200,
+			};
+		case "pro-20":
+			return {
+				projectDocMaxBytes: 24000,
+				toolOutputTokenLimit: 8000,
+			};
+		case "pro-5":
+		default:
+			return {
+				projectDocMaxBytes: 16000,
+				toolOutputTokenLimit: 4000,
+			};
+	}
+}
+
 function buildManagedCodexBody({ planName, deepwiki, includePluginEntry }) {
 	const plan = getCodexPlan(planName);
+	const budgets = codexExportBudgets(planName);
 	const compactPrompt = renderCodexCompactPrompt();
 	const pluginEntry = includePluginEntry
 		? '\n[plugins."openagentsbtw@openagentsbtw-local"]\nenabled = true\n'
@@ -108,7 +130,7 @@ model = "${plan.profiles.approvalAuto.model}"
 model_reasoning_effort = "${plan.profiles.approvalAuto.modelReasoning}"
 plan_mode_reasoning_effort = "${plan.profiles.approvalAuto.planReasoning}"
 model_verbosity = "${plan.profiles.approvalAuto.verbosity}"
-personality = "none"
+personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "never"
 sandbox_mode = "workspace-write"
@@ -123,7 +145,7 @@ model = "${plan.profiles.runtimeLong.model}"
 model_reasoning_effort = "${plan.profiles.runtimeLong.modelReasoning}"
 plan_mode_reasoning_effort = "${plan.profiles.runtimeLong.planReasoning}"
 model_verbosity = "${plan.profiles.runtimeLong.verbosity}"
-personality = "none"
+personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
@@ -138,9 +160,10 @@ unified_exec = true
 prevent_idle_sleep = true`;
 	return [
 		'sqlite_home = "~/.codex/openagentsbtw/sqlite"',
+		`project_doc_max_bytes = ${budgets.projectDocMaxBytes}`,
 		"hide_agent_reasoning = true",
 		'model_reasoning_summary = "none"',
-		"tool_output_token_limit = 12000",
+		`tool_output_token_limit = ${budgets.toolOutputTokenLimit}`,
 		'model_instructions_file = "~/.codex/AGENTS.md"',
 		"",
 		"[history]",

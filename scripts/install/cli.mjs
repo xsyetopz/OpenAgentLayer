@@ -169,7 +169,7 @@ Options:
                           Copilot capability preset (default: pro)
   --caveman-mode MODE     Set managed Caveman mode: off|lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra
   --no-caveman            Alias for --caveman-mode off
-  --codex-plan go|plus|pro-5|pro-20
+  --codex-plan plus|pro-5|pro-20
                           Codex capability preset (default: pro-5)
   --codex-set-top-profile Force setting top-level Codex profile in the managed Codex config
   --no-codex-set-top-profile
@@ -435,7 +435,7 @@ async function promptOptionalSurfaces(args, existingEnv) {
 			? existingEnv.OABTW_CODEX_PLAN || "pro-5"
 			: resolveCodexPlan(
 					(await promptText(
-						"Codex plan preset [go/plus/pro-5/pro-20]:",
+						"Codex plan preset [plus/pro-5/pro-20]:",
 						false,
 						args.codexPlan || existingEnv.OABTW_CODEX_PLAN || "pro-5",
 					)) || "pro-5",
@@ -514,7 +514,7 @@ function validateArgs(args) {
 	args.codexPlan = resolveCodexPlan(args.codexPlan || "pro-5");
 	if (args.installCodex && !args.codexPlan) {
 		fail(
-			`Unsupported Codex plan: ${args.codexPlan} (expected go, plus, pro-5, or pro-20)`,
+			`Unsupported Codex plan: ${args.codexPlan} (expected plus, pro-5, or pro-20)`,
 		);
 	}
 	args.copilotPlan = resolveCopilotPlan(args.copilotPlan);

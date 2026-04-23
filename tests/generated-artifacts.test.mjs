@@ -418,9 +418,10 @@ describe("generated Codex defaults", () => {
 		assert.equal(config.includes("commit_attribution"), false);
 		assert.equal(config.includes("codex@users.noreply.github.com"), false);
 		assert.match(config, /sqlite_home = "~\/\.codex\/openagentsbtw\/sqlite"/);
+		assert.match(config, /project_doc_max_bytes = 16000/);
 		assert.match(config, /hide_agent_reasoning = true/);
 		assert.match(config, /model_reasoning_summary = "none"/);
-		assert.match(config, /tool_output_token_limit = 12000/);
+		assert.match(config, /tool_output_token_limit = 4000/);
 		assert.match(config, /\[history\]/);
 		assert.match(config, /persistence = "save-all"/);
 		assert.match(config, /max_bytes = 134217728/);
@@ -438,8 +439,8 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /model = "gpt-5\.3-codex"/);
 		assert.match(config, /model = "gpt-5\.4-mini"/);
 		assert.match(config, /model_instructions_file = "~\/\.codex\/AGENTS\.md"/);
-		assert.match(config, /personality = "none"/);
-		assert.equal(config.includes('personality = "pragmatic"'), false);
+		assert.match(config, /personality = "pragmatic"/);
+		assert.equal(config.includes('personality = "none"'), false);
 		assert.match(config, /\[profiles\.openagentsbtw-implement\]/);
 		assert.match(config, /\[profiles\.openagentsbtw-utility\]/);
 		assert.match(config, /\[profiles\.openagentsbtw-approval-auto\]/);
@@ -453,7 +454,7 @@ describe("generated Codex defaults", () => {
 		assert.equal(config.includes('model_verbosity = "medium"'), false);
 		assert.match(
 			config,
-			/\[profiles\.openagentsbtw\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+			/\[profiles\.openagentsbtw\][\s\S]*?model_reasoning_effort = "high"[\s\S]*?plan_mode_reasoning_effort = "high"/,
 		);
 		assert.match(
 			config,
@@ -461,11 +462,15 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(
 			config,
-			/\[profiles\.openagentsbtw-approval-auto\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+			/\[profiles\.openagentsbtw-approval-auto\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "medium"/,
 		);
 		assert.match(
 			config,
-			/\[profiles\.openagentsbtw-runtime-long\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+			/\[profiles\.openagentsbtw-runtime-long\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "medium"/,
+		);
+		assert.match(
+			config,
+			/\[profiles\.openagentsbtw-utility\][\s\S]*?model_reasoning_effort = "high"[\s\S]*?plan_mode_reasoning_effort = "high"/,
 		);
 		const modelMatches = [...config.matchAll(/^model = "([^"]+)"$/gm)].map(
 			(match) => match[1],
