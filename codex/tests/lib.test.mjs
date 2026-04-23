@@ -69,7 +69,7 @@ if [ "$1" = "rewrite" ]; then
   shift
   [ "$*" = "cargo test" ] || exit 1
   printf '%s\\n' 'rtk cargo test'
-  exit 0
+  exit ${options.rewriteStatus ?? 0}
 fi
 exit 1
 `,
@@ -128,7 +128,7 @@ describe("codex RTK helper", () => {
 			const rewrite = getRtkRewrite("cargo test", fixture.repoDir);
 			assert.deepEqual(rewrite, {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk cargo test",
+				rewritten: "rtk --ultra-compact cargo test",
 			});
 		} finally {
 			process.env.HOME = originalHome;
@@ -147,7 +147,7 @@ describe("codex RTK helper", () => {
 			const rewrite = getRtkRewrite("cargo test", fixture.repoDir);
 			assert.deepEqual(rewrite, {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk cargo test",
+				rewritten: "rtk --ultra-compact cargo test",
 			});
 		} finally {
 			process.env.HOME = originalHome;
@@ -165,66 +165,93 @@ describe("codex RTK helper", () => {
 		try {
 			assert.deepEqual(getRtkRewrite("bun test tests", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk test bun test tests",
+				rewritten: "rtk --ultra-compact test bun test tests",
 			});
 			assert.deepEqual(
 				getRtkRewrite("bun run test:unit --watch", fixture.repoDir),
 				{
 					policyPath: join(fixture.repoDir, "RTK.md"),
-					rewritten: "rtk test bun run test:unit --watch",
+					rewritten: "rtk --ultra-compact test bun run test:unit --watch",
 				},
 			);
 			assert.deepEqual(getRtkRewrite("bunx tsc --noEmit", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk tsc --noEmit",
+				rewritten: "rtk --ultra-compact tsc --noEmit",
 			});
 			assert.match(
 				getRtkRewrite("bunx --cwd opencode tsc --noEmit", fixture.repoDir)
 					.rewritten,
-				/^rtk proxy -- bash -lc 'cd opencode && rtk tsc --noEmit'$/,
+				/^rtk --ultra-compact proxy -- bash -lc 'cd opencode && rtk --ultra-compact tsc --noEmit'$/,
 			);
 			assert.deepEqual(getRtkRewrite("npm test", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk test npm test",
+				rewritten: "rtk --ultra-compact test npm test",
 			});
 			assert.deepEqual(getRtkRewrite("pnpm test", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk test pnpm test",
+				rewritten: "rtk --ultra-compact test pnpm test",
 			});
 			assert.deepEqual(
 				getRtkRewrite("dotnet test --no-build", fixture.repoDir),
 				{
 					policyPath: join(fixture.repoDir, "RTK.md"),
-					rewritten: "rtk dotnet test --no-build",
+					rewritten: "rtk --ultra-compact dotnet test --no-build",
 				},
 			);
 			assert.deepEqual(getRtkRewrite("node --test", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk test node --test",
+				rewritten: "rtk --ultra-compact test node --test",
 			});
 			assert.deepEqual(getRtkRewrite("flutter test", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk test flutter test",
+				rewritten: "rtk --ultra-compact test flutter test",
 			});
 			assert.deepEqual(getRtkRewrite("env", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk env",
+				rewritten: "rtk --ultra-compact env",
 			});
 			assert.deepEqual(getRtkRewrite("jq . package.json", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk json package.json",
+				rewritten: "rtk --ultra-compact json package.json",
 			});
 			assert.deepEqual(getRtkRewrite("cat package.json", fixture.repoDir), {
 				policyPath: join(fixture.repoDir, "RTK.md"),
-				rewritten: "rtk read package.json",
+				rewritten: "rtk --ultra-compact read package.json",
 			});
 			assert.deepEqual(
 				getRtkRewrite("sed -n '1,5p' README.md", fixture.repoDir),
 				{
 					policyPath: join(fixture.repoDir, "RTK.md"),
-					rewritten: "rtk read --max-lines 5 README.md",
+					rewritten: "rtk --ultra-compact read --max-lines 5 README.md",
 				},
 			);
+			assert.deepEqual(getRtkRewrite("bun run typecheck", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact tsc --noEmit",
+			});
+			assert.deepEqual(
+				getRtkRewrite(
+					"bunx biome check . --max-diagnostics 16384",
+					fixture.repoDir,
+				),
+				{
+					policyPath: join(fixture.repoDir, "RTK.md"),
+					rewritten:
+						"rtk --ultra-compact summary bunx biome check . --max-diagnostics 16384",
+				},
+			);
+			assert.deepEqual(getRtkRewrite("bun run build", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact err bun run build",
+			});
+			assert.deepEqual(getRtkRewrite("rg -n foo src", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact grep -n foo src",
+			});
+			assert.deepEqual(getRtkRewrite("make test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact test make test",
+			});
 		} finally {
 			process.env.HOME = originalHome;
 			process.env.PATH = originalPath;
@@ -244,7 +271,7 @@ describe("codex RTK helper", () => {
 				fixture.repoDir,
 			);
 			assert.equal(rewrite.policyPath, join(fixture.repoDir, "RTK.md"));
-			assert.match(rewrite.rewritten, /^rtk proxy -- /);
+			assert.match(rewrite.rewritten, /^rtk --ultra-compact proxy -- /);
 			assert.match(rewrite.rewritten, /bun test/);
 		} finally {
 			process.env.HOME = originalHome;
@@ -263,7 +290,7 @@ describe("codex RTK helper", () => {
 			const rewrite = getRtkRewrite("cargo test", fixture.repoDir);
 			assert.deepEqual(rewrite, {
 				policyPath: join(fixture.homeDir, ".config", "openagentsbtw", "RTK.md"),
-				rewritten: "rtk cargo test",
+				rewritten: "rtk --ultra-compact cargo test",
 			});
 		} finally {
 			process.env.HOME = originalHome;

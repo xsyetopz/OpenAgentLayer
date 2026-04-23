@@ -1,6 +1,6 @@
 {
   "name": "openagentsbtw-opencode",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "openagentsbtw for OpenCode - specialized agents, tools, and commands",
   "type": "module",
   "bin": {
@@ -18,13 +18,13 @@
     "check:fix": "bunx biome check . --write --unsafe --max-diagnostics 16384"
   },
   "dependencies": {
-    "@opencode-ai/plugin": "1.4.12",
+    "@opencode-ai/plugin": "1.14.21",
     "glob": "^13.0.6",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.12",
-    "@types/bun": "^1.3.12",
+    "@types/bun": "^1.3.13",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   }

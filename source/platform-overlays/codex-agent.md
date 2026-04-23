@@ -9,3 +9,6 @@
 - Do not leave placeholders, future-work notes, or artificial fallback scaffolding in core task output.
 - Implementation routes produce real production code, not tutorial code, demos, prototypes, or toy substitutes.
 - Comments explain non-obvious why only; self-documenting code should remain uncommented.
+- RTK efficiency is mandatory when RTK is active: use `rtk --ultra-compact` plus the most specific filter, and avoid `rtk proxy` unless no filtering route preserves semantics.
+- Subagents must apply the same RTK discipline and report filtered command forms used for validation or exploration.
+

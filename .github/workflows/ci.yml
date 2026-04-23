@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   shellcheck:
@@ -12,18 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Install shellcheck
         run: |
           sudo apt-get update
           sudo apt-get install -y shellcheck
       - name: Lint shell scripts
-        run: shellcheck install.sh config.sh build-plugin.sh uninstall.sh claude/hooks/scripts/_run.sh claude/statusline/statusline-command.sh opencode/install.sh
+        run: shellcheck install.sh config.sh build-plugin.sh uninstall.sh
+          claude/hooks/scripts/_run.sh claude/statusline/statusline-command.sh
+          opencode/install.sh
 
   jsonlint:
     name: JSON Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.12"
@@ -38,6 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -55,9 +63,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ ubuntu-latest, windows-latest ]
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -74,6 +84,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -95,6 +107,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -125,6 +139,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - name: Parse PowerShell wrappers
         shell: pwsh
         run: |
@@ -144,6 +160,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -163,6 +181,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"
@@ -182,6 +202,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-node@v4
         with:
           node-version: "24.14.1"

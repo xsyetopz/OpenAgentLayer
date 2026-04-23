@@ -69,18 +69,22 @@ function shellQuote(command) {
 	return `'${String(command).replaceAll("'", "'\\''")}'`;
 }
 
+function rtk(command) {
+	return `rtk --ultra-compact ${command}`.trim();
+}
+
 function proxyRewrite(command) {
 	if (process.platform === "win32") {
-		return `rtk proxy -- ${command}`;
+		return rtk(`proxy -- ${command}`);
 	}
-	return `rtk proxy -- bash -lc ${shellQuote(command)}`;
+	return rtk(`proxy -- bash -lc ${shellQuote(command)}`);
 }
 
 function cdRtkRewrite(directory, command) {
 	if (process.platform === "win32") {
 		return proxyRewrite(`cd ${directory} && ${command}`);
 	}
-	return `rtk proxy -- bash -lc ${shellQuote(`cd ${directory} && ${command}`)}`;
+	return proxyRewrite(`cd ${directory} && ${command}`);
 }
 
 function hasShellOperators(command) {
@@ -92,20 +96,87 @@ function simpleArgs(command) {
 	return command.split(/\s+/).filter(Boolean);
 }
 
+function knownScriptRewrite(args) {
+	if (args?.[0] !== "bun" || args[1] !== "run") return "";
+	const script = args[2] || "";
+	const rest = args.slice(3).join(" ");
+	if (/^test(?::|$)/.test(script)) {
+		return rtk(`test ${args.join(" ")}`);
+	}
+	if (["typecheck", "type-check", "tsc"].includes(script)) {
+		return rtk(`tsc ${rest || "--noEmit"}`);
+	}
+	if (["build", "compile"].includes(script)) {
+		return rtk(`err ${args.join(" ")}`);
+	}
+	if (["lint"].includes(script)) {
+		return rtk(`lint ${args.join(" ")}`);
+	}
+	if (["format"].includes(script)) {
+		return rtk(`format ${args.join(" ")}`);
+	}
+	if (["check", "validate"].includes(script)) {
+		return rtk(`summary ${args.join(" ")}`);
+	}
+	return "";
+}
+
+function makeRewrite(args) {
+	if (args?.[0] !== "make" || !args[1]) return "";
+	const target = args[1];
+	const command = args.join(" ");
+	if (/test|spec/.test(target)) return rtk(`test ${command}`);
+	if (
+		/lint|check|build|install|launch|validate|analy[sz]e|format|bench/.test(
+			target,
+		)
+	) {
+		return rtk(`summary ${command}`);
+	}
+	return "";
+}
+
+function biomeRewrite(args) {
+	const isBunxBiome = args?.[0] === "bunx" && args[1] === "biome";
+	const isBiome = args?.[0] === "biome";
+	if (!isBunxBiome && !isBiome) return "";
+	const command = args.join(" ");
+	const subcommand = isBunxBiome ? args[2] : args[1];
+	if (subcommand === "lint") return rtk(`lint ${command}`);
+	if (subcommand === "format") return rtk(`format ${command}`);
+	if (subcommand === "check") return rtk(`summary ${command}`);
+	return "";
+}
+
+function readRewrite(command, args) {
+	if (
+		args?.[0] === "cat" &&
+		args.length > 1 &&
+		!args.slice(1).some((arg) => arg.startsWith("-"))
+	) {
+		return rtk(`read ${args.slice(1).join(" ")}`);
+	}
+	if (["head", "tail"].includes(args?.[0]) && args.length >= 2) {
+		return rtk(`read ${args.slice(1).join(" ")}`);
+	}
+	const headSed = command.match(
+		/^sed\s+-n\s+['"]1,(\d+)p['"]\s+([^\s'";&|<>`$()]+)$/,
+	);
+	if (headSed) {
+		return rtk(`read --max-lines ${headSed[1]} ${headSed[2]}`);
+	}
+	return "";
+}
+
 function highGainRewrite(command) {
 	const args = simpleArgs(command);
 	if (args?.[0] === "bun" && args[1] === "test") {
-		return `rtk test ${args.join(" ")}`;
+		return rtk(`test ${args.join(" ")}`);
 	}
-	if (
-		args?.[0] === "bun" &&
-		args[1] === "run" &&
-		/^test(?::|$)/.test(args[2] || "")
-	) {
-		return `rtk test ${args.join(" ")}`;
-	}
+	const script = knownScriptRewrite(args);
+	if (script) return script;
 	if (args?.[0] === "bunx" && args[1] === "tsc") {
-		return `rtk tsc ${args.slice(2).join(" ")}`.trim();
+		return rtk(`tsc ${args.slice(2).join(" ")}`);
 	}
 	if (
 		args?.[0] === "bunx" &&
@@ -113,31 +184,55 @@ function highGainRewrite(command) {
 		args[2] &&
 		args[3] === "tsc"
 	) {
-		return cdRtkRewrite(args[2], `rtk tsc ${args.slice(4).join(" ")}`.trim());
+		return cdRtkRewrite(args[2], rtk(`tsc ${args.slice(4).join(" ")}`));
 	}
+	const biome = biomeRewrite(args);
+	if (biome) return biome;
+	const make = makeRewrite(args);
+	if (make) return make;
 	if (args?.[0] === "npm" && args[1] === "test") {
-		return `rtk test ${args.join(" ")}`;
+		return rtk(`test ${args.join(" ")}`);
 	}
 	if (args?.[0] === "pnpm" && args[1] === "test") {
-		return `rtk test ${args.join(" ")}`;
+		return rtk(`test ${args.join(" ")}`);
+	}
+	if (
+		args?.[0] === "npm" &&
+		args[1] === "run" &&
+		/^test(?::|$)/.test(args[2] || "")
+	) {
+		return rtk(`test ${args.join(" ")}`);
+	}
+	if (
+		args?.[0] === "pnpm" &&
+		args[1] === "run" &&
+		/^test(?::|$)/.test(args[2] || "")
+	) {
+		return rtk(`test ${args.join(" ")}`);
 	}
 	if (
 		args?.[0] === "dotnet" &&
 		["test", "restore", "format"].includes(args[1])
 	) {
-		return `rtk dotnet ${args.slice(1).join(" ")}`;
+		return rtk(`dotnet ${args.slice(1).join(" ")}`);
 	}
 	if (args?.[0] === "node" && args[1] === "--test") {
-		return `rtk test ${args.join(" ")}`;
+		return rtk(`test ${args.join(" ")}`);
 	}
 	if (args?.[0] === "flutter" && args[1] === "test") {
-		return `rtk test ${args.join(" ")}`;
+		return rtk(`test ${args.join(" ")}`);
 	}
 	if (args?.[0] === "flutter" && args[1] === "analyze") {
-		return `rtk summary ${args.join(" ")}`;
+		return rtk(`summary ${args.join(" ")}`);
+	}
+	if (["rg", "grep"].includes(args?.[0])) {
+		return rtk(`grep ${args.slice(1).join(" ")}`);
+	}
+	if (["fd", "find"].includes(args?.[0])) {
+		return rtk(`find ${args.slice(1).join(" ")}`);
 	}
 	if (args?.length === 1 && ["env", "printenv"].includes(args[0])) {
-		return "rtk env";
+		return rtk("env");
 	}
 	if (
 		args?.[0] === "jq" &&
@@ -146,7 +241,7 @@ function highGainRewrite(command) {
 		!args[1].startsWith("-") &&
 		args[2].endsWith(".json")
 	) {
-		return `rtk json ${args[2]}`;
+		return rtk(`json ${args[2]}`);
 	}
 	if (
 		args?.[0] === "jq" &&
@@ -154,7 +249,7 @@ function highGainRewrite(command) {
 		[".", "-S"].includes(args[1]) &&
 		args[2].endsWith(".json")
 	) {
-		return `rtk json ${args[2]}`;
+		return rtk(`json ${args[2]}`);
 	}
 	if (
 		args?.[0] === "jq" &&
@@ -163,23 +258,17 @@ function highGainRewrite(command) {
 		!args[2].startsWith("-") &&
 		args[3].endsWith(".json")
 	) {
-		return `rtk json ${args[3]}`;
+		return rtk(`json ${args[3]}`);
 	}
-	if (
-		args?.[0] === "cat" &&
-		args.length > 1 &&
-		!args.slice(1).some((arg) => arg.startsWith("-"))
-	) {
-		return `rtk read ${args.slice(1).join(" ")}`;
-	}
-
-	const headSed = command.match(
-		/^sed\s+-n\s+['"]1,(\d+)p['"]\s+([^\s'";&|<>`$()]+)$/,
-	);
-	if (headSed) {
-		return `rtk read --max-lines ${headSed[1]} ${headSed[2]}`;
-	}
+	const read = readRewrite(command, args);
+	if (read) return read;
 	return "";
+}
+
+function normalizeRtkRewrite(rewritten) {
+	if (!/^rtk\b/.test(rewritten)) return "";
+	if (/^rtk\s+--ultra-compact\b/.test(rewritten)) return rewritten;
+	return rewritten.replace(/^rtk\b/, "rtk --ultra-compact");
 }
 
 export function getRtkRewrite(command, cwd = process.cwd()) {
@@ -187,6 +276,11 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 	if (!normalized || /^\s*rtk\b/.test(normalized)) return null;
 	const policyPath = findRtkMd(cwd);
 	if (!policyPath || !hasRtkBinary()) return null;
+
+	const highGain = highGainRewrite(normalized);
+	if (highGain) {
+		return { policyPath, rewritten: highGain };
+	}
 
 	try {
 		const result = spawnSync("rtk", ["rewrite", normalized], {
@@ -196,17 +290,12 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 			timeout: 3000,
 			shell: process.platform === "win32",
 		});
-		const rewritten = (result.stdout || "").trim();
-		if (/^rtk\b/.test(rewritten) && rewritten !== normalized) {
+		const rewritten = normalizeRtkRewrite((result.stdout || "").trim());
+		if (rewritten && rewritten !== normalized) {
 			return { policyPath, rewritten };
 		}
 	} catch {
 		// Fall back to proxy rewrite below.
-	}
-
-	const highGain = highGainRewrite(normalized);
-	if (highGain) {
-		return { policyPath, rewritten: highGain };
 	}
 
 	return { policyPath, rewritten: proxyRewrite(normalized) };

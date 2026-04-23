@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { mergeTaggedBlock, removeManagedBlock } from "./managed-files.mjs";
 import { PATHS, pathExists, readText, writeText } from "./shared.mjs";
@@ -9,35 +10,123 @@ export const RTK_BLOCK_END = "<!-- <<< openagentsbtw rtk <<< -->";
 export function renderRtkPolicy() {
 	return `# RTK - Rust Token Killer
 
-Always prefix RTK-supported shell commands with \`rtk\`. Prefer the most specific RTK filter available; use \`rtk proxy\` only when no specialized filter preserves command semantics.
+Always prefix RTK-supported shell commands with \`rtk\`. Prefer the most specific filtering command available, and use \`--ultra-compact\` for broad searches, tests, builds, lint, logs, and diagnostics. Use \`rtk proxy\` only when no specialized filter preserves command semantics.
+
+Decision order:
+
+1. If unsure, run \`rtk rewrite <raw command>\` first and use its suggestion.
+2. Prefer a specialized filter: \`rtk test\`, \`rtk err\`, \`rtk summary\`, \`rtk grep\`, \`rtk read\`, \`rtk json\`, \`rtk diff\`, \`rtk log\`, or \`rtk pipe\`.
+3. Add \`--ultra-compact\` unless full output is explicitly required.
+4. Fall back to \`rtk proxy\` only for commands that cannot be filtered safely.
 
 High-gain examples:
 
 \`\`\`bash
-rtk git status
-rtk diff
-rtk read package.json
-rtk grep -R "pattern" -n source tests
-rtk find source -maxdepth 3 -type f -name '*.json'
-rtk cargo test
-rtk test bun test tests claude/tests codex/tests
-rtk test bun run test
-rtk tsc --noEmit
-rtk test npm test
-rtk test pnpm test
-rtk dotnet test
-rtk test node --test
-rtk test flutter test
-rtk env
-rtk json package.json
-rtk npm run build
-rtk pytest -q
+rtk --ultra-compact git status
+rtk --ultra-compact diff
+rtk --ultra-compact read package.json
+rtk --ultra-compact grep -n "pattern" source tests
+rtk --ultra-compact find source -maxdepth 3 -type f -name '*.json'
+rtk --ultra-compact test bun test tests claude/tests codex/tests
+rtk --ultra-compact test bun run test
+rtk --ultra-compact tsc --noEmit
+rtk --ultra-compact test npm test
+rtk --ultra-compact test pnpm test
+rtk --ultra-compact cargo test
+rtk --ultra-compact go test ./...
+rtk --ultra-compact dotnet test
+rtk --ultra-compact test node --test
+rtk --ultra-compact test flutter test
+rtk --ultra-compact summary flutter analyze
+rtk --ultra-compact err bun run build
+rtk --ultra-compact lint bunx biome lint .
+rtk --ultra-compact summary bunx biome check .
+rtk --ultra-compact env
+rtk --ultra-compact json package.json
+rtk --ultra-compact pytest -q
 \`\`\`
 
-For Bun projects, do not run raw \`bun test\`, \`bun run test\`, or \`bunx tsc\`; use \`rtk test bun ...\` and \`rtk tsc\` so output is filtered instead of merely proxied. For missing upstream rewrites such as \`npm test\`, \`pnpm test\`, \`dotnet test\`, \`node --test\`, \`flutter test\`, simple \`jq\`, and \`env\`, use the closest specialized RTK command above.
+For Bun projects, do not run raw \`bun test\`, \`bun run test\`, \`bun run typecheck\`, \`bunx tsc\`, or Biome checks. Use RTK filters so output is filtered instead of merely proxied. Avoid ad-hoc \`python3 -\` scripts for repo inspection; use \`rtk read\`, \`rtk json\`, \`rtk grep\`, or a checked-in script through \`rtk err\`/\`rtk summary\`.
 
-When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw will enforce RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite.
+Use \`rtk gain --project --history\`, \`rtk gain --failures\`, and \`rtk hook-audit --since 30\` to verify efficiency. Validation-heavy sessions should exceed 70% project-scope savings; supported high-output commands should usually exceed 80%.
+
+When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw enforces RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite.
 `;
+}
+
+export function rtkConfigPath({
+	platform = process.platform,
+	env = process.env,
+	homeDir = os.homedir(),
+} = {}) {
+	const pathLib = platform === "win32" ? path.win32 : path.posix;
+	if (platform === "win32") {
+		return pathLib.join(
+			env.APPDATA ?? pathLib.join(homeDir, "AppData", "Roaming"),
+			"rtk",
+			"config.toml",
+		);
+	}
+	if (platform === "darwin") {
+		return pathLib.join(
+			homeDir,
+			"Library",
+			"Application Support",
+			"rtk",
+			"config.toml",
+		);
+	}
+	return pathLib.join(
+		env.XDG_CONFIG_HOME ?? pathLib.join(homeDir, ".config"),
+		"rtk",
+		"config.toml",
+	);
+}
+
+export function rtkCodexDatabasePath(paths = PATHS) {
+	return path.join(paths.codexHome, "memories", "rtk", "history.db");
+}
+
+function mergeTrackingDatabasePath(existing, databasePath) {
+	const line = `database_path = ${JSON.stringify(databasePath)}`;
+	if (/^\[tracking\]\s*$/m.test(existing)) {
+		const lines = existing.split("\n");
+		const output = [];
+		let inTracking = false;
+		let wrote = false;
+		for (const current of lines) {
+			if (/^\s*\[/.test(current)) {
+				if (inTracking && !wrote) {
+					output.push(line);
+					wrote = true;
+				}
+				inTracking = /^\[tracking\]\s*$/.test(current);
+			}
+			if (inTracking && /^\s*database_path\s*=/.test(current)) {
+				if (!wrote) output.push(line);
+				wrote = true;
+				continue;
+			}
+			output.push(current);
+		}
+		if (inTracking && !wrote) output.push(line);
+		return output.join("\n").trimEnd() + "\n";
+	}
+	return [existing.trimEnd(), "", "[tracking]", line, ""]
+		.filter(Boolean)
+		.join("\n");
+}
+
+export async function writeRtkCodexTrackingConfig(paths = PATHS) {
+	const configPath = rtkConfigPath({ homeDir: paths.homeDir });
+	const databasePath = rtkCodexDatabasePath(paths);
+	await fs.mkdir(path.dirname(databasePath), { recursive: true });
+	const existing = await readText(configPath, "");
+	await writeText(
+		configPath,
+		mergeTrackingDatabasePath(existing, databasePath),
+	);
+	return { configPath, databasePath };
 }
 
 export function rtkPolicyPathMap(paths = PATHS) {

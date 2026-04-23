@@ -24,6 +24,7 @@ import {
 	removeRtkSurfaces,
 	rtkPolicyPathMap,
 	rtkReferenceTargets,
+	writeRtkCodexTrackingConfig,
 	writeRtkPolicyFiles,
 	writeRtkReferences,
 } from "./rtk-surfaces.mjs";
@@ -200,6 +201,11 @@ async function writeManagedRtkSurfaces() {
 	const policyTargets = await installedRtkPolicyTargets();
 	await writeRtkPolicyFiles(policyTargets);
 	await writeRtkReferences(await installedRtkReferenceTargets());
+	if (await pathExists(PATHS.codexHome)) {
+		const tracking = await writeRtkCodexTrackingConfig();
+		await writeConfigEnv({ RTK_DB_PATH: tracking.databasePath });
+		logInfo(`RTK tracking DB -> ${tracking.databasePath}`);
+	}
 	for (const target of policyTargets) {
 		logInfo(`Installed managed RTK policy at ${target}`);
 	}

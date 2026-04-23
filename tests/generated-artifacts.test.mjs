@@ -655,7 +655,7 @@ describe("generated Codex docs", () => {
 		assert.match(codex, /model_instructions_file/);
 		assert.match(codex, /--source deepwiki/);
 		assert.match(codex, /rtk gain/);
-		assert.match(codex, /bun test` -> `rtk test bun test/);
+		assert.match(codex, /bun test` -> `rtk --ultra-compact test bun test/);
 	});
 
 	it("documents peer threads as openagentsbtw-managed instead of native Codex behavior", () => {
@@ -715,10 +715,10 @@ describe("generated OpenCode assets", () => {
 		assert.match(plugin, /const AGENT_CONTRACTS =/);
 		assert.match(plugin, /BLOCKED:/);
 		assert.match(plugin, /highGainRewrite/);
-		assert.match(plugin, /rtk test /);
-		assert.match(plugin, /rtk tsc /);
-		assert.match(plugin, /rtk dotnet /);
-		assert.match(plugin, /rtk json /);
+		assert.match(plugin, /rtk\("test /);
+		assert.match(plugin, /rtk\("tsc /);
+		assert.match(plugin, /rtk\("dotnet /);
+		assert.match(plugin, /rtk\("json /);
 		assert.match(plugin, /cdRtkRewrite/);
 	});
 
@@ -849,11 +849,11 @@ describe("generated hook manifests", () => {
 		]) {
 			const helper = readBuild(relativePath);
 			assert.match(helper, /function highGainRewrite/);
-			assert.match(helper, /rtk test/);
-			assert.match(helper, /rtk tsc/);
-			assert.match(helper, /rtk read --max-lines/);
-			assert.match(helper, /rtk dotnet/);
-			assert.match(helper, /rtk json/);
+			assert.match(helper, /rtk\(`test /);
+			assert.match(helper, /rtk\(`tsc /);
+			assert.match(helper, /read --max-lines/);
+			assert.match(helper, /rtk\(`dotnet /);
+			assert.match(helper, /rtk\(`json /);
 			assert.match(helper, /cdRtkRewrite/);
 		}
 	});

@@ -10,6 +10,14 @@
 
 - If Playwright CLI is available, you may use `playwright-cli` to automate browser flows and collect evidence (screenshots, traces, DOM snapshots) during debugging.
 
+### RTK Efficiency
+
+- When RTK is active, use `rtk --ultra-compact` for supported shell commands. Prefer `rtk test`, `rtk err`, `rtk summary`, `rtk grep`, `rtk read`, `rtk json`, `rtk diff`, and `rtk log` over raw tools or `rtk proxy`.
+- Before uncertain shell commands, run `rtk rewrite <raw command>` or choose the closest specialized RTK filter. `rtk proxy` is last resort because it tracks but barely compresses.
+- Do not run raw `bun`, `bunx`, `npm`, `pnpm`, `go test`, `cargo test`, `python3 -`, `rg`, `grep`, `find`, `cat`, `head`, or `sed` when an RTK form can preserve intent.
+- Validation-heavy sessions should keep project RTK savings above 70%; supported high-output commands should usually exceed 80%.
+
+
 ### Scope
 
 - Do only what was asked. Scope reductions require user confirmation.

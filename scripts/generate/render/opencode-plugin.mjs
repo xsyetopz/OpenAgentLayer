@@ -431,101 +431,127 @@ function shellQuote(command) {
   return "'" + String(command).replaceAll("'", "'\\''") + "'";
 }
 
+function rtk(command) {
+  return ("rtk --ultra-compact " + command).trim();
+}
+
 function proxyRewrite(command) {
   if (process.platform === "win32") {
-    return "rtk proxy -- " + command;
+    return rtk("proxy -- " + command);
   }
-  return "rtk proxy -- bash -lc " + shellQuote(command);
+  return rtk("proxy -- bash -lc " + shellQuote(command));
 }
 
 function cdRtkRewrite(directory, command) {
-  if (process.platform === "win32") {
-    return proxyRewrite("cd " + directory + " && " + command);
-  }
-  return "rtk proxy -- bash -lc " + shellQuote("cd " + directory + " && " + command);
+  return proxyRewrite("cd " + directory + " && " + command);
 }
 
 function hasShellOperators(command) {
-  return /[\\n;&|<>$()]/.test(command) || command.includes(String.fromCharCode(96));
+  return /[\n;&|<>$()]/.test(command) || command.includes(String.fromCharCode(96));
 }
 
 function simpleArgs(command) {
   if (hasShellOperators(command) || /["']/.test(command)) return null;
-  return command.split(/\\s+/).filter(Boolean);
+  return command.split(/s+/).filter(Boolean);
+}
+
+function knownScriptRewrite(args) {
+  if (args?.[0] !== "bun" || args[1] !== "run") return "";
+  const script = args[2] || "";
+  const rest = args.slice(3).join(" ");
+  if (/^test(?::|$)/.test(script)) return rtk("test " + args.join(" "));
+  if (["typecheck", "type-check", "tsc"].includes(script)) return rtk("tsc " + (rest || "--noEmit"));
+  if (["build", "compile"].includes(script)) return rtk("err " + args.join(" "));
+  if (["lint"].includes(script)) return rtk("lint " + args.join(" "));
+  if (["format"].includes(script)) return rtk("format " + args.join(" "));
+  if (["check", "validate"].includes(script)) return rtk("summary " + args.join(" "));
+  return "";
+}
+
+function makeRewrite(args) {
+  if (args?.[0] !== "make" || !args[1]) return "";
+  const target = args[1];
+  const command = args.join(" ");
+  if (/test|spec/.test(target)) return rtk("test " + command);
+  if (/lint|check|build|install|launch|validate|analy[sz]e|format|bench/.test(target)) return rtk("summary " + command);
+  return "";
+}
+
+function biomeRewrite(args) {
+  const isBunxBiome = args?.[0] === "bunx" && args[1] === "biome";
+  const isBiome = args?.[0] === "biome";
+  if (!isBunxBiome && !isBiome) return "";
+  const command = args.join(" ");
+  const subcommand = isBunxBiome ? args[2] : args[1];
+  if (subcommand === "lint") return rtk("lint " + command);
+  if (subcommand === "format") return rtk("format " + command);
+  if (subcommand === "check") return rtk("summary " + command);
+  return "";
+}
+
+function readRewrite(command, args) {
+  if (args?.[0] === "cat" && args.length > 1 && !args.slice(1).some((arg) => arg.startsWith("-"))) return rtk("read " + args.slice(1).join(" "));
+  if (["head", "tail"].includes(args?.[0]) && args.length >= 2) return rtk("read " + args.slice(1).join(" "));
+  const headSed = command.match(/^seds+-ns+['"]1,(d+)p['"]s+([^s'";&<>$()]+)$/);
+  if (headSed) return rtk("read --max-lines " + headSed[1] + " " + headSed[2]);
+  return "";
 }
 
 function highGainRewrite(command) {
   const args = simpleArgs(command);
-  if (args?.[0] === "bun" && args[1] === "test") {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "bun" && args[1] === "run" && /^test(?::|$)/.test(args[2] || "")) {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "bunx" && args[1] === "tsc") {
-    return ("rtk tsc " + args.slice(2).join(" ")).trim();
-  }
-  if (args?.[0] === "bunx" && args[1] === "--cwd" && args[2] && args[3] === "tsc") {
-    return cdRtkRewrite(args[2], ("rtk tsc " + args.slice(4).join(" ")).trim());
-  }
-  if (args?.[0] === "npm" && args[1] === "test") {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "pnpm" && args[1] === "test") {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "dotnet" && ["test", "restore", "format"].includes(args[1])) {
-    return "rtk dotnet " + args.slice(1).join(" ");
-  }
-  if (args?.[0] === "node" && args[1] === "--test") {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "flutter" && args[1] === "test") {
-    return "rtk test " + args.join(" ");
-  }
-  if (args?.[0] === "flutter" && args[1] === "analyze") {
-    return "rtk summary " + args.join(" ");
-  }
-  if (args?.length === 1 && ["env", "printenv"].includes(args[0])) {
-    return "rtk env";
-  }
-  if (args?.[0] === "jq" && args.length === 3 && ![".", "-S"].includes(args[1]) && !args[1].startsWith("-") && args[2].endsWith(".json")) {
-    return "rtk json " + args[2];
-  }
-  if (args?.[0] === "jq" && args.length === 3 && [".", "-S"].includes(args[1]) && args[2].endsWith(".json")) {
-    return "rtk json " + args[2];
-  }
-  if (args?.[0] === "jq" && args.length === 4 && args[1] === "-r" && !args[2].startsWith("-") && args[3].endsWith(".json")) {
-    return "rtk json " + args[3];
-  }
-  if (args?.[0] === "cat" && args.length > 1 && !args.slice(1).some((arg) => arg.startsWith("-"))) {
-    return "rtk read " + args.slice(1).join(" ");
-  }
-
-  const headSed = command.match(/^sed\\s+-n\\s+['"]1,(\\d+)p['"]\\s+([^\\s'";&<>$()]+)$/);
-  if (headSed) {
-    return "rtk read --max-lines " + headSed[1] + " " + headSed[2];
-  }
+  if (args?.[0] === "bun" && args[1] === "test") return rtk("test " + args.join(" "));
+  const script = knownScriptRewrite(args);
+  if (script) return script;
+  if (args?.[0] === "bunx" && args[1] === "tsc") return rtk("tsc " + args.slice(2).join(" "));
+  if (args?.[0] === "bunx" && args[1] === "--cwd" && args[2] && args[3] === "tsc") return cdRtkRewrite(args[2], rtk("tsc " + args.slice(4).join(" ")));
+  const biome = biomeRewrite(args);
+  if (biome) return biome;
+  const make = makeRewrite(args);
+  if (make) return make;
+  if (args?.[0] === "npm" && args[1] === "test") return rtk("test " + args.join(" "));
+  if (args?.[0] === "pnpm" && args[1] === "test") return rtk("test " + args.join(" "));
+  if (args?.[0] === "npm" && args[1] === "run" && /^test(?::|$)/.test(args[2] || "")) return rtk("test " + args.join(" "));
+  if (args?.[0] === "pnpm" && args[1] === "run" && /^test(?::|$)/.test(args[2] || "")) return rtk("test " + args.join(" "));
+  if (args?.[0] === "dotnet" && ["test", "restore", "format"].includes(args[1])) return rtk("dotnet " + args.slice(1).join(" "));
+  if (args?.[0] === "node" && args[1] === "--test") return rtk("test " + args.join(" "));
+  if (args?.[0] === "flutter" && args[1] === "test") return rtk("test " + args.join(" "));
+  if (args?.[0] === "flutter" && args[1] === "analyze") return rtk("summary " + args.join(" "));
+  if (["rg", "grep"].includes(args?.[0])) return rtk("grep " + args.slice(1).join(" "));
+  if (["fd", "find"].includes(args?.[0])) return rtk("find " + args.slice(1).join(" "));
+  if (args?.length === 1 && ["env", "printenv"].includes(args[0])) return rtk("env");
+  if (args?.[0] === "jq" && args.length === 3 && ![".", "-S"].includes(args[1]) && !args[1].startsWith("-") && args[2].endsWith(".json")) return rtk("json " + args[2]);
+  if (args?.[0] === "jq" && args.length === 3 && [".", "-S"].includes(args[1]) && args[2].endsWith(".json")) return rtk("json " + args[2]);
+  if (args?.[0] === "jq" && args.length === 4 && args[1] === "-r" && !args[2].startsWith("-") && args[3].endsWith(".json")) return rtk("json " + args[3]);
+  const read = readRewrite(command, args);
+  if (read) return read;
   return "";
+}
+
+function normalizeRtkRewrite(rewritten) {
+  if (!/^rtk\b/.test(rewritten)) return "";
+  if (/^rtks+--ultra-compact\b/.test(rewritten)) return rewritten;
+  return rewritten.replace(/^rtk\b/, "rtk --ultra-compact");
 }
 
 function getRtkRewrite(command, cwd) {
   const normalized = String(command || "").trim();
-  if (!normalized || /^\\s*rtk\\b/.test(normalized)) return null;
+  if (!normalized || /^s*rtk\b/.test(normalized)) return null;
   if (!(findRepoRtkMd(cwd) || findHomeRtkMd())) return null;
   if (!hasRtkBinary()) return null;
+  const highGain = highGainRewrite(normalized);
+  if (highGain) return highGain;
   try {
     const result = spawnSync("rtk", ["rewrite", normalized], {
       cwd,
       encoding: "utf8",
       timeout: 3000,
     });
-    const rewritten = (result.stdout || "").trim();
-    if (/^rtk\\b/.test(rewritten) && rewritten !== normalized) return rewritten;
+    const rewritten = normalizeRtkRewrite((result.stdout || "").trim());
+    if (rewritten && rewritten !== normalized) return rewritten;
   } catch {
     // Fall back below.
   }
-  return highGainRewrite(normalized) || proxyRewrite(normalized);
+  return proxyRewrite(normalized);
 }
 
 function recordEvidence(state, value) {

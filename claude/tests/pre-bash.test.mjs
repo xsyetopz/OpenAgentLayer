@@ -189,7 +189,7 @@ describe("RTK enforce", () => {
 			const output = parseHookOutput(result);
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.deepEqual(output?.hookSpecificOutput?.updatedInput, {
-				command: "rtk cargo test",
+				command: "rtk --ultra-compact cargo test",
 				description: "Run tests",
 			});
 		} finally {
@@ -213,7 +213,7 @@ describe("RTK enforce", () => {
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.equal(
 				output?.hookSpecificOutput?.updatedInput.command,
-				"rtk cargo test",
+				"rtk --ultra-compact cargo test",
 			);
 		} finally {
 			fixture.cleanup();
@@ -232,7 +232,7 @@ describe("RTK enforce", () => {
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.equal(
 				output?.hookSpecificOutput?.updatedInput.command,
-				"rtk test npm test",
+				"rtk --ultra-compact test npm test",
 			);
 
 			result = runHook(
@@ -244,7 +244,7 @@ describe("RTK enforce", () => {
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.equal(
 				output?.hookSpecificOutput?.updatedInput.command,
-				"rtk read --max-lines 5 README.md",
+				"rtk --ultra-compact read --max-lines 5 README.md",
 			);
 		} finally {
 			fixture.cleanup();
@@ -263,7 +263,7 @@ describe("RTK enforce", () => {
 			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
 			assert.match(
 				output?.hookSpecificOutput?.updatedInput.command,
-				/^rtk proxy -- /,
+				/^rtk --ultra-compact proxy -- /,
 			);
 		} finally {
 			fixture.cleanup();

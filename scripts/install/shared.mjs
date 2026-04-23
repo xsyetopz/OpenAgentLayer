@@ -409,17 +409,25 @@ export async function writeConfigEnv(values) {
 	const existing = await loadConfigEnv();
 	const next = { ...existing, ...values };
 	const lines = ["# Managed by openagentsbtw"];
-	if (next.CONTEXT7_API_KEY) {
-		lines.push(`CONTEXT7_API_KEY=${next.CONTEXT7_API_KEY}`);
-	}
-	if (next.OABTW_CLAUDE_PLAN) {
-		lines.push(`OABTW_CLAUDE_PLAN=${next.OABTW_CLAUDE_PLAN}`);
-	}
-	if (next.OABTW_CODEX_PLAN) {
-		lines.push(`OABTW_CODEX_PLAN=${next.OABTW_CODEX_PLAN}`);
-	}
-	if (next.OABTW_COPILOT_PLAN) {
-		lines.push(`OABTW_COPILOT_PLAN=${next.OABTW_COPILOT_PLAN}`);
+	for (const key of [
+		"CONTEXT7_API_KEY",
+		"OABTW_CLAUDE_PLAN",
+		"OABTW_CODEX_PLAN",
+		"OABTW_COPILOT_PLAN",
+		"RTK_DB_PATH",
+	]) {
+		switch (key) {
+			case "CONTEXT7_API_KEY":
+			case "OABTW_CLAUDE_PLAN":
+			case "OABTW_CODEX_PLAN":
+			case "OABTW_COPILOT_PLAN":
+			case "RTK_DB_PATH": {
+				if (next[key]) lines.push(`${key}=${next[key]}`);
+				break;
+			}
+			default:
+				break;
+		}
 	}
 	const cavemanMode =
 		resolveCavemanMode(next.OABTW_CAVEMAN_MODE || "") || DEFAULT_CAVEMAN_MODE;

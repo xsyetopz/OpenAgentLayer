@@ -8,8 +8,11 @@ import {
 	installSelectionToRtkReferences,
 	removeRtkSurfaces,
 	renderRtkPolicy,
+	rtkCodexDatabasePath,
+	rtkConfigPath,
 	rtkPolicyPathMap,
 	selectedRtkPolicyTargets,
+	writeRtkCodexTrackingConfig,
 	writeRtkPolicyFiles,
 	writeRtkReferences,
 } from "../scripts/install/rtk-surfaces.mjs";
@@ -40,12 +43,12 @@ function tempContext() {
 describe("managed RTK surfaces", () => {
 	it("renders one canonical policy body for every platform-local RTK.md", () => {
 		assert.match(renderRtkPolicy(), /# RTK - Rust Token Killer/);
-		assert.match(renderRtkPolicy(), /rtk cargo test/);
-		assert.match(renderRtkPolicy(), /rtk test bun test/);
-		assert.match(renderRtkPolicy(), /rtk tsc --noEmit/);
-		assert.match(renderRtkPolicy(), /rtk test npm test/);
-		assert.match(renderRtkPolicy(), /rtk dotnet test/);
-		assert.match(renderRtkPolicy(), /rtk json package\.json/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact cargo test/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact test bun test/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact tsc --noEmit/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact test npm test/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact dotnet test/);
+		assert.match(renderRtkPolicy(), /rtk --ultra-compact json package\.json/);
 		assert.match(
 			renderRtkPolicy(),
 			/rtk proxy` only when no specialized filter/,
@@ -129,6 +132,30 @@ describe("managed RTK surfaces", () => {
 				readFileSync(agents, "utf8"),
 				/openagentsbtw rtk|RTK\.md/,
 			);
+		} finally {
+			cleanup();
+		}
+	});
+	it("writes RTK tracking DB config into the Codex-writable memory tree", async () => {
+		const { root, paths, cleanup } = tempContext();
+		try {
+			const result = await writeRtkCodexTrackingConfig(paths);
+			assert.equal(
+				rtkConfigPath({
+					platform: "linux",
+					env: { XDG_CONFIG_HOME: path.join(root, ".config") },
+					homeDir: root,
+				}),
+				path.join(root, ".config", "rtk", "config.toml"),
+			);
+			assert.equal(result.databasePath, rtkCodexDatabasePath(paths));
+			assert.equal(
+				result.databasePath,
+				path.join(root, ".codex", "memories", "rtk", "history.db"),
+			);
+			const config = readFileSync(result.configPath, "utf8");
+			assert.match(config, /\[tracking\]/);
+			assert.match(config, /database_path = /);
 		} finally {
 			cleanup();
 		}

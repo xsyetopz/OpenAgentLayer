@@ -39,6 +39,7 @@ import {
 	installSelectionToRtkReferences,
 	rtkPolicyPathMap,
 	selectedRtkPolicyTargets,
+	writeRtkCodexTrackingConfig,
 	writeRtkPolicyFiles,
 	writeRtkReferences,
 } from "./rtk-surfaces.mjs";
@@ -852,6 +853,11 @@ async function maybeInstallRtk(args) {
 	await writeRtkReferences(
 		installSelectionToRtkReferences(args, workspacePaths),
 	);
+	if (args.installCodex) {
+		const tracking = await writeRtkCodexTrackingConfig();
+		await writeConfigEnv({ RTK_DB_PATH: tracking.databasePath });
+		logInfo(`RTK tracking DB -> ${tracking.databasePath}`);
+	}
 	for (const target of policyTargets) {
 		logInfo(`RTK policy -> ${target}`);
 	}
