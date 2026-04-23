@@ -40,6 +40,10 @@ function tempContext() {
 	};
 }
 
+function normalizePath(filepath) {
+	return filepath.replaceAll("\\", "/");
+}
+
 describe("managed RTK surfaces", () => {
 	it("renders one canonical policy body for every platform-local RTK.md", () => {
 		assert.match(renderRtkPolicy(), /# RTK - Rust Token Killer/);
@@ -141,12 +145,14 @@ describe("managed RTK surfaces", () => {
 		try {
 			const result = await writeRtkCodexTrackingConfig(paths);
 			assert.equal(
-				rtkConfigPath({
-					platform: "linux",
-					env: { XDG_CONFIG_HOME: path.join(root, ".config") },
-					homeDir: root,
-				}),
-				path.join(root, ".config", "rtk", "config.toml"),
+				normalizePath(
+					rtkConfigPath({
+						platform: "linux",
+						env: { XDG_CONFIG_HOME: path.join(root, ".config") },
+						homeDir: root,
+					}),
+				),
+				normalizePath(path.join(root, ".config", "rtk", "config.toml")),
 			);
 			assert.equal(result.databasePath, rtkCodexDatabasePath(paths));
 			assert.equal(

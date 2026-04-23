@@ -115,12 +115,16 @@ async function fileContains(path: string, marker: string): Promise<boolean> {
 	}
 }
 
+function globPath(path: string): string {
+	return path.replaceAll("\\", "/");
+}
+
 async function removeChildrenWithMarker(
 	dir: string,
 	marker: string,
 	dryRun: boolean,
 ): Promise<void> {
-	for (const target of await glob(join(dir, "*")).catch(() => [])) {
+	for (const target of await glob(globPath(join(dir, "*"))).catch(() => [])) {
 		if (
 			(await fileContains(target, marker)) ||
 			(await fileContains(join(target, "SKILL.md"), marker)) ||
@@ -252,7 +256,7 @@ async function writeSkills(
 	dryRun: boolean,
 ): Promise<number> {
 	const skillPaths = await glob(
-		join(resolveTemplatesDir(), "skills", "*", "SKILL.md"),
+		globPath(join(resolveTemplatesDir(), "skills", "*", "SKILL.md")),
 	);
 	await Promise.all(
 		skillPaths.map(async (skillPath) => {

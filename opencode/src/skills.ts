@@ -67,6 +67,10 @@ function getDirName(path: string): string {
 	return dir.slice(dir.lastIndexOf("/") + 1);
 }
 
+function globPath(path: string): string {
+	return path.replaceAll("\\", "/");
+}
+
 function getDefaultDescription(
 	parsed: FrontmatterResult,
 	content: string,
@@ -80,7 +84,7 @@ function getDefaultDescription(
 }
 
 export async function loadSkillsFromDisk(): Promise<SkillDefinition[]> {
-	const skillPaths = await glob(`${SKILLS_DIR}/*/SKILL.md`);
+	const skillPaths = await glob(globPath(`${SKILLS_DIR}/*/SKILL.md`));
 	const skills: SkillDefinition[] = [];
 
 	for (const skillPath of skillPaths) {

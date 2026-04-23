@@ -19,11 +19,14 @@ function runNode(script, args, env, cwd) {
 		cwd,
 		env: { ...process.env, ...env },
 		encoding: "utf8",
+		timeout: 20000,
 	});
 }
 
 describe("installer runtime smoke", () => {
-	it("installs and uninstalls core surfaces without agentic-ides artifacts", () => {
+	it("installs and uninstalls core surfaces without agentic-ides artifacts", {
+		timeout: 15000,
+	}, () => {
 		const tempRoot = mkdtempSync(
 			path.join(os.tmpdir(), "oabtw-runtime-smoke-"),
 		);
