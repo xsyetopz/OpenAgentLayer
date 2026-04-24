@@ -345,6 +345,61 @@ export function commandExists(command) {
 	return result.status === 0;
 }
 
+export async function resolveRtkSourceRepo({ env = process.env } = {}) {
+	const candidates = [
+		env.OABTW_RTK_REPO,
+		env.OPENAGENTSBTW_RTK_REPO,
+		path.join(ROOT, "vendor", "rtk"),
+	].filter(Boolean);
+	for (const candidate of candidates) {
+		const repo = path.resolve(candidate);
+		if (
+			(await pathExists(path.join(repo, "Cargo.toml"))) &&
+			(await pathExists(path.join(repo, "src", "main.rs")))
+		) {
+			return repo;
+		}
+	}
+	return "";
+}
+
+export function managedRtkBinaryPath({
+	platform = process.platform,
+	paths = PATHS,
+} = {}) {
+	return path.join(
+		paths.managedBinDir,
+		platform === "win32" ? "rtk.exe" : "rtk",
+	);
+}
+
+export async function installBundledRtkBinary() {
+	const repo = await resolveRtkSourceRepo();
+	if (!repo) {
+		logWarn("Bundled RTK source missing; leaving RTK configure-only mode");
+		return false;
+	}
+	if (!commandExists("cargo")) {
+		logWarn("Cargo not found; leaving RTK configure-only mode");
+		return false;
+	}
+	await run("cargo", [
+		"build",
+		"--release",
+		"--manifest-path",
+		path.join(repo, "Cargo.toml"),
+	]);
+	await ensureDir(PATHS.managedBinDir);
+	const binaryName = process.platform === "win32" ? "rtk.exe" : "rtk";
+	const source = path.join(repo, "target", "release", binaryName);
+	const target = managedRtkBinaryPath();
+	await fs.copyFile(source, target);
+	if (process.platform !== "win32") await fs.chmod(target, 0o755);
+	await writeConfigEnv({ OABTW_RTK_BIN: target, OABTW_RTK_REPO: repo });
+	logInfo(`RTK bundled source -> ${target}`);
+	return true;
+}
+
 export function resolveJsRunner() {
 	if (commandExists("bunx")) return "bunx";
 	if (commandExists("bun")) return "bunx-fallback";

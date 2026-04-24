@@ -18,10 +18,10 @@ Official reference: https://developers.openai.com/codex/config-reference
 | `project_doc_max_bytes`          | `12000`              | `16000`     | `24000`     | Tier-shaped `AGENTS.md` budget.                                |
 | `hide_agent_reasoning`           | `true`               | same        | same        | Keep reasoning events hidden.                                  |
 | `model_reasoning_summary`        | `"none"`             | same        | same        | Avoid summary overhead.                                        |
-| `tool_output_token_limit`        | `1200`               | `4000`      | `8000`      | Tier-shaped evidence budget for tool output.                   |
+| `tool_output_token_limit`        | `800`                | `2000`      | `4000`      | Tier-shaped evidence budget for tool output.                   |
 | `model_instructions_file`        | `~/.codex/AGENTS.md` | same        | same        | Keep guidance on the Codex-native instructions surface.        |
 | `review_model`                   | `gpt-5.3-codex`      | same        | same        | Align built-in `/review` with the managed review split.        |
-| `approvals_reviewer`             | `"user"`             | same        | same        | Keep approvals interactive by default.                         |
+| `approvals_reviewer`             | `"auto_review"`      | same        | same        | Let the reviewer subagent handle eligible approval prompts.    |
 | `allow_login_shell`              | `true`               | same        | same        | Preserve current shell/login semantics.                        |
 | `web_search`                     | `"cached"`           | same        | same        | Safe global default for docs/search.                           |
 | `project_doc_fallback_filenames` | `["CLAUDE.md"]`      | same        | same        | Still find repo guidance outside migrated `AGENTS.md` repos.   |
@@ -33,6 +33,8 @@ Official reference: https://developers.openai.com/codex/config-reference
 - `[features]`
   - `codex_hooks = true`
   - `multi_agent = true`
+  - `collaboration_modes = true`
+  - `default_mode_request_user_input = true`
   - `fast_mode = false`
   - `memories = true`
   - `shell_tool = true`
@@ -72,7 +74,7 @@ Swarm defaults are tier-shaped:
 
 ### `openagentsbtw`
 - `model = "gpt-5.5"`
-- `model_reasoning_effort = "high"`
+- `model_reasoning_effort = "medium"`
 - `plan_mode_reasoning_effort = "high"`
 
 ### `openagentsbtw-implement`
@@ -93,7 +95,8 @@ Swarm defaults are tier-shaped:
 
 ### `openagentsbtw-approval-auto`
 - same model split as implementation
-- `approval_policy = "never"`
+- `approval_policy = "on-request"`
+- `approvals_reviewer = "auto_review"`
 
 ### `openagentsbtw-runtime-long`
 - same model split as implementation
@@ -118,5 +121,6 @@ Installer-managed config does **not** merge those sample-only commented examples
 ## Notes
 
 - openagentsbtw does not hard-code `service_tier = "flex"` in managed Codex config.
-- `xhigh` remains manual-only; managed defaults stay `high` for planning/review, `medium` for implementation, and `high` for bounded utility.
+- `xhigh` remains manual-only; managed defaults stay `high` for Plan mode and review, `medium` for top-level edit/implementation, and `high` for bounded utility.
 - `plus|pro-5|pro-20` rewrite the contents of `openagentsbtw*` profiles. They do not create plan-specific profile names.
+- Native Codex config has no confirmed documented key for defaulting raw TUI startup into Plan mode; wrapper no-mode prompts route to `plan`.

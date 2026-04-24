@@ -425,15 +425,22 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /sqlite_home = "~\/\.codex\/openagentsbtw\/sqlite"/);
 		assert.match(config, /project_doc_max_bytes = 16000/);
 		assert.match(config, /hide_agent_reasoning = true/);
+		assert.match(config, /^model_reasoning_effort = "medium"$/m);
+		assert.match(config, /^plan_mode_reasoning_effort = "high"$/m);
 		assert.match(config, /model_reasoning_summary = "none"/);
-		assert.match(config, /tool_output_token_limit = 4000/);
+		assert.match(config, /tool_output_token_limit = 2000/);
 		assert.match(config, /review_model = "gpt-5\.3-codex"/);
-		assert.match(config, /approvals_reviewer = "user"/);
+		assert.match(config, /^approvals_reviewer = "auto_review"$/m);
 		assert.match(config, /allow_login_shell = true/);
 		assert.match(config, /^web_search = "cached"$/m);
 		assert.match(config, /project_doc_fallback_filenames = \["CLAUDE\.md"\]/);
 		assert.match(config, /\[tools\][\s\S]*?view_image = true/);
 		assert.match(config, /\[features\][\s\S]*?memories = true/);
+		assert.match(config, /\[features\][\s\S]*?collaboration_modes = true/);
+		assert.match(
+			config,
+			/\[features\][\s\S]*?default_mode_request_user_input = true/,
+		);
 		assert.match(config, /\[features\][\s\S]*?shell_tool = true/);
 		assert.match(config, /\[features\][\s\S]*?shell_snapshot = true/);
 		assert.match(
@@ -494,11 +501,11 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /background_terminal_max_timeout = 7200/);
 		assert.match(config, /unified_exec = true/);
 		assert.match(config, /prevent_idle_sleep = true/);
-		assert.match(config, /approval_policy = "never"/);
+		assert.equal(config.includes('approval_policy = "never"'), false);
 		assert.equal(config.includes('model_verbosity = "medium"'), false);
 		assert.match(
 			config,
-			/\[profiles\.openagentsbtw\][\s\S]*?model_reasoning_effort = "high"[\s\S]*?plan_mode_reasoning_effort = "high"/,
+			/\[profiles\.openagentsbtw\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "high"[\s\S]*?approvals_reviewer = "auto_review"/,
 		);
 		assert.match(
 			config,
@@ -510,7 +517,7 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(
 			config,
-			/\[profiles\.openagentsbtw-approval-auto\][\s\S]*?model_reasoning_effort = "medium"[\s\S]*?plan_mode_reasoning_effort = "medium"/,
+			/\[profiles\.openagentsbtw-approval-auto\][\s\S]*?approval_policy = "on-request"[\s\S]*?approvals_reviewer = "auto_review"/,
 		);
 		assert.match(
 			config,
@@ -645,6 +652,10 @@ describe("generated Codex defaults", () => {
 		);
 		assert.match(
 			wrapper,
+			/explicitly spawn subagents when parallel exploration/,
+		);
+		assert.match(
+			wrapper,
 			/name 2-3 key assumptions, the most likely failure mode, and what evidence would materially change the plan/,
 		);
 		assert.match(
@@ -655,6 +666,7 @@ describe("generated Codex defaults", () => {
 			wrapper,
 			/Route implementation through hephaestus-style execution/,
 		);
+		assert.match(wrapper, /explicitly spawn subagents when parallel work/);
 		assert.match(
 			wrapper,
 			/If the spec or user premise conflicts with repo evidence, stop and name the contradiction before editing/,
@@ -670,6 +682,7 @@ describe("generated Codex defaults", () => {
 			wrapper,
 			/Route review through nemesis-style analysis on the review profile/,
 		);
+		assert.match(wrapper, /explicitly spawn subagents by risk area/);
 		assert.match(
 			wrapper,
 			/run-codex-filtered\.mjs" resume --profile "\$PROFILE" "\$@"/,
@@ -1024,6 +1037,8 @@ describe("generated hook manifests", () => {
 			assert.match(helper, /rtk\(`dotnet /);
 			assert.match(helper, /rtk\(`json /);
 			assert.match(helper, /cdRtkRewrite/);
+			assert.match(helper, /managedRtkCandidates/);
+			assert.doesNotMatch(helper, /CodeProjects.*rtk-ai/);
 		}
 	});
 

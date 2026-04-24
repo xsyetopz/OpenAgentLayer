@@ -1,0 +1,65 @@
+version = 3
+extends = []
+scope = []
+
+[engine]
+semantic = "auto"
+toolchain = "stable"
+nightly_toolchain = "nightly"
+
+[workspace]
+include = ["**/*.rs"]
+exclude = [
+    "target/**",
+    ".git/**",
+]
+
+[output]
+format = "text"
+
+[adapters.clippy]
+enabled = false
+args = []
+toolchain = "inherit"
+
+[rules."architecture.banned_dependencies"]
+level = "allow"
+
+[rules."architecture.layer_direction"]
+level = "allow"
+
+[rules."architecture.qualified_module_paths"]
+level = "allow"
+
+[rules."design.god_object"]
+level = "allow"
+
+[rules."design.naming_policy"]
+level = "allow"
+
+[rules."design.public_api_errors"]
+level = "allow"
+
+[rules."design.repeated_type_aliases"]
+level = "allow"
+
+[rules."pattern.custom"]
+level = "allow"
+
+[rules."perf.hot_path_allocations"]
+level = "allow"
+
+[rules."portability.absolute_literal_paths"]
+level = "allow"
+
+[rules."shape.duplicate_logic"]
+level = "allow"
+
+[rules."shape.file_complexity"]
+level = "allow"
+
+[rules."shape.responsibility_split"]
+level = "allow"
+
+[rules."testing.external_test_modules"]
+level = "allow"

@@ -78,7 +78,7 @@ describe("managed Codex config", () => {
 			assert.equal(config.includes("approval_policy = { granular = {"), false);
 			assert.match(config, /^review_model = "gpt-5\.3-codex"$/m);
 			assert.match(config, /^web_search = "cached"$/m);
-			assert.match(config, /^approvals_reviewer = "user"$/m);
+			assert.match(config, /^approvals_reviewer = "auto_review"$/m);
 			assert.match(config, /^\[tools\]$/m);
 			assert.match(config, /^view_image = true$/m);
 			assert.match(config, /^agents\.job_max_runtime_seconds = 2700$/m);

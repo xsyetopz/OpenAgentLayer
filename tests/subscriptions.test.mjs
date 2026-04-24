@@ -131,7 +131,7 @@ describe("subscription presets", () => {
 	it("uses tier-aware reasoning split across managed Codex profiles", () => {
 		for (const planName of ["plus", "pro-5", "pro-20"]) {
 			const plan = getCodexPlan(planName);
-			assert.equal(plan.profiles.main.modelReasoning, "high");
+			assert.equal(plan.profiles.main.modelReasoning, "medium");
 			assert.equal(plan.profiles.main.planReasoning, "high");
 			assert.equal(plan.profiles.utility.modelReasoning, "high");
 			assert.equal(plan.profiles.utility.planReasoning, "high");
@@ -143,6 +143,8 @@ describe("subscription presets", () => {
 			assert.equal(plan.profiles.runtimeLong.planReasoning, "medium");
 			assert.equal(plan.profiles.implementation.modelReasoning, "medium");
 			assert.equal(plan.profiles.implementation.planReasoning, "medium");
+			assert.equal(plan.profiles.approvalAuto.approvalsReviewer, "auto_review");
+			assert.equal(plan.profiles.approvalAuto.approval, "on-request");
 		}
 	});
 

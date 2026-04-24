@@ -26,9 +26,9 @@ Codex CLI 0.124.0 supported model set for openagentsbtw:
 
 | Codex plan | Top-level `openagentsbtw` | `model_reasoning_effort` | `plan_mode_reasoning_effort` | Review          | Implementation/auto/runtime | Utility        |
 | ---------- | ------------------------- | ------------------------ | ---------------------------- | --------------- | --------------------------- | -------------- |
-| `plus`     | `gpt-5.5`                 | `high`                   | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
-| `pro-5`    | `gpt-5.5`                 | `high`                   | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
-| `pro-20`   | `gpt-5.5`                 | `high`                   | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `plus`     | `gpt-5.5`                 | `medium`                 | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `pro-5`    | `gpt-5.5`                 | `medium`                 | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
+| `pro-20`   | `gpt-5.5`                 | `medium`                 | `high`                       | `gpt-5.3-codex` | `gpt-5.3-codex`             | `gpt-5.4-mini` |
 
 Managed config export details live in [codex-config-export.md](codex-config-export.md).
 
@@ -92,11 +92,13 @@ Queue state lives outside the repository under `~/.config/openagentsbtw/queue/`.
 - Managed Codex profiles do not set `commit_attribution`; Codex/OpenAI-native model attribution should remain provider-determined.
 - Codex pre-tool commit guard now enforces AI co-author trailers on `git commit`: missing trailers are blocked with a corrected command hint, and malformed canonical domains such as `noreply@openai` are rejected in favor of `noreply@openai.com`.
 - `--source deepwiki` is for public GitHub repos only.
-- `--approval auto` maps to the sandboxed auto-accept implementation profile.
+- Managed config sets `approvals_reviewer = "auto_review"` so eligible approval prompts are reviewed by Codex's reviewer subagent instead of stopping on the user by default.
+- Native Codex config has `plan_mode_reasoning_effort`, but no confirmed documented key to make raw `codex` TUI boot directly into Plan mode. The openagentsbtw wrapper defaults no-mode prompts to the `plan` route instead.
+- `--approval auto` maps to the sandboxed auto-review implementation profile.
 - `--runtime long` maps to the long-running execution profile.
 - Default managed guidance now hardens always-on behavior: smallest-sufficient diffs, explicit instruction-hierarchy handling for repo/tool text, and no adversarial prompt-bypass tactics.
 - Codex install writes both the source plugin and active cache copy so skills are present after install, then prunes stale openagentsbtw cache versions without touching unrelated plugin caches.
-- RTK enforcement treats any valid `rtk rewrite` stdout as authoritative, even when RTK exits nonzero. openagentsbtw also applies high-gain rewrites for common upstream misses (`bun test` -> `rtk --ultra-compact test bun test`, `bun run typecheck`/`bunx tsc` -> `rtk --ultra-compact tsc`, Biome checks -> `rtk --ultra-compact summary`, `npm test`/`pnpm test` -> `rtk --ultra-compact test`, `dotnet test`, `node --test`, `flutter test`, simple `jq`, raw search/read commands, and `env`) before falling back to `rtk proxy`. The installer writes both the canonical policy and `~/.codex/RTK.md`, then appends a managed RTK reference to `~/.codex/AGENTS.md`.
+- RTK enforcement uses the managed bundled RTK binary first and treats any valid `rtk rewrite` stdout as authoritative, even when RTK exits nonzero. openagentsbtw also applies high-gain rewrites for common upstream misses (`bun test` -> `rtk --ultra-compact test bun test`, `bun run typecheck`/`bunx tsc` -> `rtk --ultra-compact tsc`, Biome checks -> `rtk --ultra-compact summary`, `npm test`/`pnpm test` -> `rtk --ultra-compact test`, `dotnet test`, `node --test`, `flutter test`, simple `jq`, raw search/read commands, `env`, and bare `rtk ...` commands missing `--ultra-compact`) before falling back to `rtk proxy`. The installer writes both the canonical policy and `~/.codex/RTK.md`, then appends a managed RTK reference to `~/.codex/AGENTS.md`.
 - `rtk gain` reports local RTK tracking analytics: estimated raw command tokens vs filtered output tokens. Use `rtk gain --project` after validation-heavy sessions to confirm commands are being filtered rather than merely proxied.
 - Managed Caveman mode is reasserted through prompt/session hooks and completion checks reject obvious verbose drift while preserving code, commands, exact errors, docs, and review findings.
 - Route prompts now add analysis scaffolds where they help: planning/review/debug explicitly name assumptions, missing evidence, contradiction handling, and what would change the conclusion. Implementation routes stay lean and stop on repo/spec conflicts.

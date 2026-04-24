@@ -275,6 +275,17 @@ describe("public entrypoints", () => {
 		assert.match(shared, /OABTW_CAVEMAN_MODE/);
 	});
 
+	it("builds managed RTK from bundled source instead of upstream bootstrap", () => {
+		const installer = readRepo("scripts/install/cli.mjs");
+		const configCli = readRepo("scripts/install/config-cli.mjs");
+		const shared = readRepo("scripts/install/shared.mjs");
+		assert.match(shared, /vendor", "rtk"/);
+		assert.match(shared, /installBundledRtkBinary/);
+		assert.doesNotMatch(installer, /rtk-ai\/tap\/rtk/);
+		assert.doesNotMatch(configCli, /raw\.githubusercontent\.com\/rtk-ai\/rtk/);
+		assert.doesNotMatch(shared, /CodeProjects", "rtk-ai", "rtk"/);
+	});
+
 	it("uses caller workspace targets for project-scoped install paths", () => {
 		const installer = readRepo("scripts/install/cli.mjs");
 		const uninstaller = readRepo("scripts/install/uninstall-cli.mjs");

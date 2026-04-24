@@ -33,6 +33,7 @@ import {
 	commandExists,
 	ctx7RunnerCommand,
 	ctx7RunnerLine,
+	installBundledRtkBinary,
 	loadConfigEnv,
 	logInfo,
 	PATHS,
@@ -137,24 +138,9 @@ async function removeCtx7Wrapper() {
 }
 
 async function ensureRtkBinary() {
-	if (commandExists("rtk")) {
-		logInfo("RTK already installed");
-		return;
+	if (!(await installBundledRtkBinary())) {
+		logInfo("RTK binary not installed; policy files will still be written");
 	}
-	if (process.platform === "win32") {
-		logInfo(
-			"RTK not found on Windows; skipping binary bootstrap and leaving configure-only mode",
-		);
-		return;
-	}
-	if (commandExists("brew")) {
-		await run("brew", ["install", "rtk-ai/tap/rtk"]);
-		return;
-	}
-	await run("sh", [
-		"-lc",
-		"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh",
-	]);
 }
 
 async function installedRtkPolicyTargets() {

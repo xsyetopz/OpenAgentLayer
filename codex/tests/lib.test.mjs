@@ -266,6 +266,32 @@ describe("codex RTK helper", () => {
 		}
 	});
 
+	it("requires ultra-compact mode for bare rtk commands", () => {
+		const fixture = withFakeRtk();
+		const originalHome = process.env.HOME;
+		const originalPath = process.env.PATH;
+		process.env.HOME = fixture.homeDir;
+		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
+		try {
+			assert.deepEqual(getRtkRewrite("rtk grep -n foo src", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact grep -n foo src",
+			});
+			assert.deepEqual(getRtkRewrite("rtk make test", fixture.repoDir), {
+				policyPath: join(fixture.repoDir, "RTK.md"),
+				rewritten: "rtk --ultra-compact make test",
+			});
+			assert.equal(
+				getRtkRewrite("rtk --ultra-compact grep -n foo src", fixture.repoDir),
+				null,
+			);
+		} finally {
+			process.env.HOME = originalHome;
+			process.env.PATH = originalPath;
+			fixture.cleanup();
+		}
+	});
+
 	it("falls back to rtk proxy for unsupported complex commands", () => {
 		const fixture = withFakeRtk();
 		const originalHome = process.env.HOME;

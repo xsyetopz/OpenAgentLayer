@@ -49,6 +49,7 @@ import {
 	ctx7RunnerCommand,
 	ctx7RunnerLine,
 	fail,
+	installBundledRtkBinary,
 	loadConfigEnv,
 	logInfo,
 	logWarn,
@@ -831,21 +832,8 @@ async function maybeInstallRtk(args) {
 		logWarn("Skipping RTK install");
 		return;
 	}
-	if (!commandExists("rtk")) {
-		if (process.platform === "win32") {
-			logWarn(
-				"RTK not found on Windows; skipping binary bootstrap and leaving configure-only mode",
-			);
-		} else if (commandExists("brew")) {
-			await run("brew", ["install", "rtk-ai/tap/rtk"]);
-		} else {
-			await run("sh", [
-				"-lc",
-				"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh",
-			]);
-		}
-	} else {
-		logInfo("RTK already installed");
+	if (!(await installBundledRtkBinary())) {
+		logWarn("RTK binary not installed; policy files will still be written");
 	}
 	const workspacePaths = resolveWorkspacePaths();
 	const policyTargets = selectedRtkPolicyTargets(args);

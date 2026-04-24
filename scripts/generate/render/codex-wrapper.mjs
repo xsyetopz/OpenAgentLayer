@@ -41,6 +41,7 @@ ${configOverrides ? `${configOverrides}\n` : ""}        ;;`;
 		),
 		utilityModes,
 	].join("\n");
+	const modePattern = modes.map((mode) => mode.mode).join("|");
 
 	return `#!/bin/bash
 set -euo pipefail
@@ -68,10 +69,23 @@ EOF
     exit 1
 }
 
-[[ $# -ge 1 ]] || usage
+is_mode() {
+    case "\${1:-}" in
+        ${modePattern}|memory|queue)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
 
-MODE="$1"
-shift
+if [[ $# -ge 1 ]] && is_mode "$1"; then
+    MODE="$1"
+    shift
+else
+    MODE="plan"
+fi
 
 if [[ "$MODE" == "memory" ]]; then
     [[ $# -ge 1 ]] || usage

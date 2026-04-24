@@ -60,7 +60,7 @@ The installer:
 - appends managed openagentsbtw guidance to `~/.codex/AGENTS.md`
 - appends managed Codex defaults (`sqlite_home`, `project_doc_max_bytes`, `history`, `memories`, `compact_prompt`, `hide_agent_reasoning`, `tool_output_token_limit`, `review_model`, `web_search`, tool/feature flags, and `[agents.<name>]` metadata) plus the managed `openagentsbtw`, `openagentsbtw-implement`, `openagentsbtw-review`, `openagentsbtw-utility`, `openagentsbtw-approval-auto`, and `openagentsbtw-runtime-long` profiles to `~/.codex/config.toml`
 - optionally appends a managed `mcp_servers.deepwiki` block to `~/.codex/config.toml`
-- optionally installs RTK, managed policy files at `~/.config/openagentsbtw/RTK.md` and `~/.codex/RTK.md`, and a managed `~/.codex/AGENTS.md` RTK reference
+- optionally builds the bundled patched RTK source, installs the managed RTK binary, writes policy files at `~/.config/openagentsbtw/RTK.md` and `~/.codex/RTK.md`, and appends a managed `~/.codex/AGENTS.md` RTK reference
 
 ## Updating
 
@@ -109,14 +109,14 @@ Wrappers no longer prepend `$openagentsbtw`. The managed profiles enable the plu
   High-reasoning installer preset. It rewrites the managed `openagentsbtw*` profiles while keeping the default profile name `openagentsbtw`.
 - `pro-20`
   Same model split as `pro-5`, with more aggressive swarming. It is an installer preset, not a profile name.
-- For `plus`, `pro-5`, and `pro-20`, top-level `openagentsbtw` defaults to `gpt-5.5` with `model_reasoning_effort = "high"` and `plan_mode_reasoning_effort = "high"`.
+- For `plus`, `pro-5`, and `pro-20`, top-level `openagentsbtw` defaults to `gpt-5.5` with `model_reasoning_effort = "medium"` and `plan_mode_reasoning_effort = "high"`.
 - `openagentsbtw-review`
   A dedicated review profile. It uses `gpt-5.3-codex` with `high` reasoning for `nemesis`-style analysis.
 - Implementation/autopilot/long-runtime profiles stay on `gpt-5.3-codex` with `model_reasoning_effort = "medium"` and `plan_mode_reasoning_effort = "medium"`.
 - `openagentsbtw-utility`
   A lightweight profile for bounded utility tasks. It uses `gpt-5.4-mini` with `high` reasoning.
 - `openagentsbtw-approval-auto`
-  A sandboxed auto-accept profile for implementation work. It keeps `sandbox_mode = "workspace-write"` but switches to `approval_policy = "never"`.
+  A sandboxed auto-review profile for implementation work. It keeps `sandbox_mode = "workspace-write"` and routes eligible approval prompts through `approvals_reviewer = "auto_review"`.
 - `openagentsbtw-runtime-long`
   A patient long-running execution profile. It keeps the implementation route, prevents idle sleep, and raises the background terminal timeout for long builds and test suites.
 - Managed config now exports first-class `[agents.<name>]` blocks with `config_file`, `description`, and `nickname_candidates`, and it shapes swarm runtime via `agents.max_threads`, `agents.max_depth`, and `agents.job_max_runtime_seconds`.

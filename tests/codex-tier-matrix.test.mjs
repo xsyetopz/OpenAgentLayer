@@ -32,7 +32,7 @@ describe("codex tier matrix wording", () => {
 		for (const plan of ["plus", "pro-5", "pro-20"]) {
 			const config = getCodexPlan(plan);
 			assert.equal(config.main.model, "gpt-5.5");
-			assert.equal(config.profiles.main.modelReasoning, "high");
+			assert.equal(config.profiles.main.modelReasoning, "medium");
 			assert.equal(config.profiles.main.planReasoning, "high");
 			assert.equal(config.review.model, "gpt-5.3-codex");
 			assert.equal(config.profiles.review.modelReasoning, "high");

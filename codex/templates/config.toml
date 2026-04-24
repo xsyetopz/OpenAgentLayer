@@ -4,11 +4,13 @@ profile = "openagentsbtw"
 sqlite_home = "~/.codex/openagentsbtw/sqlite"
 project_doc_max_bytes = 16000
 hide_agent_reasoning = true
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
 model_reasoning_summary = "none"
-tool_output_token_limit = 4000
+tool_output_token_limit = 2000
 model_instructions_file = "~/.codex/AGENTS.md"
 review_model = "gpt-5.3-codex"
-approvals_reviewer = "user"
+approvals_reviewer = "auto_review"
 allow_login_shell = true
 web_search = "cached"
 project_doc_fallback_filenames = ["CLAUDE.md"]
@@ -17,6 +19,8 @@ view_image = true
 [features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -93,17 +97,20 @@ config_file = "agents/odysseus.toml"
 nickname_candidates = ["Odysseus", "Coordinator", "Orchestrator"]
 [profiles.openagentsbtw]
 model = "gpt-5.5"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "high"
 model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -118,11 +125,14 @@ model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-implement.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -137,11 +147,14 @@ model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-review.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -156,12 +169,15 @@ model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 web_search = "live"
 
 [profiles.openagentsbtw-utility.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -175,12 +191,15 @@ plan_mode_reasoning_effort = "medium"
 model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
-approval_policy = "never"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-approval-auto.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true
@@ -195,12 +214,15 @@ model_verbosity = "low"
 personality = "pragmatic"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
+approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 background_terminal_max_timeout = 7200
 
 [profiles.openagentsbtw-runtime-long.features]
 codex_hooks = true
 multi_agent = true
+collaboration_modes = true
+default_mode_request_user_input = true
 fast_mode = false
 memories = true
 shell_tool = true

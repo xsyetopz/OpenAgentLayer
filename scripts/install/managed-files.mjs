@@ -51,6 +51,8 @@ const CODEX_AGENT_ORDER = [
 const FEATURE_KEY_MAP = {
 	codexHooks: "codex_hooks",
 	multiAgent: "multi_agent",
+	collaborationModes: "collaboration_modes",
+	defaultModeRequestUserInput: "default_mode_request_user_input",
 	fastMode: "fast_mode",
 	memories: "memories",
 	shellTool: "shell_tool",
@@ -63,6 +65,8 @@ const FEATURE_KEY_MAP = {
 const TOP_LEVEL_FEATURES = {
 	codexHooks: true,
 	multiAgent: true,
+	collaborationModes: true,
+	defaultModeRequestUserInput: true,
 	fastMode: false,
 	memories: true,
 	shellTool: true,
@@ -117,8 +121,11 @@ function renderCodexProfile(name, config, { extraLines = [] } = {}) {
 		'personality = "pragmatic"',
 		'model_instructions_file = "~/.codex/AGENTS.md"',
 		`approval_policy = "${config.approval}"`,
+		config.approvalsReviewer
+			? `approvals_reviewer = "${config.approvalsReviewer}"`
+			: "",
 		`sandbox_mode = "${config.sandbox}"`,
-	];
+	].filter(Boolean);
 	if (config.backgroundTerminalMaxTimeout) {
 		profileLines.push(
 			`background_terminal_max_timeout = ${config.backgroundTerminalMaxTimeout}`,
@@ -167,18 +174,18 @@ function codexExportBudgets(planName) {
 		case "plus":
 			return {
 				projectDocMaxBytes: 12000,
-				toolOutputTokenLimit: 1200,
+				toolOutputTokenLimit: 800,
 			};
 		case "pro-20":
 			return {
 				projectDocMaxBytes: 24000,
-				toolOutputTokenLimit: 8000,
+				toolOutputTokenLimit: 4000,
 			};
 		case "pro-5":
 		default:
 			return {
 				projectDocMaxBytes: 16000,
-				toolOutputTokenLimit: 4000,
+				toolOutputTokenLimit: 2000,
 			};
 	}
 }
@@ -248,11 +255,13 @@ async function renderCodexConfig({
 		'sqlite_home = "~/.codex/openagentsbtw/sqlite"',
 		`project_doc_max_bytes = ${budgets.projectDocMaxBytes}`,
 		"hide_agent_reasoning = true",
+		'model_reasoning_effort = "medium"',
+		'plan_mode_reasoning_effort = "high"',
 		'model_reasoning_summary = "none"',
 		`tool_output_token_limit = ${budgets.toolOutputTokenLimit}`,
 		'model_instructions_file = "~/.codex/AGENTS.md"',
 		'review_model = "gpt-5.3-codex"',
-		'approvals_reviewer = "user"',
+		'approvals_reviewer = "auto_review"',
 		"allow_login_shell = true",
 		'web_search = "cached"',
 		'project_doc_fallback_filenames = ["CLAUDE.md"]',

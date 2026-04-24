@@ -51,18 +51,44 @@ export function findRtkMd(cwd = process.cwd()) {
 	return findRepoRtkMd(cwd) || findHomeRtkMd();
 }
 
-export function hasRtkBinary() {
-	try {
-		const result = spawnSync("rtk", ["--version"], {
-			env: process.env,
-			encoding: "utf8",
-			timeout: 3000,
-			shell: process.platform === "win32",
-		});
-		return result.status === 0;
-	} catch {
-		return false;
+function managedRtkCandidates() {
+	const home = homeDir();
+	const exe = process.platform === "win32" ? "rtk.exe" : "rtk";
+	const candidates = [];
+	if (home) candidates.push(join(home, ".local", "bin", exe));
+	const appData = process.env.APPDATA || "";
+	if (appData) candidates.push(join(appData, "openagentsbtw", "bin", exe));
+	return candidates;
+}
+
+function rtkBinaryCandidates() {
+	return [
+		process.env.OABTW_RTK_BIN,
+		process.env.OPENAGENTSBTW_RTK_BIN,
+		...managedRtkCandidates(),
+		"rtk",
+	].filter(Boolean);
+}
+
+export function rtkBinary() {
+	for (const candidate of rtkBinaryCandidates()) {
+		try {
+			const result = spawnSync(candidate, ["--version"], {
+				env: process.env,
+				encoding: "utf8",
+				timeout: 3000,
+				shell: process.platform === "win32" && candidate === "rtk",
+			});
+			if (result.status === 0) return candidate;
+		} catch {
+			// Try next candidate.
+		}
 	}
+	return "";
+}
+
+export function hasRtkBinary() {
+	return Boolean(rtkBinary());
 }
 
 function shellQuote(command) {
@@ -70,7 +96,9 @@ function shellQuote(command) {
 }
 
 function rtk(command) {
-	return `rtk --ultra-compact ${command}`.trim();
+	const binary = rtkBinary() || "rtk";
+	const prefix = binary === "rtk" ? "rtk" : shellQuote(binary);
+	return `${prefix} --ultra-compact ${command}`.trim();
 }
 
 function proxyRewrite(command) {
@@ -267,15 +295,27 @@ function highGainRewrite(command) {
 
 function normalizeRtkRewrite(rewritten) {
 	if (!/^rtk\b/.test(rewritten)) return "";
-	if (/^rtk\s+--ultra-compact\b/.test(rewritten)) return rewritten;
-	return rewritten.replace(/^rtk\b/, "rtk --ultra-compact");
+	const binary = rtkBinary() || "rtk";
+	const prefix = binary === "rtk" ? "rtk" : shellQuote(binary);
+	if (/^rtk\s+--ultra-compact\b/.test(rewritten)) {
+		return rewritten.replace(/^rtk\b/, prefix);
+	}
+	return rewritten.replace(/^rtk\b/, `${prefix} --ultra-compact`);
 }
 
 export function getRtkRewrite(command, cwd = process.cwd()) {
 	const normalized = String(command || "").trim();
-	if (!normalized || /^\s*rtk\b/.test(normalized)) return null;
+	if (!normalized || /^rtk\s+--ultra-compact\b/.test(normalized)) return null;
 	const policyPath = findRtkMd(cwd);
-	if (!policyPath || !hasRtkBinary()) return null;
+	const binary = rtkBinary();
+	if (!policyPath || !binary) return null;
+	if (/^rtk\b/.test(normalized)) {
+		const rewritten = normalizeRtkRewrite(normalized);
+		if (rewritten && rewritten !== normalized) {
+			return { policyPath, rewritten };
+		}
+		return null;
+	}
 
 	const highGain = highGainRewrite(normalized);
 	if (highGain) {
@@ -283,12 +323,12 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 	}
 
 	try {
-		const result = spawnSync("rtk", ["rewrite", normalized], {
+		const result = spawnSync(binary, ["rewrite", normalized], {
 			cwd,
 			env: process.env,
 			encoding: "utf8",
 			timeout: 3000,
-			shell: process.platform === "win32",
+			shell: process.platform === "win32" && binary === "rtk",
 		});
 		const rewritten = normalizeRtkRewrite((result.stdout || "").trim());
 		if (rewritten && rewritten !== normalized) {
