@@ -18,7 +18,7 @@ project_doc_fallback_filenames = ["CLAUDE.md"]
 view_image = true
 [features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -68,31 +68,31 @@ agents.max_threads = 5
 agents.max_depth = 2
 agents.job_max_runtime_seconds = 2700
 [agents.athena]
-description = "Architecture and planning agent for multi-file changes, sequencing, and tradeoff analysis."
+description = "Architecture and planning agent for decision-complete plans, migrations, ownership boundaries, sequencing, and acceptance gates."
 config_file = "agents/athena.toml"
 nickname_candidates = ["Athena", "Architect", "Planner"]
 [agents.hephaestus]
-description = "Primary implementation agent for code changes, bug fixes, and refactors."
+description = "Primary implementation agent for production code changes, bug fixes, refactors, and plan execution with verification."
 config_file = "agents/hephaestus.toml"
 nickname_candidates = ["Hephaestus", "Builder", "Implementer"]
 [agents.nemesis]
-description = "Review and audit agent focused on correctness, regressions, security, and missing tests."
+description = "Review and audit agent for warranted correctness, regression, security, design-risk, and missing-test findings."
 config_file = "agents/nemesis.toml"
 nickname_candidates = ["Nemesis", "Reviewer", "Auditor"]
 [agents.atalanta]
-description = "Validation agent for running tests, parsing failures, and reporting exact root-cause evidence."
+description = "Validation agent for tests, failure evidence, root-cause triage, and regression validation."
 config_file = "agents/atalanta.toml"
 nickname_candidates = ["Atalanta", "Tester", "Validator"]
 [agents.calliope]
-description = "Documentation agent for READMEs, ADRs, changelogs, and precise handoff artifacts."
+description = "Documentation agent for accurate READMEs, ADRs, changelogs, handoffs, and stale-doc cleanup."
 config_file = "agents/calliope.toml"
 nickname_candidates = ["Calliope", "Writer", "Documenter"]
 [agents.hermes]
-description = "Exploration agent for repo tracing, dependency analysis, and evidence-heavy read-only investigation."
+description = "Exploration agent for cited repo tracing, dependency analysis, API discovery, and narrow evidence packets."
 config_file = "agents/hermes.toml"
 nickname_candidates = ["Hermes", "Explorer", "Tracer"]
 [agents.odysseus]
-description = "Coordinator for multi-step work that benefits from explicit delegation across several agents."
+description = "Coordinator for packet-driven multi-step work, disjoint delegation, acceptance gates, and final synthesis."
 config_file = "agents/odysseus.toml"
 nickname_candidates = ["Odysseus", "Coordinator", "Orchestrator"]
 [profiles.openagentsbtw]
@@ -108,7 +108,7 @@ sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -130,7 +130,7 @@ sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-implement.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -152,7 +152,7 @@ sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-review.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -175,7 +175,7 @@ web_search = "live"
 
 [profiles.openagentsbtw-utility.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -197,7 +197,7 @@ sandbox_mode = "workspace-write"
 
 [profiles.openagentsbtw-approval-auto.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false
@@ -220,7 +220,7 @@ background_terminal_max_timeout = 7200
 
 [profiles.openagentsbtw-runtime-long.features]
 codex_hooks = true
-multi_agent = true
+multi_agent_v2 = true
 collaboration_modes = true
 default_mode_request_user_input = true
 fast_mode = false

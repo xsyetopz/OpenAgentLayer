@@ -39,7 +39,7 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
 		agent: "hephaestus",
 		routeKind: "edit-required",
 		promptTemplate:
-			"Implement the following feature or change according to the specification. Read existing code first and follow project conventions. If the spec conflicts with repo evidence, stop and name the contradiction before editing.\n\nSpec:",
+			"Implement the following feature or change according to the specification. Read existing code first and follow project conventions. If the spec conflicts with repo evidence, stop and name the contradiction before editing. If this is a migration/refactor, remove replaced legacy layers rather than leaving wrapper-only completion unless the spec explicitly requires compatibility.\n\nSpec:",
 	},
 	{
 		name: "openagents-orchestrate",
@@ -71,7 +71,7 @@ export const COMMAND_DEFINITIONS: CommandDefinition[] = [
 		agent: "nemesis",
 		routeKind: "readonly",
 		promptTemplate:
-			"Review the following file or path. Check correctness, security, performance, and style. Before the verdict, name the main assumptions, the strongest missing evidence, and what fact would change the conclusion. If the user's premise conflicts with repo evidence, say so directly.\n\nTarget:",
+			"Review the following file or path. Check correctness, security, performance, and style. Before the verdict, name the main assumptions, the strongest missing evidence, and what fact would change the conclusion. If the user's premise conflicts with repo evidence, say so directly. Apply a warranted-fix filter; avoid nit padding. For migrations, check whether old layers were actually replaced or only wrapped.\n\nTarget:",
 	},
 	{
 		name: "openagents-test",

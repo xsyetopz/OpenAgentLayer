@@ -4,5 +4,5 @@
   "routeKind": "edit-required",
   "description": "openagentsbtw implementation (Hephaestus)",
   "title": "Implement",
-  "body": "Implement the requested work in real production code with minimal, targeted edits. If the request conflicts with repo evidence, stop and name the contradiction before editing."
+  "body": "Implement the requested work in real production code with minimal, targeted edits. If the request conflicts with repo evidence, stop and name the contradiction before editing. For migrations/refactors, remove replaced legacy layers rather than leaving wrapper-only completion unless compatibility is explicit."
 }

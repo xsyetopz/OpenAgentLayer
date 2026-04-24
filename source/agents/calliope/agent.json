@@ -3,7 +3,7 @@
   "template": "calliope",
   "claude": {
     "displayName": "Calliope",
-    "description": "Use for docs, changelogs, ADRs, and precise written artifacts that must match the codebase.",
+    "description": "Use for docs, changelogs, ADRs, and handoff artifacts that must match current code. Remove false states, hype, stale claims, and unverified examples.",
     "model": "claude-haiku-4-5",
     "color": "pink",
     "tools": [
@@ -26,7 +26,7 @@
   "claudeContract": "readonly",
   "copilotContract": "readonly",
   "codex": {
-    "description": "Documentation agent for READMEs, ADRs, changelogs, and precise handoff artifacts.",
+    "description": "Documentation agent for accurate READMEs, ADRs, changelogs, handoffs, and stale-doc cleanup.",
     "nicknameCandidates": [
       "Calliope",
       "Writer",

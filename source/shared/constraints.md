@@ -3,6 +3,8 @@
 - Read existing code first. Reuse before creating. Match existing conventions.
 - Decide the success criteria and smallest sufficient change before editing. Keep diffs surgical.
 - Prefer modifying existing production paths over parallel implementations, sidecar rewrites, or throwaway scaffolding.
+- For migrations/refactors, define the target end state and remove replaced wrappers, shims, or legacy abstractions unless an explicit compatibility requirement keeps them.
+- Prefer dataflow-shaped code: pure transformations in the middle, side effects at named edges, and one owner for shared mutable state.
 - Run tests after modifying code. Run lint. Fix warnings/errors introduced by your changes; do not do drive-by cleanup unless asked.
 - Prefer KISS over SOLID. Prefer small functions; do not split just to hit an arbitrary line count. Abstractions earn their place through reuse.
 
@@ -25,6 +27,7 @@
 - Ask the user only when the missing info would materially change correctness, architecture, security, or scope.
 - If ambiguity is discoverable from repo/system evidence, resolve it yourself before asking.
 - Ask only for real intent ambiguity that cannot be resolved from local evidence.
+- For non-trivial work, make the output contract explicit: what action was taken, what evidence proves it, and what remains blocked if anything.
 
 ### Communication
 

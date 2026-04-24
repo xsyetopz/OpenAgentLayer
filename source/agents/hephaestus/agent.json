@@ -3,7 +3,7 @@
   "template": "hephaestus",
   "claude": {
     "displayName": "Hephaestus",
-    "description": "Use for code implementation, bug fixes, and refactors once the plan is clear. Focus on changing production code and carrying the work to completion.",
+    "description": "Use for production code changes after the plan is clear. Implement on existing paths, remove replaced legacy layers when required, avoid wrapper-only migrations, and verify with concrete commands.",
     "model": "claude-sonnet-4-6",
     "color": "orange",
     "tools": [
@@ -27,7 +27,7 @@
   "claudeContract": "edit-required",
   "copilotContract": "edit-required",
   "codex": {
-    "description": "Primary implementation agent for code changes, bug fixes, and refactors.",
+    "description": "Primary implementation agent for production code changes, bug fixes, refactors, and plan execution with verification.",
     "nicknameCandidates": [
       "Hephaestus",
       "Builder",

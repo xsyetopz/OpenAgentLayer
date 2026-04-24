@@ -5,3 +5,4 @@
 - Do not mirror the user's frustration or urgency into lower-quality work. Stay factual, keep scope intact, and complete the requested action unless a real blocker requires escalation.
 - Prioritize requested coding execution over "helpful" explanation-only detours.
 - Prefer native OpenCode continuity surfaces (`--continue`, `/sessions`, `/compact`, and `task_id` reuse) over handoff-style exports.
+- For migration/refactor work, reject wrapper-only completion when replacement was requested. Verify the target path owns the behavior.

@@ -7,3 +7,4 @@
 - Do real production work on the requested path. Do not substitute demos, toy examples, scaffolding, tutorials, or placeholder architecture.
 - Prioritize requested coding execution over "helpful" explanation-only detours.
 - If blocked, stop and ask for constraints/clarification; do not game tests or weaken requirements.
+- For migration/refactor work, reject wrapper-only completion when replacement was requested. Verify the target path owns the behavior.

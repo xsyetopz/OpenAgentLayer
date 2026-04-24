@@ -345,6 +345,24 @@ export function commandExists(command) {
 	return result.status === 0;
 }
 
+export function commandPath(command) {
+	const result =
+		process.platform === "win32"
+			? spawnSync("where", [command], {
+					encoding: "utf8",
+					shell: true,
+				})
+			: spawnSync("sh", ["-lc", `command -v ${command}`], {
+					encoding: "utf8",
+				});
+	if (result.status !== 0) return "";
+	return (
+		String(result.stdout || "")
+			.split(/\r?\n/)
+			.find(Boolean) || ""
+	);
+}
+
 export async function resolveRtkSourceRepo({ env = process.env } = {}) {
 	const candidates = [
 		env.OABTW_RTK_REPO,
@@ -394,19 +412,25 @@ function managedBinShellValue(paths = PATHS) {
 	const normalizedBin = path.resolve(paths.managedBinDir);
 	const relative = path.relative(normalizedHome, normalizedBin);
 	if (relative && !relative.startsWith("..") && !path.isAbsolute(relative)) {
-		return '"${HOME}/' + relative.split(path.sep).join("/") + '"';
+		return `"\${HOME}/${relative.split(path.sep).join("/")}"`;
 	}
 	return shellSingleQuote(paths.managedBinDir);
+}
+
+function managedRtkShellValue(paths = PATHS) {
+	return shellSingleQuote(managedRtkBinaryPath({ paths }));
 }
 
 function renderManagedPathBlock(paths = PATHS) {
 	return `${MANAGED_PATH_BLOCK_START}
 openagentsbtw_managed_bin=${managedBinShellValue(paths)}
+openagentsbtw_managed_rtk=${managedRtkShellValue(paths)}
 case ":\${PATH}:" in
   *":\${openagentsbtw_managed_bin}:"*) ;;
   *) export PATH="\${openagentsbtw_managed_bin}:\${PATH}" ;;
 esac
-unset openagentsbtw_managed_bin
+rtk() { "\${openagentsbtw_managed_rtk}" "$@"; }
+unset openagentsbtw_managed_bin openagentsbtw_managed_rtk
 ${MANAGED_PATH_BLOCK_END}`;
 }
 
@@ -443,7 +467,7 @@ function managedPathShellFiles({
 }
 
 function windowsPathCommand(paths = PATHS) {
-	return `setx PATH "%PATH%;${paths.managedBinDir}"`;
+	return `setx PATH "${paths.managedBinDir};%PATH%"`;
 }
 
 export async function ensureManagedBinOnPath({
@@ -482,6 +506,7 @@ export async function ensureManagedBinOnPath({
 }
 
 export async function installBundledRtkBinary() {
+	const existingRtk = commandPath("rtk");
 	const repo = await resolveRtkSourceRepo();
 	if (!repo) {
 		logWarn("Bundled RTK source missing; leaving RTK configure-only mode");
@@ -505,6 +530,9 @@ export async function installBundledRtkBinary() {
 	if (process.platform !== "win32") await fs.chmod(target, 0o755);
 	await writeConfigEnv({ OABTW_RTK_BIN: target, OABTW_RTK_REPO: repo });
 	logInfo(`RTK bundled source -> ${target}`);
+	if (existingRtk && path.resolve(existingRtk) !== path.resolve(target)) {
+		logInfo(`RTK command redirect ${existingRtk} -> ${target}`);
+	}
 	await ensureManagedBinOnPath();
 	return true;
 }

@@ -13,7 +13,7 @@
   ],
   "claude": {
     "displayName": "Nemesis",
-    "description": "Use for code review, security review, regression hunting, and risk assessment. Findings-first, with exact citations and specific fixes.",
+    "description": "Use for correctness, security, regression, and design-risk review. Findings must be warranted, severity-ordered, holistic, and backed by file:line evidence with a concrete fix.",
     "model": "claude-sonnet-4-6",
     "color": "purple",
     "tools": [
@@ -35,7 +35,7 @@
   "claudeContract": "readonly",
   "copilotContract": "readonly",
   "codex": {
-    "description": "Review and audit agent focused on correctness, regressions, security, and missing tests.",
+    "description": "Review and audit agent for warranted correctness, regression, security, design-risk, and missing-test findings.",
     "nicknameCandidates": [
       "Nemesis",
       "Reviewer",

@@ -11,4 +11,4 @@
 - Comments explain non-obvious why only; self-documenting code should remain uncommented.
 - RTK efficiency is mandatory when RTK is active: use `rtk --ultra-compact` plus the most specific filter, and avoid `rtk proxy` unless no filtering route preserves semantics.
 - Subagents must apply the same RTK discipline and report filtered command forms used for validation or exploration.
-
+- For migration/refactor tasks, reject wrapper-only completion when the requested end state is replacement. Name removed legacy surfaces in the final evidence.

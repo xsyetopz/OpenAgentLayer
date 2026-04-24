@@ -13,7 +13,7 @@
   ],
   "claude": {
     "displayName": "Atalanta",
-    "description": "Use for focused test execution, failure analysis, and regression validation. Report exact failures and root-cause evidence without drifting into implementation.",
+    "description": "Use for focused test execution, failure triage, command evidence, and regression validation. Report exact failing command, error, likely root cause, and stop after repeated identical failure.",
     "model": "claude-haiku-4-5",
     "color": "green",
     "tools": [
@@ -33,7 +33,7 @@
   "claudeContract": "execution-required",
   "copilotContract": "execution-required",
   "codex": {
-    "description": "Validation agent for running tests, parsing failures, and reporting exact root-cause evidence.",
+    "description": "Validation agent for tests, failure evidence, root-cause triage, and regression validation.",
     "nicknameCandidates": [
       "Atalanta",
       "Tester",

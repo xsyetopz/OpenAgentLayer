@@ -435,6 +435,8 @@ describe("generated Codex defaults", () => {
 		assert.match(config, /^web_search = "cached"$/m);
 		assert.match(config, /project_doc_fallback_filenames = \["CLAUDE\.md"\]/);
 		assert.match(config, /\[tools\][\s\S]*?view_image = true/);
+		assert.match(config, /\[features\][\s\S]*?multi_agent_v2 = true/);
+		assert.doesNotMatch(config, /\[features\][\s\S]*?^multi_agent = true$/m);
 		assert.match(config, /\[features\][\s\S]*?memories = true/);
 		assert.match(config, /\[features\][\s\S]*?collaboration_modes = true/);
 		assert.match(

@@ -50,7 +50,7 @@ const CODEX_AGENT_ORDER = [
 
 const FEATURE_KEY_MAP = {
 	codexHooks: "codex_hooks",
-	multiAgent: "multi_agent",
+	multiAgentV2: "multi_agent_v2",
 	collaborationModes: "collaboration_modes",
 	defaultModeRequestUserInput: "default_mode_request_user_input",
 	fastMode: "fast_mode",
@@ -64,7 +64,7 @@ const FEATURE_KEY_MAP = {
 
 const TOP_LEVEL_FEATURES = {
 	codexHooks: true,
-	multiAgent: true,
+	multiAgentV2: true,
 	collaborationModes: true,
 	defaultModeRequestUserInput: true,
 	fastMode: false,
@@ -181,7 +181,6 @@ function codexExportBudgets(planName) {
 				projectDocMaxBytes: 24000,
 				toolOutputTokenLimit: 4000,
 			};
-		case "pro-5":
 		default:
 			return {
 				projectDocMaxBytes: 16000,

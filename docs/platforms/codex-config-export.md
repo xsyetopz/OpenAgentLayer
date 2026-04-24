@@ -32,7 +32,7 @@ Official reference: https://developers.openai.com/codex/config-reference
   - `view_image = true`
 - `[features]`
   - `codex_hooks = true`
-  - `multi_agent = true`
+  - `multi_agent_v2 = true`
   - `collaboration_modes = true`
   - `default_mode_request_user_input = true`
   - `fast_mode = false`
@@ -121,6 +121,7 @@ Installer-managed config does **not** merge those sample-only commented examples
 ## Notes
 
 - openagentsbtw does not hard-code `service_tier = "flex"` in managed Codex config.
+- `multi_agent_v2` is selected instead of `multi_agent` for current Codex CLI 0.124.0 experiments. It is a known local feature flag but still under development, so older Codex builds may reject it.
 - `xhigh` remains manual-only; managed defaults stay `high` for Plan mode and review, `medium` for top-level edit/implementation, and `high` for bounded utility.
 - `plus|pro-5|pro-20` rewrite the contents of `openagentsbtw*` profiles. They do not create plan-specific profile names.
 - Native Codex config has no confirmed documented key for defaulting raw TUI startup into Plan mode; wrapper no-mode prompts route to `plan`.

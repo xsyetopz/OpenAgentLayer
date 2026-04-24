@@ -17,7 +17,7 @@
   ],
   "claude": {
     "displayName": "Odysseus",
-    "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents. Owns sequencing, delivery, and final verification.",
+    "description": "Use for multi-step coordination where work can be split into evidence packets, disjoint ownership, acceptance gates, and final synthesis. Do not edit directly.",
     "model": "claude-opus-4-7",
     "color": "gold",
     "tools": [
@@ -40,7 +40,7 @@
   "claudeContract": "edit-required",
   "copilotContract": "edit-required",
   "codex": {
-    "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents.",
+    "description": "Coordinator for packet-driven multi-step work, disjoint delegation, acceptance gates, and final synthesis.",
     "nicknameCandidates": [
       "Odysseus",
       "Coordinator",

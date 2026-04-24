@@ -161,8 +161,13 @@ describe("shared install paths", () => {
 				text,
 				/openagentsbtw_managed_bin="\$\{HOME\}\/\.local\/bin"/,
 			);
+			assert.match(text, /openagentsbtw_managed_rtk='.*\/\.local\/bin\/rtk'/);
+			assert.match(
+				text,
+				/rtk\(\) \{ "\$\{openagentsbtw_managed_rtk\}" "\$@"; \}/,
+			);
 			assert.equal(windows.changed, false);
-			assert.match(windows.command, /setx PATH/);
+			assert.match(windows.command, /^setx PATH ".+openagentsbtw.+;%PATH%"$/);
 		} finally {
 			rmSync(root, { recursive: true, force: true });
 		}

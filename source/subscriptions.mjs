@@ -48,7 +48,7 @@ const SUPPORTED_CLAUDE_MODELS = new Set(SUPPORTED_CLAUDE_MODEL_IDS);
 
 const commonFeatureFlags = {
 	codexHooks: true,
-	multiAgent: true,
+	multiAgentV2: true,
 	collaborationModes: true,
 	defaultModeRequestUserInput: true,
 	fastMode: false,

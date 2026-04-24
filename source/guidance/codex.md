@@ -34,6 +34,8 @@
 - Prompt contracts: put critical rules first; specify step order; define ambiguity behavior (ask vs proceed); separate "do the action" from "report the action"; specify output packaging (length, section order, follow-up questions) and include one correct example when output format is strict.
 - Reasoning activation: for non-trivial tasks, force structure before the final answer (2-3 options, assumptions, and what evidence would change the conclusion). Prefer permission to be uncertain over pressure to always answer.
 - Avoid slop + god objects: prefer small cohesive modules and targeted diffs. If a file grows into a grab-bag, split it before it calcifies.
+- Refactors/migrations require explicit end-state checks: named legacy layers removed, target ownership in place, and tests proving behavior on the new path.
+- Use packet-shaped delegation when spawning agents: objective, owned paths, known evidence, expected output, and validation gate. Merge results; do not paste duplicate subagent reports.
 - Prefer `oabtw-codex explore`, `trace`, or `debug` before broad repo exploration. Use `--source deepwiki` only for public GitHub repos, then verify local file:line claims in the repo.
 - Use /clear between unrelated tasks. Start fresh when context usage reaches roughly 90-95%.
 - Run `git diff --stat` before `git diff`. Avoid dumping large files or raw diffs into context.

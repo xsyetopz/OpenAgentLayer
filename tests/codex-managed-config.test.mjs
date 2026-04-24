@@ -81,6 +81,8 @@ describe("managed Codex config", () => {
 			assert.match(config, /^approvals_reviewer = "auto_review"$/m);
 			assert.match(config, /^\[tools\]$/m);
 			assert.match(config, /^view_image = true$/m);
+			assert.match(config, /^multi_agent_v2 = true$/m);
+			assert.doesNotMatch(config, /^multi_agent = true$/m);
 			assert.match(config, /^agents\.job_max_runtime_seconds = 2700$/m);
 		} finally {
 			await rm(tmp, { recursive: true, force: true });

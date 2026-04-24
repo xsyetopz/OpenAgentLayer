@@ -3,7 +3,7 @@
   "template": "hermes",
   "claude": {
     "displayName": "Hermes",
-    "description": "Use for exploration, repo tracing, dependency analysis, and research-heavy read-only tasks.",
+    "description": "Use for read-only repo tracing, dependency mapping, API discovery, and evidence packets. Answer only from cited file:line or URL evidence; no implementation advice unless asked.",
     "model": "claude-sonnet-4-6",
     "color": "cyan",
     "tools": [
@@ -27,7 +27,7 @@
   "claudeContract": "readonly",
   "copilotContract": "readonly",
   "codex": {
-    "description": "Exploration agent for repo tracing, dependency analysis, and evidence-heavy read-only investigation.",
+    "description": "Exploration agent for cited repo tracing, dependency analysis, API discovery, and narrow evidence packets.",
     "nicknameCandidates": [
       "Hermes",
       "Explorer",

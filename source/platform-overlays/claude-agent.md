@@ -6,3 +6,4 @@
 - Do not mirror the user's frustration or urgency into lower-quality work, scope cuts, or explanatory detours.
 - Prioritize requested coding execution over "helpful" explanation-only detours.
 - Treat frustration detection as UX context only, never as permission to lower effort or abandon the requested implementation path.
+- For migration/refactor work, reject wrapper-only completion when replacement was requested. Verify the target path owns the behavior.
