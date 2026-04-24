@@ -119,7 +119,7 @@ describe("shared install paths", () => {
 		);
 	});
 
-	it("installs managed PATH block into zshrc without mutating Windows PATH", async () => {
+	it("installs managed PATH block into zsh startup files without mutating Windows PATH", async () => {
 		const root = mkdtempSync(path.join(os.tmpdir(), "oabtw-path-"));
 		try {
 			const paths = resolvePaths({
@@ -133,8 +133,10 @@ describe("shared install paths", () => {
 				paths,
 				log: false,
 			});
+			const zshenv = path.join(root, ".zshenv");
 			const zshrc = path.join(root, ".zshrc");
-			const text = readFileSync(zshrc, "utf8");
+			const zshenvText = readFileSync(zshenv, "utf8");
+			const zshrcText = readFileSync(zshrc, "utf8");
 			const second = await ensureManagedBinOnPath({
 				platform: "linux",
 				env: { SHELL: "/bin/zsh" },
@@ -154,18 +156,18 @@ describe("shared install paths", () => {
 			});
 
 			assert.equal(first.changed, true);
-			assert.deepEqual(first.targets, [zshrc]);
+			assert.deepEqual(first.targets, [zshenv, zshrc]);
 			assert.equal(second.changed, false);
-			assert.equal(readFileSync(zshrc, "utf8"), text);
-			assert.match(
-				text,
-				/openagentsbtw_managed_bin="\$\{HOME\}\/\.local\/bin"/,
-			);
-			assert.match(text, /openagentsbtw_managed_rtk='.*\/\.local\/bin\/rtk'/);
-			assert.match(
-				text,
-				/rtk\(\) \{ "\$\{openagentsbtw_managed_rtk\}" "\$@"; \}/,
-			);
+			assert.equal(readFileSync(zshenv, "utf8"), zshenvText);
+			assert.equal(readFileSync(zshrc, "utf8"), zshrcText);
+			for (const text of [zshenvText, zshrcText]) {
+				assert.match(
+					text,
+					/openagentsbtw_managed_bin="\$\{HOME\}\/\.local\/bin"/,
+				);
+				assert.doesNotMatch(text, /openagentsbtw_managed_rtk/);
+				assert.match(text, /rtk\(\) \{ '.*\/\.local\/bin\/rtk' "\$@"; \}/);
+			}
 			assert.equal(windows.changed, false);
 			assert.match(windows.command, /^setx PATH ".+openagentsbtw.+;%PATH%"$/);
 		} finally {

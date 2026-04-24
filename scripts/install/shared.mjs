@@ -424,13 +424,12 @@ function managedRtkShellValue(paths = PATHS) {
 function renderManagedPathBlock(paths = PATHS) {
 	return `${MANAGED_PATH_BLOCK_START}
 openagentsbtw_managed_bin=${managedBinShellValue(paths)}
-openagentsbtw_managed_rtk=${managedRtkShellValue(paths)}
 case ":\${PATH}:" in
   *":\${openagentsbtw_managed_bin}:"*) ;;
   *) export PATH="\${openagentsbtw_managed_bin}:\${PATH}" ;;
 esac
-rtk() { "\${openagentsbtw_managed_rtk}" "$@"; }
-unset openagentsbtw_managed_bin openagentsbtw_managed_rtk
+rtk() { ${managedRtkShellValue(paths)} "$@"; }
+unset openagentsbtw_managed_bin
 ${MANAGED_PATH_BLOCK_END}`;
 }
 
@@ -456,7 +455,12 @@ function managedPathShellFiles({
 } = {}) {
 	if (platform === "win32") return [];
 	const shell = path.basename(env.SHELL || "");
-	if (shell === "zsh") return [path.join(paths.homeDir, ".zshrc")];
+	if (shell === "zsh") {
+		return [
+			path.join(paths.homeDir, ".zshenv"),
+			path.join(paths.homeDir, ".zshrc"),
+		];
+	}
 	if (shell === "bash") {
 		return [
 			path.join(paths.homeDir, ".bashrc"),
