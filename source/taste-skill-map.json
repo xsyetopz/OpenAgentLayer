@@ -1,6 +1,6 @@
 {
   "repo": "https://github.com/Leonxlnx/taste-skill",
-  "commit": "f0eea3f4409c7de76118be0149dafcf2a0031e50",
+  "commit": "3a6e7c497f45696fceca7db6d8b497016f56c524",
   "entries": [
     {
       "upstreamPath": "skills/taste-skill/SKILL.md",
@@ -18,8 +18,8 @@
       "gptImage2": true
     },
     {
-      "upstreamPath": "skills/images-taste-skill/SKILL.md",
-      "upstreamName": "image-taste-frontend",
+      "upstreamPath": "skills/image-to-code-skill/SKILL.md",
+      "upstreamName": "image-to-code",
       "localName": "taste-images",
       "description": "Image-first frontend reference skill: generate premium website images, analyze them, then implement faithfully.",
       "codexRoute": "taste-images",
@@ -71,8 +71,8 @@
       ]
     },
     {
-      "upstreamPath": "imagegenskills/frontendwebsiteimageskill/SKILL.md",
-      "upstreamName": "image-taste-frontend",
+      "upstreamPath": "imagegen-skills/frontend-web/SKILL.md",
+      "upstreamName": "imagegen-frontend-web",
       "localName": "taste-imagegen",
       "description": "Dedicated image-generation-first workflow for premium, implementation-friendly website design references.",
       "codexRoute": "taste-imagegen",

@@ -316,7 +316,7 @@ describe("codex RTK helper", () => {
 		}
 	});
 
-	it("falls back to rtk proxy for unsupported complex commands", () => {
+	it("warns without forcing proxy for unsupported complex commands", () => {
 		const fixture = withFakeRtk();
 		const originalHome = process.env.HOME;
 		const originalPath = process.env.PATH;
@@ -328,8 +328,27 @@ describe("codex RTK helper", () => {
 				fixture.repoDir,
 			);
 			assert.equal(rewrite.policyPath, join(fixture.repoDir, "RTK.md"));
-			assert.match(rewrite.rewritten, /^rtk --ultra-compact proxy -- /);
-			assert.match(rewrite.rewritten, /bun test/);
+			assert.equal(rewrite.rewritten, undefined);
+			assert.match(rewrite.warning, /RTK has no supported rewrite/);
+			assert.match(rewrite.warning, /bun test tests && echo done/);
+		} finally {
+			process.env.HOME = originalHome;
+			process.env.PATH = originalPath;
+			fixture.cleanup();
+		}
+	});
+
+	it("does not rewrite native find syntax into incompatible rtk find syntax", () => {
+		const fixture = withFakeRtk();
+		const originalHome = process.env.HOME;
+		const originalPath = process.env.PATH;
+		process.env.HOME = fixture.homeDir;
+		process.env.PATH = prependBinToPath(fixture.binDir, originalPath || "");
+		try {
+			const rewrite = getRtkRewrite("find . -name '*.rs'", fixture.repoDir);
+			assert.equal(rewrite.policyPath, join(fixture.repoDir, "RTK.md"));
+			assert.equal(rewrite.rewritten, undefined);
+			assert.match(rewrite.warning, /find \. -name '\*\.rs'/);
 		} finally {
 			process.env.HOME = originalHome;
 			process.env.PATH = originalPath;

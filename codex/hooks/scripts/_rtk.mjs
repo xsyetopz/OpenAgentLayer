@@ -184,14 +184,31 @@ function readRewrite(command, args) {
 	) {
 		return rtk(`read ${args.slice(1).join(" ")}`);
 	}
-	if (["head", "tail"].includes(args?.[0]) && args.length >= 2) {
-		return rtk(`read ${args.slice(1).join(" ")}`);
-	}
 	const headSed = command.match(
 		/^sed\s+-n\s+['"]1,(\d+)p['"]\s+([^\s'";&|<>`$()]+)$/,
 	);
 	if (headSed) {
 		return rtk(`read --max-lines ${headSed[1]} ${headSed[2]}`);
+	}
+	const headShort = command.match(/^head\s+-(\d+)\s+([^\s'";&|<>`$()]+)$/);
+	if (headShort) {
+		return rtk(`read --max-lines ${headShort[1]} ${headShort[2]}`);
+	}
+	const headLong = command.match(
+		/^head\s+(?:-n|--lines)\s+(\d+)\s+([^\s'";&|<>`$()]+)$/,
+	);
+	if (headLong) {
+		return rtk(`read --max-lines ${headLong[1]} ${headLong[2]}`);
+	}
+	const tailShort = command.match(/^tail\s+-(\d+)\s+([^\s'";&|<>`$()]+)$/);
+	if (tailShort) {
+		return rtk(`read --tail-lines ${tailShort[1]} ${tailShort[2]}`);
+	}
+	const tailLong = command.match(
+		/^tail\s+(?:-n|--lines)\s+(\d+)\s+([^\s'";&|<>`$()]+)$/,
+	);
+	if (tailLong) {
+		return rtk(`read --tail-lines ${tailLong[1]} ${tailLong[2]}`);
 	}
 	return "";
 }
@@ -255,9 +272,6 @@ function highGainRewrite(command) {
 	}
 	if (["rg", "grep"].includes(args?.[0])) {
 		return rtk(`grep ${args.slice(1).join(" ")}`);
-	}
-	if (["fd", "find"].includes(args?.[0])) {
-		return rtk(`find ${args.slice(1).join(" ")}`);
 	}
 	if (args?.length === 1 && ["env", "printenv"].includes(args[0])) {
 		return rtk("env");
@@ -342,6 +356,10 @@ function rtkInvocationRewrite(command, binary) {
 	return `${prefix} --ultra-compact ${parsed.rest}`.trim();
 }
 
+function unsupportedWarning(command) {
+	return `RTK has no supported rewrite for this command; running raw.\nCommand: ${command}`;
+}
+
 export function getRtkRewrite(command, cwd = process.cwd()) {
 	const normalized = String(command || "").trim();
 	if (!normalized) return null;
@@ -374,8 +392,8 @@ export function getRtkRewrite(command, cwd = process.cwd()) {
 			return { policyPath, rewritten };
 		}
 	} catch {
-		// Fall back to proxy rewrite below.
+		return { policyPath, warning: unsupportedWarning(normalized) };
 	}
 
-	return { policyPath, rewritten: proxyRewrite(normalized) };
+	return { policyPath, warning: unsupportedWarning(normalized) };
 }

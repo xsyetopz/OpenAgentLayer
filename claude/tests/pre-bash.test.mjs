@@ -291,7 +291,7 @@ describe("RTK enforce", () => {
 		}
 	});
 
-	it("should proxy unsupported complex commands when RTK policy is active", () => {
+	it("should warn without proxying unsupported complex commands when RTK policy is active", () => {
 		const fixture = withFakeRtk({ repoRtk: false, homeRtk: true });
 		try {
 			const result = runHook(
@@ -300,10 +300,14 @@ describe("RTK enforce", () => {
 				fixture.env,
 			);
 			const output = parseHookOutput(result);
-			assert.equal(output?.hookSpecificOutput?.permissionDecision, "allow");
+			assert.equal(output?.hookSpecificOutput?.permissionDecision, undefined);
 			assert.match(
-				output?.hookSpecificOutput?.updatedInput.command,
-				/^rtk --ultra-compact proxy -- /,
+				output?.hookSpecificOutput?.additionalContext,
+				/RTK has no supported rewrite/,
+			);
+			assert.match(
+				output?.hookSpecificOutput?.additionalContext,
+				/bun test tests && echo done/,
 			);
 		} finally {
 			fixture.cleanup();

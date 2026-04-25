@@ -55,7 +55,7 @@ describe("managed RTK surfaces", () => {
 		assert.match(renderRtkPolicy(), /rtk --ultra-compact json package\.json/);
 		assert.match(
 			renderRtkPolicy(),
-			/rtk proxy` only when no specialized filter/,
+			/Unsupported commands pass through with a warning/,
 		);
 	});
 

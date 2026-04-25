@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { deny, passthrough, readStdin } from "../_lib.mjs";
+import { deny, passthrough, readStdin, systemMessage } from "../_lib.mjs";
 import { getRtkRewrite } from "../_rtk.mjs";
 
 (async () => {
@@ -12,5 +12,11 @@ import { getRtkRewrite } from "../_rtk.mjs";
 	const rewrite = getRtkRewrite(command, data.cwd || process.cwd());
 	if (!rewrite) passthrough();
 
-	deny(`RTK is required when RTK.md is present. Use: ${rewrite.rewritten}`);
+	if (rewrite.rewritten) {
+		deny(`RTK is required when RTK.md is present. Use: ${rewrite.rewritten}`);
+	}
+	if (rewrite.warning) {
+		systemMessage(rewrite.warning);
+	}
+	passthrough();
 })();

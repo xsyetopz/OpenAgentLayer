@@ -40,5 +40,5 @@ Current generated command names:
 
 ## Runtime Enforcement
 
-- RTK enforcement uses the managed bundled RTK binary first, treats valid `rtk rewrite` stdout as authoritative even when RTK exits nonzero, and falls back to `rtk proxy` for unsupported shell commands when policy is active. The installer writes the canonical policy plus the OpenCode config `RTK.md`, appends a managed RTK reference to the OpenCode instructions file, installs the managed binary at `~/.local/bin/rtk`, and adds the managed bin directory plus a direct `rtk()` redirect to Unix shell startup files. Restart the shell, or source the edited startup files (`~/.zshenv` and `~/.zshrc` for zsh), before running `rtk` directly.
+- RTK enforcement uses the verified official `rtk-ai/rtk` binary first, treats valid `rtk rewrite` stdout as authoritative even when RTK exits nonzero, and warns without blocking when no supported rewrite exists. The installer writes the canonical policy plus the OpenCode config `RTK.md`, appends a managed RTK reference to the OpenCode instructions file, installs RTK from `rtk-ai/rtk` when no verified official binary is present, and runs plain upstream `rtk init` best-effort.
 - Managed Caveman mode is carried in the OpenCode plugin session state and checked during text completion to prevent obvious verbose drift.

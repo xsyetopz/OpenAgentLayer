@@ -363,23 +363,9 @@ export function commandPath(command) {
 	);
 }
 
-export async function resolveRtkSourceRepo({ env = process.env } = {}) {
-	const candidates = [
-		env.OABTW_RTK_REPO,
-		env.OPENAGENTSBTW_RTK_REPO,
-		path.join(ROOT, "vendor", "rtk"),
-	].filter(Boolean);
-	for (const candidate of candidates) {
-		const repo = path.resolve(candidate);
-		if (
-			(await pathExists(path.join(repo, "Cargo.toml"))) &&
-			(await pathExists(path.join(repo, "src", "main.rs")))
-		) {
-			return repo;
-		}
-	}
-	return "";
-}
+const OFFICIAL_RTK_INSTALL_URL =
+	"https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh";
+const OFFICIAL_RTK_GIT_URL = "https://github.com/rtk-ai/rtk";
 
 export function managedRtkBinaryPath({
 	platform = process.platform,
@@ -391,6 +377,19 @@ export function managedRtkBinaryPath({
 	);
 }
 
+function rtkExecutableCandidates(paths = PATHS) {
+	const exe = process.platform === "win32" ? "rtk.exe" : "rtk";
+	const candidates = [
+		commandPath("rtk"),
+		paths.managedBinDir ? path.join(paths.managedBinDir, exe) : "",
+		paths.homeDir ? path.join(paths.homeDir, ".local", "bin", exe) : "",
+		paths.homeDir ? path.join(paths.homeDir, ".cargo", "bin", exe) : "",
+		process.env.OABTW_RTK_BIN,
+		process.env.OPENAGENTSBTW_RTK_BIN,
+	].filter(Boolean);
+	return [...new Set(candidates.map((candidate) => path.resolve(candidate)))];
+}
+
 const MANAGED_PATH_BLOCK_START = "# >>> openagentsbtw managed PATH >>>";
 const MANAGED_PATH_BLOCK_END = "# <<< openagentsbtw managed PATH <<<";
 const CONFIG_ENV_KEYS = [
@@ -399,7 +398,6 @@ const CONFIG_ENV_KEYS = [
 	"OABTW_CODEX_PLAN",
 	"OABTW_COPILOT_PLAN",
 	"OABTW_RTK_BIN",
-	"OABTW_RTK_REPO",
 	"RTK_DB_PATH",
 ];
 
@@ -417,10 +415,6 @@ function managedBinShellValue(paths = PATHS) {
 	return shellSingleQuote(paths.managedBinDir);
 }
 
-function managedRtkShellValue(paths = PATHS) {
-	return shellSingleQuote(managedRtkBinaryPath({ paths }));
-}
-
 function renderManagedPathBlock(paths = PATHS) {
 	return `${MANAGED_PATH_BLOCK_START}
 openagentsbtw_managed_bin=${managedBinShellValue(paths)}
@@ -428,7 +422,6 @@ case ":\${PATH}:" in
   *":\${openagentsbtw_managed_bin}:"*) ;;
   *) export PATH="\${openagentsbtw_managed_bin}:\${PATH}" ;;
 esac
-rtk() { ${managedRtkShellValue(paths)} "$@"; }
 unset openagentsbtw_managed_bin
 ${MANAGED_PATH_BLOCK_END}`;
 }
@@ -509,35 +502,52 @@ export async function ensureManagedBinOnPath({
 	return { changed: changed.length > 0, targets };
 }
 
-export async function installBundledRtkBinary() {
+export function isOfficialRtkBinary(binary = commandPath("rtk")) {
+	if (!binary) return false;
+	const result = spawnSync(binary, ["gain"], {
+		stdio: "ignore",
+		timeout: 5000,
+		shell: process.platform === "win32" && binary === "rtk",
+	});
+	return result.status === 0;
+}
+
+export function verifiedRtkBinaryPath() {
+	for (const binary of rtkExecutableCandidates()) {
+		if (isOfficialRtkBinary(binary)) return binary;
+	}
+	return "";
+}
+
+export async function ensureOfficialRtkBinary() {
 	const existingRtk = commandPath("rtk");
-	const repo = await resolveRtkSourceRepo();
-	if (!repo) {
-		logWarn("Bundled RTK source missing; leaving RTK configure-only mode");
+	if (isOfficialRtkBinary(existingRtk)) {
+		await writeConfigEnv({ OABTW_RTK_BIN: existingRtk });
+		logInfo(`RTK verified -> ${existingRtk}`);
+		return true;
+	}
+	if (existingRtk) {
+		logWarn(
+			`Ignoring non-rtk-ai rtk at ${existingRtk}; \`rtk gain\` did not succeed`,
+		);
+	}
+	if (process.platform !== "win32" && commandExists("curl")) {
+		await run("sh", ["-lc", `curl -fsSL ${OFFICIAL_RTK_INSTALL_URL} | sh`]);
+	} else if (commandExists("cargo")) {
+		await run("cargo", ["install", "--git", OFFICIAL_RTK_GIT_URL]);
+	} else {
+		logWarn(
+			"RTK installer needs curl or cargo; install from https://github.com/rtk-ai/rtk",
+		);
 		return false;
 	}
-	if (!commandExists("cargo")) {
-		logWarn("Cargo not found; leaving RTK configure-only mode");
+	const installedRtk = verifiedRtkBinaryPath();
+	if (!installedRtk) {
+		logWarn("RTK install finished, but `rtk gain` did not verify");
 		return false;
 	}
-	await run("cargo", [
-		"build",
-		"--release",
-		"--manifest-path",
-		path.join(repo, "Cargo.toml"),
-	]);
-	await ensureDir(PATHS.managedBinDir);
-	const binaryName = process.platform === "win32" ? "rtk.exe" : "rtk";
-	const source = path.join(repo, "target", "release", binaryName);
-	const target = managedRtkBinaryPath();
-	await fs.copyFile(source, target);
-	if (process.platform !== "win32") await fs.chmod(target, 0o755);
-	await writeConfigEnv({ OABTW_RTK_BIN: target, OABTW_RTK_REPO: repo });
-	logInfo(`RTK bundled source -> ${target}`);
-	if (existingRtk && path.resolve(existingRtk) !== path.resolve(target)) {
-		logInfo(`RTK command redirect ${existingRtk} -> ${target}`);
-	}
-	await ensureManagedBinOnPath();
+	await writeConfigEnv({ OABTW_RTK_BIN: installedRtk });
+	logInfo(`RTK verified -> ${installedRtk}`);
 	return true;
 }
 

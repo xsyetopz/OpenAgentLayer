@@ -2,6 +2,17 @@
 
 All notable changes to openagentsbtw are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [3.3.2] - 2026-04-25
+
+### Changed
+
+- RTK install now verifies an official `rtk-ai/rtk` binary with `rtk gain`, installs from upstream when needed instead of building bundled `vendor/rtk`, and runs plain upstream `rtk init` best-effort.
+- RTK enforcement now blocks only supported rewrites and warns on unsupported raw shell commands instead of forcing `rtk proxy`.
+
+### Removed
+
+- Removed bundled RTK source from `vendor/rtk`.
+
 ## [3.2.2] - 2026-04-23
 
 ### Fixed

@@ -60,7 +60,7 @@ The installer:
 - appends managed openagentsbtw guidance to `~/.codex/AGENTS.md`
 - appends managed Codex defaults (`sqlite_home`, `project_doc_max_bytes`, `history`, `memories`, `compact_prompt`, `hide_agent_reasoning`, `tool_output_token_limit`, `review_model`, `web_search`, tool/feature flags, and `[agents.<name>]` metadata) plus the managed `openagentsbtw`, `openagentsbtw-implement`, `openagentsbtw-review`, `openagentsbtw-utility`, `openagentsbtw-approval-auto`, and `openagentsbtw-runtime-long` profiles to `~/.codex/config.toml`
 - optionally appends a managed `mcp_servers.deepwiki` block to `~/.codex/config.toml`
-- optionally builds the bundled patched RTK source, installs the managed RTK binary at `~/.local/bin/rtk`, adds the managed bin directory and a direct `rtk()` redirect to Unix shell startup files, writes policy files at `~/.config/openagentsbtw/RTK.md` and `~/.codex/RTK.md`, and appends a managed `~/.codex/AGENTS.md` RTK reference. Restart the shell, or source the edited startup files (`~/.zshenv` and `~/.zshrc` for zsh), before running `rtk` directly.
+- verifies an existing official `rtk-ai/rtk` binary with `rtk gain`, installs RTK from the upstream project when needed, runs plain upstream `rtk init` best-effort, writes policy files at `~/.config/openagentsbtw/RTK.md` and `~/.codex/RTK.md`, and appends a managed `~/.codex/AGENTS.md` RTK reference.
 
 ## Updating
 

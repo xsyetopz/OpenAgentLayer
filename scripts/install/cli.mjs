@@ -48,8 +48,8 @@ import {
 	commandExists,
 	ctx7RunnerCommand,
 	ctx7RunnerLine,
+	ensureOfficialRtkBinary,
 	fail,
-	installBundledRtkBinary,
 	loadConfigEnv,
 	logInfo,
 	logWarn,
@@ -66,6 +66,7 @@ import {
 	resolveWorkspacePaths,
 	run,
 	syncManagedTree,
+	verifiedRtkBinaryPath,
 	writeConfigEnv,
 	writeText,
 } from "./shared.mjs";
@@ -832,8 +833,10 @@ async function maybeInstallRtk(args) {
 		logWarn("Skipping RTK install");
 		return;
 	}
-	if (!(await installBundledRtkBinary())) {
-		logWarn("RTK binary not installed; policy files will still be written");
+	if (!(await ensureOfficialRtkBinary())) {
+		logWarn("RTK binary not verified; policy files will still be written");
+	} else {
+		await runRtkInitializer();
 	}
 	const workspacePaths = resolveWorkspacePaths();
 	const policyTargets = selectedRtkPolicyTargets(args);
@@ -848,6 +851,16 @@ async function maybeInstallRtk(args) {
 	}
 	for (const target of policyTargets) {
 		logInfo(`RTK policy -> ${target}`);
+	}
+}
+
+async function runRtkInitializer() {
+	const rtkBinary = verifiedRtkBinaryPath() || "rtk";
+	try {
+		await run(rtkBinary, ["init"]);
+		logInfo("rtk init");
+	} catch (error) {
+		logWarn(`rtk init failed: ${error.message}`);
 	}
 }
 

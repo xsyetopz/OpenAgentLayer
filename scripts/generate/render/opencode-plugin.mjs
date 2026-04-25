@@ -523,9 +523,16 @@ function biomeRewrite(args) {
 
 function readRewrite(command, args) {
   if (args?.[0] === "cat" && args.length > 1 && !args.slice(1).some((arg) => arg.startsWith("-"))) return rtk("read " + args.slice(1).join(" "));
-  if (["head", "tail"].includes(args?.[0]) && args.length >= 2) return rtk("read " + args.slice(1).join(" "));
-  const headSed = command.match(/^seds+-ns+['"]1,(d+)p['"]s+([^s'";&<>$()]+)$/);
+  const headSed = command.match(/^sed\\s+-n\\s+['"]1,(\\d+)p['"]\\s+([^\\s'";&<>$()]+)$/);
   if (headSed) return rtk("read --max-lines " + headSed[1] + " " + headSed[2]);
+  const headShort = command.match(/^head\\s+-(\\d+)\\s+([^\\s'";&<>$()]+)$/);
+  if (headShort) return rtk("read --max-lines " + headShort[1] + " " + headShort[2]);
+  const headLong = command.match(/^head\\s+(?:-n|--lines)\\s+(\\d+)\\s+([^\\s'";&<>$()]+)$/);
+  if (headLong) return rtk("read --max-lines " + headLong[1] + " " + headLong[2]);
+  const tailShort = command.match(/^tail\\s+-(\\d+)\\s+([^\\s'";&<>$()]+)$/);
+  if (tailShort) return rtk("read --tail-lines " + tailShort[1] + " " + tailShort[2]);
+  const tailLong = command.match(/^tail\\s+(?:-n|--lines)\\s+(\\d+)\\s+([^\\s'";&<>$()]+)$/);
+  if (tailLong) return rtk("read --tail-lines " + tailLong[1] + " " + tailLong[2]);
   return "";
 }
 
@@ -549,7 +556,6 @@ function highGainRewrite(command) {
   if (args?.[0] === "flutter" && args[1] === "test") return rtk("test " + args.join(" "));
   if (args?.[0] === "flutter" && args[1] === "analyze") return rtk("summary " + args.join(" "));
   if (["rg", "grep"].includes(args?.[0])) return rtk("grep " + args.slice(1).join(" "));
-  if (["fd", "find"].includes(args?.[0])) return rtk("find " + args.slice(1).join(" "));
   if (args?.length === 1 && ["env", "printenv"].includes(args[0])) return rtk("env");
   if (args?.[0] === "jq" && args.length === 3 && ![".", "-S"].includes(args[1]) && !args[1].startsWith("-") && args[2].endsWith(".json")) return rtk("json " + args[2]);
   if (args?.[0] === "jq" && args.length === 3 && [".", "-S"].includes(args[1]) && args[2].endsWith(".json")) return rtk("json " + args[2]);
@@ -590,6 +596,10 @@ function rtkInvocationRewrite(command, binary) {
   return (prefix + " --ultra-compact " + parsed.rest).trim();
 }
 
+function unsupportedWarning(command) {
+  return "RTK has no supported rewrite for this command; running raw.\\nCommand: " + command;
+}
+
 function getRtkRewrite(command, cwd) {
   const normalized = String(command || "").trim();
   if (!normalized) return null;
@@ -598,11 +608,11 @@ function getRtkRewrite(command, cwd) {
   if (!binary) return null;
   const rtkInvocation = rtkInvocationRewrite(normalized, binary);
   if (rtkInvocation !== undefined) {
-    if (rtkInvocation && rtkInvocation !== normalized) return rtkInvocation;
+    if (rtkInvocation && rtkInvocation !== normalized) return { rewritten: rtkInvocation };
     return null;
   }
   const highGain = highGainRewrite(normalized);
-  if (highGain) return highGain;
+  if (highGain) return { rewritten: highGain };
   try {
     const result = spawnSync(binary, ["rewrite", normalized], {
       cwd,
@@ -611,11 +621,11 @@ function getRtkRewrite(command, cwd) {
       shell: process.platform === "win32" && binary === "rtk",
     });
     const rewritten = normalizeRtkRewrite((result.stdout || "").trim());
-    if (rewritten && rewritten !== normalized) return rewritten;
+    if (rewritten && rewritten !== normalized) return { rewritten };
   } catch {
-    // Fall back below.
+    return { warning: unsupportedWarning(normalized) };
   }
-  return proxyRewrite(normalized);
+  return { warning: unsupportedWarning(normalized) };
 }
 
 function recordEvidence(state, value) {
@@ -765,9 +775,12 @@ const openAgentsPlugin = async () => ({
       }
       const normalized = rule.field === "command" ? value.trim() : value;
       if (rule.kind === "rtk-rewrite") {
-        const rewritten = getRtkRewrite(normalized, resolveCommandCwd(output));
-        if (rewritten) {
-          throw new Error(\`\${rule.message}. Use: \${rewritten}\`);
+        const rewrite = getRtkRewrite(normalized, resolveCommandCwd(output));
+        if (rewrite?.rewritten) {
+          throw new Error(\`\${rule.message}. Use: \${rewrite.rewritten}\`);
+        }
+        if (rewrite?.warning) {
+          console.warn(rewrite.warning);
         }
         continue;
       }

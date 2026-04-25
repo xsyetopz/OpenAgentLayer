@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import {
+	additionalContext,
 	deny,
 	passthrough,
 	readStdin,
@@ -21,5 +22,11 @@ import { getRtkRewrite } from "../_rtk.mjs";
 	const rewrite = getRtkRewrite(command, resolveCwd(data));
 	if (!rewrite) passthrough();
 
-	deny(`RTK is required when RTK.md is present. Use: ${rewrite.rewritten}`);
+	if (rewrite.rewritten) {
+		deny(`RTK is required when RTK.md is present. Use: ${rewrite.rewritten}`);
+	}
+	if (rewrite.warning) {
+		additionalContext(rewrite.warning);
+	}
+	passthrough();
 })();

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import "../suppress-stderr.mjs";
-import { allow, passthrough, readStdin } from "../_lib.mjs";
+import { allow, passthrough, readStdin, warn } from "../_lib.mjs";
 import { getRtkRewrite } from "../_rtk.mjs";
 
 (async () => {
@@ -14,10 +14,16 @@ import { getRtkRewrite } from "../_rtk.mjs";
 		const rewrite = getRtkRewrite(command, process.cwd());
 		if (!rewrite) passthrough();
 
-		allow("RTK auto-rewrite", "PreToolUse", {
-			...(data.tool_input || {}),
-			command: rewrite.rewritten,
-		});
+		if (rewrite.rewritten) {
+			allow("RTK auto-rewrite", "PreToolUse", {
+				...(data.tool_input || {}),
+				command: rewrite.rewritten,
+			});
+		}
+		if (rewrite.warning) {
+			warn(rewrite.warning, "PreToolUse");
+		}
+		passthrough();
 	} catch {
 		passthrough();
 	}

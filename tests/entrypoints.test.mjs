@@ -166,7 +166,7 @@ describe("shared install paths", () => {
 					/openagentsbtw_managed_bin="\$\{HOME\}\/\.local\/bin"/,
 				);
 				assert.doesNotMatch(text, /openagentsbtw_managed_rtk/);
-				assert.match(text, /rtk\(\) \{ '.*\/\.local\/bin\/rtk' "\$@"; \}/);
+				assert.doesNotMatch(text, /rtk\(\)/);
 			}
 			assert.equal(windows.changed, false);
 			assert.match(windows.command, /^setx PATH ".+openagentsbtw.+;%PATH%"$/);
@@ -216,7 +216,6 @@ describe("shared install paths", () => {
 			await writeConfigEnv(
 				{
 					OABTW_RTK_BIN: "/home/test-user/.local/bin/rtk",
-					OABTW_RTK_REPO: "/repo/vendor/rtk",
 					RTK_DB_PATH: "/db/history.db",
 				},
 				paths,
@@ -227,7 +226,7 @@ describe("shared install paths", () => {
 				text,
 				/^OABTW_RTK_BIN=\/home\/test-user\/\.local\/bin\/rtk$/m,
 			);
-			assert.match(text, /^OABTW_RTK_REPO=\/repo\/vendor\/rtk$/m);
+			assert.doesNotMatch(text, /OABTW_RTK_REPO/);
 			assert.match(text, /^RTK_DB_PATH=\/db\/history\.db$/m);
 		} finally {
 			rmSync(root, { recursive: true, force: true });
@@ -392,15 +391,29 @@ describe("public entrypoints", () => {
 		assert.match(shared, /OABTW_CAVEMAN_MODE/);
 	});
 
-	it("builds managed RTK from bundled source instead of upstream bootstrap", () => {
+	it("verifies official RTK instead of building bundled source", () => {
 		const installer = readRepo("scripts/install/cli.mjs");
 		const configCli = readRepo("scripts/install/config-cli.mjs");
 		const shared = readRepo("scripts/install/shared.mjs");
-		assert.match(shared, /vendor", "rtk"/);
-		assert.match(shared, /installBundledRtkBinary/);
-		assert.doesNotMatch(installer, /rtk-ai\/tap\/rtk/);
-		assert.doesNotMatch(configCli, /raw\.githubusercontent\.com\/rtk-ai\/rtk/);
-		assert.doesNotMatch(shared, /CodeProjects", "rtk-ai", "rtk"/);
+		assert.match(shared, /ensureOfficialRtkBinary/);
+		assert.match(shared, /\["gain"\]/);
+		assert.match(shared, /github\.com\/rtk-ai\/rtk/);
+		assert.match(installer, /ensureOfficialRtkBinary/);
+		assert.match(installer, /runRtkInitializer/);
+		assert.match(installer, /\["init"\]/);
+		assert.match(installer, /rtk init failed/);
+		assert.doesNotMatch(installer, /\["-g", "--codex"\]/);
+		assert.doesNotMatch(installer, /\["-g", "--gemini"\]/);
+		assert.doesNotMatch(installer, /\["--agent", "windsurf"\]/);
+		assert.doesNotMatch(installer, /\["--agent", "cline"\]/);
+		assert.doesNotMatch(installer, /\["--agent", "kilocode"\]/);
+		assert.doesNotMatch(installer, /\["--agent", "antigravity"\]/);
+		assert.match(configCli, /ensureOfficialRtkBinary/);
+		assert.match(configCli, /runRtkInitializer/);
+		assert.match(configCli, /\["init"\]/);
+		assert.doesNotMatch(shared, /vendor", "rtk"/);
+		assert.doesNotMatch(shared, /installBundledRtkBinary/);
+		assert.doesNotMatch(shared, /OABTW_RTK_REPO/);
 	});
 
 	it("uses caller workspace targets for project-scoped install paths", () => {

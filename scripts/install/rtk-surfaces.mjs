@@ -10,14 +10,14 @@ export const RTK_BLOCK_END = "<!-- <<< openagentsbtw rtk <<< -->";
 export function renderRtkPolicy() {
 	return `# RTK - Rust Token Killer
 
-Always prefix RTK-supported shell commands with \`rtk\`. Prefer the most specific filtering command available, and use \`--ultra-compact\` for broad searches, tests, builds, lint, logs, and diagnostics. Use \`rtk proxy\` only when no specialized filter preserves command semantics.
+Always prefix RTK-supported shell commands with \`rtk\`. Prefer the most specific filtering command available, and use \`--ultra-compact\` for broad searches, tests, builds, lint, logs, and diagnostics. Unsupported shell commands may run raw; use \`rtk proxy\` only when you explicitly need raw passthrough tracking.
 
 Decision order:
 
 1. If unsure, run \`rtk rewrite <raw command>\` first and use its suggestion.
 2. Prefer a specialized filter: \`rtk test\`, \`rtk err\`, \`rtk summary\`, \`rtk grep\`, \`rtk read\`, \`rtk json\`, \`rtk diff\`, \`rtk log\`, or \`rtk pipe\`.
 3. Add \`--ultra-compact\` unless full output is explicitly required.
-4. Fall back to \`rtk proxy\` only for commands that cannot be filtered safely.
+4. Run unsupported commands raw unless passthrough tracking is explicitly useful.
 
 High-gain examples:
 
@@ -50,7 +50,7 @@ For Bun projects, do not run raw \`bun test\`, \`bun run test\`, \`bun run typec
 
 Use \`rtk gain --project --history\`, \`rtk gain --failures\`, and \`rtk hook-audit --since 30\` to verify efficiency. Validation-heavy sessions should exceed 70% project-scope savings; supported high-output commands should usually exceed 80%.
 
-When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw enforces RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite.
+When \`RTK.md\` is present and \`rtk\` is installed, openagentsbtw enforces RTK-prefixed forms where RTK can rewrite the command or apply an openagentsbtw high-gain rewrite. Unsupported commands pass through with a warning instead of forced \`rtk proxy\`.
 `;
 }
 

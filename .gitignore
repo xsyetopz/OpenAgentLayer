@@ -39,7 +39,6 @@ venv/
 # Node
 node_modules/
 *.tsbuildinfo
-vendor/rtk/target/
 
 # Environments & secrets
 .env
