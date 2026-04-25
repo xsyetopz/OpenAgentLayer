@@ -26,7 +26,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [history]
 persistence = "save-all"
 max_bytes = 134217728
@@ -116,7 +116,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [profiles.openagentsbtw-implement]
 model = "gpt-5.3-codex"
 model_reasoning_effort = "medium"
@@ -138,7 +138,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [profiles.openagentsbtw-review]
 model = "gpt-5.3-codex"
 model_reasoning_effort = "high"
@@ -160,7 +160,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [profiles.openagentsbtw-utility]
 model = "gpt-5.4-mini"
 model_reasoning_effort = "high"
@@ -183,7 +183,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [profiles.openagentsbtw-approval-auto]
 model = "gpt-5.3-codex"
 model_reasoning_effort = "medium"
@@ -205,7 +205,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 [profiles.openagentsbtw-runtime-long]
 model = "gpt-5.3-codex"
 model_reasoning_effort = "medium"
@@ -228,7 +228,7 @@ memories = true
 shell_tool = true
 shell_snapshot = true
 skill_mcp_dependency_install = true
-unified_exec = true
+unified_exec = false
 prevent_idle_sleep = true
 
 [plugins."openagentsbtw@openagentsbtw-local"]
