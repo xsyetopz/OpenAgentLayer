@@ -32,6 +32,8 @@ const schemaChecks = [
 	["source/schema/tools.schema.json", "source/tools/tools.json"],
 ] as const;
 
+const markdownToolCellPattern = /^\|\s*`([^`]+)`/;
+
 export function checkSource(root = process.cwd()): void {
 	for (const [schema, data] of schemaChecks) {
 		validateJsonBySchema(root, schema, data);
@@ -86,7 +88,7 @@ export function checkSource(root = process.cwd()): void {
 	checkProfileDefaults(graph, platformConfigs);
 	checkPlatformPolicies(graph);
 	checkProviders(graph);
-	checkTools(graph);
+	checkTools(root, graph);
 	assertRenderIdempotent(root);
 }
 
@@ -617,7 +619,7 @@ function checkProviders(graph: SourceGraph): void {
 	}
 }
 
-function checkTools(graph: SourceGraph): void {
+function checkTools(root: string, graph: SourceGraph): void {
 	for (const [id, tool] of Object.entries(toolRecords(graph))) {
 		const install = (tool as JsonObject)["install"] as JsonObject;
 		if (!install["linux"]) {
@@ -630,6 +632,92 @@ function checkTools(graph: SourceGraph): void {
 			);
 		}
 	}
+	checkRequiredTools(graph);
+	checkToolDocs(root, graph);
+}
+
+function checkRequiredTools(graph: SourceGraph): void {
+	for (const tool of ["bun", "rtk", "rg", "fd", "ast-grep", "jq"]) {
+		const record = toolRecords(graph)[tool] as JsonObject | undefined;
+		if (!record || record["required"] !== true) {
+			throw createOalError(
+				graph.tools.path,
+				`/tools/${tool}/required`,
+				"required baseline tool must be source-backed",
+				record?.["required"],
+				true,
+			);
+		}
+	}
+}
+
+function checkToolDocs(root: string, graph: SourceGraph): void {
+	const knownTools = new Set<string>();
+	for (const [id, tool] of Object.entries(toolRecords(graph))) {
+		knownTools.add(id);
+		for (const alias of ((tool as JsonObject)["aliases"] as
+			| string[]
+			| undefined) ?? []) {
+			knownTools.add(alias);
+		}
+	}
+	for (const docCheck of [
+		{
+			end: "## Anti-bloat rules",
+			jsonPath: "/Tool matrix",
+			path: "docs/research/useful-cli-tools.md",
+			start: "## Tool matrix",
+		},
+		{
+			end: "## Host install policy",
+			jsonPath: "/Required tools",
+			path: "docs/research/provider-tool-study.md",
+			start: "## Required tools",
+		},
+	]) {
+		const doc = readTextFile(root, docCheck.path).toString("utf8");
+		for (const tool of documentedToolNamesInSection(
+			doc,
+			docCheck.start,
+			docCheck.end,
+		)) {
+			if (!knownTools.has(tool)) {
+				throw createOalError(
+					docCheck.path,
+					docCheck.jsonPath,
+					"documented CLI tool must have source record or alias",
+					tool,
+					graph.tools.path,
+				);
+			}
+		}
+	}
+}
+
+function documentedToolNamesInSection(
+	doc: string,
+	startHeading: string,
+	endHeading: string,
+): string[] {
+	const names: string[] = [];
+	let inMatrix = false;
+	for (const line of doc.split("\n")) {
+		if (line === startHeading) {
+			inMatrix = true;
+			continue;
+		}
+		if (inMatrix && line === endHeading) {
+			break;
+		}
+		if (!inMatrix) {
+			continue;
+		}
+		const match = markdownToolCellPattern.exec(line);
+		if (match) {
+			names.push(match[1]);
+		}
+	}
+	return names;
 }
 
 function providerRecords(graph: SourceGraph): JsonObject {

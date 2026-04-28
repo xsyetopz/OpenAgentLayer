@@ -57,6 +57,8 @@ Optional providers sync only when explicitly enabled.
 
 ## Required tools
 
+Canonical source ids live in `source/tools/tools.json`. Human-facing names such as `ripgrep` and `playwright-cli` must appear there as aliases when they differ from the source id.
+
 | Tool       | Purpose                      | Required | Probe                                | Policy                         |
 | ---------- | ---------------------------- | -------- | ------------------------------------ | ------------------------------ |
 | `bun`      | runtime and package runner   | true     | `bun --version`                      | primary runtime                |

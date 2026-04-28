@@ -281,6 +281,7 @@ Status policy:
 - [ ] Run stale branding check.
 - [ ] Run banned wording check.
 - [ ] Run source citation check for research docs.
+- [x] Run useful CLI tool/source consistency check.
 - [ ] Run provider sync dry-run.
 
 ### Failure quality
@@ -310,7 +311,7 @@ Status policy:
 ### Smoke commands
 
 - [ ] `oal install` renders and installs managed files.
-- [ ] `oal doctor tools` checks required tools.
+- [x] `oal doctor tools` checks required tools.
 - [ ] `oal doctor hooks codex` passes with Codex fixture.
 - [ ] `oal doctor hooks claude` passes with Claude Code fixture.
 - [ ] `oal doctor hooks opencode` passes with OpenCode fixture.

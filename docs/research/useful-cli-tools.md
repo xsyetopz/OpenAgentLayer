@@ -41,25 +41,28 @@ OAL should prefer tools that can produce compact, deterministic, source-cited ou
 
 ### Required baseline
 
-These tools give most of the value for agent work:
+These tools are source-backed as required in `source/tools/tools.json`:
 
 ```bash
-brew install ripgrep fd jq git-delta just
+brew install oven-sh/bun/bun
 brew install rtk-ai/tap/rtk
+brew install ripgrep fd ast-grep jq
 ```
 
-OAL-required tools also include Bun and RTK. Install policy is tracked in `specs/providers-tools-models.md`.
+Canonical ids are `bun`, `rtk`, `rg`, `fd`, `ast-grep`, and `jq`. Aliases such as `ripgrep`, `fdfind`, and `sg` are documented in source, not treated as separate tools.
 
 ### High-value optional set
 
+These tools are useful for agents, but are not required for OAL startup:
+
 ```bash
-brew install bat eza tree fzf gh ast-grep shellcheck shfmt hyperfine watchexec mise uv
+brew install bat tree yq gh git-delta just shellcheck shfmt hyperfine watchexec mise uv
 ```
 
 ### Specialized set
 
 ```bash
-brew install semgrep duckdb sqlite-utils httpie tokei act
+brew install semgrep duckdb sqlite-utils httpie tokei act direnv
 ```
 
 For Node projects:

@@ -1,40 +1,66 @@
 {
   "$schema": "../schema/tools.schema.json",
   "tools": {
+    "act": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "act"
+      ],
+      "probe": "act --version",
+      "install": {
+        "macos": "brew install act",
+        "linux": "package-manager"
+      }
+    },
+    "ast-grep": {
+      "required": true,
+      "aliases": [
+        "sg"
+      ],
+      "binaries": [
+        "ast-grep",
+        "sg"
+      ],
+      "probe": "ast-grep --version",
+      "install": {
+        "macos": "brew install ast-grep",
+        "linux": "package-manager"
+      }
+    },
+    "bat": {
+      "required": false,
+      "aliases": [
+        "batcat"
+      ],
+      "binaries": [
+        "bat",
+        "batcat"
+      ],
+      "probe": "bat --version",
+      "install": {
+        "macos": "brew install bat",
+        "linux": "package-manager"
+      }
+    },
     "bun": {
       "required": true,
+      "aliases": [],
+      "binaries": [
+        "bun"
+      ],
       "probe": "bun --version",
       "install": {
         "macos": "brew install oven-sh/bun/bun",
         "linux": "upstream-script"
       }
     },
-    "rtk": {
-      "required": true,
-      "probe": "rtk --version",
-      "install": {
-        "macos": "brew install rtk-ai/tap/rtk",
-        "linux": "upstream-script"
-      }
-    },
-    "rg": {
-      "required": true,
-      "probe": "rg --version",
-      "install": {
-        "macos": "brew install ripgrep",
-        "linux": "package-manager"
-      }
-    },
-    "jq": {
-      "required": true,
-      "probe": "jq --version",
-      "install": {
-        "macos": "brew install jq",
-        "linux": "package-manager"
-      }
-    },
     "context7": {
       "required": false,
+      "aliases": [],
+      "binaries": [
+        "context7"
+      ],
       "probe": "context7 --version",
       "install": {
         "macos": "optional-cli",
@@ -43,15 +69,11 @@
     },
     "ctx7": {
       "required": false,
+      "aliases": [],
+      "binaries": [
+        "ctx7"
+      ],
       "probe": "ctx7 --version",
-      "install": {
-        "macos": "optional-cli",
-        "linux": "optional-cli"
-      }
-    },
-    "playwright": {
-      "required": false,
-      "probe": "playwright --version",
       "install": {
         "macos": "optional-cli",
         "linux": "optional-cli"
@@ -59,10 +81,459 @@
     },
     "deepwiki": {
       "required": false,
+      "aliases": [],
+      "binaries": [
+        "deepwiki"
+      ],
       "probe": "deepwiki --help",
       "install": {
         "macos": "optional-cli",
         "linux": "optional-cli"
+      }
+    },
+    "depcheck": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "depcheck"
+      ],
+      "probe": "bunx depcheck --version",
+      "install": {
+        "macos": "npm package depcheck",
+        "linux": "npm package depcheck"
+      }
+    },
+    "direnv": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "direnv"
+      ],
+      "probe": "direnv --version",
+      "install": {
+        "macos": "brew install direnv",
+        "linux": "package-manager"
+      }
+    },
+    "docker-compose": {
+      "required": false,
+      "aliases": [
+        "docker compose"
+      ],
+      "binaries": [
+        "docker"
+      ],
+      "probe": "docker compose version",
+      "install": {
+        "macos": "docker-desktop",
+        "linux": "package-manager"
+      }
+    },
+    "duckdb": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "duckdb"
+      ],
+      "probe": "duckdb --version",
+      "install": {
+        "macos": "brew install duckdb",
+        "linux": "package-manager"
+      }
+    },
+    "eza": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "eza"
+      ],
+      "probe": "eza --version",
+      "install": {
+        "macos": "brew install eza",
+        "linux": "package-manager"
+      }
+    },
+    "fd": {
+      "required": true,
+      "aliases": [
+        "fdfind"
+      ],
+      "binaries": [
+        "fd",
+        "fdfind"
+      ],
+      "probe": "fd --version",
+      "install": {
+        "macos": "brew install fd",
+        "linux": "package-manager"
+      }
+    },
+    "gh": {
+      "required": false,
+      "aliases": [
+        "github-cli"
+      ],
+      "binaries": [
+        "gh"
+      ],
+      "probe": "gh --version",
+      "install": {
+        "macos": "brew install gh",
+        "linux": "package-manager"
+      }
+    },
+    "git-delta": {
+      "required": false,
+      "aliases": [
+        "delta"
+      ],
+      "binaries": [
+        "delta"
+      ],
+      "probe": "delta --version",
+      "install": {
+        "macos": "brew install git-delta",
+        "linux": "package-manager"
+      }
+    },
+    "gum": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "gum"
+      ],
+      "probe": "gum --version",
+      "install": {
+        "macos": "brew install gum",
+        "linux": "package-manager"
+      }
+    },
+    "homebrew": {
+      "required": false,
+      "aliases": [
+        "brew"
+      ],
+      "binaries": [
+        "brew"
+      ],
+      "probe": "brew --version",
+      "install": {
+        "macos": "upstream-script",
+        "linux": "linuxbrew-optional"
+      }
+    },
+    "httpie": {
+      "required": false,
+      "aliases": [
+        "http"
+      ],
+      "binaries": [
+        "http"
+      ],
+      "probe": "http --version",
+      "install": {
+        "macos": "brew install httpie",
+        "linux": "package-manager"
+      }
+    },
+    "hyperfine": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "hyperfine"
+      ],
+      "probe": "hyperfine --version",
+      "install": {
+        "macos": "brew install hyperfine",
+        "linux": "package-manager"
+      }
+    },
+    "jq": {
+      "required": true,
+      "aliases": [],
+      "binaries": [
+        "jq"
+      ],
+      "probe": "jq --version",
+      "install": {
+        "macos": "brew install jq",
+        "linux": "package-manager"
+      }
+    },
+    "just": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "just"
+      ],
+      "probe": "just --version",
+      "install": {
+        "macos": "brew install just",
+        "linux": "package-manager"
+      }
+    },
+    "knip": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "knip"
+      ],
+      "probe": "bunx knip --version",
+      "install": {
+        "macos": "npm package knip",
+        "linux": "npm package knip"
+      }
+    },
+    "mise": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "mise"
+      ],
+      "probe": "mise --version",
+      "install": {
+        "macos": "brew install mise",
+        "linux": "package-manager"
+      }
+    },
+    "mypy": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "mypy"
+      ],
+      "probe": "mypy --version",
+      "install": {
+        "macos": "package-manager",
+        "linux": "package-manager"
+      }
+    },
+    "node": {
+      "required": false,
+      "aliases": [
+        "nodejs"
+      ],
+      "binaries": [
+        "node"
+      ],
+      "probe": "node --version",
+      "install": {
+        "macos": "brew install node",
+        "linux": "package-manager"
+      }
+    },
+    "playwright": {
+      "required": false,
+      "aliases": [
+        "playwright-cli"
+      ],
+      "binaries": [
+        "playwright"
+      ],
+      "probe": "playwright --version",
+      "install": {
+        "macos": "optional-cli",
+        "linux": "optional-cli"
+      }
+    },
+    "pytest": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "pytest"
+      ],
+      "probe": "pytest --version",
+      "install": {
+        "macos": "package-manager",
+        "linux": "package-manager"
+      }
+    },
+    "repomix": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "repomix"
+      ],
+      "probe": "bunx repomix --version",
+      "install": {
+        "macos": "npm package repomix",
+        "linux": "npm package repomix"
+      }
+    },
+    "rg": {
+      "required": true,
+      "aliases": [
+        "ripgrep"
+      ],
+      "binaries": [
+        "rg"
+      ],
+      "probe": "rg --version",
+      "install": {
+        "macos": "brew install ripgrep",
+        "linux": "package-manager"
+      }
+    },
+    "rtk": {
+      "required": true,
+      "aliases": [],
+      "binaries": [
+        "rtk"
+      ],
+      "probe": "rtk --version",
+      "install": {
+        "macos": "brew install rtk-ai/tap/rtk",
+        "linux": "upstream-script"
+      }
+    },
+    "ruff": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "ruff"
+      ],
+      "probe": "ruff --version",
+      "install": {
+        "macos": "brew install ruff",
+        "linux": "package-manager"
+      }
+    },
+    "rust": {
+      "required": false,
+      "aliases": [
+        "rustup",
+        "cargo"
+      ],
+      "binaries": [
+        "rustup",
+        "cargo"
+      ],
+      "probe": "rustup --version",
+      "install": {
+        "macos": "brew install rustup",
+        "linux": "package-manager"
+      }
+    },
+    "semgrep": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "semgrep"
+      ],
+      "probe": "semgrep --version",
+      "install": {
+        "macos": "brew install semgrep",
+        "linux": "package-manager"
+      }
+    },
+    "shellcheck": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "shellcheck"
+      ],
+      "probe": "shellcheck --version",
+      "install": {
+        "macos": "brew install shellcheck",
+        "linux": "package-manager"
+      }
+    },
+    "shfmt": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "shfmt"
+      ],
+      "probe": "shfmt --version",
+      "install": {
+        "macos": "brew install shfmt",
+        "linux": "package-manager"
+      }
+    },
+    "sqlite-utils": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "sqlite-utils"
+      ],
+      "probe": "sqlite-utils --version",
+      "install": {
+        "macos": "package-manager",
+        "linux": "package-manager"
+      }
+    },
+    "tokei": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "tokei"
+      ],
+      "probe": "tokei --version",
+      "install": {
+        "macos": "brew install tokei",
+        "linux": "package-manager"
+      }
+    },
+    "tree": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "tree"
+      ],
+      "probe": "tree --version",
+      "install": {
+        "macos": "brew install tree",
+        "linux": "package-manager"
+      }
+    },
+    "tsc": {
+      "required": false,
+      "aliases": [
+        "typescript"
+      ],
+      "binaries": [
+        "tsc"
+      ],
+      "probe": "bunx tsc --version",
+      "install": {
+        "macos": "npm package typescript",
+        "linux": "npm package typescript"
+      }
+    },
+    "uv": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "uv"
+      ],
+      "probe": "uv --version",
+      "install": {
+        "macos": "brew install uv",
+        "linux": "package-manager"
+      }
+    },
+    "watchexec": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "watchexec"
+      ],
+      "probe": "watchexec --version",
+      "install": {
+        "macos": "brew install watchexec",
+        "linux": "package-manager"
+      }
+    },
+    "yq": {
+      "required": false,
+      "aliases": [],
+      "binaries": [
+        "yq"
+      ],
+      "probe": "yq --version",
+      "install": {
+        "macos": "brew install yq",
+        "linux": "package-manager"
       }
     }
   }

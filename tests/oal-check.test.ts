@@ -1,52 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import {
-	cpSync,
-	mkdirSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-import { codexAdapter } from "../packages/oal/src/adapters/codex";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { checkSource } from "../packages/oal/src/check";
-import { doctorHooks } from "../packages/oal/src/doctor";
-import { explain, render } from "../packages/oal/src/render";
-import { loadSource } from "../packages/oal/src/source";
-
-const repoRoot = process.cwd();
-
-function tempRepo(): string {
-	const root = join(tmpdir(), `oal-test-${crypto.randomUUID()}`);
-	mkdirSync(root, { recursive: true });
-	cpSync(resolve(repoRoot, "source"), resolve(root, "source"), {
-		recursive: true,
-	});
-	return root;
-}
-
-function withTempRepo(run: (root: string) => void): void {
-	const root = tempRepo();
-	try {
-		run(root);
-	} finally {
-		rmSync(root, { force: true, recursive: true });
-	}
-}
-
-function mutateJson(
-	root: string,
-	path: string,
-	mutate: (value: Record<string, unknown>) => void,
-): void {
-	const fullPath = resolve(root, path);
-	const value = JSON.parse(readFileSync(fullPath, "utf8")) as Record<
-		string,
-		unknown
-	>;
-	mutate(value);
-	writeFileSync(fullPath, `${JSON.stringify(value, null, "\t")}\n`);
-}
+import { render } from "../packages/oal/src/render";
+import {
+	insertBefore,
+	mutateJson,
+	repoRoot,
+	withTempRepo,
+} from "./helpers/oal";
 
 describe("oal check", () => {
 	test("accepts current source graph", () => {
@@ -272,6 +234,61 @@ describe("oal check", () => {
 		});
 	});
 
+	test("requires source-backed baseline tools", () => {
+		withTempRepo((root) => {
+			const tools = JSON.parse(
+				readFileSync(resolve(root, "source/tools/tools.json"), "utf8"),
+			) as { tools: Record<string, { required: boolean }> };
+			for (const id of ["bun", "rtk", "rg", "fd", "ast-grep", "jq"]) {
+				expect(tools.tools[id]?.required).toBe(true);
+			}
+		});
+	});
+
+	test("rejects baseline tools that are no longer required", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/tools/tools.json", (tools) => {
+				(
+					(tools["tools"] as Record<string, unknown>)["fd"] as Record<
+						string,
+						unknown
+					>
+				)["required"] = false;
+			});
+			expect(() => checkSource(root)).toThrow(
+				"required baseline tool must be source-backed",
+			);
+		});
+	});
+
+	test("rejects useful CLI doc tools without source records or aliases", () => {
+		withTempRepo((root) => {
+			insertBefore(
+				root,
+				"docs/research/useful-cli-tools.md",
+				"## Anti-bloat rules",
+				"| `made-up-tool` | `made-up-tool --help` | narrow use | full dump | missing source. |\n\n",
+			);
+			expect(() => checkSource(root)).toThrow(
+				"documented CLI tool must have source record or alias",
+			);
+		});
+	});
+
+	test("rejects provider study tools without source records or aliases", () => {
+		withTempRepo((root) => {
+			insertBefore(
+				root,
+				"docs/research/provider-tool-study.md",
+				"## Host install policy",
+				"| `untracked-provider-tool` | drift | `untracked-provider-tool --version` | missing source |\n\n",
+			);
+			expect(() => checkSource(root)).toThrow(
+				"documented CLI tool must have source record or alias",
+			);
+		});
+	});
+
 	test("rejects Claude Code plus consumer profile", () => {
 		withTempRepo((root) => {
 			mutateJson(root, "source/routes/subscriptions.json", (subscriptions) => {
@@ -360,73 +377,6 @@ describe("oal check", () => {
 			expect(() => render(root, resolve(root, "out"))).toThrow(
 				"enabled platform has no registered adapter: kilo",
 			);
-		});
-	});
-});
-
-describe("oal render", () => {
-	test("renders deterministic tree with manifest and explain map", () => {
-		withTempRepo((root) => {
-			const first = resolve(root, "first");
-			const second = resolve(root, "second");
-			render(root, first);
-			render(root, second);
-			expect(readFileSync(resolve(first, "source-index.json"), "utf8")).toEqual(
-				readFileSync(resolve(second, "source-index.json"), "utf8"),
-			);
-			expect(
-				readFileSync(resolve(first, ".oal/render-manifest.json"), "utf8"),
-			).toEqual(
-				readFileSync(resolve(second, ".oal/render-manifest.json"), "utf8"),
-			);
-			expect(readFileSync(resolve(first, "codex/AGENTS.md"), "utf8")).toContain(
-				"### Athena",
-			);
-			expect(
-				readFileSync(resolve(first, "codex/config.toml"), "utf8"),
-			).toContain("multi_agent_v2 = true");
-			const managedFiles = JSON.parse(
-				readFileSync(resolve(first, ".oal/managed-files.json"), "utf8"),
-			) as { files: string[] };
-			expect(managedFiles.files).toContain(".oal/render-manifest.json");
-			expect(managedFiles.files).toContain(".oal/managed-files.json");
-			expect(managedFiles.files).toContain(".oal/explain-map.json");
-			expect(explain(root, `${first}/agents/athena.json`, first)).toEqual({
-				sha256: expect.any(String),
-				sources: ["source/agents/athena.json"],
-			});
-		});
-	});
-});
-
-describe("oal doctor", () => {
-	test("reports Codex detect and capabilities", () => {
-		withTempRepo((root) => {
-			const graph = loadSource(root);
-			expect(codexAdapter.detect(root, graph)).toMatchObject({
-				binary: "codex",
-				platform: "codex",
-				project_root: root,
-			});
-			expect(codexAdapter.capabilities(graph).surfaces).toMatchObject({
-				agents: "supported",
-				hooks: "supported",
-				instructions: "supported",
-				mcp: "manual",
-				model_routes: "manual",
-			});
-		});
-	});
-
-	test("reports Codex hook mappings without fake parity", () => {
-		withTempRepo((root) => {
-			const result = doctorHooks("codex", root);
-			expect(result.ok).toBe(true);
-			expect(result.checks).toContainEqual({
-				message: "tool-pre-shell-rtk: codex hook mapping supported",
-				ok: true,
-				path: "source/hooks/tool-pre-shell-rtk.json",
-			});
 		});
 	});
 });
