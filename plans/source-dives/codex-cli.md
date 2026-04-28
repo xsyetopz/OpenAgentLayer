@@ -20,7 +20,7 @@ Status: source-backed research for v4 planning.
 - `tool_output_token_limit` bounds tool output stored into context.
 - MCP servers are config-backed and can have separate approval behavior.
 - Sandbox and approval policy live in config/permissions, not prompt text.
-- External-agent import exists; v4 should not rely on it as migration path because v4 rejects compatibility.
+- External-agent import exists; OAL should prefer direct native rendering instead of import indirection.
 
 ## v4 Implications
 
@@ -29,7 +29,7 @@ Status: source-backed research for v4 planning.
 - Do not assume managed config wins against runtime overrides.
 - Treat tool output limit as a hard API constraint.
 - Generate MCP approval settings explicitly.
-- Do not use external-agent import for v3 migration.
+- Do not use external-agent import as the adapter contract.
 
 ## Edge Cases
 

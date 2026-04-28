@@ -1,6 +1,6 @@
 # Contributing
 
-openagentsbtw generates platform-specific artifacts for four targets from a single canonical source:
+OpenAgentLayer generates platform-specific artifacts for four targets from a single canonical source:
 
 | Target         | Directory   | What gets generated                     |
 | -------------- | ----------- | --------------------------------------- |
@@ -20,8 +20,8 @@ Canonical source lives in `source/`. Generation is handled by `scripts/generate.
 ## Setup
 
 ```bash
-git clone https://github.com/xsyetopz/openagentsbtw.git
-cd openagentsbtw
+git clone https://github.com/xsyetopz/OpenAgentLayer.git
+cd OpenAgentLayer
 bun install --frozen-lockfile
 bun run generate
 ```
@@ -132,7 +132,7 @@ Use the PR template at `.github/PULL_REQUEST_TEMPLATE.md`. It covers:
 
 ## Reporting Issues
 
-Open an issue at [github.com/xsyetopz/openagentsbtw/issues](https://github.com/xsyetopz/openagentsbtw/issues). Include:
+Open an issue at [github.com/xsyetopz/OpenAgentLayer/issues](https://github.com/xsyetopz/OpenAgentLayer/issues). Include:
 
 - What you did
 - What happened

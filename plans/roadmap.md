@@ -2,30 +2,27 @@
 
 ## Definition of Done
 
-OAL v4 beta is ready when Codex and OpenCode adapters install cleanly, route to current supported models, enforce task contracts through hooks/permissions, run commands through OAL runner, and pass temp-home validation. v3 parity is not enough; OAL must prove higher effectiveness.
+OAL v4 beta is ready when Codex and OpenCode adapters install cleanly, route to current supported models, enforce task contracts through hooks/permissions, run commands through OAL runner, and pass temp-home validation.
 
 ## 0. Planning and Source-of-Truth
 
 - [x] Create OAL planning index.
 - [x] Document Rust-first language/runtime decision.
 - [x] Document native adapter strategy.
-- [x] Document no-v3-compatibility policy.
+- [x] Document fresh-start product boundary.
 - [x] Document behavior-policy replacement for regex-only advice blocking.
 - [x] Document RTK/OAL runner efficiency strategy.
 - [x] Document current Codex/OpenCode model routing policy.
 - [ ] Convert planning docs into checked schemas under `source/`.
 - [ ] Add doc lints: every platform spec must list references, native surfaces, adapter plan, validation.
-- [ ] Add stale-doc check for old names: `openagentsbtw`, `oabtw`, Windows native claims.
+- [ ] Add source checks for platform references, native surfaces, install paths, and validation fixtures.
 
-## 1. Product Reset
+## 1. Product Foundation
 
-- [ ] Remove public v3 install path from active docs.
-- [ ] Keep `v3_to_be_removed/` as negative reference only until deleted.
 - [ ] Add product constants: `OpenAgentLayer`, `OAL`, `oal`, `oal-runner`.
 - [ ] Remove native Windows scripts from active product surface.
 - [ ] Add unsupported Windows-native error: `OAL supports Windows through WSL2 only.`
 - [ ] Add WSL2 install note under Linux path.
-- [ ] Add v3 residue cleanup inventory for uninstall only.
 
 ## 2. Rust Workspace Foundation
 
@@ -46,7 +43,7 @@ OAL v4 beta is ready when Codex and OpenCode adapters install cleanly, route to 
 - [ ] `oal check <platform>` validates source and generated artifacts.
 - [ ] `oal install <platform>` writes managed files and manifest.
 - [ ] `oal uninstall <platform>` removes manifest-owned files.
-- [ ] `oal doctor` checks OS, paths, tool availability, stale v3 residue.
+- [ ] `oal doctor` checks OS, paths, tool availability, and source/config validity.
 - [ ] `oal doctor rtk` probes RTK capability map.
 - [ ] `oal hook <platform> <event>` handles platform payloads.
 - [ ] `oal run -- <command...>` executes through runner policy.
@@ -73,13 +70,13 @@ OAL v4 beta is ready when Codex and OpenCode adapters install cleanly, route to 
 - [ ] Set tool-output budget fields when supported by Codex config.
 - [ ] Fail `oal check codex` if hooks are required but disabled.
 - [ ] Add temp-home install smoke.
-- [ ] Add uninstall smoke including v3 residue cleanup.
+- [ ] Add uninstall smoke.
 
 ## 6. OpenCode Adapter
 
 - [ ] Render OpenCode config from source model routes.
 - [ ] Render agents/modes from OAL roles.
-- [ ] Render skills into native OpenCode path, not accidental Claude compatibility path.
+- [ ] Render skills into native OpenCode path.
 - [ ] Render permissions that allow `oal-runner` and gate raw shell.
 - [ ] Avoid package plugin installs by default.
 - [ ] Add local plugin only if needed for hook-equivalent behavior and source-proven.
@@ -137,14 +134,13 @@ OAL v4 beta is ready when Codex and OpenCode adapters install cleanly, route to 
 - [ ] Promote fallback order changes only with fixture evidence.
 - [ ] Add `oal check models` to reject stale/default old model IDs.
 
-## 11. More-than-v3 Effectiveness Gates
+## 11. Effectiveness Gates
 
 - [ ] Project-level token savings >= 60% on supported loops.
 - [ ] Zero RTK/hook recursion incidents in fixture suite.
 - [ ] Zero regex-only blocker decisions.
 - [ ] Code-task final answers include edit/test/blocker evidence >= 95% in fixtures.
 - [ ] No Windows-native path appears in active install docs.
-- [ ] No v3 public alias appears in active command docs.
 - [ ] Codex and OpenCode install/uninstall leave no unmanaged generated files.
 - [ ] Adapter docs stay source-linked and pass stale-reference lint.
 

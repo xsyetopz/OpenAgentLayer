@@ -1,0 +1,76 @@
+[[items]]
+name = "plan"
+kind = "command"
+route = "plan"
+purpose = "produce decision-complete implementation plan"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "implement"
+kind = "command"
+route = "implement"
+purpose = "perform requested code or repo change"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "review"
+kind = "command-skill"
+route = "review"
+purpose = "correctness and regression review workflow"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "check"
+kind = "command-skill"
+route = "test"
+purpose = "verification workflow"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "debug"
+kind = "command-skill"
+route = "debug"
+purpose = "failure reproduction workflow"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "trace"
+kind = "command-skill"
+route = "research"
+purpose = "dependency and call-path tracing workflow"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "test"
+kind = "command"
+route = "test"
+purpose = "design or execute test coverage"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "document"
+kind = "command"
+route = "document"
+purpose = "write durable docs from source state"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "taste"
+kind = "command-skill"
+route = "design"
+purpose = "frontend taste system from upstream provider"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "caveman"
+kind = "command-skill"
+route = "utility"
+purpose = "terse output modes from upstream provider"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "bmad"
+kind = "skill"
+route = "orchestrate"
+purpose = "agent workflow methods from upstream provider"
+surfaces = ["codex", "claude", "opencode"]

@@ -1,0 +1,275 @@
+[[tools]]
+name = "homebrew"
+purpose = "macOS package manager bootstrap"
+required = false
+probe = ["brew --version"]
+use_policy = "check on macOS first; install Homebrew only when missing"
+
+[tools.install]
+default = "macOS only"
+macos = ["official Homebrew install script"]
+linux = ["not used on Linux"]
+
+[[tools]]
+name = "rust"
+purpose = "Rust toolchain for Rust-based providers and crates"
+required = false
+probe = ["rustup --version", "cargo --version"]
+use_policy = "install only when Rust-backed build paths need it"
+
+[tools.install]
+default = "rustup"
+macos = ["brew install rustup-init", "rustup-init -y"]
+linux = ["official rustup install script"]
+
+[[tools]]
+name = "node"
+purpose = "JavaScript runtime fallback for Node-based CLIs"
+required = false
+probe = ["node --version"]
+use_policy = "prefer Bun for Bun repos; use Node when upstream CLI requires Node"
+
+[tools.install]
+default = "platform package manager node"
+macos = ["brew install node"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for nodejs npm"]
+
+[[tools]]
+name = "bun"
+purpose = "Bun package manager and script runner"
+required = true
+probe = ["bun --version"]
+use_policy = "use when bun.lock or package manager source selects Bun"
+
+[tools.install]
+default = "bun install script"
+macos = ["brew install oven-sh/bun/bun"]
+linux = ["curl -fsSL https://bun.sh/install | bash"]
+
+[[tools]]
+name = "rtk"
+purpose = "shell command rewrite and output compaction"
+required = true
+probe = ["rtk --version", "rtk gain"]
+use_policy = "always prefer rtk when capability exists"
+
+[tools.install]
+default = "install provider rtk"
+macos = ["brew install rtk-ai/tap/rtk"]
+linux = [
+    "curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/main/install.sh | bash",
+]
+
+[[tools]]
+name = "ripgrep"
+purpose = "fast text search"
+required = true
+probe = ["rg --version"]
+use_policy = "use for targeted repo search only"
+
+[tools.install]
+default = "platform package ripgrep"
+macos = ["brew install ripgrep"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for ripgrep"]
+
+[[tools]]
+name = "fd"
+purpose = "fast file discovery"
+required = true
+probe = ["fd --version", "fdfind --version"]
+use_policy = "use for targeted file discovery only"
+
+[tools.install]
+default = "platform package fd"
+macos = ["brew install fd"]
+linux = ["detect apt package fd-find or fd on dnf/pacman/apk/zypper"]
+
+[[tools]]
+name = "ast-grep"
+purpose = "AST-aware search and rewrite"
+required = true
+probe = ["sg --version", "ast-grep --version"]
+use_policy = "use for syntax-aware refactors and audits"
+
+[tools.install]
+default = "platform package ast-grep"
+macos = ["brew install ast-grep"]
+linux = ["detect package ast-grep or install cargo package ast-grep --locked"]
+
+[[tools]]
+name = "repomix"
+purpose = "repo context packing"
+required = false
+probe = ["repomix --version"]
+use_policy = "use via bunx when repo snapshot is needed"
+
+[tools.install]
+default = "bunx repomix"
+macos = ["bunx repomix"]
+linux = ["bunx repomix"]
+
+[[tools]]
+name = "gh"
+purpose = "GitHub CLI integration"
+required = false
+probe = ["gh --version"]
+use_policy = "use for GitHub checks only when repo workflow needs it"
+
+[tools.install]
+default = "platform package gh"
+macos = ["brew install gh"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for gh"]
+
+[[tools]]
+name = "jq"
+purpose = "JSON processing"
+required = true
+probe = ["jq --version"]
+use_policy = "use for JSON inspection and shell-safe transformations"
+
+[tools.install]
+default = "platform package jq"
+macos = ["brew install jq"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for jq"]
+
+[[tools]]
+name = "just"
+purpose = "task runner"
+required = false
+probe = ["just --version"]
+use_policy = "use when repo has a justfile"
+
+[tools.install]
+default = "platform package just"
+macos = ["brew install just"]
+linux = [
+    "detect apt/dnf/pacman/apk/zypper package for just or cargo install just --locked",
+]
+
+[[tools]]
+name = "mise"
+purpose = "runtime and tool version manager"
+required = false
+probe = ["mise --version"]
+use_policy = "use when repo declares mise configuration"
+
+[tools.install]
+default = "platform package mise"
+macos = ["brew install mise"]
+linux = ["curl https://mise.run | sh"]
+
+[[tools]]
+name = "uv"
+purpose = "Python package and project runner"
+required = false
+probe = ["uv --version"]
+use_policy = "use for Python projects with uv config"
+
+[tools.install]
+default = "platform package uv"
+macos = ["brew install uv"]
+linux = [
+    "detect apt/dnf/pacman/apk/zypper package for uv or install official uv script",
+]
+
+[[tools]]
+name = "ruff"
+purpose = "Python lint and format"
+required = false
+probe = ["ruff --version"]
+use_policy = "use for Python lint/format when project selects Ruff"
+
+[tools.install]
+default = "platform package ruff"
+macos = ["brew install ruff"]
+linux = [
+    "detect apt/dnf/pacman/apk/zypper package for ruff or uv tool install ruff",
+]
+
+[[tools]]
+name = "hyperfine"
+purpose = "benchmark runner"
+required = false
+probe = ["hyperfine --version"]
+use_policy = "use for measured performance changes"
+
+[tools.install]
+default = "platform package hyperfine"
+macos = ["brew install hyperfine"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for hyperfine"]
+
+[[tools]]
+name = "act"
+purpose = "local GitHub Actions runner"
+required = false
+probe = ["act --version"]
+use_policy = "use for local workflow reproduction when requested"
+
+[tools.install]
+default = "platform package act"
+macos = ["brew install act"]
+linux = [
+    "detect apt/dnf/pacman/apk/zypper package for act or install upstream release",
+]
+
+[[tools]]
+name = "eza"
+purpose = "modern ls replacement"
+required = false
+probe = ["eza --version"]
+use_policy = "use for readable directory inspection"
+
+[tools.install]
+default = "platform package eza"
+macos = ["brew install eza"]
+linux = ["detect apt/dnf/pacman/apk/zypper package for eza"]
+
+[[tools]]
+name = "bat"
+purpose = "syntax-highlighted file viewer"
+required = false
+probe = ["bat --version", "batcat --version"]
+use_policy = "use for readable file inspection"
+
+[tools.install]
+default = "platform package bat"
+macos = ["brew install bat"]
+linux = ["detect apt package batcat or bat on dnf/pacman/apk/zypper"]
+
+[[tools]]
+name = "gum"
+purpose = "interactive shell workflows"
+required = false
+probe = ["gum --version"]
+use_policy = "use only for explicit interactive shell flows"
+
+[tools.install]
+default = "platform package gum"
+macos = ["brew install gum"]
+linux = [
+    "detect apt/dnf/pacman/apk/zypper package for gum or install Charm upstream package",
+]
+
+[[tools]]
+name = "context7"
+purpose = "third-party docs CLI"
+required = false
+probe = ["context7 --version", "ctx7 --version"]
+use_policy = "optional; use CLI when API docs are needed"
+
+[tools.install]
+default = "upstream CLI package"
+macos = ["install upstream context7 CLI when available"]
+linux = ["install upstream context7 CLI when available"]
+
+[[tools]]
+name = "playwright-cli"
+purpose = "browser automation CLI"
+required = false
+probe = ["playwright --version"]
+use_policy = "optional; use CLI, not MCP, for browser automation plans"
+
+[tools.install]
+default = "upstream playwright CLI"
+macos = ["brew install node", "bunx playwright --version"]
+linux = ["bunx playwright --version"]

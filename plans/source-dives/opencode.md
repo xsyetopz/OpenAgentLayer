@@ -28,7 +28,7 @@ Status: source-backed research for v4 planning.
 
 - Use managed config only with explicit precedence tests.
 - Avoid package plugin installs unless user explicitly opts in.
-- Render skills into the most native OpenCode path, not copied Claude layouts unless compatibility is deliberate.
+- Render skills into the most native OpenCode path.
 - Generate permissions so the harness runner is allowed while unsafe shell remains gated.
 - Validate compaction and truncation effects.
 

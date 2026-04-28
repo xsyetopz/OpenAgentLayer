@@ -1,0 +1,19 @@
+[product]
+name = "OpenAgentLayer"
+short_name = "OAL"
+cli = "oal"
+runner = "oal-runner"
+tagline = "harness layer for coding agents"
+version = "0.1.0"
+
+[support]
+macos = true
+linux = true
+wsl2_linux = true
+windows_native = false
+windows_native_error = "OAL supports Windows through WSL2 only."
+
+[docs]
+planning = "plans/roadmap.md"
+architecture = "plans/architecture.md"
+runtime = "plans/language-runtime.md"

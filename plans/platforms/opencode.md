@@ -21,7 +21,7 @@ Verified date: 2026-04-28.
 | skills      | native  | render OAL skills into native OpenCode skill path                       |
 | permissions | native  | allow `oal-runner`, gate raw shell and risky tools                      |
 | commands    | partial | render only when native path is source-backed                           |
-| hooks       | partial | use permissions/local plugin if proven; do not claim Codex parity       |
+| hooks       | partial | use permissions/local plugin if proven; document unsupported events       |
 | MCP         | native  | render explicit config only                                             |
 | workflows   | partial | compose from agents, skills, and commands                               |
 

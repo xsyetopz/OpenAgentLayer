@@ -1,7 +1,7 @@
-# Kilo Code v5 Legacy Source Dive
+# Kilo Code Source Dive
 
-Repository: https://github.com/Kilo-Org/kilocode-legacy
-Target: legacy/v5 behavior, not current v7 behavior.
+Repository: https://github.com/Kilo-Org/kilocode
+Target: documented Kilo Code customization behavior.
 
 ## Source-Backed Surfaces
 
@@ -23,10 +23,10 @@ Target: legacy/v5 behavior, not current v7 behavior.
 - Task tools include new-task/completion style behavior.
 - Tool protocol can be locked at task creation; adapter must not switch protocol mid-task.
 
-## v4 Implications
+## OAL Implications
 
-- Target Kilo Code v5 legacy paths explicitly.
-- Render mode-specific rules for role behavior instead of pretending full subagent parity.
+- Target documented Kilo Code paths explicitly.
+- Render mode-specific rules for role behavior instead of claiming unsupported subagent behavior.
 - Render workflows into `.kilocode/workflows/`.
 - Render MCP config only when user enables MCP.
 - Install/uninstall must handle VS Code extension storage separately from CLI storage.
@@ -36,5 +36,5 @@ Target: legacy/v5 behavior, not current v7 behavior.
 - `.kilocoderules` and older Cline/Roo naming may be deprecated or transitional.
 - Global and project rules can conflict.
 - Mode-specific paths multiply uninstall targets.
-- Task protocol lock can break workflows if v4 changes tool syntax mid-session.
+- Task protocol lock can break workflows if OAL changes tool syntax mid-session.
 

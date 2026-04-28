@@ -5,7 +5,7 @@ Accepted
 
 ## Context
 
-OAL must normalize shell commands, run hooks safely, compact output, track token savings, render native adapter artifacts, and validate install state. v3 JavaScript and shell surfaces were fast to change but weak for deterministic command parsing, token accounting, and cross-platform process behavior.
+OAL must normalize shell commands, run hooks safely, compact output, track token savings, render native adapter artifacts, and validate install state. Those jobs need deterministic command parsing, token accounting, and cross-platform process behavior.
 
 Native Windows support created extra code paths without improving the primary macOS/Linux agent loop. OAL should target the environments where Codex/OpenCode automation is strongest: macOS and Linux, including Windows through WSL2.
 

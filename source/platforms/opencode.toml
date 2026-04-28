@@ -1,0 +1,47 @@
+name = "opencode"
+
+references = [
+  "https://opencode.ai/docs/",
+  "https://opencode.ai/docs/config/",
+  "https://opencode.ai/docs/models/",
+  "https://opencode.ai/docs/agents/",
+  "https://opencode.ai/docs/skills/",
+  "https://github.com/anomalyco/opencode",
+]
+
+[native_surfaces]
+config = "OpenCode config"
+agents = "OpenCode agents"
+skills = "OpenCode skills"
+permissions = "OpenCode permission rules route shell through oal-runner"
+commands = "OpenCode commands when supported"
+hooks = "permission/plugin equivalents"
+mcp = "OpenCode MCP config"
+
+[adapter_plan]
+primary = true
+uses_package_plugin_by_default = false
+generated_paths = [".opencode", "agents", "skills", "config", "commands"]
+install_paths = ["$OPENCODE_CONFIG_DIR", ".opencode"]
+
+[[hook_events]]
+name = "pre-shell-guard"
+native_event = "permission"
+supported = true
+payload = "shell command"
+output = "allow or block"
+
+[[hook_events]]
+name = "pre-rtk-enforce"
+native_event = "permission"
+supported = true
+payload = "shell command"
+output = "rewritten command or block"
+
+[validation]
+checks = [
+  "config parse",
+  "command and skill render",
+  "permission matrix",
+  "temp-home install smoke",
+]

@@ -17,6 +17,8 @@ categories = ["development-tools"]
 publish = false
 
 [workspace.dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+toml = "0.8.23"
 
 [workspace.lints.rust]
 dead_code = "deny"

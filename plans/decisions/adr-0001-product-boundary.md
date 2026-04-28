@@ -5,7 +5,7 @@ Accepted
 
 ## Context
 
-openagentsbtw v3 grew into a multi-platform prompt framework with generated prompt trees, wrapper scripts, hook scripts, RTK advice, model routing, and Windows-native branches. It became hard to verify and easy to rot. The target is now a harness on top of existing tools, not another prompt pack.
+Coding-agent tools expose different native surfaces: rules files, config, hooks, permissions, skills, commands, local plugin formats, and model-routing options. OAL targets a harness on top of those tools, not another prompt pack.
 
 The OpenAI harness engineering article points at the right shape: small entry docs, repository knowledge as system of record, agent-legible tools, mechanical enforcement, and feedback loops that let agents execute instead of requiring humans to paste context.
 
@@ -34,8 +34,8 @@ OAL does not own:
 
 - model hosting
 - editor extension marketplaces
-- Windows-native support
-- v3 compatibility
+- native Windows support
+- transition modes
 - generic chatbot therapy or life-advice behavior
 
 ## Consequences
@@ -49,6 +49,6 @@ Easier:
 
 Harder:
 
-- v3 users reinstall
+- users install OAL as a new tool
 - all public docs must change names
-- old generated outputs are not reusable
+- generated output must come from OAL source specs

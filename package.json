@@ -1,7 +1,4 @@
 {
-  "bin": {
-    "oal": "packages/cli/src/oal.mjs"
-  },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",
     "ajv": "^8.20.0",
@@ -12,10 +9,10 @@
   },
   "private": true,
   "scripts": {
-    "oal": "node packages/cli/src/oal.mjs",
+    "oal": "cargo run -p oal-cli --",
     "test": "node --test tests/*.test.mjs",
-    "check:codex": "node packages/cli/src/oal.mjs check codex",
-    "typecheck": "bunx tsc -p jsconfig.json --noEmit --allowJs",
+    "check:codex": "cargo run -p oal-cli -- check codex",
+    "typecheck": "echo \"no JavaScript sources\"",
     "biome:check": "bunx biome check . --error-on-warnings --max-diagnostics 16384",
     "biome:fix": "bunx biome check . --write --max-diagnostics 16384",
     "biome:format": "bunx biome format . --write --max-diagnostics 16384",

@@ -33,7 +33,7 @@ Windsurf Cascade hooks are documented as a native surface. v4 can classify hooks
 - Split conceptually into `windsurf-editor` and possible `windsurf-plugin`.
 - Render editor-visible rules/workflows/memories first.
 - Treat transcript access as sensitive.
-- Do not claim custom-agent parity until official docs prove an artifact format.
+- Do not claim custom-agent support until official docs prove an artifact format.
 - Do not install plugin artifacts until plugin packaging is verified.
 
 ## Edge Cases

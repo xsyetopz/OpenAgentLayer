@@ -1,0 +1,69 @@
+[[items]]
+name = "plan"
+kind = "system-command"
+route = "plan"
+purpose = "produce decision-complete implementation plan"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "implement"
+kind = "system-command"
+route = "implement"
+purpose = "perform requested code or repo change"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "review"
+kind = "system-command"
+route = "review"
+purpose = "find correctness, regression, and design risk"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "check"
+kind = "system-command"
+route = "test"
+purpose = "run targeted verification and report blockers"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "debug"
+kind = "system-command"
+route = "debug"
+purpose = "reproduce failure and isolate root cause"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "trace"
+kind = "system-command"
+route = "research"
+purpose = "map call path, dependency path, or data flow"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "test"
+kind = "system-command"
+route = "test"
+purpose = "design or execute test coverage"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "document"
+kind = "system-command"
+route = "document"
+purpose = "write durable docs from source state"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "taste"
+kind = "system-command"
+route = "design"
+purpose = "apply frontend product taste"
+surfaces = ["codex", "claude", "opencode"]
+
+[[items]]
+name = "caveman"
+kind = "system-command"
+route = "utility"
+purpose = "switch terse output mode"
+surfaces = ["codex", "claude", "opencode"]

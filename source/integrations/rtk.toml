@@ -1,0 +1,23 @@
+[integration]
+name = "rtk"
+provider = "rtk-ai/rtk"
+kind = "command-output-filter"
+ownership = "external"
+vendored = false
+
+[doctor]
+commands = ["rtk --version", "rtk gain", "rtk rewrite <command>"]
+required = false
+
+[policy]
+capability_source = "probe"
+fallback = "oal-runner budgeted compaction"
+forbidden = [
+  "vendored rtk source",
+  "hardcoded high-gain filter registry in OAL",
+  "package-manager coercion",
+]
+
+[runner]
+use_when = "capability map reports supported and useful"
+unsupported = "preserve command and apply OAL output budget"

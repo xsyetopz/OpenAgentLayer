@@ -1,0 +1,23 @@
+[integration]
+name = "caveman"
+provider = "JuliusBrussee/caveman-compatible mode pack"
+kind = "response-style-skill"
+ownership = "external-source-synced"
+vendored = false
+
+[modes]
+allowed = [
+    "off",
+    "lite",
+    "full",
+    "ultra",
+    "wenyan-lite",
+    "wenyan",
+    "wenyan-ultra",
+]
+default = "full"
+
+[policy]
+scope = "assistant prose only unless explicit skill requests wider rewrite"
+protected = ["code", "commands", "paths", "URLs", "fenced code", "exact errors"]
+render_target = "platform-native skill or hook context"

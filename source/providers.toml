@@ -1,0 +1,127 @@
+[[providers]]
+name = "caveman"
+url = "https://github.com/juliusbrussee/caveman"
+required = true
+sync_mode = "exact-upstream"
+
+[providers.install]
+default = "sync-only"
+macos = []
+linux = []
+probe = []
+
+[providers.provenance]
+upstream_path = "providers/caveman/upstream"
+overlay_path = "providers/caveman/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "rtk"
+url = "https://github.com/rtk-ai/rtk"
+required = true
+sync_mode = "exact-upstream"
+
+[providers.install]
+default = "external-binary"
+macos = ["brew install rtk-ai/tap/rtk"]
+linux = [
+    "curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh",
+]
+probe = ["rtk --version", "rtk gain", "rtk rewrite <command>"]
+
+[providers.provenance]
+upstream_path = "providers/rtk/upstream"
+overlay_path = "providers/rtk/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "bmad-method"
+url = "https://github.com/bmad-code-org/BMAD-METHOD"
+required = true
+sync_mode = "upstream-extraction"
+
+[providers.install]
+default = "sync-extract"
+macos = []
+linux = []
+probe = []
+
+[providers.provenance]
+upstream_path = "providers/bmad-method/upstream"
+overlay_path = "providers/bmad-method/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "taste-skill"
+url = "https://github.com/leonxlnx/taste-skill"
+required = true
+sync_mode = "exact-upstream"
+
+[providers.install]
+default = "sync-only"
+macos = []
+linux = []
+probe = []
+
+[providers.provenance]
+upstream_path = "providers/taste-skill/upstream"
+overlay_path = "providers/taste-skill/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "context7"
+url = "https://github.com/upstash/context7"
+required = false
+sync_mode = "optional-cli"
+
+[providers.install]
+default = "cli-only"
+macos = ["bunx --bun @upstash/context7"]
+linux = ["bunx --bun @upstash/context7"]
+probe = ["context7 --version", "ctx7 --version"]
+
+[providers.provenance]
+upstream_path = "providers/context7/upstream"
+overlay_path = "providers/context7/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "playwright-cli"
+url = "https://github.com/microsoft/playwright-cli"
+required = false
+sync_mode = "optional-cli"
+
+[providers.install]
+default = "cli-only"
+macos = ["bunx playwright-cli"]
+linux = ["bunx playwright-cli"]
+probe = ["playwright-cli --help"]
+
+[providers.provenance]
+upstream_path = "providers/playwright-cli/upstream"
+overlay_path = "providers/playwright-cli/overlay"
+raw_upstream_editable = false
+pin_required = true
+
+[[providers]]
+name = "deepwiki"
+url = "https://www.deepwiki.sh/"
+required = false
+sync_mode = "optional-cli"
+
+[providers.install]
+default = "cli-only"
+macos = ["bunx deepwiki"]
+linux = ["bunx deepwiki"]
+probe = ["deepwiki --help"]
+
+[providers.provenance]
+upstream_path = "providers/deepwiki/upstream"
+overlay_path = "providers/deepwiki/overlay"
+raw_upstream_editable = false
+pin_required = true

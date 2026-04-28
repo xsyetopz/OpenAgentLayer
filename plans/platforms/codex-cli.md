@@ -27,7 +27,7 @@ Verified date: 2026-04-28.
 ## OAL Adapter Decisions
 
 - Codex is primary adapter.
-- OAL must not use v3 external-agent compatibility paths.
+- OAL must use Codex-native config, hooks, skills, and subagents directly.
 - `AGENTS.md` is an index, not full policy dump.
 - Hook output must be self-contained; installed hook artifacts cannot import repo source paths.
 - Config precedence must be tested with temp home and project config.
@@ -73,5 +73,5 @@ Failure messages must name exact missing evidence or blocked command. No generic
 - skill frontmatter smoke
 - subagent render smoke
 - temp-home install/uninstall smoke
-- v3 residue cleanup smoke
+- uninstall smoke
 - large-output token budget fixture

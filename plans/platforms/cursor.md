@@ -23,7 +23,7 @@ Verified date: 2026-04-25.
 ## Adapter Plan
 
 - Render project rules.
-- Render AGENTS.md-compatible core when supported.
+- Render AGENTS.md rules core when supported.
 - Avoid hook claims.
 - Keep Cursor as IDE adapter, not core harness runtime.
 

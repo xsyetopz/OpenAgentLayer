@@ -55,6 +55,6 @@ The sourcemap repository is unofficial reconstructed research for Claude Code 2.
 - temp `HOME` plugin install smoke
 - hook self-contained import test
 - skill discovery smoke where possible
-- uninstall removes managed files and v3 residue
+- uninstall removes managed files only
 - conditional skill fixture
 - MCP/tool name collision fixture

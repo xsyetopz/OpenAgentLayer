@@ -2,7 +2,7 @@
 
 ## Problem
 
-v3 tried to stop bad agent behavior with prompt text and regex-style stop checks. That catches some phrases but misses the real problem: the model often changes the task type. A coding task becomes advice. A requested implementation becomes a plan. An interpersonal interpretation becomes suggested scripts or coping strategies.
+Prompt text and regex-style stop checks catch some bad phrases but miss the real problem: the model often changes the task type. A coding task becomes advice. A requested implementation becomes a plan. An interpersonal interpretation becomes suggested scripts or coping strategies.
 
 Regex is too shallow because the violation is semantic: the answer does not match the requested contract.
 

@@ -2,15 +2,15 @@
 
 ## Problem
 
-Observed global RTK savings were 20.3% across 8,504 commands. High-savings commands existed, but aggregate impact stayed low. The worst visible pattern: many `rtk read` and `rtk grep` calls saved little per command, while command coverage and shell-shape handling depended on prompt compliance and v3 hook rewriting.
+RTK gives high savings on many development commands, but aggregate impact depends on command coverage, shell-shape handling, output budgets, and repeated read/search behavior.
 
-v3 failure modes from `v3_to_be_removed/`:
+Runner risks OAL must avoid:
 
-- RTK policy lived in repeated prompt text.
-- Hook enforcement had to parse shell strings in JavaScript.
-- Some unsupported paths fell back through proxy-like command wrappers.
-- Command chains and shell operators made reliable wrapping hard.
-- Agents could still issue low-yield read/search loops.
+- command policy living only in prompt text
+- hook enforcement parsing shell strings ad hoc
+- unsupported commands bypassing useful compaction
+- command chains and shell operators breaking reliable wrapping
+- repeated low-yield read/search loops
 
 ## Decision
 
@@ -87,4 +87,4 @@ Targets for v4 beta:
 
 ## Roadmap Tie-In
 
-The runner must be implemented before strict hook enforcement. Otherwise hooks repeat v3 string parsing.
+The runner must be implemented before strict hook enforcement. Otherwise hooks duplicate shell-string parsing.

@@ -1,4 +1,4 @@
-# Kilo Code v5 Legacy Platform Spec
+# Kilo Code Platform Spec
 
 Verified date: 2026-04-25.
 
@@ -8,11 +8,11 @@ Verified date: 2026-04-25.
 - https://kilo.ai/docs/customize/rules
 - https://kilo.ai/docs/customize/workflows
 - https://kilo.ai/docs/features/mcp
-- https://github.com/Kilo-Org/kilocode-legacy
+- https://github.com/Kilo-Org/kilocode
 
 ## Target
 
-v4 targets `Kilo-Org/kilocode-legacy` v5-era behavior because newer v7 behavior is reported as unsuitable. Do not silently switch to newer Kilo source or docs without updating this file.
+OAL targets the documented Kilo Code customization surfaces. Do not switch source assumptions without updating this file.
 
 ## Native Surfaces
 
@@ -42,7 +42,7 @@ v4 targets `Kilo-Org/kilocode-legacy` v5-era behavior because newer v7 behavior 
 - Render workflows.
 - Render MCP guidance only if user enables it.
 - Keep unsupported hook surfaces explicit.
-- Render mode-specific rules instead of claiming subagent parity.
+- Render mode-specific rules instead of claiming unsupported subagent behavior.
 - Preserve task protocol choice for a task; do not switch protocol mid-flow.
 
 ## Validation

@@ -5,7 +5,7 @@ Accepted
 
 ## Context
 
-The rewrite is not a continuation of openagentsbtw. It is a layer above existing coding tools. The name needs to avoid v3 baggage and avoid implying a standalone agent runtime or operating system.
+OAL is a layer above existing coding tools. The name needs to avoid implying a standalone agent runtime or operating system.
 
 ## Decision
 
@@ -31,5 +31,5 @@ Easier:
 
 Harder:
 
-- old docs and scripts cannot be kept as public aliases
-- install/uninstall must remove v3 names without preserving compatibility
+- documentation must describe the layer boundary clearly
+- install and uninstall state must stay product-owned and predictable

@@ -21,7 +21,7 @@ Go would work for CLI/process tooling, but the repo already has Rust toolchain d
 
 ## Why Not MJS/TypeScript
 
-MJS/TS are useful for fast adapter experiments but were part of v3 failure mode: runtime scripts spread across generated trees, hook scripts imported from fragile paths, and command rewriting became string-heavy. OAL needs fewer runtime surfaces, not more.
+MJS/TS are useful for fast adapter experiments, but OAL needs fewer installed runtime surfaces. Hook and runner behavior must not depend on scattered scripts, fragile imports, or string-heavy command rewriting.
 
 TypeScript can still be used by target tools that require generated plugin code, but OAL should generate those artifacts from Rust-owned source and test them as output, not depend on them as OAL core.
 

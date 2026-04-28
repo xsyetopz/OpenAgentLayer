@@ -5,7 +5,7 @@ Accepted
 
 ## Context
 
-Supported tools expose different surfaces. A generic prompt dump cannot provide real parity.
+Supported tools expose different surfaces. A generic prompt dump cannot provide real native behavior.
 
 ## Decision
 

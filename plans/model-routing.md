@@ -14,7 +14,7 @@ Allowed runtime set from current user constraint:
 | `gpt-5.3-codex` | medium, high, xhigh | implementation, debugging, refactors, code review, long coding loops                     |
 | `gpt-5.4-mini`  | medium, high, xhigh | bounded utility, classification, docs checks, route selection, fast validation summaries |
 
-Do not route Codex to unavailable models. Keep old v3 model names out of OAL defaults.
+Do not route Codex to unavailable models. OAL defaults must stay inside the supported model set.
 
 ## Codex Default Routes
 

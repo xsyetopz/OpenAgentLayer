@@ -21,7 +21,7 @@ OAL is not a replacement agent. Codex, OpenCode, Claude Code, and similar tools 
 | ---------------------- | --------------------------------------------------------------------------------------------- |
 | `oal-core`             | shared types, config loading, schemas, task contracts, model registry, adapter traits         |
 | `oal-cli`              | `oal install`, `oal uninstall`, `oal render`, `oal check`, `oal doctor`, `oal hook`           |
-| `oal-runner`           | command normalization, process execution, output filters, token accounting, RTK compatibility |
+| `oal-runner`           | command normalization, process execution, output filters, token accounting, RTK integration |
 | `oal-adapter-codex`    | Codex config, AGENTS.md, hooks, skills, subagents, commands                                   |
 | `oal-adapter-opencode` | OpenCode config, agents, skills, permissions, plugin-free workflow surfaces                   |
 | `oal-testkit`          | golden renders, temp-home install fixtures, hook fixture payloads                             |
@@ -76,11 +76,10 @@ Install writes a manifest with:
 - platform adapter version
 - managed files and content hashes
 - user-modified generated files
-- v3 residue paths removed or ignored
 - detected tool versions
 - OS mode: `macos`, `linux`, or `wsl2-linux`
 
-Uninstall removes only manifest-owned files plus explicit v3 residue cleanup paths. It never removes arbitrary user files by pattern.
+Uninstall removes only manifest-owned files. It never removes arbitrary user files by pattern.
 
 ## Validation Levels
 
@@ -96,7 +95,6 @@ Uninstall removes only manifest-owned files plus explicit v3 residue cleanup pat
 ## Non-Goals
 
 - No Windows-native PowerShell path.
-- No v3 compatibility aliases.
 - No generic regex chatbot personality filter.
 - No package-manager plugin install unless adapter explicitly opts in.
 - No generated docs as source of truth.

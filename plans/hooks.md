@@ -15,7 +15,7 @@ Hooks make the harness enforceable. They turn prompt rules into event contracts,
 | `subagent_stop` | subagent stop when available | agent/mode completion when available       | validate delegated task evidence         |
 | `session_start` | session start when available | startup/config load when available         | load manifest and route policy           |
 
-OpenCode hook parity must not be claimed until source-backed. Use permissions and local plugin files where available; otherwise document partial enforcement.
+OpenCode hook behavior must be source-backed. Use permissions and local plugin files where available; otherwise document the exact unsupported event.
 
 ## Hook Runtime
 
@@ -72,7 +72,7 @@ Stop gate must emit exact failure reason, not generic “policy violation”.
 
 ## Runner Coupling
 
-Hooks do not implement shell parsing themselves. They call `oal-runner` or shared runner modules. This removes v3-style duplicated JavaScript command rewriting.
+Hooks do not implement shell parsing themselves. They call `oal-runner` or shared runner modules. This keeps command parsing in one runtime surface.
 
 ## State Files
 
