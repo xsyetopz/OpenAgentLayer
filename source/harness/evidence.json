@@ -1,0 +1,20 @@
+{
+  "requiredPlanPaths": [
+    "plans/platforms/codex-cli.md",
+    "plans/platforms/opencode.md",
+    "plans/platforms/kilo-code.md",
+    "plans/source-dives/codex-cli.md",
+    "plans/source-dives/opencode.md",
+    "plans/source-dives/kilo-code-v5.md"
+  ],
+  "forbiddenActiveTerms": [
+    "spark"
+  ],
+  "requiredTerms": [
+    "gpt-5.4-mini",
+    "opencode/big-pickle",
+    "opencode/nemotron-3-super-free",
+    "Kilo-Org/kilocode-legacy",
+    "v3_to_be_removed/"
+  ]
+}

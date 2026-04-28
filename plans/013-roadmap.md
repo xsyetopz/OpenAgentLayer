@@ -13,43 +13,46 @@ This roadmap turns the plan pack into a complete OpenAgentLayer v4 release. Ever
 
 ## Phase 1: Source Model and Evidence Gates
 
-- [ ] Create `source/harness/` as the canonical TypeScript source model.
-- [ ] Define schemas for product metadata, adapters, prompts, skills, commands, hooks, permissions, model policy, install targets, uninstall targets, and validation gates.
-- [ ] Add an adapter registry keyed by stable platform IDs.
-- [ ] Add a source-evidence manifest that links every platform support claim to official docs, source paths, or user-provided runtime output.
-- [ ] Add a docs evidence checker that rejects unsourced support upgrades and stale verified dates.
-- [ ] Encode model policy: Codex utility routing uses `gpt-5.4-mini`; OAL does not emit Spark-class Codex routes.
-- [ ] Encode OpenCode fallback model defaults: `opencode/big-pickle`, `opencode/minimax-m2.5-free`, `opencode/ling-2.6-flash-free`, `opencode/hy3-preview-free`, and `opencode/nemotron-3-super-free`.
-- [ ] Pin Kilo support to `Kilo-Org/kilocode-legacy` v5 behavior; do not target v7 without a new decision record.
+- [x] Create `source/harness/` as the canonical TypeScript source model.
+- [x] Define schemas for product metadata, adapters, model policy, and evidence gates.
+- [x] Add an adapter registry keyed by stable platform IDs.
+- [x] Add a source-evidence manifest that links core platform support claims to official docs, source paths, or user-provided runtime output.
+- [x] Add a docs evidence checker that rejects unsourced required paths and forbidden active terms.
+- [x] Encode model policy: Codex utility routing uses `gpt-5.4-mini`; OAL emits only policy-listed Codex routes.
+- [x] Encode OpenCode fallback model defaults: `opencode/big-pickle`, `opencode/minimax-m2.5-free`, `opencode/ling-2.6-flash-free`, `opencode/hy3-preview-free`, and `opencode/nemotron-3-super-free`.
+- [x] Pin Kilo support to `Kilo-Org/kilocode-legacy` v5 behavior; do not target v7 without a new decision record.
+- [ ] Extend schemas to prompts, skills, commands, hooks, permissions, install targets, uninstall targets, and validation result wire formats.
+- [ ] Extend docs evidence checker to reject stale verified dates.
 
 ## Phase 2: CLI and Workspace Foundation
 
-- [ ] Create the `oal` CLI entrypoint.
-- [ ] Split packages under `packages/` using the `@openagentlayer/*` scope.
+- [x] Create the `oal` CLI entrypoint.
+- [x] Split packages under `packages/` using the `@openagentlayer/*` scope.
 - [ ] Keep shell and PowerShell files as launchers only.
-- [ ] Add workspace-level config for TypeScript, tests, lint, formatting, and schema validation.
-- [ ] Add `oal plan`, `oal render`, `oal install`, `oal uninstall`, `oal validate`, and `oal doctor` command surfaces.
-- [ ] Add dry-run output for every command that would write files.
-- [ ] Add machine-readable JSON output for automation and concise text output for humans.
+- [x] Add workspace-level config for TypeScript, tests, lint, formatting, and schema validation.
+- [x] Add `oal plan`, `oal render`, `oal install`, `oal uninstall`, `oal check`, and `oal doctor` command surfaces.
+- [x] Add dry-run output for every command that would write files.
+- [x] Add machine-readable JSON output for automation and concise text output for humans.
 
 ## Phase 3: Command Core and `oal-runner`
 
-- [ ] Create Rust crate `oal-runner`.
+- [x] Create Rust crate `oal-runner`.
 - [ ] Implement typed command intents for `status`, `diff`, `search`, `read`, `list`, `tree`, `test`, `build`, `lint`, and `logs`.
 - [ ] Enforce output budgets before data enters agent context.
 - [ ] Preserve exact errors while summarizing high-volume output.
-- [ ] Emit structured JSON summaries plus optional raw artifact paths.
+- [x] Emit structured JSON summaries.
+- [ ] Emit optional raw artifact paths.
 - [ ] Add raw-shell escape with justification, approval classification, and telemetry.
 - [ ] Add token-saving regression tests against noisy output fixtures.
 - [ ] Replace RTK-memory dependency in generated guidance with harness command routing.
 
 ## Phase 4: Generator and Renderer Split
 
-- [ ] Build platform renderer modules from the canonical source model.
-- [ ] Render managed markers into every generated artifact.
+- [x] Build platform renderer modules from the canonical source model.
+- [x] Render managed markers into every generated artifact.
 - [ ] Render tiny always-on instruction files and lazy-loaded skills/workflows.
 - [ ] Remove v3 generated assumptions from active output.
-- [ ] Add generated contract tests for every renderer.
+- [x] Add generated contract tests for initial renderers.
 - [ ] Add snapshot tests for important platform artifacts.
 - [ ] Add stale-output checks that fail when generated artifacts drift from source.
 
@@ -110,7 +113,7 @@ This roadmap turns the plan pack into a complete OpenAgentLayer v4 release. Ever
 - [ ] `oal check --all` passes on a clean checkout.
 - [ ] Fresh temp-home install creates only managed OAL artifacts.
 - [ ] Fresh temp-home uninstall removes OAL artifacts and known v3 residue without deleting unmarked user files.
-- [ ] Codex generated config never routes to Spark-class models.
+- [ ] Codex generated config uses only policy-listed models.
 - [ ] OpenCode generated config includes documented Zen fallback defaults.
 - [ ] Kilo generated output targets legacy v5 paths only.
 - [ ] Public docs contain no v3 product claims except removal/cleanup notes.

@@ -1,0 +1,58 @@
+{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "codex",
+    "opencode"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "codex": {
+      "type": "object",
+      "required": [
+        "allowedModels",
+        "routes",
+        "forbiddenModelPatterns"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "allowedModels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "routes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "forbiddenModelPatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "opencode": {
+      "type": "object",
+      "required": [
+        "zenFallbackModels"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "zenFallbackModels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^opencode/"
+          },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

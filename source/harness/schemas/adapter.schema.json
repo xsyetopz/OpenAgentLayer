@@ -1,0 +1,35 @@
+{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "displayName",
+      "level",
+      "planPath"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "displayName": {
+        "type": "string"
+      },
+      "level": {
+        "enum": [
+          "native",
+          "partial",
+          "prompt-only",
+          "unsupported",
+          "UNKNOWN"
+        ]
+      },
+      "planPath": {
+        "type": "string"
+      }
+    }
+  }
+}

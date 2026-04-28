@@ -1,0 +1,9 @@
+{
+  "name": "OpenAgentLayer",
+  "shortName": "OAL",
+  "cli": "oal",
+  "packageScope": "@openagentlayer",
+  "rustCratePrefix": "oal",
+  "runner": "oal-runner",
+  "tagline": "Open-source harness for building and running AI coding agents"
+}

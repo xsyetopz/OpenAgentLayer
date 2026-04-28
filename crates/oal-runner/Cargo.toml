@@ -1,0 +1,26 @@
+[package]
+name = "oal-runner"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = ""
+readme = "README.md"
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords = []
+categories = []
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "oal-runner"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+
+[lints]
+workspace = true

@@ -3,6 +3,7 @@ dist/
 build/
 .build/
 v3_to_be_removed/
+target/
 
 # Node
 node_modules/

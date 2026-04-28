@@ -1,0 +1,28 @@
+{
+  "codex": {
+    "allowedModels": [
+      "gpt-5.5",
+      "gpt-5.4-mini",
+      "gpt-5.3-codex"
+    ],
+    "routes": {
+      "planning": "gpt-5.5",
+      "orchestration": "gpt-5.5",
+      "implementation": "gpt-5.3-codex",
+      "review": "gpt-5.3-codex",
+      "utility": "gpt-5.4-mini"
+    },
+    "forbiddenModelPatterns": [
+      "spark"
+    ]
+  },
+  "opencode": {
+    "zenFallbackModels": [
+      "opencode/big-pickle",
+      "opencode/minimax-m2.5-free",
+      "opencode/ling-2.6-flash-free",
+      "opencode/hy3-preview-free",
+      "opencode/nemotron-3-super-free"
+    ]
+  }
+}

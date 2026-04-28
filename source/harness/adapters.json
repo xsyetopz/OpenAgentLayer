@@ -1,0 +1,62 @@
+[
+  {
+    "id": "codex-cli",
+    "displayName": "Codex CLI",
+    "level": "native",
+    "planPath": "plans/platforms/codex-cli.md"
+  },
+  {
+    "id": "opencode",
+    "displayName": "OpenCode",
+    "level": "native",
+    "planPath": "plans/platforms/opencode.md"
+  },
+  {
+    "id": "claude-code",
+    "displayName": "Claude Code",
+    "level": "native",
+    "planPath": "plans/platforms/claude-code.md"
+  },
+  {
+    "id": "gemini-cli",
+    "displayName": "Gemini CLI",
+    "level": "partial",
+    "planPath": "plans/platforms/gemini-cli.md"
+  },
+  {
+    "id": "cline",
+    "displayName": "Cline",
+    "level": "partial",
+    "planPath": "plans/platforms/cline.md"
+  },
+  {
+    "id": "cursor",
+    "displayName": "Cursor IDE",
+    "level": "partial",
+    "planPath": "plans/platforms/cursor.md"
+  },
+  {
+    "id": "windsurf",
+    "displayName": "Windsurf Editor",
+    "level": "partial",
+    "planPath": "plans/platforms/windsurf.md"
+  },
+  {
+    "id": "amp",
+    "displayName": "Amp",
+    "level": "partial",
+    "planPath": "plans/platforms/amp.md"
+  },
+  {
+    "id": "augment",
+    "displayName": "Augment",
+    "level": "partial",
+    "planPath": "plans/platforms/augment.md"
+  },
+  {
+    "id": "kilo-code-v5",
+    "displayName": "Kilo Code v5 legacy",
+    "level": "partial",
+    "planPath": "plans/platforms/kilo-code.md"
+  }
+]

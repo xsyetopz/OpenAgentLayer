@@ -44,7 +44,7 @@ This file tracks sources used for v4 planning. Official docs override community 
 
 ## Runtime Evidence
 
-- 2026-04-28 Codex CLI model evidence provided by user: OAL accepts `gpt-5.5`. `gpt-5.4-mini`, `gpt-5.3-codex`; OAL rejects Spark-class utility routing and uses `gpt-5.4-mini` instead.
+- 2026-04-28 Codex CLI model evidence provided by user: OAL accepts `gpt-5.5`. `gpt-5.4-mini`, `gpt-5.3-codex`; OAL rejects low-intelligence utility routing and uses `gpt-5.4-mini` instead.
 - 2026-04-28 OpenCode `opencode models` output provided by user includes free fallback IDs: `opencode/big-pickle`, `opencode/minimax-m2.5-free`, `opencode/ling-2.6-flash-free`, `opencode/hy3-preview-free`, `opencode/nemotron-3-super-free`.
 
 ## Rejected Ideas

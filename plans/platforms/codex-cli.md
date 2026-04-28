@@ -49,7 +49,7 @@ Routing policy:
 - Use `gpt-5.5` for complex planning, research, and orchestration.
 - Use `gpt-5.3-codex` for coding-specialist implementation and review.
 - Use `gpt-5.4-mini` for bounded utility and fast-small work.
-- Do not emit Spark-class Codex routes in OAL config, docs, defaults, or roadmap tasks.
+- Do not emit Codex routes outside OAL model policy in config, docs, defaults, or roadmap tasks.
 
 ## Adapter Plan
 

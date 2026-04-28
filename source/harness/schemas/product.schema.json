@@ -1,0 +1,35 @@
+{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "name",
+    "shortName",
+    "cli",
+    "packageScope",
+    "runner"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "const": "OpenAgentLayer"
+    },
+    "shortName": {
+      "const": "OAL"
+    },
+    "cli": {
+      "const": "oal"
+    },
+    "packageScope": {
+      "const": "@openagentlayer"
+    },
+    "rustCratePrefix": {
+      "type": "string"
+    },
+    "runner": {
+      "const": "oal-runner"
+    },
+    "tagline": {
+      "type": "string"
+    }
+  }
+}
