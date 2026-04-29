@@ -65,7 +65,7 @@ OAL adapter:
 
 - render `CLAUDE.md` as Claude-native wrapper around shared project rules
 - render Greek-gods subagents into `.claude/agents`
-- render skills and commands using Claude Code shapes
+- render skills into `.claude/skills` and commands into `.claude/commands`
 - render hook policy records into `.claude/settings.json` hooks plus repo-local `.claude/hooks/*.mjs` command scripts
 - run `oal doctor hooks claude`
 
@@ -103,7 +103,8 @@ OAL adapter:
 - render Greek-gods agents into OpenCode agent config
 - render Greek-gods agent bodies into `.opencode/agents`
 - render skills into `.opencode/skills`
-- leave commands and MCP manual until command/MCP source records exist
+- render source commands into OpenCode `command` config
+- leave MCP manual until MCP source records exist
 - render free fallback routes from source model
 - run `oal doctor hooks opencode` without rendering unsupported hook runtime files
 

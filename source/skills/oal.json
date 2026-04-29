@@ -1,7 +1,0 @@
-{
-	"$schema": "../schema/skill.schema.json",
-	"body_path": "source/skills/oal.md",
-	"description": "Use the OpenAgentLayer RPERS workflow and Greek-agent roles for source-backed research, planning, execution, review, and shipping in this repository.",
-	"id": "oal",
-	"source": "local"
-}
