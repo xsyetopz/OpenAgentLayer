@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { adapterFor } from "./adapters";
+import { validateHookMappings } from "./hook-mappings";
 import { assertRenderIdempotent } from "./render";
 import {
 	codexModels,
@@ -30,6 +31,7 @@ const schemaChecks = [
 	["source/schema/model-routes.schema.json", "source/routes/models.json"],
 	["source/schema/providers.schema.json", "source/providers/providers.json"],
 	["source/schema/tools.schema.json", "source/tools/tools.json"],
+	["source/schema/hook-events.schema.json", "source/hooks/events.json"],
 ] as const;
 
 const markdownToolCellPattern = /^\|\s*`([^`]+)`/;
@@ -41,18 +43,31 @@ export function checkSource(root = process.cwd()): void {
 	const graph = loadSource(root);
 	const platformConfigs = existingPlatformConfigs(root);
 	const enabledPlatforms = graph.root.data["platforms"] as string[];
-	for (const agent of readdirSync(resolve(root, "source/agents")).sort()) {
+	for (const agent of readdirSync(resolve(root, "source/agents"))
+		.filter((entry) => entry.endsWith(".json"))
+		.sort()) {
 		validateJsonBySchema(
 			root,
 			"source/schema/agent.schema.json",
 			`source/agents/${agent}`,
 		);
 	}
-	for (const hook of readdirSync(resolve(root, "source/hooks")).sort()) {
+	for (const hook of readdirSync(resolve(root, "source/hooks"))
+		.filter((entry) => entry !== "events.json")
+		.sort()) {
 		validateJsonBySchema(
 			root,
 			"source/schema/hook.schema.json",
 			`source/hooks/${hook}`,
+		);
+	}
+	for (const workflow of readdirSync(resolve(root, "source/workflows"))
+		.filter((entry) => entry.endsWith(".json"))
+		.sort()) {
+		validateJsonBySchema(
+			root,
+			"source/schema/workflow.schema.json",
+			`source/workflows/${workflow}`,
 		);
 	}
 	for (const platform of existingPlatformIds(root)) {
@@ -81,7 +96,7 @@ export function checkSource(root = process.cwd()): void {
 	checkNoGeneratedSource(graph);
 	checkRootReferences(graph);
 	checkAgents(graph);
-	checkHooks(graph);
+	checkHooks(graph, existingPlatformIds(root));
 	checkUpstreamHashes(root, graph);
 	checkModelRoutes(graph);
 	checkSubscriptions(graph);
@@ -174,9 +189,27 @@ function checkAgents(graph: SourceGraph): void {
 			required,
 		);
 	}
+	for (const agent of graph.agents) {
+		promptFor(graph, agent);
+	}
 }
 
-function checkHooks(graph: SourceGraph): void {
+function promptFor(graph: SourceGraph, agent: SourceFile): SourceFile<string> {
+	const promptPath = String(agent.data["prompt_path"]);
+	const prompt = graph.agentPrompts.find((file) => file.path === promptPath);
+	if (!prompt) {
+		throw createOalError(
+			agent.path,
+			"/prompt_path",
+			"agent prompt file missing",
+			promptPath,
+			"source/agents/prompts/<agent>.md",
+		);
+	}
+	return prompt;
+}
+
+function checkHooks(graph: SourceGraph, platformIds: string[]): void {
 	for (const hook of graph.hooks) {
 		const id = String(hook.data["id"]);
 		const category = String(hook.data["category"]);
@@ -188,6 +221,33 @@ function checkHooks(graph: SourceGraph): void {
 				id,
 				`${category}-*`,
 			);
+		}
+		const supported = hook.data["supported_platforms"] as JsonObject;
+		for (const platform of Object.keys(supported)) {
+			if (!platformIds.includes(platform)) {
+				throw createOalError(
+					hook.path,
+					"/supported_platforms",
+					"hook platform must have platform source record",
+					platform,
+					platformIds,
+				);
+			}
+		}
+		for (const check of validateHookMappings(
+			hook,
+			graph.hookEvents,
+			platformIds,
+		)) {
+			if (!check.ok) {
+				throw createOalError(
+					check.path,
+					"/supported_platforms",
+					"hook platform event mapping invalid",
+					check.message,
+					"known platform event or unsupported reason",
+				);
+			}
 		}
 	}
 }
@@ -471,16 +531,8 @@ function checkPlatformPolicies(graph: SourceGraph): void {
 		);
 		checkRequired(
 			codex.path,
-			"/required_config/features/experimental_use_unified_exec_tool",
-			codexFeatures["experimental_use_unified_exec_tool"],
-			false,
-		);
-		checkRequired(
-			codex.path,
-			"/required_config/experimental_use_unified_exec_tool",
-			(codex.data["required_config"] as JsonObject)[
-				"experimental_use_unified_exec_tool"
-			],
+			"/required_config/features/unified_exec",
+			codexFeatures["unified_exec"],
 			false,
 		);
 		checkRequired(

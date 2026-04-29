@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import Ajv from "ajv";
+import { validateHookMappings } from "../hook-mappings";
+import { composeAgentPrompt, composeModelInstructions } from "../prompts";
 import type { JsonObject, SourceFile, SourceGraph } from "../source";
 import { readJsonFile, stableStringify } from "../source";
 import {
@@ -36,22 +38,9 @@ export const codexAdapter: PlatformAdapter = {
 		};
 	},
 	doctorHooks(_root: string, graph: SourceGraph): DoctorResult {
-		const checks = graph.hooks.map((hook) => {
-			const supported = asJsonObject(hook.data["supported_platforms"]);
-			const unsupported = asJsonObject(hook.data["unsupported_platforms"]);
-			if (supported["codex"]) {
-				return {
-					message: `${hook.data["id"]}: codex hook mapping supported`,
-					ok: true,
-					path: hook.path,
-				};
-			}
-			return {
-				message: `${hook.data["id"]}: codex unsupported: ${String(unsupported["codex"] ?? "missing reason")}`,
-				ok: Boolean(unsupported["codex"]),
-				path: hook.path,
-			};
-		});
+		const checks = graph.hooks.flatMap((hook) =>
+			validateHookMappings(hook, graph.hookEvents, ["codex"], "codex"),
+		);
 		return {
 			checks,
 			ok: checks.every((check) => check.ok),
@@ -61,8 +50,16 @@ export const codexAdapter: PlatformAdapter = {
 	id: "codex",
 	render(root: string, graph: SourceGraph): RenderedPayload[] {
 		const config = configFor(graph);
-		const configObject = codexConfigObject(config);
-		validateCodexConfig(root, configObject);
+		validateCodexConfig(
+			root,
+			codexProjectConfigObject(config),
+			"generated/codex/.codex/config.toml",
+		);
+		validateCodexConfig(
+			root,
+			codexUserConfigObject(config),
+			"generated/codex/user/config.toml",
+		);
 		return [
 			{
 				content: renderAgentsMd(graph),
@@ -72,19 +69,23 @@ export const codexAdapter: PlatformAdapter = {
 					...graph.agents.map((agent) => agent.path),
 				],
 			},
-			...graph.agents.map((agent) =>
-				jsonPayload(`codex/agents/${agent.data["id"]}.json`, agent.data, [
+			{
+				content: composeModelInstructions(graph),
+				path: "codex/.codex/model-instructions.md",
+				sourcePaths: [
+					...graph.workflows.map((workflow) => workflow.path),
+					...graph.promptModules.map((module) => module.path),
+				],
+			},
+			...graph.agents.map((agent) => ({
+				content: renderCodexAgentToml(graph, agent),
+				path: `codex/.codex/agents/${agent.data["id"]}.toml`,
+				sourcePaths: [
 					agent.path,
-				]),
-			),
-			jsonPayload(
-				"codex/skills/README.json",
-				{
-					note: "No Codex skills are sourced in this wave.",
-					platform: "codex",
-				},
-				["source/oal.json"],
-			),
+					String(agent.data["prompt_path"]),
+					...graph.promptModules.map((module) => module.path),
+				],
+			})),
 			...graph.hooks
 				.filter((hook) =>
 					Boolean(asJsonObject(hook.data["supported_platforms"])["codex"]),
@@ -95,8 +96,13 @@ export const codexAdapter: PlatformAdapter = {
 					]),
 				),
 			{
-				content: toToml(configObject),
-				path: "codex/config.toml",
+				content: toToml(codexProjectConfigObject(config)),
+				path: "codex/.codex/config.toml",
+				sourcePaths: [config.path],
+			},
+			{
+				content: toToml(codexUserConfigObject(config)),
+				path: "codex/user/config.toml",
 				sourcePaths: [config.path],
 			},
 		];
@@ -113,6 +119,39 @@ function configFor(graph: SourceGraph): SourceFile {
 	return config;
 }
 
+function renderCodexAgentToml(graph: SourceGraph, agent: SourceFile): string {
+	const prompt = composeAgentPrompt(graph, agent, "Codex");
+	const profile = codexProfileFor(graph, agent);
+	return [
+		`name = ${formatTomlValue(agent.data["id"])}`,
+		`description = ${formatTomlValue(agent.data["role"])}`,
+		`model = ${formatTomlValue(profile["model"])}`,
+		`model_reasoning_effort = ${formatTomlValue(profile["effort"])}`,
+		`sandbox_mode = ${formatTomlValue(agentSandboxMode(agent))}`,
+		`developer_instructions = ${formatTomlMultilineString(prompt)}`,
+		"",
+	].join("\n");
+}
+
+function agentSandboxMode(agent: SourceFile): string {
+	const route = String(agent.data["model_route"]);
+	if (["research", "plan", "review", "classify_contract"].includes(route)) {
+		return "read-only";
+	}
+	return "workspace-write";
+}
+
+function codexProfileFor(graph: SourceGraph, agent: SourceFile): JsonObject {
+	const config = configFor(graph);
+	const defaultTier = String(
+		asJsonObject(config.data["subscription"])["default"],
+	);
+	const defaults = asJsonObject(config.data["profile_defaults"]);
+	const profile = asJsonObject(defaults[defaultTier]);
+	const agents = asJsonObject(profile["agents"]);
+	return asJsonObject(agents[String(agent.data["id"])]);
+}
+
 function platformFor(graph: SourceGraph): SourceFile {
 	const platform = graph.platforms.find((file) => file.data["id"] === "codex");
 	if (!platform) {
@@ -121,11 +160,23 @@ function platformFor(graph: SourceGraph): SourceFile {
 	return platform;
 }
 
-function codexConfigObject(config: SourceFile): JsonObject {
+function codexProjectConfigObject(config: SourceFile): JsonObject {
 	return asJsonObject(config.data["required_config"]);
 }
 
-function validateCodexConfig(root: string, config: JsonObject): void {
+function codexUserConfigObject(config: SourceFile): JsonObject {
+	return asJsonObject(config.data["user_config"]);
+}
+
+function codexConfigObject(config: SourceFile): JsonObject {
+	return codexProjectConfigObject(config);
+}
+
+function validateCodexConfig(
+	root: string,
+	config: JsonObject,
+	generatedPath: string,
+): void {
 	const schema = readJsonFile(
 		root,
 		"source/schemas/cache/codex-config-schema.json",
@@ -137,7 +188,7 @@ function validateCodexConfig(root: string, config: JsonObject): void {
 	}).compile(schema);
 	if (!validate(config)) {
 		throw new Error(
-			`generated/codex/config.toml failed codex_config: ${JSON.stringify(validate.errors)}`,
+			`${generatedPath} failed codex_config: ${JSON.stringify(validate.errors)}`,
 		);
 	}
 }
@@ -173,18 +224,31 @@ function writeTomlObject(
 	value: JsonObject,
 	path: string[],
 ): void {
-	for (const key of Object.keys(value).sort()) {
+	const keys = Object.keys(value).sort();
+	for (const key of keys) {
 		const item = value[key];
-		if (item && typeof item === "object" && !Array.isArray(item)) {
-			if (lines.length > 0) {
-				lines.push("");
-			}
-			lines.push(`[${[...path, key].join(".")}]`);
-			writeTomlObject(lines, item as JsonObject, [...path, key]);
-		} else {
+		if (!item || typeof item !== "object" || Array.isArray(item)) {
 			lines.push(`${key} = ${formatTomlValue(item)}`);
 		}
 	}
+	for (const key of keys) {
+		const item = value[key];
+		if (item && typeof item === "object" && !Array.isArray(item)) {
+			if (hasScalarValue(item as JsonObject)) {
+				if (lines.length > 0) {
+					lines.push("");
+				}
+				lines.push(`[${[...path, key].join(".")}]`);
+			}
+			writeTomlObject(lines, item as JsonObject, [...path, key]);
+		}
+	}
+}
+
+function hasScalarValue(value: JsonObject): boolean {
+	return Object.values(value).some(
+		(item) => !item || typeof item !== "object" || Array.isArray(item),
+	);
 }
 
 function formatTomlValue(value: unknown): string {
@@ -198,6 +262,10 @@ function formatTomlValue(value: unknown): string {
 		return `[${value.map(formatTomlValue).join(", ")}]`;
 	}
 	return JSON.stringify(String(value));
+}
+
+function formatTomlMultilineString(value: string): string {
+	return `"""\n${value.replaceAll('"""', '\\"\\"\\"').trim()}\n"""`;
 }
 
 export function codexConfigJsonForTest(graph: SourceGraph): string {

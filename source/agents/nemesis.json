@@ -8,5 +8,6 @@
     "codex",
     "claude",
     "opencode"
-  ]
+  ],
+  "prompt_path": "source/agents/prompts/nemesis.md"
 }

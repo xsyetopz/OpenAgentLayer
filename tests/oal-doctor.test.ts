@@ -6,7 +6,7 @@ import {
 	formatDoctorResult,
 } from "../packages/oal/src/doctor";
 import { loadSource } from "../packages/oal/src/source";
-import { withTempRepo } from "./helpers/oal";
+import { mutateJson, withTempRepo } from "./helpers/oal";
 
 describe("oal doctor", () => {
 	test("reports required tools by default", () => {
@@ -62,6 +62,25 @@ describe("oal doctor", () => {
 				ok: true,
 				path: "source/hooks/tool-pre-shell-rtk.json",
 			});
+		});
+	});
+
+	test("rejects fake Codex hook events in doctor output", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
+				(
+					(
+						(hook["supported_platforms"] as Record<string, unknown>)[
+							"codex"
+						] as Record<string, unknown>
+					)["events"] as string[]
+				)[0] = "FakeEvent";
+			});
+			const result = doctorHooks("codex", root);
+			expect(result.ok).toBe(false);
+			expect(formatDoctorResult(result)).toContain(
+				"unknown hook event FakeEvent",
+			);
 		});
 	});
 });

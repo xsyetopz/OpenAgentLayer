@@ -42,6 +42,9 @@ export interface SourceFile<T = JsonObject> {
 export interface SourceGraph {
 	root: SourceFile;
 	agents: SourceFile[];
+	agentPrompts: SourceFile<string>[];
+	promptModules: SourceFile<string>[];
+	hookEvents: SourceFile;
 	hooks: SourceFile[];
 	modelRoutes: SourceFile;
 	platformConfigs: SourceFile[];
@@ -50,6 +53,7 @@ export interface SourceGraph {
 	subscriptions: SourceFile;
 	tools: SourceFile;
 	upstreamSchemas: SourceFile;
+	workflows: SourceFile[];
 }
 
 export interface OalErrorDetail {
@@ -174,18 +178,40 @@ export function listNestedJsonFiles(root: string, path: string): string[] {
 	return files;
 }
 
+export function listMarkdownFiles(root: string, path: string): string[] {
+	const absolute = resolve(root, path);
+	if (!existsSync(absolute)) {
+		return [];
+	}
+	return readdirSync(absolute)
+		.filter((entry) => entry.endsWith(".md"))
+		.sort()
+		.map((entry) => `${path}/${entry}`);
+}
+
 export function loadSource(root = process.cwd()): SourceGraph {
 	const sourceFile = <T = JsonObject>(path: string): SourceFile<T> => ({
 		data: readJsonFile<T>(root, path),
 		path,
 	});
+	const textFile = (path: string): SourceFile<string> => ({
+		data: readTextFile(root, path).toString("utf8"),
+		path,
+	});
 	const rootSource = sourceFile("source/oal.json");
 	const enabledPlatforms = rootSource.data["platforms"] as string[];
+	const agents = listJsonFiles(root, "source/agents").map((path) =>
+		sourceFile(path),
+	);
 	return {
-		agents: listJsonFiles(root, "source/agents").map((path) =>
-			sourceFile(path),
+		agentPrompts: agents.map((agent) =>
+			textFile(String(agent.data["prompt_path"])),
 		),
-		hooks: listJsonFiles(root, "source/hooks").map((path) => sourceFile(path)),
+		agents,
+		hookEvents: sourceFile("source/hooks/events.json"),
+		hooks: listJsonFiles(root, "source/hooks")
+			.filter((path) => path !== "source/hooks/events.json")
+			.map((path) => sourceFile(path)),
 		modelRoutes: sourceFile("source/routes/models.json"),
 		platformConfigs: enabledPlatforms.map((platform) =>
 			sourceFile(`source/platforms/${platform}/config.json`),
@@ -194,17 +220,26 @@ export function loadSource(root = process.cwd()): SourceGraph {
 			sourceFile(`source/platforms/${platform}/platform.json`),
 		),
 		providers: sourceFile("source/providers/providers.json"),
+		promptModules: listMarkdownFiles(root, "source/prompts/shared").map(
+			(path) => textFile(path),
+		),
 		root: rootSource,
 		subscriptions: sourceFile("source/routes/subscriptions.json"),
 		tools: sourceFile("source/tools/tools.json"),
 		upstreamSchemas: sourceFile("source/schemas/upstream.json"),
+		workflows: listJsonFiles(root, "source/workflows").map((path) =>
+			sourceFile(path),
+		),
 	};
 }
 
-export function sourceFiles(graph: SourceGraph): SourceFile[] {
+export function sourceFiles(graph: SourceGraph): SourceFile<unknown>[] {
 	return [
 		graph.root,
 		...graph.agents,
+		...graph.agentPrompts,
+		...graph.promptModules,
+		graph.hookEvents,
 		...graph.hooks,
 		graph.modelRoutes,
 		...graph.platformConfigs,
@@ -213,6 +248,7 @@ export function sourceFiles(graph: SourceGraph): SourceFile[] {
 		graph.subscriptions,
 		graph.tools,
 		graph.upstreamSchemas,
+		...graph.workflows,
 	];
 }
 

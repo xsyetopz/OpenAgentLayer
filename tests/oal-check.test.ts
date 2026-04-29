@@ -201,6 +201,48 @@ describe("oal check", () => {
 		});
 	});
 
+	test("rejects unknown platform hook events", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
+				(
+					(
+						(hook["supported_platforms"] as Record<string, unknown>)[
+							"codex"
+						] as Record<string, unknown>
+					)["events"] as string[]
+				)[0] = "FakeEvent";
+			});
+			expect(() => checkSource(root)).toThrow(
+				"hook platform event mapping invalid",
+			);
+		});
+	});
+
+	test("rejects hooks missing unsupported-platform reasons", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
+				delete (hook["unsupported_platforms"] as Record<string, unknown>)[
+					"claude"
+				];
+			});
+			expect(() => checkSource(root)).toThrow(
+				"hook platform event mapping invalid",
+			);
+		});
+	});
+
+	test("rejects hooks that support and reject the same platform", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
+				(hook["unsupported_platforms"] as Record<string, unknown>)["codex"] =
+					"should not also be unsupported";
+			});
+			expect(() => checkSource(root)).toThrow(
+				"hook platform event mapping invalid",
+			);
+		});
+	});
+
 	test("rejects providers without provenance", () => {
 		withTempRepo((root) => {
 			mutateJson(root, "source/providers/providers.json", (providers) => {

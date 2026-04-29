@@ -1,11 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { explain, render } from "../packages/oal/src/render";
-import { withTempRepo } from "./helpers/oal";
+import { repoRoot, withTempRepo } from "./helpers/oal";
 
 describe("oal render", () => {
 	test("renders deterministic tree with manifest and explain map", () => {
+		const packageJson = JSON.parse(
+			readFileSync(resolve(repoRoot, "package.json"), "utf8"),
+		) as { scripts: Record<string, string> };
+		expect(packageJson.scripts["render"]).toBe(
+			"bun packages/oal/src/cli.ts render --out generated",
+		);
+		expect(packageJson.scripts["generate"]).toBe("bun run render");
 		withTempRepo((root) => {
 			const first = resolve(root, "first");
 			const second = resolve(root, "second");
@@ -22,9 +29,50 @@ describe("oal render", () => {
 			expect(readFileSync(resolve(first, "codex/AGENTS.md"), "utf8")).toContain(
 				"### Athena",
 			);
+			const projectConfig = readFileSync(
+				resolve(first, "codex/.codex/config.toml"),
+				"utf8",
+			);
+			const userConfig = readFileSync(
+				resolve(first, "codex/user/config.toml"),
+				"utf8",
+			);
+			const athenaAgent = readFileSync(
+				resolve(first, "codex/.codex/agents/athena.toml"),
+				"utf8",
+			);
+			expect(existsSync(resolve(first, "codex/config.toml"))).toBe(false);
+			expect(projectConfig).toContain("multi_agent_v2 = true");
+			expect(projectConfig).toContain("memories = true");
+			expect(projectConfig).toContain(
+				'model_instructions_file = "model-instructions.md"',
+			);
+			expect(projectConfig).toContain(
+				"model_auto_compact_token_limit = 120000",
+			);
+			expect(projectConfig).toContain("tool_output_token_limit = 20000");
+			expect(userConfig).toContain('profile = "oal-plus"');
+			expect(userConfig).toContain('model_reasoning_effort = "medium"');
+			expect(userConfig).toContain('plan_mode_reasoning_effort = "high"');
+			expect(userConfig).toContain('consolidation_model = "gpt-5.4-mini"');
+			expect(userConfig).toContain("[profiles.oal-plus]");
+			expect(userConfig).toContain("[profiles.oal-pro-5]");
+			expect(userConfig).toContain("[profiles.oal-pro-20]");
+			expect(userConfig).not.toContain("[profiles.plus]");
+			expect(userConfig).not.toContain("[profiles.pro-5]");
+			expect(userConfig).not.toContain("[profiles.pro-20]");
 			expect(
-				readFileSync(resolve(first, "codex/config.toml"), "utf8"),
-			).toContain("multi_agent_v2 = true");
+				existsSync(resolve(first, "codex/.codex/model-instructions.md")),
+			).toBe(true);
+			expect(
+				existsSync(resolve(first, "codex/.codex/agents/athena.toml")),
+			).toBe(true);
+			expect(athenaAgent).toContain('model = "gpt-5.4-mini"');
+			expect(athenaAgent).toContain('model_reasoning_effort = "medium"');
+			expect(athenaAgent).toContain('developer_instructions = """');
+			expect(existsSync(resolve(first, "codex/agents/athena.json"))).toBe(
+				false,
+			);
 			const managedFiles = JSON.parse(
 				readFileSync(resolve(first, ".oal/managed-files.json"), "utf8"),
 			) as { files: string[] };
@@ -34,6 +82,25 @@ describe("oal render", () => {
 			expect(explain(root, `${first}/agents/athena.json`, first)).toEqual({
 				sha256: expect.any(String),
 				sources: ["source/agents/athena.json"],
+			});
+			expect(
+				explain(root, `${first}/codex/.codex/agents/athena.toml`, first),
+			).toEqual({
+				sha256: expect.any(String),
+				sources: expect.arrayContaining([
+					"source/agents/athena.json",
+					"source/agents/prompts/athena.md",
+					"source/prompts/shared/operating-mode.md",
+				]),
+			});
+			expect(
+				explain(root, `${first}/codex/.codex/model-instructions.md`, first),
+			).toEqual({
+				sha256: expect.any(String),
+				sources: expect.arrayContaining([
+					"source/workflows/rpers.json",
+					"source/prompts/shared/operating-mode.md",
+				]),
 			});
 		});
 	});

@@ -33,8 +33,8 @@ Schema pass is not enough. OAL policy checks enforce chosen defaults that upstre
 Codex generated config must:
 
 - set `features.fast_mode = false`
-- set `features.experimental_use_unified_exec_tool = false`
-- set root `experimental_use_unified_exec_tool = false`
+- set `features.unified_exec = false`
+- set root `unified_exec = false`
 - set `features.codex_hooks = true`
 - set `features.multi_agent = false`
 - set `features.multi_agent_v2 = true`

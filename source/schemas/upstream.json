@@ -3,11 +3,12 @@
   "fetched_at": "2026-04-28",
   "schemas": {
     "codex_config": {
-      "url": "https://developers.openai.com/codex/config-schema.json",
+      "url": "https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json",
       "local_cache": "source/schemas/cache/codex-config-schema.json",
-      "sha256": "adb57fee992fdab7c40dddff7d536987be5290c37875432817245fc937126f41",
+      "sha256": "1ea0aa6b7497389f05e991854c7d7a5008f085f634ce620ae84475d575b659ec",
       "validates": [
-        "generated/codex/config.toml"
+        "generated/codex/.codex/config.toml",
+        "generated/codex/user/config.toml"
       ]
     },
     "claude_code_settings": {

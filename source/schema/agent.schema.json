@@ -7,7 +7,8 @@
     "display_name",
     "role",
     "model_route",
-    "platforms"
+    "platforms",
+    "prompt_path"
   ],
   "properties": {
     "$schema": {
@@ -54,6 +55,10 @@
           "opencode"
         ]
       }
+    },
+    "prompt_path": {
+      "type": "string",
+      "pattern": "^source/agents/prompts/[a-z]+\\.md$"
     }
   }
 }

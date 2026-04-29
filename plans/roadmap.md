@@ -94,8 +94,8 @@ Status policy:
 - [x] Render Codex config.
 - [x] Validate Codex config against upstream schema.
 - [x] Enforce `features.fast_mode = false`.
-- [x] Enforce `features.experimental_use_unified_exec_tool = false`.
-- [x] Enforce root `experimental_use_unified_exec_tool = false`.
+- [x] Enforce `features.unified_exec = false`.
+- [x] Enforce root `unified_exec = false`.
 - [x] Enforce `features.multi_agent = false`.
 - [x] Enforce `features.multi_agent_v2 = true`.
 - [x] Enforce Codex subscription profile.
@@ -161,12 +161,12 @@ Status policy:
 
 ### Hook source
 
-- [ ] Implement category-first hook schema.
-- [ ] Implement platform event maps.
-- [ ] Require unsupported-platform reasons.
-- [ ] Require hook id prefix to match category.
-- [ ] Require input adapter per supported platform event.
-- [ ] Require output adapter per supported platform event.
+- [x] Implement category-first hook schema.
+- [x] Implement platform event maps.
+- [x] Require unsupported-platform reasons.
+- [x] Require hook id prefix to match category.
+- [x] Require input adapter per supported platform event.
+- [x] Require output adapter per supported platform event.
 
 ### Required hooks
 
@@ -181,11 +181,11 @@ Status policy:
 
 ### Hook doctors
 
-- [ ] `oal doctor hooks codex` checks Codex mapping.
+- [x] `oal doctor hooks codex` checks Codex mapping.
 - [ ] `oal doctor hooks claude` checks Claude Code mapping.
 - [ ] `oal doctor hooks opencode` checks OpenCode mapping.
 - [ ] Hook doctor names unsupported events explicitly.
-- [ ] Hook doctor rejects fake parity.
+- [x] Hook doctor rejects fake parity.
 
 ## Phase 5: provider sync
 
@@ -273,11 +273,11 @@ Status policy:
 
 ### `oal check`
 
-- [ ] Run local schema checks.
-- [ ] Run upstream schema hash checks.
+- [x] Run local schema checks.
+- [x] Run upstream schema hash checks.
 - [~] Run generated config schema checks.
-- [ ] Run OAL config policy checks.
-- [ ] Run render idempotency check.
+- [x] Run OAL config policy checks.
+- [x] Run render idempotency check.
 - [ ] Run stale branding check.
 - [ ] Run banned wording check.
 - [ ] Run source citation check for research docs.

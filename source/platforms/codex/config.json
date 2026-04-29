@@ -18,33 +18,82 @@
     "generated_config": "codex_config"
   },
   "required_config": {
+    "agents": {
+      "job_max_runtime_seconds": 1800,
+      "max_depth": 1,
+      "max_threads": 8
+    },
     "features": {
+      "apply_patch_freeform": true,
+      "apps": true,
+      "child_agents_md": true,
+      "codex_git_commit": true,
       "codex_hooks": true,
+      "collaboration_modes": true,
+      "enable_request_compression": true,
+      "exec_permission_approvals": true,
+      "unified_exec": false,
       "fast_mode": false,
+      "include_apply_patch_tool": true,
+      "memories": true,
+      "memory_tool": true,
       "multi_agent": false,
       "multi_agent_v2": true,
-      "experimental_use_unified_exec_tool": false
+      "plugins": true,
+      "request_permissions": true,
+      "runtime_metrics": true,
+      "search_tool": true,
+      "shell_tool": true,
+      "tool_suggest": true,
+      "web_search": true
     },
-    "experimental_use_unified_exec_tool": false
+    "include_apps_instructions": true,
+    "include_environment_context": true,
+    "include_permissions_instructions": true,
+    "model_auto_compact_token_limit": 120000,
+    "model_instructions_file": "model-instructions.md",
+    "project_doc_fallback_filenames": [
+      "AGENTS.md"
+    ],
+    "project_doc_max_bytes": 65536,
+    "tool_output_token_limit": 20000,
+    "web_search": "cached"
   },
   "managed_keys": [
     "agents",
     "approval_policy",
+    "apps",
+    "auto_review",
+    "default_permissions",
     "features",
+    "history",
     "hooks",
     "marketplaces",
     "mcp_servers",
+    "memories",
     "model",
+    "model_auto_compact_token_limit",
+    "model_instructions_file",
     "model_reasoning_effort",
     "model_verbosity",
+    "notice",
+    "permissions",
     "plugins",
     "profile",
     "profiles",
     "project_doc_max_bytes",
+    "projects",
+    "review_model",
     "sandbox_mode",
+    "sandbox_workspace_write",
+    "shell_environment_policy",
+    "show_raw_agent_reasoning",
     "skills",
+    "suppress_unstable_features_warning",
     "tool_output_token_limit",
-    "tools"
+    "tools",
+    "tui",
+    "web_search"
   ],
   "profile_defaults": {
     "plus": {
@@ -151,10 +200,257 @@
     "reject_when": [
       "features.fast_mode == true",
       "features.unified_exec == true",
-      "features.experimental_use_unified_exec_tool == true",
-      "experimental_use_unified_exec_tool == true",
+      "unified_exec == true",
       "features.multi_agent == true",
       "subscription not in allowed"
     ]
-  }
+  },
+  "user_config": {
+    "analytics": {
+      "enabled": false
+    },
+    "approval_policy": "on-request",
+    "approvals_reviewer": "auto_review",
+    "check_for_update_on_startup": true,
+    "commit_attribution": "OpenAgentLayer",
+    "feedback": {
+      "enabled": false
+    },
+    "features": {
+      "apply_patch_freeform": true,
+      "apps": true,
+      "child_agents_md": true,
+      "codex_git_commit": true,
+      "codex_hooks": true,
+      "collaboration_modes": true,
+      "enable_request_compression": true,
+      "exec_permission_approvals": true,
+      "unified_exec": false,
+      "fast_mode": false,
+      "include_apply_patch_tool": true,
+      "memories": true,
+      "memory_tool": true,
+      "multi_agent": false,
+      "multi_agent_v2": true,
+      "plugins": true,
+      "request_permissions": true,
+      "runtime_metrics": true,
+      "search_tool": true,
+      "shell_tool": true,
+      "tool_suggest": true,
+      "web_search": true
+    },
+    "hide_agent_reasoning": true,
+    "history": {
+      "max_bytes": 20000000,
+      "persistence": "save-all"
+    },
+    "include_apps_instructions": true,
+    "include_environment_context": true,
+    "include_permissions_instructions": true,
+    "memories": {
+      "consolidation_model": "gpt-5.4-mini",
+      "disable_on_external_context": true,
+      "extract_model": "gpt-5.4-mini",
+      "generate_memories": true,
+      "max_raw_memories_for_consolidation": 256,
+      "max_rollout_age_days": 30,
+      "max_rollouts_per_startup": 24,
+      "max_unused_days": 90,
+      "min_rollout_idle_hours": 12,
+      "use_memories": true
+    },
+    "model": "gpt-5.3-codex",
+    "model_auto_compact_token_limit": 120000,
+    "model_reasoning_effort": "medium",
+    "model_reasoning_summary": "concise",
+    "model_verbosity": "medium",
+    "notice": {
+      "fast_default_opt_out": true,
+      "hide_gpt-5.1-codex-max_migration_prompt": true,
+      "hide_gpt5_1_migration_prompt": true,
+      "hide_rate_limit_model_nudge": false
+    },
+    "plan_mode_reasoning_effort": "high",
+    "profile": "oal-plus",
+    "profiles": {
+      "oal-plus": {
+        "approval_policy": "on-request",
+        "approvals_reviewer": "auto_review",
+        "features": {
+          "apply_patch_freeform": true,
+          "apps": true,
+          "child_agents_md": true,
+          "codex_git_commit": true,
+          "codex_hooks": true,
+          "collaboration_modes": true,
+          "enable_request_compression": true,
+          "exec_permission_approvals": true,
+          "unified_exec": false,
+          "fast_mode": false,
+          "include_apply_patch_tool": true,
+          "memories": true,
+          "memory_tool": true,
+          "multi_agent": false,
+          "multi_agent_v2": true,
+          "plugins": true,
+          "request_permissions": true,
+          "runtime_metrics": true,
+          "search_tool": true,
+          "shell_tool": true,
+          "tool_suggest": true,
+          "web_search": true
+        },
+        "include_apply_patch_tool": true,
+        "include_apps_instructions": true,
+        "include_environment_context": true,
+        "include_permissions_instructions": true,
+        "model": "gpt-5.3-codex",
+        "model_reasoning_effort": "medium",
+        "model_reasoning_summary": "concise",
+        "model_verbosity": "medium",
+        "personality": "pragmatic",
+        "plan_mode_reasoning_effort": "high",
+        "sandbox_mode": "workspace-write",
+        "service_tier": "flex",
+        "tools": {
+          "view_image": true
+        },
+        "web_search": "cached"
+      },
+      "oal-pro-5": {
+        "approval_policy": "on-request",
+        "approvals_reviewer": "auto_review",
+        "features": {
+          "apply_patch_freeform": true,
+          "apps": true,
+          "child_agents_md": true,
+          "codex_git_commit": true,
+          "codex_hooks": true,
+          "collaboration_modes": true,
+          "enable_request_compression": true,
+          "exec_permission_approvals": true,
+          "unified_exec": false,
+          "fast_mode": false,
+          "include_apply_patch_tool": true,
+          "memories": true,
+          "memory_tool": true,
+          "multi_agent": false,
+          "multi_agent_v2": true,
+          "plugins": true,
+          "request_permissions": true,
+          "runtime_metrics": true,
+          "search_tool": true,
+          "shell_tool": true,
+          "tool_suggest": true,
+          "web_search": true
+        },
+        "include_apply_patch_tool": true,
+        "include_apps_instructions": true,
+        "include_environment_context": true,
+        "include_permissions_instructions": true,
+        "model": "gpt-5.3-codex",
+        "model_reasoning_effort": "medium",
+        "model_reasoning_summary": "auto",
+        "model_verbosity": "medium",
+        "personality": "pragmatic",
+        "plan_mode_reasoning_effort": "high",
+        "sandbox_mode": "workspace-write",
+        "service_tier": "flex",
+        "tools": {
+          "view_image": true
+        },
+        "web_search": "cached"
+      },
+      "oal-pro-20": {
+        "approval_policy": "on-request",
+        "approvals_reviewer": "auto_review",
+        "features": {
+          "apply_patch_freeform": true,
+          "apps": true,
+          "child_agents_md": true,
+          "codex_git_commit": true,
+          "codex_hooks": true,
+          "collaboration_modes": true,
+          "enable_request_compression": true,
+          "exec_permission_approvals": true,
+          "unified_exec": false,
+          "fast_mode": false,
+          "include_apply_patch_tool": true,
+          "memories": true,
+          "memory_tool": true,
+          "multi_agent": false,
+          "multi_agent_v2": true,
+          "plugins": true,
+          "request_permissions": true,
+          "runtime_metrics": true,
+          "search_tool": true,
+          "shell_tool": true,
+          "tool_suggest": true,
+          "web_search": true
+        },
+        "include_apply_patch_tool": true,
+        "include_apps_instructions": true,
+        "include_environment_context": true,
+        "include_permissions_instructions": true,
+        "model": "gpt-5.5",
+        "model_reasoning_effort": "medium",
+        "model_reasoning_summary": "auto",
+        "model_verbosity": "high",
+        "personality": "pragmatic",
+        "plan_mode_reasoning_effort": "high",
+        "sandbox_mode": "workspace-write",
+        "service_tier": "flex",
+        "tools": {
+          "view_image": true
+        },
+        "web_search": "cached"
+      }
+    },
+    "project_doc_fallback_filenames": [
+      "AGENTS.md"
+    ],
+    "project_doc_max_bytes": 65536,
+    "review_model": "gpt-5.5",
+    "sandbox_mode": "workspace-write",
+    "sandbox_workspace_write": {
+      "exclude_slash_tmp": false,
+      "exclude_tmpdir_env_var": false,
+      "network_access": false,
+      "writable_roots": []
+    },
+    "service_tier": "flex",
+    "shell_environment_policy": {
+      "inherit": "core"
+    },
+    "show_raw_agent_reasoning": false,
+    "skills": {
+      "bundled": {
+        "enabled": true
+      },
+      "include_instructions": true
+    },
+    "suppress_unstable_features_warning": true,
+    "tool_output_token_limit": 20000,
+    "tool_suggest": {
+      "discoverables": []
+    },
+    "tools": {
+      "view_image": true
+    },
+    "tui": {
+      "alternate_screen": "auto",
+      "animations": false,
+      "notification_condition": "unfocused",
+      "notification_method": "auto",
+      "notifications": true,
+      "show_tooltips": false,
+      "status_line": [
+        "model-with-reasoning",
+        "current-dir"
+      ]
+    },
+    "web_search": "cached"
+  },
+  "profile_prefix": "oal-"
 }
