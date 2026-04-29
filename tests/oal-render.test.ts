@@ -41,6 +41,14 @@ describe("oal render", () => {
 				resolve(first, "codex/.codex/agents/athena.toml"),
 				"utf8",
 			);
+			const claudeAthenaAgent = readFileSync(
+				resolve(first, "claude/.claude/agents/athena.md"),
+				"utf8",
+			);
+			const claudeSettings = readFileSync(
+				resolve(first, "claude/.claude/settings.json"),
+				"utf8",
+			);
 			const oalSkill = readFileSync(
 				resolve(first, "codex/.agents/skills/oal/SKILL.md"),
 				"utf8",
@@ -52,10 +60,7 @@ describe("oal render", () => {
 				readFileSync(resolve(first, "skills/oal.json"), "utf8"),
 			) as { $schema: string };
 			const generatedHook = JSON.parse(
-				readFileSync(
-					resolve(first, "codex/hooks/tool-pre-shell-rtk.json"),
-					"utf8",
-				),
+				readFileSync(resolve(first, "hooks/tool-pre-shell-rtk.json"), "utf8"),
 			) as { $schema: string };
 			const generatedPlatform = JSON.parse(
 				readFileSync(resolve(first, "platforms/codex/platform.json"), "utf8"),
@@ -87,6 +92,11 @@ describe("oal render", () => {
 				"model_auto_compact_token_limit = 120000",
 			);
 			expect(projectConfig).toContain("tool_output_token_limit = 20000");
+			expect(projectConfig).toContain("[[hooks.PreToolUse]]");
+			expect(projectConfig).toContain('matcher = "^Bash$"');
+			expect(projectConfig).toContain(
+				'command = "node \\"$(git rev-parse --show-toplevel)/.codex/hooks/tool-pre-shell-rtk.mjs\\""',
+			);
 			expect(userConfig).toContain('profile = "oal-plus"');
 			expect(userConfig).toContain('model_reasoning_effort = "medium"');
 			expect(userConfig).toContain('plan_mode_reasoning_effort = "high"');
@@ -106,9 +116,43 @@ describe("oal render", () => {
 			expect(
 				existsSync(resolve(first, "codex/.agents/skills/oal/SKILL.md")),
 			).toBe(true);
+			expect(existsSync(resolve(first, "claude/CLAUDE.md"))).toBe(true);
+			expect(
+				existsSync(resolve(first, "claude/.claude/agents/athena.md")),
+			).toBe(true);
+			expect(existsSync(resolve(first, "claude/.claude/settings.json"))).toBe(
+				true,
+			);
+			expect(
+				existsSync(
+					resolve(first, "claude/.claude/hooks/tool-pre-shell-rtk.mjs"),
+				),
+			).toBe(true);
+			expect(
+				existsSync(resolve(first, "claude/hooks/tool-pre-shell-rtk.json")),
+			).toBe(false);
+			expect(
+				existsSync(resolve(first, "codex/.codex/hooks/tool-pre-shell-rtk.mjs")),
+			).toBe(true);
+			expect(
+				existsSync(resolve(first, "codex/hooks/tool-pre-shell-rtk.json")),
+			).toBe(false);
 			expect(athenaAgent).toContain('model = "gpt-5.4-mini"');
 			expect(athenaAgent).toContain('model_reasoning_effort = "medium"');
 			expect(athenaAgent).toContain('developer_instructions = """');
+			expect(claudeAthenaAgent).toContain("name: athena");
+			expect(claudeAthenaAgent).toContain("model: claude-sonnet-4-6");
+			expect(claudeAthenaAgent).toContain("effort: medium");
+			expect(claudeSettings).toContain(
+				'"$schema": "https://www.schemastore.org/claude-code-settings.json"',
+			);
+			expect(claudeSettings).toContain('"disableAllHooks": false');
+			expect(claudeSettings).toContain('"fastMode": false');
+			expect(claudeSettings).toContain('"PreToolUse"');
+			expect(claudeSettings).toContain('"matcher": "Bash"');
+			expect(claudeSettings).toContain(
+				'"command": "node \\"$CLAUDE_PROJECT_DIR/.claude/hooks/tool-pre-shell-rtk.mjs\\""',
+			);
 			expect(oalSkill).toContain("name: oal");
 			expect(oalSkill).toContain("description: Use the OpenAgentLayer");
 			expect(existsSync(resolve(first, "codex/agents/athena.json"))).toBe(

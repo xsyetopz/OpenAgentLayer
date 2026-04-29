@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { checkSource } from "../packages/oal/src/check";
 import { render } from "../packages/oal/src/render";
+import { formatOalError } from "../packages/oal/src/source";
 import {
 	insertBefore,
 	mutateJson,
@@ -222,7 +223,7 @@ describe("oal check", () => {
 		withTempRepo((root) => {
 			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
 				delete (hook["unsupported_platforms"] as Record<string, unknown>)[
-					"claude"
+					"opencode"
 				];
 			});
 			expect(() => checkSource(root)).toThrow(
@@ -240,6 +241,16 @@ describe("oal check", () => {
 			expect(() => checkSource(root)).toThrow(
 				"hook platform event mapping invalid",
 			);
+		});
+	});
+
+	test("rejects command hooks without runtime files", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/hooks/tool-pre-shell-rtk.json", (hook) => {
+				(hook["handler"] as Record<string, unknown>)["runtime_path"] =
+					"source/hooks/runtime/missing.mjs";
+			});
+			expect(() => checkSource(root)).toThrow("hook runtime path must exist");
 		});
 	});
 
@@ -362,15 +373,77 @@ describe("oal check", () => {
 			mutateJson(root, "source/oal.json", (oal) => {
 				oal["platforms"] = ["codex"];
 			});
-			rmSync(resolve(root, "source/platforms/claude"), {
-				force: true,
-				recursive: true,
-			});
 			rmSync(resolve(root, "source/platforms/opencode"), {
 				force: true,
 				recursive: true,
 			});
 			expect(() => checkSource(root)).not.toThrow();
+		});
+	});
+
+	test("reports generated Codex config schema failures with structured fields", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/platforms/codex/config.json", (config) => {
+				(
+					(config["required_config"] as Record<string, unknown>)[
+						"features"
+					] as Record<string, unknown>
+				)["apps"] = "yes";
+			});
+			try {
+				checkSource(root);
+				throw new Error("expected checkSource to fail");
+			} catch (error) {
+				const output = formatOalError(error);
+				expect(output).toContain(
+					"generated/codex/.codex/config.toml failed codex_config",
+				);
+				expect(output).toContain("platform=codex");
+				expect(output).toContain(
+					"generatedFile=generated/codex/.codex/config.toml",
+				);
+				expect(output).toContain(
+					"sourceFile=source/platforms/codex/config.json",
+				);
+				expect(output).toContain(
+					"schemaUrl=https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json",
+				);
+				expect(output).toContain("jsonPath=/features/apps");
+				expect(output).toContain('badValue="yes"');
+				expect(output).toContain('requiredValue={"type":"boolean"}');
+			}
+		});
+	});
+
+	test("reports generated Claude settings schema failures with structured fields", () => {
+		withTempRepo((root) => {
+			mutateJson(root, "source/platforms/claude/config.json", (config) => {
+				(config["required_config"] as Record<string, unknown>)[
+					"allowManagedHooksOnly"
+				] = "yes";
+			});
+			try {
+				checkSource(root);
+				throw new Error("expected checkSource to fail");
+			} catch (error) {
+				const output = formatOalError(error);
+				expect(output).toContain(
+					"generated/claude/.claude/settings.json failed claude_code_settings",
+				);
+				expect(output).toContain("platform=claude");
+				expect(output).toContain(
+					"generatedFile=generated/claude/.claude/settings.json",
+				);
+				expect(output).toContain(
+					"sourceFile=source/platforms/claude/config.json",
+				);
+				expect(output).toContain(
+					"schemaUrl=https://www.schemastore.org/claude-code-settings.json",
+				);
+				expect(output).toContain("jsonPath=/allowManagedHooksOnly");
+				expect(output).toContain('badValue="yes"');
+				expect(output).toContain('requiredValue={"type":"boolean"}');
+			}
 		});
 	});
 

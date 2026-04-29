@@ -65,7 +65,11 @@ export interface OalErrorDetail {
 	jsonPath: string;
 	message: string;
 	badValue?: unknown;
+	generatedFile?: string;
+	platform?: string;
 	requiredValue?: unknown;
+	schemaUrl?: string;
+	sourceFile?: string;
 }
 
 export class OalError extends Error {
@@ -98,6 +102,18 @@ export function formatOalError(error: unknown): string {
 		.map((detail) => {
 			const values = [
 				`file=${detail.file}`,
+				detail.platform === undefined
+					? undefined
+					: `platform=${detail.platform}`,
+				detail.generatedFile === undefined
+					? undefined
+					: `generatedFile=${detail.generatedFile}`,
+				detail.sourceFile === undefined
+					? undefined
+					: `sourceFile=${detail.sourceFile}`,
+				detail.schemaUrl === undefined
+					? undefined
+					: `schemaUrl=${detail.schemaUrl}`,
 				`jsonPath=${detail.jsonPath}`,
 				`message=${detail.message}`,
 				detail.badValue === undefined
@@ -308,7 +324,7 @@ export function validateJsonBySchema(
 				badValue: error.data,
 				file: dataPath,
 				jsonPath: error.instancePath || "/",
-				message: error.message ?? "schema validation failed",
+				message: error.message ?? "local schema rule failed",
 				requiredValue: error.params,
 			})),
 		]);

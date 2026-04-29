@@ -2,13 +2,27 @@
   "$schema": "../schema/hook-events.schema.json",
   "platform_events": {
     "claude": {
-      "agent-start": [],
-      "compact-pre": [],
-      "prompt-submit": [],
-      "session-start": [],
-      "tool-fail": [],
-      "tool-post": [],
-      "tool-pre": []
+      "agent-start": [
+        "SubagentStart"
+      ],
+      "compact-pre": [
+        "PreCompact"
+      ],
+      "prompt-submit": [
+        "UserPromptSubmit"
+      ],
+      "session-start": [
+        "SessionStart"
+      ],
+      "tool-fail": [
+        "PostToolUseFailure"
+      ],
+      "tool-post": [
+        "PostToolUse"
+      ],
+      "tool-pre": [
+        "PreToolUse"
+      ]
     },
     "codex": {
       "agent-start": [],

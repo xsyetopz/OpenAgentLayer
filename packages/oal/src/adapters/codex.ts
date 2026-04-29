@@ -4,7 +4,12 @@ import Ajv from "ajv";
 import { validateHookMappings } from "../hook-mappings";
 import { composeAgentPrompt, composeModelInstructions } from "../prompts";
 import type { JsonObject, SourceFile, SourceGraph } from "../source";
-import { readJsonFile, stableStringify } from "../source";
+import {
+	OalError,
+	readJsonFile,
+	readTextFile,
+	stableStringify,
+} from "../source";
 import {
 	asJsonObject,
 	type CapabilityReport,
@@ -37,13 +42,18 @@ export const codexAdapter: PlatformAdapter = {
 			project_root: existsSync(root) ? root : resolve(root),
 		};
 	},
-	doctorHooks(_root: string, graph: SourceGraph): DoctorResult {
+	doctorHooks(root: string, graph: SourceGraph): DoctorResult {
 		const platformEvents = asJsonObject(
 			graph.hookEvents.data["platform_events"],
 		);
-		const checks = graph.hooks.flatMap((hook) =>
-			validateHookMappings(hook, graph.hookEvents, Object.keys(platformEvents)),
-		);
+		const checks = graph.hooks.flatMap((hook) => [
+			...validateHookMappings(
+				hook,
+				graph.hookEvents,
+				Object.keys(platformEvents),
+			),
+			...validateCodexHookRuntime(root, hook),
+		]);
 		return {
 			checks,
 			ok: checks.every((check) => check.ok),
@@ -53,15 +63,22 @@ export const codexAdapter: PlatformAdapter = {
 	id: "codex",
 	render(root: string, graph: SourceGraph): RenderedPayload[] {
 		const config = configFor(graph);
+		const schemaUrl = codexConfigSchemaUrl(graph);
+		const projectConfig = codexProjectConfigObject(graph, config);
+		const userConfig = codexUserConfigObject(config);
 		validateCodexConfig(
 			root,
-			codexProjectConfigObject(config),
+			projectConfig,
 			"generated/codex/.codex/config.toml",
+			config.path,
+			schemaUrl,
 		);
 		validateCodexConfig(
 			root,
-			codexUserConfigObject(config),
+			userConfig,
 			"generated/codex/user/config.toml",
+			config.path,
+			schemaUrl,
 		);
 		return [
 			{
@@ -94,22 +111,19 @@ export const codexAdapter: PlatformAdapter = {
 				path: `codex/.agents/skills/${skill.data["id"]}/SKILL.md`,
 				sourcePaths: [skill.path, String(skill.data["body_path"])],
 			})),
+			...graph.hooks.map((hook) =>
+				jsonPayload(`hooks/${hook.data["id"]}.json`, hook.data, [hook.path]),
+			),
 			...graph.hooks
-				.filter((hook) =>
-					Boolean(asJsonObject(hook.data["supported_platforms"])["codex"]),
-				)
-				.map((hook) =>
-					jsonPayload(`codex/hooks/${hook.data["id"]}.json`, hook.data, [
-						hook.path,
-					]),
-				),
+				.filter((hook) => codexHookMapping(hook))
+				.map((hook) => renderCodexHookRuntime(root, hook)),
 			{
-				content: toToml(codexProjectConfigObject(config)),
+				content: toToml(projectConfig),
 				path: "codex/.codex/config.toml",
 				sourcePaths: [config.path],
 			},
 			{
-				content: toToml(codexUserConfigObject(config)),
+				content: toToml(userConfig),
 				path: "codex/user/config.toml",
 				sourcePaths: [config.path],
 			},
@@ -193,22 +207,109 @@ function platformFor(graph: SourceGraph): SourceFile {
 	return platform;
 }
 
-function codexProjectConfigObject(config: SourceFile): JsonObject {
-	return asJsonObject(config.data["required_config"]);
+function codexProjectConfigObject(
+	graph: SourceGraph,
+	config: SourceFile,
+): JsonObject {
+	return {
+		...asJsonObject(config.data["required_config"]),
+		hooks: codexHookConfig(graph),
+	};
 }
 
 function codexUserConfigObject(config: SourceFile): JsonObject {
 	return asJsonObject(config.data["user_config"]);
 }
 
-function codexConfigObject(config: SourceFile): JsonObject {
-	return codexProjectConfigObject(config);
+function codexHookConfig(graph: SourceGraph): JsonObject {
+	const events: JsonObject = {};
+	for (const hook of graph.hooks) {
+		const mapping = codexHookMapping(hook);
+		if (!mapping) {
+			continue;
+		}
+		for (const event of mapping["events"] as string[]) {
+			const groups = (events[event] as JsonObject[] | undefined) ?? [];
+			const handler: JsonObject = {
+				command: codexHookCommand(hook),
+				type: "command",
+			};
+			if (mapping["status_message"] !== undefined) {
+				handler["statusMessage"] = mapping["status_message"];
+			}
+			if (mapping["timeout_seconds"] !== undefined) {
+				handler["timeout"] = mapping["timeout_seconds"];
+			}
+			const group: JsonObject = {
+				hooks: [handler],
+			};
+			if (mapping["matcher"] !== undefined) {
+				group["matcher"] = mapping["matcher"];
+			}
+			groups.push({
+				...group,
+			});
+			events[event] = groups;
+		}
+	}
+	return events;
+}
+
+function codexHookMapping(hook: SourceFile): JsonObject | undefined {
+	return asJsonObject(hook.data["supported_platforms"])["codex"] as
+		| JsonObject
+		| undefined;
+}
+
+function codexHookCommand(hook: SourceFile): string {
+	return `node "$(git rev-parse --show-toplevel)/.codex/hooks/${hook.data["id"]}.mjs"`;
+}
+
+function renderCodexHookRuntime(
+	root: string,
+	hook: SourceFile,
+): RenderedPayload {
+	const handler = asJsonObject(hook.data["handler"]);
+	const runtimePath = String(handler["runtime_path"]);
+	return {
+		content: readTextFile(root, runtimePath).toString("utf8"),
+		path: `codex/.codex/hooks/${hook.data["id"]}.mjs`,
+		sourcePaths: [hook.path, runtimePath],
+	};
+}
+
+function validateCodexHookRuntime(root: string, hook: SourceFile) {
+	if (!codexHookMapping(hook)) {
+		return [];
+	}
+	const handler = asJsonObject(hook.data["handler"]);
+	const runtimePath = String(handler["runtime_path"]);
+	const runtimeExists = existsSync(resolve(root, runtimePath));
+	return [
+		{
+			message: `${hook.data["id"]}: codex runtime ${runtimePath} ${runtimeExists ? "found" : "missing"}`,
+			ok: runtimeExists,
+			path: hook.path,
+		},
+	];
+}
+
+function codexConfigObject(graph: SourceGraph): JsonObject {
+	return codexProjectConfigObject(graph, configFor(graph));
+}
+
+function codexConfigSchemaUrl(graph: SourceGraph): string {
+	const schemas = asJsonObject(graph.upstreamSchemas.data["schemas"]);
+	const codexConfig = asJsonObject(schemas["codex_config"]);
+	return String(codexConfig["url"]);
 }
 
 function validateCodexConfig(
 	root: string,
 	config: JsonObject,
 	generatedPath: string,
+	sourcePath: string,
+	schemaUrl: string,
 ): void {
 	const schema = readJsonFile(
 		root,
@@ -220,10 +321,35 @@ function validateCodexConfig(
 		strict: false,
 	}).compile(schema);
 	if (!validate(config)) {
-		throw new Error(
-			`${generatedPath} failed codex_config: ${JSON.stringify(validate.errors)}`,
-		);
+		throw new OalError(`${generatedPath} failed codex_config`, [
+			...(validate.errors ?? []).map((error) => ({
+				badValue: valueAtJsonPath(config, error.instancePath),
+				file: generatedPath,
+				generatedFile: generatedPath,
+				jsonPath: error.instancePath || "/",
+				message: error.message ?? "codex config schema rule failed",
+				platform: "codex",
+				requiredValue: error.params,
+				schemaUrl,
+				sourceFile: sourcePath,
+			})),
+		]);
 	}
+}
+
+function valueAtJsonPath(value: unknown, jsonPath: string): unknown {
+	if (!jsonPath) {
+		return value;
+	}
+	let current = value;
+	for (const rawPart of jsonPath.split("/").slice(1)) {
+		if (!current || typeof current !== "object") {
+			return undefined;
+		}
+		const part = rawPart.replaceAll("~1", "/").replaceAll("~0", "~");
+		current = (current as JsonObject)[part];
+	}
+	return current;
 }
 
 function renderAgentsMd(graph: SourceGraph): string {
@@ -260,8 +386,24 @@ function writeTomlObject(
 	const keys = Object.keys(value).sort();
 	for (const key of keys) {
 		const item = value[key];
-		if (!item || typeof item !== "object" || Array.isArray(item)) {
+		if (
+			!item ||
+			typeof item !== "object" ||
+			(Array.isArray(item) && !isTomlTableArray(item))
+		) {
 			lines.push(`${key} = ${formatTomlValue(item)}`);
+		}
+	}
+	for (const key of keys) {
+		const item = value[key];
+		if (Array.isArray(item) && isTomlTableArray(item)) {
+			for (const entry of item) {
+				if (lines.length > 0) {
+					lines.push("");
+				}
+				lines.push(`[[${[...path, key].join(".")}]]`);
+				writeTomlObject(lines, entry as JsonObject, [...path, key]);
+			}
 		}
 	}
 	for (const key of keys) {
@@ -280,7 +422,19 @@ function writeTomlObject(
 
 function hasScalarValue(value: JsonObject): boolean {
 	return Object.values(value).some(
-		(item) => !item || typeof item !== "object" || Array.isArray(item),
+		(item) =>
+			!item ||
+			typeof item !== "object" ||
+			(Array.isArray(item) && !isTomlTableArray(item)),
+	);
+}
+
+function isTomlTableArray(value: unknown[]): boolean {
+	return (
+		value.length > 0 &&
+		value.every(
+			(item) => item && typeof item === "object" && !Array.isArray(item),
+		)
 	);
 }
 
@@ -302,5 +456,5 @@ function formatTomlMultilineString(value: string): string {
 }
 
 export function codexConfigJsonForTest(graph: SourceGraph): string {
-	return stableStringify(codexConfigObject(configFor(graph)));
+	return stableStringify(codexConfigObject(graph));
 }

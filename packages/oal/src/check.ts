@@ -53,7 +53,7 @@ export function checkSource(root = process.cwd()): void {
 		);
 	}
 	for (const hook of readdirSync(resolve(root, "source/hooks"))
-		.filter((entry) => entry !== "events.json")
+		.filter((entry) => entry.endsWith(".json") && entry !== "events.json")
 		.sort()) {
 		validateJsonBySchema(
 			root,
@@ -106,7 +106,7 @@ export function checkSource(root = process.cwd()): void {
 	checkRootReferences(graph);
 	checkAgents(graph);
 	checkSkills(graph);
-	checkHooks(graph, existingPlatformIds(root));
+	checkHooks(root, graph, existingPlatformIds(root));
 	checkUpstreamHashes(root, graph);
 	checkModelRoutes(graph);
 	checkSubscriptions(graph);
@@ -247,10 +247,16 @@ function checkSkills(graph: SourceGraph): void {
 	}
 }
 
-function checkHooks(graph: SourceGraph, platformIds: string[]): void {
+function checkHooks(
+	root: string,
+	graph: SourceGraph,
+	platformIds: string[],
+): void {
 	for (const hook of graph.hooks) {
 		const id = String(hook.data["id"]);
 		const category = String(hook.data["category"]);
+		const handler = hook.data["handler"] as JsonObject;
+		const runtimePath = String(handler["runtime_path"] ?? "");
 		if (!id.startsWith(`${category}-`)) {
 			throw createOalError(
 				hook.path,
@@ -258,6 +264,18 @@ function checkHooks(graph: SourceGraph, platformIds: string[]): void {
 				"hook id must start with hook category prefix",
 				id,
 				`${category}-*`,
+			);
+		}
+		if (
+			["command", "script", "plugin"].includes(String(handler["kind"])) &&
+			!existsSync(resolve(root, runtimePath))
+		) {
+			throw createOalError(
+				hook.path,
+				"/handler/runtime_path",
+				"hook runtime path must exist",
+				runtimePath,
+				"repo-relative runtime file",
 			);
 		}
 		const supported = hook.data["supported_platforms"] as JsonObject;

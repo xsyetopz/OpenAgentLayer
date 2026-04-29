@@ -6,6 +6,8 @@
     "id",
     "category",
     "description",
+    "intent",
+    "handler",
     "supported_platforms",
     "unsupported_platforms"
   ],
@@ -31,6 +33,32 @@
     "description": {
       "type": "string",
       "minLength": 1
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "runtime_path"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "command",
+            "script",
+            "plugin",
+            "config-only"
+          ]
+        },
+        "runtime_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "supported_platforms": {
       "type": "object",
@@ -58,6 +86,17 @@
           "output_adapter": {
             "type": "string",
             "minLength": 1
+          },
+          "matcher": {
+            "type": "string"
+          },
+          "status_message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 1
           }
         }
       }

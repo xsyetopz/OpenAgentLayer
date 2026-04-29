@@ -28,7 +28,7 @@ OAL adapter:
 - render `AGENTS.md` as primary instruction anchor
 - render Greek-gods subagents in native Codex shape
 - render skills from source/provider records
-- render hooks only for supported Codex hook events
+- render hook policy records into inline Codex `[hooks]` config plus repo-local `.codex/hooks/*.mjs` command scripts
 - render model routes only inside allowed Codex model set
 
 Codex priorities:
@@ -36,6 +36,7 @@ Codex priorities:
 - source-backed instructions
 - strict model set
 - hook checks through `oal doctor hooks codex`
+- hook JSON stays OAL policy source; Codex runtime output stays native TOML/script shape
 - no unavailable model ids
 
 ## Claude Code
@@ -65,13 +66,14 @@ OAL adapter:
 - render `CLAUDE.md` as Claude-native wrapper around shared project rules
 - render Greek-gods subagents into `.claude/agents`
 - render skills and commands using Claude Code shapes
-- render hooks through Claude event names and JSON input/output contract
+- render hook policy records into `.claude/settings.json` hooks plus repo-local `.claude/hooks/*.mjs` command scripts
 - run `oal doctor hooks claude`
 
 Claude priorities:
 
 - keep subagent names canonical
 - use native hook events
+- hook JSON stays OAL policy source; Claude runtime output stays native settings/script shape
 - do not copy Codex config concepts into Claude settings
 
 ## OpenCode
@@ -272,4 +274,3 @@ Cursor priorities:
 | Cursor      | rules        | no native OAL target | no native OAL target | rules/commands only | no OAL hook target   | yes | editor-managed    |
 
 `platform-specific` means adapter must prove current native support before rendering.
-

@@ -103,20 +103,20 @@ Status policy:
 
 ### Claude Code
 
-- [ ] Implement Claude Code `detect`.
-- [ ] Implement Claude Code `capabilities`.
-- [ ] Render `CLAUDE.md`.
-- [ ] Render `.claude/agents/*.md`.
+- [x] Implement Claude Code `detect`.
+- [x] Implement Claude Code `capabilities`.
+- [x] Render `CLAUDE.md`.
+- [x] Render `.claude/agents/*.md`.
 - [ ] Render Claude Code skills.
 - [ ] Render Claude Code custom commands.
-- [ ] Render Claude Code hooks.
-- [ ] Render Claude Code settings.
-- [ ] Validate Claude Code settings against SchemaStore schema.
-- [ ] Enforce `disableAllHooks = false`.
-- [ ] Enforce `fastMode = false`.
-- [ ] Enforce `fastModePerSessionOptIn = false`.
-- [ ] Enforce Claude Code subscription profile.
-- [ ] Implement `oal doctor hooks claude`.
+- [x] Render Claude Code hooks.
+- [x] Render Claude Code settings.
+- [x] Validate Claude Code settings against SchemaStore schema.
+- [x] Enforce `disableAllHooks = false`.
+- [x] Enforce `fastMode = false`.
+- [x] Enforce `fastModePerSessionOptIn = false`.
+- [x] Enforce Claude Code subscription profile.
+- [x] Implement `oal doctor hooks claude`.
 
 ### OpenCode
 
@@ -167,10 +167,12 @@ Status policy:
 - [x] Require hook id prefix to match category.
 - [x] Require input adapter per supported platform event.
 - [x] Require output adapter per supported platform event.
+- [x] Treat hook JSON as OAL policy records, not platform runtime hook files.
+- [x] Require command/script/plugin hook runtime paths to exist.
 
 ### Required hooks
 
-- [ ] Implement `tool-pre-shell-rtk`.
+- [x] Implement `tool-pre-shell-rtk`.
 - [ ] Implement `tool-pre-destructive-command`.
 - [ ] Implement `tool-post-write-quality`.
 - [ ] Implement `tool-fail-circuit`.
@@ -182,7 +184,7 @@ Status policy:
 ### Hook doctors
 
 - [x] `oal doctor hooks codex` checks Codex mapping.
-- [ ] `oal doctor hooks claude` checks Claude Code mapping.
+- [x] `oal doctor hooks claude` checks Claude Code mapping.
 - [ ] `oal doctor hooks opencode` checks OpenCode mapping.
 - [x] Hook doctor names unsupported events explicitly.
 - [x] Hook doctor rejects fake parity.
@@ -275,7 +277,7 @@ Status policy:
 
 - [x] Run local schema checks.
 - [x] Run upstream schema hash checks.
-- [~] Run generated config schema checks.
+- [x] Run generated config schema checks.
 - [x] Run OAL config policy checks.
 - [x] Run render idempotency check.
 - [ ] Run stale branding check.
@@ -286,13 +288,13 @@ Status policy:
 
 ### Failure quality
 
-- [ ] Error names platform.
-- [ ] Error names generated file.
-- [ ] Error names source file.
-- [ ] Error names JSON path.
-- [ ] Error names bad value.
-- [ ] Error names required value.
-- [ ] Error avoids generic “validation failed” wording.
+- [x] Error names platform.
+- [x] Error names generated file.
+- [x] Error names source file.
+- [x] Error names JSON path.
+- [x] Error names bad value.
+- [x] Error names required value.
+- [x] Error avoids generic “validation failed” wording.
 
 ## Phase 8: install smoke
 
