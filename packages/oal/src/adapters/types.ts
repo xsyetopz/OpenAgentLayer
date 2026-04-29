@@ -1,4 +1,4 @@
-import type { JsonObject, SourceGraph } from "../source";
+import { type JsonObject, type SourceGraph, withRawSchemaUrl } from "../source";
 
 export type CapabilityStatus =
 	| "supported"
@@ -49,7 +49,7 @@ export function jsonPayload(
 	sourcePaths: string[],
 ): RenderedPayload {
 	return {
-		content: `${JSON.stringify(value, null, "\t")}\n`,
+		content: `${JSON.stringify(withRawSchemaUrl(value), null, "\t")}\n`,
 		path,
 		sourcePaths,
 	};

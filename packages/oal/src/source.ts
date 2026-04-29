@@ -33,6 +33,8 @@ export const codexModels = [
 ] as const;
 
 export type JsonObject = Record<string, unknown>;
+const rawSchemaBase =
+	"https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/refs/heads/master/source/schema/";
 
 export interface SourceFile<T = JsonObject> {
 	path: string;
@@ -134,6 +136,23 @@ export function stableStringify(value: unknown): string {
 export function writeStableJson(path: string, value: unknown): void {
 	mkdirSync(dirname(path), { recursive: true });
 	writeFileSync(path, stableStringify(value));
+}
+
+export function withRawSchemaUrl(value: unknown): unknown {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return value;
+	}
+	const record = { ...(value as JsonObject) };
+	const schema = record["$schema"];
+	if (typeof schema !== "string") {
+		return record;
+	}
+	const schemaFile = schema.split("/").at(-1);
+	if (!schemaFile?.endsWith(".schema.json")) {
+		return record;
+	}
+	record["$schema"] = `${rawSchemaBase}${schemaFile}`;
+	return record;
 }
 
 export function sortJson(value: unknown): unknown {

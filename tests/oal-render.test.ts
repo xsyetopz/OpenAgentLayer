@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative, resolve, sep } from "node:path";
 import { explain, render } from "../packages/oal/src/render";
 import { repoRoot, withTempRepo } from "./helpers/oal";
 
@@ -41,7 +41,33 @@ describe("oal render", () => {
 				resolve(first, "codex/.codex/agents/athena.toml"),
 				"utf8",
 			);
+			const generatedAthena = JSON.parse(
+				readFileSync(resolve(first, "agents/athena.json"), "utf8"),
+			) as { $schema: string };
+			const generatedHook = JSON.parse(
+				readFileSync(
+					resolve(first, "codex/hooks/tool-pre-shell-rtk.json"),
+					"utf8",
+				),
+			) as { $schema: string };
+			const generatedPlatform = JSON.parse(
+				readFileSync(resolve(first, "platforms/codex/platform.json"), "utf8"),
+			) as { $schema: string };
 			expect(existsSync(resolve(first, "codex/config.toml"))).toBe(false);
+			expect(generatedAthena.$schema).toBe(
+				"https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/refs/heads/master/source/schema/agent.schema.json",
+			);
+			expect(generatedHook.$schema).toBe(
+				"https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/refs/heads/master/source/schema/hook.schema.json",
+			);
+			expect(generatedPlatform.$schema).toBe(
+				"https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/refs/heads/master/source/schema/platform.schema.json",
+			);
+			for (const path of listJsonFiles(first)) {
+				const content = readFileSync(path, "utf8");
+				expect(content).not.toContain('"$schema": "../schema/');
+				expect(content).not.toContain('"$schema": "../../schema/');
+			}
 			expect(projectConfig).toContain("multi_agent_v2 = true");
 			expect(projectConfig).toContain("memories = true");
 			expect(projectConfig).toContain(
@@ -105,3 +131,16 @@ describe("oal render", () => {
 		});
 	});
 });
+
+function listJsonFiles(root: string): string[] {
+	const files: string[] = [];
+	for (const entry of readdirSync(root).sort()) {
+		const path = join(root, entry);
+		if (statSync(path).isDirectory()) {
+			files.push(...listJsonFiles(path));
+		} else if (path.endsWith(".json")) {
+			files.push(relative(root, path).split(sep).join("/"));
+		}
+	}
+	return files.map((path) => resolve(root, path));
+}

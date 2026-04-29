@@ -17,6 +17,7 @@ import {
 	sha256,
 	sourceFiles,
 	stableStringify,
+	withRawSchemaUrl,
 	writeStableJson,
 } from "./source";
 
@@ -33,7 +34,6 @@ export interface RenderManifest {
 }
 
 const generatedAt = "1970-01-01T00:00:00.000Z";
-
 export function render(
 	root = process.cwd(),
 	outDir = "generated",
@@ -49,7 +49,7 @@ export function render(
 		sources: string[],
 	) => {
 		const absolutePath = join(absoluteOut, relativePath);
-		writeStableJson(absolutePath, value);
+		writeStableJson(absolutePath, withRawSchemaUrl(value));
 		files.push({
 			path: relativePath,
 			sha256: sha256(readFileSync(absolutePath)),
