@@ -17,6 +17,21 @@ describe("OAL docs validation", () => {
 		);
 	});
 
+	test("fails nested docs audit for invalid status marker", async () => {
+		const root = await createFixtureRoot();
+		await mkdir(join(root, "docs/surface-config"), { recursive: true });
+		await writeFile(
+			join(root, "docs/surface-config/bad.md"),
+			"- [x] Done — wrong\n",
+		);
+
+		const diagnostics = await validateDocumentation(root);
+
+		expect(diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-status-marker",
+		);
+	});
+
 	test("fails docs audit for spec missing top-level link", async () => {
 		const root = await createFixtureRoot();
 		await mkdir(join(root, "specs"), { recursive: true });

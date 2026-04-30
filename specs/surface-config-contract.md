@@ -26,6 +26,22 @@ Each adapter must maintain a schema-derived allowlist:
 
 Render fails when OAL attempts to emit a key outside the adapter allowlist.
 
+## Upstream schema provenance
+
+Provider schema and docs inputs are cached under `source/schemas/upstream/` and indexed by `source/schemas/upstream/manifest.json`.
+
+The manifest records:
+
+- provider surface;
+- local cache path;
+- official source URL;
+- retrieval date;
+- SHA-256;
+- content type;
+- extraction status.
+
+Each cached JSON schema must parse as JSON and match its manifest SHA-256. Each surface-config `source_url` must point to a manifest-listed official URL. OAL must not invent public schema IDs or authority URLs.
+
 ## Default profiles
 
 Each adapter must define a `default_profile` record for each supported surface.
@@ -105,6 +121,29 @@ Each adapter must validate:
 - generated defaults match the surface `default_profile`;
 - user-local recommendations are not written by project install;
 - runtime-owned paths exist after install.
+
+Provider parity tests must assert rendered output by native surface shape, not by
+shared prose text:
+
+- Codex emits TOML config, `.codex/agents/*.toml`, plugin skills under
+  `.codex/openagentlayer/plugin/skills/`, and runtime hooks under
+  `.codex/openagentlayer/runtime/`.
+- Claude emits `.claude/settings.json`, `.claude/agents/*.md`,
+  `.claude/commands/*.md`, `.claude/skills/<id>/SKILL.md`, and runtime hooks
+  under `.claude/openagentlayer/runtime/`.
+- OpenCode emits `opencode.json`, `.opencode/plugins/openagentlayer.ts`,
+  `.opencode/agents/*.md`, `.opencode/commands/*.md`,
+  `.opencode/skills/<id>/SKILL.md`, and runtime hooks under
+  `.opencode/openagentlayer/runtime/`.
+
+Install parity tests must verify provider config artifacts are
+`structured-object`, user-facing instruction documents are `marked-text-block`,
+and generated runtime hook scripts are `full-file`.
+
+Native-surface completeness tests must verify every source record that declares
+a provider surface emits that provider's native artifact path, including command
+support files, skill support files, policy runtime scripts, policy metadata, and
+source-record ownership metadata for install manifests.
 
 ## Links
 

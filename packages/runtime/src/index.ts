@@ -5,7 +5,10 @@ export { evaluateDestructiveCommandGuard } from "./destructive-command-guard";
 export { evaluateDiffStateGate } from "./diff-state-gate";
 export { evaluatePermissionEscalationGuard } from "./permission-escalation-guard";
 export { evaluatePlaceholderPrototypeGuard } from "./placeholder-prototype-guard";
-export { evaluateRuntimePolicy } from "./policy-router";
+export {
+	evaluateRuntimePolicy,
+	evaluateRuntimePolicyAsync,
+} from "./policy-router";
 export { evaluatePromptContextInjection } from "./prompt-context-injection";
 export { evaluateRtkEnforcementGuard } from "./rtk-enforcement-guard";
 export { renderRuntimeScript } from "./scripts";

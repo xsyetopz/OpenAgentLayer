@@ -18,7 +18,7 @@
   },
   "scripts": {
     "oal": "bun packages/cli/src/cli.ts",
-    "test": "bun test ./packages",
+    "test": "bun test ./packages ./scripts/e2e",
     "lint": "bunx biome check . --error-on-warnings --max-diagnostics 16384",
     "format": "bunx biome format . --write --max-diagnostics 16384",
     "check": "bun run lint && bun run check:source && bun run test",

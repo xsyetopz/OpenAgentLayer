@@ -1,0 +1,31 @@
+id = "caveman-help"
+kind = "skill"
+title = "Caveman Help"
+description = "Explain Caveman modes, boundaries, and escape hatches without changing code or repo state."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["caveman-help"]
+when_to_use = "Explain Caveman modes, boundaries, and escape hatches without changing code or repo state."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search"]
+tool_grants = ["read", "search"]
+route_contract = "readonly"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-upstream"
+source_package = "caveman"
+skill_category = "caveman-family"
+upstream_name = "caveman-help"
+
+[upstream]
+body = "third_party/caveman/skills/caveman-help/SKILL.md"
+package = "caveman"
+repository = "https://github.com/juliusbrussee/caveman"
+commit = "84cc3c14fa1e10182adaced856e003406ccd250d"

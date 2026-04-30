@@ -8,7 +8,7 @@ export {
 export { resolveHookEvent } from "./hooks";
 export { renderJsonFile, stableJson } from "./json";
 export { renderMarkdownWithFrontmatter } from "./markdown";
-export { resolveModelAssignment } from "./models";
+export { resolveModelAssignment, validateModelAssignments } from "./models";
 export {
 	disablesImplicitSkillInvocation,
 	renderAgentSkillMarkdown,

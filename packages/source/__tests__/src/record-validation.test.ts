@@ -153,7 +153,7 @@ describe("OAL source record validation", () => {
 			skillPath,
 			source.replace(
 				'metadata = { origin = "fixture" }',
-				'metadata = { origin = "openagentlayer-local" }',
+				'metadata = { origin = "openagentlayer-vendor" }',
 			),
 		);
 
@@ -162,6 +162,28 @@ describe("OAL source record validation", () => {
 		expect(hasErrors(result.diagnostics)).toBe(true);
 		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
 			"missing-imported-skill-attribution",
+		);
+	});
+
+	test("fails skill records that still cite v3 evidence as active source", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		const skillPath = `${root}/source/skills/fixture-skill/skill.toml`;
+		const source = await Bun.file(skillPath).text();
+		await Bun.write(
+			skillPath,
+			source.replace(
+				'metadata = { origin = "fixture" }',
+				'metadata = { origin = "fixture", source_package = "v3-evidence" }',
+			),
+		);
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"copied-v3-skill-source",
 		);
 	});
 
@@ -479,6 +501,22 @@ describe("OAL source record validation", () => {
 		);
 	});
 
+	test("fails unsupported command aliases", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, {
+			aliases: '["fixture"]',
+			surfaceOverrides: '{ codex = { aliases = ["fixture"] } }',
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"unsupported-command-alias",
+		);
+	});
+
 	test("fails missing and escaping command support files", async () => {
 		const root = await createFixtureRoot();
 		await writeAgent(root);
@@ -545,6 +583,31 @@ describe("OAL source record validation", () => {
 		);
 	});
 
+	test("fails recovered commands that still use generic scaffold prose", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, {
+			promptBody: [
+				"# Command",
+				"",
+				"Route $ARGUMENTS through fixture agent.",
+				"",
+				"## Procedure",
+				"",
+				"- Inspect current repository state and source records before deciding action.",
+				"- Return evidence.",
+				"",
+			].join("\n"),
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"generic-command-body",
+		);
+	});
+
 	test("fails invalid policy field types", async () => {
 		const root = await createFixtureRoot();
 		await writePolicy(root, {
@@ -587,6 +650,32 @@ describe("OAL source record validation", () => {
 		expect(hasErrors(result.diagnostics)).toBe(true);
 		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
 			"invalid-hook-surface-event",
+		);
+	});
+
+	test("fails policy surface without hook mapping", async () => {
+		const root = await createFixtureRoot();
+		await writePolicy(root, {
+			surfaces: '["codex", "claude"]',
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"missing-hook-surface-mapping",
+		);
+	});
+
+	test("fails deterministic policy without runtime script", async () => {
+		const root = await createFixtureRoot();
+		await writePolicy(root, { runtimeScript: "" });
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"runtime-policy-missing-script",
 		);
 	});
 

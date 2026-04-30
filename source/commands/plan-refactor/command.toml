@@ -1,0 +1,23 @@
+id = "plan-refactor"
+kind = "command"
+title = "Plan Refactor"
+description = "Produce a behavior-preserving refactor plan."
+owner_role = "athena"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["decide", "elegance"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Plan Refactor route"
+invocation = "plan-refactor $ARGUMENTS"
+notes = "Routes requested objective through athena."

@@ -14,7 +14,12 @@ export async function createInstallFixture() {
 	const registry = createAdapterRegistry();
 	return {
 		targetRoot,
+		claudeBundle: registry.renderSurfaceBundle(sourceResult.graph, "claude"),
 		codexBundle: registry.renderSurfaceBundle(sourceResult.graph, "codex"),
+		opencodeBundle: registry.renderSurfaceBundle(
+			sourceResult.graph,
+			"opencode",
+		),
 	};
 }
 

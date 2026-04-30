@@ -1,0 +1,23 @@
+id = "design-taste-images"
+kind = "command"
+title = "Design Taste Images"
+description = "Use image-first frontend references for implementation."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste-images"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste Images route"
+invocation = "design-taste-images $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

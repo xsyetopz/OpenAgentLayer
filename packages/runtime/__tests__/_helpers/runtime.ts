@@ -4,6 +4,7 @@ import { renderRuntimeScript } from "@openagentlayer/runtime";
 import { createFixtureRoot } from "@openagentlayer/testkit";
 
 type RuntimeScriptId = Parameters<typeof renderRuntimeScript>[0];
+export type RuntimeScriptDecision = "allow" | "context" | "deny" | "warn";
 
 export interface RuntimeScriptResult {
 	readonly exitCode: number;
@@ -83,4 +84,21 @@ async function sha256(content: string): Promise<string> {
 	return [...new Uint8Array(digest)]
 		.map((byte) => byte.toString(16).padStart(2, "0"))
 		.join("");
+}
+
+export function expectedDecisionForPolicy(
+	policyId: string,
+): RuntimeScriptDecision {
+	switch (policyId) {
+		case "completion-gate":
+			return "deny";
+		case "prompt-context-injection":
+		case "prompt-git-context":
+		case "subagent-route-context":
+			return "context";
+		case "source-drift-guard":
+			return "deny";
+		default:
+			return "allow";
+	}
 }

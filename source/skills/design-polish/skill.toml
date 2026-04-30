@@ -1,0 +1,25 @@
+id = "design-polish"
+kind = "skill"
+title = "Design Polish"
+description = "Refine frontend/UI/UX work so it stops looking like generic AI output. Use for layout, typography, spacing, interaction polish, design system cleanup, and frontend visual audits across Claude, Codex, OpenCode, and Copilot."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["design-polish"]
+when_to_use = "Refine frontend/UI/UX work so it stops looking like generic AI output. Use for layout, typography, spacing, interaction polish, design system cleanup, and frontend visual audits across Claude, Codex, OpenCode, and Copilot."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search", "edit"]
+tool_grants = ["read", "search", "edit"]
+route_contract = "edit-required"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "design-polish"

@@ -54,22 +54,81 @@ export async function readModelCandidates(surface) {
 	return [...models];
 }
 
-export async function runProviderE2E({ binary, probe, scenario, surface }) {
-	if (!(await commandExists(binary))) {
-		console.log(`skip ${surface}: '${binary}' binary not installed`);
+export function requiredProviderFiles(surface) {
+	switch (surface) {
+		case "codex":
+			return [
+				"AGENTS.md",
+				".codex/config.toml",
+				".codex/agents/athena.toml",
+				".codex/openagentlayer/plugin/.codex-plugin/plugin.json",
+				".codex/openagentlayer/plugin/skills/command-implement/SKILL.md",
+				".codex/openagentlayer/plugin/skills/review/SKILL.md",
+				".codex/openagentlayer/runtime/completion-gate.mjs",
+			];
+		case "claude":
+			return [
+				"CLAUDE.md",
+				".claude/settings.json",
+				".claude/agents/athena.md",
+				".claude/commands/implement.md",
+				".claude/skills/review/SKILL.md",
+				".claude/openagentlayer/runtime/completion-gate.mjs",
+			];
+		case "opencode":
+			return [
+				"opencode.json",
+				".opencode/agents/athena.md",
+				".opencode/commands/implement.md",
+				".opencode/openagentlayer/instructions.md",
+				".opencode/plugins/openagentlayer.ts",
+				".opencode/skills/review/SKILL.md",
+				".opencode/openagentlayer/runtime/completion-gate.mjs",
+			];
+		default:
+			throw new Error(`Unsupported e2e surface '${surface}'.`);
+	}
+}
+
+export function providerInspectionPrompt(surface, marker) {
+	const paths = requiredProviderFiles(surface)
+		.map((path) => `- ${path}`)
+		.join("\n");
+	return [
+		"Inspect these generated provider-native files without editing them:",
+		paths,
+		`If every listed file exists and is readable, respond exactly ${marker}`,
+	].join("\n");
+}
+
+export async function runProviderE2E({
+	binary,
+	commandExistsFn = commandExists,
+	createTempProjectFn = createTempProject,
+	cleanupProjectFn = async (project) =>
+		await rm(project, { force: true, recursive: true }),
+	installSurfaceFn = installSurface,
+	logFn = console.log,
+	modelCandidatesFn = readModelCandidates,
+	probe,
+	scenario,
+	surface,
+}) {
+	if (!(await commandExistsFn(binary))) {
+		logFn(`skip ${surface}: '${binary}' binary not installed`);
 		return 0;
 	}
 
-	const models = await readModelCandidates(surface);
+	const models = await modelCandidatesFn(surface);
 	if (models.length === 0) {
-		console.log(`skip ${surface}: no source model candidates found`);
+		logFn(`skip ${surface}: no source model candidates found`);
 		return 0;
 	}
 
 	for (const model of models) {
-		const project = await createTempProject(surface);
+		const project = await createTempProjectFn(surface);
 		try {
-			const install = await installSurface(surface, project);
+			const install = await installSurfaceFn(surface, project);
 			if (install.exitCode !== 0) {
 				console.error(install.stderr || install.stdout);
 				return install.exitCode;
@@ -77,7 +136,7 @@ export async function runProviderE2E({ binary, probe, scenario, surface }) {
 
 			const probeResult = await probe({ model, project });
 			if (!probeResult.ok) {
-				console.log(`skip ${surface}/${model}: ${probeResult.reason}`);
+				logFn(`skip ${surface}/${model}: ${probeResult.reason}`);
 				continue;
 			}
 
@@ -87,14 +146,14 @@ export async function runProviderE2E({ binary, probe, scenario, surface }) {
 				return 1;
 			}
 
-			console.log(`ok ${surface}/${model}`);
+			logFn(`ok ${surface}/${model}`);
 			return 0;
 		} finally {
-			await rm(project, { force: true, recursive: true });
+			await cleanupProjectFn(project);
 		}
 	}
 
-	console.log(
+	logFn(
 		`skip ${surface}: no installed/authenticated source model returned a probe response`,
 	);
 	return 0;

@@ -1,0 +1,23 @@
+id = "design-taste"
+kind = "command"
+title = "Design Taste"
+description = "Apply premium frontend taste guidance to an implementation route."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste route"
+invocation = "design-taste $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

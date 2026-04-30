@@ -14,6 +14,7 @@ import {
 	compareByPath,
 	renderJsonFile,
 	validateConfigObject,
+	validateModelAssignments,
 } from "../../shared";
 import { renderProjectPromptInstructions } from "../../shared/prompt-layers";
 import {
@@ -52,6 +53,7 @@ export function renderClaudeBundle(
 		renderInstructionsArtifact(graph),
 	];
 	diagnostics.push(
+		...validateModelAssignments(graph, CLAUDE_SURFACE, context.modelPlanId),
 		...validateConfigObject({
 			artifactPath: CLAUDE_SETTINGS_PATH,
 			config: renderClaudeSettings(graph),

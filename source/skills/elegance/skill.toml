@@ -1,0 +1,25 @@
+id = "elegance"
+kind = "skill"
+title = "Elegance"
+description = "Use when evaluating or improving code organization, naming, public API shape, subsystem boundaries, registration patterns, or runtime-state ownership. Triggers: elegance, clean codebase, ownership boundaries, naming discipline, god file split, public API cleanup, table-driven registration, runtime state organization, subsystem boundaries, API shape, module organization."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["elegance"]
+when_to_use = "Use when evaluating or improving code organization, naming, public API shape, subsystem boundaries, registration patterns, or runtime-state ownership. Triggers: elegance, clean codebase, ownership boundaries, naming discipline, god file split, public API cleanup, table-driven registration, runtime state organization, subsystem boundaries, API shape, module organization."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search", "edit"]
+tool_grants = ["read", "search", "edit"]
+route_contract = "edit-required"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "elegance"

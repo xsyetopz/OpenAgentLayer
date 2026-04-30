@@ -8,7 +8,7 @@ Source:
 
 - `https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json`
 
-Retrieval date: 2026-04-29.
+Retrieval date: 2026-04-30.
 
 ## Scope
 
@@ -238,4 +238,10 @@ These defaults are part of the OAL model-balance contract:
 - Emit current approvals keys only.
 - Emit hooks from policy source, not hand-authored JSON.
 - Emit agents from role records.
-- Validate generated TOML against this study and upstream JSON Schema.
+- Validate generated TOML against this study, upstream JSON Schema, and source/schemas/upstream/manifest.json provenance.
+
+## Provenance checkpoint
+
+- Raw schema cache: `source/schemas/upstream/codex-config.schema.json`.
+- Manifest entry: `codex-config-schema` in `source/schemas/upstream/manifest.json`.
+- Extraction policy: include current keys only; skip descriptions marked experimental endpoint, replacement-only, old fallback, no-op, or not emitted by project install.

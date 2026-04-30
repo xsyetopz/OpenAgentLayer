@@ -108,10 +108,17 @@ async function validateNoSpecV3Requirements(
 async function markdownFiles(directory: string): Promise<readonly string[]> {
 	try {
 		const entries = await readdir(directory, { withFileTypes: true });
-		return entries
-			.filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-			.map((entry) => join(directory, entry.name))
-			.sort();
+		const nestedFiles = await Promise.all(
+			entries
+				.filter((entry) => entry.isDirectory())
+				.map((entry) => markdownFiles(join(directory, entry.name))),
+		);
+		return [
+			...entries
+				.filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
+				.map((entry) => join(directory, entry.name)),
+			...nestedFiles.flat(),
+		].sort();
 	} catch (error) {
 		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 			return [];

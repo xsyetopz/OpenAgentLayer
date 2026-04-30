@@ -77,4 +77,19 @@ describe("OAL runtime policy router", () => {
 			"allow",
 		]);
 	});
+
+	test("unsupported policy ids use explicit runtime diagnostic identity", () => {
+		const decision = evaluateRuntimePolicy({
+			event: "PreToolUse",
+			policy_id: "missing-policy",
+			surface: "codex",
+		});
+
+		expect(decision).toMatchObject({
+			context: { requested_policy_id: "missing-policy" },
+			decision: "warn",
+			policy_id: "unsupported-runtime-policy",
+		});
+		expect(decision.message).toContain("Unsupported runtime policy id");
+	});
 });

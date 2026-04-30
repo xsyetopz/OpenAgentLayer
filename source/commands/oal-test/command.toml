@@ -1,0 +1,23 @@
+id = "oal-test"
+kind = "command"
+title = "Oal Test"
+description = "Run or design validation evidence for requested scope."
+owner_role = "atalanta"
+route_contract = "execution-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "validation"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["test"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Test route"
+invocation = "test $ARGUMENTS"
+notes = "Routes requested objective through atalanta."

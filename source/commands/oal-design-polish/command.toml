@@ -1,0 +1,23 @@
+id = "oal-design-polish"
+kind = "command"
+title = "Oal Design Polish"
+description = "Improve UI or UX polish with concrete design evidence."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["design-polish", "taste"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Design Polish route"
+invocation = "design-polish $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

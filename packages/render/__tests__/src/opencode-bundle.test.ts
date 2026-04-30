@@ -49,6 +49,7 @@ describe("OAL OpenCode bundle rendering", () => {
 		expect(plugin).toContain("secret-path-guard");
 		expect(plugin).toContain("OpenAgentLayerPlugin");
 		expect(config).toContain('"model": "gpt-5.4"');
+		expect(config).toContain('"default_agent": "odysseus"');
 		expect(config).toContain('"morpheus"');
 		expect(config).toContain('"gpt-5.4"');
 		const proteus = artifactContent(bundle, ".opencode/agents/proteus.md");

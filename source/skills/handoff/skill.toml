@@ -1,0 +1,25 @@
+id = "handoff"
+kind = "skill"
+title = "Handoff"
+description = "Export session context as a structured handoff file for explicit transfer or archival. Use when the user wants a handoff file, session export, cross-tool transfer artifact, or explicit saved summary before ending. Do not treat this as the default Claude continuity path."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["handoff"]
+when_to_use = "Export session context as a structured handoff file for explicit transfer or archival. Use when the user wants a handoff file, session export, cross-tool transfer artifact, or explicit saved summary before ending. Do not treat this as the default Claude continuity path."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search"]
+tool_grants = ["read", "search"]
+route_contract = "readonly"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "handoff"

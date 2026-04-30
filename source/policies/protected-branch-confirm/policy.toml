@@ -1,0 +1,21 @@
+id = "protected-branch-confirm"
+kind = "policy"
+title = "Protected Branch Confirm"
+description = "Block protected branch mutation unless confirmation is explicit."
+category = "vcs_gate"
+severity = "error"
+event_intent = "tool_execution"
+hook_event_category = "pre_tool"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+runtime_script = "runtime/protected-branch-confirm.mjs"
+surface_events = ["PreToolUse", "tool.execute.before"]
+test_payloads = []
+tests = ["protected-branch-confirm.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PreToolUse"
+claude = "PreToolUse"
+opencode = "tool.execute.before"

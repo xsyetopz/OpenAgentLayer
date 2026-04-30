@@ -11,7 +11,7 @@ Sources:
 - Claude SchemaStore: `https://www.schemastore.org/claude-code-settings.json`
 - OpenCode: `https://opencode.ai/config.json`
 
-Retrieval date: 2026-04-29.
+Retrieval date: 2026-04-30.
 
 ## Crosswalk
 
@@ -46,3 +46,7 @@ Retrieval date: 2026-04-29.
 
 Each adapter owns a schema-derived allowlist. Render fails if a generated key is not on the allowlist unless the adapter explicitly marks it as a pass-through user-owned key.
 
+
+## Provenance checkpoint
+
+`source/schemas/upstream/manifest.json` is the local source-of-truth index for cached upstream schema/doc inputs. Surface config `source_url` fields must refer to URLs listed there; generated config validation is not sufficient without this provenance check.

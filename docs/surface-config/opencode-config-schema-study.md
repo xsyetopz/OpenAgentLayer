@@ -8,7 +8,7 @@ Source:
 
 - `https://opencode.ai/config.json`
 
-Retrieval date: 2026-04-29.
+Retrieval date: 2026-04-30.
 
 ## File format
 
@@ -182,4 +182,10 @@ OAL mapping:
 - Emit `command`, `skills`, `plugin`, `agent`, `instructions`, and `permission` from source graph.
 - Emit provider/model keys only from model-routing source.
 - Do not emit removed/replaced/no-op keys.
-- Validate generated config against OpenCode schema.
+- Validate generated config against OpenCode schema and source/schemas/upstream/manifest.json provenance.
+
+## Provenance checkpoint
+
+- Raw schema cache: `source/schemas/upstream/opencode-config.schema.json`.
+- Manifest entry: `opencode-config-schema` in `source/schemas/upstream/manifest.json`.
+- Extraction policy: include current config keys only; skip replaced sharing keys, fixed-layout/no-op keys, and experimental defaults.

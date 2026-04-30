@@ -1,0 +1,23 @@
+id = "design-taste-stitch"
+kind = "command"
+title = "Design Taste Stitch"
+description = "Use Google Stitch-compatible semantic design guidance."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste-stitch"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste Stitch route"
+invocation = "design-taste-stitch $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

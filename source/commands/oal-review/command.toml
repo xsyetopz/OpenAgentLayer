@@ -1,0 +1,23 @@
+id = "oal-review"
+kind = "command"
+title = "Oal Review"
+description = "Review code, docs, generated artifacts, and tests for warranted findings."
+owner_role = "nemesis"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["review"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Review route"
+invocation = "review $ARGUMENTS"
+notes = "Routes requested objective through nemesis."

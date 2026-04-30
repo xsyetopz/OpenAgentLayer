@@ -14,9 +14,10 @@ import {
 	compareByPath,
 	renderJsonFile,
 	validateConfigObject,
+	validateModelAssignments,
 } from "../../shared";
 import { renderProjectPromptInstructions } from "../../shared/prompt-layers";
-import { renderOpenCodeConfig } from "./config";
+import { renderOpenCodeConfig, validateOpenCodeDefaultAgent } from "./config";
 import {
 	OPENCODE_CONFIG_PATH,
 	OPENCODE_INSTRUCTIONS_PATH,
@@ -54,6 +55,8 @@ export function renderOpenCodeBundle(
 		context,
 	);
 	diagnostics.push(
+		...validateModelAssignments(graph, OPENCODE_SURFACE, context.modelPlanId),
+		...validateOpenCodeDefaultAgent(graph),
 		...validateConfigObject({
 			artifactPath: OPENCODE_CONFIG_PATH,
 			config: renderOpenCodeConfig(graph, context),

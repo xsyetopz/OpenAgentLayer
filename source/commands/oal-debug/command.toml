@@ -1,0 +1,23 @@
+id = "oal-debug"
+kind = "command"
+title = "Oal Debug"
+description = "Reproduce and isolate a failure without editing source files."
+owner_role = "hermes"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["debug"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Debug route"
+invocation = "debug $ARGUMENTS"
+notes = "Routes requested objective through hermes."

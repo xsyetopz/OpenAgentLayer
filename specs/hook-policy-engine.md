@@ -114,6 +114,8 @@ Runtime package internals are split by responsibility. The public API remains ex
 
 Rendered runtime scripts are self-contained `.mjs` files. They read normalized JSON from stdin, write a normalized decision JSON line to stdout, and exit non-zero only for `deny`.
 
+Router/script parity is mandatory. Every deterministic policy recovered from v3 behavior must have a representative payload test that compares `evaluateRuntimePolicy(payload)` with the rendered `.mjs` script output. The policy id, decision, and deny exit-code semantics must match.
+
 ## Required guards
 
 - destructive shell command guard;

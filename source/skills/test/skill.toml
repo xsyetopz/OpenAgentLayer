@@ -1,0 +1,25 @@
+id = "test"
+kind = "skill"
+title = "Test"
+description = "Test design patterns, strategies, and coverage guidance for writing effective tests. Triggers: write tests, test patterns, testing strategy, test coverage, unit test, integration test, mock, fixture, test architecture, TDD, test-driven."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["test", "validate", "verification"]
+when_to_use = "Test design patterns, strategies, and coverage guidance for writing effective tests. Triggers: write tests, test patterns, testing strategy, test coverage, unit test, integration test, mock, fixture, test architecture, TDD, test-driven."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search"]
+tool_grants = ["read", "search"]
+route_contract = "readonly"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "test"

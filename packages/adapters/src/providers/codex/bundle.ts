@@ -14,6 +14,7 @@ import {
 	compareByPath,
 	renderJsonFile,
 	validateConfigObject,
+	validateModelAssignments,
 } from "../../shared";
 import { renderCodexAgentsMd, renderCodexConfig } from "./config";
 import {
@@ -48,6 +49,7 @@ export function renderCodexBundle(
 	const diagnostics: Diagnostic[] = [];
 	const artifacts: AdapterArtifact[] = renderCodexBundleArtifacts(graph);
 	diagnostics.push(
+		...validateModelAssignments(graph, CODEX_SURFACE, context.modelPlanId),
 		...validateConfigObject({
 			artifactPath: CODEX_CONFIG_PATH,
 			config: Bun.TOML.parse(renderCodexConfig(graph)) as Record<

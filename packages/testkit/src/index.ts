@@ -12,6 +12,7 @@ export async function writeAgent(
 	options: {
 		readonly directory?: string;
 		readonly id?: string;
+		readonly primary?: boolean;
 		readonly prompt?: string;
 		readonly commands?: string;
 		readonly policies?: string;
@@ -62,6 +63,9 @@ export async function writeAgent(
 			'title = "Fixture Agent"',
 			'role = "Fixture"',
 			'description = "Fixture agent."',
+			...(options.primary === undefined
+				? []
+				: [`primary = ${options.primary}`]),
 			`prompt = "${options.prompt ?? "prompt.md"}"`,
 			'mode = "both"',
 			`route_contract = "${options.routeContract ?? "readonly"}"`,
@@ -85,6 +89,7 @@ export async function writeModelPlan(
 		readonly assignedModel?: string;
 		readonly assignedEffort?: string;
 		readonly defaultPlan?: boolean;
+		readonly extraAssignments?: string;
 	} = {},
 ): Promise<void> {
 	await writeFixtureSurfaceConfigs(root);
@@ -111,6 +116,9 @@ export async function writeModelPlan(
 			`role = "${options.assignedRole ?? "fixture-agent"}"`,
 			`model = "${options.assignedModel ?? options.defaultModel ?? "gpt-5.4"}"`,
 			`effort = "${options.assignedEffort ?? options.effort ?? "medium"}"`,
+			...(options.extraAssignments === undefined
+				? []
+				: ["", options.extraAssignments.trimEnd()]),
 			"",
 		].join("\n"),
 	);
@@ -185,6 +193,7 @@ export async function writeCommand(
 	root: string,
 	options: {
 		readonly arguments?: string;
+		readonly aliases?: string;
 		readonly createSupportFile?: boolean;
 		readonly directory?: string;
 		readonly hookPolicies?: string;
@@ -194,6 +203,7 @@ export async function writeCommand(
 		readonly requiredSkills?: string;
 		readonly sideEffectLevel?: string;
 		readonly supportFile?: string;
+		readonly surfaceOverrides?: string;
 		readonly surfaces?: string;
 	} = {},
 ): Promise<void> {
@@ -235,11 +245,13 @@ export async function writeCommand(
 			'description = "Fixture command."',
 			`owner_role = "${options.ownerRole ?? "fixture-agent"}"`,
 			'route_contract = "readonly"',
+			`aliases = ${options.aliases ?? "[]"}`,
 			'prompt_template = "prompt.md"',
 			`arguments = ${options.arguments ?? '["objective"]'}`,
 			'argument_schema = { objective = "string" }',
 			'invocation = "user"',
 			`side_effect_level = "${options.sideEffectLevel ?? "none"}"`,
+			`surface_overrides = ${options.surfaceOverrides ?? "{}"}`,
 			`hook_policies = ${options.hookPolicies ?? "[]"}`,
 			`required_skills = ${options.requiredSkills ?? "[]"}`,
 			`supporting_files = ${options.supportFile === undefined ? "[]" : `["${options.supportFile}"]`}`,
@@ -258,17 +270,21 @@ export async function writePolicy(
 	root: string,
 	options: {
 		readonly hookEventCategory?: string;
+		readonly id?: string;
+		readonly runtimeScript?: string;
 		readonly surfaceEvents?: string;
 		readonly surfaceMappings?: string;
+		readonly surfaces?: string;
 	} = {},
 ): Promise<void> {
 	await writeFixtureSurfaceConfigs(root);
-	const directory = join(root, "source", "policies", "fixture-policy");
+	const id = options.id ?? "fixture-policy";
+	const directory = join(root, "source", "policies", id);
 	await mkdir(directory, { recursive: true });
 	await writeFile(
 		join(directory, "policy.toml"),
 		[
-			'id = "fixture-policy"',
+			`id = "${id}"`,
 			'kind = "policy"',
 			'title = "Fixture Policy"',
 			'description = "Fixture policy."',
@@ -276,10 +292,15 @@ export async function writePolicy(
 			'severity = "error"',
 			'event_intent = "completion"',
 			`hook_event_category = "${options.hookEventCategory ?? "completion"}"`,
+			...(options.runtimeScript === ""
+				? []
+				: [
+						`runtime_script = "${options.runtimeScript ?? `runtime/${id}.mjs`}"`,
+					]),
 			`surface_events = ${options.surfaceEvents ?? '["Stop"]'}`,
 			"test_payloads = []",
 			"tests = []",
-			'surfaces = ["codex"]',
+			`surfaces = ${options.surfaces ?? '["codex"]'}`,
 			"",
 			`surface_mappings = ${options.surfaceMappings ?? '{ codex = "Stop" }'}`,
 			"",

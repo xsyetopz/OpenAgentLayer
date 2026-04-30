@@ -1,0 +1,23 @@
+id = "design-taste-brutalist"
+kind = "command"
+title = "Design Taste Brutalist"
+description = "Apply brutalist frontend design direction."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste-brutalist"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste Brutalist route"
+invocation = "design-taste-brutalist $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

@@ -1,0 +1,23 @@
+id = "resume"
+kind = "command"
+title = "Resume"
+description = "Recover session context and produce a continuation packet."
+owner_role = "mnemosyne"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["handoff"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Resume route"
+invocation = "resume $ARGUMENTS"
+notes = "Routes requested objective through mnemosyne."

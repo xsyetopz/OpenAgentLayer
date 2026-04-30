@@ -1,0 +1,25 @@
+id = "style"
+kind = "skill"
+title = "Style"
+description = "Detects project code style conventions and injects them as context. Preloaded by @hephaestus."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["style"]
+when_to_use = "Detects project code style conventions and injects them as context. Preloaded by @hephaestus."
+invocation_mode = "manual-or-route"
+user_invocable = false
+allowed_tools = ["read", "search"]
+tool_grants = ["read", "search"]
+route_contract = "readonly"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "style"

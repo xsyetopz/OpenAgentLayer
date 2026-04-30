@@ -1,0 +1,23 @@
+id = "orchestrate"
+kind = "command"
+title = "Orchestrate"
+description = "Coordinate multi-agent work with packet ownership and validation gates."
+owner_role = "odysseus"
+route_contract = "execution-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "validation"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["openagentsbtw"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Orchestrate route"
+invocation = "orchestrate $ARGUMENTS"
+notes = "Routes requested objective through odysseus."

@@ -12,6 +12,12 @@ export const RUNTIME_SCRIPT_FILES = {
 	"secret-path-guard": "secret-path-guard.mjs",
 	"source-drift-guard": "source-drift-guard.mjs",
 	"stale-generated-artifact-guard": "stale-generated-artifact-guard.mjs",
+	"failure-circuit": "failure-circuit.mjs",
+	"prompt-git-context": "prompt-git-context.mjs",
+	"protected-branch-confirm": "protected-branch-confirm.mjs",
+	"staged-secret-guard": "staged-secret-guard.mjs",
+	"subagent-route-context": "subagent-route-context.mjs",
+	"write-quality": "write-quality.mjs",
 } as const satisfies Record<string, string>;
 
 export function renderRuntimeScript(policyId: string): string {

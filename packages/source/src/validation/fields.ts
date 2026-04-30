@@ -80,6 +80,8 @@ const PLACEHOLDER_PHRASES = [
 	"similar to above",
 	"add more as needed",
 ] as const;
+const GENERIC_RECOVERED_COMMAND_PROMPT_PHRASE =
+	"Inspect current repository state and source records before deciding action.";
 const FRONTMATTER_PATTERN = /^---\n[\s\S]*?\n---\n?/u;
 const NUMBERED_LIST_PATTERN = /^\d+\.\s/u;
 const COMMAND_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -171,6 +173,7 @@ function validateSkillRecordFields(
 	}
 
 	validateImportedSkillAttribution(record, diagnostics);
+	validateSkillV3EvidenceMetadata(record, diagnostics);
 	validateSkillBody(record, diagnostics);
 }
 
@@ -179,7 +182,6 @@ function validateImportedSkillAttribution(
 	diagnostics: Diagnostic[],
 ): void {
 	if (
-		record.metadata["origin"] !== "openagentlayer-local" &&
 		record.metadata["origin"] !== "openagentlayer-vendor" &&
 		record.metadata["origin"] !== "openagentlayer-upstream" &&
 		record.upstream === undefined
@@ -205,6 +207,23 @@ function validateImportedSkillAttribution(
 	}
 }
 
+function validateSkillV3EvidenceMetadata(
+	record: Extract<SourceRecord, { readonly kind: "skill" }>,
+	diagnostics: Diagnostic[],
+): void {
+	if (record.metadata["source_package"] !== "v3-evidence") {
+		return;
+	}
+
+	diagnostics.push(
+		errorDiagnostic(
+			"copied-v3-skill-source",
+			`Skill '${record.id}' must be authored as OAL v4 source or imported from third_party; v3_to_be_removed is evidence only.`,
+			record.location.metadataPath,
+		),
+	);
+}
+
 function validateSkillBody(
 	record: Extract<SourceRecord, { readonly kind: "skill" }>,
 	diagnostics: Diagnostic[],
@@ -220,6 +239,7 @@ function validateSkillBody(
 		(line) =>
 			line.startsWith("- ") ||
 			line.startsWith("* ") ||
+			line.startsWith("|") ||
 			NUMBERED_LIST_PATTERN.test(line) ||
 			line.startsWith("## "),
 	);
@@ -269,6 +289,16 @@ function validateCommandRecordFields(
 		);
 	}
 
+	if (record.aliases.length > 0 && hasSurfaceCommandOverrides(record)) {
+		diagnostics.push(
+			errorDiagnostic(
+				"unsupported-command-alias",
+				`Command '${record.id}' declares aliases through surface overrides before provider-native alias rendering is implemented.`,
+				record.location.metadataPath,
+			),
+		);
+	}
+
 	if (record.arguments.length > 0 && !hasArgumentPlaceholder(record)) {
 		diagnostics.push(
 			errorDiagnostic(
@@ -307,6 +337,12 @@ function hasArgumentPlaceholder(
 	);
 }
 
+function hasSurfaceCommandOverrides(
+	record: Extract<SourceRecord, { readonly kind: "command" }>,
+): boolean {
+	return record.surfaces.some((surface) => surface in record.surface_overrides);
+}
+
 function validateCommandBody(
 	record: Extract<SourceRecord, { readonly kind: "command" }>,
 	diagnostics: Diagnostic[],
@@ -341,6 +377,20 @@ function validateCommandBody(
 			errorDiagnostic(
 				"placeholder-command-body",
 				`Command '${record.id}' body contains placeholder text.`,
+				record.location.bodyPath ?? record.location.metadataPath,
+			),
+		);
+	}
+
+	if (
+		record.prompt_template_content.includes(
+			GENERIC_RECOVERED_COMMAND_PROMPT_PHRASE,
+		)
+	) {
+		diagnostics.push(
+			errorDiagnostic(
+				"generic-command-body",
+				`Command '${record.id}' still uses the generic recovered command scaffold instead of capability-specific route guidance.`,
 				record.location.bodyPath ?? record.location.metadataPath,
 			),
 		);
@@ -411,6 +461,7 @@ function validatePolicyRecordFields(
 	}
 
 	validatePolicyHookCategory(record, diagnostics);
+	validatePolicyRuntimeScript(record, diagnostics);
 }
 
 function validatePolicyHookCategory(
@@ -443,6 +494,39 @@ function validatePolicyHookCategory(
 			),
 		);
 	}
+
+	for (const surface of record.surfaces) {
+		if (typeof record.surface_mappings[surface] !== "string") {
+			diagnostics.push(
+				errorDiagnostic(
+					"missing-hook-surface-mapping",
+					`Policy '${record.id}' is emitted for '${surface}' but has no hook surface mapping.`,
+					record.location.metadataPath,
+				),
+			);
+		}
+	}
+}
+
+function validatePolicyRuntimeScript(
+	record: Extract<SourceRecord, { readonly kind: "policy" }>,
+	diagnostics: Diagnostic[],
+): void {
+	if (
+		record.runtime_script !== undefined ||
+		record.handler_class === "prompt_review" ||
+		record.handler_class === "agent_review"
+	) {
+		return;
+	}
+
+	diagnostics.push(
+		errorDiagnostic(
+			"runtime-policy-missing-script",
+			`Policy '${record.id}' uses deterministic hook handling but has no runtime script.`,
+			record.location.metadataPath,
+		),
+	);
 }
 
 function validateRouteContract(

@@ -9,7 +9,7 @@ Sources:
 - `https://code.claude.com/docs/en/settings`
 - `https://www.schemastore.org/claude-code-settings.json`
 
-Retrieval date: 2026-04-29.
+Retrieval date: 2026-04-30.
 
 ## Scope model
 
@@ -196,4 +196,11 @@ OAL model rules:
 - Keep user/local settings for personal model/UI/env values.
 - Generate command hooks from policy records.
 - Generate permission rules from route contracts and policy records.
-- Validate against SchemaStore while accepting that docs may lead schema for new fields.
+- Validate against SchemaStore and source/schemas/upstream/manifest.json provenance while accepting that docs may lead schema for new fields.
+
+## Provenance checkpoint
+
+- Raw schema cache: `source/schemas/upstream/claude-code-settings.schema.json`.
+- Official docs study entry: `claude-code-settings-docs` in `source/schemas/upstream/manifest.json`.
+- Manifest entries: `claude-code-settings-schema` and `claude-code-settings-docs`.
+- Extraction policy: include current project-safe settings only; skip managed-only, user-local-only, old alias, or replacement-only keys unless documented as non-emitted guidance.

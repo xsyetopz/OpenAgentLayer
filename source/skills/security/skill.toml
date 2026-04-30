@@ -1,0 +1,25 @@
+id = "security"
+kind = "skill"
+title = "Security"
+description = "Security audit checklist covering OWASP Top 10, secrets management, dependency vulnerabilities, and hardening. Triggers: security, audit, OWASP, vulnerability, hardening, CVE, secrets, injection, XSS, CSRF, authentication, authorization, penetration test."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["security"]
+when_to_use = "Security audit checklist covering OWASP Top 10, secrets management, dependency vulnerabilities, and hardening. Triggers: security, audit, OWASP, vulnerability, hardening, CVE, secrets, injection, XSS, CSRF, authentication, authorization, penetration test."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search", "edit"]
+tool_grants = ["read", "search", "edit"]
+route_contract = "edit-required"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "security"

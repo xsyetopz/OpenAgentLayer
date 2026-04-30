@@ -198,7 +198,13 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 - [x] Sealed — Map each OAL policy category to current Codex hooks, Claude hooks, and OpenCode plugin events with provider-owned conversion modules.
 - [x] Sealed — Add normalized payload adapters for prompt, session, tool, permission, file, subagent, compaction, stop, and plugin event families.
 - [x] Sealed — Define blocking, warn-only, fail-open, and fail-closed semantics per policy and surface event.
-- [x] Sealed — Validate every policy with synthetic payload tests for every supported event mapping and every generated runtime script.
+
+## Phase 32: provider parity gates
+
+- [x] Sealed — Add provider parity render checks for Codex, Claude, and OpenCode configs so emitted keys stay schema-allowlisted, blocked keys stay absent, and replacement-source keys are not generated.
+- [x] Sealed — Add provider-native artifact checks for Codex agents/plugin skills/hooks, Claude agents/commands/skills/settings, and OpenCode config/plugin/events/runtime paths.
+- [x] Sealed — Add install manifest ownership checks for structured provider configs, marked user instruction blocks, and generated runtime hook files.
+- [x] Sealed — Keep provider parity structural and behavioral; tests do not assert arbitrary agent, command, or skill prose.
 
 ## Phase 25: prompt and instruction architecture
 
@@ -227,19 +233,19 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 
 ## Phase 28: external-source sync studies
 
-- [ ] Queued — Refresh docs for Codex config/schema, hooks, subagents, AGENTS.md, skills, and command behavior with retrieval date and official-source URLs.
-- [ ] Queued — Refresh docs for Claude settings schema, hooks, slash commands, agents, skills, permissions, Max subscription model routing, and current binary name `claude`.
-- [ ] Queued — Refresh docs for OpenCode config, plugins, events, commands, skills, permissions, and provider model routing.
-- [ ] Queued — Extract only non-deprecated, non-legacy, non-compatibility fields into OAL specs and source schemas.
-- [ ] Queued — Enforce no-false-authority rules: no fake schema URLs, no inferred native keys, no stale provider claims, and no copied schema fragments without source provenance.
+- [x] Sealed — Refresh docs for Codex config/schema, hooks, subagents, AGENTS.md, skills, and command behavior with retrieval date and official-source URLs.
+- [x] Sealed — Refresh docs for Claude settings schema, hooks, slash commands, agents, skills, permissions, Max subscription model routing, and current binary name `claude`.
+- [x] Sealed — Refresh docs for OpenCode config, plugins, events, commands, skills, permissions, and provider model routing.
+- [x] Sealed — Extract only non-deprecated, non-legacy, non-compatibility fields into OAL specs and source schemas.
+- [x] Sealed — Enforce no-false-authority rules: no fake schema URLs, no inferred native keys, no stale provider claims, and no copied schema fragments without source provenance.
 
 ## Phase 29: extensiveness validation suite
 
-- [ ] Queued — Add tests for full skill package completeness, command render parity, hook event coverage, prompt-layer coverage, provider config validity, and install manifest support-file tracking.
-- [ ] Queued — Add boundary tests preventing barebones skills, unsupported command aliases, missing support-file installs, missing hook mappings, and prose-only guards where runtime checks are possible.
-- [ ] Queued — Add render smoke fixtures for complex graphs that include many agents, commands, skills, support files, policies, prompt layers, and model-plan variants.
-- [ ] Queued — Add install and doctor checks that managed skills, commands, hooks, runtime scripts, and support files are reversible and drift-detectable.
-- [ ] Queued — Add roadmap/docs/spec consistency audit for new phases so plans, specs, and docs cannot disagree about supported surfaces or source concepts.
+- [x] Sealed — Add tests for full skill package completeness, command render parity, hook event coverage, prompt-layer coverage, provider config validity, and install manifest support-file tracking.
+- [x] Sealed — Add boundary tests preventing barebones skills, unsupported command aliases, missing support-file installs, missing hook mappings, and prose-only guards where runtime checks are possible.
+- [x] Sealed — Add render smoke fixtures for complex graphs that include many agents, commands, skills, support files, policies, prompt layers, and model-plan variants.
+- [x] Sealed — Add install and doctor checks that managed skills, commands, hooks, runtime scripts, and support files are reversible and drift-detectable.
+- [x] Sealed — Add roadmap/docs/spec consistency audit for new phases so plans, specs, and docs cannot disagree about supported surfaces or source concepts.
 
 ## Phase 30: prompt and OAL skill quality
 
@@ -258,6 +264,46 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 - [x] Sealed — Add opt-in headless e2e scripts for Codex, OpenCode, and Claude that run only after binary, model, and auth are proven by a real prompt response.
 - [x] Sealed — Do not add e2e force overrides; unavailable binaries, unavailable models, or missing auth skip with a concrete reason.
 - [x] Sealed — Remove generic OpenAgentLayer mentions from role prompts unless the prompt is specifically about layer mechanics, generated surfaces, skills, commands, or provider invocation.
+
+## Phase 33: runtime policy parity
+
+- [x] Sealed — Export async runtime policy evaluation for policies that need filesystem or manifest IO while preserving the existing sync runtime router.
+- [x] Sealed — Route `source-drift-guard` through async runtime evaluation and keep the sync router explicit about the async-only path.
+- [x] Sealed — Validate every source policy id resolves to a separate runtime script file.
+- [x] Sealed — Validate every source policy surface mapping evaluates through synthetic runtime payloads for Codex, Claude, and OpenCode.
+- [x] Sealed — Validate every generated runtime script emits decision JSON and exits nonzero only for deny decisions.
+
+## Phase 34: fallback removal and shortcut audit
+
+- [x] Sealed — Remove adapter fallback from missing role assignments to role `model_class`, role `effort_ceiling`, or plan defaults; generated agent and command model fields must come from explicit source model-plan assignments or command model policy.
+- [x] Sealed — Report missing model plans and missing per-role model assignments as adapter diagnostics before generated artifacts can be treated as valid.
+- [x] Sealed — Remove hardcoded Codex fallback profile generation; Codex profiles are emitted only from source model-plan records.
+- [x] Sealed — Select OpenCode `default_agent` only from source agent metadata with exactly one OpenCode-capable `primary = true` agent, and emit diagnostics for zero or multiple candidates.
+- [x] Sealed — Keep runtime policy-router misses explicit through `unsupported-runtime-policy` diagnostics instead of generic unknown-policy fallbacks.
+
+## Phase 35: v3 capability recovery gate
+
+- [x] Sealed — Add v3 recovery matrix so command, skill, and hook behavior is tracked as capability evidence rather than legacy compatibility.
+- [x] Sealed — Restore broad shared command coverage for debug, explore, implement, orchestrate, review, test, trace, validate, document, deslop, design-polish, plan variants, resume, audit, and taste/design routes.
+- [x] Sealed — Restore missing v3 skill families for debug, decide, document, elegance, errors, explore, git-workflow, handoff, onboard, openagentsbtw, perf, plain-language, review, security, style, test, and trace.
+- [x] Sealed — Render recovered commands and skills through Codex, Claude, and OpenCode native surfaces with structural tests.
+- [x] Sealed — Recover useful v3 hook behaviors for failure circuits, prompt git context, protected branch confirmation, staged secret scanning, subagent route context, and write-quality checks as source-native runtime policies.
+
+## Phase 36: recovered capability quality gate
+
+- [x] Sealed — Replace scaffold recovered command prompts with route-specific procedures, acceptance gates, and evidence output.
+- [x] Sealed — Convert copied v3 skill metadata and bodies into OAL v4-local skill source while retaining v3 only as evidence.
+- [x] Sealed — Add source validation rejecting generic recovered command prompts and active `v3-evidence` skill source metadata.
+- [x] Sealed — Add runtime parity tests comparing recovered policy router decisions with generated `.mjs` hook scripts.
+- [x] Sealed — Update recovery matrix, specs, and roadmap with quality status and validation evidence.
+
+## Phase 37: native-surface completeness and operational hardening
+
+- [x] Sealed — Add full source-graph render coverage proving every surface-capable agent, command, skill, support file, policy runtime script, and policy metadata artifact renders to each declared native provider surface.
+- [x] Sealed — Extend runtime parity so every source policy compares router decisions with rendered `.mjs` script decisions for representative payloads and deny exit semantics.
+- [x] Sealed — Harden all-surface install tests so every rendered artifact is manifest-owned with source ownership, SHA-256 tracking, runtime script executability, and native install modes.
+- [x] Sealed — Strengthen headless e2e harness prompts so provider probes inspect concrete generated native files, while unit tests cover binary-skip and auth/model probe gating without real provider binaries.
+- [x] Sealed — Keep Phase 37 structural and behavioral: no prompt prose assertions, no generated artifact reliance, no new runner/filter layer, and no active implementation authority from retired snapshots.
 
 ## Done criteria
 

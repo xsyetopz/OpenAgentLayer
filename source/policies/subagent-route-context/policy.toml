@@ -1,0 +1,21 @@
+id = "subagent-route-context"
+kind = "policy"
+title = "Subagent Route Context"
+description = "Attach route context for delegated agent work."
+category = "delegation"
+severity = "info"
+event_intent = "delegation_context"
+hook_event_category = "prompt_submit"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+runtime_script = "runtime/subagent-route-context.mjs"
+surface_events = ["UserPromptSubmit", "tui.prompt.append"]
+test_payloads = []
+tests = ["subagent-route-context.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "UserPromptSubmit"
+claude = "UserPromptSubmit"
+opencode = "tui.prompt.append"

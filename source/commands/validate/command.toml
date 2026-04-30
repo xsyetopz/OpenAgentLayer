@@ -1,0 +1,23 @@
+id = "validate"
+kind = "command"
+title = "Validate"
+description = "Validate source, render, install, runtime, or provider behavior."
+owner_role = "atalanta"
+route_contract = "execution-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "validation"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["test"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Validate route"
+invocation = "validate $ARGUMENTS"
+notes = "Routes requested objective through atalanta."

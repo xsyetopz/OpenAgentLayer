@@ -1,0 +1,23 @@
+id = "implement"
+kind = "command"
+title = "Implement"
+description = "Execute an accepted implementation plan against current repository."
+owner_role = "hephaestus"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["openagentsbtw", "review"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Implement route"
+invocation = "implement $ARGUMENTS"
+notes = "Routes requested objective through hephaestus."

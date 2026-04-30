@@ -1,0 +1,25 @@
+id = "review"
+kind = "skill"
+title = "Review"
+description = "Enforces coding standards, design principles, naming conventions, and anti-patterns when writing, editing, or reviewing code. The single source of truth for code quality rules. Triggers: implement, write code, add function, create module, refactor, edit code, fix bug, review code, check quality, review PR, validate implementation, code review, restructure, extract, rename, move, simplify, decompose, clean up code, reduce complexity, split module."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["review", "audit", "risk"]
+when_to_use = "Enforces coding standards, design principles, naming conventions, and anti-patterns when writing, editing, or reviewing code. The single source of truth for code quality rules. Triggers: implement, write code, add function, create module, refactor, edit code, fix bug, review code, check quality, review PR, validate implementation, code review, restructure, extract, rename, move, simplify, decompose, clean up code, reduce complexity, split module."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search", "edit"]
+tool_grants = ["read", "search", "edit"]
+route_contract = "edit-required"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "review"

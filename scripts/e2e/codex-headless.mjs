@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { join } from "node:path";
 import {
+	providerInspectionPrompt,
 	responseContainsOk,
 	runProcess,
 	runProviderE2E,
@@ -34,7 +35,7 @@ const exitCode = await runProviderE2E({
 				model,
 				output,
 				project,
-				prompt: `Inspect the generated project instruction files without editing them. Respond exactly ${MARKER}`,
+				prompt: providerInspectionPrompt("codex", MARKER),
 			}),
 			cwd: project,
 			timeoutMs: 180_000,

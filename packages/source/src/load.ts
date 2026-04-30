@@ -11,6 +11,7 @@ import { buildGraph } from "./graph-builder";
 import { loadRecord } from "./record-loader";
 import { validateGraphReferences } from "./validate";
 import { validateDocumentation } from "./validate-docs";
+import { validateUpstreamSchemaProvenance } from "./validation/upstream-schemas";
 
 export async function loadSourceGraph(root: string): Promise<LoadResult> {
 	const sourceRoot = resolve(root, "source");
@@ -48,6 +49,7 @@ export async function loadSourceGraph(root: string): Promise<LoadResult> {
 
 	const graph = buildGraph(records);
 	diagnostics.push(...validateGraphReferences(graph));
+	diagnostics.push(...(await validateUpstreamSchemaProvenance(root, graph)));
 
 	if (hasErrors(diagnostics)) {
 		return { diagnostics };

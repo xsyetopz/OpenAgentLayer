@@ -32,7 +32,7 @@ export function renderClaudeRecordArtifacts(
 		case "agent": {
 			const assignment =
 				graph === undefined
-					? { effort: record.effort_ceiling, model: record.model_class }
+					? { effort: undefined, model: undefined }
 					: resolveModelAssignment(
 							graph,
 							CLAUDE_SURFACE,
@@ -47,8 +47,8 @@ export function renderClaudeRecordArtifacts(
 					content: renderMarkdownWithFrontmatter(
 						{
 							description: record.description,
-							effort: assignment.effort ?? record.effort_ceiling,
-							model: assignment.model ?? record.model_class,
+							effort: assignment.effort,
+							model: assignment.model,
 							name: record.id,
 							skills: record.skills,
 							tools: record.permissions,

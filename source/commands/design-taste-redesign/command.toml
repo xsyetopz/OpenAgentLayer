@@ -1,0 +1,23 @@
+id = "design-taste-redesign"
+kind = "command"
+title = "Design Taste Redesign"
+description = "Redesign existing UI with concrete hierarchy and polish changes."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste-redesign"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste Redesign route"
+invocation = "design-taste-redesign $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

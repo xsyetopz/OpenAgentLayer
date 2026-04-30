@@ -46,6 +46,16 @@ Plan records must define:
 
 Every model plan must assign every source agent role. Missing role assignments are validation failures because subagent routing must stay explicit, subscription-aware, and free from hardcoded role assumptions.
 
+Adapters must not synthesize model assignments from role `model_class`,
+role `effort_ceiling`, provider defaults, or profile defaults when a selected
+model plan is missing an assignment. A missing model plan or missing role
+assignment is a diagnostic. Rendered agent and command model fields are valid
+only when they come from:
+
+- the selected surface model plan role assignment;
+- an explicit command `model_policy`;
+- a surface-native profile generated from a source model-plan record.
+
 ## Codex plan rules
 
 All OAL-generated Codex profiles must set:
@@ -183,6 +193,11 @@ Current seed roles:
 - Model routing must be test-covered.
 - Role assignments must validate against known model set per surface.
 - Role records must validate handoff contract presence.
+- Surface adapters must not emit hardcoded fallback profiles or default role
+  models when model-plan source data is incomplete.
+- OpenCode `default_agent` must resolve from exactly one OpenCode-capable
+  source agent with `primary = true`; zero or multiple candidates are
+  diagnostics.
 
 ## Links
 

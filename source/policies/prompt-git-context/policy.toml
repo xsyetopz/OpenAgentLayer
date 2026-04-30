@@ -1,0 +1,21 @@
+id = "prompt-git-context"
+kind = "policy"
+title = "Prompt Git Context"
+description = "Attach branch and dirty-tree context to prompt routes."
+category = "session_context"
+severity = "info"
+event_intent = "prompt_context"
+hook_event_category = "prompt_submit"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+runtime_script = "runtime/prompt-git-context.mjs"
+surface_events = ["UserPromptSubmit", "tui.prompt.append"]
+test_payloads = []
+tests = ["prompt-git-context.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "UserPromptSubmit"
+claude = "UserPromptSubmit"
+opencode = "tui.prompt.append"

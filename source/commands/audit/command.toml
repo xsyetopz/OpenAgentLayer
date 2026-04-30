@@ -1,0 +1,23 @@
+id = "audit"
+kind = "command"
+title = "Audit"
+description = "Inspect implementation for concrete regressions, risk, and missing validation evidence."
+owner_role = "nemesis"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["review"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Audit route"
+invocation = "audit $ARGUMENTS"
+notes = "Routes requested objective through nemesis."

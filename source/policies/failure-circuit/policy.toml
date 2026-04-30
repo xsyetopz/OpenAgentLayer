@@ -1,0 +1,21 @@
+id = "failure-circuit"
+kind = "policy"
+title = "Failure Circuit"
+description = "Warn when repeated tool failures indicate retry-loop risk."
+category = "output_safety"
+severity = "warning"
+event_intent = "failure_recovery"
+hook_event_category = "post_tool"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+runtime_script = "runtime/failure-circuit.mjs"
+surface_events = ["PostToolUse", "tool.execute.after"]
+test_payloads = []
+tests = ["failure-circuit.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PostToolUse"
+claude = "PostToolUse"
+opencode = "tool.execute.after"

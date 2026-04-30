@@ -1,0 +1,23 @@
+id = "oal-trace"
+kind = "command"
+title = "Oal Trace"
+description = "Trace call paths, data flow, ownership, and downstream impact."
+owner_role = "hermes"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["trace"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Trace route"
+invocation = "trace $ARGUMENTS"
+notes = "Routes requested objective through hermes."

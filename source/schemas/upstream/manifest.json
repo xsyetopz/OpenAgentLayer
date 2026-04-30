@@ -1,0 +1,45 @@
+{
+  "retrieval_date": "2026-04-30",
+  "entries": [
+    {
+      "id": "codex-config-schema",
+      "surface": "codex",
+      "path": "source/schemas/upstream/codex-config.schema.json",
+      "source_url": "https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json",
+      "retrieval_date": "2026-04-30",
+      "content_type": "json-schema",
+      "extraction_status": "raw-upstream-cached",
+      "sha256": "17469ef6adc33aab7b183e5786963739da06a590b3baa18526788aee6cbf4f68"
+    },
+    {
+      "id": "claude-code-settings-schema",
+      "surface": "claude",
+      "path": "source/schemas/upstream/claude-code-settings.schema.json",
+      "source_url": "https://www.schemastore.org/claude-code-settings.json",
+      "retrieval_date": "2026-04-30",
+      "content_type": "json-schema",
+      "extraction_status": "raw-upstream-cached",
+      "sha256": "2bd1e77066a74a901c1fd45b93b59b8cffb4089557789fe264a1860f3f928396"
+    },
+    {
+      "id": "claude-code-settings-docs",
+      "surface": "claude",
+      "path": "docs/surface-config/claude-settings-study.md",
+      "source_url": "https://code.claude.com/docs/en/settings",
+      "retrieval_date": "2026-04-30",
+      "content_type": "official-docs-study",
+      "extraction_status": "official-docs-summarized",
+      "sha256": "feefef3b27169c34237fb5105bdd08bc01fd504f63c5e996ea936ca3cf11f1a2"
+    },
+    {
+      "id": "opencode-config-schema",
+      "surface": "opencode",
+      "path": "source/schemas/upstream/opencode-config.schema.json",
+      "source_url": "https://opencode.ai/config.json",
+      "retrieval_date": "2026-04-30",
+      "content_type": "json-schema",
+      "extraction_status": "raw-upstream-cached",
+      "sha256": "49bbf7e035c24b2b73ce9f0f7a8c3ab2e4a8ad16318fd6ba61e49254f2572254"
+    }
+  ]
+}

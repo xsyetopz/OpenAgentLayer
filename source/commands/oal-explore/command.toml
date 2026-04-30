@@ -1,0 +1,23 @@
+id = "oal-explore"
+kind = "command"
+title = "Oal Explore"
+description = "Map repository behavior, architecture, and source evidence."
+owner_role = "hermes"
+route_contract = "readonly"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "none"
+hook_policies = ["completion-gate"]
+required_skills = ["explore"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Explore route"
+invocation = "explore $ARGUMENTS"
+notes = "Routes requested objective through hermes."

@@ -55,8 +55,8 @@ export function renderCodexAgentConfig(
 				.filter((line): line is string => line !== undefined)
 				.join("\n"),
 		),
-		model: assignment.model ?? record.model_class,
-		model_reasoning_effort: assignment.effort ?? record.effort_ceiling,
+		model: assignment.model,
+		model_reasoning_effort: assignment.effort,
 		name: record.id,
 		nickname_candidates: [record.id],
 		sandbox_mode: record.permissions.includes("write")
@@ -116,18 +116,7 @@ function renderCodexConfigObject(graph: SourceGraph) {
 			max_depth: 1,
 			max_threads: 6,
 		},
-		profiles:
-			Object.keys(profiles).length === 0
-				? {
-						openagentlayer: {
-							approval_policy: "on-request",
-							approvals_reviewer: "auto_review",
-							model: "gpt-5.4",
-							model_reasoning_effort: "medium",
-							plan_mode_reasoning_effort: "medium",
-						},
-					}
-				: profiles,
+		profiles,
 	};
 }
 

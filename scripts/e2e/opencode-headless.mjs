@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import {
+	providerInspectionPrompt,
 	responseContainsOk,
 	runProcess,
 	runProviderE2E,
@@ -29,7 +30,7 @@ const exitCode = await runProviderE2E({
 			args: opencodeArgs({
 				model,
 				project,
-				prompt: `Inspect the generated project instruction files without editing them. Respond exactly ${MARKER}`,
+				prompt: providerInspectionPrompt("opencode", MARKER),
 			}),
 			cwd: project,
 			timeoutMs: 180_000,

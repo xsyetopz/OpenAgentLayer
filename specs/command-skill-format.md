@@ -49,6 +49,7 @@ Command rules:
 - Required skills must reference source skill records.
 - Model overrides come from `model_policy`, not inline prompt text.
 - Hook policies attach by policy id.
+- Recovered commands must contain capability-specific route guidance, acceptance gates, and evidence output. They must not reuse generic scaffold prose from recovery work.
 
 ## Skill source layout
 
@@ -98,6 +99,7 @@ Imported skill rules:
 - Imported skill bodies must preserve full procedural depth from the source skill. OAL metadata may add routing, tool policy, support-file lists, and surface-native frontmatter, but must not compress the body into a summary.
 - Support files from imported skills remain support files. `openai.yaml`, scripts, references, and assets must render under the native skill directory with source-relative paths.
 - Caveman-family skills are response-style skills only. Taste-family skills are frontend/UI/design execution skills only.
+- Retired implementation snapshots are evidence only. First-party OAL skills must be authored as OAL v4-local source; third-party skills must be sourced through `third_party/` upstream sync records. No active skill may cite `v3-evidence` as its source package.
 
 ## Rendering rules
 

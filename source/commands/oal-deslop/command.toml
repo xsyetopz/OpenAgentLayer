@@ -1,0 +1,23 @@
+id = "oal-deslop"
+kind = "command"
+title = "Oal Deslop"
+description = "Remove AI slop from prose, docs, prompts, comments, or text artifacts."
+owner_role = "calliope"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["deslop"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Oal Deslop route"
+invocation = "deslop $ARGUMENTS"
+notes = "Routes requested objective through calliope."

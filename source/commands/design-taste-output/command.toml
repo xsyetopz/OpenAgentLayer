@@ -1,0 +1,23 @@
+id = "design-taste-output"
+kind = "command"
+title = "Design Taste Output"
+description = "Enforce complete frontend output without skipped implementation."
+owner_role = "aphrodite"
+route_contract = "edit-required"
+aliases = []
+prompt_template = "prompt.md"
+arguments = ["objective"]
+invocation = "user"
+side_effect_level = "repo-edit"
+hook_policies = ["completion-gate", "placeholder-prototype-guard", "diff-state-gate"]
+required_skills = ["taste-output"]
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Design Taste Output route"
+invocation = "design-taste-output $ARGUMENTS"
+notes = "Routes requested objective through aphrodite."

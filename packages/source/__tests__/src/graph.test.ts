@@ -16,7 +16,14 @@ describe("OAL source graph", () => {
 				"agent:morpheus",
 				"agent:prometheus",
 				"agent:proteus",
+				"command:implement",
+				"command:oal-debug",
+				"command:oal-explore",
+				"command:oal-review",
+				"command:oal-test",
+				"command:oal-trace",
 				"command:plan",
+				"command:validate",
 				"guidance:core",
 				"model-plan:claude-max-20",
 				"model-plan:claude-max-5",
@@ -25,17 +32,29 @@ describe("OAL source graph", () => {
 				"model-plan:codex-pro-5",
 				"policy:completion-gate",
 				"policy:destructive-command-guard",
+				"policy:failure-circuit",
 				"policy:prompt-context-injection",
+				"policy:prompt-git-context",
+				"policy:protected-branch-confirm",
+				"policy:staged-secret-guard",
+				"policy:subagent-route-context",
+				"policy:write-quality",
 				"surface-config:claude-surface-config",
 				"surface-config:codex-surface-config",
 				"surface-config:opencode-surface-config",
 				"skill:caveman",
+				"skill:debug",
+				"skill:explore",
+				"skill:openagentsbtw",
 				"skill:review-policy",
+				"skill:trace",
 				"skill:taste",
 			]),
 		);
 		expect(result.graph?.agents).toHaveLength(25);
-		expect(result.graph?.skills).toHaveLength(15);
+		expect(result.graph?.commands).toHaveLength(26);
+		expect(result.graph?.policies).toHaveLength(17);
+		expect(result.graph?.skills).toHaveLength(35);
 		expect(result.graph?.modelPlans).toHaveLength(5);
 		expect(result.graph?.surfaceConfigs).toHaveLength(3);
 		expect(
@@ -46,8 +65,9 @@ describe("OAL source graph", () => {
 			result.graph?.skills.find((record) => record.id === "review-policy")
 				?.metadata,
 		).toMatchObject({ quality_gate: "warranted-review" });
-		expect(result.graph?.commands[0]?.prompt_template_content).toContain(
-			"# Plan",
-		);
+		expect(
+			result.graph?.commands.find((record) => record.id === "plan")
+				?.prompt_template_content,
+		).toContain("# Plan");
 	});
 });

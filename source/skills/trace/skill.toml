@@ -1,0 +1,25 @@
+id = "trace"
+kind = "skill"
+title = "Trace"
+description = "Structured tracing workflow for dependencies, call paths, data flow, and change impact analysis. Triggers: trace, dependency trace, call graph, data flow, impact analysis, who uses this, what depends on this, downstream effects, upstream callers, symbol trace."
+body = "SKILL.md"
+license = "MIT"
+compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
+triggers = ["trace"]
+when_to_use = "Structured tracing workflow for dependencies, call paths, data flow, and change impact analysis. Triggers: trace, dependency trace, call graph, data flow, impact analysis, who uses this, what depends on this, downstream effects, upstream callers, symbol trace."
+invocation_mode = "manual-or-route"
+user_invocable = true
+allowed_tools = ["read", "search"]
+tool_grants = ["read", "search"]
+route_contract = "readonly"
+references = []
+scripts = []
+assets = []
+supporting_files = []
+surfaces = ["codex", "claude", "opencode"]
+
+[metadata]
+origin = "openagentlayer-local"
+source_package = "openagentlayer"
+skill_category = "oal-core"
+upstream_name = "trace"
