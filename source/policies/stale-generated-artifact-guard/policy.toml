@@ -1,0 +1,21 @@
+id = "stale-generated-artifact-guard"
+kind = "policy"
+title = "Stale Generated Artifact Guard"
+description = "Block stale generated artifacts reported by render or install metadata."
+category = "drift_guard"
+severity = "error"
+event_intent = "generated_artifact_drift"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+matcher = "generated_artifact"
+runtime_script = "runtime/stale-generated-artifact-guard.mjs"
+surface_events = ["PostToolUse", "FileChanged", "session.status"]
+test_payloads = ["stale-generated-artifact-guard/basic.json"]
+tests = ["stale-generated-artifact-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PostToolUse"
+claude = "FileChanged"
+opencode = "session.status"

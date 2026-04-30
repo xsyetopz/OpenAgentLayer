@@ -1,0 +1,21 @@
+id = "rtk-enforcement-guard"
+kind = "policy"
+title = "RTK Enforcement Guard"
+description = "Require RTK wrapper for supported shell commands."
+category = "execution_guard"
+severity = "error"
+event_intent = "tool_execution"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+matcher = "shell_command"
+runtime_script = "runtime/rtk-enforcement-guard.mjs"
+surface_events = ["PreToolUse", "tool.execute.before"]
+test_payloads = ["rtk-enforcement-guard/basic.json"]
+tests = ["rtk-enforcement-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PreToolUse"
+claude = "PreToolUse"
+opencode = "tool.execute.before"

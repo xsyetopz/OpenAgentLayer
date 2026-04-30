@@ -61,6 +61,10 @@ export function validateRecordFields(
 	if (record.kind === "skill") {
 		validateSkillRecordFields(record, diagnostics);
 	}
+
+	if (record.kind === "command") {
+		validateCommandRecordFields(record, diagnostics);
+	}
 }
 
 const AGENT_SKILL_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -71,6 +75,8 @@ const PLACEHOLDER_BODY_PATTERN =
 	/(^|\n)\s*(TODO|FIXME|\.\.\.|…)\s*($|\n)|rest follows|similar to above|add more as needed/iu;
 const FRONTMATTER_PATTERN = /^---\n[\s\S]*?\n---\n?/u;
 const NUMBERED_LIST_PATTERN = /^\d+\.\s/u;
+const COMMAND_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+const ARGUMENT_PLACEHOLDER_PATTERN = /\$ARGUMENTS|\$\d+/u;
 
 function validateSkillRecordFields(
 	record: Extract<SourceRecord, { readonly kind: "skill" }>,
@@ -159,6 +165,108 @@ function validateSkillBody(
 			errorDiagnostic(
 				"placeholder-skill-body",
 				`Skill '${record.id}' body contains placeholder text.`,
+				record.location.bodyPath ?? record.location.metadataPath,
+			),
+		);
+	}
+}
+
+function validateCommandRecordFields(
+	record: Extract<SourceRecord, { readonly kind: "command" }>,
+	diagnostics: Diagnostic[],
+): void {
+	if (!COMMAND_ID_PATTERN.test(record.id)) {
+		diagnostics.push(
+			errorDiagnostic(
+				"invalid-command-id",
+				`Command id '${record.id}' must be lowercase kebab-case.`,
+				record.location.metadataPath,
+			),
+		);
+	}
+
+	if (basename(record.location.directory) !== record.id) {
+		diagnostics.push(
+			errorDiagnostic(
+				"command-directory-mismatch",
+				`Command directory name must match command id '${record.id}'.`,
+				record.location.metadataPath,
+			),
+		);
+	}
+
+	if (record.arguments.length > 0 && !hasArgumentPlaceholder(record)) {
+		diagnostics.push(
+			errorDiagnostic(
+				"unused-command-arguments",
+				`Command '${record.id}' declares arguments but does not use $ARGUMENTS or positional placeholders.`,
+				record.location.bodyPath ?? record.location.metadataPath,
+			),
+		);
+	}
+
+	if (
+		record.side_effect_level !== undefined &&
+		record.side_effect_level !== "none" &&
+		record.hook_policies.length === 0
+	) {
+		diagnostics.push(
+			errorDiagnostic(
+				"side-effect-command-missing-hook",
+				`Command '${record.id}' has side effects but no hook policies.`,
+				record.location.metadataPath,
+			),
+		);
+	}
+
+	validateCommandBody(record, diagnostics);
+}
+
+function hasArgumentPlaceholder(
+	record: Extract<SourceRecord, { readonly kind: "command" }>,
+): boolean {
+	return (
+		ARGUMENT_PLACEHOLDER_PATTERN.test(record.prompt_template_content) ||
+		record.arguments.some((argument) =>
+			record.prompt_template_content.includes(`$${argument}`),
+		)
+	);
+}
+
+function validateCommandBody(
+	record: Extract<SourceRecord, { readonly kind: "command" }>,
+	diagnostics: Diagnostic[],
+): void {
+	const bodyWithoutFrontmatter = record.prompt_template_content
+		.replace(FRONTMATTER_PATTERN, "")
+		.trim();
+	const bodyLines = bodyWithoutFrontmatter
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0 && !line.startsWith("#"));
+	const hasProceduralStructure = bodyLines.some(
+		(line) =>
+			line.startsWith("- ") ||
+			line.startsWith("* ") ||
+			NUMBERED_LIST_PATTERN.test(line) ||
+			line.startsWith("## "),
+	);
+
+	if (bodyLines.length < 2 || !hasProceduralStructure) {
+		diagnostics.push(
+			errorDiagnostic(
+				"barebones-command-body",
+				`Command '${record.id}' must include procedural route guidance beyond a heading or one-line summary.`,
+				record.location.bodyPath ?? record.location.metadataPath,
+			),
+		);
+	}
+
+	if (PLACEHOLDER_BODY_PATTERN.test(record.prompt_template_content)) {
+		diagnostics.push(
+			errorDiagnostic(
+				"placeholder-command-body",
+				`Command '${record.id}' body contains placeholder text.`,
 				record.location.bodyPath ?? record.location.metadataPath,
 			),
 		);

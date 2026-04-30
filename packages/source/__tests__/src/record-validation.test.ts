@@ -222,6 +222,132 @@ describe("OAL source record validation", () => {
 		);
 	});
 
+	test("loads rich command metadata and support files", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		await writeCommand(root, {
+			requiredSkills: '["fixture-skill"]',
+			supportFile: "references/command.md",
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(result.diagnostics).toEqual([]);
+		expect(result.graph?.commands[0]).toMatchObject({
+			argument_schema: { objective: "string" },
+			examples: [
+				{
+					invocation: "fixture-command demo",
+					notes: "Exercises command metadata.",
+					title: "Fixture route",
+				},
+			],
+			required_skills: ["fixture-skill"],
+			support_files: [
+				{
+					content: "support\n",
+					path: "references/command.md",
+				},
+			],
+		});
+	});
+
+	test("fails invalid command id", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, { directory: "commands/bad", id: "Bad_Command" });
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-command-id",
+		);
+	});
+
+	test("fails command directory mismatch", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, {
+			directory: "commands/different-command",
+			id: "fixture-command",
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"command-directory-mismatch",
+		);
+	});
+
+	test("fails missing and escaping command support files", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, {
+			createSupportFile: false,
+			supportFile: "missing.md",
+		});
+		await writeCommand(root, {
+			directory: "commands/escaping-command",
+			id: "escaping-command",
+			supportFile: "../escape.md",
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"missing-command-support-file",
+		);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-command-support-file",
+		);
+	});
+
+	test("fails unknown required command skill", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, { requiredSkills: '["missing-skill"]' });
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"unknown-required-skill",
+		);
+	});
+
+	test("fails side-effect command without hook policy", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, { sideEffectLevel: "write" });
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"side-effect-command-missing-hook",
+		);
+	});
+
+	test("fails command arguments without placeholders", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeCommand(root, {
+			promptBody:
+				"# Command\n\nRoute through fixture agent.\n\n## Procedure\n\n- Return evidence.\n",
+		});
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"unused-command-arguments",
+		);
+	});
+
 	test("fails invalid policy field types", async () => {
 		const root = await createFixtureRoot();
 		await writePolicy(root, {

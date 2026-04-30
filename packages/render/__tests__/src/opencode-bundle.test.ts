@@ -4,6 +4,7 @@ import { loadSourceGraph } from "@openagentlayer/source";
 import {
 	createFixtureRoot,
 	writeAgent,
+	writeCommand,
 	writeSkill,
 } from "@openagentlayer/testkit";
 import {
@@ -30,6 +31,7 @@ describe("OAL OpenCode bundle rendering", () => {
 				".opencode/openagentlayer/policies/completion-gate.json",
 				".opencode/openagentlayer/policies/destructive-command-guard.json",
 				".opencode/openagentlayer/policies/prompt-context-injection.json",
+				".opencode/openagentlayer/policies/secret-path-guard.json",
 				".opencode/openagentlayer/runtime/completion-gate.mjs",
 				".opencode/openagentlayer/runtime/destructive-command-guard.mjs",
 				".opencode/openagentlayer/runtime/prompt-context-injection.mjs",
@@ -41,6 +43,8 @@ describe("OAL OpenCode bundle rendering", () => {
 		expect(bundle.diagnostics).toEqual([]);
 		expect(plugin).toContain("destructive-command-guard");
 		expect(plugin).toContain("tui.prompt.append");
+		expect(plugin).toContain("permission.asked");
+		expect(plugin).toContain("secret-path-guard");
 		expect(plugin).toContain("OpenAgentLayerPlugin");
 		expect(config).toContain('"model": "gpt-5.4"');
 		expect(() => JSON.parse(config ?? "")).not.toThrow();
@@ -81,5 +85,36 @@ describe("OAL OpenCode bundle rendering", () => {
 		expect(skill).toContain('license: "MIT"');
 		expect(skill).not.toContain("disable-model-invocation");
 		expect(skill).not.toContain("user-invocable");
+	});
+
+	test("renders command config and markdown from fixture source", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root, { surfaces: '["opencode"]' });
+		await writeSkill(root, { surfaces: '["opencode"]' });
+		await writeCommand(root, {
+			requiredSkills: '["fixture-skill"]',
+			supportFile: "references/command.md",
+			surfaces: '["opencode"]',
+		});
+		const result = await loadSourceGraph(root);
+		if (result.graph === undefined) {
+			throw new Error("Expected fixture graph.");
+		}
+		const bundle = createAdapterRegistry().renderSurfaceBundle(
+			result.graph,
+			"opencode",
+		);
+		const config = artifactContent(bundle, "opencode.json");
+		const command = artifactContent(
+			bundle,
+			".opencode/commands/fixture-command.md",
+		);
+
+		expect(config).toContain('"fixture-command"');
+		expect(command).toContain("$ARGUMENTS");
+		expect(command).toContain("Required skills: fixture-skill");
+		expect(artifactPaths(bundle)).toContain(
+			".opencode/commands/fixture-command/references/command.md",
+		);
 	});
 });

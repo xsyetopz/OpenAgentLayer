@@ -81,12 +81,27 @@ export interface CommandRecord extends BaseRecord {
 	readonly prompt_template: string;
 	readonly prompt_template_content: string;
 	readonly arguments: readonly string[];
+	readonly argument_schema: UnknownMap;
 	readonly invocation: string | undefined;
 	readonly side_effect_level: string | undefined;
 	readonly surface_overrides: UnknownMap;
 	readonly model_policy: ModelId | undefined;
 	readonly hook_policies: readonly string[];
+	readonly required_skills: readonly string[];
+	readonly examples: readonly CommandExample[];
+	readonly support_files: readonly CommandSupportFile[];
 	readonly supporting_files: readonly string[];
+}
+
+export interface CommandExample {
+	readonly title: string;
+	readonly invocation: string;
+	readonly notes: string | undefined;
+}
+
+export interface CommandSupportFile {
+	readonly path: string;
+	readonly content: string;
 }
 
 export interface PolicyRecord extends BaseRecord {

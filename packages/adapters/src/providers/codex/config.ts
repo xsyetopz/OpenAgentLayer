@@ -3,7 +3,7 @@ import type {
 	PolicyRecord,
 	SourceGraph,
 } from "@openagentlayer/types";
-import { renderTomlDocument } from "../../shared";
+import { renderTomlDocument, tomlMultilineString } from "../../shared";
 import { CODEX_ARTIFACT_ROOT, CODEX_SURFACE } from "./constants";
 
 export function renderCodexConfig(graph: SourceGraph): string {
@@ -25,16 +25,18 @@ export function renderCodexAgentConfig(
 ): string {
 	return renderTomlDocument({
 		description: record.description,
-		developer_instructions: [
-			record.prompt_content.trimEnd(),
-			"",
-			`OAL role: ${record.role}.`,
-			record.route_contract === undefined
-				? undefined
-				: `Route contract: ${record.route_contract}.`,
-		]
-			.filter((line): line is string => line !== undefined)
-			.join("\n"),
+		developer_instructions: tomlMultilineString(
+			[
+				record.prompt_content.trimEnd(),
+				"",
+				`OAL role: ${record.role}.`,
+				record.route_contract === undefined
+					? undefined
+					: `Route contract: ${record.route_contract}.`,
+			]
+				.filter((line): line is string => line !== undefined)
+				.join("\n"),
+		),
 		model: assignment.model ?? record.model_class,
 		model_reasoning_effort: assignment.effort ?? record.effort_ceiling,
 		name: record.id,
@@ -124,7 +126,7 @@ function renderCodexHook(record: PolicyRecord): string {
 		`command = ${JSON.stringify(`bun ${runtimePath}`)}`,
 		"timeout = 10",
 		"async = false",
-		`statusMessage = ${JSON.stringify(`checking ${record.id}`)}`,
+		`statusMessage = ${JSON.stringify(`checking ${record.id}...`)}`,
 		"",
 	].join("\n");
 }

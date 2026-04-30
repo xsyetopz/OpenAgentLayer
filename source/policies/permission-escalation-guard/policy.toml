@@ -1,0 +1,21 @@
+id = "permission-escalation-guard"
+kind = "policy"
+title = "Permission Escalation Guard"
+description = "Require justification and risk metadata for permission escalation requests."
+category = "delegation"
+severity = "error"
+event_intent = "permission_request"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+matcher = "permission_request"
+runtime_script = "runtime/permission-escalation-guard.mjs"
+surface_events = ["PermissionRequest", "permission.asked"]
+test_payloads = ["permission-escalation-guard/basic.json"]
+tests = ["permission-escalation-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PermissionRequest"
+claude = "PermissionRequest"
+opencode = "permission.asked"

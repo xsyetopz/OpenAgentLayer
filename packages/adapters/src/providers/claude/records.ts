@@ -16,6 +16,10 @@ import {
 	renderSkillSupportArtifacts,
 	resolveModelAssignment,
 } from "../../shared";
+import {
+	renderCommandMetadata,
+	renderCommandSupportArtifacts,
+} from "../../shared/commands";
 import { CLAUDE_ARTIFACT_ROOT, CLAUDE_SURFACE } from "./constants";
 
 export function renderClaudeRecordArtifacts(
@@ -78,7 +82,14 @@ export function renderClaudeRecordArtifacts(
 				),
 			];
 		case "command":
-			return [renderClaudeCommandSkill(record, graph, context)];
+			return [
+				renderClaudeCommandSkill(record, graph, context),
+				...renderCommandSupportArtifacts(
+					record,
+					CLAUDE_SURFACE,
+					`.claude/commands/${record.id}`,
+				),
+			];
 		case "policy":
 			return [
 				{
@@ -136,19 +147,18 @@ function renderClaudeCommandSkill(
 	return {
 		surface: CLAUDE_SURFACE,
 		kind: "command",
-		path: `.claude/skills/command-${record.id}/SKILL.md`,
+		path: `.claude/commands/${record.id}.md`,
 		content: renderMarkdownWithFrontmatter(
 			{
 				"argument-hint": record.arguments.join(" "),
-				arguments: record.arguments,
-				context: "fork",
+				"allowed-tools": record.required_skills,
 				description: record.description,
-				name: `command-${record.id}`,
-				"user-invocable": true,
-				agent: record.owner_role,
 				model: record.model_policy ?? assignment.model,
 			},
-			record.prompt_template_content,
+			[
+				record.prompt_template_content.trimEnd(),
+				renderCommandMetadata(record),
+			].join("\n"),
 		),
 		sourceRecordIds: [record.id],
 	};

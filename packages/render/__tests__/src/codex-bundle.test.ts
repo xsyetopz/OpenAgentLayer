@@ -80,7 +80,8 @@ describe("OAL Codex bundle rendering", () => {
 		expect(codexPlugin).not.toContain("openagentsbtw");
 		expect(codexPlusAthena).toContain('model = "gpt-5.4"');
 		expect(codexPlusAthena).toContain('name = "athena"');
-		expect(codexPlusAthena).toContain("developer_instructions = ");
+		expect(codexPlusAthena).toContain('developer_instructions = """');
+		expect(codexPlusAthena).not.toContain("\\nOAL role");
 		expect(() => Bun.TOML.parse(codexPlusAthena ?? "")).not.toThrow();
 		expect(codexProAthena).toContain('model = "gpt-5.5"');
 		expect(artifactContent(bundle, "AGENTS.md")).toContain(

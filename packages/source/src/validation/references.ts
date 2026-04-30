@@ -46,6 +46,18 @@ export function validateGraphReferences(
 				);
 			}
 		}
+
+		for (const skillId of record.required_skills) {
+			if (!skillIds.has(skillId)) {
+				diagnostics.push(
+					errorDiagnostic(
+						"unknown-required-skill",
+						`Command '${record.id}' references unknown required skill '${skillId}'.`,
+						record.location.metadataPath,
+					),
+				);
+			}
+		}
 	}
 
 	validateModelPlanReferences(graph, diagnostics, agentIds);

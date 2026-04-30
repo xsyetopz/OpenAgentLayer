@@ -18,7 +18,7 @@ export function renderClaudeSettings(
 				hooks: [
 					{
 						command: `bun ${CLAUDE_ARTIFACT_ROOT}/${record.runtime_script ?? `runtime/${record.id}.mjs`}`,
-						statusMessage: `checking ${record.id}`,
+						statusMessage: `checking ${record.id}...`,
 						timeout: 10,
 						type: "command",
 					},

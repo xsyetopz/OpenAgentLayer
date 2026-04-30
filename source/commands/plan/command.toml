@@ -11,6 +11,14 @@ invocation = "user"
 side_effect_level = "none"
 model_policy = "gpt-5.5"
 hook_policies = ["completion-gate"]
+required_skills = ["review-policy"]
 supporting_files = []
 surfaces = ["codex", "claude", "opencode"]
 
+[argument_schema]
+objective = "string"
+
+[[examples]]
+title = "Plan implementation"
+invocation = "plan implement command routing"
+notes = "Returns a decision-complete route plan."

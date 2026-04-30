@@ -4,8 +4,18 @@ export interface TomlValueMap {
 		| boolean
 		| number
 		| readonly string[]
+		| TomlMultilineString
 		| TomlValueMap
 		| undefined;
+}
+
+export interface TomlMultilineString {
+	readonly kind: "multiline-string";
+	readonly content: string;
+}
+
+export function tomlMultilineString(content: string): TomlMultilineString {
+	return { content, kind: "multiline-string" };
 }
 
 export function renderTomlDocument(input: TomlValueMap): string {
@@ -35,10 +45,13 @@ function renderTomlEntries(input: TomlValueMap, prefix = ""): string[] {
 }
 
 function renderTomlValue(
-	value: string | boolean | number | readonly string[],
+	value: string | boolean | number | readonly string[] | TomlMultilineString,
 ): string {
 	if (Array.isArray(value)) {
 		return `[${value.map((entry) => JSON.stringify(entry)).join(", ")}]`;
+	}
+	if (isTomlMultilineString(value)) {
+		return `"""${value.content.replaceAll('"""', '\\"\\"\\"')}"""`;
 	}
 	if (typeof value === "string") {
 		return JSON.stringify(value);
@@ -47,5 +60,19 @@ function renderTomlValue(
 }
 
 function isTomlTable(value: unknown): value is TomlValueMap {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		!Array.isArray(value) &&
+		!isTomlMultilineString(value)
+	);
+}
+
+function isTomlMultilineString(value: unknown): value is TomlMultilineString {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"kind" in value &&
+		value.kind === "multiline-string"
+	);
 }

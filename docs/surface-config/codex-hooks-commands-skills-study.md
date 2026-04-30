@@ -8,6 +8,8 @@ Sources:
 
 - `https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json`
 - `https://openai.com/academy/codex-plugins-and-skills/`
+- `https://developers.openai.com/codex/config-advanced`
+- `https://developers.openai.com/codex/subagents`
 
 Retrieval date: 2026-04-29.
 
@@ -37,7 +39,7 @@ type = "command"
 command = "~/.codex/openagentlayer/hooks/destructive-command.mjs"
 timeout = 10
 async = false
-statusMessage = "checking command policy"
+statusMessage = "checking command policy..."
 ```
 
 Handler types:
@@ -56,15 +58,15 @@ OAL render rules:
 
 ## OAL event mapping
 
-| OAL policy category | Codex event | Default handler | Notes |
-| ------------------- | ----------- | --------------- | ----- |
-| `session_context` | `SessionStart` | `command` | Verify profile, runtime paths, project docs. |
-| `input_guard` | `UserPromptSubmit` | `command` | Inject OAL route context and prompt policy. |
-| `execution_guard` | `PreToolUse` | `command` | Destructive shell, RTK, secret read, network policy. |
-| `output_safety` | `PostToolUse` | `command` | Generated drift and artifact checks. |
-| `completion_gate` | `Stop` | `command` or `agent` | Validation and acceptance gate. |
-| `delegation` | `PermissionRequest` | `command` or `agent` | Approval summary and risk classification. |
-| `vcs_gate` | `PreToolUse`, `PostToolUse`, `Stop` | `command` | Git command guard, diff-state checks, final VCS gate. |
+| OAL policy category | Codex event                         | Default handler      | Notes                                                 |
+| ------------------- | ----------------------------------- | -------------------- | ----------------------------------------------------- |
+| `session_context`   | `SessionStart`                      | `command`            | Verify profile, runtime paths, project docs.          |
+| `input_guard`       | `UserPromptSubmit`                  | `command`            | Inject OAL route context and prompt policy.           |
+| `execution_guard`   | `PreToolUse`                        | `command`            | Destructive shell, RTK, secret read, network policy.  |
+| `output_safety`     | `PostToolUse`                       | `command`            | Generated drift and artifact checks.                  |
+| `completion_gate`   | `Stop`                              | `command` or `agent` | Validation and acceptance gate.                       |
+| `delegation`        | `PermissionRequest`                 | `command` or `agent` | Approval summary and risk classification.             |
+| `vcs_gate`          | `PreToolUse`, `PostToolUse`, `Stop` | `command`            | Git command guard, diff-state checks, final VCS gate. |
 
 ## Command support
 
@@ -73,8 +75,8 @@ Codex Academy describes skill invocation with `$skill-name` in a thread. Current
 OAL decision:
 
 - Render OAL command records to Codex skills.
-- Command aliases become skill trigger text and generated route examples.
-- Command arguments render as argument prose in `SKILL.md`; Codex-specific runtime may parse the first prompt line when a route needs structured args.
+- Command aliases become generated route examples, not legacy compatibility aliases.
+- Command arguments render as argument prose and preserved placeholders in `SKILL.md`; OAL does not invent unsupported Codex command files.
 - Built-in Codex routes such as review remain surface-owned; OAL references them only when the route contract explicitly calls for native behavior.
 
 ## Skill support
@@ -152,3 +154,4 @@ OAL should not emit:
 - [x] Sealed — Codex hook handler types captured.
 - [x] Sealed — Codex commands mapped to skills/plugin route prompts.
 - [x] Sealed — Codex skill/plugin file target documented.
+- [x] Sealed — Phase 24 policy catalog maps deterministic guards to current hook events without fake provider keys.

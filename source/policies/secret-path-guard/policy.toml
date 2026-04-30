@@ -1,0 +1,21 @@
+id = "secret-path-guard"
+kind = "policy"
+title = "Secret Path Guard"
+description = "Block tool or shell access to secret-bearing paths."
+category = "execution_guard"
+severity = "error"
+event_intent = "tool_execution"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+matcher = "secret_path"
+runtime_script = "runtime/secret-path-guard.mjs"
+surface_events = ["PreToolUse", "tool.execute.before"]
+test_payloads = ["secret-path-guard/basic.json"]
+tests = ["secret-path-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PreToolUse"
+claude = "PreToolUse"
+opencode = "tool.execute.before"

@@ -110,7 +110,19 @@ Rendered runtime scripts are self-contained `.mjs` files. They read normalized J
 - prompt/context injection guard;
 - generated drift guard;
 - secret path guard;
-- placeholder/prototype guard for gated routes.
+- stale generated artifact guard;
+- placeholder/prototype guard for inspectable generated output;
+- diff-state gate;
+- context-budget guard;
+- permission-escalation guard.
+
+## Phase 24 policy semantics
+
+- `fail_closed` deterministic guards exit non-zero on `deny`.
+- `warn_only` guards emit `warn` decisions and must not block unless route metadata explicitly requires blocking.
+- `context_budget` guards emit `context` decisions with `prompt_append` guidance.
+- Missing optional payload context must not crash runtime scripts.
+- Provider adapters render policy records only from source policy metadata and do not invent provider config keys.
 
 ## Links
 

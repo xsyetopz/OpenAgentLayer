@@ -1,0 +1,21 @@
+id = "diff-state-gate"
+kind = "policy"
+title = "Diff State Gate"
+description = "Report dirty working tree state at completion and block only when route requires a clean tree."
+category = "vcs_gate"
+severity = "warn"
+event_intent = "completion"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+matcher = "diff_state"
+runtime_script = "runtime/diff-state-gate.mjs"
+surface_events = ["Stop", "session.status"]
+test_payloads = ["diff-state-gate/basic.json"]
+tests = ["diff-state-gate.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "Stop"
+claude = "Stop"
+opencode = "session.status"

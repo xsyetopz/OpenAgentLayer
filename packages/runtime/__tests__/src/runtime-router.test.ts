@@ -25,10 +25,56 @@ describe("OAL runtime policy router", () => {
 				surface: "opencode",
 				toolInput: { cmd: "bun test ./packages" },
 			}),
+			createSyntheticHookPayload({
+				event: "PreToolUse",
+				policyId: "secret-path-guard",
+				surface: "codex",
+			}),
+			createSyntheticHookPayload({
+				event: "PostToolUse",
+				policyId: "placeholder-prototype-guard",
+				surface: "claude",
+			}),
+			createSyntheticHookPayload({
+				event: "PreToolUse",
+				policyId: "rtk-enforcement-guard",
+				surface: "codex",
+			}),
+			createSyntheticHookPayload({
+				event: "Stop",
+				policyId: "diff-state-gate",
+				surface: "codex",
+			}),
+			createSyntheticHookPayload({
+				event: "PostCompact",
+				policyId: "context-budget-guard",
+				surface: "claude",
+			}),
+			createSyntheticHookPayload({
+				event: "tool.execute.before",
+				policyId: "permission-escalation-guard",
+				surface: "opencode",
+			}),
+			createSyntheticHookPayload({
+				event: "session.status",
+				policyId: "stale-generated-artifact-guard",
+				surface: "opencode",
+			}),
 		];
 
 		expect(
 			cases.map((payload) => evaluateRuntimePolicy(payload).decision),
-		).toEqual(["allow", "allow", "allow"]);
+		).toEqual([
+			"allow",
+			"allow",
+			"allow",
+			"allow",
+			"allow",
+			"allow",
+			"allow",
+			"context",
+			"allow",
+			"allow",
+		]);
 	});
 });

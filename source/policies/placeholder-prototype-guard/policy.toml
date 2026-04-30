@@ -1,0 +1,21 @@
+id = "placeholder-prototype-guard"
+kind = "policy"
+title = "Placeholder Prototype Guard"
+description = "Block placeholder or prototype text in generated output when content is inspectable."
+category = "output_safety"
+severity = "error"
+event_intent = "post_tool_output"
+blocking = true
+failure_mode = "fail_closed"
+handler_class = "command_script"
+matcher = "generated_content"
+runtime_script = "runtime/placeholder-prototype-guard.mjs"
+surface_events = ["PostToolUse", "tool.execute.after"]
+test_payloads = ["placeholder-prototype-guard/basic.json"]
+tests = ["placeholder-prototype-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "PostToolUse"
+claude = "PostToolUse"
+opencode = "tool.execute.after"

@@ -185,19 +185,20 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 
 ## Phase 23: command system expansion
 
-- [ ] Queued — Split command source into metadata, prompt template, argument schema, examples, route contract, required skills, hook policies, model policy, and optional support files.
-- [ ] Queued — Render commands natively per surface: Codex plugin command skill, Claude slash command or command-skill shape, and OpenCode command Markdown/config entries.
-- [ ] Queued — Define argument interpolation for `$ARGUMENTS`, positional arguments, missing arguments, examples, and provider-native argument hints.
-- [ ] Queued — Preserve command ownership metadata: owner role, side-effect level, route contract, required skills, hook policies, and model/effort assignment.
-- [ ] Queued — Validate command parity across Codex, Claude, and OpenCode with fixture commands that cover read-only, write, review, and handoff routes.
+- [x] Sealed — Split command source into metadata, prompt template, argument schema, examples, route contract, required skills, hook policies, model policy, and optional support files.
+- [x] Sealed — Render commands natively per surface: Codex plugin command skill, Claude slash command shape, and OpenCode command Markdown/config entries.
+- [x] Sealed — Define argument interpolation for `$ARGUMENTS`, positional arguments, named arguments, missing arguments, examples, and provider-native argument hints.
+- [x] Sealed — Preserve command ownership metadata: owner role, side-effect level, route contract, required skills, hook policies, and model/effort assignment.
+- [x] Sealed — Validate command parity across Codex, Claude, and OpenCode with fixture commands that cover rich metadata, support files, and placeholder preservation.
+- [x] Sealed — Render Codex agent `developer_instructions` as TOML multiline strings and validate that generated agent TOML does not collapse multiline prompts into escaped one-line strings.
 
 ## Phase 24: hook parity and policy coverage
 
-- [ ] Queued — Expand policy catalog with secret path guard, placeholder/prototype guard, RTK enforcement guard, diff-state gate, context-budget guard, permission escalation guard, and stale-generated-artifact guard.
-- [ ] Queued — Map each OAL policy category to current Codex hooks, Claude hooks, and OpenCode plugin events with provider-owned conversion modules.
-- [ ] Queued — Add normalized payload adapters for prompt, session, tool, permission, file, subagent, compaction, stop, and plugin event families.
-- [ ] Queued — Define blocking, warn-only, fail-open, and fail-closed semantics per policy and surface event.
-- [ ] Queued — Validate every policy with synthetic payload tests for every supported event mapping and every generated runtime script.
+- [x] Sealed — Expand policy catalog with secret path guard, placeholder/prototype guard, RTK enforcement guard, diff-state gate, context-budget guard, permission escalation guard, and stale-generated-artifact guard.
+- [x] Sealed — Map each OAL policy category to current Codex hooks, Claude hooks, and OpenCode plugin events with provider-owned conversion modules.
+- [x] Sealed — Add normalized payload adapters for prompt, session, tool, permission, file, subagent, compaction, stop, and plugin event families.
+- [x] Sealed — Define blocking, warn-only, fail-open, and fail-closed semantics per policy and surface event.
+- [x] Sealed — Validate every policy with synthetic payload tests for every supported event mapping and every generated runtime script.
 
 ## Phase 25: prompt and instruction architecture
 

@@ -152,23 +152,72 @@ export async function writeSkill(
 
 export async function writeCommand(
 	root: string,
-	options: { readonly hookPolicies?: string } = {},
+	options: {
+		readonly arguments?: string;
+		readonly createSupportFile?: boolean;
+		readonly directory?: string;
+		readonly hookPolicies?: string;
+		readonly id?: string;
+		readonly ownerRole?: string;
+		readonly promptBody?: string;
+		readonly requiredSkills?: string;
+		readonly sideEffectLevel?: string;
+		readonly supportFile?: string;
+		readonly surfaces?: string;
+	} = {},
 ): Promise<void> {
 	await writeFixtureSurfaceConfigs(root);
-	const directory = join(root, "source", "commands", "fixture-command");
+	const id = options.id ?? "fixture-command";
+	const directory = join(root, "source", options.directory ?? `commands/${id}`);
 	await mkdir(directory, { recursive: true });
-	await writeFile(join(directory, "prompt.md"), "# Command\n");
+	if (
+		options.supportFile !== undefined &&
+		options.createSupportFile !== false &&
+		!options.supportFile.startsWith("..")
+	) {
+		await mkdir(dirname(join(directory, options.supportFile)), {
+			recursive: true,
+		});
+		await writeFile(join(directory, options.supportFile), "support\n");
+	}
+	await writeFile(
+		join(directory, "prompt.md"),
+		options.promptBody ??
+			[
+				"# Command",
+				"",
+				"Route `$ARGUMENTS` through the owning fixture agent.",
+				"",
+				"## Procedure",
+				"",
+				"- Parse the supplied arguments.",
+				"- Return concrete validation evidence.",
+				"",
+			].join("\n"),
+	);
 	await writeFile(
 		join(directory, "command.toml"),
 		[
-			'id = "fixture-command"',
+			`id = "${id}"`,
 			'kind = "command"',
 			'title = "Fixture Command"',
 			'description = "Fixture command."',
-			'owner_role = "fixture-agent"',
+			`owner_role = "${options.ownerRole ?? "fixture-agent"}"`,
+			'route_contract = "readonly"',
 			'prompt_template = "prompt.md"',
+			`arguments = ${options.arguments ?? '["objective"]'}`,
+			'argument_schema = { objective = "string" }',
+			'invocation = "user"',
+			`side_effect_level = "${options.sideEffectLevel ?? "none"}"`,
 			`hook_policies = ${options.hookPolicies ?? "[]"}`,
-			'surfaces = ["codex"]',
+			`required_skills = ${options.requiredSkills ?? "[]"}`,
+			`supporting_files = ${options.supportFile === undefined ? "[]" : `["${options.supportFile}"]`}`,
+			`surfaces = ${options.surfaces ?? '["codex"]'}`,
+			"",
+			"[[examples]]",
+			'title = "Fixture route"',
+			'invocation = "fixture-command demo"',
+			'notes = "Exercises command metadata."',
 			"",
 		].join("\n"),
 	);

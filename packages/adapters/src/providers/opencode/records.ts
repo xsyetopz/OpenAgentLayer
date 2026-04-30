@@ -15,6 +15,10 @@ import {
 	renderSkillSupportArtifacts,
 	resolveModelAssignment,
 } from "../../shared";
+import {
+	renderCommandMetadata,
+	renderCommandSupportArtifacts,
+} from "../../shared/commands";
 import { OPENCODE_ARTIFACT_ROOT, OPENCODE_SURFACE } from "./constants";
 
 export function renderOpenCodeRecordArtifacts(
@@ -55,7 +59,14 @@ export function renderOpenCodeRecordArtifacts(
 				),
 			];
 		case "command":
-			return [renderOpenCodeCommand(record, graph, context)];
+			return [
+				renderOpenCodeCommand(record, graph, context),
+				...renderCommandSupportArtifacts(
+					record,
+					OPENCODE_SURFACE,
+					`.opencode/commands/${record.id}`,
+				),
+			];
 		case "policy":
 			return [
 				{
@@ -121,7 +132,10 @@ function renderOpenCodeCommand(
 				model: record.model_policy ?? assignment.model,
 				subtask: true,
 			},
-			record.prompt_template_content,
+			[
+				record.prompt_template_content.trimEnd(),
+				renderCommandMetadata(record),
+			].join("\n"),
 		),
 		sourceRecordIds: [record.id],
 	};

@@ -14,7 +14,7 @@ Retrieval date: 2026-04-29.
 
 ## Scope
 
-Claude Code has rich hooks, skills, custom commands, and subagents. OAL should prefer modern skill files for command-like workflows because Claude docs say command files still work but skills are recommended and support supporting files.
+Claude Code has rich hooks, skills, custom commands, and subagents. OAL renders durable agent capabilities as skills and user-triggered command records as native slash command Markdown under `.claude/commands/`, with support files placed beside the command when the source command declares them.
 
 ## Hook support
 
@@ -73,17 +73,17 @@ Claude Code current event set includes:
 
 OAL required subset:
 
-| OAL policy category | Claude event | Default handler | Notes |
-| ------------------- | ------------ | --------------- | ----- |
-| `session_context` | `SessionStart`, `InstructionsLoaded` | `command` | Check project instructions and route state. |
-| `input_guard` | `UserPromptSubmit`, `UserPromptExpansion` | `command` | Inject or block prompt expansion. |
-| `execution_guard` | `PreToolUse`, `PermissionRequest`, `PermissionDenied` | `command` | Shell, secret path, tool approval policy. |
-| `output_safety` | `PostToolUse`, `PostToolUseFailure`, `PostToolBatch` | `command` | Drift and validation follow-up. |
-| `completion_gate` | `Stop`, `StopFailure` | `command` or `agent` | Acceptance gate. |
-| `delegation` | `SubagentStart`, `SubagentStop`, `TaskCreated`, `TaskCompleted` | `command` | Subagent lifecycle tracking. |
-| `vcs_gate` | `PreToolUse`, `PostToolUse`, `Stop` | `command` | Git command guard, diff-state checks, final VCS gate. |
-| `drift_guard` | `FileChanged`, `ConfigChange`, `CwdChanged` | `command` | Reactive project/runtime guard. |
-| `context_budget` | `PreCompact`, `PostCompact` | `command` | Preserve OAL handoff state. |
+| OAL policy category | Claude event                                                    | Default handler      | Notes                                                 |
+| ------------------- | --------------------------------------------------------------- | -------------------- | ----------------------------------------------------- |
+| `session_context`   | `SessionStart`, `InstructionsLoaded`                            | `command`            | Check project instructions and route state.           |
+| `input_guard`       | `UserPromptSubmit`, `UserPromptExpansion`                       | `command`            | Inject or block prompt expansion.                     |
+| `execution_guard`   | `PreToolUse`, `PermissionRequest`, `PermissionDenied`           | `command`            | Shell, secret path, tool approval policy.             |
+| `output_safety`     | `PostToolUse`, `PostToolUseFailure`, `PostToolBatch`            | `command`            | Drift and validation follow-up.                       |
+| `completion_gate`   | `Stop`, `StopFailure`                                           | `command` or `agent` | Acceptance gate.                                      |
+| `delegation`        | `SubagentStart`, `SubagentStop`, `TaskCreated`, `TaskCompleted` | `command`            | Subagent lifecycle tracking.                          |
+| `vcs_gate`          | `PreToolUse`, `PostToolUse`, `Stop`                             | `command`            | Git command guard, diff-state checks, final VCS gate. |
+| `drift_guard`       | `FileChanged`, `ConfigChange`, `CwdChanged`                     | `command`            | Reactive project/runtime guard.                       |
+| `context_budget`    | `PreCompact`, `PostCompact`                                     | `command`            | Preserve OAL handoff state.                           |
 
 ## Hook file shape
 
@@ -100,7 +100,7 @@ Project settings hook shape:
             "type": "command",
             "command": ".oal/hooks/destructive-command.mjs",
             "timeout": 10,
-            "statusMessage": "checking command policy"
+            "statusMessage": "checking command policy..."
           }
         ]
       }
@@ -174,11 +174,10 @@ Fields OAL may emit:
 
 Command decision:
 
-- Prefer `.claude/skills/<id>/SKILL.md` for OAL commands.
-- Use `disable-model-invocation: true` for side-effectful user-triggered commands.
-- Use `user-invocable: false` for background knowledge skills.
-- Use `context: fork` plus `agent` for isolated command execution.
-- Do not emit `.claude/commands/` unless a route explicitly asks for the command-only file target.
+- Render OAL command records to `.claude/commands/<id>.md`.
+- Preserve command prompt templates, `$ARGUMENTS`, argument hints, owner role metadata, route contract, required skills, and support files.
+- Keep reusable Agent Skills under `.claude/skills/<id>/SKILL.md`; do not create fake skills solely to mirror commands.
+- Use skill support files only for skill records and command support files only for command records.
 
 ## Subagent support
 

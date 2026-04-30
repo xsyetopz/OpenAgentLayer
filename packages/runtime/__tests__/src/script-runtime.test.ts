@@ -22,15 +22,24 @@ describe("OAL runtime scripts", () => {
 		expect(JSON.parse(result.stdout).decision).toBe("allow");
 	});
 
-	test("rendered runtime script handles empty stdin as empty payload", async () => {
-		const result = await runRuntimeScript("destructive-command-guard", "");
-		const decision = JSON.parse(result.stdout);
+	test("rendered runtime scripts handle empty stdin as empty payload", async () => {
+		const scripts = [
+			"destructive-command-guard",
+			"secret-path-guard",
+			"placeholder-prototype-guard",
+			"rtk-enforcement-guard",
+			"diff-state-gate",
+			"permission-escalation-guard",
+			"stale-generated-artifact-guard",
+		] as const;
 
-		expect(result.exitCode).toBe(0);
-		expect(decision).toMatchObject({
-			decision: "allow",
-			policy_id: "destructive-command-guard",
-		});
+		for (const script of scripts) {
+			const result = await runRuntimeScript(script, "");
+			const decision = JSON.parse(result.stdout);
+
+			expect(result.exitCode).toBe(0);
+			expect(decision).toMatchObject({ decision: "allow" });
+		}
 	});
 
 	test("rendered runtime script fails malformed JSON payloads", async () => {

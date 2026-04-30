@@ -21,25 +21,32 @@ Command TOML fields:
 - `route_contract`
 - `aliases`
 - `arguments`
+- `argument_schema`
 - `invocation`
 - `side_effect_level`
 - `surfaces`
 - `surface_overrides`
 - `model_policy`
 - `hook_policies`
+- `required_skills`
+- `examples`
+- `supporting_files`
 
 The `aliases` field is for v4 command ergonomics only.
 
 Command render targets:
 
-- Codex: plugin skill `skills/<id>/SKILL.md`.
-- Claude Code: `.claude/skills/<id>/SKILL.md`.
-- OpenCode: `.opencode/commands/<id>.md` by default, or `opencode.jsonc` `command` entry for short generated commands.
+- Codex: plugin command skill `skills/command-<id>/SKILL.md` plus listed support files under that command skill directory.
+- Claude Code: `.claude/commands/<id>.md` plus listed support files under `.claude/commands/<id>/`.
+- OpenCode: `.opencode/commands/<id>.md`, `opencode.json` command entry, and listed support files under `.opencode/commands/<id>/`.
 
 Command rules:
 
 - Commands with side effects must be user-invocable only where the surface supports it.
+- Commands with side effects must attach at least one hook policy.
 - Isolated commands must route through owner role/subagent fields.
+- Declared arguments must appear in the prompt as `$ARGUMENTS`, `$1`, `$2`, or a named `$argument` placeholder.
+- Required skills must reference source skill records.
 - Model overrides come from `model_policy`, not inline prompt text.
 - Hook policies attach by policy id.
 

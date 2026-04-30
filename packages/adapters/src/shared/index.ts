@@ -14,4 +14,4 @@ export {
 	renderSkillSupportArtifacts,
 } from "./skills";
 export { compareByPath } from "./sort";
-export { renderTomlDocument } from "./toml";
+export { renderTomlDocument, tomlMultilineString } from "./toml";

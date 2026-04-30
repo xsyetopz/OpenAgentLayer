@@ -1,0 +1,21 @@
+id = "context-budget-guard"
+kind = "policy"
+title = "Context Budget Guard"
+description = "Emit context preservation guidance before compaction or low-context continuation."
+category = "context_budget"
+severity = "info"
+event_intent = "context_compaction"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+matcher = "context_budget"
+runtime_script = "runtime/context-budget-guard.mjs"
+surface_events = ["PreCompact", "PostCompact", "tui.prompt.append"]
+test_payloads = ["context-budget-guard/basic.json"]
+tests = ["context-budget-guard.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "UserPromptSubmit"
+claude = "PreCompact"
+opencode = "tui.prompt.append"

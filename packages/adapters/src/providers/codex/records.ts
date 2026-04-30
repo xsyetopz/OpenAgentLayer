@@ -16,6 +16,10 @@ import {
 	renderSkillSupportArtifacts,
 	resolveModelAssignment,
 } from "../../shared";
+import {
+	renderCommandMetadata,
+	renderCommandSupportArtifacts,
+} from "../../shared/commands";
 import { renderCodexAgentConfig } from "./config";
 import {
 	CODEX_ARTIFACT_ROOT,
@@ -86,7 +90,14 @@ export function renderCodexRecordArtifacts(
 					: []),
 			];
 		case "command":
-			return [renderCodexCommandSkill(record, graph, context)];
+			return [
+				renderCodexCommandSkill(record, graph, context),
+				...renderCommandSupportArtifacts(
+					record,
+					CODEX_SURFACE,
+					`${CODEX_PLUGIN_ROOT}/skills/command-${record.id}`,
+				),
+			];
 		case "policy":
 			return [
 				{
@@ -154,10 +165,8 @@ function renderCodexCommandSkill(
 			},
 			[
 				record.prompt_template_content.trimEnd(),
-				"",
-				`Owner role: ${record.owner_role}.`,
-				`Route contract: ${record.route_contract ?? "none"}.`,
-				`Arguments: ${record.arguments.join(", ") || "none"}.`,
+				renderCommandMetadata(record),
+				`Argument schema: ${JSON.stringify(record.argument_schema)}.`,
 			].join("\n"),
 		),
 		sourceRecordIds: [record.id],
