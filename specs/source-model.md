@@ -64,10 +64,11 @@ Fields:
 - `surfaces`
 - `model_policy`
 - `supporting_files`
+- `upstream`
 
 Skill records express procedural capability. Adapters translate into native skill formats.
 
-Imported skills are first-class skill records. They keep the original `SKILL.md` body, attribution metadata, and support files instead of being summarized into OAL prose. Imported records from the local openagentlayer package must include `metadata.source_package` and `metadata.upstream_name`; records named as generic wrappers such as `full-skill` are invalid because they hide the concrete Agent Skill identity.
+Imported skills are first-class skill records. They keep the original `SKILL.md` body, attribution metadata, and support files instead of being summarized into OAL prose. Third-party-backed records keep only OAL overlay metadata under `source/skills/<id>/skill.toml`; body and mapped support files resolve from `third_party/` upstream submodules through the `upstream` table. Imported records must include `metadata.source_package`, `metadata.upstream_name`, `upstream.repository`, and `upstream.commit`; records named as generic wrappers such as `full-skill` are invalid because they hide the concrete Agent Skill identity.
 
 ## Command record
 

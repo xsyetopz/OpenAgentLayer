@@ -165,6 +165,124 @@ describe("OAL source record validation", () => {
 		);
 	});
 
+	test("loads third-party-backed upstream skill body and support files", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		await mkdir(join(root, "third_party/upstream-skill/reference"), {
+			recursive: true,
+		});
+		await writeFile(
+			join(root, "third_party/upstream-skill/SKILL.md"),
+			[
+				"# Upstream Skill",
+				"",
+				"Use this upstream skill for third-party-backed tests.",
+				"",
+				"## Procedure",
+				"",
+				"- Read upstream body.",
+				"- Render mapped support files.",
+				"",
+			].join("\n"),
+		);
+		await writeFile(
+			join(root, "third_party/upstream-skill/reference/guide.md"),
+			"# Upstream Guide\n",
+		);
+		await writeFile(
+			join(root, "source/skills/fixture-skill/skill.toml"),
+			upstreamFixtureSkillToml({
+				supportSource: "third_party/upstream-skill/reference/guide.md",
+				supportTarget: "references/guide.md",
+			}),
+		);
+
+		const result = await loadSourceGraph(root);
+
+		expect(result.diagnostics).toEqual([]);
+		expect(result.graph?.skills[0]?.body_content).toContain("# Upstream Skill");
+		expect(result.graph?.skills[0]?.support_files).toContainEqual(
+			expect.objectContaining({
+				content: "# Upstream Guide\n",
+				path: "references/guide.md",
+			}),
+		);
+	});
+
+	test("fails upstream body paths outside third_party", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		await writeFile(
+			join(root, "source/skills/fixture-skill/skill.toml"),
+			upstreamFixtureSkillToml({
+				body: "source/skills/fixture-skill/SKILL.md",
+			}),
+		);
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-upstream-source-path",
+		);
+	});
+
+	test("fails upstream support sources outside third_party", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		await mkdir(join(root, "third_party/upstream-skill"), { recursive: true });
+		await writeFile(
+			join(root, "third_party/upstream-skill/SKILL.md"),
+			"# Upstream Skill\n\n## Procedure\n\n- Use third-party body.\n",
+		);
+		await writeFile(
+			join(root, "source/skills/fixture-skill/skill.toml"),
+			upstreamFixtureSkillToml({
+				supportSource: "source/skills/fixture-skill/SKILL.md",
+				supportTarget: "references/guide.md",
+			}),
+		);
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-upstream-source-path",
+		);
+	});
+
+	test("fails upstream support targets escaping skill directory", async () => {
+		const root = await createFixtureRoot();
+		await writeAgent(root);
+		await writeSkill(root);
+		await mkdir(join(root, "third_party/upstream-skill"), { recursive: true });
+		await writeFile(
+			join(root, "third_party/upstream-skill/SKILL.md"),
+			"# Upstream Skill\n\n## Procedure\n\n- Use third-party body.\n",
+		);
+		await writeFile(
+			join(root, "third_party/upstream-skill/guide.md"),
+			"# Guide\n",
+		);
+		await writeFile(
+			join(root, "source/skills/fixture-skill/skill.toml"),
+			upstreamFixtureSkillToml({
+				supportSource: "third_party/upstream-skill/guide.md",
+				supportTarget: "../guide.md",
+			}),
+		);
+
+		const result = await loadSourceGraph(root);
+
+		expect(hasErrors(result.diagnostics)).toBe(true);
+		expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toContain(
+			"invalid-skill-support-file",
+		);
+	});
+
 	test("fails overlong Agent Skills text fields", async () => {
 		const root = await createFixtureRoot();
 		await writeAgent(root);
@@ -422,3 +540,51 @@ describe("OAL source record validation", () => {
 		);
 	});
 });
+
+function upstreamFixtureSkillToml(
+	options: {
+		readonly body?: string;
+		readonly supportSource?: string;
+		readonly supportTarget?: string;
+	} = {},
+): string {
+	const lines = [
+		'id = "fixture-skill"',
+		'kind = "skill"',
+		'title = "Fixture Skill"',
+		'description = "Fixture skill with complete procedural guidance."',
+		'body = "SKILL.md"',
+		'license = "MIT"',
+		'compatibility = "Codex, Claude, and OpenCode skill surfaces."',
+		'allowed_tools = ["read", "search"]',
+		'invocation_mode = "manual-or-route"',
+		"user_invocable = true",
+		'model_policy = "gpt-5.4"',
+		"supporting_files = []",
+		'surfaces = ["codex"]',
+		"",
+		"[metadata]",
+		'origin = "openagentlayer-upstream"',
+		'source_package = "fixture-upstream"',
+		'upstream_name = "fixture-upstream"',
+		"",
+		"[upstream]",
+		`body = "${options.body ?? "third_party/upstream-skill/SKILL.md"}"`,
+		'package = "fixture-upstream"',
+		'repository = "https://example.test/fixture-upstream"',
+		'commit = "fixture-commit"',
+	];
+	if (
+		options.supportSource !== undefined &&
+		options.supportTarget !== undefined
+	) {
+		lines.push(
+			"",
+			"[[upstream.support_files]]",
+			`source = "${options.supportSource}"`,
+			`target = "${options.supportTarget}"`,
+			'category = "reference"',
+		);
+	}
+	return `${lines.join("\n")}\n`;
+}

@@ -211,8 +211,9 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 ## Phase 26: taste and caveman skill integration
 
 - [x] Sealed — Add source records for caveman, caveman-commit, caveman-compress, caveman-review, taste, taste-output, taste-redesign, taste-images, taste-imagegen, and taste family variants.
-- [x] Sealed — Preserve upstream-style skill metadata, invocation rules, full body depth, pinned source attribution, and support-file structure instead of compressing them into short summaries.
-- [x] Sealed — Add OAL wrappers only for routing, surface-native metadata, and model/tool policy; do not dilute skill bodies or convert them into generic guidance.
+- [x] Sealed — Preserve upstream-style skill metadata, invocation rules, full body depth, pinned source attribution, and support-file structure from `third_party/` upstream submodules instead of manual source copies.
+- [x] Sealed — Add OAL overlays only for routing, surface-native metadata, and model/tool policy; do not dilute skill bodies or convert them into generic guidance.
+- [x] Sealed — Add canonical third-party sync for caveman and taste-skill upstream submodules.
 - [x] Sealed — Validate caveman skills affect assistant response style only and taste skills affect frontend/UI/design tasks only.
 - [x] Sealed — Test generated skills for complete instructions, no missing sections, no placeholder prose, and correct user invocation behavior.
 

@@ -5,20 +5,62 @@ description = "Compress prose-first memory/docs files into Caveman style, preser
 body = "SKILL.md"
 license = "MIT"
 compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
-triggers = ["caveman-compress", "caveman"]
+triggers = ["caveman-compress", "compress memory file"]
 when_to_use = "Compress prose-first memory/docs files into Caveman style, preserving code, links, and structure while saving a .original.md backup."
 invocation_mode = "manual-or-route"
 user_invocable = true
 allowed_tools = ["read", "search"]
 tool_grants = ["read", "search"]
-route_contract = "readonly"
-scripts = ["scripts/compress.mjs"]
+route_contract = "edit-required"
+references = []
+scripts = []
+assets = []
 supporting_files = []
 surfaces = ["codex", "claude", "opencode"]
 
 [metadata]
-origin = "openagentlayer-local"
-source = "local installed openagentlayer skill cache"
-source_package = "openagentlayer/3.3.2"
+origin = "openagentlayer-upstream"
+source_package = "caveman"
 skill_category = "caveman-family"
-upstream_name = "caveman-compress"
+upstream_name = "compress"
+
+[upstream]
+body = "third_party/caveman/skills/compress/SKILL.md"
+package = "caveman"
+repository = "https://github.com/juliusbrussee/caveman"
+commit = "84cc3c14fa1e10182adaced856e003406ccd250d"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/__init__.py"
+target = "scripts/__init__.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/__main__.py"
+target = "scripts/__main__.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/benchmark.py"
+target = "scripts/benchmark.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/cli.py"
+target = "scripts/cli.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/compress.py"
+target = "scripts/compress.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/detect.py"
+target = "scripts/detect.py"
+category = "script"
+
+[[upstream.support_files]]
+source = "third_party/caveman/skills/compress/scripts/validate.py"
+target = "scripts/validate.py"
+category = "script"

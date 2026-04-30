@@ -78,6 +78,7 @@ Skill TOML fields:
 - `surfaces`
 - `model_policy`
 - `supporting_files`
+- `upstream`
 
 The `id` field is the canonical Agent Skills `name`. It must match the skill directory name and use lowercase kebab-case. OAL does not maintain a second source-of-truth name field.
 
@@ -92,7 +93,8 @@ Skill render targets:
 Imported skill rules:
 
 - Imported skills must keep the concrete upstream skill identity. OAL must not create generic wrapper skills such as `full-skill`.
-- Imported skills with `metadata.origin = "openagentlayer-local"` must set `metadata.source_package` and `metadata.upstream_name`.
+- Imported skills with `metadata.origin = "openagentlayer-upstream"` must set `metadata.source_package`, `metadata.upstream_name`, `upstream.repository`, and `upstream.commit`.
+- Imported skill bodies and mapped support files must resolve from `third_party/` upstream submodules, not manually copied files under `source/skills/`.
 - Imported skill bodies must preserve full procedural depth from the source skill. OAL metadata may add routing, tool policy, support-file lists, and surface-native frontmatter, but must not compress the body into a summary.
 - Support files from imported skills remain support files. `openai.yaml`, scripts, references, and assets must render under the native skill directory with source-relative paths.
 - Caveman-family skills are response-style skills only. Taste-family skills are frontend/UI/design execution skills only.

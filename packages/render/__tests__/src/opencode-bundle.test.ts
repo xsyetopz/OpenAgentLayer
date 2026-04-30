@@ -48,12 +48,6 @@ describe("OAL OpenCode bundle rendering", () => {
 		expect(plugin).toContain("OpenAgentLayerPlugin");
 		expect(config).toContain('"model": "gpt-5.4"');
 		expect(() => JSON.parse(config ?? "")).not.toThrow();
-		for (const artifact of bundle.artifacts) {
-			if (artifact.path.startsWith(".opencode/skills/")) {
-				continue;
-			}
-			expect(artifact.content).not.toContain("openagentlayer");
-		}
 	});
 
 	test("renders complete native skill packages from fixture source", async () => {

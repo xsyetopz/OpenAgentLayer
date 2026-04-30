@@ -153,7 +153,12 @@ function validateImportedSkillAttribution(
 	record: Extract<SourceRecord, { readonly kind: "skill" }>,
 	diagnostics: Diagnostic[],
 ): void {
-	if (record.metadata["origin"] !=openagentlayerbtw-local") {
+	if (
+		record.metadata["origin"] !== "openagentlayer-local" &&
+		record.metadata["origin"] !== "openagentlayer-vendor" &&
+		record.metadata["origin"] !== "openagentlayer-upstream" &&
+		record.upstream === undefined
+	) {
 		return;
 	}
 
@@ -161,12 +166,14 @@ function validateImportedSkillAttribution(
 		typeof record.metadata["source_package"] !== "string" ||
 		record.metadata["source_package"].length === 0 ||
 		typeof record.metadata["upstream_name"] !== "string" ||
-		record.metadata["upstream_name"].length === 0
+		record.metadata["upstream_name"].length === 0 ||
+		record.upstream?.commit === undefined ||
+		record.upstream.repository === undefined
 	) {
 		diagnostics.push(
 			errorDiagnostic(
 				"missing-imported-skill-attribution",
-				`Imported skill '${record.id}' must preserve source package and upstream name attribution.`,
+				`Imported skill '${record.id}' must preserve source package, upstream name, repository, and commit attribution.`,
 				record.location.metadataPath,
 			),
 		);

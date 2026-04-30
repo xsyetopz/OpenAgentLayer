@@ -25,6 +25,7 @@
     "check:source": "bun packages/cli/src/cli.ts check",
     "render": "bun packages/cli/src/cli.ts render --out generated",
     "generate": "bun run render",
+    "sync:third-party-skills": "bun scripts/sync-third-party-skills.mjs",
     "biome:check": "bunx biome check . --error-on-warnings --max-diagnostics 16384",
     "biome:lint": "bunx biome lint . --max-diagnostics 16384",
     "biome:lint:fix": "bunx biome lint . --write --max-diagnostics 16384",

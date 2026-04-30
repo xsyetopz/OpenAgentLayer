@@ -14,7 +14,8 @@
 			"**/*.tsx",
 			"**/*.mts",
 			"!**/node_modules",
-			"!**/dist"
+			"!**/dist",
+			"!third_party"
 		],
 		"ignoreUnknown": true
 	},

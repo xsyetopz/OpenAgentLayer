@@ -15,21 +15,24 @@ describe("OAL imported skill rendering", () => {
 			expect.arrayContaining([
 				".codex/openagentlayer/plugin/skills/caveman/SKILL.md",
 				".codex/openagentlayer/plugin/skills/taste/SKILL.md",
-				".codex/openagentlayer/plugin/skills/taste-imagegen/openai.yaml",
+				".codex/openagentlayer/plugin/skills/caveman-compress/scripts/compress.py",
+				".codex/openagentlayer/plugin/skills/taste-stitch/reference/upstream/DESIGN.md",
 			]),
 		);
 		expect(artifactPaths(claude)).toEqual(
 			expect.arrayContaining([
 				".claude/skills/caveman/SKILL.md",
 				".claude/skills/taste/SKILL.md",
-				".claude/skills/taste-imagegen/openai.yaml",
+				".claude/skills/caveman-compress/scripts/compress.py",
+				".claude/skills/taste-stitch/reference/upstream/DESIGN.md",
 			]),
 		);
 		expect(artifactPaths(opencode)).toEqual(
 			expect.arrayContaining([
 				".opencode/skills/caveman/SKILL.md",
 				".opencode/skills/taste/SKILL.md",
-				".opencode/skills/taste-imagegen/openai.yaml",
+				".opencode/skills/caveman-compress/scripts/compress.py",
+				".opencode/skills/taste-stitch/reference/upstream/DESIGN.md",
 			]),
 		);
 
@@ -43,18 +46,18 @@ describe("OAL imported skill rendering", () => {
 				codex,
 				".codex/openagentlayer/plugin/skills/caveman/SKILL.md",
 			),
-		).toContain("Caveman changes assistant prose only");
+		).toContain("Respond terse like smart caveman");
 		expect(
 			artifactContent(
 				codex,
 				".codex/openagentlayer/plugin/skills/taste/SKILL.md",
 			),
-		).toContain("openagentlayerrontend Skill");
+		).toContain("High-Agency Frontend Skill");
 		expect(
 			artifactContent(
 				codex,
 				".codex/openagentlayer/plugin/skills/taste/SKILL.md",
 			),
-		).toContain("openagentsbtw Taste Mapping");
+		).toContain("design-taste-frontend");
 	});
 });

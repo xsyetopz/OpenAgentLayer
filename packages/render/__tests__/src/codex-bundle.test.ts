@@ -77,7 +77,6 @@ describe("OAL Codex bundle rendering", () => {
 		expect(() => Bun.TOML.parse(codexConfig ?? "")).not.toThrow();
 		expect(codexPlugin).toContain('"displayName": "OpenAgentLayer"');
 		expect(codexPlugin).toContain('"name": "openagentlayer"');
-		expect(codexPlugin).not.toContain("openagentlayer");
 		expect(codexPlusAthena).toContain('model = "gpt-5.4"');
 		expect(codexPlusAthena).toContain('name = "athena"');
 		expect(codexPlusAthena).toContain('developer_instructions = """');

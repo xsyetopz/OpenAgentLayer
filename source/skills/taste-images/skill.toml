@@ -1,24 +1,31 @@
 id = "taste-images"
 kind = "skill"
 title = "Taste Images"
-description = "Image-first frontend reference skill: generate premium website images, analyze them, then implement faithfully."
+description = "Image-first frontend reference workflow for premium website implementation."
 body = "SKILL.md"
 license = "MIT"
 compatibility = "Codex, Claude, and OpenCode Agent Skills surfaces."
 triggers = ["frontend", "ui", "ux", "design", "polish"]
-when_to_use = "Image-first frontend reference skill: generate premium website images, analyze them, then implement faithfully."
+when_to_use = "Image-first frontend reference workflow for premium website implementation."
 invocation_mode = "manual-or-route"
 user_invocable = true
 allowed_tools = ["read", "search", "edit"]
 tool_grants = ["read", "search", "edit"]
 route_contract = "edit-required"
+references = []
 scripts = []
-supporting_files = ["openai.yaml"]
+assets = []
+supporting_files = []
 surfaces = ["codex", "claude", "opencode"]
 
 [metadata]
-origin = "openagentlayer-local"
-source = "local installed openagentlayer skill cache"
-source_package = "openagentlayer/3.3.2"
+origin = "openagentlayer-upstream"
+source_package = "taste-skill"
 skill_category = "taste-family"
-upstream_name = "taste-images"
+upstream_name = "image-to-code"
+
+[upstream]
+body = "third_party/taste-skill/skills/image-to-code-skill/SKILL.md"
+package = "taste-skill"
+repository = "https://github.com/Leonxlnx/taste-skill"
+commit = "60c2de19766019297287bd26a260275e499789a9"
