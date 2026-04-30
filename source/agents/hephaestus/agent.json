@@ -1,0 +1,35 @@
+{
+  "name": "hephaestus",
+  "template": "hephaestus",
+  "claude": {
+    "displayName": "Hephaestus",
+    "description": "Use for code implementation, bug fixes, and refactors once the plan is clear. Focus on changing production code and carrying the work to completion.",
+    "model": "sonnet",
+    "color": "orange",
+    "tools": [
+      "Read",
+      "Edit",
+      "MultiEdit",
+      "Write",
+      "Grep",
+      "Glob",
+      "Bash"
+    ],
+    "skills": [
+      "cca:review",
+      "cca:test",
+      "cca:style"
+    ],
+    "permissionMode": "acceptEdits",
+    "maxTurns": 80,
+    "effort": "high"
+  },
+  "claudeContract": "edit-required",
+  "copilotContract": "edit-required",
+  "codex": {
+    "description": "Primary implementation agent for code changes, bug fixes, and refactors.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "high",
+    "sandboxMode": "workspace-write"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "openagents-audit",
+  "description": "Security audit of a file, module, or API surface",
+  "agent": "nemesis",
+  "routeKind": "readonly",
+  "promptTemplate": "Perform a security-focused audit of the following target. Prioritize: authentication gaps, input validation failures, injection vulnerabilities, secret exposure, authorization bypasses, and dependency CVEs. Every finding requires file:line citation and a specific fix. Flag BLOCKING issues that must be resolved before production deployment.\n\nTarget:"
+}

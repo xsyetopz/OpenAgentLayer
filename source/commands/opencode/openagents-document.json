@@ -1,0 +1,7 @@
+{
+  "name": "openagents-document",
+  "description": "Generate or update documentation",
+  "agent": "calliope",
+  "routeKind": "readonly",
+  "promptTemplate": "Generate or update documentation for the following target. Documentation must accurately reflect actual code behavior.\n\nTarget:"
+}

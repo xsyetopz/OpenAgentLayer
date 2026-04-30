@@ -1,0 +1,14 @@
+{
+  "id": "pre-commit-test",
+  "opencode": {
+    "gitHooks": [
+      {
+        "hook": "pre-commit",
+        "kind": "package-test",
+        "label": "Running tests...",
+        "message": "Tests failed. Fix them before committing."
+      }
+    ]
+  },
+  "category": "vcs_gate"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "decide",
+  "description": "Shared collaboration protocol for presenting options, tradeoffs, and rationale in technical decisions. Triggers: present options, tradeoffs, collaboration, decision making, \"which approach\", \"how should we\", alternatives, options analysis, trade-off.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": ""
+}

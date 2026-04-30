@@ -1,0 +1,14 @@
+{
+  "name": "trace",
+  "description": "Structured tracing workflow for dependencies, call paths, data flow, and change impact analysis. Triggers: trace, dependency trace, call graph, data flow, impact analysis, who uses this, what depends on this, downstream effects, upstream callers, symbol trace.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": "Recommended routing: `oabtw-codex trace \"<symbol or path>\"` for local dependency and data-flow tracing."
+}

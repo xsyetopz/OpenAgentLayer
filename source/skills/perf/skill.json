@@ -1,0 +1,14 @@
+{
+  "name": "perf",
+  "description": "Performance optimization patterns, profiling guidance, and common bottleneck identification. Triggers: performance, optimize, slow, bottleneck, profiling, latency, throughput, memory usage, CPU usage, N+1, caching, benchmark.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "execution-required",
+  "copilotContract": "execution-required",
+  "codexLead": ""
+}

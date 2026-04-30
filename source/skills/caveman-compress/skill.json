@@ -1,0 +1,14 @@
+{
+  "name": "caveman-compress",
+  "description": "Compress prose-first memory/docs files into Caveman style, preserving code, links, and structure while saving a .original.md backup.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "edit-required",
+  "copilotContract": "edit-required",
+  "codexLead": ""
+}

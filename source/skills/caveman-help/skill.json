@@ -1,0 +1,14 @@
+{
+  "name": "caveman-help",
+  "description": "Explain Caveman modes, boundaries, and escape hatches without changing code or repo state.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": ""
+}

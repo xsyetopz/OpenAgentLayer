@@ -1,0 +1,48 @@
+{
+  "name": "odysseus",
+  "template": "odysseus",
+  "replacements": [
+    [
+      "@argus",
+      "@nemesis"
+    ],
+    [
+      "@orion",
+      "@atalanta"
+    ],
+    [
+      "@prometheus",
+      "@odysseus"
+    ]
+  ],
+  "claude": {
+    "displayName": "Odysseus",
+    "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents. Owns sequencing, delivery, and final verification.",
+    "model": "opus",
+    "color": "gold",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Task",
+      "AskUserQuestion"
+    ],
+    "skills": [
+      "cca:git-workflow",
+      "cca:review",
+      "cca:test",
+      "cca:handoff"
+    ],
+    "permissionMode": "plan",
+    "maxTurns": 70,
+    "effort": "high"
+  },
+  "claudeContract": "edit-required",
+  "copilotContract": "edit-required",
+  "codex": {
+    "description": "Coordinator for multi-step work that benefits from explicit delegation across several agents.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "high",
+    "sandboxMode": "read-only"
+  }
+}

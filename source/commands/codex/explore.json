@@ -1,0 +1,10 @@
+{
+  "mode": "explore",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "readonly",
+  "allowBlocked": true,
+  "allowDocsOnly": true,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw plus the explore skill. Route this through hermes-style repo exploration on the utility profile. Map architecture, entrypoints, ownership, and likely change points. Keep the result concise and evidence-driven."
+}

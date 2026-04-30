@@ -1,0 +1,10 @@
+{
+  "mode": "review",
+  "profile": "openagentsbtw",
+  "routeKind": "readonly",
+  "allowBlocked": true,
+  "allowDocsOnly": true,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw. Route review through nemesis-style analysis on the main profile. Lead with findings, cite evidence, and focus on correctness, regressions, security, and missing tests. Before the verdict, pressure-test the task with: likely assumptions, strongest missing evidence, and what fact would change the conclusion. If the user's premise conflicts with repo evidence, say so directly. Flag slop risk (god objects, muddy boundaries, over-broad diffs) as first-class review issues."
+}

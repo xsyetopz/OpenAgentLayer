@@ -1,0 +1,34 @@
+{
+  "name": "calliope",
+  "template": "calliope",
+  "claude": {
+    "displayName": "Calliope",
+    "description": "Use for docs, changelogs, ADRs, and precise written artifacts that must match the codebase.",
+    "model": "haiku",
+    "color": "pink",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Edit",
+      "MultiEdit",
+      "Write"
+    ],
+    "skills": [
+      "cca:document",
+      "cca:handoff",
+      "cca:style"
+    ],
+    "permissionMode": "acceptEdits",
+    "maxTurns": 40,
+    "effort": "medium"
+  },
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codex": {
+    "description": "Documentation agent for READMEs, ADRs, changelogs, and precise handoff artifacts.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "medium",
+    "sandboxMode": "workspace-write"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "openagents-test",
+  "description": "Execute test suite, analyze results",
+  "agent": "atalanta",
+  "routeKind": "execution-required",
+  "promptTemplate": "Run the test suite and analyze results. If tests fail, identify the root cause and propose specific fixes.\n\nScope:"
+}

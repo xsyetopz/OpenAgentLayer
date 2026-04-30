@@ -1,0 +1,10 @@
+{
+  "mode": "deslop",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "readonly",
+  "allowBlocked": true,
+  "allowDocsOnly": true,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw. Route this through calliope plus the deslop skill on the utility profile. Remove AI filler, sycophancy, narrating comments, and optional-offer boilerplate."
+}

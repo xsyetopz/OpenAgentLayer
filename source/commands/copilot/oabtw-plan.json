@@ -1,0 +1,8 @@
+{
+  "name": "oabtw-plan",
+  "agent": "athena",
+  "routeKind": "readonly",
+  "description": "openagentsbtw planning (Athena)",
+  "title": "Plan",
+  "body": "Produce a decision-complete plan for implementation. Name the key assumptions, likeliest failure mode, and what evidence would change the recommendation."
+}

@@ -1,0 +1,14 @@
+{
+  "name": "design-polish",
+  "description": "Refine frontend/UI/UX work so it stops looking like generic AI output. Use for layout, typography, spacing, interaction polish, design system cleanup, and frontend visual audits across Claude, Codex, OpenCode, and Copilot.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "edit-required",
+  "copilotContract": "edit-required",
+  "codexLead": "Recommended routing: `oabtw-codex design-polish \"<target>\"` when frontend output needs stronger UI/UX quality, not just correctness."
+}

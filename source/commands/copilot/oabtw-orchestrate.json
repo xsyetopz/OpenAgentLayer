@@ -1,0 +1,8 @@
+{
+  "name": "oabtw-orchestrate",
+  "agent": "odysseus",
+  "routeKind": "edit-required",
+  "description": "openagentsbtw orchestration (Odysseus)",
+  "title": "Orchestrate",
+  "body": "Coordinate multi-step work across roles and carry the requested delivery to completion."
+}

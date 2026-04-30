@@ -1,0 +1,14 @@
+{
+  "name": "deslop",
+  "description": "Detect and remove AI-generated linguistic slop from code, comments, documentation, READMEs, changelogs, commit messages, and any text artifacts. Use whenever the user mentions \"AI slop\", \"deslop\", \"remove AI-isms\", \"sounds like AI\", \"too AI\", \"clean up AI writing\", \"make it sound human\", or asks to review text for AI patterns. Also trigger when reviewing any AI-generated documentation, comments, or prose -- even if the user doesn't explicitly mention AI slop -- if the content exhibits hallmark AI writing patterns like filler adjectives, hedge phrases, or obvious code comments. Trigger for any request to \"clean up\", \"tighten\", or \"edit\" AI-generated text, and when auditing codebases for comment quality.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": ""
+}

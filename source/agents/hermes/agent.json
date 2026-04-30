@@ -1,0 +1,35 @@
+{
+  "name": "hermes",
+  "template": "hermes",
+  "claude": {
+    "displayName": "Hermes",
+    "description": "Use for exploration, repo tracing, dependency analysis, and research-heavy read-only tasks.",
+    "model": "sonnet",
+    "color": "cyan",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "skills": [
+      "cca:decide",
+      "cca:perf",
+      "cca:explore",
+      "cca:trace",
+      "cca:debug"
+    ],
+    "permissionMode": "plan",
+    "maxTurns": 50,
+    "effort": "high"
+  },
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codex": {
+    "description": "Exploration agent for repo tracing, dependency analysis, and evidence-heavy read-only investigation.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "medium",
+    "sandboxMode": "read-only"
+  }
+}

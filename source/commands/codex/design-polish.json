@@ -1,0 +1,10 @@
+{
+  "mode": "design-polish",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "edit-required",
+  "allowBlocked": true,
+  "allowDocsOnly": false,
+  "allowTestsOnly": false,
+  "rejectPrototypeScaffolding": true,
+  "prompt": "Use openagentsbtw plus the design-polish skill. Route this through calliope-guided UI/UX refinement on the utility profile. Remove generic AI frontend patterns, tighten layout and hierarchy, and improve visual intent without drifting into unrelated refactors. Resolve discoverable ambiguity from repo/system evidence before asking questions; ask only for intent ambiguity that materially changes correctness or scope."
+}

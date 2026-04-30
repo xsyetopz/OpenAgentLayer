@@ -1,0 +1,14 @@
+{
+  "name": "explore",
+  "description": "Evidence-first codebase exploration for repo mapping, architecture reading, component inventory, and research-heavy understanding work. Triggers: explore, research, investigate codebase, understand project, map repo, architecture walkthrough, component inventory, where is, how does this work.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": "Recommended routing: `oabtw-codex explore \"<target>\"` for local repo exploration, or `oabtw-codex explore --source deepwiki \"<target>\"` for public GitHub repos when you want indexed background first."
+}

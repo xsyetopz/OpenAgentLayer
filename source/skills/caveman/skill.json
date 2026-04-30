@@ -1,0 +1,14 @@
+{
+  "name": "caveman",
+  "description": "Ultra-terse response mode that compresses assistant prose while preserving technical substance. Supports off, lite, full, ultra, wenyan-lite, wenyan, and wenyan-ultra. Use when the user wants fewer tokens, shorter answers, or Caveman mode.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": ""
+}

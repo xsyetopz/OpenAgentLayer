@@ -1,0 +1,33 @@
+{
+  "name": "athena",
+  "template": "athena",
+  "claude": {
+    "displayName": "Athena",
+    "description": "Use proactively when the task involves system design, breaking down complex problems, evaluating trade-offs between approaches, or planning multi-file changes. Route here BEFORE @hephaestus for any non-trivial feature. Use instead of Plan for any implementation planning or design tasks.",
+    "model": "opus",
+    "color": "blue",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebSearch",
+      "WebFetch",
+      "AskUserQuestion"
+    ],
+    "skills": [
+      "cca:decide",
+      "cca:review"
+    ],
+    "permissionMode": "plan",
+    "maxTurns": 50,
+    "effort": "high"
+  },
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codex": {
+    "description": "Architecture and planning agent for multi-file changes, sequencing, and tradeoff analysis.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "high",
+    "sandboxMode": "read-only"
+  }
+}

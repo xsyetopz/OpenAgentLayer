@@ -36,12 +36,27 @@
 			}
 		},
 		{
-			"includes": ["src/index.ts"],
+			"includes": [
+				"src/index.ts"
+			],
 			"linter": {
 				"rules": {
 					"performance": {
 						"noBarrelFile": "off",
 						"noReExportAll": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"tests/**/*.test.mjs",
+				"tests/**/*.test.js"
+			],
+			"linter": {
+				"rules": {
+					"performance": {
+						"useTopLevelRegex": "off"
 					}
 				}
 			}
@@ -147,7 +162,10 @@
 		}
 	},
 	"javascript": {
-		"globals": ["Bun", "$"],
+		"globals": [
+			"Bun",
+			"$"
+		],
 		"formatter": {
 			"quoteStyle": "double"
 		}

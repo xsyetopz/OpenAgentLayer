@@ -1,0 +1,14 @@
+{
+  "name": "review",
+  "description": "Enforces coding standards, design principles, naming conventions, and anti-patterns when writing, editing, or reviewing code. The single source of truth for code quality rules. Triggers: implement, write code, add function, create module, refactor, edit code, fix bug, review code, check quality, review PR, validate implementation, code review, restructure, extract, rename, move, simplify, decompose, clean up code, reduce complexity, split module.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": ""
+}

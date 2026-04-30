@@ -1,0 +1,10 @@
+{
+  "mode": "trace",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "readonly",
+  "allowBlocked": true,
+  "allowDocsOnly": true,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw plus the trace skill. Route this through hermes-style tracing on the utility profile. Follow a symbol, dependency path, or data flow end-to-end and report upstream, downstream, and impact points."
+}

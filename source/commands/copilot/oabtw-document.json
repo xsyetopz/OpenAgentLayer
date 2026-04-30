@@ -1,0 +1,8 @@
+{
+  "name": "oabtw-document",
+  "agent": "calliope",
+  "routeKind": "readonly",
+  "description": "openagentsbtw docs (Calliope)",
+  "title": "Document",
+  "body": "Update documentation to match actual code behavior."
+}

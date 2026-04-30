@@ -1,0 +1,10 @@
+{
+  "mode": "document",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "readonly",
+  "allowBlocked": true,
+  "allowDocsOnly": true,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw. Route this through calliope-style documentation work on the utility profile. Keep prose factual, terse, and free of filler."
+}

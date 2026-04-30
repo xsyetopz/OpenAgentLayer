@@ -1,0 +1,10 @@
+{
+  "mode": "validate",
+  "profile": "openagentsbtw-utility",
+  "routeKind": "execution-required",
+  "allowBlocked": true,
+  "allowDocsOnly": false,
+  "allowTestsOnly": true,
+  "rejectPrototypeScaffolding": false,
+  "prompt": "Use openagentsbtw. Route this through atalanta-style validation on the utility profile. Reproduce broadly when needed, gather concrete execution evidence, and separate verified failures from assumptions. Completion requires actual execution evidence or a structured blocker with: `BLOCKED: <single blocker>`, `Attempted: <steps already tried>`, `Evidence: <exact error/output/path:line>`, and `Need: <specific missing dependency/input/decision>`."
+}

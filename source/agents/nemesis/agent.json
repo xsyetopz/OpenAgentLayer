@@ -1,0 +1,43 @@
+{
+  "name": "nemesis",
+  "template": "argus",
+  "replacements": [
+    [
+      "Argus",
+      "Nemesis"
+    ],
+    [
+      "@argus",
+      "@nemesis"
+    ]
+  ],
+  "claude": {
+    "displayName": "Nemesis",
+    "description": "Use for code review, security review, regression hunting, and risk assessment. Findings-first, with exact citations and specific fixes.",
+    "model": "sonnet",
+    "color": "purple",
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "skills": [
+      "cca:review",
+      "cca:security",
+      "cca:deslop"
+    ],
+    "permissionMode": "plan",
+    "maxTurns": 60,
+    "effort": "high"
+  },
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codex": {
+    "description": "Review and audit agent focused on correctness, regressions, security, and missing tests.",
+    "model": "gpt-5.3-codex",
+    "reasoning": "high",
+    "sandboxMode": "read-only"
+  }
+}

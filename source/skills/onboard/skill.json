@@ -1,0 +1,14 @@
+{
+  "name": "onboard",
+  "description": "Interactive onboarding guide for new openagentsbtw users. Explains the agent system, nano workflow, platform usage, shared surfaces, and safety hooks. Triggers: onboard, onboarding, getting started, how does this work, what is openagentsbtw, help me get started, new user, setup guide, walkthrough.",
+  "userInvocable": true,
+  "platforms": [
+    "claude",
+    "codex",
+    "opencode",
+    "copilot"
+  ],
+  "claudeContract": "readonly",
+  "copilotContract": "readonly",
+  "codexLead": "Recommended routing: `oabtw-codex document \"onboarding\"` for a guided walkthrough."
+}
