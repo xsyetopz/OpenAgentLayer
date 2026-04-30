@@ -6,33 +6,34 @@ Authority: Atalanta execution plan.
 
 ## Documentation validation
 
-- [ ] Queued — Run `rtk --ultra-compact bunx biome check plans specs docs --error-on-warnings --max-diagnostics 16384`.
-- [ ] Queued — Confirm every `specs/*.md` links to `specs/openagentlayer-v4.md`.
-- [ ] Queued — Confirm every v3 doc cites `v3_to_be_removed/...`.
-- [ ] Queued — Confirm `specs/` does not define old implementation behavior.
-- [ ] Queued — Confirm status marker spellings are consistent.
+- [x] Sealed — Run root `rtk --ultra-compact err bun run biome:check`; docs are ignored by Biome and audited by source validation.
+- [x] Sealed — Confirm every `specs/*.md` links to `specs/openagentlayer-v4.md`.
+- [x] Sealed — Confirm every v3 doc cites `v3_to_be_removed/...`.
+- [x] Sealed — Confirm `specs/` does not define old implementation behavior.
+- [x] Sealed — Confirm status marker spellings are consistent.
 
 ## Source validation
 
-- [ ] Queued — Validate source graph IDs are unique.
-- [ ] Queued — Validate records have body files.
-- [ ] Queued — Validate route kinds are known.
-- [ ] Queued — Validate surface keys are known.
-- [ ] Queued — Validate model IDs are managed.
+- [x] Sealed — Validate source graph IDs are unique.
+- [x] Sealed — Validate records have body files.
+- [x] Sealed — Validate route kinds are known.
+- [x] Sealed — Validate surface keys are known.
+- [x] Sealed — Validate model IDs are managed.
 
 ## Render validation
 
-- [ ] Queued — Render to temporary output.
-- [ ] Queued — Render again and assert no drift.
-- [ ] Queued — Validate each adapter emits required files.
-- [ ] Queued — Validate generated configs parse.
-- [ ] Queued — Validate generated hook scripts execute on synthetic payloads.
+- [x] Sealed — Render to temporary output.
+- [x] Sealed — Render again and assert no drift.
+- [x] Sealed — Validate each adapter emits required files.
+- [x] Sealed — Validate generated configs parse.
+- [x] Sealed — Validate generated hook scripts execute on synthetic payloads.
 
 ## Install validation
 
-- [ ] Queued — Install to temp home.
-- [ ] Queued — Verify manifest.
-- [ ] Queued — Verify managed blocks.
-- [ ] Queued — Uninstall from temp home.
-- [ ] Queued — Verify no managed files remain.
-
+- [x] Sealed — Install to temp home.
+- [x] Sealed — Verify manifest.
+- [x] Sealed — Verify managed blocks.
+- [x] Sealed — Verify edited managed config keeps manifest and returns uninstall issue.
+- [x] Sealed — Verify `--surface all` preflights config conflicts before writing.
+- [x] Sealed — Uninstall from temp home.
+- [x] Sealed — Verify no managed files remain.

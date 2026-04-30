@@ -5,6 +5,7 @@ import {
 	createSyntheticHookPayload,
 	evaluateCompletionGate,
 	evaluateDestructiveCommandGuard,
+	evaluatePromptContextInjection,
 	evaluateRuntimePolicy,
 	evaluateSourceDriftGuard,
 	renderRuntimeScript,
@@ -28,6 +29,21 @@ describe("OAL runtime policies", () => {
 				policy_id: "completion-gate",
 			}).decision,
 		).toBe("allow");
+	});
+
+	test("prompt context injection returns prompt append context", () => {
+		const decision = evaluatePromptContextInjection({
+			event: "UserPromptSubmit",
+			policy_id: "prompt-context-injection",
+			route: "plan",
+			surface: "codex",
+		});
+
+		expect(decision.decision).toBe("context");
+		expect(decision.context?.["prompt_append"]).toContain(
+			"OpenAgentLayer context:",
+		);
+		expect(decision.context?.["prompt_append"]).toContain("Route: plan");
 	});
 
 	test("completion gate denies missing validation evidence", () => {
@@ -109,6 +125,27 @@ describe("OAL runtime policies", () => {
 		expect(
 			cases.map((payload) => evaluateRuntimePolicy(payload).decision),
 		).toEqual(["allow", "allow", "allow"]);
+	});
+
+	test("rendered prompt context script returns context decision", async () => {
+		const root = await createFixtureRoot();
+		const scriptPath = join(root, "prompt-context-injection.mjs");
+		await writeFile(
+			scriptPath,
+			renderRuntimeScript("prompt-context-injection"),
+		);
+
+		const process = Bun.spawn(["bun", scriptPath], {
+			stdin: "pipe",
+			stdout: "pipe",
+		});
+		process.stdin.write(
+			JSON.stringify({ event: "UserPromptSubmit", surface: "codex" }),
+		);
+		process.stdin.end();
+		const output = await new Response(process.stdout).text();
+
+		expect(JSON.parse(output).decision).toBe("context");
 	});
 
 	test("rendered runtime script handles empty stdin as empty payload", async () => {

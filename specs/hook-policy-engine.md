@@ -93,9 +93,12 @@ Current runtime package exports:
 - `RuntimeDecision`
 - `evaluateCompletionGate(payload)`
 - `evaluateDestructiveCommandGuard(payload)`
+- `evaluatePromptContextInjection(payload)`
 - `evaluateSourceDriftGuard(payload)`
 - `evaluateRuntimePolicy(payload)`
 - `renderRuntimeScript(policyId)`
+
+Runtime package internals are split by responsibility. The public API remains exported from `@openagentlayer/runtime`; internal modules own payload extraction, policy routing, individual policy evaluators, runtime script lookup, and synthetic payload creation separately.
 
 Rendered runtime scripts are self-contained `.mjs` files. They read normalized JSON from stdin, write a normalized decision JSON line to stdout, and exit non-zero only for `deny`.
 

@@ -38,14 +38,21 @@ describe("OAL adapter registry", () => {
 				".codex/openagentlayer/plugin/skills/review-policy/SKILL.md",
 				".codex/openagentlayer/policies/completion-gate.json",
 				".codex/openagentlayer/policies/destructive-command-guard.json",
+				".codex/openagentlayer/policies/prompt-context-injection.json",
 				".codex/openagentlayer/runtime/completion-gate.mjs",
 				".codex/openagentlayer/runtime/destructive-command-guard.mjs",
+				".codex/openagentlayer/runtime/prompt-context-injection.mjs",
 				"AGENTS.md",
 			]),
 		);
 		expect(bundle.diagnostics).toEqual([]);
 		const codexConfig = bundle.artifacts.find(
 			(artifact) => artifact.path === ".codex/config.toml",
+		)?.content;
+		const codexPlugin = bundle.artifacts.find(
+			(artifact) =>
+				artifact.path ===
+				".codex/openagentlayer/plugin/.codex-plugin/plugin.json",
 		)?.content;
 		expect(codexConfig).toContain("fast_mode = false");
 		expect(codexConfig).toContain("multi_agent = false");
@@ -58,10 +65,14 @@ describe("OAL adapter registry", () => {
 		expect(codexConfig).toContain("[profiles.codex-pro-5]");
 		expect(codexConfig).toContain("[[hooks.Stop]]");
 		expect(codexConfig).toContain("[[hooks.PreToolUse]]");
+		expect(codexConfig).toContain("[[hooks.UserPromptSubmit]]");
 		expect(codexConfig).toContain(
 			'command = "bun .codex/openagentlayer/runtime/completion-gate.mjs"',
 		);
 		expect(() => Bun.TOML.parse(codexConfig ?? "")).not.toThrow();
+		expect(codexPlugin).toContain('"displayName": "OpenAgentLayer"');
+		expect(codexPlugin).toContain('"name": "openagentlayer"');
+		expect(codexPlugin).not.toContain("openagentsbtw");
 		const codexPlusAthena = bundle.artifacts.find(
 			(artifact) => artifact.path === ".codex/agents/athena.toml",
 		)?.content;
@@ -124,6 +135,11 @@ describe("OAL adapter registry", () => {
 				(artifact) => artifact.path === ".claude/settings.json",
 			)?.content,
 		).toContain("bun .claude/openagentlayer/runtime/completion-gate.mjs");
+		expect(
+			claudeBundle.artifacts.find(
+				(artifact) => artifact.path === ".claude/settings.json",
+			)?.content,
+		).toContain("UserPromptSubmit");
 		expect(() =>
 			JSON.parse(
 				claudeBundle.artifacts.find(
@@ -143,8 +159,10 @@ describe("OAL adapter registry", () => {
 				".opencode/openagentlayer/guidance/core.md",
 				".opencode/openagentlayer/policies/completion-gate.json",
 				".opencode/openagentlayer/policies/destructive-command-guard.json",
+				".opencode/openagentlayer/policies/prompt-context-injection.json",
 				".opencode/openagentlayer/runtime/completion-gate.mjs",
 				".opencode/openagentlayer/runtime/destructive-command-guard.mjs",
+				".opencode/openagentlayer/runtime/prompt-context-injection.mjs",
 				".opencode/plugins/openagentlayer.ts",
 				".opencode/skills/review-policy/SKILL.md",
 				"opencode.json",
@@ -158,6 +176,16 @@ describe("OAL adapter registry", () => {
 		).toContain("destructive-command-guard");
 		expect(
 			openCodeBundle.artifacts.find(
+				(artifact) => artifact.path === ".opencode/plugins/openagentlayer.ts",
+			)?.content,
+		).toContain("tui.prompt.append");
+		expect(
+			openCodeBundle.artifacts.find(
+				(artifact) => artifact.path === ".opencode/plugins/openagentlayer.ts",
+			)?.content,
+		).toContain("OpenAgentLayerPlugin");
+		expect(
+			openCodeBundle.artifacts.find(
 				(artifact) => artifact.path === "opencode.json",
 			)?.content,
 		).toContain('"model": "gpt-5.4"');
@@ -168,6 +196,12 @@ describe("OAL adapter registry", () => {
 				)?.content ?? "",
 			),
 		).not.toThrow();
+		for (const artifact of [
+			...claudeBundle.artifacts,
+			...openCodeBundle.artifacts,
+		]) {
+			expect(artifact.content).not.toContain("openagentsbtw");
+		}
 	});
 
 	test("renders self-contained hook scripts", async () => {

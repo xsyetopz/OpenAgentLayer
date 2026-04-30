@@ -52,9 +52,10 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 ## Phase 4: policy runtime
 
 - [x] Sealed — Implement shared `.mjs` runtime library for hook scripts.
+- [x] Sealed — Split runtime package into focused policy, script, payload, and type modules.
 - [x] Sealed — Implement command safety guard.
 - [x] Sealed — Implement route contract completion gate.
-- [ ] Queued — Implement prompt injection/context hook.
+- [x] Sealed — Implement prompt injection/context hook.
 - [x] Sealed — Implement source drift guard.
 - [x] Sealed — Implement policy test harness with synthetic hook payloads.
 
@@ -65,7 +66,10 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 - [x] Sealed — Implement project install.
 - [x] Sealed — Implement managed-file manifest.
 - [x] Sealed — Implement uninstall from manifest.
-- [ ] Queued — Implement config merge with marked managed blocks.
+- [x] Sealed — Implement config merge with marked managed blocks.
+- [x] Sealed — Implement all-surface install preflight before writes.
+- [x] Sealed — Preserve manifest ownership when uninstall finds edited managed content.
+- [x] Sealed — Split installer package into focused modules with a barrel public entrypoint.
 - [x] Sealed — Implement install verification.
 
 ## Phase 6: validation
@@ -74,8 +78,26 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 - [x] Sealed — Validate render determinism.
 - [x] Sealed — Validate generated artifacts against snapshots or structural assertions.
 - [x] Sealed — Validate installed hook scripts are self-contained.
-- [ ] Queued — Validate docs match specs.
-- [ ] Queued — Validate no spec contains v3 implementation requirements.
+- [x] Sealed — Validate docs match specs.
+- [x] Sealed — Validate no spec contains v3 implementation requirements.
+
+## Phase 7: adapter maintainability
+
+- [x] Sealed — Split provider monoliths into provider-local bundle, config, record, constants, and install-plan modules.
+- [x] Sealed — Split shared adapter helpers into focused modules with barrel-only public entrypoint.
+- [x] Sealed — Validate provider indexes stay small and providers do not import from each other.
+
+## Phase 8: implementation hygiene
+
+- [x] Sealed — Define 1500-line split threshold for package code and test files.
+- [x] Sealed — Validate package `.ts` and `.mjs` files stay below split threshold.
+- [x] Sealed — Document split-by-ownership rule for large implementation files.
+
+## Phase 9: CLI maintainability
+
+- [x] Sealed — Split CLI binary entrypoint from command dispatch and command handlers.
+- [x] Sealed — Move option parsing, output helpers, surface resolution, and hook verification into focused CLI modules.
+- [x] Sealed — Validate CLI entrypoint stays thin and package modules do not import CLI internals.
 
 ## Done criteria
 
@@ -84,6 +106,6 @@ OpenAgentLayer is not a harness and not a framework. It does not own model execu
 - [x] Sealed — `oal install --surface <surface> --scope <scope>` installs from managed manifest.
 - [x] Sealed — `oal uninstall --surface <surface> --scope <scope>` reverses managed install.
 - [x] Sealed — `oal doctor` reports runtime and install health.
-- [ ] Queued — `bun test` covers source, adapters, runtime, installer, docs audits.
+- [x] Sealed — `bun test` covers source, adapters, runtime, installer, docs audits.
 - [x] Sealed — No `*.test.ts` files live under `packages/*/src/`; tests mirror package source under `packages/*/__tests__/`.
-- [ ] Queued — v4 specs define all behavior needed by implementers.
+- [x] Sealed — v4 specs define all behavior needed by implementers.

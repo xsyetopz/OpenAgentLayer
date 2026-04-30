@@ -6,6 +6,7 @@
     ".": "./src/load.ts",
     "./graph": "./src/graph.ts",
     "./load": "./src/load.ts",
+    "./validate-docs": "./src/validate-docs.ts",
     "./validate": "./src/validate.ts"
   },
   "dependencies": {

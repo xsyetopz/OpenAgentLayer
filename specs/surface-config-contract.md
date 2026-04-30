@@ -52,7 +52,7 @@ Every emitted config key must have one placement class:
 - Runtime-owned generated: path or command pointing at files created by OAL installer.
 - Enterprise-managed note: organization policy documentation only.
 
-Project install may write only generated project profile, policy-owned route override, and runtime-owned generated values.
+Project install may write only generated project profile, policy-owned route override, and runtime-owned generated values. Existing user-owned config keys must not be overwritten; OAL-owned structured keys are tracked by manifest path/value metadata.
 
 Global install may write generated global profile values only when explicitly selected.
 
@@ -86,6 +86,12 @@ Each owned field must also record:
 - placement class;
 - validation rule;
 - renderer responsible for writing it.
+
+Installer ownership modes:
+
+- full-file: generated artifacts owned entirely by OAL;
+- marked-text-block: Markdown/text files where OAL owns only the marked block;
+- structured-object: JSON/TOML files where OAL owns only manifest-listed key paths.
 
 ## Validation
 

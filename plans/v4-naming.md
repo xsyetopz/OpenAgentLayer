@@ -8,7 +8,9 @@ Authority: planning companion to `../specs/naming.md`.
 
 - [x] Sealed — Product name: OpenAgentLayer.
 - [x] Sealed — Short name: OAL.
-- [x] Sealed — Package root: `packages/oal`.
+- [x] Sealed — Package root: package-module workspace under `packages/*`.
+- [x] Sealed — Package names: `@openagentlayer/*`.
+- [x] Sealed — No monolithic `packages/oal` package.
 - [x] Sealed — CLI namespace: `oal`.
 - [x] Sealed — Source namespace: `openagentlayer`.
 
@@ -23,7 +25,6 @@ Authority: planning companion to `../specs/naming.md`.
 
 ## Implementation tracking
 
-- [ ] Queued — Create package names from `specs/naming.md`.
-- [ ] Queued — Create CLI command from `specs/naming.md`.
-- [ ] Queued — Create generated output labels from `specs/naming.md`.
-
+- [x] Sealed — Create package names from `specs/naming.md`.
+- [x] Sealed — Create CLI command from `specs/naming.md`.
+- [x] Sealed — Create generated output labels from `specs/naming.md`.

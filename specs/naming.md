@@ -12,7 +12,9 @@ Authority: normative.
 
 ## Package and CLI
 
-- Package root: `packages/oal`.
+- Package root: package-module workspace under `packages/*`.
+- Package names: `@openagentlayer/*`.
+- There is no monolithic `packages/oal` package.
 - CLI binary: `oal`.
 - Source namespace: `openagentlayer`.
 - Generated bundle metadata key: `openagentlayer`.

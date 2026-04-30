@@ -75,6 +75,10 @@ Dependency direction is intentional:
 
 Rationale: OAL must be extensible by adding or replacing packages. A monolithic package would hide ownership, make adapter growth brittle, and make testing harder. Package boundaries make each surface and compiler stage independently reviewable.
 
+## Module size governance
+
+Package code and package test files must stay below 1500 lines. A file that would cross that threshold must split by ownership: command family, provider surface, validation domain, runtime policy, installer concern, or test scenario group.
+
 ## Test package shape
 
 Package tests live outside `src/`:

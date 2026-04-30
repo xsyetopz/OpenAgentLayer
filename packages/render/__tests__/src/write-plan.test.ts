@@ -42,6 +42,10 @@ describe("OAL render write plan", () => {
 
 		const outDir = join(await createFixtureRoot(), "generated");
 		await applyWritePlan(await createWritePlan(result.graph, outDir));
+		const manifest = JSON.parse(
+			await Bun.file(join(outDir, "manifest.json")).text(),
+		) as { readonly generated_by?: string };
+		expect(manifest.generated_by).toBe("openagentlayer");
 		await writeFile(join(outDir, "manifest.json"), "stale\n");
 		await mkdir(join(outDir, "obsolete"), { recursive: true });
 		await writeFile(join(outDir, "obsolete/file.txt"), "remove\n");

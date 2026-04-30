@@ -4,6 +4,13 @@ import { join } from "node:path";
 import { createFixtureRoot } from "@openagentlayer/testkit";
 
 describe("OAL CLI installer", () => {
+	test("help uses OAL CLI namespace", async () => {
+		const result = await runCli(["help"]);
+
+		expect(result.exitCode).toBe(0);
+		expect(result.stdout).toContain("Usage: oal ");
+	});
+
 	test("doctor verifies source and rendered hook scripts", async () => {
 		const result = await runCli(["doctor", "--root", process.cwd()]);
 
@@ -277,6 +284,73 @@ describe("OAL CLI installer", () => {
 		).toBe(false);
 	});
 
+	test("install reports config conflicts without partial writes", async () => {
+		const targetRoot = await createFixtureRoot();
+		await mkdir(join(targetRoot, ".codex"), { recursive: true });
+		await writeFile(
+			join(targetRoot, ".codex/config.toml"),
+			"[features]\nfast_mode = true\n",
+		);
+
+		const result = await runCli([
+			"install",
+			"--surface",
+			"codex",
+			"--scope",
+			"project",
+			"--target",
+			targetRoot,
+			"--root",
+			process.cwd(),
+		]);
+
+		expect(result.exitCode).toBe(1);
+		expect(result.stderr).toContain("config-conflict");
+		expect(
+			await Bun.file(
+				join(targetRoot, ".oal/manifest/codex-project.json"),
+			).exists(),
+		).toBe(false);
+	});
+
+	test("uninstall reports edited managed config and keeps manifest", async () => {
+		const targetRoot = await createFixtureRoot();
+		const installResult = await runCli([
+			"install",
+			"--surface",
+			"codex",
+			"--scope",
+			"project",
+			"--target",
+			targetRoot,
+			"--root",
+			process.cwd(),
+		]);
+		expect(installResult.exitCode).toBe(0);
+		await writeFile(
+			join(targetRoot, ".codex/config.toml"),
+			"[features]\nfast_mode = true\n",
+		);
+
+		const uninstallResult = await runCli([
+			"uninstall",
+			"--surface",
+			"codex",
+			"--scope",
+			"project",
+			"--target",
+			targetRoot,
+		]);
+
+		expect(uninstallResult.exitCode).toBe(1);
+		expect(uninstallResult.stderr).toContain("managed-content-changed");
+		expect(
+			await Bun.file(
+				join(targetRoot, ".oal/manifest/codex-project.json"),
+			).exists(),
+		).toBe(true);
+	});
+
 	test("surface all install fails atomically when one adapter has diagnostics", async () => {
 		const sourceRoot = await createFixtureRoot();
 		const targetRoot = await createFixtureRoot();
@@ -304,6 +378,38 @@ describe("OAL CLI installer", () => {
 
 		expect(result.exitCode).toBe(1);
 		expect(result.stderr).toContain("blocked-config-key");
+		expect(
+			await Bun.file(
+				join(targetRoot, ".oal/manifest/codex-project.json"),
+			).exists(),
+		).toBe(false);
+		expect(
+			await Bun.file(join(targetRoot, ".codex/config.toml")).exists(),
+		).toBe(false);
+	});
+
+	test("surface all install preflights config conflicts before writing", async () => {
+		const targetRoot = await createFixtureRoot();
+		await mkdir(join(targetRoot, ".claude"), { recursive: true });
+		await writeFile(
+			join(targetRoot, ".claude/settings.json"),
+			'{"hooks":{"UserPromptSubmit":[]}}\n',
+		);
+
+		const result = await runCli([
+			"install",
+			"--surface",
+			"all",
+			"--scope",
+			"project",
+			"--target",
+			targetRoot,
+			"--root",
+			process.cwd(),
+		]);
+
+		expect(result.exitCode).toBe(1);
+		expect(result.stderr).toContain("config-conflict");
 		expect(
 			await Bun.file(
 				join(targetRoot, ".oal/manifest/codex-project.json"),

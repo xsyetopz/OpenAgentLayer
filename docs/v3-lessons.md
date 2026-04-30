@@ -4,6 +4,8 @@ Purpose: distill v3 evidence into v4 design lessons.
 
 Authority: research synthesis only.
 
+Evidence base: `v3_to_be_removed/` source, generator, hook, installer, and generated surface files.
+
 ## Worked well
 
 - One canonical source feeding multiple surfaces.
@@ -31,4 +33,3 @@ Authority: research synthesis only.
 - Source formats change to TOML plus Markdown.
 - Command and skill format becomes unified.
 - Validation becomes a first-order subsystem.
-

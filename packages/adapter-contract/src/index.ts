@@ -23,6 +23,11 @@ export type AdapterCapability = SourceRecord["kind"] | AdapterArtifactKind;
 
 export type InstallScope = "global" | "project";
 
+export type AdapterArtifactInstallMode =
+	| "full-file"
+	| "marked-text-block"
+	| "structured-object";
+
 export interface AdapterContext {
 	readonly surface: Surface;
 	readonly deterministicId: string;
@@ -36,6 +41,9 @@ export interface AdapterArtifact {
 	readonly path: string;
 	readonly content: string;
 	readonly sourceRecordIds: readonly string[];
+	readonly installMode?: AdapterArtifactInstallMode;
+	readonly managedBlockId?: string;
+	readonly managedKeyPaths?: readonly string[];
 }
 
 export interface AdapterRenderResult {

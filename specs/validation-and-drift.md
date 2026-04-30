@@ -37,6 +37,8 @@ Authority: normative.
 - external-source synthesis labels anecdotes;
 - plans use status markers consistently.
 
+Documentation validation is executable through source graph validation. `oal check` and `bun run check:source` must report diagnostics for missing top-level spec links, missing v3 evidence paths, invalid plan status markers, and normative v3 implementation requirements in specs.
+
 ## Links
 
 - [OpenAgentLayer v4](openagentlayer-v4.md)

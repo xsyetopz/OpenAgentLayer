@@ -56,13 +56,17 @@ Each entry contains:
 
 - Create target directories as needed.
 - Write only generated artifacts for the selected surface.
+- Preflight every selected surface before writing files.
+- `--surface all` must not write an earlier surface when a later surface has a config conflict or other predictable prepare-time install error.
 - Merge config through marked managed blocks once config-merge support exists.
 - Respect surface-specific config scope and ownership from [surface config contract](surface-config-contract.md).
 - Never overwrite unmarked user content.
 - Write executable bits for hook scripts where needed.
 - Verify installed files parse or execute where possible.
 
-Current install writes full generated artifact files for the selected surface and records those files in the manifest. Install verification checks manifest presence, target-root path safety, managed file existence, managed file hashes, and generated hook script execution.
+Current install writes generated-only artifacts as full files, text instructions as marked managed blocks, and JSON/TOML configs as manifest-owned structured keys. Install verification checks manifest presence, target-root path safety, managed file existence, managed file hashes or owned values, marked block integrity, and generated hook script execution.
+
+Installer package internals are split by responsibility. The public API remains exported from `@openagentlayer/install`; internal modules own paths, manifest IO, structured config, merge behavior, install planning, uninstall, and verification separately.
 
 ## Uninstall rules
 
@@ -72,7 +76,9 @@ Current install writes full generated artifact files for the selected surface an
 - Remove managed config blocks.
 - Leave unmarked user files untouched.
 
-Current uninstall removes full-file generated artifacts listed in the manifest. Marked config-block removal remains queued until config merge is implemented.
+Current uninstall removes full-file generated artifacts, removes OAL marked text blocks, and removes only manifest-owned structured config keys when the installed value is unchanged. If a managed block or config value was edited after install, uninstall preserves it and reports managed content change.
+
+When uninstall reports unresolved managed content changes, it must keep a manifest with unresolved entries so ownership and later cleanup remain possible. CLI uninstall must return non-zero when uninstall issues are reported.
 
 ## Links
 

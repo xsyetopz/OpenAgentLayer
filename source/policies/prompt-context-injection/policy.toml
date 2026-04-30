@@ -1,0 +1,21 @@
+id = "prompt-context-injection"
+kind = "policy"
+title = "Prompt Context Injection"
+description = "Attach concise OpenAgentLayer route and behavior context to user prompts."
+category = "input_guard"
+severity = "info"
+event_intent = "prompt_context"
+blocking = false
+failure_mode = "warn_only"
+handler_class = "command_script"
+matcher = "prompt"
+runtime_script = "runtime/prompt-context-injection.mjs"
+surface_events = ["UserPromptSubmit", "tui.prompt.append"]
+test_payloads = ["prompt-context-injection/basic.json"]
+tests = ["prompt-context-injection.test.ts"]
+surfaces = ["codex", "claude", "opencode"]
+
+[surface_mappings]
+codex = "UserPromptSubmit"
+claude = "UserPromptSubmit"
+opencode = "tui.prompt.append"

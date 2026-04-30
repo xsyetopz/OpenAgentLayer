@@ -35,6 +35,7 @@ import {
 	validateRecordFields,
 	validateRecordIdentity,
 } from "./validate";
+import { validateDocumentation } from "./validate-docs";
 
 interface RecordDefinition {
 	readonly kind: SourceRecord["kind"];
@@ -86,6 +87,8 @@ export async function loadSourceGraph(root: string): Promise<LoadResult> {
 			}
 		}
 	}
+
+	diagnostics.push(...(await validateDocumentation(root)));
 
 	const duplicateDiagnostics = validateDuplicateIds(records);
 	diagnostics.push(...duplicateDiagnostics);

@@ -65,5 +65,5 @@ Docs:
 - [x] Sealed — V3 docs are evidence studies.
 - [x] Sealed — Status markers appear in plan files.
 - [x] Sealed — Mermaid graphs live in `specs/architecture-graph.md`.
-- [ ] Queued — Run Biome docs check.
-- [ ] Queued — Fix formatting issues from validation.
+- [x] Sealed — Run root Biome check; docs paths are ignored by Biome.
+- [x] Sealed — Validate docs formatting and status issues through source validation.
