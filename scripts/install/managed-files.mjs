@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getCodexPlan } from "../../source/subscriptions.mjs";
@@ -12,6 +13,21 @@ const SECTION_HEADER_RE = /^[\s]*\[/;
 const OPENAGENTSBTW_PREFIX_RE = /^openagentsbtw-/;
 const OPENAGENTSBTW_PLUGIN_RE =
 	/\[plugins\."openagentsbtw@openagentsbtw-local"\]/;
+
+function resolveZshPath() {
+	try {
+		const result = spawnSync("which", ["zsh"], {
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		});
+		if (result.status === 0 && result.stdout) {
+			return result.stdout.trim();
+		}
+	} catch {
+		// fall through
+	}
+	return null;
+}
 
 export function mergeTaggedBlock(text, block, start, end) {
 	if (text.includes(start) && text.includes(end)) {
@@ -47,6 +63,8 @@ function buildCodexAgentProfiles(planName) {
 }
 
 function renderCodexProfile(name, config, extra = "") {
+	const zshPath = resolveZshPath();
+	const zshConfig = zshPath ? `\nzsh_path = "${zshPath}"` : "";
 	return `[profiles.${name}]
 model = "${config.model}"
 model_reasoning_effort = "${config.modelReasoning}"
@@ -55,7 +73,7 @@ model_verbosity = "${config.verbosity}"
 personality = "none"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
-sandbox_mode = "workspace-write"${extra}
+sandbox_mode = "workspace-write"${zshConfig}${extra}
 
 [profiles.${name}.features]
 codex_hooks = true
@@ -118,6 +136,8 @@ function buildManagedCodexBody({ planName, deepwiki, includePluginEntry }) {
 	const deepwikiBlock = deepwiki
 		? '\n[mcp_servers.deepwiki]\nurl = "https://mcp.deepwiki.com/mcp"\nenabled = true\n'
 		: "";
+	const zshPath = resolveZshPath();
+	const zshConfig = zshPath ? `\nzsh_path = "${zshPath}"` : "";
 	const mainProfile = renderCodexProfile("openagentsbtw", plan.profiles.main);
 	const implementProfile = renderCodexProfile(
 		"openagentsbtw-implement",
@@ -135,7 +155,7 @@ model_verbosity = "${plan.profiles.approvalAuto.verbosity}"
 personality = "none"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "never"
-sandbox_mode = "workspace-write"
+sandbox_mode = "workspace-write"${zshConfig}
 
 [profiles.openagentsbtw-approval-auto.features]
 codex_hooks = true
@@ -166,7 +186,7 @@ personality = "none"
 model_instructions_file = "~/.codex/AGENTS.md"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
-background_terminal_max_timeout = 7200
+background_terminal_max_timeout = 7200${zshConfig}
 
 [profiles.openagentsbtw-runtime-long.features]
 codex_hooks = true

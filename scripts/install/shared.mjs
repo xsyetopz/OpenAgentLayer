@@ -208,7 +208,9 @@ export async function syncManagedTree(source, target) {
 		previous = JSON.parse(await readText(manifestPath, "[]")).filter(
 			(entry) => typeof entry === "string",
 		);
-	} catch {}
+	} catch {
+		//
+	}
 	for (const relativePath of previous) {
 		if (sourceFiles.has(relativePath)) continue;
 		const targetPath = path.join(target, relativePath);
@@ -297,7 +299,9 @@ export async function removeCopilotPluginCaches(
 					await fs.rm(pluginRoot, { recursive: true, force: true });
 					break;
 				}
-			} catch {}
+			} catch {
+				//
+			}
 		}
 	}
 }
@@ -437,7 +441,7 @@ export async function promptText(
 	}
 }
 
-export async function run(command, args, options = {}) {
+export function run(command, args, options = {}) {
 	return new Promise((resolve, reject) => {
 		const child = spawn(command, args, {
 			stdio: options.stdio ?? "inherit",
@@ -459,7 +463,7 @@ export async function run(command, args, options = {}) {
 	});
 }
 
-export async function capture(command, args, options = {}) {
+export function capture(command, args, options = {}) {
 	return new Promise((resolve, reject) => {
 		const child = spawn(command, args, {
 			stdio: ["ignore", "pipe", "pipe"],

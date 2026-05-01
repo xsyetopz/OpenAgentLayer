@@ -339,10 +339,12 @@ async function ensureSelection(args) {
 	);
 
 	if (
-		!args.installClaude &&
-		!args.installOpenCode &&
-		!args.installCodex &&
-		!args.installCopilot
+		!(
+			args.installClaude ||
+			args.installOpenCode ||
+			args.installCodex ||
+			args.installCopilot
+		)
 	) {
 		fail("No systems selected");
 	}
@@ -518,7 +520,7 @@ function validateArgs(args) {
 	}
 }
 
-async function ensureNode() {
+function ensureNode() {
 	if (!commandExists("node")) {
 		fail(
 			"node not found. Claude and Codex hook scripts require Node.js >= 24.14.1.",
@@ -805,21 +807,19 @@ async function maybeInstallRtk(args) {
 		logWarn("Skipping RTK install");
 		return;
 	}
-	if (!commandExists("rtk")) {
-		if (process.platform === "win32") {
-			logWarn(
-				"RTK not found on Windows; skipping binary bootstrap and leaving configure-only mode",
-			);
-		} else if (commandExists("brew")) {
-			await run("brew", ["install", "rtk-ai/tap/rtk"]);
-		} else {
-			await run("sh", [
-				"-lc",
-				"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh",
-			]);
-		}
-	} else {
+	if (commandExists("rtk")) {
 		logInfo("RTK already installed");
+	} else if (process.platform === "win32") {
+		logWarn(
+			"RTK not found on Windows; skipping binary bootstrap and leaving configure-only mode",
+		);
+	} else if (commandExists("brew")) {
+		await run("brew", ["install", "rtk-ai/tap/rtk"]);
+	} else {
+		await run("sh", [
+			"-lc",
+			"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh",
+		]);
 	}
 	const workspacePaths = resolveWorkspacePaths();
 	const policyTargets = selectedRtkPolicyTargets(args);
@@ -840,12 +840,12 @@ async function installClaude(args, artifacts) {
 	const models = configureClaudeModels(args.claudePlan);
 	const settingsFile = path.join(PATHS.claudeHome, "settings.json");
 	await fs.mkdir(path.dirname(settingsFile), { recursive: true });
-	if (!(await pathExists(settingsFile))) {
-		await writeText(settingsFile, "{}\n");
-		logInfo("Created settings.json");
-	} else {
+	if (await pathExists(settingsFile)) {
 		await fs.copyFile(settingsFile, `${settingsFile}.backup`);
 		logInfo("Backed up existing settings.json");
+	} else {
+		await writeText(settingsFile, "{}\n");
+		logInfo("Created settings.json");
 	}
 	const template = path.join(
 		artifacts.claudeDir,
@@ -908,10 +908,14 @@ async function installClaude(args, artifacts) {
 			{
 				cwd: ROOT,
 			},
-		).catch(() => {});
+		).catch(() => {
+			//
+		});
 		await run("claude", ["plugin", "uninstall", "openagentsbtw"], {
 			cwd: ROOT,
-		}).catch(() => {});
+		}).catch(() => {
+			//
+		});
 		const marketplaceDir = path.join(
 			PATHS.claudeHome,
 			"plugins",
@@ -970,7 +974,9 @@ async function writeCopilotDeepwiki(target) {
 	let payload = {};
 	try {
 		payload = JSON.parse(existing);
-	} catch {}
+	} catch {
+		//
+	}
 	payload.servers ??= {};
 	payload.servers.deepwiki = {
 		type: "http",
@@ -1010,17 +1016,17 @@ async function logCopilotRuntimeDiagnostics() {
 		);
 	}
 
-	if (!ghBinary) {
-		logWarn(
-			"GitHub CLI is not on PATH; gh copilot fallback entrypoints are unavailable",
-		);
-	} else {
+	if (ghBinary) {
 		const ghCheck = runVersionCheck("gh", ["copilot", "--help"]);
 		if (!ghCheck.ok) {
 			logWarn(
 				`gh copilot is present but not healthy in this environment: ${ghCheck.output || "help check failed"}`,
 			);
 		}
+	} else {
+		logWarn(
+			"GitHub CLI is not on PATH; gh copilot fallback entrypoints are unavailable",
+		);
 	}
 
 	const vscodeExtensionsDir =
