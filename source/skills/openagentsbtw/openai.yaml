@@ -1,8 +1,0 @@
-interface:
-  display_name: openagentsbtw
-  short_description: Route work through openagentsbtw roles and wrapper workflows.
-  default_prompt:
-    - Use openagentsbtw to plan a multi-file refactor through Athena before implementation.
-    - Use openagentsbtw to review the current diff through Nemesis, then run targeted validation through Atalanta.
-policy:
-  allow_implicit_invocation: false

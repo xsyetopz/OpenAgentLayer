@@ -1,7 +1,8 @@
+v3_legacy/
+
 # Build output
 dist/
 generated/
-v3_to_be_removed/
 target/
 
 # Node

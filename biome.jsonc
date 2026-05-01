@@ -36,9 +36,7 @@
 			}
 		},
 		{
-			"includes": [
-				"src/index.ts"
-			],
+			"includes": ["src/index.ts", "**/src/index.ts"],
 			"linter": {
 				"rules": {
 					"performance": {
@@ -49,10 +47,7 @@
 			}
 		},
 		{
-			"includes": [
-				"tests/**/*.test.mjs",
-				"tests/**/*.test.js"
-			],
+			"includes": ["tests/**/*.test.mjs", "tests/**/*.test.js"],
 			"linter": {
 				"rules": {
 					"performance": {
@@ -162,10 +157,7 @@
 		}
 	},
 	"javascript": {
-		"globals": [
-			"Bun",
-			"$"
-		],
+		"globals": ["Bun", "$"],
 		"formatter": {
 			"quoteStyle": "double"
 		}

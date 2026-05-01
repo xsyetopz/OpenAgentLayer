@@ -10,29 +10,13 @@
         "bun-types": "1.3.13",
       },
     },
-    "packages/adapter-contract": {
-      "name": "@openagentlayer/adapter-contract",
-      "dependencies": {
-        "@openagentlayer/diagnostics": "workspace:*",
-        "@openagentlayer/types": "workspace:*",
-      },
-    },
-    "packages/adapters": {
-      "name": "@openagentlayer/adapters",
-      "dependencies": {
-        "@openagentlayer/adapter-contract": "workspace:*",
-        "@openagentlayer/runtime": "workspace:*",
-        "@openagentlayer/types": "workspace:*",
-      },
-    },
     "packages/cli": {
       "name": "@openagentlayer/cli",
       "bin": {
         "oal": "src/cli.ts",
       },
       "dependencies": {
-        "@openagentlayer/diagnostics": "workspace:*",
-        "@openagentlayer/install": "workspace:*",
+        "@openagentlayer/model-routing": "workspace:*",
         "@openagentlayer/render": "workspace:*",
         "@openagentlayer/source": "workspace:*",
         "@openagentlayer/types": "workspace:*",
@@ -47,15 +31,12 @@
         "@openagentlayer/types": "workspace:*",
       },
     },
-    "packages/install": {
-      "name": "@openagentlayer/install",
+    "packages/model-routing": {
+      "name": "@openagentlayer/model-routing",
       "dependencies": {
-        "@openagentlayer/adapter-contract": "workspace:*",
-        "@openagentlayer/diagnostics": "workspace:*",
         "@openagentlayer/types": "workspace:*",
       },
       "devDependencies": {
-        "@openagentlayer/render": "workspace:*",
         "@openagentlayer/source": "workspace:*",
         "@openagentlayer/testkit": "workspace:*",
       },
@@ -63,19 +44,8 @@
     "packages/render": {
       "name": "@openagentlayer/render",
       "dependencies": {
-        "@openagentlayer/adapter-contract": "workspace:*",
-        "@openagentlayer/adapters": "workspace:*",
+        "@openagentlayer/model-routing": "workspace:*",
         "@openagentlayer/source": "workspace:*",
-        "@openagentlayer/types": "workspace:*",
-      },
-      "devDependencies": {
-        "@openagentlayer/testkit": "workspace:*",
-      },
-    },
-    "packages/runtime": {
-      "name": "@openagentlayer/runtime",
-      "dependencies": {
-        "@openagentlayer/diagnostics": "workspace:*",
         "@openagentlayer/types": "workspace:*",
       },
       "devDependencies": {
@@ -122,19 +92,13 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.4.13", "", { "os": "win32", "cpu": "x64" }, "sha512-tTcMkXyBrmHi9BfrD2VNHs/5rYIUKETqsBlYOvSAABwBkJhSDVb5e7wPukftsQbO3WzQkXe6kaztC6WtUOXSoQ=="],
 
-    "@openagentlayer/adapter-contract": ["@openagentlayer/adapter-contract@workspace:packages/adapter-contract"],
-
-    "@openagentlayer/adapters": ["@openagentlayer/adapters@workspace:packages/adapters"],
-
     "@openagentlayer/cli": ["@openagentlayer/cli@workspace:packages/cli"],
 
     "@openagentlayer/diagnostics": ["@openagentlayer/diagnostics@workspace:packages/diagnostics"],
 
-    "@openagentlayer/install": ["@openagentlayer/install@workspace:packages/install"],
+    "@openagentlayer/model-routing": ["@openagentlayer/model-routing@workspace:packages/model-routing"],
 
     "@openagentlayer/render": ["@openagentlayer/render@workspace:packages/render"],
-
-    "@openagentlayer/runtime": ["@openagentlayer/runtime@workspace:packages/runtime"],
 
     "@openagentlayer/source": ["@openagentlayer/source@workspace:packages/source"],
 

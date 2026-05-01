@@ -1,8 +1,0 @@
-{
-  "name": "oabtw-research",
-  "agent": "hermes",
-  "routeKind": "readonly",
-  "description": "openagentsbtw research (Hermes)",
-  "title": "Research",
-  "body": "Follow the nano workflow: Research -> Plan -> Execute -> Review -> Ship. Separate verified evidence from assumptions and name the single best next check when uncertainty remains."
-}

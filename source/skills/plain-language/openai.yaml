@@ -1,4 +1,0 @@
-display_name: Plain Language
-short_description: Rewrite public prose for clear, translation-ready readers.
-default_prompt: Rewrite this copy in plain language for non-native readers while
-  keeping technical meaning exact.

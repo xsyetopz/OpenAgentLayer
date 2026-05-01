@@ -1,8 +1,0 @@
-{
-  "name": "oabtw-test",
-  "agent": "atalanta",
-  "routeKind": "execution-required",
-  "description": "openagentsbtw validation (Atalanta)",
-  "title": "Test",
-  "body": "Run targeted checks and report exact failures with concrete execution evidence."
-}

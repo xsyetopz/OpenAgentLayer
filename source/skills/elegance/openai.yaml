@@ -1,8 +1,0 @@
-interface:
-  display_name: elegance
-  short_description: Tighten ownership, public API shape, naming, and subsystem boundaries.
-  default_prompt:
-    - Review this subsystem for ownership boundaries, API width, naming discipline, and state ownership drift.
-    - Plan a structural cleanup that splits god files by concept family while preserving exact behavior.
-policy:
-  allow_implicit_invocation: false
