@@ -22,10 +22,10 @@ Use:
 Avoid/replace:
 
 - `approval_policy = "on-failure"` → use `on-request` or `never`.
-- `approvals_reviewer = "guardian_subagent"` → use `auto_review`.
-- legacy no-op ghost snapshot fields.
+- `approvals_reviewer = "deprecated approval alias"` → use `auto_review`.
+- deprecated no-op ghost snapshot fields.
 - prompt/agent hooks if the installed Codex version still skips them.
-- `gpt-5.4`, `gpt-5.2`, stale v3 model names.
+- blocked Codex models, blocked model names.
 
 ## Claude Code
 
@@ -43,7 +43,7 @@ Use:
 
 Avoid/replace:
 
-- stale Opus 4.6 models.
+- stale blocked Claude model family models.
 - deprecated `includeCoAuthoredBy` if current attribution object is available.
 - writing `.claude/settings.local.json` without explicit user/local install choice.
 - toggling plugins without installed plugin payload.
@@ -77,4 +77,4 @@ Avoid/replace:
 
 ## Cross-provider replacement principle
 
-Never keep deprecated/legacy fields because v3 used them. Render current provider-supported keys and keep migration cleanup separate from new OAL product output.
+Never keep deprecated/deprecated fields because baseline behavior used them. Render current provider-supported keys and keep migration cleanup separate from new OAL product output.

@@ -12,11 +12,11 @@ This pack is not a goal prompt. It is a product-surface research pack. It is mea
 4. `04_CROSS_PROVIDER_SURFACE_MATRIX.md` — canonical surface matrix for agents, skills, commands, tools, hooks, configs, instructions.
 5. `05_HOOK_CAPABILITY_MATRIX.md` — all supported hook/event types that matter for OAL and their provider-specific behavior.
 6. `06_AGENT_SKILLS_COMMANDS_TOOLS_SPEC.md` — product standard for OAL agents/subagents, skills, commands/routes, OpenCode tools, plugins.
-7. `07_CONFIG_KEYS_TO_USE_AVOID_REPLACE.md` — fields OAL should use, avoid, or replace because they are deprecated, legacy, no-op, or provider-local.
+7. `07_CONFIG_KEYS_TO_USE_AVOID_REPLACE.md` — fields OAL should use, avoid, or replace because they are deprecated, no-op, or provider-local.
 8. `08_OAL_RENDER_DEPLOY_MAPPING.md` — how the OAL generator/deployer should map source records to rendered provider artifacts.
 9. `09_ACCEPTANCE_TEST_REQUIREMENTS.md` — product acceptance suite to prevent stubbed generated output.
 10. `10_SOURCE_REFERENCES.md` — primary source URLs and observed evidence.
-11. `11_CODEX_FEATURE_FLAGS_TESTED_PROFILE.md` — field-tested Codex native-capability profile and canonical/legacy key handling.
+11. `11_CODEX_FEATURE_FLAGS_TESTED_PROFILE.md` — field-tested Codex native-capability profile and canonical/deprecated key handling.
 12. `12_SURFACE_EXPLOITATION_POSTURE.md` — naming and product posture for using every stable provider surface OAL can back with real behavior.
 13. `.codex/README.md` — how to use this research pack with a Codex worker without making it invent stubs.
 
@@ -28,7 +28,7 @@ The pack does not use “recommended” in the conservative-default sense. OAL�
 
 OAL must generate provider-native artifacts. A file is only useful if it is consumed by source loading, rendering, deployment, uninstall, runtime hooks, or validation. Provider capability differences must be represented explicitly; no fake parity layer.
 
-V3 is reference-only. The reboot must not mention `legacy project`, `legacy project`, or `OAL` in product code or generated end-user artifacts.
+baseline behavior is reference-only. The reboot must not mention `deprecated product wording`, `deprecated product wording`, or `OAL` in product code or generated end-user artifacts.
 
 ## Added user-researched Codex surface-exploitation profile
 

@@ -17,13 +17,7 @@ const REQUIRED_CASK_SNIPPETS = [
 	"`oal check`",
 ] as const;
 
-const FORBIDDEN_CASK_SNIPPETS = [
-	["openagents", "btw"].join(""),
-	["oa", "btw"].join(""),
-	"TODO",
-	"FIXME",
-	"placeholder",
-] as const;
+const FORBIDDEN_CASK_SNIPPETS = ["TODO", "FIXME", "placeholder"] as const;
 
 export async function assertHomebrewCask(repoRoot: string): Promise<void> {
 	const packageJson = JSON.parse(

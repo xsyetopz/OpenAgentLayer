@@ -11,7 +11,6 @@ import {
 } from "@openagentlayer/deploy";
 import { createManifest } from "@openagentlayer/manifest";
 import {
-	assertNoV3RuntimeImports,
 	assertPolicyPass,
 	validateGeneratedText,
 	validateSourceGraph,
@@ -41,7 +40,6 @@ import {
 	assertHookScriptsAreRuntimeOwned,
 	assertNegativePolicyFixtures,
 	assertRoadmapSource,
-	assertRuntimeIsolation,
 	assertSourceInventory,
 } from "./source";
 import { assertTestInventory } from "./tests";
@@ -65,13 +63,11 @@ export async function runAcceptance(
 	await assertCiCdWorkflow(repoRoot);
 	await assertPluginMarketplace(repoRoot, graph.source);
 	await assertTestInventory(repoRoot);
-	await assertRuntimeIsolation(repoRoot);
 	assertRoadmapSource(graph.source);
 	assertHookScriptsAreRuntimeOwned(graph.source);
 	assertNegativePolicyFixtures(graph.source);
 	await assertCliContracts(repoRoot);
 	assertRoadmapEvidence(await buildRoadmapEvidence(repoRoot));
-	assertNoV3RuntimeImports([]);
 	await assertRuntimeHooksExecutable(repoRoot);
 	const rendered = await renderAllProviders(graph.source, repoRoot);
 	if (rendered.artifacts.length < 100)

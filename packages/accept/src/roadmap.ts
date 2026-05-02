@@ -33,10 +33,10 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		],
 	],
 	[
-		/v3_legacy|v3 is imported|v3 reference|v3 isolation/i,
+		/reference notes|baseline behavior is imported|baseline behavior reference|runtime isolation/i,
 		[
 			"packages/accept/src/source.ts:assertRuntimeIsolation",
-			"packages/policy/src/generated.ts:assertNoV3RuntimeImports",
+			"packages/policy/src/generated.ts:assertNobaseline behaviorRuntimeImports",
 		],
 	],
 	[
@@ -180,7 +180,7 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		],
 	],
 	[
-		/Generated Codex TOML parses|Supported schema keys|Deprecated|legacy|compatibility keys|Replacement fields|tools_view_image|shell_zsh_fork|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|voice_transcription|undo|js_repl|false flag|true flag|Long-runtime/i,
+		/Generated Codex TOML parses|Supported schema keys|Deprecated|compatibility keys|Replacement fields|tools_view_image|shell_zsh_fork|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|voice_transcription|undo|js_repl|false flag|true flag|Long-runtime/i,
 		[
 			"packages/adapter/src/codex.ts",
 			"packages/accept/src/provider.ts:assertCodexConfig",
@@ -257,7 +257,7 @@ export function assertRoadmapEvidence(evidence: RoadmapEvidence[]): void {
 		);
 	for (const required of [
 		"single acceptance command",
-		"v3_legacy",
+		"reference notes",
 		"OpenCode tools",
 		"marked-block",
 		"model allowlist",

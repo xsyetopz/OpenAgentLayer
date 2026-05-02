@@ -104,12 +104,12 @@ Config output is a tailored provider config payload with model routing, hooks, p
 
 - TOML output must respect Codex config schema and current supported fields.
 - Model allowlist must be enforced.
-- Do not emit gpt-5.4 or gpt-5.2 for OAL reboot.
+- Do not emit blocked Codex models for OAL reboot.
 
 ### Claude Code
 
 - Settings JSON output must respect Claude Code settings schema and current supported fields.
-- Do not emit Opus 4-6 models for OAL reboot.
+- Do not emit blocked Claude model family models for OAL reboot.
 
 ### OpenCode
 

@@ -42,7 +42,6 @@
   },
   "exclude": [
     "dist",
-    "node_modules",
-    "v3_legacy",
+    "node_modules"
   ]
 }

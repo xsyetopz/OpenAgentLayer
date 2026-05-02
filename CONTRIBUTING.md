@@ -16,7 +16,7 @@ Before large changes, read:
 - `docs/provider_config_research/08_OAL_RENDER_DEPLOY_MAPPING.md`
 - `docs/provider_config_research/09_ACCEPTANCE_TEST_REQUIREMENTS.md`
 
-`v3_legacy/` is read-only reference material. Do not modify it and do not import
+`reference notes/` is read-only reference material. Do not modify it and do not import
 it from runtime code.
 
 ## Workflow
@@ -82,10 +82,10 @@ bun run roadmap:evidence
 ### Product naming audit
 
 ```bash
-grep -R -n -i 'legacy-name-pattern' README.md CONTRIBUTING.md CHANGELOG.md docs homebrew packages source tests package.json .github
+grep -R -n -i 'blocked-name-pattern' README.md CONTRIBUTING.md CHANGELOG.md docs homebrew packages source tests package.json .github
 ```
 
-Replace `legacy-name-pattern` with the legacy names being checked during the
+Replace `blocked-name-pattern` with the blocked names being checked during the
 release audit.
 
 ## Provider notes

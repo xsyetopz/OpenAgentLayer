@@ -53,7 +53,7 @@ Use:
 - `web_search`
 - profile-scoped `features`.
 
-Use `approvals_reviewer = "auto_review"` if OAL wants an automated approval reviewer. Do not emit the legacy alias `guardian_subagent` even though the schema accepts it for compatibility.
+Use `approvals_reviewer = "auto_review"` if OAL wants an automated approval reviewer. Do not emit the deprecated alias `deprecated approval alias` even though the schema accepts it for compatibility.
 
 Do not emit `approval_policy = "on-failure"`; Codex schema marks it deprecated and marks the replacement path as `on-request` for interactive runs or `never` for non-interactive runs.
 
@@ -67,9 +67,9 @@ OAL should only render these Codex models:
 
 Do not render:
 
-- `gpt-5.4`
-- `gpt-5.2`
-- stale v3 model names.
+- `blocked Codex model`
+- `blocked Codex model`
+- blocked model names.
 
 OAL capability-maximizing routing:
 
@@ -182,15 +182,15 @@ OAL must not clobber user `config.toml`. It should:
 - prefer project scope when possible.
 - provide uninstall that removes only manifest-owned OAL keys/files.
 
-## Deprecated/legacy/compatibility avoidance
+## Deprecated/compatibility avoidance
 
 Avoid:
 
 - `approval_policy = "on-failure"`.
-- `approvals_reviewer = "guardian_subagent"`; use `auto_review`.
-- legacy no-op ghost snapshot settings.
-- legacy managed config paths except as uninstall/migration cleanup.
-- emitting `gpt-5.4`, `gpt-5.2`, or v3 stale model values.
+- `approvals_reviewer = "deprecated approval alias"`; use `auto_review`.
+- deprecated no-op ghost snapshot settings.
+- deprecated managed config paths except as uninstall/migration cleanup.
+- emitting blocked Codex models, or blocked model values.
 - prompt/agent hook handler types unless the installed Codex version proves support.
 
 ## OAL Codex rendering outputs
@@ -207,7 +207,7 @@ AGENTS.md or .codex/AGENTS.md depending project policy
 .codex/openagentlayer/manifest.json
 ```
 
-Final names should be `openagentlayer` or `oal`, not `legacy project`.
+Final names should be `openagentlayer` or `oal`, not `deprecated product wording`.
 
 ## User-researched native-capability feature profile for OAL-managed Codex profiles
 

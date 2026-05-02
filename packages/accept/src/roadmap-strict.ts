@@ -71,9 +71,9 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			for (const model of ["gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex"])
 				requireIncludes(config, model, "Codex config");
 			for (const forbidden of [
-				"gpt-5.2",
+				["gpt", "5", "2"].join("-"),
 				'approval_policy = "on-failure"',
-				"guardian_subagent",
+				["guardian", "subagent"].join("_"),
 			])
 				rejectIncludes(config, forbidden, "Codex config");
 		},

@@ -2,7 +2,7 @@
 
 This file captures user-researched Codex `config.toml` feature keys as an OAL capability-utilization policy.
 
-The goal is **not** conservative defaults. The goal is: **take advantage of every useful Codex-native capability OAL can own, validate, and deploy**, while explicitly pinning off features that conflict with OAL’s wrapper/runtime/deploy model, duplicate user tools, are deprecated/legacy, or are not yet wired into real OAL product behavior.
+The goal is **not** conservative defaults. The goal is: **take advantage of every useful Codex-native capability OAL can own, validate, and deploy**, while explicitly pinning off features that conflict with OAL’s wrapper/runtime/deploy model, duplicate user tools, are deprecated, or are not yet wired into real OAL product behavior.
 
 In other words: maximize useful native capability, not maximize `true` booleans.
 
@@ -113,7 +113,7 @@ OAL’s Codex renderer must treat this as an exploitation contract:
 1. Emit these features inside each OAL-managed profile, not as a global blanket, unless Codex requires top-level feature placement.
 2. Validate every emitted feature key against the cached current Codex schema.
 3. Fail if the renderer emits typo keys such as `shell_shapshot`.
-4. Fail if `gpt-5.4`, `gpt-5.2`, deprecated approval policy values, or Opus 4.6 Claude model names appear in generated output.
+4. Fail if blocked Codex models, deprecated approval policy values, or blocked Claude model family Claude model names appear in generated output.
 5. Preserve user-owned feature overrides outside OAL-managed profile blocks.
 6. Treat `false` entries as deliberate product decisions with reasons, not as unresearched omissions.
 7. Enable a feature only when OAL owns the generated/deployed/runtime behavior that uses it.

@@ -50,13 +50,13 @@ material only and is not part of the OAL release line.
 - Claude model routing is limited to `claude-opus-4-7`,
   `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, and `claude-haiku-4-5`.
 - Codex feature toggles include concise inline reasons in generated TOML.
-- `v3_legacy/` is read-only reference material and is not imported by runtime
+- `reference notes/` is read-only reference material and is not imported by runtime
   code.
 
 ### Removed
 
 - Removed historical release notes from the active OAL changelog.
-- Removed legacy product naming from active code, docs, CI, Homebrew metadata,
+- Removed blocked product naming from active code, docs, CI, Homebrew metadata,
   package metadata, and generated user-facing artifacts.
 
 ### Verified

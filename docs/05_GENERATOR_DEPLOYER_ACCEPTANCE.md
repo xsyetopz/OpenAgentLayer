@@ -19,7 +19,7 @@ The exact command name can differ, but there must be one clear full-product acce
 - authored source loads successfully;
 - all source references resolve;
 - generated output is not treated as authored source;
-- `v3_legacy` is not imported by OAL runtime code.
+- `reference notes` is not imported by OAL runtime code.
 
 ### 2. Provider rendering
 

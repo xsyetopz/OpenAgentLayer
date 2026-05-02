@@ -20,11 +20,3 @@ export function validateGeneratedText(
 	}
 	return issues;
 }
-
-export function assertNoV3RuntimeImports(paths: string[]): void {
-	const offenders = paths.filter((path) => path.includes("v3_legacy"));
-	if (offenders.length > 0)
-		throw new Error(
-			`OAL runtime must not import v3_legacy: ${offenders.join(", ")}`,
-		);
-}

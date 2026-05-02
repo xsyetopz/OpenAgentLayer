@@ -33,7 +33,7 @@ OpenCode supports JSON and JSONC. Config files are merged, not replaced. Relevan
 - `.opencode` directory content
 - `OPENCODE_CONFIG`
 - `OPENCODE_CONFIG_DIR`
-- managed settings at highest priority
+- managed settings at highest precedence
 
 OAL should use project config for project installs and global config for explicit user installs. It must preserve user-owned keys and track OAL-owned writes/merges in a manifest.
 

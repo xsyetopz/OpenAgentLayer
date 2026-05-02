@@ -1,13 +1,13 @@
 # OAL Reboot Evidence Pack
 
-This pack studies `xsyetopz/OpenAgentLayer` at commit `bd7fb00663153af0aca90b12b9c525895f1a7a0d`, the pinned legacy project v3 reference, and derives reboot requirements for OAL.
+This pack studies `xsyetopz/OpenAgentLayer` at commit `bd7fb00663153af0aca90b12b9c525895f1a7a0d`, the pinned deprecated product wording baseline behavior reference, and derives reboot requirements for OAL.
 
-Important naming rule: the reboot must not mention `legacy project`, `legacy project`, or `OAL` in product code or generated user-facing artifacts. Those terms are reference-only for this audit. The new product is OAL / OpenAgentLayer.
+Important naming rule: the reboot must not mention `deprecated product wording`, `deprecated product wording`, or `OAL` in product code or generated user-facing artifacts. Those terms are reference-only for this audit. The new product is OAL / OpenAgentLayer.
 
 ## Files
 
-1. `01_V3_EVIDENCE_AUDIT.md` — what v3 actually did, with evidence.
-2. `02_V3_SUCCEEDED_VS_FAILED.md` — where v3 succeeded and where it fell short.
+1. `01_baseline behavior_EVIDENCE_AUDIT.md` — what baseline behavior actually did, with evidence.
+2. `02_baseline behavior_SUCCEEDED_VS_FAILED.md` — where baseline behavior succeeded and where it fell short.
 3. `03_OAL_REBOOT_PRODUCT_SPEC.md` — evidence-derived product definition for OAL.
 4. `04_PROVIDER_NATIVE_REQUIREMENTS.md` — Codex, Claude Code, and OpenCode surface requirements.
 5. `05_GENERATOR_DEPLOYER_ACCEPTANCE.md` — full-product acceptance gate, not a toy-product gate.

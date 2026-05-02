@@ -1,5 +1,2 @@
 [install]
 linker = "isolated"
-
-[test]
-pathIgnorePatterns = ["v3_legacy/**"]

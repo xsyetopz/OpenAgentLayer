@@ -1,6 +1,6 @@
 # OAL Reboot Product Requirements
 
-OAL is a reboot, not an “legacy reference line” codebase. The product may be called OpenAgentLayer or OAL. Product code and generated artifacts must not mention “legacy reference line.” V3 is reference material only.
+OAL is a reboot, not an “deprecated product wording” codebase. The product may be called OpenAgentLayer or OAL. Product code and generated artifacts must not mention “deprecated product wording.” baseline behavior is reference material only.
 
 ## Product definition
 
@@ -36,7 +36,7 @@ OAL is not complete unless the product can do all of this as running code:
 11. Execute `.mjs` hook fixtures.
 12. Verify OpenCode tools/commands are wired when generated.
 13. Enforce allowed model sets.
-14. Prove v3_legacy is reference-only and not imported by OAL.
+14. Prove reference notes is reference-only and not imported by OAL.
 15. Detect generated/source drift.
 
 ## File validity rule
@@ -50,7 +50,7 @@ A file belongs in OAL only if at least one is true:
 - it is executable runtime hook/tool code;
 - it is used by validation or fixture tests;
 - it is documentation of actual implemented behavior;
-- it is v3 reference material under `v3_legacy`.
+- it is baseline behavior reference material under `reference notes`.
 
 Everything else is suspect. A disconnected Markdown/JSON catalog is not product.
 
@@ -154,8 +154,8 @@ Allowed Codex models:
 
 Forbidden Codex models:
 
-- `gpt-5.4`
-- `gpt-5.2`
+- `blocked Codex model`
+- `blocked Codex model`
 
 Allowed Claude models:
 
@@ -166,8 +166,8 @@ Allowed Claude models:
 
 Forbidden Claude models:
 
-- `claude-opus-4-6`
-- `claude-opus-4-6[1m]`
+- `blocked Claude model`
+- `blocked Claude long-context model`
 
 Avoid `xhigh` and `1m` except when explicitly justified by a route or large-context requirement.
 
@@ -186,4 +186,4 @@ A passing implementation must prove:
 - uninstall removes only owned material;
 - manifests record ownership;
 - unsupported models/provider features fail validation;
-- v3 remains reference-only.
+- baseline behavior remains reference-only.

@@ -20,13 +20,13 @@ The acceptance command must verify:
    - loads all authored source records;
    - rejects missing references;
    - rejects unsupported model names;
-   - rejects v3 legacy imports;
+   - rejects baseline behavior reference imports;
    - maps generated artifacts back to source records.
 
 2. Codex rendering
    - generated TOML parses;
    - config uses only allowed Codex models;
-   - deprecated `on-failure` and `guardian_subagent` are not emitted;
+   - deprecated `on-failure` and `deprecated approval alias` are not emitted;
    - hooks are command `.mjs` hooks unless installed support proves otherwise;
    - agent roles are not shallow placeholders.
 
@@ -69,7 +69,7 @@ Acceptance must fail on:
 - OpenCode tool references without tool files.
 - plugin entries without plugin payload.
 - provider config with unsupported models.
-- any `legacy project`/`legacy project` naming in new OAL product output.
+- any `deprecated product wording`/`deprecated product wording` naming in new OAL product output.
 
 ## Why this matters
 

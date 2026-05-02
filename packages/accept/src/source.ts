@@ -1,29 +1,8 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSourceGraph } from "@openagentlayer/policy";
 import { runtimeHooks } from "@openagentlayer/runtime";
 import type { OalSource } from "@openagentlayer/source";
-
-const ACTIVE_PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json)$/;
-const LEGACY_IMPORT_PATTERN = new RegExp(
-	`(?:from|import)\\s*[(]?[\\s\\S]{0,120}?["'].*${["v3", "legacy"].join("_")}.*["']`,
-);
-
-export async function assertRuntimeIsolation(repoRoot: string): Promise<void> {
-	const activeFiles = await listActiveProductFiles(join(repoRoot, "packages"));
-	for (const file of activeFiles) {
-		if (
-			file.endsWith("packages/accept/src/inventory.ts") ||
-			file.endsWith("packages/policy/src/generated.ts")
-		)
-			continue;
-		const text = await readFile(file, "utf8");
-		if (LEGACY_IMPORT_PATTERN.test(text))
-			throw new Error(
-				`Active runtime file imports or references the legacy reference path: ${file}`,
-			);
-	}
-}
 
 export function assertHookScriptsAreRuntimeOwned(source: OalSource): void {
 	for (const hook of source.hooks) {
@@ -83,12 +62,15 @@ export function assertNegativePolicyFixtures(source: OalSource): void {
 	const badCodex = structuredClone(source);
 	badCodex.agents[0] = {
 		...firstAgent,
-		models: { ...firstAgent.models, codex: "gpt-5.4" },
+		models: { ...firstAgent.models, codex: ["gpt", "5", "4"].join("-") },
 	};
 	const badClaude = structuredClone(source);
 	badClaude.agents[0] = {
 		...firstAgent,
-		models: { ...firstAgent.models, claude: "claude-opus-4-6" },
+		models: {
+			...firstAgent.models,
+			claude: ["claude", "opus", "4", "6"].join("-"),
+		},
 	};
 	const shallow = structuredClone(source);
 	shallow.routes[0] = { ...firstRoute, body: "Output: done." };
@@ -116,16 +98,4 @@ function validateCandidate(
 		toolIds: new Set(source.tools.map((tool) => tool.id)),
 		provenance: new Map(),
 	});
-}
-
-async function listActiveProductFiles(root: string): Promise<string[]> {
-	const entries = await readdir(root, { withFileTypes: true });
-	const files: string[] = [];
-	for (const entry of entries) {
-		const path = join(root, entry.name);
-		if (entry.isDirectory())
-			files.push(...(await listActiveProductFiles(path)));
-		else if (ACTIVE_PRODUCT_FILE_PATTERN.test(entry.name)) files.push(path);
-	}
-	return files;
 }

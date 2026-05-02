@@ -51,9 +51,9 @@ NOTE: `opusplan` is another "model" that essentially auto-switches `opus` in Pla
 
 Do not render:
 
-- `claude-opus-4-6`
-- `claude-opus-4-6[1m]`
-- stale v3 `opusplan`/`opus[1m]` aliases unless the installed CLI explicitly needs aliases and the renderer maps them outside product source.
+- `blocked Claude model`
+- `blocked Claude long-context model`
+- stale baseline behavior `opusplan`/`opus[1m]` aliases unless the installed CLI explicitly needs aliases and the renderer maps them outside product source.
 
 Avoid `[1m]` unless a route explicitly needs large-context behavior.
 
@@ -141,7 +141,7 @@ OAL Claude hook surfaces to exploit:
 
 - `SessionStart`: context boot, project memory, model/route summary.
 - `UserPromptSubmit`: route context, prompt guard, context injection.
-- `SubagentStart`: subagent route-context injection. This was a v3 strength.
+- `SubagentStart`: subagent route-context injection. This was a baseline behavior strength.
 - `PreToolUse`: destructive command guard, generated-file edit guard, secret read guard.
 - `PermissionRequest`: policy/risk review.
 - `PostToolUse`: changed-file tracking and tool-result classification.
@@ -174,7 +174,7 @@ User install should render analogous `~/.claude` paths, with explicit user appro
 ## Avoid
 
 - `includeCoAuthoredBy` if schema marks it deprecated in favor of a newer attribution object.
-- stale Opus 4.6 models.
+- stale blocked Claude model family models.
 - local settings writes without user consent.
 - hooks that are descriptions instead of executable commands.
 - marketplace/plugin toggles for missing plugin payloads.

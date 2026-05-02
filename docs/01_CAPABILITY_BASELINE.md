@@ -1,12 +1,12 @@
-# v3 Capability Map: What to Recover, What to Reject
+# baseline behavior Capability Map: What to Recover, What to Reject
 
-This document maps original v3 capabilities into OAL reboot requirements. It is not a porting guide. It identifies what was real product behavior and what should be redesigned.
+This document maps original baseline behavior capabilities into OAL reboot requirements. It is not a porting guide. It identifies what was real product behavior and what should be redesigned.
 
 ## Agent prompts
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 maintained agent metadata and full prompt bodies under `source/agents/<agent>/`. Prompt bodies were multi-section operating manuals. They included identity, constraints, behavioral rules, workflow/protocol, capabilities, reference tables, and output format.
+baseline behavior maintained agent metadata and full prompt bodies under `source/agents/<agent>/`. Prompt bodies were multi-section operating manuals. They included identity, constraints, behavioral rules, workflow/protocol, capabilities, reference tables, and output format.
 
 Examples:
 
@@ -32,9 +32,9 @@ Examples:
 
 ## Commands and routes
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 had per-provider command catalogs, such as `source/commands/codex/plan.json`. The Codex `plan` record had a profile, route kind, docs/test allowances, prototype-scaffolding flag, and a prompt that described planning behavior.
+baseline behavior had per-provider command catalogs, such as `source/commands/codex/plan.json`. The Codex `plan` record had a profile, route kind, docs/test allowances, prototype-scaffolding flag, and a prompt that described planning behavior.
 
 This is partly good: commands carried route contract fields, not just text.
 
@@ -53,9 +53,9 @@ This is partly good: commands carried route contract fields, not just text.
 
 ## Hooks
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 hooks were executable `.mjs` files. The stop-scan hook read stdin, parsed route contracts, inspected git diffs, classified file changes, detected placeholders/prototype scaffolding, required execution evidence, rejected weak blocked results, warned on soft placeholder/prose drift, and blocked invalid route completions.
+baseline behavior hooks were executable `.mjs` files. The stop-scan hook read stdin, parsed route contracts, inspected git diffs, classified file changes, detected placeholders/prototype scaffolding, required execution evidence, rejected weak blocked results, warned on soft placeholder/prose drift, and blocked invalid route completions.
 
 The hook policy model also represented provider-specific surfaces: Claude hook events, Codex hook events, Copilot fallback events, OpenCode plugin/git-hook surfaces, and unsupported provider cases.
 
@@ -76,9 +76,9 @@ The hook policy model also represented provider-specific surfaces: Claude hook e
 
 ## Installer and deployment
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 installer supported multiple providers and many optional surfaces: Claude, OpenCode, Codex, Copilot, RTK, Caveman, Context7, DeepWiki MCP, Playwright CLI, wrapper shims, Codex plugin payloads, and provider plan presets.
+baseline behavior installer supported multiple providers and many optional surfaces: Claude, OpenCode, Codex, Copilot, RTK, Caveman, Context7, DeepWiki MCP, Playwright CLI, wrapper shims, Codex plugin payloads, and provider plan presets.
 
 ### Recover in OAL
 
@@ -97,9 +97,9 @@ v3 installer supported multiple providers and many optional surfaces: Claude, Op
 
 ## Model routing
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 had plan presets and swarm policies. It assigned models per role and had profiles such as main, utility, implementation, approvalAuto, and runtimeLong.
+baseline behavior had plan presets and swarm policies. It assigned models per role and had profiles such as main, utility, implementation, approvalAuto, and runtimeLong.
 
 ### Recover in OAL
 
@@ -116,9 +116,9 @@ v3 had plan presets and swarm policies. It assigned models per role and had prof
 
 ## Source/generation model
 
-### v3 behavior
+### baseline behavior behavior
 
-v3 had an authored source tree and generated platform targets. It loaded agents, skills, commands, hook policies, and guidance from `source/`, then rendered provider output.
+baseline behavior had an authored source tree and generated platform targets. It loaded agents, skills, commands, hook policies, and guidance from `source/`, then rendered provider output.
 
 ### Recover in OAL
 

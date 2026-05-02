@@ -27,7 +27,7 @@ Do not fake support by emitting a meaningless stub.
 
 ## Example: subagent route context
 
-Claude Code can use `SubagentStart`. OpenCode can map to `tool.execute.before` when the `task` tool starts a subagent. Codex does not expose a Claude-style `SubagentStart` in observed v3 evidence. Therefore OAL must render different provider policies rather than pretend all three have the same lifecycle event.
+Claude Code can use `SubagentStart`. OpenCode can map to `tool.execute.before` when the `task` tool starts a subagent. Codex does not expose a Claude-style `SubagentStart` in observed baseline behavior evidence. Therefore OAL must render different provider policies rather than pretend all three have the same lifecycle event.
 
 ## Example: custom tools
 

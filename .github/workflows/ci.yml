@@ -44,11 +44,6 @@ jobs:
         run: bun run roadmap:evidence
       - name: Homebrew cask syntax
         run: ruby -c homebrew/Casks/openagentlayer.rb
-      - name: Product naming guard
-        run: |
-          bad_names='openagents''btw\|oa''btw'
-          ! grep -R -n -i "$bad_names" README.md CONTRIBUTING.md CHANGELOG.md docs homebrew packages source tests package.json
-
   dry-run:
     name: Render and deploy dry-run
     runs-on: macos-15

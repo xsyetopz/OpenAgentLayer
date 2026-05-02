@@ -34,7 +34,7 @@ OAL is not:
 - a generic harness
 - fake provider-parity middleware
 - a decorative Greek-agent generator
-- a v3 compatibility wrapper
+- a baseline behavior compatibility wrapper
 
 ## Product rule
 
@@ -48,21 +48,21 @@ A file belongs in OAL only if it is one of these:
 6. validation/acceptance logic;
 7. generated output;
 8. documentation for actual behavior;
-9. v3 reference under `v3_legacy`.
+9. baseline behavior reference under `reference notes`.
 
 Anything else is suspect.
 
-## V3 reference rule
+## baseline behavior reference rule
 
-`v3_legacy/` is study/reference only.
+`reference notes/` is study/reference only.
 
 OAL product code must not import it, mutate it, regenerate it, or depend on it at runtime.
 
-Useful v3 behavior can be recovered only by re-implementing it as OAL behavior.
+Useful baseline behavior behavior can be recovered only by re-implementing it as OAL behavior.
 
 ## Naming rule
 
-Internal discussions may call this `legacy reference line`. Product code and generated artifacts must not.
+Internal discussions may call this `deprecated product wording`. Product code and generated artifacts must not.
 
 Allowed product language:
 
@@ -73,10 +73,10 @@ Allowed product language:
 
 Disallowed in OAL user-facing output:
 
-- `legacy project`
-- `legacy project`
+- `deprecated product wording`
+- `deprecated product wording`
 - `OAL`
-- `legacy v3`
+- `deprecated baseline behavior`
 
 ## Production-quality bar
 
@@ -97,5 +97,5 @@ OAL is production-quality when it can:
 - prove OpenCode commands/tools are wired, not just described;
 - reject unsupported models;
 - reject generated/source drift;
-- keep v3 reference isolated;
+- keep baseline behavior reference isolated;
 - pass a single full-product acceptance command.

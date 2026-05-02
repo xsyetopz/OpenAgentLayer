@@ -4,7 +4,7 @@ OAL should be tooling-agnostic at the source intent layer and provider-native at
 
 ## Codex
 
-Reference v3 Codex surfaces:
+Reference baseline behavior Codex surfaces:
 
 - `AGENTS.md`
 - custom agent TOML with `developer_instructions`
@@ -23,12 +23,12 @@ OAL Codex requirements:
 - wire hooks through documented Codex hook surfaces only;
 - support route contracts such as readonly, edit-required, execution-required;
 - validate model allowlist: `gpt-5.5`, `gpt-5.4-mini`, `gpt-5.3-codex` only;
-- reject `gpt-5.4`, `gpt-5.2`, and any unapproved model;
+- reject blocked Codex models, and any unapproved model;
 - avoid default `xhigh` unless explicitly justified by route/model plan.
 
 ## Claude Code
 
-Reference v3 Claude surfaces:
+Reference baseline behavior Claude surfaces:
 
 - `.claude/settings.json` / settings templates
 - agents/subagents
@@ -46,17 +46,17 @@ OAL Claude requirements:
 - render `CLAUDE.md`/instructions;
 - package executable `.mjs` hooks;
 - validate allowed models: `claude-opus-4-7`, `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`;
-- reject Opus 4.6 variants;
+- reject blocked Claude model family variants;
 - avoid 1m unless a route explicitly needs large context.
 
 ## OpenCode
 
-Reference v3 OpenCode surfaces:
+Reference baseline behavior OpenCode surfaces:
 
 - role prompts under `opencode/templates/agents/`
 - generated skills
 - commands under `opencode/src/commands.ts`
-- plugin guardrails under `opencode/templates/plugins/legacy project.ts`
+- plugin guardrails under `opencode/templates/plugins/deprecated product wording.ts`
 - instructions
 - native continuation concepts such as `--continue`, `/sessions`, `/compact`, and `task_id`
 
@@ -73,7 +73,7 @@ OAL OpenCode requirements:
 
 OAL must explicitly represent provider differences.
 
-Example from v3: Claude had `SubagentStart`, OpenCode mapped route context to plugin `tool.execute.before`, and Codex lacked a Claude-style `SubagentStart` event. OAL should preserve this style of explicit capability mapping.
+Example from baseline behavior: Claude had `SubagentStart`, OpenCode mapped route context to plugin `tool.execute.before`, and Codex lacked a Claude-style `SubagentStart` event. OAL should preserve this style of explicit capability mapping.
 
 ## External surface references
 

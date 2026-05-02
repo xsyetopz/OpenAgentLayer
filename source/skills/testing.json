@@ -7,5 +7,5 @@
     "opencode"
   ],
   "description": "Prove generator, deployer, hooks, tools, and drift behavior end to end.",
-  "body": "Use fixture roots outside the source tree. Verify render, deploy, uninstall, hook execution, OpenCode tool import, model rejection, v3 isolation, and drift detection. A passing test must exercise behavior, not merely assert that a file exists."
+  "body": "Use fixture roots outside the source tree. Verify render, deploy, uninstall, hook execution, OpenCode tool import, model rejection, runtime isolation, and drift detection. A passing test must exercise behavior, not merely assert that a file exists."
 }

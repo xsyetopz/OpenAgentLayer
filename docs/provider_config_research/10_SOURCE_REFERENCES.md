@@ -12,7 +12,7 @@ Key findings:
 
 - Config supports profiles, agents, feature flags, approval/sandbox/model settings, hooks, tools, history, memories, apps/connectors.
 - `on-failure` approval policy is deprecated in schema descriptions.
-- `guardian_subagent` is legacy compatibility for approvals reviewer; use `auto_review`.
+- `deprecated approval alias` is compatibility for approvals reviewer; use `auto_review`.
 - Hook discovery supports command hooks; prompt/agent hook handler types are skipped in observed implementation.
 - Observed hook events: PreToolUse, PermissionRequest, PostToolUse, SessionStart, UserPromptSubmit, Stop.
 
@@ -45,7 +45,7 @@ Key findings:
 Key findings:
 
 - Config is JSON/JSONC and merged from multiple locations.
-- `permission` is the current tool-control surface; legacy `tools` booleans should be avoided when possible.
+- `permission` is the current tool-control surface; deprecated `tools` booleans should be avoided when possible.
 - Custom tools are TS/JS files in `.opencode/tools` or global tools dir.
 - Plugins can add tools, hooks, integrations, and subscribe to many runtime events.
 - OpenCode has primary agents and subagents; `default_agent` must be primary.

@@ -33,12 +33,6 @@ export interface PluginSyncResult {
 const PROVIDERS = ["codex", "claude", "opencode"] as const;
 const PLUGIN_NAME = "openagentlayer";
 const CODEX_MARKETPLACE_NAME = "openagentlayer-local";
-const LEGACY_CACHE_NAMES = [
-	["openagents", "btw"].join(""),
-	["openagents", "btw-local"].join(""),
-	["oa", "btw"].join(""),
-	["oa", "btw-local"].join(""),
-] as const;
 
 export async function syncPlugins(
 	options: PluginSyncOptions,
@@ -90,7 +84,6 @@ async function syncCodex(options: ProviderSyncOptions): Promise<void> {
 	await writeProviderArtifacts(options, cacheTarget);
 	await writeCodexMarketplace(options, pluginRoot);
 	await pruneVersionCache(options, cacheRoot);
-	await removeKnownCaches(options, join(options.home, ".codex/plugins/cache"));
 }
 
 async function syncClaude(options: ProviderSyncOptions): Promise<void> {
@@ -118,10 +111,6 @@ async function syncOpenCode(options: ProviderSyncOptions): Promise<void> {
 	await copyMarketplace(options, "opencode", cacheTarget);
 	await writeProviderArtifacts(options, cacheTarget);
 	await pruneVersionCache(options, cacheRoot);
-	await removeKnownCaches(
-		options,
-		join(options.home, ".opencode/plugins/cache"),
-	);
 }
 
 async function copyMarketplace(
@@ -227,14 +216,6 @@ async function pruneVersionCache(
 	}
 }
 
-async function removeKnownCaches(
-	options: ProviderSyncOptions,
-	cacheRoot: string,
-): Promise<void> {
-	for (const name of LEGACY_CACHE_NAMES)
-		await removePath(options, join(cacheRoot, name), "legacy cache");
-}
-
 async function removeMatchingChildren(
 	options: ProviderSyncOptions,
 	cacheRoot: string,
@@ -245,11 +226,7 @@ async function removeMatchingChildren(
 }
 
 function isOalCacheName(name: string): boolean {
-	return (
-		name.includes("openagentlayer") ||
-		LEGACY_CACHE_NAMES.some((legacy) => name.includes(legacy)) ||
-		name.startsWith("temp_local_")
-	);
+	return name.includes("openagentlayer") || name.startsWith("temp_local_");
 }
 
 async function writeText(

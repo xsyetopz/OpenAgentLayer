@@ -6,9 +6,9 @@ This is not a prompt-card task. This is product construction.
 
 Build OAL as a running generator/deployer product. Do not satisfy the task by creating representational files. A file that looks like an artifact is not enough. It must be consumed, rendered, deployed, uninstalled, executed, or validated by product behavior.
 
-## v3 rule
+## baseline behavior rule
 
-`v3_legacy/` is reference and study material only. Do not modify v3 except to move existing reference material into that directory if the repository layout requires it. Do not import v3 into OAL runtime code. Do not mention “legacy reference line” in OAL product code.
+`reference notes/` is reference and study material only. Do not modify baseline behavior except to move existing reference material into that directory if the repository layout requires it. Do not import baseline behavior into OAL runtime code. Do not mention “deprecated product wording” in OAL product code.
 
 ## No shortcut rule
 
@@ -60,7 +60,7 @@ Acceptable primary work:
 - command/route renderer;
 - model routing enforcement;
 - generated/source drift check;
-- v3 isolation check;
+- runtime isolation check;
 - product acceptance command.
 
 Content assets are acceptable only when they complete a product path. Do not make content the main work unless the render/deploy path is already working.
@@ -80,6 +80,6 @@ The repo should eventually have one command that proves full product behavior. I
 - `.mjs` hook fixtures run;
 - generated/source drift is detected;
 - model allowlist is enforced;
-- v3_legacy is not imported by OAL runtime code.
+- reference notes is not imported by OAL runtime code.
 
 Do not stop because one file or one provider works. Stop only when product behavior works or a concrete blocker prevents completion.

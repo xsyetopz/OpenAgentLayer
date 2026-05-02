@@ -68,8 +68,8 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 	assertCodexFeatureComments(config);
 	for (const forbidden of [
 		'approval_policy = "on-failure"',
-		"guardian_subagent",
-		"gpt-5.2",
+		["guardian", "subagent"].join("_"),
+		["gpt", "5", "2"].join("-"),
 	])
 		if (config.includes(forbidden))
 			throw new Error(

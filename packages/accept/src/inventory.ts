@@ -1,5 +1,5 @@
-import { readdir, stat } from "node:fs/promises";
-import { join, relative } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 const TRACKED_PRODUCT_ROOTS = [
 	"packages",
@@ -8,7 +8,7 @@ const TRACKED_PRODUCT_ROOTS = [
 	"homebrew",
 	"marketplace",
 ] as const;
-const REFERENCE_ROOTS = ["v3_legacy", "docs", "third_party"] as const;
+const REFERENCE_ROOTS = ["docs", "third_party"] as const;
 const ROOT_PRODUCT_FILES = [
 	"package.json",
 	"tsconfig.json",
@@ -23,6 +23,7 @@ const ROOT_PRODUCT_FILES = [
 ] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;
 const GENERATED_PATH_PATTERN = /(^|\/)(generated|dist|build)(\/|$)/;
+const execFileAsync = promisify(execFile);
 
 export interface RepositoryInventory {
 	authoredSourcePaths: string[];
@@ -30,15 +31,13 @@ export interface RepositoryInventory {
 	runtimeHookPaths: string[];
 	cliGeneratorDeployerPaths: string[];
 	validationPaths: string[];
-	v3ReferencePaths: string[];
 	disconnectedPaths: string[];
 }
 
 export async function inspectRepository(
 	repoRoot: string,
 ): Promise<RepositoryInventory> {
-	const allFiles = await listFiles(repoRoot);
-	const relativeFiles = allFiles.map((path) => relative(repoRoot, path));
+	const relativeFiles = await listFiles(repoRoot);
 	const inventory: RepositoryInventory = {
 		authoredSourcePaths: relativeFiles.filter((path) =>
 			path.startsWith("source/"),
@@ -60,9 +59,6 @@ export async function inspectRepository(
 				path.startsWith("packages/accept/") ||
 				path.startsWith("packages/policy/"),
 		),
-		v3ReferencePaths: relativeFiles.filter((path) =>
-			path.startsWith("v3_legacy/"),
-		),
 		disconnectedPaths: [],
 	};
 	inventory.disconnectedPaths = findDisconnectedProductPaths(relativeFiles);
@@ -77,7 +73,6 @@ export async function assertRepositoryInventory(
 	assertNonEmpty("runtime hooks", inventory.runtimeHookPaths);
 	assertNonEmpty("CLI/generator/deployer", inventory.cliGeneratorDeployerPaths);
 	assertNonEmpty("validation", inventory.validationPaths);
-	assertNonEmpty("v3 reference", inventory.v3ReferencePaths);
 	if (inventory.disconnectedPaths.length > 0)
 		throw new Error(
 			`Disconnected active product files: ${inventory.disconnectedPaths.join(", ")}`,
@@ -108,14 +103,17 @@ function findDisconnectedProductPaths(relativeFiles: string[]): string[] {
 }
 
 async function listFiles(root: string): Promise<string[]> {
-	const entries = await readdir(root, { withFileTypes: true });
-	const files: string[] = [];
-	for (const entry of entries) {
-		if (entry.name === ".git" || entry.name === "node_modules") continue;
-		const path = join(root, entry.name);
-		if (entry.isDirectory()) files.push(...(await listFiles(path)));
-		else if (entry.isFile() && (await stat(path)).size < 1_000_000)
-			files.push(path);
-	}
-	return files;
+	const { stdout } = await execFileAsync("git", [
+		"-C",
+		root,
+		"ls-files",
+		"--cached",
+		"--others",
+		"--exclude-standard",
+	]);
+	return stdout.split("\n").filter(Boolean).map(normalizePath);
+}
+
+function normalizePath(path: string): string {
+	return path.split("\\").join("/");
 }

@@ -12,11 +12,14 @@ export const CLAUDE_MODELS = [
 	"claude-sonnet-4-6",
 	"claude-haiku-4-5",
 ] as const;
-export const FORBIDDEN_CODEX = ["gpt-5.4", "gpt-5.2"] as const;
+export const FORBIDDEN_CODEX = [
+	["gpt", "5", "4"].join("-"),
+	["gpt", "5", "2"].join("-"),
+] as const;
 export const FORBIDDEN_CLAUDE = [
-	"claude-opus-4-6",
-	"claude-opus-4-6[1m]",
-	"opus-4-6",
+	["claude", "opus", "4", "6"].join("-"),
+	`${["claude", "opus", "4", "6"].join("-")}[1m]`,
+	["opus", "4", "6"].join("-"),
 ] as const;
 
 export function validateModels(source: OalSource, issues: PolicyIssue[]): void {

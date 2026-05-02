@@ -2,7 +2,7 @@ import type { SourceGraph } from "@openagentlayer/source";
 import { validateContracts } from "./contracts";
 import { validateDepth } from "./depth";
 
-export { assertNoV3RuntimeImports, validateGeneratedText } from "./generated";
+export { validateGeneratedText } from "./generated";
 export { CLAUDE_MODELS, CODEX_MODELS } from "./models";
 
 import { validateModels } from "./models";
