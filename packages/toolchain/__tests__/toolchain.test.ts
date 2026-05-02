@@ -10,6 +10,7 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	expect(plan.commands).toContain("rtk grep --help");
 	expect(plan.commands).toContain("rtk find --help");
 	expect(renderToolchainPlan(plan)).toContain("confirm token savings");
+	expect(renderToolchainPlan(plan)).toContain("at or above 80%");
 });
 
 test("Linux plan uses selected distro package manager and optional tools", () => {

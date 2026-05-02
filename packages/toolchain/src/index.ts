@@ -71,6 +71,7 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		notes: [
 			"Run as dry-run first; install mutates user machine state.",
 			"RTK must be verified with `rtk gain` to avoid the wrong rtk package.",
+			"Keep `rtk gain` at or above 80%; drops below 80% require command/output efficiency work before release.",
 			"Use `rtk gain` to confirm token savings; prefer `rtk grep` and bounded `rtk find` for high-volume repository inspection.",
 		],
 	};

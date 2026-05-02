@@ -34,18 +34,24 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.13
+      - name: Setup RTK
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh
+          echo "$HOME/.rtk/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Typecheck
-        run: bunx tsc --noEmit
+        run: rtk proxy -- bunx tsc --noEmit
       - name: Test
-        run: bun run test
+        run: rtk proxy -- bun run test
       - name: Acceptance
-        run: bun run accept
+        run: rtk proxy -- bun run accept
       - name: Lint
-        run: bun run biome:check
+        run: rtk proxy -- bun run biome:check
       - name: Roadmap evidence
-        run: bun run roadmap:evidence
+        run: rtk proxy -- bun run roadmap:evidence
       - name: Homebrew cask syntax
         run: ruby -c homebrew/Casks/openagentlayer.rb
   dry-run:
@@ -66,16 +72,22 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.13
+      - name: Setup RTK
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh
+          echo "$HOME/.rtk/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Source check
-        run: bun run check
+        run: rtk proxy -- bun run check
       - name: Preview generated artifacts
-        run: bun run preview -- --provider all --path .codex/config.toml --content
+        run: rtk proxy -- bun run preview -- --provider all --path .codex/config.toml --content
       - name: Deploy dry-run
         run: |
           target="$(mktemp -d)"
-          bun run deploy -- --target "$target" --scope project --provider all --dry-run
+          rtk proxy -- bun run deploy -- --target "$target" --scope project --provider all --dry-run
 
   homebrew-submission:
     name: Homebrew submission

@@ -36,6 +36,7 @@ import { assertPluginMarketplace } from "./plugins";
 import { assertProviderConfigContracts } from "./provider";
 import { assertRoadmapEvidence, buildRoadmapEvidence } from "./roadmap";
 import { assertStrictRoadmapChecks } from "./roadmap-strict";
+import { assertRtkGainThreshold } from "./rtk";
 import {
 	assertAuthoredMarkdownStyle,
 	assertHookScriptsAreRuntimeOwned,
@@ -68,6 +69,7 @@ export async function runAcceptance(
 	await assertCiCdWorkflow(repoRoot);
 	await assertPluginMarketplace(repoRoot, graph.source);
 	await assertVersionBumpTool(repoRoot);
+	await assertRtkGainThreshold(repoRoot);
 	await assertTestInventory(repoRoot);
 	assertRoadmapSource(graph.source);
 	assertHookScriptsAreRuntimeOwned(graph.source);
