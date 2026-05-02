@@ -52,7 +52,7 @@ export async function renderClaude(
 	artifacts.push({
 		provider: PROVIDER,
 		path: "CLAUDE.md",
-		content: instructions(source.routes, PROVIDER),
+		content: instructions(source, source.routes, PROVIDER),
 		sourceId: "instructions:claude",
 		mode: "block",
 	});

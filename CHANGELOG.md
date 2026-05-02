@@ -5,7 +5,7 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.1.0] - 2026-05-02
+## [0.1.1-beta.2] - 2026-05-02
 
 ### Added
 

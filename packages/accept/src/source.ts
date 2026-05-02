@@ -18,9 +18,18 @@ export function assertHookScriptsAreRuntimeOwned(source: OalSource): void {
 }
 
 export async function assertSourceInventory(repoRoot: string): Promise<void> {
-	for (const directory of ["agents", "skills", "routes", "hooks", "tools"]) {
+	for (const directory of [
+		"agents",
+		"skills",
+		"routes",
+		"hooks",
+		"tools",
+		"prompts",
+	]) {
 		const entries = await readdir(join(repoRoot, "source", directory));
-		if (!entries.some((entry) => entry.endsWith(".json")))
+		if (
+			!entries.some((entry) => entry.endsWith(".json") || entry.endsWith(".md"))
+		)
 			throw new Error(`No authored source records in ${directory}.`);
 	}
 }
@@ -74,10 +83,18 @@ export function assertNegativePolicyFixtures(source: OalSource): void {
 	};
 	const shallow = structuredClone(source);
 	shallow.routes[0] = { ...firstRoute, body: "Output: done." };
+	if (!source.promptContracts)
+		throw new Error("Negative fixtures require product prompt contracts.");
+	const noSourceBehavior = structuredClone(source);
+	noSourceBehavior.promptContracts = {
+		...source.promptContracts,
+		sourceBackedBehavior: "Evidence matters.",
+	};
 	for (const [name, candidate] of [
 		["bad codex model", badCodex],
 		["bad claude model", badClaude],
 		["shallow route", shallow],
+		["missing source-backed behavior", noSourceBehavior],
 	] as const) {
 		const report = validateCandidate(candidate);
 		if (!report.issues.some((issue) => issue.severity === "error"))

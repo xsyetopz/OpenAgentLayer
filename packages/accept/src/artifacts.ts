@@ -30,6 +30,10 @@ const AGENT_CONTRACT_TERMS = [
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
+	"Source-backed behaviour is mandatory",
+	"Source Evidence Map",
+	"A confident guess is failure",
+	"Simplicity discipline",
 	"RTK efficiency:",
 	"Response boundaries:",
 	"Triggers:",
@@ -49,6 +53,10 @@ const COMMAND_CONTRACT_TERMS = [
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
+	"Source-backed behaviour is mandatory",
+	"Source Evidence Map",
+	"A confident guess is failure",
+	"Simplicity discipline",
 	"RTK efficiency:",
 	"Response boundaries:",
 ] as const;
@@ -58,8 +66,6 @@ const SKILL_PROMPT_CONTRACT_TERMS = [
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
-	"RTK efficiency:",
-	"Response boundaries:",
 ] as const;
 
 export function assertGeneratedArtifactContracts(

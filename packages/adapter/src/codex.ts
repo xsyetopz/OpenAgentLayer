@@ -100,7 +100,7 @@ export async function renderCodex(
 	artifacts.push({
 		provider: PROVIDER,
 		path: "AGENTS.md",
-		content: instructions(source.routes, PROVIDER),
+		content: instructions(source, source.routes, PROVIDER),
 		sourceId: "instructions:codex",
 		mode: "block",
 	});

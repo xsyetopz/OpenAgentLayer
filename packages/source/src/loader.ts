@@ -28,6 +28,7 @@ export async function loadSource(sourceRoot: string): Promise<SourceGraph> {
 	validateProductSource(product);
 	const source: OalSource = {
 		...product,
+		promptTemplates: await loadPromptTemplates(sourceRoot),
 		agents: await readRecords<AgentRecord>(
 			sourceRoot,
 			"agents",
@@ -51,6 +52,31 @@ export async function loadSource(sourceRoot: string): Promise<SourceGraph> {
 		),
 	};
 	return createSourceGraph(sourceRoot, source);
+}
+
+async function loadPromptTemplates(
+	sourceRoot: string,
+): Promise<NonNullable<ProductSource["promptTemplates"]>> {
+	const promptRoot = join(sourceRoot, "prompts");
+	return {
+		agentContract: await readFile(
+			join(promptRoot, "agent-contract.md"),
+			"utf8",
+		),
+		skillContract: await readFile(
+			join(promptRoot, "skill-contract.md"),
+			"utf8",
+		),
+		commandContract: await readFile(
+			join(promptRoot, "command-contract.md"),
+			"utf8",
+		),
+		instructions: await readFile(join(promptRoot, "instructions.md"), "utf8"),
+		codexBaseline: await readFile(
+			join(promptRoot, "codex-baseline.md"),
+			"utf8",
+		),
+	};
 }
 
 async function loadSkillRecords(sourceRoot: string): Promise<SkillRecord[]> {

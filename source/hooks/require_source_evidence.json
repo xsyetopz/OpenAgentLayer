@@ -1,0 +1,21 @@
+{
+  "id": "require_source_evidence",
+  "script": "require-source-evidence.mjs",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "events": {
+    "codex": [
+      "Stop"
+    ],
+    "claude": [
+      "Stop",
+      "SubagentStop"
+    ],
+    "opencode": [
+      "session.idle"
+    ]
+  }
+}

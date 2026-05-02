@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	mkdtemp,
+	readdir,
+	readFile,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { allPluginProviders, syncPlugins } from "@openagentlayer/plugins";
@@ -11,6 +18,11 @@ const MARKETPLACE_FILES = [
 	"plugins/codex/openagentlayer/.codex-plugin/plugin.json",
 	"plugins/opencode/openagentlayer/package.json",
 ] as const;
+const REPO_PLUGIN_METADATA = new Set<string>([
+	"plugins/claude/openagentlayer/.claude-plugin/plugin.json",
+	"plugins/codex/openagentlayer/.codex-plugin/plugin.json",
+	"plugins/opencode/openagentlayer/package.json",
+]);
 
 export async function assertPluginMarketplace(
 	repoRoot: string,
@@ -74,17 +86,10 @@ async function assertRepositoryPluginPayloads(
 	for (const path of [
 		".agents/plugins/marketplace.json",
 		".claude-plugin/marketplace.json",
-		"plugins/codex/openagentlayer/AGENTS.md",
-		"plugins/codex/openagentlayer/.codex-plugin/plugin.json",
-		"plugins/codex/openagentlayer/skills/review/SKILL.md",
-		"plugins/codex/openagentlayer/hooks/inject-route-context.mjs",
-		"plugins/claude/openagentlayer/.claude-plugin/plugin.json",
-		"plugins/claude/openagentlayer/hooks/hooks.json",
-		"plugins/claude/openagentlayer/skills/review/SKILL.md",
-		"plugins/opencode/openagentlayer/package.json",
-		"plugins/opencode/openagentlayer/plugins/openagentlayer.ts",
+		...REPO_PLUGIN_METADATA,
 	])
 		await readFile(join(repoRoot, path), "utf8");
+	await assertNoRepositoryGeneratedPluginPayloads(repoRoot);
 	const codexPlugin = JSON.parse(
 		await readFile(
 			join(repoRoot, "plugins/codex/openagentlayer/.codex-plugin/plugin.json"),
@@ -93,6 +98,18 @@ async function assertRepositoryPluginPayloads(
 	) as { version?: string };
 	if (codexPlugin.version !== source.version)
 		throw new Error("Repo-hosted Codex plugin version drifted.");
+}
+
+async function assertNoRepositoryGeneratedPluginPayloads(
+	repoRoot: string,
+): Promise<void> {
+	for (const file of await listFiles(join(repoRoot, "plugins"))) {
+		const relativePath = file.slice(repoRoot.length + 1);
+		if (!REPO_PLUGIN_METADATA.has(relativePath))
+			throw new Error(
+				`Repository plugin directory contains generated payload ${relativePath}.`,
+			);
+	}
 }
 
 async function assertPluginSync(
@@ -122,10 +139,10 @@ async function assertPluginSync(
 		for (const path of [
 			".codex/plugins/openagentlayer/.codex-plugin/plugin.json",
 			".codex/plugins/openagentlayer/AGENTS.md",
-			".codex/plugins/cache/openagentlayer-local/openagentlayer/0.1.0/.codex-plugin/plugin.json",
+			`.codex/plugins/cache/openagentlayer-local/openagentlayer/${source.version}/.codex-plugin/plugin.json`,
 			".claude/plugins/marketplaces/openagentlayer/.claude-plugin/plugin.json",
-			".claude/plugins/cache/openagentlayer/openagentlayer/0.1.0/.claude-plugin/plugin.json",
-			".claude/plugins/cache/openagentlayer/openagentlayer/0.1.0/hooks/hooks.json",
+			`.claude/plugins/cache/openagentlayer/openagentlayer/${source.version}/.claude-plugin/plugin.json`,
+			`.claude/plugins/cache/openagentlayer/openagentlayer/${source.version}/hooks/hooks.json`,
 			".config/opencode/plugins/openagentlayer/package.json",
 			".agents/plugins/marketplace.json",
 		])
@@ -162,4 +179,15 @@ async function seedStalePluginCaches(home: string): Promise<void> {
 		),
 		"stale",
 	);
+}
+
+async function listFiles(root: string): Promise<string[]> {
+	const entries = await readdir(root, { withFileTypes: true });
+	const files: string[] = [];
+	for (const entry of entries) {
+		const path = join(root, entry.name);
+		if (entry.isDirectory()) files.push(...(await listFiles(path)));
+		else if (entry.isFile()) files.push(path);
+	}
+	return files;
 }

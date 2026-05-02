@@ -53,6 +53,14 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		input: { routeKind: "execution-required", finalResponse: "done" },
 		decision: "block",
 	},
+	require_source_evidence: {
+		input: {
+			status: "complete",
+			behaviorChanged: true,
+			sourceEvidence: [{ type: "screenshot", path: "screen.png" }],
+		},
+		decision: "block",
+	},
 	block_explanation_only: {
 		input: {
 			routeKind: "execution-required",

@@ -13,12 +13,9 @@ export function quoteToml(text: string): string {
 export function agentPrompt(agent: AgentRecord, source: OalSource): string {
 	return `${agent.prompt}
 
-Prompt contract:
-- Success criteria: complete the owned route outcome, preserve OAL source-of-truth boundaries, and verify provider-native generated artifacts before reporting success.
-- Ordered steps: inspect source and roadmap evidence, choose the smallest route, use tools instead of guessing, implement or review within the owning package, then validate with exact commands.
-- Ambiguity behavior: resolve from local source, generated artifacts, manifests, and provider docs before asking; ask only when no safe local evidence can decide.
-- Evidence contract: final output must name changed source records, generated artifacts, hook or command evidence, validation commands, and remaining blocker fields when blocked.
-${renderProductPromptContracts(source)}
+${renderTemplate(source, "agentContract", {
+	productPromptContracts: renderProductPromptContracts(source),
+})}
 
 Triggers: ${agent.triggers.join("; ")}
 Do not use for: ${agent.nonGoals.join("; ")}
@@ -29,25 +26,34 @@ Final output must include concrete evidence or a precise blocker.`;
 }
 
 export function skillMarkdown(skill: SkillRecord, source: OalSource): string {
-	return `---\ndescription: ${skill.description}\n---\n# ${skill.title}\n\n${skill.body}\n\n## Prompt contract\n\n- Success criteria: apply this skill only to its stated scope and produce output that can be checked against repo evidence or provider artifacts.\n- Ordered steps: inspect relevant files first, apply the skill-specific workflow, verify the result, then report evidence.\n- Ambiguity behavior: prefer current source, generated artifacts, manifests, and official provider docs over memory or assumptions.\n- Evidence contract: cite concrete paths, commands, rendered artifacts, or blocker fields required for the route.\n${renderProductPromptContracts(source)}\n`;
+	return `---\ndescription: ${skill.description}\n---\n# ${skill.title}\n\n${skill.body}\n\n${renderTemplate(source, "skillContract", {})}\n`;
 }
 
 export function commandMarkdown(route: RouteRecord, source: OalSource): string {
-	return `# ${route.id}\n\nOwner: ${route.agent}\nPermissions: ${route.permissions}\nArguments: ${route.arguments}\nRequired skills: ${route.skills.join(", ")}\n\n${route.body}\n\n## Prompt contract\n\n- Success criteria: complete the route outcome with source-backed changes or a structured blocker.\n- Ordered steps: inspect route inputs, read relevant source and generated artifacts, perform the smallest safe action, run route-appropriate validation, then summarize evidence.\n- Ambiguity behavior: use tools to resolve repo or provider facts; ask only when the missing decision cannot be inferred safely.\n- Evidence contract: include touched source records, generated artifact paths, command output, validation status, and blocker fields when blocked.\n${renderProductPromptContracts(source)}\n`;
+	return `# ${route.id}\n\nOwner: ${route.agent}\nPermissions: ${route.permissions}\nArguments: ${route.arguments}\nRequired skills: ${route.skills.join(", ")}\n\n${route.body}\n\n${renderTemplate(
+		source,
+		"commandContract",
+		{
+			productPromptContracts: renderProductPromptContracts(source),
+		},
+	)}\n`;
 }
 
 export function instructions(
+	source: OalSource,
 	sourceRoutes: RouteRecord[],
 	provider: Provider,
 ): string {
-	const baseline =
-		provider === "codex"
-			? "\n## Codex baseline\n\n- Treat this file as the stable OAL baseline selected by `model_instructions_file`.\n- Follow OAL source records, generated artifact contracts, manifest ownership, and route evidence before general assistant defaults.\n- Do not edit generated files directly; update `source/`, renderer code, plugin payloads, or deploy logic, then regenerate or validate.\n- Use provider-native Codex surfaces that OAL renders and acceptance verifies.\n- Final responses must include concrete validation evidence or a precise blocker.\n"
-			: "";
-	return `# OpenAgentLayer Instructions\n\nThis project is managed by OAL for ${provider}. Treat authored source as the source of truth and generated artifacts as disposable outputs. Use provider-native capabilities only when OAL renders and validates them. Do not modify generated files by hand; update source and regenerate.${baseline}\n\nRoutes:\n${sourceRoutes
-		.filter((route) => route.providers.includes(provider))
-		.map((route) => `- ${route.id}: ${route.body}`)
-		.join("\n")}\n`;
+	return renderTemplate(source, "instructions", {
+		provider,
+		providerBaseline:
+			provider === "codex" ? renderTemplate(source, "codexBaseline", {}) : "",
+		productPromptContracts: renderProductPromptContracts(source),
+		routes: sourceRoutes
+			.filter((route) => route.providers.includes(provider))
+			.map((route) => `- ${route.id}: ${route.body}`)
+			.join("\n"),
+	});
 }
 
 export function camelCase(text: string): string {
@@ -60,5 +66,23 @@ function renderProductPromptContracts(source: OalSource): string {
 	return [
 		`- ${contracts.rtkEfficiency}`,
 		`- ${contracts.responseBoundaries}`,
+		`- ${contracts.sourceBackedBehavior}`,
+		`- ${contracts.accountabilityPressure}`,
+		`- ${contracts.simplicityDiscipline}`,
 	].join("\n");
+}
+
+function renderTemplate(
+	source: OalSource,
+	name: keyof NonNullable<OalSource["promptTemplates"]>,
+	values: Record<string, string>,
+): string {
+	const template = source.promptTemplates?.[name];
+	if (!template) throw new Error(`OAL prompt template ${name} was not loaded.`);
+	return Object.entries(values)
+		.reduce(
+			(content, [key, value]) => content.replaceAll(`{{ ${key} }}`, value),
+			template,
+		)
+		.trimEnd();
 }

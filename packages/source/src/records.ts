@@ -63,6 +63,7 @@ export interface ProductSource {
 	version: string;
 	product: { name: "OpenAgentLayer"; shortName: "OAL" };
 	promptContracts?: ProductPromptContracts;
+	promptTemplates?: ProductPromptTemplates;
 }
 
 export interface OalSource extends ProductSource {
@@ -76,4 +77,15 @@ export interface OalSource extends ProductSource {
 export interface ProductPromptContracts {
 	rtkEfficiency: string;
 	responseBoundaries: string;
+	sourceBackedBehavior: string;
+	accountabilityPressure: string;
+	simplicityDiscipline: string;
+}
+
+export interface ProductPromptTemplates {
+	agentContract: string;
+	skillContract: string;
+	commandContract: string;
+	instructions: string;
+	codexBaseline: string;
 }

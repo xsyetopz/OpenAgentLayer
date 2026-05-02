@@ -86,7 +86,7 @@ export async function renderOpenCode(
 	artifacts.push({
 		provider: PROVIDER,
 		path: ".opencode/instructions/openagentlayer.md",
-		content: instructions(source.routes, PROVIDER),
+		content: instructions(source, source.routes, PROVIDER),
 		sourceId: "instructions:opencode",
 		mode: "file",
 	});

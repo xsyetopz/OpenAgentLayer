@@ -62,14 +62,15 @@ openagentlayer-<version>-macos-universal.tar.gz
 
 The archive must contain `bin/oal`.
 
-## Provider plugin payloads
+## Provider plugin metadata
 
-OAL hosts native marketplace entrypoints and plugin payloads directly in this
-repository:
+OAL keeps provider plugin metadata in this repository and renders provider
+payloads from source at sync time. The `plugins/` tree must not duplicate
+generated agents, commands, skills, hooks, or tools:
 
 - `.claude-plugin/marketplace.json` points Claude Code at `plugins/claude/openagentlayer`
 - `.agents/plugins/marketplace.json` points Codex at `plugins/codex/openagentlayer`
-- `plugins/opencode/openagentlayer` is a local OpenCode plugin payload
+- `plugins/opencode/openagentlayer/package.json` identifies the local OpenCode plugin
 
 For local install testing, use the provider-native commands:
 
@@ -81,9 +82,9 @@ For local install testing, use the provider-native commands:
 OpenCode loads local plugins from `~/.config/opencode/plugins/` or a project
 `.opencode/plugins/` directory; `bun run plugins` writes the user-level choice.
 
-User-level plugin sync copies those payloads into provider homes, writes the
-Codex local marketplace entry, populates active plugin caches, and prunes stale
-OAL cache versions:
+User-level plugin sync renders provider-native payloads into provider homes,
+writes the Codex local marketplace entry, populates active plugin caches, and
+prunes stale OAL cache versions:
 
 ```bash
 bun run plugins -- --home "$HOME" --provider all --dry-run

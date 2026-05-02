@@ -1,5 +1,5 @@
 cask "openagentlayer" do
-  version "0.1.0"
+  version "0.1.1-beta.2"
   sha256 :no_check
 
   url "https://github.com/xsyetopz/OpenAgentLayer/releases/download/v#{version}/openagentlayer-#{version}-macos-universal.tar.gz"

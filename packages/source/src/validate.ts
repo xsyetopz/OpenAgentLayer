@@ -88,6 +88,40 @@ export function validateProductSource(record: ProductSource): void {
 			record.promptContracts.responseBoundaries,
 			"product promptContracts.responseBoundaries",
 		);
+		requireText(
+			record.promptContracts.sourceBackedBehavior,
+			"product promptContracts.sourceBackedBehavior",
+		);
+		requireText(
+			record.promptContracts.accountabilityPressure,
+			"product promptContracts.accountabilityPressure",
+		);
+		requireText(
+			record.promptContracts.simplicityDiscipline,
+			"product promptContracts.simplicityDiscipline",
+		);
+	}
+	if (record.promptTemplates) {
+		requireText(
+			record.promptTemplates.agentContract,
+			"product promptTemplates.agentContract",
+		);
+		requireText(
+			record.promptTemplates.skillContract,
+			"product promptTemplates.skillContract",
+		);
+		requireText(
+			record.promptTemplates.commandContract,
+			"product promptTemplates.commandContract",
+		);
+		requireText(
+			record.promptTemplates.instructions,
+			"product promptTemplates.instructions",
+		);
+		requireText(
+			record.promptTemplates.codexBaseline,
+			"product promptTemplates.codexBaseline",
+		);
 	}
 }
 

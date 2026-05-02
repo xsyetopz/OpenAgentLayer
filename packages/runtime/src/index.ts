@@ -28,6 +28,7 @@ export const runtimeHooks: readonly string[] = [
 	"require-completion-evidence.mjs",
 	"require-execution-evidence.mjs",
 	"require-jq-yq-edits.mjs",
+	"require-source-evidence.mjs",
 	"require-validation-evidence.mjs",
 	"warn-large-diff.mjs",
 ];

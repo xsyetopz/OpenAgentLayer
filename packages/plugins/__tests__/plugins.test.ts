@@ -20,6 +20,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 	try {
 		await seedStaleCaches(home);
 		const graph = await loadSource(resolve(repoRoot, "source"));
+		const version = graph.source.version;
 		const preview = await syncPlugins({
 			repoRoot,
 			home,
@@ -52,7 +53,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 			await readFile(
 				join(
 					home,
-					".codex/plugins/cache/openagentlayer-local/openagentlayer/0.1.0/skills/review/SKILL.md",
+					`.codex/plugins/cache/openagentlayer-local/openagentlayer/${version}/skills/review/SKILL.md`,
 				),
 				"utf8",
 			),
@@ -62,7 +63,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 				await stat(
 					join(
 						home,
-						".codex/plugins/cache/openagentlayer-local/openagentlayer/0.1.0/hooks/inject-route-context.mjs",
+						`.codex/plugins/cache/openagentlayer-local/openagentlayer/${version}/hooks/inject-route-context.mjs`,
 					),
 				)
 			).mode & 0o111,
@@ -80,7 +81,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 			await readFile(
 				join(
 					home,
-					".claude/plugins/cache/openagentlayer/openagentlayer/0.1.0/hooks/hooks.json",
+					`.claude/plugins/cache/openagentlayer/openagentlayer/${version}/hooks/hooks.json`,
 				),
 				"utf8",
 			),

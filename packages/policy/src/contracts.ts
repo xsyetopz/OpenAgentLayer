@@ -2,11 +2,18 @@ import type { OalSource } from "@openagentlayer/source";
 import type { PolicyIssue } from "./types";
 
 const ROUTE_EVIDENCE_PATTERN = /validation|evidence|command|output/i;
+const REQUIRED_SOURCE_CONTRACT_TERMS = [
+	"Source-backed behaviour is mandatory",
+	"Source Evidence Map",
+	"A confident guess is failure",
+	"Simplicity discipline",
+] as const;
 
 export function validateContracts(
 	source: OalSource,
 	issues: PolicyIssue[],
 ): void {
+	validateProductPromptContracts(source, issues);
 	for (const route of source.routes) {
 		if (route.permissions.includes("read-only")) {
 			const agent = source.agents.find(
@@ -39,5 +46,34 @@ export function validateContracts(
 				code: "hook-script-extension",
 				message: `Hook ${hook.id} must reference executable .mjs runtime script.`,
 				sourceId: hook.id,
+			});
+}
+
+function validateProductPromptContracts(
+	source: OalSource,
+	issues: PolicyIssue[],
+): void {
+	const contracts = source.promptContracts;
+	if (!contracts) {
+		issues.push({
+			severity: "error",
+			code: "source-backed-contract",
+			message: "Product prompt contracts are missing.",
+			sourceId: "product",
+		});
+		return;
+	}
+	const combined = [
+		contracts.sourceBackedBehavior,
+		contracts.accountabilityPressure,
+		contracts.simplicityDiscipline,
+	].join("\n");
+	for (const term of REQUIRED_SOURCE_CONTRACT_TERMS)
+		if (!combined.includes(term))
+			issues.push({
+				severity: "error",
+				code: "source-backed-contract",
+				message: `Product prompt contracts lack required term: ${term}.`,
+				sourceId: "product",
 			});
 }

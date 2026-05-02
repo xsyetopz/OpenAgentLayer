@@ -4,6 +4,8 @@ import { renderClaude } from "./claude";
 import { renderCodex } from "./codex";
 import { renderOpenCode } from "./opencode";
 
+export { renderClaude, renderCodex, renderOpenCode };
+
 export type ProviderAdapter = {
 	provider: Provider;
 	render(source: OalSource, repoRoot: string): Promise<ArtifactSet>;

@@ -1,6 +1,5 @@
 import {
 	chmod,
-	cp,
 	mkdir,
 	readdir,
 	readFile,
@@ -9,6 +8,12 @@ import {
 	writeFile,
 } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
+import {
+	renderClaude,
+	renderCodex,
+	renderOpenCode,
+} from "@openagentlayer/adapter";
+import type { Artifact } from "@openagentlayer/artifact";
 import type { OalSource, Provider } from "@openagentlayer/source";
 
 export interface PluginSyncOptions {
@@ -36,6 +41,11 @@ const REPO_PLUGIN_ROOTS: Record<Provider, string> = {
 	codex: "plugins/codex/openagentlayer",
 	claude: "plugins/claude/openagentlayer",
 	opencode: "plugins/opencode/openagentlayer",
+};
+const PROVIDER_ARTIFACT_ROOTS: Record<Provider, string> = {
+	codex: ".codex",
+	claude: ".claude",
+	opencode: ".opencode",
 };
 
 export async function syncPlugins(
@@ -117,12 +127,102 @@ async function copyPluginPayload(
 	provider: Provider,
 	targetRoot: string,
 ): Promise<void> {
-	const sourceRoot = join(options.repoRoot, REPO_PLUGIN_ROOTS[provider]);
-	const files = await listFiles(sourceRoot);
-	for (const sourcePath of files) {
-		const target = join(targetRoot, relative(sourceRoot, sourcePath));
-		await copyFile(options, sourcePath, target, "plugin payload");
+	for (const metadataPath of await listFiles(
+		join(options.repoRoot, REPO_PLUGIN_ROOTS[provider]),
+	)) {
+		const target = join(
+			targetRoot,
+			relative(
+				join(options.repoRoot, REPO_PLUGIN_ROOTS[provider]),
+				metadataPath,
+			),
+		);
+		await copyStaticPluginFile(options, metadataPath, target);
 	}
+	for (const artifact of await renderProviderPluginArtifacts(
+		options,
+		provider,
+	)) {
+		if (!isPluginArtifact(artifact)) continue;
+		await writeBytes(
+			options,
+			join(targetRoot, providerPluginPath(provider, artifact.path)),
+			Buffer.from(artifact.content),
+			"rendered plugin artifact",
+			artifact.executable === true,
+		);
+	}
+}
+
+function isPluginArtifact(artifact: Artifact): boolean {
+	return artifact.mode !== "config" && artifact.path !== "opencode.jsonc";
+}
+
+async function copyStaticPluginFile(
+	options: ProviderSyncOptions,
+	sourcePath: string,
+	targetPath: string,
+): Promise<void> {
+	options.changes.push({
+		action: "write",
+		path: targetPath,
+		reason: "plugin metadata",
+	});
+	if (options.dryRun) return;
+	await mkdir(dirname(targetPath), { recursive: true });
+	await writeFile(targetPath, await readFile(sourcePath));
+	const metadata = await stat(sourcePath);
+	if ((metadata.mode & 0o111) !== 0) await chmod(targetPath, 0o755);
+}
+
+async function renderProviderPluginArtifacts(
+	options: ProviderSyncOptions,
+	provider: Provider,
+): Promise<Artifact[]> {
+	if (provider === "codex")
+		return (await renderCodex(options.source, options.repoRoot)).artifacts;
+	if (provider === "claude")
+		return [
+			...(await renderClaude(options.source, options.repoRoot)).artifacts,
+			claudeHooksPluginArtifact(options.source),
+		];
+	return (await renderOpenCode(options.source, options.repoRoot)).artifacts;
+}
+
+function providerPluginPath(provider: Provider, artifactPath: string): string {
+	if (provider === "codex") {
+		const codexPluginRoot = ".codex/openagentlayer/";
+		if (artifactPath.startsWith(codexPluginRoot))
+			return artifactPath.slice(codexPluginRoot.length);
+	}
+	const root = PROVIDER_ARTIFACT_ROOTS[provider];
+	if (artifactPath === "AGENTS.md" || artifactPath === "CLAUDE.md")
+		return artifactPath;
+	if (artifactPath === "opencode.jsonc") return artifactPath;
+	return artifactPath.startsWith(`${root}/`)
+		? artifactPath.slice(root.length + 1)
+		: artifactPath;
+}
+
+function claudeHooksPluginArtifact(source: OalSource): Artifact {
+	const hooks: Record<string, { type: "command"; command: string }[]> = {};
+	for (const hook of source.hooks) {
+		for (const event of hook.events.claude ?? []) {
+			const entries = hooks[event] ?? [];
+			entries.push({
+				type: "command",
+				command: `\${CLAUDE_PLUGIN_ROOT}/hooks/scripts/${hook.script}`,
+			});
+			hooks[event] = entries;
+		}
+	}
+	return {
+		provider: "claude",
+		path: ".claude/hooks/hooks.json",
+		content: `${JSON.stringify({ hooks }, null, 2)}\n`,
+		sourceId: "plugin:claude-hooks",
+		mode: "file",
+	};
 }
 
 async function writeCodexMarketplace(
@@ -197,20 +297,6 @@ async function writeText(
 	reason: string,
 ): Promise<void> {
 	await writeBytes(options, path, Buffer.from(content), reason);
-}
-
-async function copyFile(
-	options: ProviderSyncOptions,
-	sourcePath: string,
-	targetPath: string,
-	reason: string,
-): Promise<void> {
-	options.changes.push({ action: "write", path: targetPath, reason });
-	if (options.dryRun) return;
-	await mkdir(dirname(targetPath), { recursive: true });
-	await cp(sourcePath, targetPath, { force: true, preserveTimestamps: true });
-	const metadata = await stat(sourcePath);
-	if ((metadata.mode & 0o111) !== 0) await chmod(targetPath, 0o755);
 }
 
 async function writeBytes(

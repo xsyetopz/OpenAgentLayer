@@ -5,6 +5,8 @@
   "private": true,
   "exports": "./src/index.ts",
   "dependencies": {
+    "@openagentlayer/adapter": "workspace:*",
+    "@openagentlayer/artifact": "workspace:*",
     "@openagentlayer/source": "workspace:*"
   }
 }
