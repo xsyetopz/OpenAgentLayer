@@ -41,8 +41,8 @@
     "useDefineForClassFields": true
   },
   "exclude": [
-    "v3_to_be_removed",
+    "dist",
     "node_modules",
-    "dist"
+    "v3_legacy",
   ]
 }
