@@ -111,7 +111,7 @@ test("CLI plugins dry-run reports provider plugin payloads without writing", asy
 	expect(stderr).toBe("");
 	expect(stdout).toContain(".codex-plugin/plugin.json");
 	expect(stdout).toContain(".claude/plugins/marketplaces/openagentlayer");
-	expect(stdout).toContain(".opencode/plugins/openagentlayer");
+	expect(stdout).toContain(".config/opencode/plugins/openagentlayer");
 	await expect(
 		readFile(
 			join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),

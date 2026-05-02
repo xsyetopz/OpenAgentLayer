@@ -7,6 +7,7 @@ const TRACKED_PRODUCT_ROOTS = [
 	"tests",
 	"homebrew",
 	"marketplace",
+	"plugins",
 ] as const;
 const REFERENCE_ROOTS = ["docs", "third_party"] as const;
 const ROOT_PRODUCT_FILES = [
@@ -21,6 +22,7 @@ const ROOT_PRODUCT_FILES = [
 	"upstream-sources.lock.json",
 	"bunfig.toml",
 ] as const;
+const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin"] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;
 const GENERATED_PATH_PATTERN = /(^|\/)(generated|dist|build)(\/|$)/;
 const execFileAsync = promisify(execFile);
@@ -89,6 +91,8 @@ function findDisconnectedProductPaths(relativeFiles: string[]): string[] {
 	for (const rootFile of ROOT_PRODUCT_FILES) active.add(rootFile);
 	for (const file of relativeFiles) {
 		if (TRACKED_PRODUCT_ROOTS.some((root) => file.startsWith(`${root}/`)))
+			active.add(file);
+		if (ROOT_PRODUCT_DIRS.some((root) => file.startsWith(`${root}/`)))
 			active.add(file);
 		if (REFERENCE_ROOTS.some((root) => file.startsWith(`${root}/`)))
 			active.add(file);

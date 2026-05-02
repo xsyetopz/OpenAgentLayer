@@ -89,7 +89,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			pluginDryRun.stdout.includes(
 				".claude/plugins/marketplaces/openagentlayer",
 			) &&
-			pluginDryRun.stdout.includes(".opencode/plugins/openagentlayer")
+			pluginDryRun.stdout.includes(".config/opencode/plugins/openagentlayer")
 		)
 	)
 		throw new Error("CLI plugins dry-run did not report provider plugin sync.");

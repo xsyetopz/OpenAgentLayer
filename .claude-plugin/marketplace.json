@@ -1,0 +1,23 @@
+{
+  "name": "openagentlayer",
+  "plugins": [
+    {
+      "name": "openagentlayer",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/xsyetopz/OpenAgentLayer",
+        "path": "plugins/claude/openagentlayer",
+        "ref": "master"
+      },
+      "description": "OpenAgentLayer provider-native agents, skills, commands, and hooks for Claude Code.",
+      "version": "0.1.0",
+      "author": {
+        "name": "xsyetopz"
+      },
+      "homepage": "https://github.com/xsyetopz/OpenAgentLayer",
+      "repository": "https://github.com/xsyetopz/OpenAgentLayer",
+      "license": "MIT",
+      "category": "productivity"
+    }
+  ]
+}

@@ -77,7 +77,16 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 		).toContain('"openagentlayer"');
 		expect(
 			await readFile(
-				join(home, ".opencode/plugins/openagentlayer/package.json"),
+				join(
+					home,
+					".claude/plugins/cache/openagentlayer/openagentlayer/0.1.0/hooks/hooks.json",
+				),
+				"utf8",
+			),
+		).toContain(["${", "CLAUDE_PLUGIN_ROOT", "}"].join("") + "/hooks/scripts/");
+		expect(
+			await readFile(
+				join(home, ".config/opencode/plugins/openagentlayer/package.json"),
 				"utf8",
 			),
 		).toContain("openagentlayer-opencode-plugin");
@@ -119,7 +128,7 @@ async function seedStaleCaches(home: string): Promise<void> {
 	);
 	const staleOpenCode = join(
 		home,
-		".opencode/plugins/cache/openagentlayer/0.0.1",
+		".config/opencode/plugins/cache/openagentlayer/0.0.1",
 	);
 	for (const path of [staleCodex, otherCodex, staleClaude, staleOpenCode])
 		await mkdir(path, { recursive: true });

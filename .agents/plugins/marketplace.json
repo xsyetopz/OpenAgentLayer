@@ -1,0 +1,22 @@
+{
+  "name": "openagentlayer",
+  "interface": {
+    "displayName": "OpenAgentLayer"
+  },
+  "plugins": [
+    {
+      "name": "openagentlayer",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/xsyetopz/OpenAgentLayer",
+        "path": "./plugins/codex/openagentlayer",
+        "ref": "master"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

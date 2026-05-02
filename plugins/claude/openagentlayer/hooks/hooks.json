@@ -1,0 +1,46 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/require-validation-evidence.mjs"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/require-jq-yq-edits.mjs"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/warn-large-diff.mjs"
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/block-test-failure-loop.mjs"
+      }
+    ],
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/inject-project-memory.mjs"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/inject-route-context.mjs"
+      }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/inject-subagent-context.mjs"
+      }
+    ]
+  }
+}

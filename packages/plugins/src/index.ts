@@ -91,20 +91,42 @@ async function syncClaude(options: ProviderSyncOptions): Promise<void> {
 		options.home,
 		".claude/plugins/marketplaces/openagentlayer",
 	);
-	await copyMarketplace(options, "claude", marketplaceRoot);
-	await writeProviderArtifacts(options, marketplaceRoot);
-	await removeMatchingChildren(
+	const cacheRoot = join(
+		options.home,
+		".claude/plugins/cache/openagentlayer/openagentlayer",
+	);
+	const cacheTarget = join(cacheRoot, options.version);
+	await writeBytes(
+		options,
+		join(marketplaceRoot, ".claude-plugin/marketplace.json"),
+		await readFile(
+			join(
+				options.repoRoot,
+				"marketplace/claude/.claude-plugin/marketplace.json",
+			),
+		),
+		"marketplace payload",
+	);
+	await writeBytes(
+		options,
+		join(cacheTarget, ".claude-plugin/plugin.json"),
+		await readFile(
+			join(options.repoRoot, "marketplace/claude/.claude-plugin/plugin.json"),
+		),
+		"marketplace payload",
+	);
+	await writeProviderArtifacts(options, cacheTarget);
+	await pruneVersionCache(options, cacheRoot);
+	await removeTemporaryCaches(
 		options,
 		join(options.home, ".claude/plugins/cache"),
 	);
 }
 
 async function syncOpenCode(options: ProviderSyncOptions): Promise<void> {
-	const pluginRoot = join(options.home, ".opencode/plugins/openagentlayer");
-	const cacheRoot = join(
-		options.home,
-		".opencode/plugins/cache/openagentlayer",
-	);
+	const configRoot = join(options.home, ".config/opencode");
+	const pluginRoot = join(configRoot, "plugins/openagentlayer");
+	const cacheRoot = join(configRoot, "plugins/cache/openagentlayer");
 	const cacheTarget = join(cacheRoot, options.version);
 	await copyMarketplace(options, "opencode", pluginRoot);
 	await writeProviderArtifacts(options, pluginRoot);
@@ -150,28 +172,76 @@ function pluginArtifacts(
 	provider: Provider,
 	artifacts: Artifact[],
 ): { targetPath: string; content: string; executable?: boolean }[] {
-	return artifacts
-		.filter(
-			(artifact) => artifact.mode === "file" || artifact.mode === "config",
-		)
-		.map((artifact) => {
-			const pluginArtifact: {
-				targetPath: string;
-				content: string;
-				executable?: boolean;
-			} = {
-				targetPath: artifact.path.replace(providerPrefix(provider), ""),
-				content: artifact.content,
-			};
-			if (artifact.executable) pluginArtifact.executable = true;
-			return pluginArtifact;
-		});
+	const pluginFiles: {
+		targetPath: string;
+		content: string;
+		executable?: boolean;
+	}[] = [];
+	for (const artifact of artifacts) {
+		if (artifact.mode !== "file" && artifact.mode !== "config") continue;
+		const targetPath = pluginTargetPath(provider, artifact.path);
+		if (!targetPath) continue;
+		const pluginArtifact: {
+			targetPath: string;
+			content: string;
+			executable?: boolean;
+		} = {
+			targetPath,
+			content: pluginContent(provider, artifact),
+		};
+		if (artifact.executable) pluginArtifact.executable = true;
+		pluginFiles.push(pluginArtifact);
+	}
+	return pluginFiles;
 }
 
-function providerPrefix(provider: Provider): string {
-	if (provider === "codex") return ".codex/openagentlayer/";
-	if (provider === "claude") return ".claude/";
-	return ".opencode/";
+function pluginTargetPath(
+	provider: Provider,
+	artifactPath: string,
+): string | undefined {
+	if (provider === "codex") {
+		const prefix = ".codex/openagentlayer/";
+		return artifactPath.startsWith(prefix)
+			? artifactPath.replace(prefix, "")
+			: undefined;
+	}
+	if (provider === "claude") {
+		if (artifactPath === ".claude/settings.json") return "hooks/hooks.json";
+		const prefix = ".claude/";
+		return artifactPath.startsWith(prefix)
+			? artifactPath.replace(prefix, "")
+			: undefined;
+	}
+	const prefix = ".opencode/";
+	return artifactPath.startsWith(prefix)
+		? artifactPath.replace(prefix, "")
+		: undefined;
+}
+
+function pluginContent(provider: Provider, artifact: Artifact): string {
+	if (provider !== "claude" || artifact.path !== ".claude/settings.json")
+		return artifact.content;
+	const settings = JSON.parse(artifact.content) as {
+		hooks?: Record<string, { type: string; command: string }[]>;
+	};
+	return `${JSON.stringify(
+		{
+			hooks: Object.fromEntries(
+				Object.entries(settings.hooks ?? {}).map(([event, handlers]) => [
+					event,
+					handlers.map((handler) => ({
+						...handler,
+						command: handler.command.replace(
+							".claude/hooks/scripts/",
+							["${", "CLAUDE_PLUGIN_ROOT", "}"].join("") + "/hooks/scripts/",
+						),
+					})),
+				]),
+			),
+		},
+		null,
+		2,
+	)}\n`;
 }
 
 async function writeCodexMarketplace(
@@ -179,28 +249,42 @@ async function writeCodexMarketplace(
 	pluginRoot: string,
 ): Promise<void> {
 	const path = join(options.home, ".agents/plugins/marketplace.json");
-	const current = await readJson(path, { marketplaces: [] });
-	const marketplaces = Array.isArray(current["marketplaces"])
-		? (current["marketplaces"] as unknown[])
-		: [];
-	const nextMarketplaces = marketplaces.filter(
-		(entry) =>
-			!(
-				isRecord(entry) &&
-				entry["name"] === CODEX_MARKETPLACE_NAME &&
-				entry["plugin"] === PLUGIN_NAME
-			),
-	);
-	nextMarketplaces.push({
+	const current = await readJson(path, {
 		name: CODEX_MARKETPLACE_NAME,
-		plugin: PLUGIN_NAME,
-		path: pluginRoot,
-		version: options.version,
+		interface: { displayName: "OpenAgentLayer" },
+		plugins: [],
+	});
+	const plugins = Array.isArray(current["plugins"])
+		? (current["plugins"] as unknown[])
+		: [];
+	const nextPlugins = plugins.filter(
+		(entry) => !(isRecord(entry) && entry["name"] === PLUGIN_NAME),
+	);
+	nextPlugins.push({
+		name: PLUGIN_NAME,
+		source: {
+			source: "local",
+			path: pluginRoot,
+		},
+		policy: {
+			installation: "AVAILABLE",
+			authentication: "ON_INSTALL",
+		},
+		category: "Productivity",
 	});
 	await writeText(
 		options,
 		path,
-		`${JSON.stringify({ ...current, marketplaces: nextMarketplaces }, null, 2)}\n`,
+		`${JSON.stringify(
+			{
+				...current,
+				name: CODEX_MARKETPLACE_NAME,
+				interface: { displayName: "OpenAgentLayer" },
+				plugins: nextPlugins,
+			},
+			null,
+			2,
+		)}\n`,
 		"Codex marketplace entry",
 	);
 }
@@ -216,17 +300,13 @@ async function pruneVersionCache(
 	}
 }
 
-async function removeMatchingChildren(
+async function removeTemporaryCaches(
 	options: ProviderSyncOptions,
 	cacheRoot: string,
 ): Promise<void> {
 	for (const entry of await safeReaddir(cacheRoot))
-		if (isOalCacheName(entry))
+		if (entry.startsWith("temp_local_"))
 			await removePath(options, join(cacheRoot, entry), "stale cache");
-}
-
-function isOalCacheName(name: string): boolean {
-	return name.includes("openagentlayer") || name.startsWith("temp_local_");
 }
 
 async function writeText(

@@ -69,6 +69,22 @@ OAL hosts marketplace payload metadata in `marketplace/`:
 - `marketplace/codex` for Codex
 - `marketplace/opencode` for OpenCode user plugins
 
+The repository also hosts native marketplace entrypoints and plugin payloads:
+
+- `.claude-plugin/marketplace.json` points Claude Code at `plugins/claude/openagentlayer`
+- `.agents/plugins/marketplace.json` points Codex at `plugins/codex/openagentlayer`
+- `plugins/opencode/openagentlayer` is a local OpenCode plugin payload
+
+For local install testing, use the provider-native commands:
+
+```text
+/plugin marketplace add ./OpenAgentLayer
+/plugin install openagentlayer@openagentlayer
+```
+
+OpenCode loads local plugins from `~/.config/opencode/plugins/` or a project
+`.opencode/plugins/` directory; `bun run plugins` writes the user-level choice.
+
 User-level plugin sync copies those payloads into provider homes, writes the
 Codex local marketplace entry, populates active plugin caches, and prunes stale
 OAL cache versions:
