@@ -23,12 +23,16 @@ it from runtime code.
 
 1. Fork the repo.
 2. Clone your fork.
-3. Create a focused branch.
-4. Make one coherent change set.
-5. Preview generated output when source or renderers change.
-6. Run targeted validation.
-7. Commit with a message that explains why.
-8. Open a pull request with motivation, approach, generated-output evidence, and
+3. Fetch upstream skill submodules:
+   ```bash
+   git submodule update --init --recursive
+   ```
+4. Create a focused branch.
+5. Make one coherent change set.
+6. Preview generated output when source or renderers change.
+7. Run targeted validation.
+8. Commit with a message that explains why.
+9. Open a pull request with motivation, approach, generated-output evidence, and
    test evidence.
 
 ## Ground rules

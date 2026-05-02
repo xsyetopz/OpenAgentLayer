@@ -20,6 +20,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify upstream skill submodules
+        run: |
+          test -f third_party/caveman/skills/caveman/SKILL.md
+          test -f third_party/taste-skill/skills/taste-skill/SKILL.md
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -50,6 +56,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify upstream skill submodules
+        run: |
+          test -f third_party/caveman/skills/caveman/SKILL.md
+          test -f third_party/taste-skill/skills/taste-skill/SKILL.md
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -76,6 +88,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Verify upstream skill submodules
+        run: |
+          test -f third_party/caveman/skills/caveman/SKILL.md
+          test -f third_party/taste-skill/skills/taste-skill/SKILL.md
       - name: Refuse fork deploy
         run: test "$GITHUB_REPOSITORY" = "xsyetopz/OpenAgentLayer"
       - name: Refuse non-master deploy

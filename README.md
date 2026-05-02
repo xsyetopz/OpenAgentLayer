@@ -6,6 +6,16 @@ Claude Code, Codex, and OpenCode.
 OAL keeps authored source in `source/`, renders disposable provider artifacts,
 deploys them with manifest ownership, and uninstalls only OAL-owned material.
 
+## Setup
+
+```bash
+git clone https://github.com/xsyetopz/OpenAgentLayer.git
+cd OpenAgentLayer
+git submodule update --init --recursive
+bun install --frozen-lockfile
+bun run check
+```
+
 ## CLI
 
 ```bash

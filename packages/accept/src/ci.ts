@@ -5,7 +5,10 @@ const CI_WORKFLOW = ".github/workflows/ci.yml";
 const REQUIRED_WORKFLOW_TERMS = [
 	"pull_request:",
 	"branches: [master]",
+	"submodules: recursive",
 	"permissions:\n  contents: read",
+	"test -f third_party/caveman/skills/caveman/SKILL.md",
+	"test -f third_party/taste-skill/skills/taste-skill/SKILL.md",
 	"needs: [quality, dry-run]",
 	"github.event_name == 'push'",
 	"github.ref == 'refs/heads/master'",
