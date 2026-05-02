@@ -1,12 +1,25 @@
 # OpenAgentLayer
 
-OpenAgentLayer (OAL) generates and deploys provider-native agent layers for
-Claude Code, Codex, and OpenCode.
+OpenAgentLayer (OAL) generates, previews, deploys, updates, and uninstalls provider-native agent layers for Claude Code, Codex, and OpenCode.
 
-OAL keeps authored source in `source/`, renders disposable provider artifacts,
-deploys them with manifest ownership, and uninstalls only OAL-owned material.
+OAL keeps authored product input in `source/`, renders disposable provider artifacts, records manifest ownership, and removes only OAL-owned material during uninstall.
 
-## Setup
+## Contents
+
+- [Quick start](#quick-start)
+- [Install paths](#install-paths)
+- [Provider support](#provider-support)
+- [CLI commands](#cli-commands)
+- [Common workflows](#common-workflows)
+- [Homebrew](#homebrew)
+- [Repository layout](#repository-layout)
+- [Validation](#validation)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Quick start
+
+Clone, load upstream skill submodules, install dependencies, and verify the source graph:
 
 ```bash
 git clone https://github.com/xsyetopz/OpenAgentLayer.git
@@ -16,109 +29,153 @@ bun install --frozen-lockfile
 bun run check
 ```
 
-## CLI
+Preview exactly what OAL would generate before writing anything:
 
 ```bash
-bun run check
 bun run preview -- --provider all
-bun run render -- --provider codex --out generated
-bun run deploy -- --target /path/to/project --scope project --provider codex
-bun run uninstall -- --target /path/to/project --scope project --provider codex
-bun run plugins -- --home "$HOME" --provider all --dry-run
-./bump-version.sh --dry-run patch
-bun run accept
+bun run preview -- --provider codex --path .codex/config.toml --content
 ```
 
-Useful inspection:
+Dry-run deployment into a project before applying changes:
 
 ```bash
-bun packages/cli/src/main.ts preview --provider codex --path .codex/config.toml --content
+bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
 ```
 
-## Packages
+Apply only after the dry-run paths are correct:
 
-- `source` loads authored OAL records.
-- `policy` validates source, model allowlists, depth, and generated boundaries.
-- `adapter` renders Claude Code, Codex, and OpenCode artifacts.
-- `artifact` owns artifact hashing, provenance, and writes.
-- `manifest` records OAL ownership.
-- `deploy` plans, applies, merges, backs up, and uninstalls.
-- `runtime` owns executable `.mjs` hooks.
-- `accept` runs product acceptance.
-- `cli` exposes user commands.
-- `toolchain` prints machine setup plans.
-
-## Homebrew
-
-The tap cask is in `homebrew/Casks/openagentlayer.rb`.
-The release repository is [xsyetopz/OpenAgentLayer](https://github.com/xsyetopz/OpenAgentLayer) on the `master` branch.
-
-It expects release archives named:
-
-```text
-openagentlayer-<version>-macos-universal.tar.gz
+```bash
+bun run deploy -- --target /path/to/project --scope project --provider all
 ```
 
-The archive must contain `bin/oal`.
+Detailed setup options are in [INSTALLATION.md](INSTALLATION.md).
 
-## Provider plugin metadata
+## Install paths
 
-OAL keeps provider plugin metadata in this repository and renders provider
-payloads from source at sync time. The `plugins/` tree must not duplicate
-generated agents, commands, skills, hooks, or tools:
+| Path | Use when | Commands |
+| ---- | -------- | -------- |
+| Source checkout | You want the current repository behavior or plan to contribute. | `git submodule update --init --recursive`, then `bun install --frozen-lockfile`. |
+| Homebrew cask | You want the packaged `oal` binary after a release archive exists. | Use the tap cask described in [Homebrew](#homebrew). |
+| Provider plugin sync | You want OAL available from provider plugin locations in your user home. | `bun run plugins -- --home "$HOME" --provider all --dry-run`. |
+| Project deploy | You want OAL artifacts in one project repository. | `bun run deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
 
-- `.claude-plugin/marketplace.json` points Claude Code at `plugins/claude/openagentlayer`
-- `.agents/plugins/marketplace.json` points Codex at `plugins/codex/openagentlayer`
-- `plugins/opencode/openagentlayer/package.json` identifies the local OpenCode plugin
+## Provider support
 
-For local install testing, use the provider-native commands:
+| Capability | Claude Code | Codex | OpenCode |
+| ---------- | ----------- | ----- | -------- |
+| Provider-native agents or subagents | ✅ Markdown agents with models, tools, and colors. | ✅ TOML agents with model routes and quoted hex colors. | ✅ Config agents plus Markdown agent files with quoted hex colors. |
+| Skills | ✅ `.claude/skills/*/SKILL.md`. | ✅ `.codex/openagentlayer/skills/*/SKILL.md`. | ✅ `.opencode/skills/*/SKILL.md`. |
+| Commands and routes | ✅ Slash-command Markdown files. | 🟡 Routes are rendered into `AGENTS.md` because Codex has no matching command-file surface. | ✅ Command Markdown files and config command entries. |
+| Hooks | ✅ Provider hook command entries plus executable `.mjs` scripts. | ✅ Executable `.mjs` hooks and Codex feature flags. | 🟡 Executable `.mjs` scripts plus plugin guidance. |
+| Custom tools | ❌ No OpenCode-style custom tool surface. | ❌ No OpenCode-style custom tool surface. | ✅ TypeScript tools using `@opencode-ai/plugin`. |
+| Config rendering | ✅ `.claude/settings.json` and `CLAUDE.md`. | ✅ `.codex/config.toml` and `AGENTS.md`. | ✅ `opencode.jsonc`, plugins, instructions, tools, commands, and agents. |
+| Model routing | ✅ Claude allowlisted models only. | ✅ Codex allowlisted models only. | ✅ OAL OpenCode fallback model list. |
+| RTK and privileged runtime | 🟡 Privileged runtime helpers. | ✅ RTK zsh shim, command shims, and privileged runtime helpers. | 🟡 Privileged runtime helpers. |
+| Manifest deploy and uninstall | ✅ OAL-owned artifact tracking. | ✅ OAL-owned artifact tracking. | ✅ OAL-owned artifact tracking. |
 
-```text
-/plugin marketplace add ./OpenAgentLayer
-/plugin install openagentlayer@openagentlayer
+## CLI commands
+
+Run through package scripts from a source checkout, or replace `bun run <script> --` with `oal` after installing the binary.
+
+| Command | Purpose | Common flags | Safe first command |
+| ------- | ------- | ------------ | ------------------ |
+| `check` | Load source, validate policy, and prove renderability. | None. | `bun run check`. |
+| `preview` | Show generated artifact paths and optional file contents without writing. | `--provider`, `--path`, `--content`. | `bun run preview -- --provider all`. |
+| `render` or `generate` | Write generated artifacts into an output directory. | `--provider`, `--out`. | `bun run render -- --provider codex --out generated`. |
+| `deploy` | Merge OAL artifacts into a target project and write ownership metadata. | `--target`, `--scope project`, `--provider`, `--dry-run`. | `bun run deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
+| `uninstall` | Remove one provider's OAL-owned artifacts from a target project. | `--target`, `--scope project`, `--provider`. | `bun run uninstall -- --target /path/to/project --scope project --provider codex`. |
+| `plugins` | Sync provider plugin payloads into user-level provider homes. | `--home`, `--provider`, `--dry-run`. | `bun run plugins -- --home "$HOME" --provider all --dry-run`. |
+| `toolchain` | Print OS package-manager setup commands for OAL-friendly tools. | `--os`, `--pkg`, `--optional`, `--json`. | `bun run toolchain -- --os macos --optional ctx7,playwright`. |
+| `rtk-gain` | Check RTK token-savings policy. | `--from-file`, `--allow-empty-history`. | `bun run rtk-gain -- --allow-empty-history`. |
+| `roadmap-evidence` | Print the acceptance evidence ledger. | None. | `bun run roadmap:evidence`. |
+| `accept` | Run full product acceptance over source, rendering, deploy, uninstall, and fixtures. | None. | `bun run accept`. |
+
+Providers accepted by provider-aware commands are `all`, `codex`, `claude`, and `opencode`. `uninstall` requires one provider, not `all`.
+
+## Common workflows
+
+### Inspect generated output
+
+```bash
+bun run preview -- --provider all
+bun run preview -- --provider opencode --path opencode.jsonc --content
 ```
 
-OpenCode loads local plugins from `~/.config/opencode/plugins/` or a project
-`.opencode/plugins/` directory; `bun run plugins` writes the user-level choice.
+### Deploy to one project
 
-User-level plugin sync renders provider-native payloads into provider homes,
-writes the Codex local marketplace entry, populates active plugin caches, and
-prunes stale OAL cache versions:
+```bash
+bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
+bun run deploy -- --target /path/to/project --scope project --provider all
+```
+
+### Sync provider plugins into your home directory
 
 ```bash
 bun run plugins -- --home "$HOME" --provider all --dry-run
 bun run plugins -- --home "$HOME" --provider all
 ```
 
-## Codex baseline instructions
-
-Codex OAL profiles set `model_instructions_file = "AGENTS.md"` so sessions use
-the generated OAL baseline instead of changing server defaults. To inspect what
-Codex received, start a Codex thread and check the first line of the newest
-`~/.codex/sessions/**/*.jsonl`.
-
-## Version bumps
-
-Use `bump-version.sh` for product releases:
+### Remove OAL from a project
 
 ```bash
-./bump-version.sh --dry-run patch
-./bump-version.sh minor
-./bump-version.sh 1.2.3-beta.1
+bun run uninstall -- --target /path/to/project --scope project --provider codex
+bun run uninstall -- --target /path/to/project --scope project --provider claude
+bun run uninstall -- --target /path/to/project --scope project --provider opencode
 ```
 
-The script updates the root product version, source metadata, plugin manifests,
-Homebrew cask, Claude marketplace entry, and changelog heading. Workspace
-package versions stay internal.
+Uninstall removes OAL-owned artifacts from the manifest. It must preserve user-owned files and user-authored config blocks.
 
-## Validation
+## Homebrew
+
+The cask definition lives at `homebrew/Casks/openagentlayer.rb`. It expects release archives from [xsyetopz/OpenAgentLayer](https://github.com/xsyetopz/OpenAgentLayer) on the `master` branch with this name:
+
+```text
+openagentlayer-<version>-macos-universal.tar.gz
+```
+
+The archive must contain `bin/oal`. After a tap contains the cask, the installed binary supports the same commands as the source checkout:
+
+```bash
+oal check
+oal preview --provider all
+oal deploy --target /path/to/project --scope project --provider all --dry-run
+```
+
+Run the syntax check before submitting cask changes:
 
 ```bash
 rtk ruby -c homebrew/Casks/openagentlayer.rb
-rtk bunx tsc --noEmit
+```
+
+## Repository layout
+
+| Path | Responsibility |
+| ---- | -------------- |
+| `source/` | Authored OAL source records, prompt templates, skills, routes, hooks, tools, and provider inputs. |
+| `packages/source` | Source loading and record validation. |
+| `packages/policy` | Product policy validation, model allowlists, and generated text checks. |
+| `packages/adapter` | Provider-native rendering for Claude Code, Codex, and OpenCode. |
+| `packages/deploy` | Deploy planning, merging, backup, and uninstall behavior. |
+| `packages/manifest` | OAL ownership metadata. |
+| `packages/runtime` | Executable `.mjs` hooks and runtime helpers. |
+| `packages/accept` | Full product acceptance gates. |
+| `packages/cli` | User-facing command entrypoint. |
+| `packages/toolchain` | OS toolchain setup plan rendering. |
+| `plugins/` | Provider plugin metadata and sync roots, not duplicated generated content. |
+
+## Validation
+
+Use package scripts where possible:
+
+```bash
+rtk bun run biome:format
 rtk bun run test
-rtk bunx biome check . --error-on-warnings --max-diagnostics 16384
 rtk bun run accept
+rtk proxy -- bun run accept
+rtk bun run rtk-gain -- --allow-empty-history
+rtk bun run biome:check
+rtk bunx tsc --noEmit
+rtk ruby -c homebrew/Casks/openagentlayer.rb
 ```
 
 ## Contributing
