@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: oal-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -19,9 +22,10 @@ jobs:
     runs-on: macos-15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
+          persist-credentials: false
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md
@@ -50,9 +54,10 @@ jobs:
     needs: quality
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
+          persist-credentials: false
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md
@@ -82,9 +87,10 @@ jobs:
       HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
+          persist-credentials: false
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md
