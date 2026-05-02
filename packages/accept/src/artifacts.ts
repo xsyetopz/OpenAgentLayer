@@ -224,6 +224,16 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	const shim = findArtifact(".codex/openagentlayer/shim/git", artifacts);
 	if (!(shim.executable && shim.content.includes("exec rtk git")))
 		throw new Error("Codex RTK shim artifact is not executable.");
+	for (const packageManager of ["npm", "npx", "pnpm", "yarn"]) {
+		const packageShim = findArtifact(
+			`.codex/openagentlayer/shim/${packageManager}`,
+			artifacts,
+		);
+		if (packageShim.content.includes(`exec rtk ${packageManager}`))
+			throw new Error(`${packageManager} shim bypasses Bun rewrite.`);
+		if (!packageShim.content.includes("bun"))
+			throw new Error(`${packageManager} shim does not route to Bun.`);
+	}
 	const privileged = findArtifact(
 		".codex/openagentlayer/runtime/privileged-exec.mjs",
 		artifacts,

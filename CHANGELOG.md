@@ -5,6 +5,33 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.2-beta.4] - 2026-05-03
+
+### Added
+
+- Added Bun rewrite enforcement for replaceable `npm`, `npx`, `pnpm`, and
+  `yarn` package-manager commands.
+- Added Codex package-manager shims that route replaceable Node.js package
+  commands through `bun` or `bunx` under RTK.
+
+### Changed
+
+- Added Bun to OAL toolchain bootstrap plans so Bun-backed generated shims have
+  the required runtime.
+- Replaced OAL-owned toolchain package-exec guidance with `bunx` where Bun has
+  a direct equivalent.
+- Kept Deno commands separate from Bun rewrites.
+
+### Verified
+
+- `rtk bun run test`
+- `rtk bun run accept`
+- `rtk proxy -- bun run accept`
+- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run biome:check`
+- `rtk bunx tsc --noEmit`
+- `rtk ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.2-beta.3] - 2026-05-03
 
 ### Changed

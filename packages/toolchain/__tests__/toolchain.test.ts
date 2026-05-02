@@ -5,7 +5,8 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	const plan = planToolchainInstall({ os: "macos", hasHomebrew: false });
 	expect(plan.packageManager).toBe("brew");
 	expect(plan.commands[0]).toContain("Homebrew/install");
-	expect(plan.commands[1]).toContain("brew install ripgrep fd fzf");
+	expect(plan.commands[1]).toContain("brew install bun ripgrep fd fzf");
+	expect(plan.requiredTools).toContain("bun");
 	expect(plan.commands).toContain("rtk gain");
 	expect(plan.commands).toContain("rtk grep --help");
 	expect(plan.commands).toContain("rtk find --help");
@@ -20,8 +21,10 @@ test("Linux plan uses selected distro package manager and optional tools", () =>
 		includeOptional: ["ctx7", "playwright"],
 	});
 	expect(plan.commands[0]).toBe("sudo dnf check-update || true");
-	expect(renderToolchainPlan(plan)).toContain("ctx7 setup --cli --universal");
 	expect(renderToolchainPlan(plan)).toContain(
-		"npx playwright install --with-deps",
+		"bunx ctx7 setup --cli --universal",
+	);
+	expect(renderToolchainPlan(plan)).toContain(
+		"bunx playwright install --with-deps",
 	);
 });

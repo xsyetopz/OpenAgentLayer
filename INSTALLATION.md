@@ -31,6 +31,8 @@ bun run toolchain -- --os macos --optional ctx7,playwright
 bun run toolchain -- --os linux --pkg apt --optional ctx7,playwright
 ```
 
+The toolchain plan includes Bun itself. OAL-generated npm/pnpm/yarn/npx shims rely on Bun being present before provider usage starts.
+
 Install RTK when it is missing:
 
 ```bash

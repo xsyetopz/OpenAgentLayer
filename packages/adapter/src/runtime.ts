@@ -19,8 +19,6 @@ const RTK_SHIMS: Record<string, string[]> = {
 	go: ["go"],
 	grep: ["grep"],
 	kubectl: ["kubectl"],
-	npm: ["npm"],
-	npx: ["npx"],
 	pytest: ["pytest"],
 	rg: ["grep"],
 	ruff: ["ruff"],
@@ -45,6 +43,15 @@ export function renderCodexShellShimArtifacts(): ArtifactSet {
 			path: `.codex/openagentlayer/shim/${name}`,
 			content: renderRtkShim(rtkArgs),
 			sourceId: "runtime:codex-rtk-shim",
+			executable: true,
+			mode: "file" as const,
+		})),
+		...["npm", "pnpm", "yarn", "npx"].map((name) => ({
+			provider: "codex" as const,
+			path: `.codex/openagentlayer/shim/${name}`,
+			content:
+				name === "npx" ? renderNpxShim() : renderPackageManagerShim(name),
+			sourceId: "runtime:codex-bun-shim",
 			executable: true,
 			mode: "file" as const,
 		})),
@@ -86,6 +93,110 @@ exec /bin/zsh "$@"
 function renderRtkShim(rtkArgs: string[]): string {
 	return `#!/usr/bin/env zsh
 exec rtk ${rtkArgs.map(shellQuote).join(" ")} "$@"
+`;
+}
+
+function renderNpxShim(): string {
+	return `#!/usr/bin/env zsh
+exec rtk proxy -- bunx "$@"
+`;
+}
+
+function renderPackageManagerShim(name: string): string {
+	const publishCase =
+		name === "yarn"
+			? `
+  npm)
+    shift
+    if [[ "$1" == "publish" ]]; then
+      shift
+      exec rtk proxy -- bun publish "$@"
+    fi
+    echo "OAL has no Bun rewrite for yarn npm $1" >&2
+    exit 64
+    ;;`
+			: "";
+	const upgradeCase =
+		name === "yarn"
+			? `
+  upgrade|up)
+    shift
+    exec rtk proxy -- bun update "$@"
+    ;;`
+			: "";
+	const execCase =
+		name === "pnpm" || name === "yarn"
+			? `
+  dlx|exec)
+    shift
+    [[ "$1" == "--" ]] && shift
+    exec rtk proxy -- bunx "$@"
+    ;;`
+			: `
+  exec|x)
+    shift
+    [[ "$1" == "--" ]] && shift
+    exec rtk proxy -- bunx "$@"
+    ;;`;
+	const runCase = name === "npm" ? "run|run-script" : "run";
+	const removeCase =
+		name === "npm" ? "remove|rm|uninstall|un" : "remove|rm|uninstall";
+	return `#!/usr/bin/env zsh
+set -e
+case "$1" in
+  ${execCase.trim()}
+  ${runCase})
+    shift
+    exec rtk proxy -- bun run "$@"
+    ;;
+  install|i|ci)
+    shift
+    exec rtk proxy -- bun install "$@"
+    ;;
+  add)
+    shift
+    exec rtk proxy -- bun add "$@"
+    ;;
+  ${removeCase})
+    shift
+    exec rtk proxy -- bun remove "$@"
+    ;;
+  update|up)
+    shift
+    exec rtk proxy -- bun update "$@"
+    ;;${upgradeCase}
+  outdated)
+    shift
+    exec rtk proxy -- bun outdated "$@"
+    ;;
+  publish)
+    shift
+    exec rtk proxy -- bun publish "$@"
+    ;;
+  pack)
+    shift
+    exec rtk proxy -- bun pm pack "$@"
+    ;;
+  link)
+    shift
+    exec rtk proxy -- bun link "$@"
+    ;;
+  list|ls)
+    shift
+    exec rtk proxy -- bun pm ls "$@"
+    ;;${publishCase}
+  "")
+    exec rtk proxy -- bun install
+    ;;
+  *)
+    ${
+			name === "yarn"
+				? 'exec rtk proxy -- bun run "$@"'
+				: `echo "OAL has no Bun rewrite for ${name} $1" >&2
+    exit 64`
+		}
+    ;;
+esac
 `;
 }
 

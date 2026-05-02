@@ -36,6 +36,8 @@ bun install --frozen-lockfile
 bun run check
 ```
 
+`bun` is a required OAL runtime dependency. The Homebrew cask depends on Bun, and `bun run toolchain` includes Bun in OS package-manager setup plans so generated Bun shims do not fail at use time.
+
 Preview exactly what OAL would generate before writing anything:
 
 ```bash

@@ -83,11 +83,12 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	const stdout = await new Response(command.stdout).text();
 	expect(await command.exited).toBe(0);
 	expect(stdout).toContain("sudo apt-get update");
-	expect(stdout).toContain("sudo apt-get install -y ripgrep");
+	expect(stdout).toContain("sudo apt-get install -y bun ripgrep");
 	expect(stdout).toContain("rtk gain");
 	expect(stdout).toContain("rtk grep --help");
 	expect(stdout).toContain("rtk find --help");
-	expect(stdout).toContain("ctx7 setup --cli --universal");
+	expect(stdout).toContain("bunx ctx7 setup --cli --universal");
+	expect(stdout).toContain("bunx playwright install --with-deps");
 });
 
 test("CLI RTK gain check reports status", async () => {

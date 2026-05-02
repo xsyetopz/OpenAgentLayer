@@ -20,11 +20,11 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 	if (
 		!(
 			toolchain.stdout.includes("Homebrew/install") &&
-			toolchain.stdout.includes("brew install ripgrep") &&
+			toolchain.stdout.includes("brew install bun ripgrep") &&
 			toolchain.stdout.includes("rtk gain") &&
 			toolchain.stdout.includes("rtk grep --help") &&
 			toolchain.stdout.includes("rtk find --help") &&
-			toolchain.stdout.includes("ctx7 setup")
+			toolchain.stdout.includes("bunx ctx7 setup")
 		)
 	)
 		throw new Error(

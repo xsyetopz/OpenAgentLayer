@@ -223,6 +223,16 @@ async function assertRuntimeArtifacts(targetRoot: string): Promise<void> {
 	);
 	if (!shim.includes("exec rtk git"))
 		throw new Error("Codex RTK shim does not route git through RTK.");
+	for (const packageManager of ["npm", "npx", "pnpm", "yarn"]) {
+		const packageShim = await readFile(
+			join(targetRoot, `.codex/openagentlayer/shim/${packageManager}`),
+			"utf8",
+		);
+		if (packageShim.includes(`exec rtk ${packageManager}`))
+			throw new Error(`${packageManager} shim bypasses Bun rewrite.`);
+		if (!packageShim.includes("bun"))
+			throw new Error(`${packageManager} shim does not route to Bun.`);
+	}
 	const zsh = await readFile(
 		join(targetRoot, ".codex/openagentlayer/shim/oal-zsh"),
 		"utf8",

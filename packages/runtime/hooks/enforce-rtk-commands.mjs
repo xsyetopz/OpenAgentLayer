@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { bunRewrite } from "./_bun-rewrite.mjs";
 import { asString, createHookRunner } from "./_runtime.mjs";
 
 const SUPPORTED_COMMANDS = new Map(
@@ -33,11 +34,8 @@ const SUPPORTED_COMMANDS = new Map(
 		"ls",
 		"mypy",
 		"next",
-		"npm",
-		"npx",
 		"pip",
 		"playwright",
-		"pnpm",
 		"prettier",
 		"prisma",
 		"psql",
@@ -74,6 +72,17 @@ function evaluate(payload) {
 	const normalized = normalizeCommand(command);
 	if (normalized.startsWith("rtk ") || normalized === "rtk") {
 		return { decision: "pass", reason: "Command already uses RTK." };
+	}
+
+	const rewriteCandidate = shellInnerCommand(normalized) ?? normalized;
+	const bunReplacement = bunRewrite(rewriteCandidate);
+	if (bunReplacement) {
+		return {
+			decision: "block",
+			reason:
+				"Bun supports this Node.js package-manager command; use the Bun form instead.",
+			details: [`Use: rtk proxy -- ${bunReplacement}`],
+		};
 	}
 
 	const executable = commandExecutable(normalized);
@@ -131,6 +140,17 @@ function commandExecutable(command) {
 		return commandExecutable(nested);
 	}
 	return tokens[0];
+}
+
+function shellInnerCommand(command) {
+	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	if (SHELL_WRAPPERS.has(tokens[0]) && tokens[1] === "-lc") {
+		return tokens
+			.slice(2)
+			.join(" ")
+			.replace(/^['"]|['"]$/g, "");
+	}
+	return undefined;
 }
 
 function rewriteExecutable(command, replacement) {

@@ -250,8 +250,6 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 		"ruff",
 		"go",
 		"cargo",
-		"npm",
-		"npx",
 		"docker",
 		"kubectl",
 		"aws",
@@ -260,6 +258,15 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 	])
 		if (!script.includes(`"${command}"`))
 			throw new Error(`RTK enforcement hook missing command ${command}.`);
+	const rewriteSupport = await readFile(
+		join(targetRoot, ".codex/openagentlayer/hooks/_bun-rewrite.mjs"),
+		"utf8",
+	);
+	for (const replacement of ["bunx", '"run"', '"add"', "bun install", '"pm"'])
+		if (!rewriteSupport.includes(replacement))
+			throw new Error(
+				`RTK enforcement hook missing Bun rewrite ${replacement}.`,
+			);
 }
 
 async function assertHooksAvoidProseMatchers(

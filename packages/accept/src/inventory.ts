@@ -15,6 +15,7 @@ const ROOT_PRODUCT_FILES = [
 	"tsconfig.base.json",
 	"biome.jsonc",
 	"README.md",
+	"INSTALLATION.md",
 	"CHANGELOG.md",
 	"CONTRIBUTING.md",
 	"SECURITY.md",

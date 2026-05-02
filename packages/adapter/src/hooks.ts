@@ -25,12 +25,23 @@ export async function renderHookArtifacts(
 		`${prefix}/_runtime.mjs`,
 		repoRoot,
 	);
+	const bunRewriteSupport = await renderHookArtifact(
+		provider,
+		{
+			id: "bun_rewrite_support",
+			script: "_bun-rewrite.mjs",
+			providers: [provider],
+			events: {},
+		},
+		`${prefix}/_bun-rewrite.mjs`,
+		repoRoot,
+	);
 	const hookArtifacts = await Promise.all(
 		providerHooks.map((hook) =>
 			renderHookArtifact(provider, hook, `${prefix}/${hook.script}`, repoRoot),
 		),
 	);
-	return [runtimeSupport, ...hookArtifacts];
+	return [runtimeSupport, bunRewriteSupport, ...hookArtifacts];
 }
 
 async function renderHookArtifact(

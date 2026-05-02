@@ -48,6 +48,35 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 	});
 });
 
+test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", async () => {
+	for (const [command, replacement] of [
+		["npx prettier foo.js", "rtk proxy -- bunx prettier foo.js"],
+		["npm run test", "rtk proxy -- bun run test"],
+		["pnpm add zod", "rtk proxy -- bun add zod"],
+		["yarn add zod", "rtk proxy -- bun add zod"],
+		["yarn dlx prettier foo.js", "rtk proxy -- bunx prettier foo.js"],
+		["yarn test", "rtk proxy -- bun run test"],
+	] as const) {
+		await expect(runHook({ command })).resolves.toMatchObject({
+			decision: "block",
+			details: [`Use: ${replacement}`],
+		});
+	}
+	await expect(
+		runHook({ command: "yarn set version stable" }),
+	).resolves.toMatchObject({
+		decision: "warn",
+	});
+	await expect(runHook({ command: "deno test" })).resolves.toMatchObject({
+		decision: "warn",
+	});
+	await expect(
+		runHook({ command: "rtk proxy -- bun run test" }),
+	).resolves.toMatchObject({
+		decision: "pass",
+	});
+});
+
 test("privileged exec helper denies by default and supports dry-run allowlist", async () => {
 	const root = await mkdtemp(resolve(tmpdir(), "oal-privileged-"));
 	const allowed = await runPrivileged({

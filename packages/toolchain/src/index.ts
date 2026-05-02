@@ -25,6 +25,7 @@ export interface ToolchainPlan {
 }
 
 const CORE_TOOLS = [
+	"bun",
 	"ripgrep",
 	"fd",
 	"fzf",
@@ -70,6 +71,7 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		commands,
 		notes: [
 			"Run as dry-run first; install mutates user machine state.",
+			"Bun is installed before OAL-managed package-manager rewrites can run.",
 			"RTK must be verified with `rtk gain` to avoid the wrong rtk package.",
 			"Keep `rtk gain` at or above 80%; drops below 80% require command/output efficiency work before release.",
 			"Use `rtk gain` to confirm token savings; prefer `rtk grep` and bounded `rtk find` for high-volume repository inspection.",
@@ -150,12 +152,11 @@ function linuxRefreshCommand(packageManager: PackageManager): string {
 function optionalCommands(optionalTools: OptionalTool[]): string[] {
 	const commands: string[] = [];
 	if (optionalTools.includes("ctx7")) {
-		commands.push("npm install -g ctx7");
-		commands.push("ctx7 setup --cli --universal");
+		commands.push("bunx ctx7 setup --cli --universal");
 	}
 	if (optionalTools.includes("deepwiki"))
 		commands.push("echo 'Configure DeepWiki MCP manually from provider docs.'");
 	if (optionalTools.includes("playwright"))
-		commands.push("npx playwright install --with-deps");
+		commands.push("bunx playwright install --with-deps");
 	return commands;
 }
