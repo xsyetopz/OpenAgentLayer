@@ -14,14 +14,18 @@ export function validateDepth(source: OalSource, issues: PolicyIssue[]): void {
 				message: `Agent ${agent.id} is too shallow for production output.`,
 				sourceId: agent.id,
 			});
-	for (const skill of source.skills)
-		if (skill.body.length < 220)
+	for (const skill of source.skills) {
+		const supportDepth = (skill.supportFiles ?? [])
+			.map((supportFile) => supportFile.content ?? "")
+			.join("\n").length;
+		if (skill.body.length + supportDepth < 220)
 			issues.push({
 				severity: "error",
 				code: "stub-skill",
 				message: `Skill ${skill.id} body is too shallow.`,
 				sourceId: skill.id,
 			});
+	}
 	for (const route of source.routes)
 		if (route.body.length < 200 || route.permissions.length < 6)
 			issues.push({

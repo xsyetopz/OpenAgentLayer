@@ -51,8 +51,7 @@ bun packages/cli/src/main.ts preview --provider codex --path .codex/config.toml 
 ## Homebrew
 
 The tap cask is in `homebrew/Casks/openagentlayer.rb`.
-The release repository is `https://github.com/xsyetopz/OpenAgentLayer` on
-the `master` branch.
+The release repository is [xsyetopz/OpenAgentLayer](https://github.com/xsyetopz/OpenAgentLayer) on the `master` branch.
 
 It expects release archives named:
 

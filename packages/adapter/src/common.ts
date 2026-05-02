@@ -26,7 +26,13 @@ Final output must include concrete evidence or a precise blocker.`;
 }
 
 export function skillMarkdown(skill: SkillRecord, source: OalSource): string {
-	return `---\ndescription: ${skill.description}\n---\n# ${skill.title}\n\n${skill.body}\n\n${renderTemplate(source, "skillContract", {})}\n`;
+	return `---\nname: ${skill.id}\ndescription: ${quoteToml(skill.description)}\n---\n# ${skill.title}\n\n${skill.body}\n\n${renderTemplate(
+		source,
+		"skillContract",
+		{
+			supportFiles: renderSkillSupportFiles(skill),
+		},
+	)}\n`;
 }
 
 export function commandMarkdown(route: RouteRecord, source: OalSource): string {
@@ -70,6 +76,22 @@ function renderProductPromptContracts(source: OalSource): string {
 		`- ${contracts.accountabilityPressure}`,
 		`- ${contracts.simplicityDiscipline}`,
 	].join("\n");
+}
+
+function renderSkillSupportFiles(skill: SkillRecord): string {
+	const supportFiles = skill.supportFiles ?? [];
+	if (supportFiles.length === 0)
+		return "No bundled support files. Use the main instructions only.";
+	return supportFiles
+		.map((supportFile) => {
+			const action = supportFile.path.startsWith("scripts/")
+				? "Run when useful"
+				: supportFile.path.startsWith("assets/")
+					? "Use as template"
+					: "Read when needed";
+			return `- ${supportFile.path}: ${action}.`;
+		})
+		.join("\n");
 }
 
 function renderTemplate(

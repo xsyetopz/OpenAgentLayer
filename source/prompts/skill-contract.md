@@ -1,6 +1,14 @@
 ## Prompt contract
 
-- Success criteria: apply this skill only to its stated scope and produce output that can be checked against repo evidence or provider artifacts.
-- Ordered steps: inspect relevant files first, apply the skill-specific workflow, verify the result, then report evidence.
-- Ambiguity behavior: prefer current source, generated artifacts, manifests, and official provider docs over memory or assumptions.
-- Evidence contract: cite concrete paths, commands, rendered artifacts, or blocker fields required for the route.
+- **Success criteria:** apply this skill only to its stated scope and produce output that can be checked against repo evidence or provider artifacts.
+- **Ordered steps:** inspect relevant files first, apply the skill-specific workflow, verify the result, then report evidence.
+- **Ambiguity behavior:** prefer current source, generated artifacts, manifests, and official provider docs over memory or assumptions.
+- **Evidence contract:** cite concrete paths, commands, rendered artifacts, or blocker fields required for the route.
+- **Standards contract:** when a support file names an open standard, use that standard as the first design/test shape and state when it does not fit.
+- **Structure contract:** prefer Given/When/Then, Arrange/Act/Assert, ADR, OpenAPI, JSON Schema, AsyncAPI, GraphQL SDL, WCAG, OpenTelemetry, or language-native test layout where the task surface matches.
+- **Markdown contract:** use headings for hierarchy, lists for steps, fenced code blocks with language identifiers for examples, inline code for literals, and `**bold**` or `_italic_` only when emphasis adds meaning.
+- **Attribution contract:** when external standards or guides influence the result, include a concise `## References` section with descriptive links.
+
+## Bundled support files
+
+{{ supportFiles }}

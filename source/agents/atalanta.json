@@ -23,10 +23,9 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "trace",
-    "review",
-    "testing"
+    "test",
+    "debug",
+    "trace"
   ],
   "routes": [
     "test",

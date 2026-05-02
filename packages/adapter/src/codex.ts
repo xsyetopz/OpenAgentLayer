@@ -10,7 +10,6 @@ import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "codex";
 const CODEX_FEATURES = [
-	{ key: "shell_zsh_fork", enabled: true, reason: "zsh shell execution" },
 	{ key: "steer", enabled: true, reason: "mid-turn steering" },
 	{ key: "apps", enabled: false, reason: "app config not wired" },
 	{ key: "tui_app_server", enabled: true, reason: "richer TUI surface" },
@@ -51,11 +50,6 @@ const CODEX_FEATURES = [
 		key: "fast_mode",
 		enabled: false,
 		reason: "profile routing over blanket speed mode",
-	},
-	{
-		key: "voice_transcription",
-		enabled: false,
-		reason: "voice input not wired",
 	},
 	{ key: "undo", enabled: false, reason: "rollback owns recovery" },
 	{ key: "js_repl", enabled: false, reason: "tool surface not wired" },

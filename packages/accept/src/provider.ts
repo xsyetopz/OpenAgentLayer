@@ -7,7 +7,6 @@ import {
 } from "./config-schema";
 
 const CODEX_REQUIRED_FLAGS = [
-	"shell_zsh_fork = true # zsh shell execution",
 	"steer = true # mid-turn steering",
 	"apps = false # app config not wired",
 	"tui_app_server = true # richer TUI surface",
@@ -25,7 +24,6 @@ const CODEX_REQUIRED_FLAGS = [
 	"collaboration_modes = false # route contracts own mode",
 	"codex_git_commit = false # user-authored commits",
 	"fast_mode = false # profile routing over blanket speed mode",
-	"voice_transcription = false # voice input not wired",
 	"undo = false # rollback owns recovery",
 	"js_repl = false # tool surface not wired",
 ] as const;

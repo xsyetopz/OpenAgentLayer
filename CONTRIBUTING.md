@@ -99,7 +99,7 @@ release audit.
 
 ### Claude Code
 
-- Allowed models: `claude-opus-4-7`, `claude-opus-4-7[1m]`,
+- Allowed models: `claude-opus-4-6`, `claude-opus-4-6[1m]`,
   `claude-sonnet-4-6`, `claude-haiku-4-5`.
 - `CLAUDE.md` is a managed block.
 - Hooks are command handlers that call executable `.mjs` scripts.

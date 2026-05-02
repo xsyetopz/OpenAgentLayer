@@ -1,0 +1,17 @@
+{
+  "id": "git",
+  "title": "Git",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Handle git state, commits, version bumps, branches, and release hygiene without losing user work. Use when work involves status, diffs, commits, tags, PR prep, or pre-commit setup.",
+  "body": "Inspect status before touching git state. Preserve user edits. Do not reset, delete, stash, rebase, or push unless explicitly requested. Commit messages must state why and include required trailers.",
+  "supportFiles": [
+    {
+      "path": "references/git.md",
+      "source": "skill-resources/git/references/git.md"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
   ],
   "agent": "calliope",
   "skills": [
-    "planning"
+    "document"
   ],
   "permissions": "docs-only write",
   "arguments": "task objective, target paths, and required evidence",

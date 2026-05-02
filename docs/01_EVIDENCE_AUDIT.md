@@ -65,7 +65,7 @@ OAL must carry forward model-routing as a first-class product feature, but with 
 
 - Codex allowed: `gpt-5.5`, `gpt-5.4-mini`, `gpt-5.3-codex`.
 - Codex disallowed: blocked Codex models.
-- Claude allowed: `claude-opus-4-7`, `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
+- Claude allowed: `claude-opus-4-6`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
 - Claude disallowed: `blocked Claude model`, `blocked Claude long-context model`.
 
 ## 6. baseline behavior had too much monolithic generation logic

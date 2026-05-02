@@ -104,7 +104,7 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		],
 	],
 	[
-		/model allowlist|model ids|model routing|gpt-5|claude-opus|claude-sonnet|claude-haiku|opus 4\.6|xhigh/i,
+		/model allowlist|model ids|model routing|gpt-5|claude-opus|claude-sonnet|claude-haiku|opus 4\.7|xhigh/i,
 		[
 			"packages/policy/src/models.ts",
 			"packages/accept/src/source.ts:assertNegativePolicyFixtures",
@@ -180,7 +180,7 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		],
 	],
 	[
-		/Generated Codex TOML parses|Supported schema keys|Deprecated|compatibility keys|Replacement fields|tools_view_image|shell_zsh_fork|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|voice_transcription|undo|js_repl|false flag|true flag|Long-runtime/i,
+		/Generated Codex TOML parses|Supported schema keys|Deprecated|compatibility keys|Replacement fields|tools_view_image|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|undo|js_repl|false flag|true flag|Long-runtime/i,
 		[
 			"packages/adapter/src/codex.ts",
 			"packages/accept/src/provider.ts:assertCodexConfig",

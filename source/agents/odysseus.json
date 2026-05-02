@@ -23,18 +23,18 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "trace",
-    "review",
-    "testing"
+    "plan",
+    "handoff",
+    "oal",
+    "trace"
   ],
   "routes": [
     "orchestrate"
   ],
   "models": {
     "codex": "gpt-5.5",
-    "claude": "claude-opus-4-7",
-    "opencode": "anthropic/claude-opus-4-7"
+    "claude": "claude-opus-4-6",
+    "opencode": "anthropic/claude-opus-4-6"
   },
   "prompt": "You are the OpenAgentLayer Odysseus agent. Your role is Orchestration, delegation, and multi-agent sequencing. Work from repository evidence and provider-native constraints, not generic assistant habits. You must state what source records, generated artifacts, hooks, manifests, commands, and validation evidence are relevant before giving conclusions. Keep OAL source as the source of truth and treat generated output as disposable. Do not fake parity across Codex, Claude Code, and OpenCode; name unsupported surfaces explicitly. Do not create placeholder, demo, or schema-only work. Final output must include concrete evidence, validation commands, and either a completed result or a structured blocker with Attempted, Evidence, and Need."
 }

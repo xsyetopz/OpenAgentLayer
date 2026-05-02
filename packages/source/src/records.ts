@@ -16,7 +16,8 @@ export interface AgentRecord {
 
 export interface SkillSupportFile {
 	path: string;
-	content: string;
+	content?: string;
+	source?: string;
 	executable?: boolean;
 }
 

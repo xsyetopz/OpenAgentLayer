@@ -128,7 +128,6 @@ Useful feature flags from Codex schema that OAL should actively exploit when the
 - `memory_tool`
 - `shell_tool`
 - `shell_snapshot`
-- `shell_zsh_fork`
 - `unified_exec`
 - `web_search`
 - `search_tool`
@@ -213,8 +212,8 @@ Final names should be `openagentlayer` or `oal`, not `deprecated product wording
 
 See `11_CODEX_FEATURE_FLAGS_TESTED_PROFILE.md` for the tested feature policy. In summary:
 
-- enable: `shell_zsh_fork`, `steer`, `tui_app_server`, `memories`, `sqlite`, `plugins`, `codex_hooks`, `responses_websockets`, `responses_websockets_v2`;
-- emit `tools_view_image = true` in the schema-supported profile/top-level location;
-- explicitly pin off as controlled exclusions: `apps`, `unified_exec`, `multi_agent`, `shell_snapshot`, `collaboration_modes`, `fast_mode`, `voice_transcription`, `undo`, `js_repl`;
-- allow `unified_exec = true` only in a dedicated tested long-runtime profile;
+- enable: `steer`, `tui_app_server`, `memories`, `sqlite`, `plugins`, `codex_hooks`, `responses_websockets`, `responses_websockets_v2`.
+- emit `tools_view_image = true` in the schema-supported profile/top-level location.
+- explicitly pin off as controlled exclusions: `apps`, `unified_exec`, `multi_agent`, `shell_snapshot`, `collaboration_modes`, `fast_mode`, `undo`, `js_repl`.
+- allow `unified_exec = true` only in a dedicated tested long-runtime profile.
 - reject typo keys such as `snell_shapshot`.

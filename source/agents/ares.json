@@ -23,10 +23,10 @@
     "shell"
   ],
   "skills": [
-    "planning",
+    "debug",
+    "test",
     "trace",
-    "review",
-    "testing"
+    "review"
   ],
   "routes": [
     "debug"

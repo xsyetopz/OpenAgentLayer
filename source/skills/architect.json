@@ -1,0 +1,21 @@
+{
+  "id": "architect",
+  "title": "Architect",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Find simpler module seams, naming fixes, god-object splits, and deep-module opportunities. Use when architecture, package boundaries, cohesion, or codebase shape is the problem.",
+  "body": "Prefer boring depth over elaborate diagrams. A useful architecture change reduces reasons to change, shrinks public interfaces, or concentrates product behavior behind a stable seam. Do not introduce abstractions that are used once.",
+  "supportFiles": [
+    {
+      "path": "references/deep-modules.md",
+      "source": "skill-resources/architect/references/deep-modules.md"
+    },
+    {
+      "path": "references/simplicity.md",
+      "source": "skill-resources/shared/references/simplicity.md"
+    }
+  ]
+}

@@ -16,14 +16,14 @@ Reference baseline behavior Codex surfaces:
 
 OAL Codex requirements:
 
-- render complete agent TOML, not shallow role cards;
-- render complete config/profile fragments with allowed models only;
-- render AGENTS.md/global instructions from OAL source;
-- render plugin skills with support files/metadata where needed;
-- wire hooks through documented Codex hook surfaces only;
-- support route contracts such as readonly, edit-required, execution-required;
-- validate model allowlist: `gpt-5.5`, `gpt-5.4-mini`, `gpt-5.3-codex` only;
-- reject blocked Codex models, and any unapproved model;
+- render complete agent TOML, not shallow role cards.
+- render complete config/profile fragments with allowed models only.
+- render AGENTS.md/global instructions from OAL source.
+- render plugin skills with support files/metadata where needed.
+- wire hooks through documented Codex hook surfaces only.
+- support route contracts such as readonly, edit-required, execution-required.
+- validate model allowlist: `gpt-5.5`, `gpt-5.4-mini`, `gpt-5.3-codex` only.
+- reject blocked Codex models, and any unapproved model.
 - avoid default `xhigh` unless explicitly justified by route/model plan.
 
 ## Claude Code
@@ -40,13 +40,13 @@ Reference baseline behavior Claude surfaces:
 
 OAL Claude requirements:
 
-- render real agents/subagents with detailed operating contracts;
-- render skills and support files;
-- render settings fragments while preserving user-owned settings;
-- render `CLAUDE.md`/instructions;
-- package executable `.mjs` hooks;
-- validate allowed models: `claude-opus-4-7`, `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`;
-- reject blocked Claude model family variants;
+- render real agents/subagents with detailed operating contracts.
+- render skills and support files.
+- render settings fragments while preserving user-owned settings.
+- render `CLAUDE.md`/instructions.
+- package executable `.mjs` hooks.
+- validate allowed models: `claude-opus-4-6`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
+- reject blocked Claude model family variants.
 - avoid 1m unless a route explicitly needs large context.
 
 ## OpenCode
@@ -62,11 +62,11 @@ Reference baseline behavior OpenCode surfaces:
 
 OAL OpenCode requirements:
 
-- render `opencode.json`/`opencode.jsonc` using OpenCode-native config shape;
-- render agents, commands, permissions, instructions, tools, and plugin/hook surfaces where supported;
-- preserve OpenCode’s own continuation and agent semantics;
-- do not clone Claude or Codex behavior blindly;
-- ensure generated tools are runnable integrations, not metadata labels;
+- render `opencode.json`/`opencode.jsonc` using OpenCode-native config shape.
+- render agents, commands, permissions, instructions, tools, and plugin/hook surfaces where supported.
+- preserve OpenCode’s own continuation and agent semantics.
+- do not clone Claude or Codex behavior blindly.
+- ensure generated tools are runnable integrations, not metadata labels.
 - ensure generated commands have actionable execution contracts, not two-line descriptors.
 
 ## Provider-difference rule

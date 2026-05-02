@@ -14,7 +14,6 @@ export interface StrictRoadmapContext {
 }
 
 const REQUIRED_CODEX_FLAGS = [
-	"shell_zsh_fork = true",
 	"steer = true",
 	"apps = false",
 	"tui_app_server = true",
@@ -32,7 +31,6 @@ const REQUIRED_CODEX_FLAGS = [
 	"collaboration_modes = false",
 	"codex_git_commit = false",
 	"fast_mode = false",
-	"voice_transcription = false",
 	"undo = false",
 	"js_repl = false",
 ] as const;
@@ -72,6 +70,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				requireIncludes(config, model, "Codex config");
 			for (const forbidden of [
 				["gpt", "5", "2"].join("-"),
+				`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 				'approval_policy = "on-failure"',
 				["guardian", "subagent"].join("_"),
 			])

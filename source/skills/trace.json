@@ -1,11 +1,21 @@
 {
   "id": "trace",
-  "title": "Dependency Trace",
+  "title": "Trace",
   "providers": [
     "codex",
     "claude",
     "opencode"
   ],
-  "description": "Trace callers, callees, data flow, rendered artifacts, deploy ownership, and provider capability impact before proposing",
-  "body": "Trace callers, callees, data flow, rendered artifacts, deploy ownership, and provider capability impact before proposing changes. Record exact source ids and generated paths. This skill is used by OAL acceptance and route execution to keep investigation evidence-based and avoid speculative fixes. It must be rendered into provider skill surfaces and referenced by route or agent contracts."
+  "description": "Follow data flow, ownership, callers, providers, generated artifacts, hooks, and deploy paths with exact evidence. Use for impact analysis and source-to-output questions.",
+  "body": "Trace from source to behavior. A trace is complete when it names the source record, code path, generated artifact, deploy ownership, and validation gate.",
+  "supportFiles": [
+    {
+      "path": "references/trace.md",
+      "source": "skill-resources/trace/references/trace.md"
+    },
+    {
+      "path": "assets/trace.md",
+      "source": "skill-resources/trace/assets/trace.md"
+    }
+  ]
 }

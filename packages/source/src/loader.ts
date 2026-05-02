@@ -86,10 +86,35 @@ async function loadSkillRecords(sourceRoot: string): Promise<SkillRecord[]> {
 		validateSkillRecordShape,
 	);
 	const hydrated = await Promise.all(
-		records.map((record) => hydrateUpstreamSkill(sourceRoot, record)),
+		records.map(async (record) =>
+			hydrateSupportFiles(
+				sourceRoot,
+				await hydrateUpstreamSkill(sourceRoot, record),
+			),
+		),
 	);
 	for (const record of hydrated) validateSkillRecord(record);
 	return hydrated;
+}
+
+async function hydrateSupportFiles(
+	sourceRoot: string,
+	record: SkillRecord,
+): Promise<SkillRecord> {
+	const supportFiles = record.supportFiles ?? [];
+	if (supportFiles.length === 0) return record;
+	return {
+		...record,
+		supportFiles: await Promise.all(
+			supportFiles.map(async (supportFile) => {
+				if (!supportFile.source) return supportFile;
+				return {
+					...supportFile,
+					content: await readFile(join(sourceRoot, supportFile.source), "utf8"),
+				};
+			}),
+		),
+	};
 }
 
 async function hydrateUpstreamSkill(

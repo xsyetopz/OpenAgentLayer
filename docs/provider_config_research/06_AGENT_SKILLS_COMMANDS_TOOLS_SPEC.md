@@ -110,11 +110,11 @@ Caveman, Taste Skill, RTK, and similar integrations must be scoped:
 
 Artifacts are valid only if they are:
 
-- authored source consumed by loader;
-- generated provider output;
-- deploy/install/uninstall logic;
-- runtime hook/tool/plugin logic;
-- validation/fixtures;
+- authored source consumed by loader.
+- generated provider output.
+- deploy/install/uninstall logic.
+- runtime hook/tool/plugin logic.
+- validation/fixtures.
 - docs describing implemented behavior.
 
 Everything else is suspect.

@@ -14,15 +14,15 @@ Build OAL as a running generator/deployer product. Do not satisfy the task by cr
 
 Invalid outputs:
 
-- toy configs;
-- stub agent TOML;
-- two-line commands;
-- hook policy files without executable hook behavior;
-- tool names without runnable tool code;
-- generated artifacts not produced by generator;
-- docs as implementation;
-- schema-only work;
-- placeholder catalogs;
+- toy configs.
+- stub agent TOML.
+- two-line commands.
+- hook policy files without executable hook behavior.
+- tool names without runnable tool code.
+- generated artifacts not produced by generator.
+- docs as implementation.
+- schema-only work.
+- placeholder catalogs.
 - tests that only assert files exist.
 
 ## Required product path
@@ -44,23 +44,23 @@ If any link is missing, the work is incomplete.
 
 Acceptable primary work:
 
-- source loader;
-- source validator;
-- Codex renderer;
-- Claude renderer;
-- OpenCode renderer;
-- deploy planner;
-- install/apply code;
-- uninstall code;
-- manifest ownership;
-- structured config merge;
-- runtime `.mjs` hooks;
-- hook fixtures;
-- OpenCode tool implementation;
-- command/route renderer;
-- model routing enforcement;
-- generated/source drift check;
-- runtime isolation check;
+- source loader.
+- source validator.
+- Codex renderer.
+- Claude renderer.
+- OpenCode renderer.
+- deploy planner.
+- install/apply code.
+- uninstall code.
+- manifest ownership.
+- structured config merge.
+- runtime `.mjs` hooks.
+- hook fixtures.
+- OpenCode tool implementation.
+- command/route renderer.
+- model routing enforcement.
+- generated/source drift check.
+- runtime isolation check.
 - product acceptance command.
 
 Content assets are acceptable only when they complete a product path. Do not make content the main work unless the render/deploy path is already working.
@@ -69,17 +69,17 @@ Content assets are acceptable only when they complete a product path. Do not mak
 
 The repo should eventually have one command that proves full product behavior. It may be named according to project conventions, but it should prove at least:
 
-- source loads;
-- source validates;
-- Codex artifacts render and parse;
-- Claude artifacts render and parse;
-- OpenCode artifacts render and parse;
-- deploy into fixture root works;
-- manifest ownership is written;
-- uninstall removes only OAL-owned material;
-- `.mjs` hook fixtures run;
-- generated/source drift is detected;
-- model allowlist is enforced;
+- source loads.
+- source validates.
+- Codex artifacts render and parse.
+- Claude artifacts render and parse.
+- OpenCode artifacts render and parse.
+- deploy into fixture root works.
+- manifest ownership is written.
+- uninstall removes only OAL-owned material.
+- `.mjs` hook fixtures run.
+- generated/source drift is detected.
+- model allowlist is enforced.
 - reference notes is not imported by OAL runtime code.
 
 Do not stop because one file or one provider works. Stop only when product behavior works or a concrete blocker prevents completion.

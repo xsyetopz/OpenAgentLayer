@@ -61,7 +61,7 @@ baseline behavior committed generated provider directories and also used them as
 baseline behavior used models now rejected by the user for OAL reboot: blocked Codex models, Claude blocked Claude model family variants, and sometimes xhigh-heavy Codex assignments. OAL must use only the user-approved model set:
 
 - Codex: `gpt-5.5`, `gpt-5.4-mini`, `gpt-5.3-codex`.
-- Claude: `claude-opus-4-7`, `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
+- Claude: `claude-opus-4-6`, `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, `claude-haiku-4-5`.
 
 ### 5. Install behavior was real but too intertwined
 

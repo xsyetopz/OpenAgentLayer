@@ -9,6 +9,7 @@ import type {
 } from "./records";
 
 const PROVIDERS = new Set(supportedProviders());
+const AGENT_SKILL_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function validateAgentRecord(record: AgentRecord): void {
 	requireText(record.id, "agent id");
@@ -24,12 +25,25 @@ export function validateAgentRecord(record: AgentRecord): void {
 }
 
 export function validateSkillRecord(record: SkillRecord): void {
-	validateSkillRecordShape(record);
+	validateSkillRecordShape(record, { allowHydratedSupportFiles: true });
 	requireText(record.body, `skill ${record.id} body`);
+	for (const supportFile of record.supportFiles ?? [])
+		requireHydratedSupportContent(
+			record.id,
+			supportFile.path,
+			supportFile.content,
+		);
 }
 
-export function validateSkillRecordShape(record: SkillRecord): void {
+export function validateSkillRecordShape(
+	record: SkillRecord,
+	options: { allowHydratedSupportFiles?: boolean } = {},
+): void {
 	requireText(record.id, "skill id");
+	if (!AGENT_SKILL_ID_PATTERN.test(record.id))
+		throw new Error(
+			`skill ${record.id} id must use Agent Skills lowercase hyphen format.`,
+		);
 	requireText(record.title, `skill ${record.id} title`);
 	requireProviderList(record.providers, `skill ${record.id}`);
 	requireText(record.description, `skill ${record.id} description`);
@@ -41,8 +55,39 @@ export function validateSkillRecordShape(record: SkillRecord): void {
 	}
 	for (const supportFile of record.supportFiles ?? []) {
 		requireText(supportFile.path, `skill ${record.id} support file path`);
-		requireText(supportFile.content, `skill ${record.id} support file content`);
+		if (!isSkillSupportPath(supportFile.path))
+			throw new Error(
+				`skill ${record.id} support file ${supportFile.path} must live under scripts, references, or assets.`,
+			);
+		if (
+			supportFile.content &&
+			supportFile.source &&
+			options.allowHydratedSupportFiles !== true
+		)
+			throw new Error(
+				`skill ${record.id} support file ${supportFile.path} cannot define content and source.`,
+			);
+		if (!(supportFile.content || supportFile.source))
+			throw new Error(
+				`skill ${record.id} support file ${supportFile.path} needs content or source.`,
+			);
+		if (supportFile.content)
+			requireText(
+				supportFile.content,
+				`skill ${record.id} support file content`,
+			);
+		if (supportFile.source)
+			requireText(supportFile.source, `skill ${record.id} support file source`);
 	}
+}
+
+function isSkillSupportPath(path: string): boolean {
+	const parts = path.split("/");
+	return (
+		parts.length === 2 &&
+		["scripts", "references", "assets"].includes(parts[0] ?? "") &&
+		parts.every((part) => part.length > 0 && !part.includes(".."))
+	);
 }
 
 export function validateRouteRecord(record: RouteRecord): void {
@@ -148,4 +193,13 @@ function requireStringList(value: string[], label: string): void {
 function requireText(value: string, label: string): void {
 	if (typeof value !== "string" || value.trim().length === 0)
 		throw new Error(`${label} must be a non-empty string.`);
+}
+
+function requireHydratedSupportContent(
+	skillId: string,
+	path: string,
+	content: string | undefined,
+): void {
+	if (content) return;
+	throw new Error(`skill ${skillId} support file ${path} was not hydrated.`);
 }

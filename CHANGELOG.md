@@ -5,65 +5,50 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.1.1-beta.2] - 2026-05-02
+## [0.1.1-beta.3] - 2026-05-02
 
 ### Added
 
-- Introduced OAL as a production-grade generator and deployer for Claude Code,
-  Codex, and OpenCode.
-- Added authored source loading from `source/` for agents, routes, skills,
-  hooks, tools, support files, and product metadata.
-- Added provider-native rendering:
-  - Codex profiles, agents, skills, executable hooks, `AGENTS.md`, and
-    `.codex/config.toml`
-  - Claude Code settings, agents, commands, skills, executable hooks, and
-    `CLAUDE.md`
-  - OpenCode `opencode.jsonc`, agents, commands, skills, tools, plugins,
-    instructions, permissions, model fallbacks, and executable hooks
-- Added manifest-owned deploy, update, backup, drift detection, and uninstall
-  behavior.
-- Added OAL managed markers for generated comment-capable artifacts and managed
-  instruction blocks.
-- Added executable `.mjs` runtime hooks for safety, route context, source drift,
-  evidence checks, secret protection, generated-file protection, RTK enforcement,
-  and failure-loop protection.
-- Added acceptance validation for source loading, provider rendering, manifests,
-  deploy/uninstall behavior, hook executability, generated artifact contracts,
-  toolchain planning, Homebrew cask syntax, and CI/CD gates.
-- Added package boundaries for `source`, `policy`, `adapter`, `artifact`,
-  `manifest`, `deploy`, `runtime`, `accept`, `cli`, and `toolchain`.
-- Added CLI commands for check, preview, render, deploy, uninstall, acceptance,
-  roadmap evidence, and toolchain planning.
-- Added Homebrew cask definition for `openagentlayer`.
-- Added CI/CD that runs quality gates and deploy dry-runs before guarded
-  Homebrew submission.
-- Added repo-hosted provider plugin marketplace payloads and user-level plugin
-  sync for Claude Code, Codex, and OpenCode with stale OAL cache pruning.
+- Added generated artifact preview support so users can inspect exact provider
+  output without writing files.
+- Added Markdown structure, emphasis, directive, and attribution standards for
+  authored `.md` files and generated prompt/skill/command artifacts.
+- Added source-backed skill support resources for architecture, debugging,
+  design, documentation, plain-language writing, implementation, planning,
+  prompting, review, security, testing, tracing, and OAL surface checks.
+- Added the shared simplicity discipline reference with the Terry A. Davis quote
+  for architecture, implementation, and review skills.
+- Added executable RTK command enforcement through a universal `.mjs` hook.
 
 ### Changed
 
-- Product naming is OpenAgentLayer or OAL across new code, docs, package names,
-  generated user-facing artifacts, and release surfaces.
-- CLI command implementations are split under `packages/cli/src/commands`.
-- Codex model routing is limited to `gpt-5.5`, `gpt-5.4-mini`, and
+- Renamed and reshaped skills around short action names such as `debug`,
+  `document`, `implement`, `plan`, `prompt`, `secure`, and `test`.
+- Reworked generated skill bodies to load reusable source files instead of
+  hard-coded large template strings.
+- Strengthened source-backed behavior prompts so agents block on missing evidence
+  instead of guessing, scaffolding, or approximating behavior.
+- Switched Claude model routing to `claude-opus-4-6`,
+  `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, and `claude-haiku-4-5`.
+- Kept Codex routing limited to `gpt-5.5`, `gpt-5.4-mini`, and
   `gpt-5.3-codex`.
-- Claude model routing is limited to `claude-opus-4-7`,
-  `claude-opus-4-7[1m]`, `claude-sonnet-4-6`, and `claude-haiku-4-5`.
-- Codex feature toggles include concise inline reasons in generated TOML.
-- `reference notes/` is read-only reference material and is not imported by runtime
-  code.
+- Updated CI/CD and Homebrew release checks so guarded release paths run only
+  after quality gates and dry-run deployment checks.
 
 ### Removed
 
-- Removed historical release notes from the active OAL changelog.
-- Removed blocked product naming from active code, docs, CI, Homebrew metadata,
-  package metadata, and generated user-facing artifacts.
+- Removed obsolete skill names such as `implementation`, `documentation`,
+  `planning`, `prompting`, `security`, `testing`, and `rtk_safety` from active
+  OAL source.
+- Removed RTK as a user-facing skill because RTK command policy is enforced by
+  runtime hooks.
+- Removed stale RTK/non-RTK hook names in favor of `enforce_rtk_commands`.
+- Removed blocked model names from active model policy.
 
 ### Verified
 
-- `bunx tsc --noEmit`
-- `bun run test`
-- `bun run accept`
-- `bun run biome:check`
-- `ruby -c homebrew/Casks/openagentlayer.rb`
-- `bun run roadmap:evidence`
+- `rtk bun run test`
+- `rtk bun run accept`
+- `rtk bunx biome check . --error-on-warnings --max-diagnostics 16384`
+- `rtk bunx tsc --noEmit`
+- `rtk ruby -c homebrew/Casks/openagentlayer.rb`

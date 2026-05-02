@@ -1,0 +1,22 @@
+{
+  "id": "secure",
+  "title": "Secure",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Check destructive actions, generated-file edits, secrets, permissions, and deploy/uninstall safety. Use for security-sensitive code, hooks, config, or release automation.",
+  "body": "Security work starts with what can be damaged or leaked. Classify the path, permission surface, and ownership boundary before editing.",
+  "supportFiles": [
+    {
+      "path": "references/guards.md",
+      "source": "skill-resources/secure/references/guards.md"
+    },
+    {
+      "path": "scripts/classify-path.mjs",
+      "source": "skill-resources/secure/scripts/classify-path.mjs",
+      "executable": true
+    }
+  ]
+}

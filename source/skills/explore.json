@@ -1,12 +1,21 @@
 {
   "id": "explore",
-  "title": "Explore and Trace",
+  "title": "Explore",
   "providers": [
     "codex",
     "claude",
     "opencode"
   ],
-  "description": "Map repositories and data flow with exact file evidence before implementation. Avoid broad unbounded scans and summarize only verified facts",
-  "body": "Map repositories and data flow with exact file evidence before implementation. Avoid broad unbounded scans and summarize only verified facts. Workflow: read binding roadmap and source, inspect relevant implementation, identify owner package, verify generated artifacts and acceptance coverage, then report exact evidence. Non-goals: placeholders, shallow descriptions, or docs that are not backed by code.",
-  "supportFiles": []
+  "description": "Map code, docs, provider artifacts, and data flow before changing behavior. Use when the user asks where something lives, how it works, or why a generated artifact appears.",
+  "body": "Read the narrowest source set that can answer the question. Produce a map with exact paths and evidence. Do not turn exploration into a rewrite plan unless the user asked for one.",
+  "supportFiles": [
+    {
+      "path": "references/map.md",
+      "source": "skill-resources/explore/references/map.md"
+    },
+    {
+      "path": "assets/map-template.md",
+      "source": "skill-resources/explore/assets/map-template.md"
+    }
+  ]
 }

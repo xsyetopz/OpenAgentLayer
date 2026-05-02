@@ -82,20 +82,20 @@ Disallowed in OAL user-facing output:
 
 OAL is production-quality when it can:
 
-- load authored source;
-- validate source and model rules;
-- render Codex provider-native artifacts;
-- render Claude Code provider-native artifacts;
-- render OpenCode provider-native artifacts;
-- parse/validate generated provider configs;
-- write generated output;
-- deploy into fixture and real targets;
-- preserve user-owned config values;
-- write manifest ownership records;
-- uninstall only owned material;
-- package and run executable `.mjs` hooks outside the source repo;
-- prove OpenCode commands/tools are wired, not just described;
-- reject unsupported models;
-- reject generated/source drift;
-- keep baseline behavior reference isolated;
+- load authored source.
+- validate source and model rules.
+- render Codex provider-native artifacts.
+- render Claude Code provider-native artifacts.
+- render OpenCode provider-native artifacts.
+- parse/validate generated provider configs.
+- write generated output.
+- deploy into fixture and real targets.
+- preserve user-owned config values.
+- write manifest ownership records.
+- uninstall only owned material.
+- package and run executable `.mjs` hooks outside the source repo.
+- prove OpenCode commands/tools are wired, not just described.
+- reject unsupported models.
+- reject generated/source drift.
+- keep baseline behavior reference isolated.
 - pass a single full-product acceptance command.

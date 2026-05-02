@@ -1,0 +1,15 @@
+{
+  "id": "document-plain",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "agent": "calliope",
+  "skills": [
+    "document-plain"
+  ],
+  "permissions": "docs/prose-only write",
+  "arguments": "target prose, audience, tone constraints, files, and required evidence",
+  "body": "Rewrite public prose into plain, translation-ready language while preserving exact technical meaning. Inspect authored source first, keep commands, paths, IDs, product names, legal/security terms, and validation evidence stable, then report changed files and checks run. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a wording preference with no source evidence."
+}

@@ -1,12 +1,21 @@
 {
   "id": "handoff",
-  "title": "Session Handoff",
+  "title": "Handoff",
   "providers": [
     "codex",
     "claude",
     "opencode"
   ],
-  "description": "Create factual continuation artifacts from actual repo state, commands, failing evidence, and remaining decisions without inventing complete",
-  "body": "Create factual continuation artifacts from actual repo state, commands, failing evidence, and remaining decisions without inventing completed work. Workflow: read binding roadmap and source, inspect relevant implementation, identify owner package, verify generated artifacts and acceptance coverage, then report exact evidence. Non-goals: placeholders, shallow descriptions, or docs that are not backed by code.",
-  "supportFiles": []
+  "description": "Create continuation notes from actual repo state, commands, failures, and remaining decisions. Use when transferring work across agents, tools, or sessions.",
+  "body": "A handoff is not a progress story. It is a restart artifact. Include enough evidence for the next agent to resume without trusting memory.",
+  "supportFiles": [
+    {
+      "path": "references/handoff.md",
+      "source": "skill-resources/handoff/references/handoff.md"
+    },
+    {
+      "path": "assets/handoff.md",
+      "source": "skill-resources/handoff/assets/handoff.md"
+    }
+  ]
 }

@@ -1,0 +1,21 @@
+{
+  "id": "plan",
+  "title": "Plan",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Turn current repo evidence and user goals into a decision-complete implementation plan. Use before broad multi-file work, architecture changes, or uncertain provider behavior.",
+  "body": "Planning is done when implementation can proceed without guessing. Gather evidence first, list decisions, define the owner package, and name the acceptance signal.",
+  "supportFiles": [
+    {
+      "path": "references/plan.md",
+      "source": "skill-resources/plan/references/plan.md"
+    },
+    {
+      "path": "assets/prd.md",
+      "source": "skill-resources/plan/assets/prd.md"
+    }
+  ]
+}

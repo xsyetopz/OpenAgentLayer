@@ -7,7 +7,7 @@
   ],
   "agent": "hephaestus",
   "skills": [
-    "implementation"
+    "implement"
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",

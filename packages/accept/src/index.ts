@@ -37,8 +37,10 @@ import { assertProviderConfigContracts } from "./provider";
 import { assertRoadmapEvidence, buildRoadmapEvidence } from "./roadmap";
 import { assertStrictRoadmapChecks } from "./roadmap-strict";
 import {
+	assertAuthoredMarkdownStyle,
 	assertHookScriptsAreRuntimeOwned,
 	assertNegativePolicyFixtures,
+	assertNoLegacyCommandAlias,
 	assertRoadmapSource,
 	assertSourceInventory,
 } from "./source";
@@ -58,6 +60,8 @@ export async function runAcceptance(
 	const graph = await loadSource(join(repoRoot, "source"));
 	assertPolicyPass(validateSourceGraph(graph));
 	await assertSourceInventory(repoRoot);
+	await assertNoLegacyCommandAlias(repoRoot);
+	await assertAuthoredMarkdownStyle(repoRoot);
 	await assertCheckboxDiscipline(repoRoot);
 	await assertRepositoryInventory(repoRoot);
 	await assertHomebrewCask(repoRoot);
@@ -100,7 +104,7 @@ export async function runAcceptance(
 	await assertBackupsCreated(targetRoot);
 	await assertHooks(targetRoot, graph.source);
 	await assertOpenCodeTools(targetRoot);
-	await assertSkillSupportFiles(targetRoot);
+	await assertSkillSupportFiles(targetRoot, graph.source);
 	const comparableArtifacts = rendered.artifacts.filter(
 		(artifact) => artifact.mode === "file",
 	);

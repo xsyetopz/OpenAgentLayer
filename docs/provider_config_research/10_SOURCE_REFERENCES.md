@@ -2,11 +2,11 @@
 
 ## Codex
 
-- `https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json`
-- `https://developers.openai.com/codex/config-reference`
-- `https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/discovery.rs`
-- `https://developers.openai.com/codex/agents-md`
-- `https://openai.com/index/unrolling-the-codex-agent-loop/`
+- [Codex config schema](https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/core/config.schema.json)
+- [Codex config reference](https://developers.openai.com/codex/config-reference)
+- [Codex hook discovery source](https://github.com/openai/codex/blob/main/codex-rs/hooks/src/engine/discovery.rs)
+- [Codex AGENTS.md documentation](https://developers.openai.com/codex/agents-md)
+- [Unrolling the Codex agent loop](https://openai.com/index/unrolling-the-codex-agent-loop/)
 
 Key findings:
 
@@ -18,12 +18,12 @@ Key findings:
 
 ## Claude Code
 
-- `https://www.schemastore.org/claude-code-settings.json`
-- `https://code.claude.com/docs/en/settings`
-- `https://docs.claude.com/en/docs/claude-code/hooks`
-- `https://docs.claude.com/en/docs/claude-code/skills`
-- `https://docs.claude.com/en/docs/claude-code/sub-agents`
-- `https://docs.claude.com/en/docs/claude-code/slash-commands`
+- [Claude Code settings schema](https://www.schemastore.org/claude-code-settings.json)
+- [Claude Code settings](https://code.claude.com/docs/en/settings)
+- [Claude Code hooks](https://docs.claude.com/en/docs/claude-code/hooks)
+- [Claude Code skills](https://docs.claude.com/en/docs/claude-code/skills)
+- [Claude Code subagents](https://docs.claude.com/en/docs/claude-code/sub-agents)
+- [Claude Code slash commands](https://docs.claude.com/en/docs/claude-code/slash-commands)
 
 Key findings:
 
@@ -35,12 +35,12 @@ Key findings:
 
 ## OpenCode
 
-- `https://opencode.ai/config.json`
-- `https://opencode.ai/docs/config/`
-- `https://opencode.ai/docs/tools/`
-- `https://opencode.ai/docs/custom-tools/`
-- `https://opencode.ai/docs/agents/`
-- `https://opencode.ai/docs/plugins/`
+- [OpenCode config schema](https://opencode.ai/config.json)
+- [OpenCode config documentation](https://opencode.ai/docs/config/)
+- [OpenCode tools](https://opencode.ai/docs/tools/)
+- [OpenCode custom tools](https://opencode.ai/docs/custom-tools/)
+- [OpenCode agents](https://opencode.ai/docs/agents/)
+- [OpenCode plugins](https://opencode.ai/docs/plugins/)
 
 Key findings:
 

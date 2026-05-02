@@ -112,8 +112,8 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		input: { routeKind: "edit-required", changedFiles: [] },
 		decision: "block",
 	},
-	block_non_rtk_commands: {
-		input: { text: "rm -rf generated" },
+	enforce_rtk_commands: {
+		input: { command: "git status" },
 		decision: "block",
 	},
 	block_secret_files: {
@@ -156,6 +156,7 @@ export async function assertHooks(
 ): Promise<void> {
 	for (const hook of source.hooks) await assertSourceHook(targetRoot, hook);
 	await assertHooksAvoidProseMatchers(targetRoot, source);
+	await assertRtkHookBehavior(targetRoot);
 	await assertMalformedInput(
 		join(targetRoot, ".codex/openagentlayer/hooks/inject-route-context.mjs"),
 	);
@@ -227,6 +228,38 @@ async function assertMalformedInput(scriptPath: string): Promise<void> {
 		throw new Error(
 			`Hook ${scriptPath} did not fail closed on malformed input.`,
 		);
+}
+
+async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
+	const scriptPath = join(
+		targetRoot,
+		".codex/openagentlayer/hooks/enforce-rtk-commands.mjs",
+	);
+	await assertHook(scriptPath, { command: "git status" }, "block");
+	await assertHook(scriptPath, { command: "rtk git status" }, "pass");
+	await assertHook(scriptPath, { command: "make check" }, "warn");
+	await assertHook(scriptPath, { command: "cat package.json" }, "block");
+	const script = await readFile(scriptPath, "utf8");
+	for (const command of [
+		"git",
+		"gh",
+		"cat",
+		"read",
+		"pytest",
+		"mypy",
+		"ruff",
+		"go",
+		"cargo",
+		"npm",
+		"npx",
+		"docker",
+		"kubectl",
+		"aws",
+		"curl",
+		"glab",
+	])
+		if (!script.includes(`"${command}"`))
+			throw new Error(`RTK enforcement hook missing command ${command}.`);
 }
 
 async function assertHooksAvoidProseMatchers(

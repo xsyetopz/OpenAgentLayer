@@ -1,0 +1,25 @@
+{
+  "id": "prompt",
+  "title": "Prompt",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Design strict operational prompts, skill bodies, agent instructions, and route contracts without hidden manipulation or policy bypass. Use when prompt behavior is the product surface.",
+  "body": "Prompts should constrain behavior through clear source gates, ordered steps, ambiguity rules, and output contracts. Do not use hidden manipulation, emotional coercion, or adversarial tricks. Make failure modes explicit.",
+  "supportFiles": [
+    {
+      "path": "references/prompt.md",
+      "source": "skill-resources/prompt/references/prompt.md"
+    },
+    {
+      "path": "assets/contract.md",
+      "source": "skill-resources/prompt/assets/contract.md"
+    },
+    {
+      "path": "references/markdown-prompts.md",
+      "source": "skill-resources/prompt/references/markdown-prompts.md"
+    }
+  ]
+}

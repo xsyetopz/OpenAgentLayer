@@ -1,0 +1,25 @@
+{
+  "id": "document",
+  "title": "Document",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Write or update docs only for implemented behavior. Use for README, changelog, contribution docs, provider notes, handoffs, and user-facing generated artifact explanations.",
+  "body": "Documentation is product surface, not a substitute for product behavior. Inspect current code, generated artifacts, commands, manifests, and validation output before editing. Do not describe future behavior as current behavior.",
+  "supportFiles": [
+    {
+      "path": "references/doc-standard.md",
+      "source": "skill-resources/document/references/doc-standard.md"
+    },
+    {
+      "path": "assets/change-note.md",
+      "source": "skill-resources/document/assets/change-note.md"
+    },
+    {
+      "path": "references/markdown.md",
+      "source": "skill-resources/document/references/markdown.md"
+    }
+  ]
+}

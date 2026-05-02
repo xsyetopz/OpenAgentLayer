@@ -42,8 +42,8 @@ OAL must preserve user-owned settings and track OAL-owned values in an install m
 
 OAL should only render these Claude models:
 
-- `claude-opus-4-7` -- CC aliases this as `opus`
-- `claude-opus-4-7[1m]` -- CC aliases this as `opus[1m]`
+- `claude-opus-4-6` -- CC aliases this as `opus`
+- `claude-opus-4-6[1m]` -- CC aliases this as `opus[1m]`
 - `claude-sonnet-4-6` -- CC aliases this as `sonnet`
 - `claude-haiku-4-5` -- CC aliases this as `haiku`
 

@@ -1,0 +1,25 @@
+{
+  "id": "document-plain",
+  "title": "Document Plain",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Rewrite public prose into plain, translation-ready language while preserving exact technical meaning. Use for docs wording, UI copy, status text, onboarding text, changelog prose, and reader-facing generated artifact explanations.",
+  "body": "Rewrite prose so readers understand it quickly without losing technical meaning. Edit authored public prose, not generated output, unless the generated file is the requested artifact. Preserve commands, code, paths, IDs, API names, product names, legal terms, security terms, and validation evidence. Do not translate unless the user explicitly asks.",
+  "supportFiles": [
+    {
+      "path": "references/a2-b1.md",
+      "source": "skill-resources/document-plain/references/a2-b1.md"
+    },
+    {
+      "path": "references/localization.md",
+      "source": "skill-resources/document-plain/references/localization.md"
+    },
+    {
+      "path": "assets/rewrite-checklist.md",
+      "source": "skill-resources/document-plain/assets/rewrite-checklist.md"
+    }
+  ]
+}

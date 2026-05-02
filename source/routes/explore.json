@@ -7,7 +7,7 @@
   ],
   "agent": "hermes",
   "skills": [
-    "trace"
+    "explore"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

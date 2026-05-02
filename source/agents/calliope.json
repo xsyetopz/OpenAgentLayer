@@ -23,13 +23,14 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "trace",
-    "review",
-    "testing"
+    "document",
+    "handoff",
+    "plan",
+    "document-plain"
   ],
   "routes": [
-    "document"
+    "document",
+    "document-plain"
   ],
   "models": {
     "codex": "gpt-5.4-mini",

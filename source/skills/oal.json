@@ -1,0 +1,17 @@
+{
+  "id": "oal",
+  "title": "OAL",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Work on OpenAgentLayer source records, provider renderers, deployment, plugin payloads, manifests, and acceptance gates. Use for OAL-specific generator/deployer behavior.",
+  "body": "Authored OAL source is the product input. Generated provider files are outputs. Change source records, prompt templates, runtime hooks, renderers, deploy logic, or acceptance checks so behavior is owned end to end.",
+  "supportFiles": [
+    {
+      "path": "references/surfaces.md",
+      "source": "skill-resources/oal/references/surfaces.md"
+    }
+  ]
+}

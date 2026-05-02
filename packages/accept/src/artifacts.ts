@@ -20,16 +20,22 @@ const REQUIRED_ROUTES = [
 	"explore",
 	"trace",
 	"debug",
+	"design",
 	"document",
+	"document-plain",
 	"orchestrate",
 	"audit",
 ] as const;
 const AGENT_CONTRACT_TERMS = [
-	"Prompt contract:",
+	"## Prompt contract",
 	"Success criteria:",
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
+	"Standards contract:",
+	"Structure contract:",
+	"Markdown contract:",
+	"Attribution contract:",
 	"Source-backed behaviour is mandatory",
 	"Source Evidence Map",
 	"A confident guess is failure",
@@ -53,6 +59,10 @@ const COMMAND_CONTRACT_TERMS = [
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
+	"Standards contract:",
+	"Structure contract:",
+	"Markdown contract:",
+	"Attribution contract:",
 	"Source-backed behaviour is mandatory",
 	"Source Evidence Map",
 	"A confident guess is failure",
@@ -66,6 +76,10 @@ const SKILL_PROMPT_CONTRACT_TERMS = [
 	"Ordered steps:",
 	"Ambiguity behavior:",
 	"Evidence contract:",
+	"Standards contract:",
+	"Structure contract:",
+	"Markdown contract:",
+	"Attribution contract:",
 ] as const;
 
 export function assertGeneratedArtifactContracts(
@@ -146,9 +160,11 @@ function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
 				skill.upstream?.verbatim
 					? [skill.body.slice(0, 60), skill.body.slice(-60).trim()]
 					: [
+							`name: ${skill.id}`,
 							skill.title,
 							skill.description,
 							skill.body.slice(0, 60),
+							"## Bundled support files",
 							...SKILL_PROMPT_CONTRACT_TERMS,
 						],
 			);
@@ -161,8 +177,13 @@ function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
 						: provider === "claude"
 							? ".claude/skills"
 							: ".opencode/skills";
+				const content = supportFile.content;
+				if (!content)
+					throw new Error(
+						`Skill support file ${skill.id}/${supportFile.path} was not hydrated.`,
+					);
 				assertArtifact(`${root}/${skill.id}/${supportFile.path}`, artifacts, [
-					supportFile.content.slice(0, 20),
+					content.slice(0, 20),
 				]);
 			}
 		}

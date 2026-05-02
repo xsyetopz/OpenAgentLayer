@@ -25,10 +25,10 @@
     "patch"
   ],
   "skills": [
-    "planning",
-    "implementation",
-    "testing",
-    "security"
+    "plan",
+    "trace",
+    "review",
+    "test"
   ],
   "routes": [
     "implement"

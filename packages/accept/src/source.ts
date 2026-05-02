@@ -1,8 +1,14 @@
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSourceGraph } from "@openagentlayer/policy";
 import { runtimeHooks } from "@openagentlayer/runtime";
 import type { OalSource } from "@openagentlayer/source";
+
+const LIVE_TEXT_PATH_PATTERN =
+	/\.(cjs|js|json|jsonc|md|mjs|ts|tsx|toml|yaml|yml)$/;
+const LINE_PATTERN = /\r?\n/;
+const MARKDOWN_SEMICOLON_BULLET_PATTERN = /^\s*-\s.+;$/;
+const BARE_MARKDOWN_URL_PATTERN = /(^|[\s(])https?:\/\/[^\s)<>]+/;
 
 export function assertHookScriptsAreRuntimeOwned(source: OalSource): void {
 	for (const hook of source.hooks) {
@@ -34,6 +40,37 @@ export async function assertSourceInventory(repoRoot: string): Promise<void> {
 	}
 }
 
+export async function assertNoLegacyCommandAlias(
+	repoRoot: string,
+): Promise<void> {
+	const legacyAlias = ["c", "c", "a"].join("");
+	const legacyPattern = new RegExp(
+		`/${legacyAlias}:|\\\\b${legacyAlias}\\\\b|${legacyAlias}-`,
+		"i",
+	);
+	for (const path of await liveTextPaths(repoRoot)) {
+		const content = await readFile(join(repoRoot, path), "utf8");
+		if (legacyPattern.test(content))
+			throw new Error(
+				`Live OAL surface contains legacy command alias: ${path}`,
+			);
+	}
+}
+
+export async function assertAuthoredMarkdownStyle(
+	repoRoot: string,
+): Promise<void> {
+	const markdownPaths = (await liveTextPaths(repoRoot)).filter((path) =>
+		path.endsWith(".md"),
+	);
+	for (const path of markdownPaths) {
+		const content = await readFile(join(repoRoot, path), "utf8");
+		assertMarkdownHasHeading(path, content);
+		assertMarkdownBulletPunctuation(path, content);
+		assertMarkdownLinks(path, content);
+	}
+}
+
 export function assertRoadmapSource(source: OalSource): void {
 	for (const id of [
 		"athena",
@@ -55,6 +92,7 @@ export function assertRoadmapSource(source: OalSource): void {
 		"explore",
 		"trace",
 		"debug",
+		"design",
 		"document",
 		"orchestrate",
 		"audit",
@@ -78,7 +116,7 @@ export function assertNegativePolicyFixtures(source: OalSource): void {
 		...firstAgent,
 		models: {
 			...firstAgent.models,
-			claude: ["claude", "opus", "4", "6"].join("-"),
+			claude: ["claude", "opus", "4", "7"].join("-"),
 		},
 	};
 	const shallow = structuredClone(source);
@@ -100,6 +138,85 @@ export function assertNegativePolicyFixtures(source: OalSource): void {
 		if (!report.issues.some((issue) => issue.severity === "error"))
 			throw new Error(`Negative policy fixture did not fail: ${name}`);
 	}
+}
+
+async function liveTextPaths(repoRoot: string): Promise<string[]> {
+	const roots = [
+		".github",
+		"docs",
+		"packages",
+		"plugins",
+		"source",
+		"tests",
+	] as const;
+	const paths = ["CHANGELOG.md", "CONTRIBUTING.md", "README.md"];
+	for (const root of roots)
+		paths.push(...(await collectTextPaths(repoRoot, root)));
+	return paths;
+}
+
+function assertMarkdownHasHeading(path: string, content: string): void {
+	const first = content
+		.split(LINE_PATTERN)
+		.find((line) => line.trim().length > 0)
+		?.trim();
+	if (!first?.startsWith("#"))
+		throw new Error(`Authored Markdown must start with a heading: ${path}`);
+}
+
+function assertMarkdownBulletPunctuation(path: string, content: string): void {
+	const lines = content.split(LINE_PATTERN);
+	for (const [index, line] of lines.entries())
+		if (MARKDOWN_SEMICOLON_BULLET_PATTERN.test(line.trim()))
+			throw new Error(
+				`Authored Markdown bullet ends with semicolon: ${path}:${index + 1}`,
+			);
+}
+
+function assertMarkdownLinks(path: string, content: string): void {
+	let inFence = false;
+	for (const [index, line] of content.split(LINE_PATTERN).entries()) {
+		if (line.trim().startsWith("```")) {
+			inFence = !inFence;
+			continue;
+		}
+		if (
+			inFence ||
+			line.includes("](") ||
+			line.includes("href=") ||
+			line.includes("src=") ||
+			line.includes("srcset=")
+		)
+			continue;
+		if (BARE_MARKDOWN_URL_PATTERN.test(line))
+			throw new Error(
+				`Authored Markdown uses a bare URL; add descriptive link text: ${path}:${index + 1}`,
+			);
+	}
+}
+
+async function collectTextPaths(
+	repoRoot: string,
+	relativeDirectory: string,
+): Promise<string[]> {
+	const entries = await readdir(join(repoRoot, relativeDirectory), {
+		withFileTypes: true,
+	});
+	const paths: string[] = [];
+	for (const entry of entries) {
+		const relativePath = `${relativeDirectory}/${entry.name}`;
+		if (entry.isDirectory()) {
+			if (["node_modules", ".git", ".oal"].includes(entry.name)) continue;
+			paths.push(...(await collectTextPaths(repoRoot, relativePath)));
+		} else if (isLiveTextPath(relativePath)) {
+			paths.push(relativePath);
+		}
+	}
+	return paths;
+}
+
+function isLiveTextPath(path: string): boolean {
+	return LIVE_TEXT_PATH_PATTERN.test(path);
 }
 
 function validateCandidate(

@@ -17,46 +17,46 @@ Exact name can differ, but it must be a single visible command in `package.json`
 The acceptance command must verify:
 
 1. Source loading
-   - loads all authored source records;
-   - rejects missing references;
-   - rejects unsupported model names;
-   - rejects baseline behavior reference imports;
+   - loads all authored source records.
+   - rejects missing references.
+   - rejects unsupported model names.
+   - rejects baseline behavior reference imports.
    - maps generated artifacts back to source records.
 
 2. Codex rendering
-   - generated TOML parses;
-   - config uses only allowed Codex models;
-   - deprecated `on-failure` and `deprecated approval alias` are not emitted;
-   - hooks are command `.mjs` hooks unless installed support proves otherwise;
+   - generated TOML parses.
+   - config uses only allowed Codex models.
+   - deprecated `on-failure` and `deprecated approval alias` are not emitted.
+   - hooks are command `.mjs` hooks unless installed support proves otherwise.
    - agent roles are not shallow placeholders.
 
 3. Claude rendering
-   - settings JSON parses;
-   - only allowed Claude models are emitted;
-   - hooks are executable `.mjs` commands;
+   - settings JSON parses.
+   - only allowed Claude models are emitted.
+   - hooks are executable `.mjs` commands.
    - subagents/skills/commands are generated where intended.
 
 4. OpenCode rendering
-   - config JSON/JSONC parses;
-   - `permission` is used for tool control;
-   - custom tools exist as `.ts`/`.js` files when referenced;
-   - plugin files are executable/importable;
+   - config JSON/JSONC parses.
+   - `permission` is used for tool control.
+   - custom tools exist as `.ts`/`.js` files when referenced.
+   - plugin files are executable/importable.
    - commands and agents are provider-native.
 
 5. Deploy/uninstall
-   - deploy into fixture roots for Codex/Claude/OpenCode;
-   - manifest is written;
-   - structured merge preserves user-owned config;
-   - uninstall removes only manifest-owned files/blocks/keys;
+   - deploy into fixture roots for Codex/Claude/OpenCode.
+   - manifest is written.
+   - structured merge preserves user-owned config.
+   - uninstall removes only manifest-owned files/blocks/keys.
    - executable `.mjs` mode is preserved.
 
 6. Runtime hooks
-   - every hook has allowed/blocking/malformed fixtures;
-   - hooks run from installed fixture path, not source repo path;
+   - every hook has allowed/blocking/malformed fixtures.
+   - hooks run from installed fixture path, not source repo path.
    - provider-specific outputs are valid.
 
 7. Generated/source drift
-   - generated outputs match renderer results;
+   - generated outputs match renderer results.
    - hand-edited generated output fails check.
 
 ## Stub rejection

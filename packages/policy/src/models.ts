@@ -7,19 +7,22 @@ export const CODEX_MODELS = [
 	"gpt-5.3-codex",
 ] as const;
 export const CLAUDE_MODELS = [
-	"claude-opus-4-7",
-	"claude-opus-4-7[1m]",
+	"claude-opus-4-6",
+	"claude-opus-4-6[1m]",
 	"claude-sonnet-4-6",
 	"claude-haiku-4-5",
 ] as const;
 export const FORBIDDEN_CODEX = [
 	["gpt", "5", "4"].join("-"),
 	["gpt", "5", "2"].join("-"),
+	`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 ] as const;
 export const FORBIDDEN_CLAUDE = [
-	["claude", "opus", "4", "6"].join("-"),
-	`${["claude", "opus", "4", "6"].join("-")}[1m]`,
-	["opus", "4", "6"].join("-"),
+	["claude", "opus", "4", "7"].join("-"),
+	`${["claude", "opus", "4", "7"].join("-")}[1m]`,
+	["claude", "opus", "4.7"].join("-"),
+	`${["claude", "opus", "4.7"].join("-")}[1m]`,
+	["opus", "4", "7"].join("-"),
 ] as const;
 
 export function validateModels(source: OalSource, issues: PolicyIssue[]): void {

@@ -22,7 +22,6 @@ const ALLOWED_CODEX_MODELS = new Set([
 const ALLOWED_APPROVAL_POLICIES = new Set(["on-request", "never"]);
 const ALLOWED_SANDBOX_MODES = new Set(["workspace-write", "read-only"]);
 const ALLOWED_CODEX_FEATURES = new Set([
-	"shell_zsh_fork",
 	"steer",
 	"apps",
 	"tui_app_server",
@@ -40,13 +39,12 @@ const ALLOWED_CODEX_FEATURES = new Set([
 	"collaboration_modes",
 	"codex_git_commit",
 	"fast_mode",
-	"voice_transcription",
 	"undo",
 	"js_repl",
 ]);
 const ALLOWED_CLAUDE_MODELS = new Set([
-	"claude-opus-4-7",
-	"claude-opus-4-7[1m]",
+	"claude-opus-4-6",
+	"claude-opus-4-6[1m]",
 	"claude-sonnet-4-6",
 	"claude-haiku-4-5",
 ]);

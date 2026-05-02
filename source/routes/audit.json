@@ -7,7 +7,8 @@
   ],
   "agent": "nemesis",
   "skills": [
-    "security"
+    "secure",
+    "review"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

@@ -1,0 +1,31 @@
+{
+  "id": "test",
+  "title": "Test",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Design and run behavior-focused tests, TDD loops, acceptance checks, fixtures, regression signals, and language-native test suites. Use for test-first work, validation failures, acceptance coverage, and framework-specific test layout.",
+  "body": "Tests should verify behavior through stable public surfaces. Detect the repo's existing language, runner, fixture, and file-layout conventions before adding tests. Keep tests beside owned code without bloating production files: Rust uses `mod tests;` plus `foo/tests.rs`, TypeScript uses `foo.test.ts` or `__tests__/foo.test.ts`, .NET usually uses separate test projects, Swift uses Swift Testing or XCTest, Dart uses package or Flutter test conventions, and other ecosystems follow their native external test-file conventions.",
+  "supportFiles": [
+    {
+      "path": "references/tdd.md",
+      "source": "skill-resources/test/references/tdd.md"
+    },
+    {
+      "path": "scripts/hook-fixture.mjs",
+      "source": "skill-resources/test/scripts/hook-fixture.mjs",
+      "executable": true
+    },
+    {
+      "path": "references/language-suites.md",
+      "source": "skill-resources/test/references/language-suites.md"
+    },
+    {
+      "path": "scripts/detect-rust-inline-tests.mjs",
+      "source": "skill-resources/test/scripts/detect-rust-inline-tests.mjs",
+      "executable": true
+    }
+  ]
+}
