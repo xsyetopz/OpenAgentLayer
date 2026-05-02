@@ -8,7 +8,9 @@
   "agent": "atalanta",
   "skills": [
     "test",
-    "oal"
+    "oal",
+    "parse",
+    "elevate"
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",

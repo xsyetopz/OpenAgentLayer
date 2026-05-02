@@ -88,6 +88,7 @@ export async function assertSkillSupportFiles(
 	assertTestSkillStandards(source);
 	assertMarkdownPromptStandards(source);
 	assertSimplicityDiscipline(source);
+	assertRuntimeSafetySkills(source);
 }
 
 function providerSkillRoot(provider: Provider): string {
@@ -228,6 +229,28 @@ function assertSimplicityDiscipline(source: OalSource): void {
 		])
 			if (!content.includes(term))
 				throw new Error(`${skillId} simplicity discipline missing ${term}.`);
+	}
+}
+
+function assertRuntimeSafetySkills(source: OalSource): void {
+	const required = {
+		elevate: ["privileged execution", "argv", "dry-run", "allowlist"],
+		delete: ["git status", "OAL manifest ownership", "dirty", "unknown"],
+		parse: ["shell operators", "argv arrays", "exit code", "Regex-only"],
+	} as const;
+	for (const [skillId, terms] of Object.entries(required)) {
+		const skill = source.skills.find((candidate) => candidate.id === skillId);
+		if (!skill) throw new Error(`Missing ${skillId} skill.`);
+		const supportPath =
+			skillId === "elevate"
+				? "references/runtime.md"
+				: skillId === "delete"
+					? "references/checklist.md"
+					: "references/commands.md";
+		const content = supportFileContent(skill, supportPath);
+		for (const term of terms)
+			if (!content.includes(term))
+				throw new Error(`${skillId} safety skill missing ${term}.`);
 	}
 }
 

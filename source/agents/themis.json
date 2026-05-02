@@ -25,7 +25,9 @@
   "skills": [
     "secure",
     "review",
-    "trace"
+    "trace",
+    "delete",
+    "parse"
   ],
   "routes": [
     "audit",

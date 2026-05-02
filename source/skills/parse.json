@@ -1,0 +1,17 @@
+{
+  "id": "parse",
+  "title": "Parse",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Parse shell commands and noisy command output without inventing behavior. Use for hook enforcement, RTK command routing, shell safety checks, CI log extraction, and command failure summaries.",
+  "body": "Treat command text as structured input, not prose. Separate argv words, shell operators, redirection, environment assignments, glob expansion, and command segments before enforcing policy. For noisy output, extract only the actionable errors, warnings, file paths, exit codes, and requested facts.",
+  "supportFiles": [
+    {
+      "path": "references/commands.md",
+      "source": "skill-resources/parse/references/commands.md"
+    }
+  ]
+}

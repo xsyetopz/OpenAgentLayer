@@ -1,0 +1,17 @@
+{
+  "id": "elevate",
+  "title": "Elevate",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Use OAL privileged execution only for bounded commands that need host privileges, such as Xcode or signing commands. Use when sandboxed shell execution blocks a required validation or deploy command.",
+  "body": "Prefer normal guarded shell first. Use privileged execution only when the command is allowlisted, argv is explicit, cwd is inside the repo or approved target root, and dry-run evidence proves the request shape before execution. Never pass a shell string, pipeline, glob expansion, or user-provided command through privileged execution.",
+  "supportFiles": [
+    {
+      "path": "references/runtime.md",
+      "source": "skill-resources/elevate/references/runtime.md"
+    }
+  ]
+}

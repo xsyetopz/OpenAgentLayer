@@ -5,6 +5,30 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.2-beta.2] - 2026-05-03
+
+### Added
+
+- Added OAL `elevate`, `delete`, and `parse` skills for privileged execution,
+  safe deletion, and command/output parsing.
+
+### Changed
+
+- Made acceptance's internal RTK gain CLI check fixture-backed so fresh CI
+  runner history cannot fail `bun run accept`.
+- Kept live `rtk-gain --allow-empty-history` strict for non-empty histories
+  below the 80% threshold.
+
+### Verified
+
+- `rtk bun run test`
+- `rtk bun run accept`
+- `rtk proxy -- bun run accept`
+- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run biome:check`
+- `rtk bunx tsc --noEmit`
+- `rtk ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.2-beta.1] - 2026-05-03
 
 ### Added

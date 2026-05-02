@@ -7,7 +7,9 @@
   ],
   "agent": "ares",
   "skills": [
-    "debug"
+    "debug",
+    "parse",
+    "elevate"
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",

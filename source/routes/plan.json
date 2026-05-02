@@ -8,7 +8,8 @@
   "agent": "athena",
   "skills": [
     "plan",
-    "prompt"
+    "prompt",
+    "parse"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

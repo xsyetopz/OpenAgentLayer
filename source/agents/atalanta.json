@@ -25,7 +25,9 @@
   "skills": [
     "test",
     "debug",
-    "trace"
+    "trace",
+    "elevate",
+    "parse"
   ],
   "routes": [
     "test",

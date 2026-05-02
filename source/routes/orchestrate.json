@@ -8,7 +8,10 @@
   "agent": "odysseus",
   "skills": [
     "plan",
-    "handoff"
+    "handoff",
+    "elevate",
+    "delete",
+    "parse"
   ],
   "permissions": "coordination",
   "arguments": "task objective, target paths, and required evidence",

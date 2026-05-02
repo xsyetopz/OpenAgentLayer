@@ -26,7 +26,10 @@
     "plan",
     "handoff",
     "oal",
-    "trace"
+    "trace",
+    "elevate",
+    "delete",
+    "parse"
   ],
   "routes": [
     "orchestrate"

@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -6,7 +6,7 @@ const CLI_ENTRY = "packages/cli/src/main.ts";
 
 export async function assertCliContracts(repoRoot: string): Promise<void> {
 	await runCli(repoRoot, ["check"]);
-	const rtkGain = await runCli(repoRoot, ["rtk-gain", "--allow-empty-history"]);
+	const rtkGain = await runRtkGainFixture(repoRoot);
 	if (!rtkGain.stdout.includes("STATUS PASS"))
 		throw new Error("CLI rtk-gain did not report pass status.");
 	const toolchain = await runCli(repoRoot, [
@@ -103,6 +103,27 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		["deploy", "--target", deployRoot, "--scope", "global"],
 		"scope",
 	);
+}
+
+async function runRtkGainFixture(
+	repoRoot: string,
+): Promise<{ code: number; stdout: string; stderr: string }> {
+	const fixtureRoot = await mkdtemp(join(tmpdir(), "oal-rtk-gain-"));
+	try {
+		const fixturePath = join(fixtureRoot, "gain.txt");
+		await writeFile(
+			fixturePath,
+			"Total commands:    1\nTokens saved:      10K (92.9%)\n",
+		);
+		return await runCli(repoRoot, [
+			"rtk-gain",
+			"--from-file",
+			fixturePath,
+			"--allow-empty-history",
+		]);
+	} finally {
+		await rm(fixtureRoot, { recursive: true, force: true });
+	}
 }
 
 async function assertCliFails(

@@ -1,0 +1,17 @@
+{
+  "id": "delete",
+  "title": "Delete",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Remove files safely without losing user work. Use before rm, unlink, fs.rm, generated artifact pruning, manifest uninstall, cache cleanup, or any operation that removes paths.",
+  "body": "Deletion is allowed only after ownership and intent are explicit. Inspect git status, manifests, generated markers, and target paths first. Delete only the named owned paths. If the path is user-authored, dirty, ambiguous, outside the target root, or broader than the user requested, stop with a blocker instead of guessing.",
+  "supportFiles": [
+    {
+      "path": "references/checklist.md",
+      "source": "skill-resources/delete/references/checklist.md"
+    }
+  ]
+}

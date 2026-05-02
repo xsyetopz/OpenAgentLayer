@@ -29,7 +29,10 @@
     "implement",
     "test",
     "secure",
-    "git"
+    "git",
+    "elevate",
+    "delete",
+    "parse"
   ],
   "routes": [
     "implement"

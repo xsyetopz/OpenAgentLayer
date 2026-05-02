@@ -26,7 +26,8 @@
     "debug",
     "test",
     "trace",
-    "review"
+    "review",
+    "parse"
   ],
   "routes": [
     "debug"

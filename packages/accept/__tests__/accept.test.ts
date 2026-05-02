@@ -38,6 +38,11 @@ test("RTK gain gate accepts 80 percent and rejects non-empty regressions", async
 			stderr: "",
 		})),
 	).rejects.toThrow("below the required 80%");
+	expect(() =>
+		evaluateRtkGainOutput("Total commands:    1\nTokens saved:      0 (0%)\n", {
+			allowEmptyHistory: true,
+		}),
+	).toThrow("below the required 80%");
 });
 
 test("RTK gain gate treats fresh empty history as explicit neutral state", () => {

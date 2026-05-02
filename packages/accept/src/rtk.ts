@@ -104,6 +104,10 @@ export function assertRtkGainPolicyFixtures(): void {
 			"below threshold",
 			"Total commands:    1\nTokens saved:      10K (79.9%)\n",
 		],
+		[
+			"non-empty zero gain",
+			"Total commands:    1\nTokens saved:      0 (0%)\n",
+		],
 		["empty history", "Total commands:    0\nTokens saved:      0 (0%)\n"],
 		["missing percent", "Total commands:    1\nRTK Token Savings\n"],
 	] as const) {

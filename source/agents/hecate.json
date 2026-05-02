@@ -28,7 +28,8 @@
     "plan",
     "trace",
     "review",
-    "test"
+    "test",
+    "parse"
   ],
   "routes": [
     "implement"

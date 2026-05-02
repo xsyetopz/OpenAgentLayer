@@ -28,7 +28,10 @@
     "plan",
     "implement",
     "test",
-    "secure"
+    "secure",
+    "elevate",
+    "delete",
+    "parse"
   ],
   "routes": [
     "implement"

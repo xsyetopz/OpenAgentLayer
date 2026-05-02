@@ -25,7 +25,9 @@
   "skills": [
     "review",
     "secure",
-    "architect"
+    "architect",
+    "delete",
+    "parse"
   ],
   "routes": [
     "review",

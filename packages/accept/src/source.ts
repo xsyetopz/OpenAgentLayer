@@ -99,6 +99,9 @@ export function assertRoadmapSource(source: OalSource): void {
 	])
 		if (!source.routes.some((route) => route.id === id))
 			throw new Error(`Missing route ${id}.`);
+	for (const id of ["elevate", "delete", "parse"])
+		if (!source.skills.some((skill) => skill.id === id))
+			throw new Error(`Missing runtime safety skill ${id}.`);
 }
 
 export function assertNegativePolicyFixtures(source: OalSource): void {

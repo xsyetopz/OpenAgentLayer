@@ -25,7 +25,8 @@
   "skills": [
     "explore",
     "trace",
-    "oal"
+    "oal",
+    "parse"
   ],
   "routes": [
     "explore",
