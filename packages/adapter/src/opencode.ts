@@ -9,6 +9,7 @@ import type {
 	Provider,
 	ToolRecord,
 } from "@openagentlayer/source";
+import { agentHexColor } from "./agent-colors";
 import {
 	agentPrompt,
 	camelCase,
@@ -17,6 +18,7 @@ import {
 	quoteToml,
 } from "./common";
 import { renderHookArtifacts } from "./hooks";
+import { renderPrivilegedExecArtifacts } from "./runtime";
 import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "opencode";
@@ -98,6 +100,13 @@ export async function renderOpenCode(
 			repoRoot,
 		)),
 	);
+	artifacts.push(
+		...(await renderPrivilegedExecArtifacts(
+			PROVIDER,
+			repoRoot,
+			".opencode/openagentlayer/runtime",
+		)),
+	);
 	return { artifacts, unsupported: [] };
 }
 
@@ -124,6 +133,7 @@ function renderOpenCodeConfig(source: OalSource): unknown {
 				{
 					description: agent.role,
 					model: agent.models.opencode ?? OPENCODE_MODEL_FALLBACKS[0],
+					color: agentHexColor(agent.id),
 					permission: agent.tools.includes("write")
 						? { edit: "ask", write: "ask", bash: "ask" }
 						: { edit: "deny", write: "deny", bash: "ask" },
@@ -140,32 +150,45 @@ function renderOpenCodeConfig(source: OalSource): unknown {
 }
 
 function renderOpenCodeAgent(agent: AgentRecord, source: OalSource): string {
-	return `# ${agent.name}
+	return `---
+color: "${agentHexColor(agent.id)}"
+---
+# ${agent.name}
 
 ${agentPrompt(agent, source)}
 `;
 }
 
 function renderOpenCodeTool(tool: ToolRecord): string {
-	return `export async function ${camelCase(tool.id)}() {
-	return {
-		title: ${quoteToml(tool.description)},
-		body: ${quoteToml(tool.body)}
-	};
-}
+	return `import { tool } from "@opencode-ai/plugin";
+
+export const ${camelCase(tool.id)} = tool({
+	description: ${quoteToml(tool.description)},
+	args: {},
+	async execute() {
+		return {
+			output: ${quoteToml(tool.body)}
+		};
+	}
+});
 `;
 }
 
 function renderOpenCodePlugin(source: OalSource): string {
-	return `export const OpenAgentLayerPlugin = {
-	name: "openagentlayer",
-	event: async (event) => {
-		if (event?.type === "tool.execute.before" && String(event?.tool ?? "").includes("bash")) {
-			return { note: "OAL guard hooks are installed under .opencode/openagentlayer/hooks" };
+	return `import type { Plugin } from "@opencode-ai/plugin";
+
+const OpenAgentLayerPlugin: Plugin = async () => ({
+	"tool.execute.before": async (input, output) => {
+		if (input.tool === "bash") {
+			output.metadata = {
+				...(output.metadata ?? {}),
+				openagentlayer: "Guard hooks are installed under .opencode/openagentlayer/hooks",
+			};
 		}
-		return {};
-	}
-};
+	},
+});
+
+export default OpenAgentLayerPlugin;
 export const hookScripts = ${JSON.stringify(source.hooks.map((hook) => hook.script))};
 `;
 }

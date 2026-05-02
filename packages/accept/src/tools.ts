@@ -6,7 +6,7 @@ export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 	for (const tool of ["manifest_inspect", "generated_diff"]) {
 		const toolPath = join(targetRoot, `.opencode/tools/${tool}.ts`);
 		const text = await readFile(toolPath, "utf8");
-		if (!text.includes("export async function"))
+		if (!text.includes('import { tool } from "@opencode-ai/plugin"'))
 			throw new Error(`OpenCode tool is not runnable: ${tool}`);
 		const moduleUrl = new URL(toolPath, "file://").href;
 		const module = (await import(
@@ -16,14 +16,34 @@ export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 			letter.toUpperCase(),
 		);
 		const integration = module[functionName];
-		if (typeof integration !== "function")
+		if (
+			!(
+				integration &&
+				typeof integration === "object" &&
+				"execute" in integration &&
+				typeof integration.execute === "function"
+			)
+		)
 			throw new Error(`OpenCode tool ${tool} does not export ${functionName}.`);
-		const output = await integration();
+		const output = await integration.execute({}, toolContext(targetRoot));
 		if (!output || typeof output !== "object")
 			throw new Error(
 				`OpenCode tool ${tool} did not return an object contract.`,
 			);
 	}
+}
+
+function toolContext(targetRoot: string): Record<string, unknown> {
+	return {
+		sessionID: "acceptance",
+		messageID: "acceptance",
+		agent: "hephaestus",
+		directory: targetRoot,
+		worktree: targetRoot,
+		abort: new AbortController().signal,
+		metadata: () => undefined,
+		ask: async () => undefined,
+	};
 }
 
 export async function assertSkillSupportFiles(

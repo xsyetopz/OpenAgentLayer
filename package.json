@@ -1,6 +1,6 @@
 {
   "name": "openagentlayer",
-  "version": "0.1.1-beta.5",
+  "version": "0.1.2-beta.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -40,10 +40,11 @@
     "@openagentlayer/policy": "workspace:*",
     "@openagentlayer/runtime": "workspace:*",
     "@openagentlayer/source": "workspace:*",
-    "@openagentlayer/toolchain": "workspace:*"
+    "@openagentlayer/toolchain": "workspace:*",
+    "@opencode-ai/plugin": "1.14.33"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
+    "@biomejs/biome": "2.4.14",
     "ajv": "^8.20.0",
     "bun-types": "1.3.13"
   },

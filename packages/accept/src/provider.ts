@@ -46,6 +46,12 @@ const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/hy3-preview-free",
 	"opencode/big-pickle",
 ] as const;
+const CODEX_ZSH_PATH_EXPORT = [
+	'export PATH="$',
+	"{shim_dir}:$",
+	'{PATH}"',
+].join("");
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/;
 
 export async function assertProviderConfigContracts(
 	targetRoot: string,
@@ -53,6 +59,7 @@ export async function assertProviderConfigContracts(
 	await assertCodexConfig(targetRoot);
 	await assertClaudeSettings(targetRoot);
 	await assertOpenCodeConfig(targetRoot);
+	await assertRuntimeArtifacts(targetRoot);
 }
 
 async function assertCodexConfig(targetRoot: string): Promise<void> {
@@ -92,6 +99,12 @@ async function assertCodexInstructionBaseline(
 			throw new Error(
 				`Codex profile ${profile} does not pin model_instructions_file.`,
 			);
+		if (
+			!profileBlock?.includes(
+				'shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"',
+			)
+		)
+			throw new Error(`Codex profile ${profile} does not pin shell_zsh_fork.`);
 	}
 	const agents = await readFile(join(targetRoot, "AGENTS.md"), "utf8");
 	for (const required of [
@@ -164,6 +177,7 @@ async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
 		JSON.stringify(OPENCODE_MODEL_FALLBACKS)
 	)
 		throw new Error("OpenCode model fallbacks do not match OAL defaults.");
+	assertOpenCodeAgentColors(config.agent);
 	for (const command of [
 		"plan",
 		"implement",
@@ -179,6 +193,57 @@ async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
 	])
 		if (!config.command[command])
 			throw new Error(`OpenCode config missing command ${command}`);
+}
+
+function assertOpenCodeAgentColors(agentConfig: Record<string, unknown>): void {
+	for (const [agentId, config] of Object.entries(agentConfig)) {
+		if (!(config && typeof config === "object" && "color" in config))
+			throw new Error(`OpenCode agent ${agentId} missing color.`);
+		const color = (config as { color?: unknown }).color;
+		if (!(typeof color === "string" && HEX_COLOR_PATTERN.test(color)))
+			throw new Error(`OpenCode agent ${agentId} has invalid color.`);
+	}
+}
+
+async function assertRuntimeArtifacts(targetRoot: string): Promise<void> {
+	const plugin = await readFile(
+		join(targetRoot, ".opencode/plugins/openagentlayer.ts"),
+		"utf8",
+	);
+	if (
+		!(
+			plugin.includes('import type { Plugin } from "@opencode-ai/plugin"') &&
+			plugin.includes("export default OpenAgentLayerPlugin")
+		)
+	)
+		throw new Error("OpenCode plugin does not use native plugin typing.");
+	const shim = await readFile(
+		join(targetRoot, ".codex/openagentlayer/shim/git"),
+		"utf8",
+	);
+	if (!shim.includes("exec rtk git"))
+		throw new Error("Codex RTK shim does not route git through RTK.");
+	const zsh = await readFile(
+		join(targetRoot, ".codex/openagentlayer/shim/oal-zsh"),
+		"utf8",
+	);
+	if (!zsh.includes(CODEX_ZSH_PATH_EXPORT))
+		throw new Error("Codex zsh fork shim does not prepend shim PATH.");
+	for (const runtimePath of [
+		".codex/openagentlayer/runtime/privileged-exec.mjs",
+		".claude/openagentlayer/runtime/privileged-exec.mjs",
+		".opencode/openagentlayer/runtime/privileged-exec.mjs",
+	]) {
+		const content = await readFile(join(targetRoot, runtimePath), "utf8");
+		if (
+			!(
+				content.includes("ALLOWED_COMMANDS") &&
+				content.includes("xcodebuild") &&
+				content.includes("dryRun")
+			)
+		)
+			throw new Error(`Privileged exec runtime is incomplete: ${runtimePath}`);
+	}
 }
 
 function stripJsonComments(text: string): string {

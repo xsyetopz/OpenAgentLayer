@@ -3,6 +3,7 @@ interface CodexProfile {
 	approval_policy?: string;
 	sandbox_mode?: string;
 	model_instructions_file?: string;
+	shell_zsh_fork?: string;
 	tools_view_image?: boolean;
 }
 
@@ -70,6 +71,13 @@ export function assertCodexTomlSchema(toml: string): void {
 		)
 			throw new Error(
 				`Codex profile ${profileName} has unsupported sandbox mode ${profile.sandbox_mode}`,
+			);
+		if (
+			profile.shell_zsh_fork &&
+			profile.shell_zsh_fork !== ".codex/openagentlayer/shim/oal-zsh"
+		)
+			throw new Error(
+				`Codex profile ${profileName} has unmanaged shell_zsh_fork ${profile.shell_zsh_fork}`,
 			);
 	}
 	for (const [profileName, features] of Object.entries(parsed.features)) {

@@ -4,8 +4,13 @@ import {
 	withProvenance,
 } from "@openagentlayer/artifact";
 import type { AgentRecord, OalSource, Provider } from "@openagentlayer/source";
+import { agentHexColor } from "./agent-colors";
 import { agentPrompt, instructions, quoteToml } from "./common";
 import { renderHookArtifacts } from "./hooks";
+import {
+	renderCodexShellShimArtifacts,
+	renderPrivilegedExecArtifacts,
+} from "./runtime";
 import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "codex";
@@ -106,6 +111,15 @@ export async function renderCodex(
 			repoRoot,
 		)),
 	);
+	const shim = renderCodexShellShimArtifacts();
+	artifacts.push(...shim.artifacts);
+	artifacts.push(
+		...(await renderPrivilegedExecArtifacts(
+			PROVIDER,
+			repoRoot,
+			".codex/openagentlayer/runtime",
+		)),
+	);
 	return {
 		artifacts,
 		unsupported: [
@@ -125,6 +139,7 @@ model = "gpt-5.5"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_instructions_file = "AGENTS.md"
+shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"
 tools_view_image = true
 
 [profiles.openagentlayer.features]
@@ -135,12 +150,14 @@ model = "gpt-5.3-codex"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_instructions_file = "AGENTS.md"
+shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"
 
 [profiles.openagentlayer-utility]
 model = "gpt-5.4-mini"
 approval_policy = "never"
 sandbox_mode = "read-only"
 model_instructions_file = "AGENTS.md"
+shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"
 
 [agents]
 max_threads = 4
@@ -153,6 +170,7 @@ ${source.agents
 [agents.${agent.id}]
 description = ${quoteToml(agent.role)}
 nickname_candidates = [${quoteToml(agent.id)}]
+color = ${quoteToml(agentHexColor(agent.id))}
 config_file = "./agents/${agent.id}.toml"`,
 	)
 	.join("\n")}
@@ -169,6 +187,7 @@ function renderCodexFeatures(): string {
 function renderCodexAgent(agent: AgentRecord, source: OalSource): string {
 	return `model = ${quoteToml(agent.models.codex ?? "gpt-5.4-mini")}
 sandbox_mode = ${quoteToml(agent.tools.includes("write") ? "workspace-write" : "read-only")}
+color = ${quoteToml(agentHexColor(agent.id))}
 developer_instructions = ${quoteToml(agentPrompt(agent, source))}
 `;
 }

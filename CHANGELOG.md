@@ -5,6 +5,38 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.2-beta.1] - 2026-05-03
+
+### Added
+
+- Added `rtk-gain --from-file` so CI/e2e can validate RTK gain behavior from
+  deterministic fixture output instead of live runner history.
+- Added Codex `shell_zsh_fork` rendering with OAL-managed zsh and RTK command
+  shims under `.codex/openagentlayer/shim`.
+- Added lightweight zero-dependency privileged exec runtime helpers for Codex,
+  Claude Code, and OpenCode.
+- Added quoted hex colors to generated Codex, Claude Code, and OpenCode agent
+  artifacts.
+- Added `@opencode-ai/plugin` 1.14.33 and native OpenCode plugin/tool imports
+  for generated OpenCode artifacts.
+
+### Changed
+
+- Kept live RTK gain available for release checks while removing live RTK
+  history from the e2e test path.
+- Rendered privileged execution as opt-in executable `.mjs` artifacts with argv
+  allowlists, cwd bounds, timeout limits, dry-run fixtures, and audit logging.
+
+### Verified
+
+- `rtk bun run test`
+- `rtk bun run accept`
+- `rtk proxy -- bun run accept`
+- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run biome:check`
+- `rtk bunx tsc --noEmit`
+- `rtk ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.1-beta.5] - 2026-05-03
 
 ### Added

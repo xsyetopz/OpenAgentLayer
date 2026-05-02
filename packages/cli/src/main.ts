@@ -15,23 +15,45 @@ const repoRoot = resolve(import.meta.dir, "../../..");
 const [command, ...args] = process.argv.slice(2);
 
 if (!command || command === "help") usage();
-if (command === "accept") await runAcceptCommand(repoRoot);
-else if (command === "check") await runCheckCommand(repoRoot);
-else if (command === "render" || command === "generate")
-	await runRenderCommand(repoRoot, args);
-else if (command === "preview") await runPreviewCommand(repoRoot, args);
-else if (command === "deploy") await runDeployCommand(repoRoot, args);
-else if (command === "uninstall") await runUninstallCommand(args);
-else if (command === "plugins") await runPluginsCommand(repoRoot, args);
-else if (command === "toolchain") await runToolchainCommand(args);
-else if (command === "rtk-gain") await runRtkGainCommand(repoRoot, args);
-else if (command === "roadmap-evidence")
-	await runRoadmapEvidenceCommand(repoRoot);
-else usage();
+switch (command) {
+	case "accept":
+		await runAcceptCommand(repoRoot);
+		break;
+	case "check":
+		await runCheckCommand(repoRoot);
+		break;
+	case "render":
+	case "generate":
+		await runRenderCommand(repoRoot, args);
+		break;
+	case "preview":
+		await runPreviewCommand(repoRoot, args);
+		break;
+	case "deploy":
+		await runDeployCommand(repoRoot, args);
+		break;
+	case "uninstall":
+		await runUninstallCommand(args);
+		break;
+	case "plugins":
+		await runPluginsCommand(repoRoot, args);
+		break;
+	case "toolchain":
+		await runToolchainCommand(args);
+		break;
+	case "rtk-gain":
+		await runRtkGainCommand(repoRoot, args);
+		break;
+	case "roadmap-evidence":
+		await runRoadmapEvidenceCommand(repoRoot);
+		break;
+	default:
+		usage();
+}
 
 function usage(): never {
 	console.log(
-		"Usage: oal accept|roadmap-evidence|rtk-gain [--allow-empty-history]|check|preview [--provider all|codex|claude|opencode] [--path artifact] [--content]|render|generate [--provider all|codex|claude|opencode] [--out dir]|deploy --target dir [--scope project] [--provider all|codex|claude|opencode] [--dry-run]|uninstall --target dir --scope project --provider <provider>|plugins [--home dir] [--provider all|codex|claude|opencode] [--dry-run]|toolchain [--os macos|linux] [--pkg brew|apt|dnf|pacman|zypper|apk] [--optional ctx7,deepwiki,playwright]",
+		"Usage: oal accept|roadmap-evidence|rtk-gain [--from-file path] [--allow-empty-history]|check|preview [--provider all|codex|claude|opencode] [--path artifact] [--content]|render|generate [--provider all|codex|claude|opencode] [--out dir]|deploy --target dir [--scope project] [--provider all|codex|claude|opencode] [--dry-run]|uninstall --target dir --scope project --provider <provider>|plugins [--home dir] [--provider all|codex|claude|opencode] [--dry-run]|toolchain [--os macos|linux] [--pkg brew|apt|dnf|pacman|zypper|apk] [--optional ctx7,deepwiki,playwright]",
 	);
 	process.exit(command ? 2 : 0);
 }

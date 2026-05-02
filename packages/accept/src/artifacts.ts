@@ -81,6 +81,7 @@ const SKILL_PROMPT_CONTRACT_TERMS = [
 	"Markdown contract:",
 	"Attribution contract:",
 ] as const;
+const HEX_COLOR_PATTERN = /#[0-9a-f]{6}/;
 
 export function assertGeneratedArtifactContracts(
 	source: OalSource,
@@ -108,22 +109,20 @@ function assertProviderCoverage(artifacts: Artifact[]): void {
 
 function assertCoreAgentArtifacts(artifacts: Artifact[]): void {
 	for (const agent of CORE_AGENTS) {
-		assertArtifact(
-			`.codex/agents/${agent}.toml`,
-			artifacts,
-			AGENT_CONTRACT_TERMS,
-		);
-		assertArtifact(
-			`.claude/agents/${agent}.md`,
-			artifacts,
-			AGENT_CONTRACT_TERMS,
-		);
-		assertArtifact(
-			`.opencode/agents/${agent}.md`,
-			artifacts,
-			AGENT_CONTRACT_TERMS,
-		);
+		assertArtifact(`.codex/agents/${agent}.toml`, artifacts, [
+			...AGENT_CONTRACT_TERMS,
+			'color = "#',
+		]);
+		assertArtifact(`.claude/agents/${agent}.md`, artifacts, [
+			...AGENT_CONTRACT_TERMS,
+			'color: "#',
+		]);
+		assertArtifact(`.opencode/agents/${agent}.md`, artifacts, [
+			...AGENT_CONTRACT_TERMS,
+			'color: "#',
+		]);
 	}
+	assertDistinctAgentColors(artifacts);
 }
 
 function assertRouteArtifacts(artifacts: Artifact[]): void {
@@ -212,12 +211,27 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"// Regenerate: oal render",
 		"// <<< oal opencode <<<",
 	]);
+	assertArtifact(".opencode/plugins/openagentlayer.ts", artifacts, [
+		'import type { Plugin } from "@opencode-ai/plugin"',
+		"export default OpenAgentLayerPlugin",
+	]);
 	const hook = findArtifact(
 		".codex/openagentlayer/hooks/block-destructive-commands.mjs",
 		artifacts,
 	);
 	if (!hook.content.startsWith("#!/usr/bin/env node"))
 		throw new Error("Codex hook shebang was not preserved.");
+	const shim = findArtifact(".codex/openagentlayer/shim/git", artifacts);
+	if (!(shim.executable && shim.content.includes("exec rtk git")))
+		throw new Error("Codex RTK shim artifact is not executable.");
+	const privileged = findArtifact(
+		".codex/openagentlayer/runtime/privileged-exec.mjs",
+		artifacts,
+	);
+	if (
+		!(privileged.executable && privileged.content.includes("ALLOWED_COMMANDS"))
+	)
+		throw new Error("Privileged exec artifact is not executable.");
 }
 
 function assertArtifact(
@@ -235,4 +249,17 @@ function findArtifact(path: string, artifacts: Artifact[]): Artifact {
 	const artifact = artifacts.find((candidate) => candidate.path === path);
 	if (!artifact) throw new Error(`Missing generated artifact ${path}`);
 	return artifact;
+}
+
+function assertDistinctAgentColors(artifacts: Artifact[]): void {
+	const colors = new Map<string, string>();
+	for (const agent of CORE_AGENTS) {
+		const artifact = findArtifact(`.codex/agents/${agent}.toml`, artifacts);
+		const color = artifact.content.match(HEX_COLOR_PATTERN)?.[0];
+		if (!color) throw new Error(`Agent ${agent} missing hex color.`);
+		const owner = colors.get(color);
+		if (owner)
+			throw new Error(`Agents ${owner} and ${agent} share color ${color}.`);
+		colors.set(color, agent);
+	}
 }

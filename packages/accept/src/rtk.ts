@@ -10,6 +10,7 @@ export type RtkGainRunner = (repoRoot: string) => Promise<RtkGainResult>;
 
 export interface RtkGainOptions {
 	allowEmptyHistory?: boolean;
+	fromFile?: string;
 }
 
 export interface RtkGainAssessment {
@@ -27,7 +28,13 @@ export async function assertRtkGainThreshold(
 	options: RtkGainOptions = {},
 	runner: RtkGainRunner = runRtkGain,
 ): Promise<RtkGainAssessment> {
-	const result = await runner(repoRoot);
+	const result = options.fromFile
+		? {
+				exitCode: 0,
+				stdout: await Bun.file(options.fromFile).text(),
+				stderr: "",
+			}
+		: await runner(repoRoot);
 	if (result.exitCode !== 0)
 		throw new Error(
 			`rtk gain failed with exit code ${result.exitCode}: ${result.stderr || result.stdout}`,

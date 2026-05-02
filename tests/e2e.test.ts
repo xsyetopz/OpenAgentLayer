@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -91,8 +91,21 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 });
 
 test("CLI RTK gain check reports status", async () => {
+	const root = await mkdtemp(join(tmpdir(), "oal-rtk-gain-"));
+	const fixture = join(root, "gain.txt");
+	await writeFile(
+		fixture,
+		"Total commands:    1\nTokens saved:      10K (92.9%)\n",
+	);
 	const command = Bun.spawn(
-		["bun", "packages/cli/src/main.ts", "rtk-gain", "--allow-empty-history"],
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"rtk-gain",
+			"--from-file",
+			fixture,
+			"--allow-empty-history",
+		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
 	);
 	const stdout = await new Response(command.stdout).text();
@@ -100,6 +113,7 @@ test("CLI RTK gain check reports status", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain("STATUS PASS");
+	await rm(root, { recursive: true, force: true });
 });
 
 test("CLI plugins dry-run reports provider plugin payloads without writing", async () => {

@@ -32,6 +32,10 @@ export const runtimeHooks: readonly string[] = [
 	"require-validation-evidence.mjs",
 	"warn-large-diff.mjs",
 ];
+export const privilegedRuntimeScripts: readonly string[] = [
+	"privileged-exec.mjs",
+	"privileged-exec-client.mjs",
+];
 export async function assertRuntimeHooksExecutable(
 	repoRoot: string,
 ): Promise<void> {
@@ -43,5 +47,14 @@ export async function assertRuntimeHooksExecutable(
 		const hookStat = await stat(join(hookRoot, hookName));
 		if ((hookStat.mode & 0o111) === 0)
 			throw new Error(`Runtime hook is not executable: ${hookName}`);
+	}
+	const privilegedRoot = join(repoRoot, "packages/runtime/privileged");
+	const privilegedDiscovered = await readdir(privilegedRoot);
+	for (const script of privilegedRuntimeScripts) {
+		if (!privilegedDiscovered.includes(script))
+			throw new Error(`Missing privileged runtime script ${script}`);
+		const hookStat = await stat(join(privilegedRoot, script));
+		if ((hookStat.mode & 0o111) === 0)
+			throw new Error(`Privileged runtime is not executable: ${script}`);
 	}
 }

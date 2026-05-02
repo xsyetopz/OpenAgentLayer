@@ -4,8 +4,10 @@ import {
 	withProvenance,
 } from "@openagentlayer/artifact";
 import type { AgentRecord, OalSource, Provider } from "@openagentlayer/source";
+import { agentHexColor } from "./agent-colors";
 import { agentPrompt, commandMarkdown, instructions } from "./common";
 import { renderHookArtifacts } from "./hooks";
+import { renderPrivilegedExecArtifacts } from "./runtime";
 import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "claude";
@@ -64,6 +66,13 @@ export async function renderClaude(
 			repoRoot,
 		)),
 	);
+	artifacts.push(
+		...(await renderPrivilegedExecArtifacts(
+			PROVIDER,
+			repoRoot,
+			".claude/openagentlayer/runtime",
+		)),
+	);
 	return { artifacts, unsupported: [] };
 }
 
@@ -90,6 +99,7 @@ name: ${agent.id}
 description: ${agent.role}. Use when: ${agent.triggers.join("; ")}
 model: ${agent.models.claude ?? "claude-haiku-4-5"}
 tools: ${agent.tools.join(", ")}
+color: "${agentHexColor(agent.id)}"
 ---
 
 ${agentPrompt(agent, source)}

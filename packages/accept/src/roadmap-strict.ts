@@ -68,6 +68,11 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				requireIncludes(config, flag, "Codex config");
 			for (const model of ["gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex"])
 				requireIncludes(config, model, "Codex config");
+			requireIncludes(
+				config,
+				'shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"',
+				"Codex config",
+			);
 			for (const forbidden of [
 				["gpt", "5", "2"].join("-"),
 				`${["gpt", "5", "3", "codex"].join("-")}-spark`,
