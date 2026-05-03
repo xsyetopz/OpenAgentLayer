@@ -39,6 +39,7 @@ test("CLI dry-run reports Codex and OpenCode changes without writing", async () 
 				"--provider",
 				provider,
 				"--dry-run",
+				"--verbose",
 			],
 			{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
 		);
@@ -161,7 +162,7 @@ test("CLI global dry-run maps provider artifacts into global homes", async () =>
 	expect(stdout).toContain(".config/opencode/opencode.jsonc");
 	expect(stdout).toContain(".codex/AGENTS.md");
 	expect(stdout).toContain(".claude/CLAUDE.md");
-	expect(stdout).toContain("OpenAgentLayer deploy DRY RUN");
+	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
 	expect(stdout).toContain("binary:");
 	await expect(
 		readFile(join(home, ".openagentlayer/manifest/global/codex.json"), "utf8"),
@@ -254,6 +255,7 @@ test("CLI global deploy skips missing provider binaries without failing", async 
 			"--provider",
 			"codex,claude",
 			"--dry-run",
+			"--verbose",
 		],
 		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
@@ -262,7 +264,7 @@ test("CLI global deploy skips missing provider binaries without failing", async 
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain(".codex/config.toml");
-	expect(stdout).toContain("skip provider: claude");
+	expect(stdout).toContain("skip claude");
 	expect(stdout).not.toContain(".claude/settings.json");
 	await rm(home, { recursive: true, force: true });
 });
@@ -526,15 +528,15 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	const stderr = await new Response(command.stderr).text();
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
-	expect(stdout).toContain("OpenAgentLayer setup DRY RUN");
+	expect(stdout).toContain("OpenAgentLayer setup · dry-run");
 	expect(stdout).toContain("providers: codex, opencode");
-	expect(stdout).toContain("skip provider: claude");
+	expect(stdout).toContain("skip claude");
 	expect(stdout).toContain("rtk init -g --codex");
 	expect(stdout).toContain("bunx ctx7 setup --cli --universal");
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain("Configure DeepWiki MCP");
-	expect(stdout).toContain("OpenAgentLayer deploy DRY RUN");
-	expect(stdout).toContain("OpenAgentLayer plugins DRY RUN");
+	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
+	expect(stdout).toContain("OpenAgentLayer plugins · dry-run");
 	expect(stdout).toContain("Validate source and installed state");
 	await rm(home, { recursive: true, force: true });
 });
@@ -651,6 +653,7 @@ test("CLI plugins dry-run reports provider plugin payloads without writing", asy
 			"--provider",
 			"all",
 			"--dry-run",
+			"--verbose",
 		],
 		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
@@ -683,6 +686,7 @@ test("CLI plugins accepts comma-separated providers", async () => {
 			"--provider",
 			"codex,opencode",
 			"--dry-run",
+			"--verbose",
 		],
 		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
@@ -709,6 +713,7 @@ test("CLI plugins skips missing provider binaries without failing", async () => 
 			"--provider",
 			"codex,claude",
 			"--dry-run",
+			"--verbose",
 		],
 		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
@@ -717,7 +722,7 @@ test("CLI plugins skips missing provider binaries without failing", async () => 
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain(".codex-plugin/plugin.json");
-	expect(stdout).toContain("skip provider: claude");
+	expect(stdout).toContain("skip claude");
 	expect(stdout).toContain("claude binary not found in PATH");
 	expect(stdout).not.toContain(".claude/plugins/marketplaces/openagentlayer");
 	await rm(home, { recursive: true, force: true });

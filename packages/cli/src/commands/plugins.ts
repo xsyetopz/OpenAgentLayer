@@ -3,7 +3,12 @@ import { resolve } from "node:path";
 import { allPluginProviders, syncPlugins } from "@openagentlayer/plugins";
 import { flag, option, providerOptions } from "../arguments";
 import { renderOptions } from "../model-options";
-import { printChanges } from "../output";
+import {
+	printChanges,
+	printDetail,
+	printHeader,
+	printWarning,
+} from "../output";
 import { installableProviders } from "../provider-binaries";
 import { loadCheckedSource } from "../source";
 
@@ -41,13 +46,13 @@ export async function runPluginsCommand(
 		return;
 	}
 	if (flag(args, "--quiet")) return;
-	const mode = flag(args, "--dry-run") ? "DRY RUN" : "APPLY";
-	console.log(`OpenAgentLayer plugins ${mode}`);
-	console.log(`home: ${home}`);
-	console.log(`providers: ${availability.providers.join(", ") || "none"}`);
+	const mode = flag(args, "--dry-run") ? "dry-run" : "apply";
+	printHeader("OpenAgentLayer plugins", mode);
+	printDetail("home", home);
+	printDetail("providers", availability.providers.join(", ") || "none");
 	for (const skipped of availability.skipped)
-		console.log(`skip provider: ${skipped.provider} (${skipped.reason})`);
+		printWarning(`skip ${skipped.provider}: ${skipped.reason}`);
 	printChanges("plugin changes", result.changes, {
-		verbose: flag(args, "--verbose") || flag(args, "--dry-run"),
+		verbose: flag(args, "--verbose"),
 	});
 }

@@ -3,7 +3,7 @@ import { delimiter, join } from "node:path";
 import type { Provider } from "@openagentlayer/source";
 
 const PROVIDERS = ["codex", "claude", "opencode"] as const satisfies Provider[];
-const PROVIDER_BINARIES: Record<Provider, string> = {
+export const PROVIDER_BINARIES: Record<Provider, string> = {
 	codex: "codex",
 	claude: "claude",
 	opencode: "opencode",

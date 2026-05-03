@@ -55,9 +55,9 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 	);
 	if (
 		!(
-			setup.stdout.includes("OpenAgentLayer setup DRY RUN") &&
-			setup.stdout.includes("OpenAgentLayer deploy DRY RUN") &&
-			setup.stdout.includes("OpenAgentLayer plugins DRY RUN") &&
+			setup.stdout.includes("OpenAgentLayer setup · dry-run") &&
+			setup.stdout.includes("OpenAgentLayer deploy · dry-run") &&
+			setup.stdout.includes("OpenAgentLayer plugins · dry-run") &&
 			setup.stdout.includes("Validate source and installed state")
 		)
 	)
@@ -106,6 +106,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		"--scope",
 		"project",
 		"--dry-run",
+		"--verbose",
 	]);
 	if (!dryRun.stdout.includes(".codex/config.toml"))
 		throw new Error("CLI deploy dry-run did not report Codex config changes.");
@@ -127,6 +128,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			"--provider",
 			"all",
 			"--dry-run",
+			"--verbose",
 		],
 		{ env: globalEnv },
 	);
@@ -147,7 +149,15 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 	]);
 	const pluginDryRun = await runCli(
 		repoRoot,
-		["plugins", "--home", pluginRoot, "--provider", "all", "--dry-run"],
+		[
+			"plugins",
+			"--home",
+			pluginRoot,
+			"--provider",
+			"all",
+			"--dry-run",
+			"--verbose",
+		],
 		{ env: pluginEnv },
 	);
 	if (

@@ -11,6 +11,8 @@ import {
 	select,
 	text,
 } from "@clack/prompts";
+import type { Provider } from "@openagentlayer/source";
+import type { OptionalTool } from "@openagentlayer/toolchain";
 import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
 import { runPluginsCommand } from "./commands/plugins";
@@ -18,21 +20,25 @@ import { runPreviewCommand } from "./commands/preview";
 import { runSetupCommand } from "./commands/setup";
 import { runFeaturesCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
+import { printDetail, printHeader, printStep, printWarning } from "./output";
+import { installableProviders } from "./provider-binaries";
 import { cavemanModes } from "./source";
+import {
+	buildSetupArgs,
+	providerSetArg,
+	type WorkflowProvider,
+	type WorkflowScope,
+} from "./workflows";
 
-type InteractiveAction =
-	| "setup"
-	| "update"
+type InteractiveAction = "setup" | "inspect" | "repair" | "remove" | "advanced";
+type AdvancedAction =
 	| "preview"
 	| "deploy"
 	| "plugins"
 	| "features"
 	| "uninstall"
 	| "check";
-type InteractiveProvider = "all" | "codex" | "claude" | "opencode";
-type ProviderSingle = Exclude<InteractiveProvider, "all">;
-type ProviderMulti = ProviderSingle[];
-type Scope = "project" | "global";
+type ProviderMulti = WorkflowProvider[];
 
 export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	if (!process.stdin.isTTY)
@@ -40,18 +46,15 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	intro("OpenAgentLayer");
 	for (;;) {
 		const action = await workflowPrompt();
-		if (action === "check") await runCheckCommand(repoRoot);
-		else if (action === "setup" || action === "update")
-			await interactiveSetup(repoRoot);
-		else if (action === "preview") await interactivePreview(repoRoot);
-		else if (action === "deploy") await interactiveDeploy(repoRoot);
-		else if (action === "plugins") await interactivePlugins(repoRoot);
-		else if (action === "features") await interactiveFeatures();
-		else await interactiveUninstall();
+		if (action === "setup") await interactiveSetup(repoRoot, "setup");
+		else if (action === "repair") await interactiveSetup(repoRoot, "repair");
+		else if (action === "inspect") await interactiveInspect(repoRoot);
+		else if (action === "remove") await interactiveUninstall();
+		else await interactiveAdvanced(repoRoot);
 		const again = await ask<boolean>(
 			confirm({
 				message: "Run another OAL workflow?",
-				initialValue: true,
+				initialValue: false,
 			}),
 		);
 		if (!again) break;
@@ -64,65 +67,163 @@ function workflowPrompt(): Promise<InteractiveAction> {
 		select({
 			message: "Choose workflow",
 			options: [
-				{ value: "setup", label: "Set up OAL", hint: "guided install/update" },
-				{ value: "update", label: "Update OAL", hint: "rerun managed setup" },
-				{ value: "preview", label: "Preview", hint: "no writes" },
 				{
-					value: "deploy",
-					label: "Deploy",
-					hint: "render and merge managed artifacts",
+					value: "setup",
+					label: "Set up / update OAL",
+					hint: "preflight, optional tools, deploy, plugins, check",
 				},
 				{
-					value: "plugins",
-					label: "Plugins",
-					hint: "sync provider plugin payloads",
+					value: "inspect",
+					label: "Inspect OAL",
+					hint: "check source or preview generated artifacts",
 				},
 				{
-					value: "features",
-					label: "Features",
-					hint: "optional tool commands",
+					value: "repair",
+					label: "Repair installed OAL",
+					hint: "rerun setup against selected providers",
 				},
 				{
-					value: "uninstall",
-					label: "Uninstall",
-					hint: "remove OAL-owned files",
+					value: "remove",
+					label: "Remove OAL",
+					hint: "uninstall owned provider artifacts",
 				},
-				{ value: "check", label: "Check", hint: "validate source graph" },
+				{
+					value: "advanced",
+					label: "Advanced commands",
+					hint: "direct low-level CLI surfaces",
+				},
 			],
 		}),
 	);
 }
 
-async function interactiveSetup(repoRoot: string): Promise<void> {
-	const provider = await providerPrompt();
+async function interactiveSetup(
+	repoRoot: string,
+	intent: "setup" | "repair",
+): Promise<void> {
+	const providers = await availableProviderPrompt();
 	const scope = await scopePrompt();
-	const args = ["--provider", provider, "--scope", scope];
-	if (scope === "global") args.push("--home", await globalHomePrompt());
-	else args.push("--target", await targetPrompt());
-	await appendProviderPlans(args, provider);
-	appendCavemanMode(args, await cavemanModePrompt());
-	if (
-		await ask<boolean>(
-			confirm({ message: "Initialize RTK?", initialValue: true }),
-		)
-	)
-		args.push("--rtk");
-	const optional = await optionalToolPrompt();
-	if (optional.length > 0) args.push("--optional", optional.join(","));
-	if (
-		await ask<boolean>(
-			confirm({ message: "Dry-run only?", initialValue: true }),
-		)
-	)
-		args.push("--dry-run");
-	await runSetupCommand(repoRoot, args);
+	const home = scope === "global" ? await globalHomePrompt() : undefined;
+	const target = scope === "project" ? await targetPrompt() : undefined;
+	const codexPlan = providers.includes("codex")
+		? await codexPlanPrompt()
+		: undefined;
+	const claudePlan = providers.includes("claude")
+		? await claudePlanPrompt()
+		: undefined;
+	const opencodePlan = providers.includes("opencode")
+		? await opencodePlanPrompt()
+		: undefined;
+	const cavemanMode = await cavemanModePrompt();
+	const rtk = await ask<boolean>(
+		confirm({ message: "Set up RTK enforcement?", initialValue: true }),
+	);
+	const optionalTools = await optionalToolPrompt();
+	const verbose = await ask<boolean>(
+		confirm({ message: "Show detailed command output?", initialValue: false }),
+	);
+	const workflowSelection = {
+		providers,
+		scope,
+		...(home ? { home } : {}),
+		...(target ? { target } : {}),
+		...(codexPlan ? { codexPlan } : {}),
+		...(claudePlan ? { claudePlan } : {}),
+		...(opencodePlan ? { opencodePlan } : {}),
+		cavemanMode,
+		rtk,
+		optionalTools,
+		intent,
+	};
+	const dryRun = await confirmApplyPrompt(workflowSelection);
+	await runSetupCommand(
+		repoRoot,
+		buildSetupArgs({
+			...workflowSelection,
+			dryRun,
+			verbose,
+		}),
+	);
+	log.success(dryRun ? "Setup dry-run complete." : "Setup applied.");
+}
+
+async function interactiveInspect(repoRoot: string): Promise<void> {
+	const action = await ask<"check" | "installed" | "preview" | "content">(
+		select({
+			message: "Inspect target",
+			options: [
+				{ value: "check", label: "Check source", hint: "renderability only" },
+				{
+					value: "installed",
+					label: "Check installed state",
+					hint: "manifest and drift checks",
+				},
+				{ value: "preview", label: "Preview artifact tree", hint: "no writes" },
+				{
+					value: "content",
+					label: "Preview artifact content",
+					hint: "select one path",
+				},
+			],
+		}),
+	);
+	if (action === "check") {
+		await runCheckCommand(repoRoot);
+		return;
+	}
+	if (action === "installed") {
+		const providers = await availableProviderPrompt();
+		await runCheckCommand(repoRoot, [
+			"--installed",
+			"--provider",
+			providerSetArg(providers),
+			"--home",
+			await globalHomePrompt(),
+		]);
+		return;
+	}
+	const providers = await providerPrompt();
+	const args = ["--provider", providerSetArg(providers)];
+	if (action === "content") {
+		args.push("--content");
+		args.push("--path", await artifactPathPrompt());
+	}
+	await runPreviewCommand(repoRoot, args);
+}
+
+async function interactiveAdvanced(repoRoot: string): Promise<void> {
+	const action = await ask<AdvancedAction>(
+		select({
+			message: "Advanced command",
+			options: [
+				{
+					value: "preview",
+					label: "preview",
+					hint: "show generated artifacts",
+				},
+				{ value: "deploy", label: "deploy", hint: "write provider artifacts" },
+				{ value: "plugins", label: "plugins", hint: "sync plugin payloads" },
+				{
+					value: "features",
+					label: "features",
+					hint: "optional feature commands",
+				},
+				{ value: "uninstall", label: "uninstall", hint: "remove owned files" },
+				{ value: "check", label: "check", hint: "validate source" },
+			],
+		}),
+	);
+	if (action === "check") await runCheckCommand(repoRoot);
+	else if (action === "preview") await interactivePreview(repoRoot);
+	else if (action === "deploy") await interactiveDeploy(repoRoot);
+	else if (action === "plugins") await interactivePlugins(repoRoot);
+	else if (action === "features") await interactiveFeatures();
+	else await interactiveUninstall();
 }
 
 async function interactivePreview(repoRoot: string): Promise<void> {
-	const provider = await providerPrompt();
-	const scope = await scopePrompt();
-	const args = ["--provider", provider, "--scope", scope];
-	if (scope === "global") args.push("--home", await globalHomePrompt());
+	const providers = await providerPrompt();
+	const args = ["--provider", providerSetArg(providers)];
 	if (
 		await ask<boolean>(
 			confirm({ message: "Include artifact contents?", initialValue: false }),
@@ -133,9 +234,9 @@ async function interactivePreview(repoRoot: string): Promise<void> {
 }
 
 async function interactiveDeploy(repoRoot: string): Promise<void> {
-	const provider = await providerPrompt();
+	const providers = await availableProviderPrompt();
 	const scope = await scopePrompt();
-	const args = ["--provider", provider, "--scope", scope];
+	const args = ["--provider", providerSetArg(providers), "--scope", scope];
 	if (scope === "global") args.push("--home", await globalHomePrompt());
 	else args.push("--target", await targetPrompt());
 	appendCavemanMode(args, await cavemanModePrompt());
@@ -149,8 +250,13 @@ async function interactiveDeploy(repoRoot: string): Promise<void> {
 }
 
 async function interactivePlugins(repoRoot: string): Promise<void> {
-	const provider = await providerPrompt();
-	const args = ["--provider", provider, "--home", await globalHomePrompt()];
+	const providers = await availableProviderPrompt();
+	const args = [
+		"--provider",
+		providerSetArg(providers),
+		"--home",
+		await globalHomePrompt(),
+	];
 	appendCavemanMode(args, await cavemanModePrompt());
 	if (
 		await ask<boolean>(
@@ -159,7 +265,7 @@ async function interactivePlugins(repoRoot: string): Promise<void> {
 	)
 		args.push("--dry-run");
 	await runPluginsCommand(repoRoot, args);
-	log.success(`Plugin sync complete for ${provider}.`);
+	log.success(`Plugin sync complete for ${providerSetArg(providers)}.`);
 }
 
 async function interactiveUninstall(): Promise<void> {
@@ -194,18 +300,47 @@ async function interactiveFeatures(): Promise<void> {
 	runFeaturesCommand([`--${action}`, feature]);
 }
 
-async function appendProviderPlans(
-	args: string[],
-	provider: string,
-): Promise<void> {
-	const selected =
-		provider === "all" ? ["codex", "claude", "opencode"] : provider.split(",");
-	if (selected.includes("codex"))
-		args.push("--codex-plan", await codexPlanPrompt());
-	if (selected.includes("claude"))
-		args.push("--claude-plan", await claudePlanPrompt());
-	if (selected.includes("opencode"))
-		args.push("--opencode-plan", await opencodePlanPrompt());
+async function confirmApplyPrompt(selection: {
+	providers: Provider[];
+	scope: WorkflowScope;
+	home?: string;
+	target?: string;
+	codexPlan?: string;
+	claudePlan?: string;
+	opencodePlan?: string;
+	cavemanMode?: string;
+	rtk: boolean;
+	optionalTools: OptionalTool[];
+	intent: "setup" | "repair";
+}): Promise<boolean> {
+	printHeader("OpenAgentLayer workflow", selection.intent);
+	printStep("Selected providers");
+	printDetail("providers", providerSetArg(selection.providers));
+	printStep("Target");
+	printDetail("scope", selection.scope);
+	printDetail(
+		selection.scope === "global" ? "home" : "target",
+		selection.scope === "global"
+			? (selection.home ?? homedir())
+			: (selection.target ?? process.cwd()),
+	);
+	printStep("Model plans");
+	if (selection.codexPlan) printDetail("codex", selection.codexPlan);
+	if (selection.claudePlan) printDetail("claude", selection.claudePlan);
+	if (selection.opencodePlan) printDetail("opencode", selection.opencodePlan);
+	printStep("Options");
+	printDetail("caveman", selection.cavemanMode ?? "source");
+	printDetail("rtk", selection.rtk ? "yes" : "no");
+	printDetail(
+		"optional",
+		selection.optionalTools.length > 0
+			? selection.optionalTools.join(", ")
+			: "none",
+	);
+	const apply = await ask<boolean>(
+		confirm({ message: "Apply changes now?", initialValue: false }),
+	);
+	return !apply;
 }
 
 function codexPlanPrompt(): Promise<string> {
@@ -217,7 +352,7 @@ function codexPlanPrompt(): Promise<string> {
 				{
 					value: "pro-20",
 					label: "Pro 20x",
-					hint: "high lead/review, high code",
+					hint: "medium top-level, high agents",
 				},
 				{ value: "plus", label: "Plus", hint: "low lead, medium code" },
 			],
@@ -271,8 +406,8 @@ function opencodePlanPrompt(): Promise<string> {
 	);
 }
 
-function optionalToolPrompt(): Promise<string[]> {
-	return ask<string[]>(
+function optionalToolPrompt(): Promise<OptionalTool[]> {
+	return ask<OptionalTool[]>(
 		multiselect({
 			message: "Optional tool phases",
 			required: false,
@@ -316,31 +451,38 @@ function cavemanModePrompt(): Promise<string> {
 	);
 }
 
-async function providerPrompt(): Promise<string> {
-	const providers = await ask<ProviderMulti>(
+async function availableProviderPrompt(): Promise<ProviderMulti> {
+	const availability = await installableProviders(["all"]);
+	printHeader("Provider preflight");
+	for (const provider of availability.providers)
+		printDetail(provider, "available");
+	for (const skipped of availability.skipped)
+		printWarning(`${skipped.provider} disabled: ${skipped.reason}`);
+	if (availability.providers.length === 0)
+		throw new Error(
+			"No provider binaries found. Install codex, claude, or opencode first.",
+		);
+	return providerPrompt(availability.providers);
+}
+
+function providerPrompt(
+	providers: readonly WorkflowProvider[] = ["codex", "claude", "opencode"],
+): Promise<ProviderMulti> {
+	return ask<ProviderMulti>(
 		multiselect({
 			message: "Providers",
 			required: true,
-			options: [
-				{ value: "codex", label: "Codex", hint: "AGENTS.md, TOML, hooks" },
-				{
-					value: "claude",
-					label: "Claude Code",
-					hint: "CLAUDE.md, settings, hooks",
-				},
-				{
-					value: "opencode",
-					label: "OpenCode",
-					hint: "JSONC, plugins, tools",
-				},
-			],
+			options: providers.map((provider) => ({
+				value: provider,
+				label: providerLabel(provider),
+				hint: providerHint(provider),
+			})),
 		}),
 	);
-	return providers.length === 3 ? "all" : providers.join(",");
 }
 
-function providerSinglePrompt(): Promise<ProviderSingle> {
-	return ask<ProviderSingle>(
+function providerSinglePrompt(): Promise<WorkflowProvider> {
+	return ask<WorkflowProvider>(
 		select({
 			message: "Provider to remove",
 			options: [
@@ -360,17 +502,17 @@ function providerSinglePrompt(): Promise<ProviderSingle> {
 	);
 }
 
-function scopePrompt(): Promise<Scope> {
-	return ask<Scope>(
+function scopePrompt(): Promise<WorkflowScope> {
+	return ask<WorkflowScope>(
 		select({
 			message: "Scope",
 			options: [
-				{ value: "project", label: "Project", hint: "target repository" },
 				{
 					value: "global",
 					label: "Global",
 					hint: "provider home plus oal shim",
 				},
+				{ value: "project", label: "Project", hint: "target repository" },
 			],
 		}),
 	);
@@ -383,6 +525,17 @@ function targetPrompt(): Promise<string> {
 			placeholder: process.cwd(),
 			defaultValue: process.cwd(),
 			validate: (value) => (value?.trim() ? undefined : "Target is required"),
+		}),
+	);
+}
+
+function artifactPathPrompt(): Promise<string> {
+	return ask<string>(
+		text({
+			message: "Artifact path",
+			placeholder: ".codex/config.toml",
+			defaultValue: ".codex/config.toml",
+			validate: (value) => (value?.trim() ? undefined : "Path is required"),
 		}),
 	);
 }
@@ -410,6 +563,18 @@ async function globalHomePrompt(): Promise<string> {
 	);
 	if (useDetectedHome) return detectedHome;
 	return homePrompt();
+}
+
+function providerLabel(provider: WorkflowProvider): string {
+	if (provider === "codex") return "Codex";
+	if (provider === "claude") return "Claude Code";
+	return "OpenCode";
+}
+
+function providerHint(provider: WorkflowProvider): string {
+	if (provider === "codex") return "AGENTS.md, TOML, hooks";
+	if (provider === "claude") return "CLAUDE.md, settings, hooks";
+	return "JSONC, plugins, tools";
 }
 
 async function ask<T>(prompt: Promise<unknown>): Promise<T> {

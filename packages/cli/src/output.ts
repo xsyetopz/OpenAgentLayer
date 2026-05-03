@@ -7,6 +7,30 @@ export interface OutputOptions {
 	verbose?: boolean;
 }
 
+export function printHeader(title: string, mode?: string): void {
+	console.log(mode ? `${title} · ${mode}` : title);
+}
+
+export function printStep(message: string): void {
+	console.log(`◇ ${message}`);
+}
+
+export function printSuccess(message: string): void {
+	console.log(`└ ✓ ${message}`);
+}
+
+export function printWarning(message: string): void {
+	console.log(`  ! ${message}`);
+}
+
+export function printDetail(label: string, value: string | number): void {
+	console.log(`  ${label}: ${value}`);
+}
+
+export function printCommand(command: string): void {
+	console.log(`  $ ${command}`);
+}
+
 export interface DeployReport {
 	sourceRoot: string;
 	providers: readonly (Provider | "all")[];
@@ -33,33 +57,35 @@ export function printDeployReport(
 ): void {
 	if (options.quiet) return;
 	const counts = countActions(report.plan.changes);
-	const mode = options.dryRun ? "DRY RUN" : "APPLY";
-	console.log(`OpenAgentLayer deploy ${mode}`);
-	console.log(`source: ${report.sourceRoot}`);
-	console.log(`providers: ${report.providers.join(", ")}`);
+	const mode = options.dryRun ? "dry-run" : "apply";
+	printHeader("OpenAgentLayer deploy", mode);
+	printDetail("source", report.sourceRoot);
+	printDetail("providers", report.providers.join(", "));
 	const skippedProviders = report.skippedProviders ?? [];
 	if (skippedProviders.length > 0)
 		for (const skipped of skippedProviders)
-			console.log(`skip provider: ${skipped.provider} (${skipped.reason})`);
-	console.log(`scope: ${report.scope}`);
-	console.log(`target: ${report.targetRoot}`);
-	console.log(`manifest: ${report.manifestRoot}`);
-	console.log(`artifacts: ${report.plan.artifacts.length}`);
-	console.log(
-		`changes: write ${counts.write}, update ${counts.update}, skip ${counts.skip}, remove ${counts.remove}, backup ${counts.backup}`,
+			printWarning(`skip ${skipped.provider}: ${skipped.reason}`);
+	printDetail("scope", report.scope);
+	printDetail("target", report.targetRoot);
+	printDetail("manifest", report.manifestRoot);
+	printDetail("artifacts", report.plan.artifacts.length);
+	printDetail(
+		"changes",
+		`write ${counts.write}, update ${counts.update}, skip ${counts.skip}, remove ${counts.remove}, backup ${counts.backup}`,
 	);
 	if (report.binary) {
-		console.log(
-			`binary: ${report.binary.action} ${report.binary.path} (${report.binary.reason})`,
+		printDetail(
+			"binary",
+			`${report.binary.action} ${report.binary.path} (${report.binary.reason})`,
 		);
 		if (!report.binary.pathReady)
-			console.log(
-				`path: add ${dirname(report.binary.path)} to PATH or run ${report.binary.path} directly`,
+			printWarning(
+				`add ${dirname(report.binary.path)} to PATH or run ${report.binary.path} directly`,
 			);
 	}
-	if (options.verbose || options.dryRun) {
+	if (options.verbose) {
 		for (const change of report.plan.changes)
-			console.log(`${change.action}: ${change.path} # ${change.reason}`);
+			printDetail(change.action, `${change.path} # ${change.reason}`);
 	}
 }
 
@@ -70,13 +96,14 @@ export function printChanges(
 ): void {
 	if (options.quiet) return;
 	const counts = countActions(changes);
-	console.log(label);
-	console.log(
-		`changes: write ${counts.write}, update ${counts.update}, skip ${counts.skip}, remove ${counts.remove}, backup ${counts.backup}`,
+	printStep(label);
+	printDetail(
+		"changes",
+		`write ${counts.write}, update ${counts.update}, skip ${counts.skip}, remove ${counts.remove}, backup ${counts.backup}`,
 	);
 	if (options.verbose)
 		for (const change of changes)
-			console.log(`${change.action}: ${change.path} # ${change.reason}`);
+			printDetail(change.action, `${change.path} # ${change.reason}`);
 }
 
 function countActions(

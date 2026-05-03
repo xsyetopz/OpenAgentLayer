@@ -88,17 +88,19 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 
 export function renderSetupPlan(plan: SetupPlan): string {
 	const lines = [
-		`OpenAgentLayer setup ${plan.dryRun ? "DRY RUN" : "APPLY"}`,
-		`providers: ${plan.providers.join(", ") || "none"}`,
-		`scope: ${plan.scope}`,
-		`home: ${plan.home}`,
-		`target: ${plan.target}`,
+		`OpenAgentLayer setup · ${plan.dryRun ? "dry-run" : "apply"}`,
+		"◇ Provider check",
+		`  providers: ${plan.providers.join(", ") || "none"}`,
 	];
-	if (plan.binDir) lines.push(`bin: ${plan.binDir}`);
-	if (plan.optionalTools.length > 0)
-		lines.push(`optional: ${plan.optionalTools.join(", ")}`);
 	for (const skipped of plan.skippedProviders)
-		lines.push(`skip provider: ${skipped.provider} (${skipped.reason})`);
+		lines.push(`  ! skip ${skipped.provider}: ${skipped.reason}`);
+	lines.push("◇ Target");
+	lines.push(`  scope: ${plan.scope}`);
+	lines.push(`  home: ${plan.home}`);
+	lines.push(`  target: ${plan.target}`);
+	if (plan.binDir) lines.push(`  bin: ${plan.binDir}`);
+	lines.push("◇ Optional tools");
+	lines.push(`  selected: ${plan.optionalTools.join(", ") || "none"}`);
 	for (const phase of plan.phases) {
 		lines.push(`◇ ${phase.action}`);
 		for (const command of phase.commands) lines.push(`  $ ${command}`);

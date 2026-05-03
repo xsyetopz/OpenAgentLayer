@@ -1,6 +1,6 @@
 {
   "name": "openagentlayer",
-  "version": "0.1.2-beta.12",
+  "version": "0.1.2-beta.13",
   "description": "OpenAgentLayer provider-native agents, skills, commands, and hooks for Claude Code.",
   "author": "xsyetopz",
   "homepage": "https://github.com/xsyetopz/OpenAgentLayer"

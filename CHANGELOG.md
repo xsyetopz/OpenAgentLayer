@@ -5,6 +5,28 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.2-beta.13] - 2026-05-03
+
+### Added
+
+- Added a high-level interactive workflow layer for setup, inspection, repair, removal, and advanced low-level command access.
+- Added a typed setup workflow argument builder so interactive setup calls the same low-level `setup` command path as scripted usage.
+- Added provider preflight output in interactive setup so missing provider binaries are shown before provider selection.
+
+### Changed
+
+- Reworked CLI output around concise OAL sections, details, warnings, and checkmarks while keeping `--verbose` for per-artifact internals.
+- Reworked setup dry-run output to summarize provider checks, target scope, optional tools, and setup phases before deploy/plugin/check execution.
+- Kept low-level deploy, plugins, features, preview, check, and uninstall commands available under the advanced interactive workflow instead of duplicating behavior.
+
+### Verified
+
+- `rtk proxy -- bun run test`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bunx tsc --noEmit`
+- `rtk proxy -- bun run accept`
+- `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.2-beta.12] - 2026-05-03
 
 ### Added
