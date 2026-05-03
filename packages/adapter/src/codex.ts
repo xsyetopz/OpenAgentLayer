@@ -70,7 +70,7 @@ export async function renderCodex(
 		withProvenance({
 			provider: PROVIDER,
 			path: ".codex/config.toml",
-			content: renderCodexConfig(source),
+			content: renderCodexConfig(source, options),
 			sourceId: "config:codex",
 			mode: "config",
 		}),
@@ -135,9 +135,11 @@ export async function renderCodex(
 	};
 }
 
-function renderCodexConfig(source: OalSource): string {
+function renderCodexConfig(source: OalSource, options: RenderOptions): string {
+	const profile = resolveCodexProfilePlan(options);
 	return `[profiles.openagentlayer]
 model = "gpt-5.5"
+${profile.lead ? `model_reasoning_effort = ${quoteToml(profile.lead)}\n` : ""}
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_instructions_file = "AGENTS.md"
@@ -149,6 +151,7 @@ ${renderCodexFeatures()}
 
 [profiles.openagentlayer-implement]
 model = "gpt-5.3-codex"
+${profile.implement ? `model_reasoning_effort = ${quoteToml(profile.implement)}\n` : ""}
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 model_instructions_file = "AGENTS.md"
@@ -156,6 +159,7 @@ shell_zsh_fork = ".codex/openagentlayer/shim/oal-zsh"
 
 [profiles.openagentlayer-utility]
 model = "gpt-5.4-mini"
+${profile.utility ? `model_reasoning_effort = ${quoteToml(profile.utility)}\n` : ""}
 approval_policy = "never"
 sandbox_mode = "read-only"
 model_instructions_file = "AGENTS.md"
@@ -176,6 +180,21 @@ config_file = "./agents/${agent.id}.toml"`,
 	)
 	.join("\n")}
 `;
+}
+
+function resolveCodexProfilePlan(options: RenderOptions): {
+	lead?: "low" | "medium" | "high";
+	implement?: "medium" | "high";
+	utility?: "low" | "medium";
+} {
+	const plan = options.codexPlan ?? options.plan;
+	if (plan === "plus")
+		return { lead: "low", implement: "medium", utility: "low" };
+	if (plan === "pro-5")
+		return { lead: "medium", implement: "high", utility: "low" };
+	if (plan === "pro-20")
+		return { lead: "high", implement: "high", utility: "medium" };
+	return {};
 }
 
 function renderCodexFeatures(): string {

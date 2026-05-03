@@ -6,7 +6,13 @@ import type { RenderOptions } from "./model-routing";
 import { renderOpenCode } from "./opencode";
 
 export type { ModelPlan, RenderOptions } from "./model-routing";
-export { assertKnownModelPlan, parseOpenCodeModels } from "./model-routing";
+export {
+	assertKnownModelPlan,
+	isClaudePlan,
+	isCodexPlan,
+	isOpenCodePlan,
+	parseOpenCodeModels,
+} from "./model-routing";
 export { renderClaude, renderCodex, renderOpenCode };
 
 export type ProviderAdapter = {

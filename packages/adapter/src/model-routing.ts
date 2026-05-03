@@ -14,6 +14,12 @@ export type ReasoningEffort = "low" | "medium" | "high";
 
 export interface RenderOptions {
 	plan?: ModelPlan;
+	codexPlan?: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">;
+	claudePlan?: Extract<ModelPlan, "max-5" | "max-20" | "max-20-long">;
+	opencodePlan?: Extract<
+		ModelPlan,
+		"opencode-auto" | "opencode-auth" | "opencode-free"
+	>;
 	opencodeModels?: readonly string[];
 }
 
@@ -145,12 +151,9 @@ export function resolveCodexModel(
 	agent: AgentRecord,
 	options: RenderOptions = {},
 ): RoutedModel {
-	if (
-		options.plan === "plus" ||
-		options.plan === "pro-5" ||
-		options.plan === "pro-20"
-	)
-		return CODEX_PLANS[options.plan][agent.modelClass];
+	const plan =
+		options.codexPlan ?? (isCodexPlan(options.plan) ? options.plan : undefined);
+	if (plan) return CODEX_PLANS[plan][agent.modelClass];
 	return { model: agent.models.codex ?? "gpt-5.4-mini" };
 }
 
@@ -158,12 +161,10 @@ export function resolveClaudeModel(
 	agent: AgentRecord,
 	options: RenderOptions = {},
 ): string {
-	if (
-		options.plan === "max-5" ||
-		options.plan === "max-20" ||
-		options.plan === "max-20-long"
-	)
-		return CLAUDE_PLANS[options.plan][agent.modelClass];
+	const plan =
+		options.claudePlan ??
+		(isClaudePlan(options.plan) ? options.plan : undefined);
+	if (plan) return CLAUDE_PLANS[plan][agent.modelClass];
 	return agent.models.claude ?? "claude-haiku-4-5";
 }
 
@@ -171,9 +172,11 @@ export function resolveOpenCodeModel(
 	agent: AgentRecord,
 	options: RenderOptions = {},
 ): string {
-	if (options.plan === "opencode-free")
-		return OPENCODE_FREE_BY_CLASS[agent.modelClass];
-	if (options.plan === "opencode-auth" || options.plan === "opencode-auto") {
+	const plan =
+		options.opencodePlan ??
+		(isOpenCodePlan(options.plan) ? options.plan : undefined);
+	if (plan === "opencode-free") return OPENCODE_FREE_BY_CLASS[agent.modelClass];
+	if (plan === "opencode-auth" || plan === "opencode-auto") {
 		const detected = new Set(
 			(options.opencodeModels ?? []).filter(isAllowedOpenCodeModel),
 		);
@@ -181,7 +184,7 @@ export function resolveOpenCodeModel(
 			detected.has(model),
 		);
 		if (selected) return selected;
-		if (options.plan === "opencode-auth")
+		if (plan === "opencode-auth")
 			throw new Error(
 				`OpenCode auth plan has no allowed detected model for ${agent.id}.`,
 			);
@@ -208,6 +211,31 @@ export function isAllowedOpenCodeModel(model: string): boolean {
 		model === "opencode/claude-sonnet-4-6" ||
 		model === "opencode/claude-haiku-4-5" ||
 		(OPENCODE_FREE_MODELS as readonly string[]).includes(model)
+	);
+}
+
+export function isCodexPlan(
+	plan: string | undefined,
+): plan is Extract<ModelPlan, "plus" | "pro-5" | "pro-20"> {
+	return plan === "plus" || plan === "pro-5" || plan === "pro-20";
+}
+
+export function isClaudePlan(
+	plan: string | undefined,
+): plan is Extract<ModelPlan, "max-5" | "max-20" | "max-20-long"> {
+	return plan === "max-5" || plan === "max-20" || plan === "max-20-long";
+}
+
+export function isOpenCodePlan(
+	plan: string | undefined,
+): plan is Extract<
+	ModelPlan,
+	"opencode-auto" | "opencode-auth" | "opencode-free"
+> {
+	return (
+		plan === "opencode-auto" ||
+		plan === "opencode-auth" ||
+		plan === "opencode-free"
 	);
 }
 

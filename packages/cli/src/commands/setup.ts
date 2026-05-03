@@ -113,7 +113,14 @@ function setupOptionalTools(args: string[]): OptionalTool[] {
 
 function passthroughRenderArgs(args: string[]): string[] {
 	const result: string[] = [];
-	for (const name of ["--plan", "--opencode-models-file", "--caveman-mode"]) {
+	for (const name of [
+		"--plan",
+		"--codex-plan",
+		"--claude-plan",
+		"--opencode-plan",
+		"--opencode-models-file",
+		"--caveman-mode",
+	]) {
 		const value = option(args, name);
 		if (value) result.push(name, value);
 	}

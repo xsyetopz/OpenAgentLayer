@@ -99,6 +99,7 @@ async function interactiveSetup(repoRoot: string): Promise<void> {
 	const args = ["--provider", provider, "--scope", scope];
 	if (scope === "global") args.push("--home", await globalHomePrompt());
 	else args.push("--target", await targetPrompt());
+	await appendProviderPlans(args, provider);
 	appendCavemanMode(args, await cavemanModePrompt());
 	if (
 		await ask<boolean>(
@@ -191,6 +192,83 @@ async function interactiveFeatures(): Promise<void> {
 		}),
 	);
 	runFeaturesCommand([`--${action}`, feature]);
+}
+
+async function appendProviderPlans(
+	args: string[],
+	provider: string,
+): Promise<void> {
+	const selected =
+		provider === "all" ? ["codex", "claude", "opencode"] : provider.split(",");
+	if (selected.includes("codex"))
+		args.push("--codex-plan", await codexPlanPrompt());
+	if (selected.includes("claude"))
+		args.push("--claude-plan", await claudePlanPrompt());
+	if (selected.includes("opencode"))
+		args.push("--opencode-plan", await opencodePlanPrompt());
+}
+
+function codexPlanPrompt(): Promise<string> {
+	return ask<string>(
+		select({
+			message: "ChatGPT/Codex subscription",
+			options: [
+				{ value: "pro-5", label: "Pro 5x", hint: "medium lead, high code" },
+				{
+					value: "pro-20",
+					label: "Pro 20x",
+					hint: "high lead/review, high code",
+				},
+				{ value: "plus", label: "Plus", hint: "low lead, medium code" },
+			],
+		}),
+	);
+}
+
+function claudePlanPrompt(): Promise<string> {
+	return ask<string>(
+		select({
+			message: "Claude subscription",
+			options: [
+				{ value: "max-5", label: "Max 5x", hint: "Opus/Sonnet/Haiku routing" },
+				{
+					value: "max-20",
+					label: "Max 20x",
+					hint: "more Sonnet worker routes",
+				},
+				{
+					value: "max-20-long",
+					label: "Max 20x long",
+					hint: "1M Opus for lead/review",
+				},
+			],
+		}),
+	);
+}
+
+function opencodePlanPrompt(): Promise<string> {
+	return ask<string>(
+		select({
+			message: "OpenCode model mode",
+			options: [
+				{
+					value: "opencode-auto",
+					label: "Auto",
+					hint: "detected auth models, free fallback",
+				},
+				{
+					value: "opencode-free",
+					label: "Free fallback",
+					hint: "OpenCode free models only",
+				},
+				{
+					value: "opencode-auth",
+					label: "Require auth",
+					hint: "fail if auth models missing",
+				},
+			],
+		}),
+	);
 }
 
 function optionalToolPrompt(): Promise<string[]> {

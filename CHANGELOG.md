@@ -5,6 +5,31 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.2-beta.12] - 2026-05-03
+
+### Added
+
+- Added provider-specific model plan flags for Codex, Claude Code, and OpenCode
+  so high-level setup can choose each subscription independently.
+- Added interactive setup prompts for ChatGPT/Codex, Claude, and OpenCode model
+  modes.
+- Added Codex profile reasoning coverage for Pro 5x and Pro 20x plans.
+
+### Changed
+
+- Codex generated profiles now set `model_reasoning_effort` from the selected
+  Codex subscription plan: Pro 5x uses medium lead/high code, and Pro 20x uses
+  high lead/high code with medium utility.
+- Kept low-level `--plan` as a compatibility option while making high-level
+  setup use provider-specific plan flags.
+
+### Verified
+
+- `rtk proxy -- bun run test`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bunx tsc --noEmit`
+- `rtk proxy -- bun run accept`
+
 ## [0.1.2-beta.11] - 2026-05-03
 
 ### Added

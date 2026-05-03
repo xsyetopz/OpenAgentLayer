@@ -458,6 +458,45 @@ test("CLI rejects unsupported Caveman mode cleanly", async () => {
 	expect(stderr).toContain("Unsupported caveman mode yell");
 });
 
+test("CLI preview applies Codex subscription plan to profile reasoning", async () => {
+	const pro5 = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"preview",
+			"--provider",
+			"codex",
+			"--codex-plan",
+			"pro-5",
+			"--path",
+			".codex/config.toml",
+			"--content",
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const pro5Stdout = await new Response(pro5.stdout).text();
+	expect(await pro5.exited).toBe(0);
+	expect(pro5Stdout).toContain('model_reasoning_effort = "medium"');
+	const pro20 = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"preview",
+			"--provider",
+			"codex",
+			"--codex-plan",
+			"pro-20",
+			"--path",
+			".codex/config.toml",
+			"--content",
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const pro20Stdout = await new Response(pro20.stdout).text();
+	expect(await pro20.exited).toBe(0);
+	expect(pro20Stdout).toContain('model_reasoning_effort = "high"');
+});
+
 test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-setup-e2e-"));
 	const env = await fakeProviderPath(home, ["codex", "opencode"]);
@@ -472,6 +511,10 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 			home,
 			"--provider",
 			"all",
+			"--codex-plan",
+			"pro-20",
+			"--opencode-plan",
+			"opencode-free",
 			"--optional",
 			"ctx7,playwright,deepwiki",
 			"--rtk",

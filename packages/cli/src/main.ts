@@ -214,7 +214,16 @@ function addRenderOptions(command: Command): Command {
 		)
 		.option("--scope <scope>", "project or global", "project")
 		.option("--home <dir>", "home directory for global scope")
-		.option("--plan <plan>", "model plan")
+		.option("--plan <plan>", "legacy shared model plan")
+		.option("--codex-plan <plan>", "Codex plan: plus, pro-5, or pro-20")
+		.option(
+			"--claude-plan <plan>",
+			"Claude plan: max-5, max-20, or max-20-long",
+		)
+		.option(
+			"--opencode-plan <plan>",
+			"OpenCode plan: opencode-auto, opencode-auth, or opencode-free",
+		)
 		.option("--opencode-models-file <path>", "saved `opencode models` output")
 		.option(
 			"--caveman-mode <mode>",
@@ -228,6 +237,9 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--scope", options["scope"]);
 	pushValue(args, "--home", options["home"]);
 	pushValue(args, "--plan", options["plan"]);
+	pushValue(args, "--codex-plan", options["codexPlan"]);
+	pushValue(args, "--claude-plan", options["claudePlan"]);
+	pushValue(args, "--opencode-plan", options["opencodePlan"]);
 	pushValue(args, "--opencode-models-file", options["opencodeModelsFile"]);
 	pushValue(args, "--caveman-mode", options["cavemanMode"]);
 	pushValue(args, "--path", options["path"]);
