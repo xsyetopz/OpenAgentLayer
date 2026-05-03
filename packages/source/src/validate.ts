@@ -149,6 +149,10 @@ export function validateProductSource(record: ProductSource): void {
 			"product promptContracts.responseBoundaries",
 		);
 		requireText(
+			record.promptContracts.scopeDiscipline,
+			"product promptContracts.scopeDiscipline",
+		);
+		requireText(
 			record.promptContracts.sourceBackedBehavior,
 			"product promptContracts.sourceBackedBehavior",
 		);

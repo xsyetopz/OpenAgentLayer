@@ -29,7 +29,7 @@ test("model plans route Greek agents by subscription", async () => {
 		(artifact) => artifact.path === ".codex/agents/athena.toml",
 	)?.content;
 	expect(athena).toContain('model = "gpt-5.5"');
-	expect(athena).toContain('model_reasoning_effort = "medium"');
+	expect(athena).toContain('model_reasoning_effort = "high"');
 	const hephaestus = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
 	)?.content;

@@ -352,7 +352,7 @@ function codexPlanPrompt(): Promise<string> {
 				{
 					value: "pro-20",
 					label: "Pro 20x",
-					hint: "medium top-level, high agents",
+					hint: "high lead, high code",
 				},
 				{ value: "plus", label: "Plus", hint: "low lead, medium code" },
 			],

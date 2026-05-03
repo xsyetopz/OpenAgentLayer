@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "openagentlayer",
+      "name": "oal",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/xsyetopz/OpenAgentLayer",

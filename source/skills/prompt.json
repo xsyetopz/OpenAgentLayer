@@ -6,8 +6,8 @@
     "claude",
     "opencode"
   ],
-  "description": "Design strict operational prompts, skill bodies, agent instructions, and route contracts without hidden manipulation or policy bypass. Use when prompt behavior is the product surface.",
-  "body": "Prompts should constrain behavior through clear source gates, ordered steps, ambiguity rules, and output contracts. Do not use hidden manipulation, emotional coercion, or adversarial tricks. Make failure modes explicit.",
+  "description": "Design strict operational prompts, skill bodies, agent instructions, and route contracts that keep agents inside the requested scope. Use when prompt behavior is the product surface.",
+  "body": "Prompts should constrain behavior through clear source gates, ordered steps, ambiguity rules, output contracts, and explicit failure pressure. Strong pressure is valid when it is task-relevant, transparent in the prompt text, and aimed at preventing shortcut behavior, scope drift, fake progress, or rejected-idea memorialization.",
   "supportFiles": [
     {
       "path": "references/prompt.md",

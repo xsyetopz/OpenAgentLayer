@@ -75,14 +75,31 @@ function mergeJsonConfig(
 		string,
 		unknown
 	>;
-	const merged = JSON.stringify(
-		{ ...currentObject, ...incomingObject },
-		null,
-		2,
-	);
+	const mergedObject = deepMerge(currentObject, incomingObject);
+	if (path.endsWith("opencode.jsonc")) delete mergedObject["model_fallbacks"];
+	const merged = JSON.stringify(mergedObject, null, 2);
 	if (!path.endsWith(".jsonc")) return merged;
 	const comments = leadingJsonComments(incoming);
 	return comments.length > 0 ? `${comments}\n${merged}` : merged;
+}
+
+function deepMerge(
+	current: Record<string, unknown>,
+	incoming: Record<string, unknown>,
+): Record<string, unknown> {
+	const merged: Record<string, unknown> = { ...current };
+	for (const [key, value] of Object.entries(incoming)) {
+		const existing = merged[key];
+		merged[key] =
+			isRecord(existing) && isRecord(value)
+				? deepMerge(existing, value)
+				: value;
+	}
+	return merged;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function mergeTomlConfig(current: string, incoming: string): string {

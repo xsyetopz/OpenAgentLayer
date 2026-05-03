@@ -37,8 +37,10 @@ export interface PluginSyncResult {
 }
 
 const PROVIDERS = ["codex", "claude", "opencode"] as const;
-const PLUGIN_NAME = "openagentlayer";
+const PLUGIN_NAME = "oal";
+const PLUGIN_ROOT_NAME = "openagentlayer";
 const CODEX_MARKETPLACE_NAME = "openagentlayer-local";
+const TOML_TABLE_PATTERN = /^\[[^\]]+\]/;
 const REPO_PLUGIN_ROOTS: Record<Provider, string> = {
 	codex: "plugins/codex/openagentlayer",
 	claude: "plugins/claude/openagentlayer",
@@ -83,17 +85,26 @@ async function syncProvider(options: ProviderSyncOptions): Promise<void> {
 }
 
 async function syncCodex(options: ProviderSyncOptions): Promise<void> {
-	const pluginRoot = join(options.home, ".codex/plugins/openagentlayer");
+	const pluginRoot = join(options.home, `.codex/plugins/${PLUGIN_ROOT_NAME}`);
 	const cacheRoot = join(
 		options.home,
-		".codex/plugins/cache/openagentlayer-local/openagentlayer",
+		`.codex/plugins/cache/${CODEX_MARKETPLACE_NAME}/${PLUGIN_NAME}`,
 	);
 	const cacheTarget = join(cacheRoot, options.version);
 	await copyPluginPayload(options, "codex", pluginRoot);
 	await copyPluginPayload(options, "codex", cacheTarget);
 	await writeCodexMarketplace(options, pluginRoot);
+	await writeCodexPluginActivation(options);
 	await activateCodexMarketplace(options);
 	await pruneVersionCache(options, cacheRoot);
+	await removePath(
+		options,
+		join(
+			options.home,
+			`.codex/plugins/cache/${CODEX_MARKETPLACE_NAME}/${PLUGIN_ROOT_NAME}`,
+		),
+		"stale Codex plugin cache",
+	);
 }
 
 async function syncClaude(options: ProviderSyncOptions): Promise<void> {
@@ -258,7 +269,8 @@ async function writeCodexMarketplace(
 	const nextPlugins = plugins.filter(
 		(entry) =>
 			!(
-				isRecord(entry) && [PLUGIN_NAME, "oal"].includes(String(entry["name"]))
+				isRecord(entry) &&
+				[PLUGIN_NAME, PLUGIN_ROOT_NAME].includes(String(entry["name"]))
 			),
 	);
 	nextPlugins.push({
@@ -290,6 +302,39 @@ async function writeCodexMarketplace(
 	);
 }
 
+async function writeCodexPluginActivation(
+	options: ProviderSyncOptions,
+): Promise<void> {
+	const path = join(options.home, ".codex/config.toml");
+	const current = await readFile(path, "utf8").catch(() => "");
+	const next =
+		`${removeCodexPluginActivation(current).trimEnd()}\n\n[plugins."${PLUGIN_NAME}@${CODEX_MARKETPLACE_NAME}"]\nenabled = true\n`.trimStart();
+	await writeText(options, path, next, "Codex plugin activation");
+}
+
+function removeCodexPluginActivation(content: string): string {
+	let current = content;
+	for (const key of [
+		`${PLUGIN_NAME}@${CODEX_MARKETPLACE_NAME}`,
+		`${PLUGIN_ROOT_NAME}@${CODEX_MARKETPLACE_NAME}`,
+		`${PLUGIN_ROOT_NAME}@${PLUGIN_ROOT_NAME}`,
+	])
+		current = removeTomlTable(current, `plugins."${key}"`);
+	return current;
+}
+
+function removeTomlTable(content: string, table: string): string {
+	const lines = content.split("\n");
+	const result: string[] = [];
+	let skipping = false;
+	for (const line of lines) {
+		if (TOML_TABLE_PATTERN.test(line.trim()))
+			skipping = line.trim() === `[${table}]`;
+		if (!skipping) result.push(line);
+	}
+	return result.join("\n");
+}
+
 async function activateCodexMarketplace(
 	options: ProviderSyncOptions,
 ): Promise<void> {
@@ -303,6 +348,7 @@ async function activateCodexMarketplace(
 	const child = Bun.spawn(
 		["codex", "plugin", "marketplace", "add", marketplaceRoot],
 		{
+			env: { ...process.env, HOME: options.home },
 			stdout: "pipe",
 			stderr: "pipe",
 		},

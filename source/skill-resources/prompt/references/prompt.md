@@ -9,9 +9,9 @@ Put critical rules first. Use direct instructions:
 - name forbidden shortcuts
 - include one correct compact example when format matters
 
-**Good pressure:** source evidence required, validation required, blocker format required.
+**Good pressure:** source evidence required, validation required, blocker format required, explicit consequences for scope drift.
 
-**Bad pressure:** hidden manipulation or emotional coercion.
+**Bad pressure:** vague encouragement, politeness that weakens the rule, or pressure unrelated to the task.
 
 ## References
 

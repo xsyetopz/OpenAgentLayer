@@ -5,6 +5,39 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.3-beta.2] - 2026-05-03
+
+### Added
+
+- Added scope-discipline prompt contracts so generated agents reject
+  unrequested work, rejected-idea memorialization, and conversation-preference
+  tests.
+- Added `$oal` Codex plugin activation and installed-state checks for generated
+  provider plugin payloads.
+- Added setup smoke coverage for Codex profile activation, `$oal` plugin
+  activation, and provider cache payloads.
+
+### Changed
+
+- Reworked generated agent prompts into role-based senior-peer prompts instead
+  of generic product-branded agent prose.
+- Balanced Codex profile and agent reasoning effort across Plus, Pro 5x, and
+  Pro 20x plans, with `xhigh` reserved for rare high-risk review/security
+  roles.
+- Removed Codex feature inline reason comments from generated config output.
+- Removed stale prompt-skill language that blocked stronger prompt pressure.
+- Deep-merged provider JSON config during deploy so plugin/settings updates
+  preserve existing structured user config.
+
+### Verified
+
+- `rtk proxy -- bunx tsc --noEmit`
+- `rtk proxy -- bun run test`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bun run schemas:check`
+- `rtk proxy -- bun run accept`
+- `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.3-beta.1] - 2026-05-03
 
 ### Added

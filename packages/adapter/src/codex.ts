@@ -16,50 +16,26 @@ import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "codex";
 const CODEX_FEATURES = [
-	{ key: "steer", enabled: true, reason: "mid-turn steering" },
-	{ key: "apps", enabled: false, reason: "app config not wired" },
-	{ key: "tui_app_server", enabled: true, reason: "richer TUI surface" },
-	{ key: "memories", enabled: true, reason: "session continuity" },
-	{ key: "sqlite", enabled: true, reason: "local state persistence" },
-	{ key: "plugins", enabled: true, reason: "plugin skill payloads" },
-	{ key: "codex_hooks", enabled: true, reason: "runtime hooks" },
-	{ key: "shell_zsh_fork", enabled: true, reason: "RTK command shim" },
-	{ key: "goals", enabled: true, reason: "goal state tracking" },
-	{
-		key: "responses_websockets",
-		enabled: true,
-		reason: "faster streaming transport",
-	},
-	{
-		key: "responses_websockets_v2",
-		enabled: true,
-		reason: "newer streaming transport",
-	},
-	{
-		key: "unified_exec",
-		enabled: false,
-		reason: "long-runtime profile only",
-	},
-	{ key: "multi_agent", enabled: false, reason: "owned delegation routes" },
-	{ key: "multi_agent_v2", enabled: false, reason: "owned delegation routes" },
-	{
-		key: "shell_snapshot",
-		enabled: false,
-		reason: "snapshot surface not wired",
-	},
-	{
-		key: "collaboration_modes",
-		enabled: false,
-		reason: "route contracts own mode",
-	},
-	{ key: "codex_git_commit", enabled: false, reason: "user-authored commits" },
-	{
-		key: "fast_mode",
-		enabled: false,
-		reason: "profile routing over blanket speed mode",
-	},
-	{ key: "undo", enabled: false, reason: "rollback owns recovery" },
-	{ key: "js_repl", enabled: false, reason: "tool surface not wired" },
+	{ key: "steer", enabled: true },
+	{ key: "apps", enabled: false },
+	{ key: "tui_app_server", enabled: true },
+	{ key: "memories", enabled: true },
+	{ key: "sqlite", enabled: true },
+	{ key: "plugins", enabled: true },
+	{ key: "codex_hooks", enabled: true },
+	{ key: "shell_zsh_fork", enabled: true },
+	{ key: "goals", enabled: true },
+	{ key: "responses_websockets", enabled: true },
+	{ key: "responses_websockets_v2", enabled: true },
+	{ key: "unified_exec", enabled: false },
+	{ key: "multi_agent", enabled: false },
+	{ key: "multi_agent_v2", enabled: false },
+	{ key: "shell_snapshot", enabled: false },
+	{ key: "collaboration_modes", enabled: false },
+	{ key: "codex_git_commit", enabled: false },
+	{ key: "fast_mode", enabled: false },
+	{ key: "undo", enabled: false },
+	{ key: "js_repl", enabled: false },
 ] as const;
 
 export async function renderCodex(
@@ -138,7 +114,9 @@ export async function renderCodex(
 
 function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
-	return `[notice]
+	return `profile = "openagentlayer"
+
+[notice]
 hide_rate_limit_model_nudge = true
 
 ${renderCodexProfile({
@@ -180,6 +158,9 @@ nickname_candidates = [${quoteToml(agent.id)}]
 config_file = "./agents/${agent.id}.toml"`,
 	)
 	.join("\n")}
+
+[plugins."oal@openagentlayer-local"]
+enabled = true
 `;
 }
 
@@ -188,8 +169,8 @@ interface CodexProfileConfig {
 	model: string;
 	approvalPolicy: "never" | "on-request";
 	sandboxMode: "read-only" | "workspace-write";
-	planReasoningEffort?: "low" | "medium" | "high";
-	modelReasoningEffort?: "low" | "medium" | "high";
+	planReasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
+	modelReasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
 	toolsViewImage?: boolean;
 }
 
@@ -216,48 +197,50 @@ ${profile.toolsViewImage ? "tools_view_image = true\n" : ""}
 }
 
 function resolveCodexProfilePlan(options: RenderOptions): {
-	plan?: "medium" | "high";
-	model?: "medium" | "high";
-	implementPlan?: "medium" | "high";
-	implementModel?: "medium" | "high";
-	utilityPlan?: "low" | "medium";
-	utilityModel?: "low" | "medium";
+	plan?: CodexProfileConfig["planReasoningEffort"];
+	model?: CodexProfileConfig["modelReasoningEffort"];
+	implementPlan?: CodexProfileConfig["planReasoningEffort"];
+	implementModel?: CodexProfileConfig["modelReasoningEffort"];
+	utilityPlan?: CodexProfileConfig["planReasoningEffort"];
+	utilityModel?: CodexProfileConfig["modelReasoningEffort"];
 } {
 	const plan = options.codexPlan ?? options.plan;
-	if (plan === "plus")
-		return {
-			plan: "medium",
-			model: "medium",
-			implementPlan: "medium",
-			implementModel: "medium",
-			utilityPlan: "low",
-			utilityModel: "low",
-		};
-	if (plan === "pro-5")
-		return {
-			plan: "medium",
-			model: "high",
-			implementPlan: "medium",
-			implementModel: "high",
-			utilityPlan: "low",
-			utilityModel: "low",
-		};
-	if (plan === "pro-20")
-		return {
-			plan: "high",
-			model: "high",
-			implementPlan: "high",
-			implementModel: "high",
-			utilityPlan: "medium",
-			utilityModel: "medium",
-		};
-	return {};
+	switch (plan) {
+		case "plus":
+			return {
+				plan: "medium",
+				model: "low",
+				implementPlan: "low",
+				implementModel: "medium",
+				utilityPlan: "low",
+				utilityModel: "low",
+			};
+		case "pro-5":
+			return {
+				plan: "high",
+				model: "medium",
+				implementPlan: "medium",
+				implementModel: "high",
+				utilityPlan: "low",
+				utilityModel: "medium",
+			};
+		case "pro-20":
+			return {
+				plan: "high",
+				model: "medium",
+				implementPlan: "medium",
+				implementModel: "high",
+				utilityPlan: "low",
+				utilityModel: "medium",
+			};
+		default:
+			return {};
+	}
 }
 
 function renderCodexFeatures(): string {
 	return CODEX_FEATURES.map(
-		(feature) =>
-			`${feature.key} = ${feature.enabled ? "true" : "false"} # ${feature.reason}`,
+		(feature) => `${feature.key} = ${feature.enabled ? "true" : "false"}`,
 	).join("\n");
 }
 

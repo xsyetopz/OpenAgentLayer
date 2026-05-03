@@ -7,6 +7,7 @@ const TRACKED_PRODUCT_ROOTS = [
 	"tests",
 	"homebrew",
 	"plugins",
+	"scripts",
 ] as const;
 const REFERENCE_ROOTS = ["docs", "third_party"] as const;
 const ROOT_PRODUCT_FILES = [

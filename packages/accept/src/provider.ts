@@ -7,38 +7,31 @@ import {
 } from "./config-schema";
 
 const CODEX_REQUIRED_FLAGS = [
-	"steer = true # mid-turn steering",
-	"apps = false # app config not wired",
-	"tui_app_server = true # richer TUI surface",
-	"memories = true # session continuity",
-	"sqlite = true # local state persistence",
-	"plugins = true # plugin skill payloads",
-	"codex_hooks = true # runtime hooks",
-	"goals = true # goal state tracking",
-	"responses_websockets = true # faster streaming transport",
-	"responses_websockets_v2 = true # newer streaming transport",
-	"unified_exec = false # long-runtime profile only",
-	"multi_agent = false # owned delegation routes",
-	"multi_agent_v2 = false # owned delegation routes",
-	"shell_snapshot = false # snapshot surface not wired",
-	"collaboration_modes = false # route contracts own mode",
-	"codex_git_commit = false # user-authored commits",
-	"fast_mode = false # profile routing over blanket speed mode",
-	"undo = false # rollback owns recovery",
-	"js_repl = false # tool surface not wired",
+	"steer = true",
+	"apps = false",
+	"tui_app_server = true",
+	"memories = true",
+	"sqlite = true",
+	"plugins = true",
+	"codex_hooks = true",
+	"goals = true",
+	"responses_websockets = true",
+	"responses_websockets_v2 = true",
+	"unified_exec = false",
+	"multi_agent = false",
+	"multi_agent_v2 = false",
+	"shell_snapshot = false",
+	"collaboration_modes = false",
+	"codex_git_commit = false",
+	"fast_mode = false",
+	"undo = false",
+	"js_repl = false",
 ] as const;
 const CODEX_MARKERS = [
 	"# >>> oal codex >>>",
 	"# Source: config:codex",
 	"# Regenerate: oal render",
 	"# <<< oal codex <<<",
-] as const;
-const FORBIDDEN_CODEX_FEATURE_COMMENT_TERMS = [
-	"OAL",
-	"OpenAgentLayer",
-	"because",
-	"for ",
-	"guarded execution path",
 ] as const;
 const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/nemotron-3-super-free",
@@ -76,7 +69,6 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		throw new Error("Codex config has invalid agents.interrupt_message.");
 	if (config.includes('interrupt_message = "'))
 		throw new Error("Codex config emitted string agents.interrupt_message.");
-	assertCodexFeatureComments(config);
 	for (const forbidden of [
 		'approval_policy = "on-failure"',
 		["guardian", "subagent"].join("_"),
@@ -118,22 +110,6 @@ async function assertCodexInstructionBaseline(
 	])
 		if (!agents.includes(required))
 			throw new Error(`AGENTS.md missing Codex baseline text: ${required}`);
-}
-
-function assertCodexFeatureComments(config: string): void {
-	for (const line of config.split("\n")) {
-		if (!(line.includes(" = ") && line.includes("#"))) continue;
-		const [assignment, comment] = line.split("#", 2);
-		if (!assignment.includes("=")) continue;
-		const reason = comment?.trim() ?? "";
-		if (reason.length === 0)
-			throw new Error(`Codex feature line missing reason: ${line}`);
-		for (const term of FORBIDDEN_CODEX_FEATURE_COMMENT_TERMS)
-			if (reason.includes(term))
-				throw new Error(
-					`Codex feature comment contains forbidden term ${term}`,
-				);
-	}
 }
 
 async function assertClaudeSettings(targetRoot: string): Promise<void> {

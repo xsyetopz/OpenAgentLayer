@@ -48,12 +48,12 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 				join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),
 				"utf8",
 			),
-		).toContain('"openagentlayer"');
+		).toContain('"oal"');
 		expect(
 			await readFile(
 				join(
 					home,
-					`.codex/plugins/cache/openagentlayer-local/openagentlayer/${version}/skills/review/SKILL.md`,
+					`.codex/plugins/cache/openagentlayer-local/oal/${version}/skills/review/SKILL.md`,
 				),
 				"utf8",
 			),
@@ -63,7 +63,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 				await stat(
 					join(
 						home,
-						`.codex/plugins/cache/openagentlayer-local/openagentlayer/${version}/hooks/inject-route-context.mjs`,
+						`.codex/plugins/cache/openagentlayer-local/oal/${version}/hooks/inject-route-context.mjs`,
 					),
 				)
 			).mode & 0o111,
@@ -76,7 +76,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 				),
 				"utf8",
 			),
-		).toContain('"openagentlayer"');
+		).toContain('"oal"');
 		expect(
 			await readFile(
 				join(
@@ -94,12 +94,15 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 		).toContain("openagentlayer-opencode-plugin");
 		expect(
 			await readFile(join(home, ".agents/plugins/marketplace.json"), "utf8"),
-		).toContain("openagentlayer-local");
+		).toContain('"name": "oal"');
+		expect(await readFile(join(home, ".codex/config.toml"), "utf8")).toContain(
+			'[plugins."oal@openagentlayer-local"]',
+		);
 		await expect(
 			readFile(
 				join(
 					home,
-					".codex/plugins/cache/openagentlayer-local/openagentlayer/0.0.1/stale.txt",
+					".codex/plugins/cache/openagentlayer-local/oal/0.0.1/stale.txt",
 				),
 				"utf8",
 			),
@@ -118,7 +121,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 async function seedStaleCaches(home: string): Promise<void> {
 	const staleCodex = join(
 		home,
-		".codex/plugins/cache/openagentlayer-local/openagentlayer/0.0.1",
+		".codex/plugins/cache/openagentlayer-local/oal/0.0.1",
 	);
 	const otherCodex = join(
 		home,

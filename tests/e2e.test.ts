@@ -3,6 +3,7 @@ import {
 	chmod,
 	mkdir,
 	mkdtemp,
+	readdir,
 	readFile,
 	rm,
 	writeFile,
@@ -24,6 +25,15 @@ async function fakeProviderPath(
 		await chmod(path, 0o755);
 	}
 	return { ...process.env, PATH: `${bin}:${process.env["PATH"] ?? ""}` };
+}
+
+function tomlSection(content: string, section: string): string {
+	const escapedSection = section.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return (
+		content.match(
+			new RegExp(`\\[${escapedSection}\\]([\\s\\S]*?)(?=\\n\\[|$)`),
+		)?.[1] ?? ""
+	);
 }
 
 test("CLI dry-run reports Codex and OpenCode changes without writing", async () => {
@@ -373,7 +383,7 @@ test("CLI preview applies subscription model plans", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain('model = "gpt-5.5"');
-	expect(stdout).toContain('model_reasoning_effort = "medium"');
+	expect(stdout).toContain('model_reasoning_effort = "high"');
 	expect(stdout).toContain("developer_instructions =");
 	expect(stdout).not.toContain("color =");
 });
@@ -479,9 +489,16 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	);
 	const pro5Stdout = await new Response(pro5.stdout).text();
 	expect(await pro5.exited).toBe(0);
-	expect(pro5Stdout).toContain('plan_mode_reasoning_effort = "medium"');
-	expect(pro5Stdout).toContain('model_reasoning_effort = "high"');
-	expect(pro5Stdout).toContain('model_verbosity = "low"');
+	const pro5Lead = tomlSection(pro5Stdout, "profiles.openagentlayer");
+	const pro5Implement = tomlSection(
+		pro5Stdout,
+		"profiles.openagentlayer-implement",
+	);
+	expect(pro5Lead).toContain('plan_mode_reasoning_effort = "high"');
+	expect(pro5Lead).toContain('model_reasoning_effort = "medium"');
+	expect(pro5Lead).toContain('model_verbosity = "low"');
+	expect(pro5Implement).toContain('plan_mode_reasoning_effort = "medium"');
+	expect(pro5Implement).toContain('model_reasoning_effort = "high"');
 	expect(pro5Stdout).toContain("hide_rate_limit_model_nudge = true");
 	const pro20 = Bun.spawn(
 		[
@@ -500,9 +517,16 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	);
 	const pro20Stdout = await new Response(pro20.stdout).text();
 	expect(await pro20.exited).toBe(0);
-	expect(pro20Stdout).toContain('plan_mode_reasoning_effort = "high"');
-	expect(pro20Stdout).toContain('model_reasoning_effort = "high"');
-	expect(pro20Stdout).toContain('model_verbosity = "low"');
+	const pro20Lead = tomlSection(pro20Stdout, "profiles.openagentlayer");
+	const pro20Implement = tomlSection(
+		pro20Stdout,
+		"profiles.openagentlayer-implement",
+	);
+	expect(pro20Lead).toContain('plan_mode_reasoning_effort = "high"');
+	expect(pro20Lead).toContain('model_reasoning_effort = "medium"');
+	expect(pro20Lead).toContain('model_verbosity = "low"');
+	expect(pro20Implement).toContain('plan_mode_reasoning_effort = "medium"');
+	expect(pro20Implement).toContain('model_reasoning_effort = "high"');
 	expect(pro20Stdout).toContain("hide_rate_limit_model_nudge = true");
 });
 
@@ -545,6 +569,58 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
 	expect(stdout).toContain("OpenAgentLayer plugins · dry-run");
 	expect(stdout).toContain("Validate source and installed state");
+	await rm(home, { recursive: true, force: true });
+});
+
+test("CLI setup apply activates Codex profile and $oal plugin", async () => {
+	const home = await mkdtemp(join(tmpdir(), "oal-setup-apply-codex-"));
+	const env = await fakeProviderPath(home, ["codex"]);
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"setup",
+			"--scope",
+			"global",
+			"--home",
+			home,
+			"--provider",
+			"codex",
+			"--codex-plan",
+			"pro-20",
+			"--quiet",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
+	expect(config).toContain('profile = "openagentlayer"');
+	expect(config).toContain('plan_mode_reasoning_effort = "high"');
+	expect(config).toContain('model_reasoning_effort = "high"');
+	expect(config).toContain('[plugins."oal@openagentlayer-local"]');
+	expect(
+		await readFile(
+			join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),
+			"utf8",
+		),
+	).toContain('"name": "oal"');
+	const [version] = await readdir(
+		join(home, ".codex/plugins/cache/openagentlayer-local/oal"),
+	);
+	expect(version).toBeTruthy();
+	expect(
+		await readFile(
+			join(
+				home,
+				".codex/plugins/cache/openagentlayer-local/oal",
+				version,
+				".codex-plugin/plugin.json",
+			),
+			"utf8",
+		),
+	).toContain('"name": "oal"');
 	await rm(home, { recursive: true, force: true });
 });
 

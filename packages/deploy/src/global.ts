@@ -64,10 +64,16 @@ function globalContent(
 					`config_file = ${JSON.stringify(join(home, ".codex/agents", file))}`,
 			);
 	if (provider === "claude" && path === ".claude/settings.json")
-		return content.replaceAll(
-			".claude/hooks/scripts/",
-			() => `${join(home, ".claude/hooks/scripts")}/`,
-		);
+		return content
+			.replaceAll(
+				".claude/hooks/scripts/",
+				() => `${join(home, ".claude/hooks/scripts")}/`,
+			)
+			.replaceAll('".claude/plugins/marketplaces/openagentlayer"', () =>
+				JSON.stringify(
+					join(home, ".claude/plugins/marketplaces/openagentlayer"),
+				),
+			);
 	if (provider === "opencode" && path === "opencode.jsonc")
 		return content
 			.replaceAll(

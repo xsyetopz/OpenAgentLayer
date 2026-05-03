@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { flag, option, providerOptions } from "../arguments";
@@ -38,7 +38,7 @@ async function assertInstalledState(
 	for (const provider of providers) {
 		if (provider === "codex") await assertCodexInstalled(home, target);
 		if (provider === "claude") {
-			await assertReadable(
+			const settings = await assertReadable(
 				join(home, ".claude/settings.json"),
 				"Claude global settings",
 			).catch(() =>
@@ -47,9 +47,21 @@ async function assertInstalledState(
 					"Claude project settings",
 				),
 			);
+			assertClaudePluginActive(settings);
+			await assertReadable(
+				join(
+					home,
+					".claude/plugins/marketplaces/openagentlayer/.claude-plugin/plugin.json",
+				),
+				"Claude OAL plugin marketplace",
+			);
+			await assertNonEmptyDir(
+				join(home, ".claude/plugins/cache/openagentlayer/openagentlayer"),
+				"Claude OAL plugin cache",
+			);
 		}
 		if (provider === "opencode") {
-			await assertReadable(
+			const config = await assertReadable(
 				join(home, ".config/opencode/opencode.jsonc"),
 				"OpenCode global config",
 			).catch(() =>
@@ -58,9 +70,50 @@ async function assertInstalledState(
 					"OpenCode project config",
 				),
 			);
+			assertOpenCodeInstalledConfig(config);
+			await assertReadable(
+				join(home, ".config/opencode/plugins/openagentlayer/package.json"),
+				"OpenCode OAL plugin",
+			);
+			await assertNonEmptyDir(
+				join(home, ".config/opencode/plugins/cache/openagentlayer"),
+				"OpenCode OAL plugin cache",
+			);
 		}
 		if (verbose) console.log(`installed: ${provider}`);
 	}
+}
+
+function assertClaudePluginActive(settings: string): void {
+	const parsed = JSON.parse(settings) as {
+		enabledPlugins?: Record<string, boolean>;
+		extraKnownMarketplaces?: Record<string, unknown>;
+	};
+	if (parsed.enabledPlugins?.["oal@openagentlayer"] !== true)
+		throw new Error("Installed Claude settings do not activate $oal plugin.");
+	if (!parsed.extraKnownMarketplaces?.["openagentlayer"])
+		throw new Error(
+			"Installed Claude settings do not register OAL marketplace.",
+		);
+}
+
+function assertOpenCodeInstalledConfig(config: string): void {
+	const parsed = JSON.parse(stripJsonComments(config)) as {
+		model_fallbacks?: unknown;
+		plugin?: unknown;
+	};
+	if ("model_fallbacks" in parsed)
+		throw new Error(
+			"Installed OpenCode config contains stale model_fallbacks.",
+		);
+	if (
+		!(
+			Array.isArray(parsed.plugin) &&
+			(parsed.plugin.includes("plugins/openagentlayer.ts") ||
+				parsed.plugin.includes(".opencode/plugins/openagentlayer.ts"))
+		)
+	)
+		throw new Error("Installed OpenCode config does not activate OAL plugin.");
 }
 
 async function assertCodexInstalled(
@@ -81,6 +134,22 @@ async function assertCodexInstalled(
 		throw new Error(
 			"Installed Codex agent TOML contains unsupported color field.",
 		);
+	if (!config.content.includes('profile = "openagentlayer"'))
+		throw new Error("Installed Codex config does not activate OAL profile.");
+	if (!config.content.includes('[plugins."oal@openagentlayer-local"]'))
+		throw new Error("Installed Codex config does not activate $oal plugin.");
+	await assertReadable(
+		join(home, ".agents/plugins/marketplace.json"),
+		"Codex plugin marketplace",
+	);
+	await assertReadable(
+		join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),
+		"Codex OAL plugin",
+	);
+	await assertNonEmptyDir(
+		join(home, ".codex/plugins/cache/openagentlayer-local/oal"),
+		"Codex OAL plugin cache",
+	);
 }
 
 async function assertReadable(path: string, label: string): Promise<string> {
@@ -89,6 +158,15 @@ async function assertReadable(path: string, label: string): Promise<string> {
 	} catch {
 		throw new Error(`${label} missing at ${path}`);
 	}
+}
+
+async function assertNonEmptyDir(path: string, label: string): Promise<void> {
+	try {
+		if ((await readdir(path)).length > 0) return;
+	} catch {
+		// Report the same missing error for unreadable and absent cache roots.
+	}
+	throw new Error(`${label} missing at ${path}`);
 }
 
 async function readFirst(
@@ -103,4 +181,11 @@ async function readFirst(
 		}
 	}
 	throw new Error(`${label} missing at ${paths.join(" or ")}`);
+}
+
+function stripJsonComments(text: string): string {
+	return text
+		.split("\n")
+		.filter((line) => !line.trimStart().startsWith("//"))
+		.join("\n");
 }

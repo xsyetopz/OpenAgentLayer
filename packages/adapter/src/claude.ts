@@ -87,6 +87,17 @@ function renderClaudeSettings(source: OalSource): unknown {
 			ask: ["Bash(git push)", "Bash(chmod)", "Bash(npm publish)"],
 			allow: ["Read", "Grep", "Glob"],
 		},
+		enabledPlugins: {
+			"oal@openagentlayer": true,
+		},
+		extraKnownMarketplaces: {
+			openagentlayer: {
+				source: {
+					source: "directory",
+					path: ".claude/plugins/marketplaces/openagentlayer",
+				},
+			},
+		},
 		hooks: Object.fromEntries(
 			source.hooks.map((hook) => [
 				hook.events.claude?.[0] ?? hook.id,

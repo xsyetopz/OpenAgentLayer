@@ -35,7 +35,13 @@ export async function assertPluginMarketplace(
 			version?: string;
 			plugins?: unknown;
 		};
-		if (!parsed.name?.includes("openagentlayer"))
+		if (
+			path.endsWith(".codex-plugin/plugin.json") ||
+			path.endsWith(".claude-plugin/plugin.json")
+		) {
+			if (parsed.name !== "oal")
+				throw new Error(`Plugin payload ${path} is not named $oal.`);
+		} else if (!parsed.name?.includes("openagentlayer"))
 			throw new Error(
 				`Marketplace payload ${path} is not named OpenAgentLayer.`,
 			);
@@ -57,8 +63,8 @@ function assertMarketplaceEntry(path: string, plugins: unknown): void {
 		policy?: { installation?: string; authentication?: string };
 		category?: string;
 	};
-	if (entry.name !== "openagentlayer")
-		throw new Error(`Marketplace ${path} does not expose OpenAgentLayer.`);
+	if (entry.name !== "oal")
+		throw new Error(`Marketplace ${path} does not expose $oal.`);
 	if (path.startsWith(".agents/")) {
 		if (entry.source?.source !== "git-subdir")
 			throw new Error("Codex marketplace must use a git-subdir source.");
@@ -139,7 +145,8 @@ async function assertPluginSync(
 		for (const path of [
 			".codex/plugins/openagentlayer/.codex-plugin/plugin.json",
 			".codex/plugins/openagentlayer/AGENTS.md",
-			`.codex/plugins/cache/openagentlayer-local/openagentlayer/${source.version}/.codex-plugin/plugin.json`,
+			`.codex/plugins/cache/openagentlayer-local/oal/${source.version}/.codex-plugin/plugin.json`,
+			".codex/config.toml",
 			".claude/plugins/marketplaces/openagentlayer/.claude-plugin/plugin.json",
 			`.claude/plugins/cache/openagentlayer/openagentlayer/${source.version}/.claude-plugin/plugin.json`,
 			`.claude/plugins/cache/openagentlayer/openagentlayer/${source.version}/hooks/hooks.json`,
@@ -147,9 +154,15 @@ async function assertPluginSync(
 			".agents/plugins/marketplace.json",
 		])
 			await readFile(join(home, path), "utf8");
+		const codexConfig = await readFile(
+			join(home, ".codex/config.toml"),
+			"utf8",
+		);
+		if (!codexConfig.includes('[plugins."oal@openagentlayer-local"]'))
+			throw new Error("Plugin sync did not activate $oal for Codex.");
 		const staleFile = join(
 			home,
-			".codex/plugins/cache/openagentlayer-local/openagentlayer/0.0.1/stale.txt",
+			".codex/plugins/cache/openagentlayer-local/oal/0.0.1/stale.txt",
 		);
 		let staleExists = true;
 		try {
@@ -166,17 +179,14 @@ async function assertPluginSync(
 
 async function seedStalePluginCaches(home: string): Promise<void> {
 	const stalePaths = [
-		".codex/plugins/cache/openagentlayer-local/openagentlayer/0.0.1",
+		".codex/plugins/cache/openagentlayer-local/oal/0.0.1",
 		".claude/plugins/cache/temp_local_openagentlayer",
 		".config/opencode/plugins/cache/openagentlayer/0.0.1",
 	];
 	for (const path of stalePaths)
 		await mkdir(join(home, path), { recursive: true });
 	await writeFile(
-		join(
-			home,
-			".codex/plugins/cache/openagentlayer-local/openagentlayer/0.0.1/stale.txt",
-		),
+		join(home, ".codex/plugins/cache/openagentlayer-local/oal/0.0.1/stale.txt"),
 		"stale",
 	);
 }

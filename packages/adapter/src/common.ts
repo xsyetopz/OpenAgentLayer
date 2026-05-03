@@ -14,7 +14,7 @@ export function agentPrompt(agent: AgentRecord, source: OalSource): string {
 	return `${agent.prompt}
 
 ${renderTemplate(source, "agentContract", {
-	productPromptContracts: renderProductPromptContracts(source),
+	productPromptContracts: renderAgentPromptContracts(source),
 })}
 
 Triggers: ${agent.triggers.join("; ")}
@@ -72,9 +72,22 @@ function renderProductPromptContracts(source: OalSource): string {
 	return [
 		`- ${contracts.rtkEfficiency}`,
 		`- ${contracts.responseBoundaries}`,
+		`- ${contracts.scopeDiscipline}`,
 		`- ${contracts.sourceBackedBehavior}`,
 		`- ${contracts.accountabilityPressure}`,
 		`- ${contracts.simplicityDiscipline}`,
+		renderCavemanContract(source),
+	].join("\n");
+}
+
+function renderAgentPromptContracts(source: OalSource): string {
+	const contracts = source.promptContracts;
+	if (!contracts) return "";
+	return [
+		"- Scope control: unrequested additions are defects; do not preserve rejected ideas in docs, tests, comments, warnings, changelogs, or config.",
+		"- Source evidence: inspect controlling source before claims; behavior changes need Source Evidence Map, Changed Behavior, and Validation Evidence.",
+		"- Boundaries: answer only the requested task; do not add guidance, alternatives, cleanup, or guardrails unless requested or validation-required.",
+		"- Block honestly: if source truth is missing, ambiguous, or contradictory, return STATUS BLOCKED with Attempted, Evidence, and Need.",
 		renderCavemanContract(source),
 	].join("\n");
 }

@@ -92,6 +92,7 @@ export interface OalSource extends ProductSource {
 export interface ProductPromptContracts {
 	rtkEfficiency: string;
 	responseBoundaries: string;
+	scopeDiscipline: string;
 	sourceBackedBehavior: string;
 	accountabilityPressure: string;
 	simplicityDiscipline: string;

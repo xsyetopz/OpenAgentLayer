@@ -10,7 +10,7 @@ export type ModelPlan =
 	| "opencode-auto"
 	| "opencode-auth"
 	| "opencode-free";
-export type ReasoningEffort = "low" | "medium" | "high";
+export type ReasoningEffort = "low" | "medium" | "high" | "xhigh";
 
 export interface RenderOptions {
 	plan?: ModelPlan;
@@ -74,7 +74,7 @@ const CODEX_PLANS: Record<
 		artemis: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		asclepius: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		atalanta: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		athena: { model: "gpt-5.5", reasoningEffort: "medium" },
+		athena: { model: "gpt-5.5", reasoningEffort: "high" },
 		calliope: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		chronos: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		daedalus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
@@ -84,11 +84,11 @@ const CODEX_PLANS: Record<
 		hephaestus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
 		hermes: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		hestia: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		janus: { model: "gpt-5.5", reasoningEffort: "medium" },
+		janus: { model: "gpt-5.5", reasoningEffort: "high" },
 		mnemosyne: { model: "gpt-5.4-mini", reasoningEffort: "low" },
 		morpheus: { model: "gpt-5.5", reasoningEffort: "medium" },
 		nemesis: { model: "gpt-5.5", reasoningEffort: "medium" },
-		odysseus: { model: "gpt-5.5", reasoningEffort: "medium" },
+		odysseus: { model: "gpt-5.5", reasoningEffort: "high" },
 		prometheus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
 		themis: { model: "gpt-5.5", reasoningEffort: "medium" },
 	},
@@ -99,7 +99,7 @@ const CODEX_PLANS: Record<
 		artemis: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
 		asclepius: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
 		atalanta: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		athena: { model: "gpt-5.5", reasoningEffort: "medium" },
+		athena: { model: "gpt-5.5", reasoningEffort: "high" },
 		calliope: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
 		chronos: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
 		daedalus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
@@ -109,13 +109,13 @@ const CODEX_PLANS: Record<
 		hephaestus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
 		hermes: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
 		hestia: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		janus: { model: "gpt-5.5", reasoningEffort: "medium" },
+		janus: { model: "gpt-5.5", reasoningEffort: "high" },
 		mnemosyne: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		morpheus: { model: "gpt-5.5", reasoningEffort: "high" },
-		nemesis: { model: "gpt-5.5", reasoningEffort: "high" },
-		odysseus: { model: "gpt-5.5", reasoningEffort: "medium" },
+		morpheus: { model: "gpt-5.5", reasoningEffort: "xhigh" },
+		nemesis: { model: "gpt-5.5", reasoningEffort: "xhigh" },
+		odysseus: { model: "gpt-5.5", reasoningEffort: "high" },
 		prometheus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		themis: { model: "gpt-5.5", reasoningEffort: "high" },
+		themis: { model: "gpt-5.5", reasoningEffort: "xhigh" },
 	},
 };
 
