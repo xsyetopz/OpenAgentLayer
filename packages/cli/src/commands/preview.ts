@@ -1,6 +1,6 @@
 import { renderAllProviders, renderProvider } from "@openagentlayer/adapter";
 import type { Artifact, ArtifactSet } from "@openagentlayer/artifact";
-import { flag, option, providerOption } from "../arguments";
+import { flag, option, providerOptions } from "../arguments";
 import { renderOptions } from "../model-options";
 import { scopeArtifacts, scopeContext } from "../scope";
 import { loadCheckedSource } from "../source";
@@ -9,16 +9,21 @@ export async function runPreviewCommand(
 	repoRoot: string,
 	args: string[],
 ): Promise<void> {
-	const provider = providerOption(option(args, "--provider") ?? "all");
+	const providers = providerOptions(option(args, "--provider") ?? "all");
 	const selectedPath = option(args, "--path");
 	const includeContent = flag(args, "--content");
 	const options = await renderOptions(args);
 	const context = scopeContext(args);
 	const source = await loadCheckedSource(repoRoot);
-	const rendered =
-		provider === "all"
-			? await renderAllProviders(source, repoRoot, options)
-			: await renderProvider(provider, source, repoRoot, options);
+	const rendered = combineArtifactSets(
+		await Promise.all(
+			providers.map((provider) =>
+				provider === "all"
+					? renderAllProviders(source, repoRoot, options)
+					: renderProvider(provider, source, repoRoot, options),
+			),
+		),
+	);
 	const artifacts = selectArtifacts(
 		scopeArtifacts(context, rendered.artifacts),
 		selectedPath,
@@ -26,6 +31,13 @@ export async function runPreviewCommand(
 	if (selectedPath && artifacts.length === 0)
 		throw new Error(`No generated artifact path matched ${selectedPath}.`);
 	console.log(renderPreview({ ...rendered, artifacts }, { includeContent }));
+}
+
+function combineArtifactSets(sets: ArtifactSet[]): ArtifactSet {
+	return {
+		artifacts: sets.flatMap((set) => set.artifacts),
+		unsupported: sets.flatMap((set) => set.unsupported),
+	};
 }
 
 function selectArtifacts(

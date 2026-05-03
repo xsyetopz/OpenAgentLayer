@@ -1,17 +1,23 @@
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { allPluginProviders, syncPlugins } from "@openagentlayer/plugins";
-import { flag, option, providerOption } from "../arguments";
+import { flag, option, providerOptions } from "../arguments";
 import { renderOptions } from "../model-options";
+import { installableProviders } from "../provider-binaries";
 import { loadCheckedSource } from "../source";
 
 export async function runPluginsCommand(
 	repoRoot: string,
 	args: string[],
 ): Promise<void> {
-	const rawProvider = providerOption(option(args, "--provider") ?? "all");
-	const providers =
-		rawProvider === "all" ? allPluginProviders() : [rawProvider];
+	const selectedProviders = providerOptions(
+		option(args, "--provider") ?? "all",
+	);
+	const availability = await installableProviders(
+		selectedProviders.includes("all")
+			? allPluginProviders()
+			: selectedProviders,
+	);
 	const home = resolve(option(args, "--home") ?? homedir());
 	const options = await renderOptions(args);
 	const source = await loadCheckedSource(repoRoot);
@@ -19,9 +25,15 @@ export async function runPluginsCommand(
 		repoRoot,
 		home,
 		source,
-		providers,
+		providers: availability.providers,
 		dryRun: flag(args, "--dry-run"),
 		renderOptions: options,
 	});
-	console.log(JSON.stringify(result.changes, null, 2));
+	console.log(
+		JSON.stringify(
+			{ changes: result.changes, skippedProviders: availability.skipped },
+			null,
+			2,
+		),
+	);
 }

@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -82,16 +82,25 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		throw new Error("CLI deploy dry-run did not report Codex config changes.");
 	await rm(deployRoot, { recursive: true, force: true });
 	const globalRoot = await mkdtemp(join(tmpdir(), "oal-cli-global-"));
-	const globalDryRun = await runCli(repoRoot, [
-		"deploy",
-		"--scope",
-		"global",
-		"--home",
-		globalRoot,
-		"--provider",
-		"all",
-		"--dry-run",
+	const globalEnv = await fakeProviderPath(globalRoot, [
+		"codex",
+		"claude",
+		"opencode",
 	]);
+	const globalDryRun = await runCli(
+		repoRoot,
+		[
+			"deploy",
+			"--scope",
+			"global",
+			"--home",
+			globalRoot,
+			"--provider",
+			"all",
+			"--dry-run",
+		],
+		{ env: globalEnv },
+	);
 	if (
 		!(
 			globalDryRun.stdout.includes(".codex/AGENTS.md") &&
@@ -102,14 +111,16 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		throw new Error("CLI global dry-run did not report provider home changes.");
 	await rm(globalRoot, { recursive: true, force: true });
 	const pluginRoot = await mkdtemp(join(tmpdir(), "oal-cli-plugins-"));
-	const pluginDryRun = await runCli(repoRoot, [
-		"plugins",
-		"--home",
-		pluginRoot,
-		"--provider",
-		"all",
-		"--dry-run",
+	const pluginEnv = await fakeProviderPath(pluginRoot, [
+		"codex",
+		"claude",
+		"opencode",
 	]);
+	const pluginDryRun = await runCli(
+		repoRoot,
+		["plugins", "--home", pluginRoot, "--provider", "all", "--dry-run"],
+		{ env: pluginEnv },
+	);
 	if (
 		!(
 			pluginDryRun.stdout.includes(".codex-plugin/plugin.json") &&
@@ -163,13 +174,15 @@ async function assertCliFails(
 async function runCli(
 	repoRoot: string,
 	args: string[],
-	options: { allowFailure?: boolean } = {},
+	options: { allowFailure?: boolean; env?: NodeJS.ProcessEnv } = {},
 ): Promise<{ code: number; stdout: string; stderr: string }> {
-	const command = Bun.spawn(["bun", CLI_ENTRY, ...args], {
+	const spawnOptions = {
 		cwd: repoRoot,
 		stdout: "pipe",
 		stderr: "pipe",
-	});
+		...(options.env ? { env: options.env } : {}),
+	} as const;
+	const command = Bun.spawn(["bun", CLI_ENTRY, ...args], spawnOptions);
 	const [stdout, stderr, code] = await Promise.all([
 		new Response(command.stdout).text(),
 		new Response(command.stderr).text(),
@@ -180,4 +193,18 @@ async function runCli(
 			`CLI command failed (${args.join(" ")}):\n${stdout}\n${stderr}`,
 		);
 	return { code, stdout, stderr };
+}
+
+async function fakeProviderPath(
+	root: string,
+	providers: string[],
+): Promise<NodeJS.ProcessEnv> {
+	const bin = join(root, "provider-bin");
+	await mkdir(bin, { recursive: true });
+	for (const provider of providers) {
+		const path = join(bin, provider);
+		await writeFile(path, "#!/usr/bin/env sh\nexit 0\n");
+		await chmod(path, 0o755);
+	}
+	return { ...process.env, PATH: `${bin}:${process.env["PATH"] ?? ""}` };
 }

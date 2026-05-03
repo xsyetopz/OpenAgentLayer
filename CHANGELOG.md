@@ -5,27 +5,22 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.1.2-beta.7] - 2026-05-03
+## [0.1.2-beta.8] - 2026-05-03
 
 ### Added
 
-- Added an owned source-checkout `oal` executable shim for global deploys, with
-  direct `bin` command management and PATH diagnostics.
-- Added default deploy operation logging plus `--verbose` and `--quiet` output
-  modes.
-- Added RTK hook checks for both a working `rtk-ai/rtk` binary and global or
-  project `RTK.md` policy presence before command enforcement.
+- Added comma-separated provider selection for `preview`, `render`, and
+  `plugins`, matching `deploy` behavior.
+- Added provider binary availability checks for global deploy and plugin sync so
+  missing provider CLIs skip that provider instead of failing OAL installation.
+- Added acceptance and e2e fixtures that prove missing provider binaries are
+  reported and skipped safely.
 
 ### Changed
 
-- Removed the duplicate `generate` command alias so rendering has one command:
-  `render`.
-- Made interactive provider selection multi-select and changed global home
-  prompts to use auto-detected home by default.
-- Updated RTK toolchain setup to use `rtk init` commands for Claude Code, Codex,
-  and OpenCode initialization.
-- Reworked the README provider comparison table to compare provider surfaces
-  apples-to-apples with a documented status legend.
+- Kept `uninstall` single-provider only while making non-destructive
+  provider-aware commands accept provider sets.
+- Made plugin dry-runs report skipped providers in structured JSON.
 
 ### Verified
 

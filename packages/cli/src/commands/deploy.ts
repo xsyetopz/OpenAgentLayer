@@ -1,6 +1,6 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { renderAllProviders, renderProvider } from "@openagentlayer/adapter";
+import { renderProvider } from "@openagentlayer/adapter";
 import {
 	applyBinInstall,
 	applyDeploy,
@@ -12,6 +12,7 @@ import {
 import { flag, option, providerOptions } from "../arguments";
 import { renderOptions } from "../model-options";
 import { printDeployReport } from "../output";
+import { expandProviders, installableProviders } from "../provider-binaries";
 import { scopeArtifacts, scopeContext } from "../scope";
 import { loadCheckedSource } from "../source";
 
@@ -21,14 +22,17 @@ export async function runDeployCommand(
 ): Promise<void> {
 	const context = scopeContext(args, { requireTarget: true });
 	const providers = providerOptions(option(args, "--provider") ?? "all");
+	const expandedProviders = expandProviders(providers);
+	const installable =
+		context.scope === "global"
+			? await installableProviders(providers)
+			: { providers: expandedProviders, skipped: [] };
 	const options = await renderOptions(args);
 	const source = await loadCheckedSource(repoRoot);
 	const artifacts = (
 		await Promise.all(
-			providers.map((provider) =>
-				provider === "all"
-					? renderAllProviders(source, repoRoot, options)
-					: renderProvider(provider, source, repoRoot, options),
+			installable.providers.map((provider) =>
+				renderProvider(provider, source, repoRoot, options),
 			),
 		)
 	).flatMap((set) => set.artifacts);
@@ -57,6 +61,7 @@ export async function runDeployCommand(
 		{
 			sourceRoot: repoRoot,
 			providers,
+			skippedProviders: installable.skipped,
 			scope: context.scope,
 			targetRoot: context.targetRoot,
 			manifestRoot: context.manifestRoot,

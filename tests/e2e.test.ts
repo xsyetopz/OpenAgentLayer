@@ -1,9 +1,30 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	mkdtemp,
+	readFile,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const repoRoot = resolve(import.meta.dir, "..");
+
+async function fakeProviderPath(
+	root: string,
+	providers: string[],
+): Promise<NodeJS.ProcessEnv> {
+	const bin = join(root, "provider-bin");
+	await mkdir(bin, { recursive: true });
+	for (const provider of providers) {
+		const path = join(bin, provider);
+		await writeFile(path, "#!/usr/bin/env sh\nexit 0\n");
+		await chmod(path, 0o755);
+	}
+	return { ...process.env, PATH: `${bin}:${process.env["PATH"] ?? ""}` };
+}
 
 test("CLI dry-run reports Codex and OpenCode changes without writing", async () => {
 	for (const provider of ["codex", "opencode"]) {
@@ -53,6 +74,7 @@ test("CLI help is Commander-backed and non-interactive-safe", async () => {
 
 test("CLI global dry-run maps provider artifacts into global homes", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-global-e2e-"));
+	const env = await fakeProviderPath(home, ["codex", "claude", "opencode"]);
 	const command = Bun.spawn(
 		[
 			"bun",
@@ -67,7 +89,7 @@ test("CLI global dry-run maps provider artifacts into global homes", async () =>
 			"--dry-run",
 			"--verbose",
 		],
-		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
 	const stdout = await new Response(command.stdout).text();
 	const stderr = await new Response(command.stderr).text();
@@ -88,6 +110,7 @@ test("CLI global dry-run maps provider artifacts into global homes", async () =>
 
 test("CLI global deploy installs usable oal shim", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-global-bin-e2e-"));
+	const env = await fakeProviderPath(home, ["codex"]);
 	const binDir = join(home, "bin");
 	const command = Bun.spawn(
 		[
@@ -104,7 +127,7 @@ test("CLI global deploy installs usable oal shim", async () => {
 			"codex",
 			"--quiet",
 		],
-		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
 	const stderr = await new Response(command.stderr).text();
 	expect(await command.exited).toBe(0);
@@ -126,6 +149,7 @@ test("CLI global deploy installs usable oal shim", async () => {
 
 test("CLI global deploy can skip oal shim", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-global-no-bin-e2e-"));
+	const env = await fakeProviderPath(home, ["codex"]);
 	const binDir = join(home, "bin");
 	const command = Bun.spawn(
 		[
@@ -143,7 +167,7 @@ test("CLI global deploy can skip oal shim", async () => {
 			"--skip-bin",
 			"--dry-run",
 		],
-		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
 	const stdout = await new Response(command.stdout).text();
 	const stderr = await new Response(command.stderr).text();
@@ -151,6 +175,34 @@ test("CLI global deploy can skip oal shim", async () => {
 	expect(stderr).toBe("");
 	expect(stdout).not.toContain("binary:");
 	await expect(readFile(join(binDir, "oal"), "utf8")).rejects.toThrow();
+	await rm(home, { recursive: true, force: true });
+});
+
+test("CLI global deploy skips missing provider binaries without failing", async () => {
+	const home = await mkdtemp(join(tmpdir(), "oal-global-missing-provider-"));
+	const env = await fakeProviderPath(home, ["codex"]);
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"deploy",
+			"--scope",
+			"global",
+			"--home",
+			home,
+			"--provider",
+			"codex,claude",
+			"--dry-run",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain(".codex/config.toml");
+	expect(stdout).toContain("skip provider: claude");
+	expect(stdout).not.toContain(".claude/settings.json");
 	await rm(home, { recursive: true, force: true });
 });
 
@@ -182,6 +234,57 @@ test("CLI preview shows generated artifact set without writing files", async () 
 		readFile(join(root, ".codex/config.toml"), "utf8"),
 	).rejects.toThrow();
 	await rm(root, { recursive: true, force: true });
+});
+
+test("CLI preview accepts comma-separated providers", async () => {
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"preview",
+			"--provider",
+			"codex,opencode",
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain(".codex/config.toml");
+	expect(stdout).toContain("opencode.jsonc");
+	expect(stdout).not.toContain(".claude/settings.json");
+});
+
+test("CLI render accepts comma-separated providers", async () => {
+	const out = await mkdtemp(join(tmpdir(), "oal-render-multi-"));
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"render",
+			"--provider",
+			"codex,opencode",
+			"--out",
+			out,
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain("codex,opencode");
+	expect(await readFile(join(out, ".codex/config.toml"), "utf8")).toContain(
+		"model",
+	);
+	expect(await readFile(join(out, "opencode.jsonc"), "utf8")).toContain(
+		"openagentlayer",
+	);
+	await expect(
+		readFile(join(out, ".claude/settings.json"), "utf8"),
+	).rejects.toThrow();
+	await rm(out, { recursive: true, force: true });
 });
 
 test("CLI preview applies subscription model plans", async () => {
@@ -329,6 +432,7 @@ test("CLI RTK gain check reports status", async () => {
 
 test("CLI plugins dry-run reports provider plugin payloads without writing", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-plugins-e2e-"));
+	const env = await fakeProviderPath(home, ["codex", "claude", "opencode"]);
 	const command = Bun.spawn(
 		[
 			"bun",
@@ -340,7 +444,7 @@ test("CLI plugins dry-run reports provider plugin payloads without writing", asy
 			"all",
 			"--dry-run",
 		],
-		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
 	);
 	const stdout = await new Response(command.stdout).text();
 	const stderr = await new Response(command.stderr).text();
@@ -355,5 +459,58 @@ test("CLI plugins dry-run reports provider plugin payloads without writing", asy
 			"utf8",
 		),
 	).rejects.toThrow();
+	await rm(home, { recursive: true, force: true });
+});
+
+test("CLI plugins accepts comma-separated providers", async () => {
+	const home = await mkdtemp(join(tmpdir(), "oal-plugins-multi-e2e-"));
+	const env = await fakeProviderPath(home, ["codex", "opencode"]);
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"plugins",
+			"--home",
+			home,
+			"--provider",
+			"codex,opencode",
+			"--dry-run",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain(".codex-plugin/plugin.json");
+	expect(stdout).toContain(".config/opencode/plugins/openagentlayer");
+	expect(stdout).not.toContain(".claude/plugins/marketplaces/openagentlayer");
+	await rm(home, { recursive: true, force: true });
+});
+
+test("CLI plugins skips missing provider binaries without failing", async () => {
+	const home = await mkdtemp(join(tmpdir(), "oal-plugins-missing-e2e-"));
+	const env = await fakeProviderPath(home, ["codex"]);
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"plugins",
+			"--home",
+			home,
+			"--provider",
+			"codex,claude",
+			"--dry-run",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain(".codex-plugin/plugin.json");
+	expect(stdout).toContain('"provider": "claude"');
+	expect(stdout).toContain("claude binary not found in PATH");
+	expect(stdout).not.toContain(".claude/plugins/marketplaces/openagentlayer");
 	await rm(home, { recursive: true, force: true });
 });

@@ -10,6 +10,11 @@ export interface OutputOptions {
 export interface DeployReport {
 	sourceRoot: string;
 	providers: readonly (Provider | "all")[];
+	skippedProviders?: readonly {
+		provider: Provider;
+		binary: string;
+		reason: string;
+	}[];
 	scope: string;
 	targetRoot: string;
 	manifestRoot: string;
@@ -32,6 +37,10 @@ export function printDeployReport(
 	console.log(`OpenAgentLayer deploy ${mode}`);
 	console.log(`source: ${report.sourceRoot}`);
 	console.log(`providers: ${report.providers.join(", ")}`);
+	const skippedProviders = report.skippedProviders ?? [];
+	if (skippedProviders.length > 0)
+		for (const skipped of skippedProviders)
+			console.log(`skip provider: ${skipped.provider} (${skipped.reason})`);
 	console.log(`scope: ${report.scope}`);
 	console.log(`target: ${report.targetRoot}`);
 	console.log(`manifest: ${report.manifestRoot}`);
