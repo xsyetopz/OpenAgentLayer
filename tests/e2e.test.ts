@@ -566,7 +566,7 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	expect(stdout).toContain("rtk init -g --codex");
 	expect(stdout).toContain("bunx ctx7 setup --cli --yes --codex --opencode");
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
-	expect(stdout).toContain("claude mcp add oal-deepwiki-docs");
+	expect(stdout).not.toContain("claude mcp add oal-deepwiki-docs");
 	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
 	expect(stdout).toContain("OpenAgentLayer plugins · dry-run");
 	expect(stdout).toContain("Validate source and installed state");
@@ -676,7 +676,7 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain("claude mcp add oal-anthropic-docs");
-	expect(stdout).toContain("opencode mcp add oal-opencode-docs");
+	expect(stdout).toContain("oal mcp install opencode-docs");
 	expect(stdout).not.toContain("\n- bunx");
 });
 
@@ -702,7 +702,7 @@ test("CLI features shows optional install and removal commands", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain("claude mcp add oal-anthropic-docs");
-	expect(stdout).toContain("opencode mcp add oal-opencode-docs");
+	expect(stdout).toContain("oal mcp install opencode-docs");
 	expect(stdout).toContain("bunx -p playwright playwright uninstall --all");
 });
 

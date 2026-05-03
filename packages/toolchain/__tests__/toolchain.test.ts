@@ -5,11 +5,18 @@ import {
 	renderToolchainPlan,
 } from "../src";
 
+const WHITESPACE_PATTERN = /\s+/;
+
 test("macOS plan installs Homebrew before core tools when missing", () => {
 	const plan = planToolchainInstall({ os: "macos", hasHomebrew: false });
 	expect(plan.packageManager).toBe("brew");
 	expect(plan.commands[0]).toContain("Homebrew/install");
-	expect(plan.commands[1]).toContain("brew install bun ripgrep fd fzf");
+	expect(plan.commands[1]).toContain("bun.sh/install");
+	const brewCommand = plan.commands.find((command) =>
+		command.startsWith("brew install "),
+	);
+	expect(brewCommand?.split(WHITESPACE_PATTERN)).toContain("ripgrep");
+	expect(brewCommand?.split(WHITESPACE_PATTERN)).not.toContain("bun");
 	expect(plan.requiredTools).toContain("bun");
 	expect(plan.requiredTools).toContain("shellcheck");
 	expect(plan.requiredTools).toContain("shfmt");
@@ -65,12 +72,19 @@ test("optional feature commands support install and removal", () => {
 		optionalFeatureCommands("install", ["anthropic-docs", "opencode-docs"]),
 	).toEqual([
 		"claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs",
-		"opencode mcp add oal-opencode-docs -- oal mcp serve opencode-docs",
+		"oal mcp install opencode-docs --provider opencode --scope global",
 	]);
 	expect(
 		optionalFeatureCommands("remove", ["anthropic-docs", "opencode-docs"]),
 	).toEqual([
 		"claude mcp remove oal-anthropic-docs --scope user",
-		"opencode mcp remove oal-opencode-docs",
+		"oal mcp remove opencode-docs --provider opencode --scope global",
+	]);
+	expect(
+		optionalFeatureCommands("install", ["anthropic-docs", "opencode-docs"], {
+			providers: ["codex", "opencode"],
+		}),
+	).toEqual([
+		"oal mcp install opencode-docs --provider opencode --scope global",
 	]);
 });

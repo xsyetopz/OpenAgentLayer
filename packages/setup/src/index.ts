@@ -17,6 +17,7 @@ export interface SetupPlanOptions {
 	binDir?: string;
 	optionalTools?: OptionalTool[];
 	toolchain?: boolean;
+	hasHomebrew?: boolean;
 	rtk?: boolean;
 	dryRun?: boolean;
 }
@@ -45,8 +46,11 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 	if (options.toolchain) {
 		const toolchainPlan = planToolchainInstall({
 			os: process.platform === "darwin" ? "macos" : "linux",
-			hasHomebrew: false,
 			includeOptional: optionalTools,
+			providers: options.providers,
+			...(options.hasHomebrew === undefined
+				? {}
+				: { hasHomebrew: options.hasHomebrew }),
 		});
 		phases.push({
 			name: "toolchain",

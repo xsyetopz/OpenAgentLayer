@@ -4,6 +4,7 @@
 dist/
 generated/
 target/
+.openagentlayer-install
 
 # Node
 node_modules/

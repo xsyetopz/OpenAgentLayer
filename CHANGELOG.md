@@ -19,6 +19,9 @@ material only and is not part of the OAL release line.
 
 - Reworked interactive setup as a high-level wrapper over the low-level setup command path.
 - Expanded low-level setup/toolchain CLI flags for optional docs MCPs and command-line tool installation.
+- Fixed setup toolchain planning so Bun uses the Bun installer, Homebrew does not try to install a nonexistent `bun` formula, and provider-specific optional MCP commands are skipped when that provider is unavailable.
+- Fixed OpenCode Docs MCP setup to write OpenCode `mcp` config instead of calling an interactive `opencode mcp add` path.
+- Hardened RTK command policy so `rtk proxy` is rejected when a native RTK filter exists or when raw file dumps should use bounded `rtk read`.
 - Consolidated advisory command-tool hooks into `advise-command-tools`, while keeping RTK command enforcement separate.
 - Updated OpenCode runtime/plugin rendering for command policy, Bun rewrites, command safety, secret checks, and repeated-failure handling.
 

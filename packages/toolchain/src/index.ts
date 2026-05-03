@@ -21,6 +21,7 @@ export interface ToolchainOptions {
 	packageManager?: PackageManager;
 	hasHomebrew?: boolean;
 	includeOptional?: OptionalTool[];
+	providers?: OptionalToolProvider[];
 }
 
 export interface ToolchainPlan {
@@ -77,6 +78,7 @@ const CORE_TOOLS = [
 ] as const;
 const BREW_INSTALL =
 	'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
+const BUN_INSTALL = ["curl -fsSL https://bun.sh/install", "bash"].join(" | ");
 const RTK_INSTALL =
 	"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh";
 
@@ -84,9 +86,11 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 	const packageManager =
 		options.packageManager ?? defaultPackageManager(options.os);
 	const optionalTools = options.includeOptional ?? [];
+	const providers = options.providers ?? ["codex", "claude", "opencode"];
 	const commands = [
 		...bootstrapCommands(options.os, packageManager, options.hasHomebrew),
-		installCommand(packageManager, [...CORE_TOOLS]),
+		BUN_INSTALL,
+		installCommand(packageManager, packageManagerTools(packageManager)),
 		RTK_INSTALL,
 		"rtk --version",
 		"rtk gain",
@@ -97,7 +101,7 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		"rtk grep --help",
 		"rtk find --help",
 		...optionalFeatureCommands("install", optionalTools, {
-			providers: ["codex", "claude", "opencode"],
+			providers,
 			scope: "global",
 		}),
 	];
@@ -180,6 +184,14 @@ function installCommand(
 	}
 }
 
+function packageManagerTools(
+	packageManager: PackageManager,
+): readonly string[] {
+	if (packageManager === "brew")
+		return CORE_TOOLS.filter((tool) => tool !== "bun");
+	return CORE_TOOLS;
+}
+
 function linuxRefreshCommand(packageManager: PackageManager): string {
 	switch (packageManager) {
 		case "apt":
@@ -203,26 +215,27 @@ export function optionalFeatureCommands(
 	options: OptionalFeatureCommandOptions = {},
 ): string[] {
 	const commands: string[] = [];
+	const providers = options.providers ?? ["codex", "claude", "opencode"];
 	if (optionalTools.includes("ctx7")) {
 		commands.push(ctx7Command(action, options));
 	}
-	if (optionalTools.includes("deepwiki"))
+	if (optionalTools.includes("deepwiki") && providers.includes("claude"))
 		commands.push(
 			action === "install"
-				? "claude mcp add oal-deepwiki-docs --scope user -- bunx ctx7@latest mcp deepwiki && opencode mcp add oal-deepwiki-docs -- bunx ctx7@latest mcp deepwiki"
-				: "claude mcp remove oal-deepwiki-docs --scope user && opencode mcp remove oal-deepwiki-docs",
+				? "claude mcp add oal-deepwiki-docs --scope user -- bunx ctx7@latest mcp deepwiki"
+				: "claude mcp remove oal-deepwiki-docs --scope user",
 		);
-	if (optionalTools.includes("anthropic-docs"))
+	if (optionalTools.includes("anthropic-docs") && providers.includes("claude"))
 		commands.push(
 			action === "install"
 				? "claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs"
 				: "claude mcp remove oal-anthropic-docs --scope user",
 		);
-	if (optionalTools.includes("opencode-docs"))
+	if (optionalTools.includes("opencode-docs") && providers.includes("opencode"))
 		commands.push(
 			action === "install"
-				? "opencode mcp add oal-opencode-docs -- oal mcp serve opencode-docs"
-				: "opencode mcp remove oal-opencode-docs",
+				? `oal mcp install opencode-docs --provider opencode --scope ${options.scope ?? "global"}`
+				: `oal mcp remove opencode-docs --provider opencode --scope ${options.scope ?? "global"}`,
 		);
 	if (optionalTools.includes("playwright"))
 		commands.push(

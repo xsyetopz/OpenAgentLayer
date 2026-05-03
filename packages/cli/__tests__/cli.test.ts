@@ -1,4 +1,6 @@
 import { expect, test } from "bun:test";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { providerOption, providerOptions, scopeOption } from "../src/arguments";
 import { buildSetupArgs } from "../src/workflows";
@@ -43,6 +45,47 @@ test("MCP command serves OAL-owned Anthropic and OpenCode tools", async () => {
 	expect(opencode[1]?.result?.content?.[0]?.text).toContain(
 		"https://opencode.ai/docs/plugins/",
 	);
+});
+
+test("MCP command installs OpenCode docs server into config", async () => {
+	const home = await mkdtemp(`${tmpdir()}/oal-mcp-home-`);
+	const proc = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"mcp",
+			"install",
+			"opencode-docs",
+			"--provider",
+			"opencode",
+			"--scope",
+			"global",
+			"--home",
+			home,
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const [stdout, stderr, code] = await Promise.all([
+		new Response(proc.stdout).text(),
+		new Response(proc.stderr).text(),
+		proc.exited,
+	]);
+	expect(code).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain("OpenCode MCP install");
+	const config = JSON.parse(
+		await readFile(`${home}/.config/opencode/opencode.json`, "utf8"),
+	) as {
+		mcp?: Record<
+			string,
+			{ type?: string; command?: string[]; enabled?: boolean }
+		>;
+	};
+	expect(config.mcp?.["oal-opencode-docs"]).toEqual({
+		type: "local",
+		command: ["oal", "mcp", "serve", "opencode-docs"],
+		enabled: true,
+	});
 });
 
 async function runDocsMcp(

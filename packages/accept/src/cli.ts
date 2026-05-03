@@ -20,7 +20,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 	if (
 		!(
 			toolchain.stdout.includes("Homebrew/install") &&
-			toolchain.stdout.includes("brew install bun ripgrep") &&
+			toolchain.stdout.includes("bun.sh/install") &&
 			toolchain.stdout.includes("shellcheck") &&
 			toolchain.stdout.includes("gitleaks") &&
 			toolchain.stdout.includes("git ls-files") &&
@@ -32,7 +32,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 				"bunx -p playwright playwright install --with-deps",
 			) &&
 			toolchain.stdout.includes("claude mcp add oal-anthropic-docs") &&
-			toolchain.stdout.includes("opencode mcp add oal-opencode-docs") &&
+			toolchain.stdout.includes("oal mcp install opencode-docs") &&
 			!toolchain.stdout.includes("\n- bunx")
 		)
 	)

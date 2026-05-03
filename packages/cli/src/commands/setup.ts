@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -39,6 +40,7 @@ export async function runSetupCommand(
 		target: scope === "global" ? home : target,
 		optionalTools,
 		toolchain: flag(args, "--toolchain"),
+		hasHomebrew: commandExists("brew"),
 		rtk,
 		dryRun,
 	};
@@ -96,6 +98,14 @@ export async function runSetupCommand(
 					...(scope === "project" ? ["--target", target] : []),
 				]),
 	]);
+}
+
+function commandExists(command: string): boolean {
+	return (
+		spawnSync("sh", ["-lc", `command -v ${command}`], {
+			stdio: "ignore",
+		}).status === 0
+	);
 }
 
 function setupOptionalTools(args: string[]): OptionalTool[] {

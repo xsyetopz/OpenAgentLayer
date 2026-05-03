@@ -1,6 +1,11 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline";
+import { option } from "../arguments";
 
 type McpServer = "anthropic-docs" | "opencode-docs";
+type McpAction = "serve" | "install" | "remove";
 
 interface JsonRpcRequest {
 	id?: string | number;
@@ -46,12 +51,14 @@ const MCP_SERVERS = {
 } as const;
 
 export async function runMcpCommand(args: string[]): Promise<void> {
-	const action = args[0];
-	if (action !== "serve") throw new Error("Expected MCP action: serve.");
+	const action = mcpAction(args[0]);
+	if (!action)
+		throw new Error("Expected MCP action: serve, install, or remove.");
 	const server = mcpServer(args[1]);
 	if (!server)
 		throw new Error("Expected MCP server: anthropic-docs or opencode-docs.");
-	await runMcpServer(server);
+	if (action === "serve") await runMcpServer(server);
+	else await configureMcpServer(action, server, args.slice(2));
 }
 
 async function runMcpServer(server: McpServer): Promise<void> {
@@ -154,4 +161,80 @@ function docsText(server: McpServer, query: string): string {
 function mcpServer(value: string | undefined): McpServer | undefined {
 	if (value === "anthropic-docs" || value === "opencode-docs") return value;
 	return undefined;
+}
+
+function mcpAction(value: string | undefined): McpAction | undefined {
+	if (value === "serve" || value === "install" || value === "remove")
+		return value;
+	return undefined;
+}
+
+async function configureMcpServer(
+	action: "install" | "remove",
+	server: McpServer,
+	args: string[],
+): Promise<void> {
+	if (server !== "opencode-docs")
+		throw new Error("Only opencode-docs has OAL-managed MCP config install.");
+	const provider = option(args, "--provider") ?? "opencode";
+	if (provider !== "opencode")
+		throw new Error("Only --provider opencode is supported for MCP config.");
+	const scope = option(args, "--scope") === "project" ? "project" : "global";
+	const configPath =
+		scope === "global"
+			? join(
+					resolve(option(args, "--home") ?? homedir()),
+					".config/opencode/opencode.json",
+				)
+			: join(
+					resolve(option(args, "--target") ?? process.cwd()),
+					"opencode.jsonc",
+				);
+	await writeOpenCodeMcpConfig(configPath, action, server);
+	console.log(`OpenCode MCP ${action}: ${configPath}`);
+}
+
+async function writeOpenCodeMcpConfig(
+	configPath: string,
+	action: "install" | "remove",
+	server: McpServer,
+): Promise<void> {
+	const config = await readJsonConfig(configPath);
+	const mcp = isRecord(config["mcp"]) ? { ...config["mcp"] } : {};
+	const docs = MCP_SERVERS[server];
+	if (action === "install") {
+		mcp[docs.name] = {
+			type: "local",
+			command: ["oal", "mcp", "serve", server],
+			enabled: true,
+		};
+	} else {
+		delete mcp[docs.name];
+	}
+	config["mcp"] = mcp;
+	await mkdir(dirname(configPath), { recursive: true });
+	await writeFile(configPath, `${JSON.stringify(config, undefined, 2)}\n`);
+}
+
+async function readJsonConfig(
+	configPath: string,
+): Promise<Record<string, unknown>> {
+	try {
+		const text = await readFile(configPath, "utf8");
+		const parsed = JSON.parse(stripJsonComments(text)) as unknown;
+		return isRecord(parsed) ? parsed : {};
+	} catch {
+		return {};
+	}
+}
+
+function stripJsonComments(text: string): string {
+	return text
+		.split("\n")
+		.filter((line) => !line.trimStart().startsWith("//"))
+		.join("\n");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return value !== null && typeof value === "object" && !Array.isArray(value);
 }

@@ -60,6 +60,21 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "pass",
 	});
 	await expect(
+		runHook({ command: "rtk proxy -- rg Token ." }),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason:
+			"RTK has a native filter for this command; do not route it through proxy.",
+		details: ["Use: rtk grep Token ."],
+	});
+	await expect(
+		runHook({ command: "rtk proxy nl -ba file.ts" }),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason:
+			"RTK proxy is leaking raw file output; use the bounded RTK read filter.",
+	});
+	await expect(
 		runHook({
 			command: "cat package.json",
 			rtkInstalled: true,

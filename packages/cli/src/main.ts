@@ -213,10 +213,16 @@ program
 
 program
 	.command("mcp")
-	.description("run OAL-owned MCP servers")
-	.argument("<action>", "serve")
+	.description("run or configure OAL-owned MCP servers")
+	.argument("<action>", "serve, install, or remove")
 	.argument("<server>", "anthropic-docs or opencode-docs")
-	.action((action: string, server: string) => runMcpCommand([action, server]));
+	.option("--provider <provider>", "opencode for config install/remove")
+	.option("--scope <scope>", "project or global", "global")
+	.option("--home <dir>", "home directory for global scope")
+	.option("--target <dir>", "project target directory")
+	.action((action: string, server: string, options) =>
+		runMcpCommand([action, server, ...argsFromOptions(options)]),
+	);
 
 program
 	.command("interactive", { isDefault: true })

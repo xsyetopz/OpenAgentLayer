@@ -20,8 +20,9 @@ export function styleHookMessage(level, text) {
 export function styleHookLines(level, lines) {
 	return lines.map((line) => {
 		const text = String(line);
+		const output = ` ${text}`;
 		if (text.startsWith("Use: ") || text.startsWith("Use when useful: "))
-			return styleHookMessage("fix", text);
-		return styleHookMessage(level, text);
+			return styleHookMessage("fix", output);
+		return styleHookMessage(level, output);
 	});
 }

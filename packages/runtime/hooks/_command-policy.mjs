@@ -83,6 +83,27 @@ export function evaluateCommandPolicy(command, options = {}) {
 }
 
 function evaluateSingleCommand(normalized, options) {
+	const proxied = rtkProxyInnerCommand(normalized);
+	if (proxied) {
+		const proxiedExecutable = commandExecutable(proxied);
+		if (proxiedExecutable === "nl")
+			return {
+				decision: "block",
+				reason:
+					"RTK proxy is leaking raw file output; use the bounded RTK read filter.",
+				details: ["Use: rtk read --line-numbers --max-lines <n> <file>"],
+			};
+		const proxiedRtkExecutable = SUPPORTED_COMMANDS.get(proxiedExecutable);
+		if (proxiedRtkExecutable)
+			return {
+				decision: "block",
+				reason:
+					"RTK has a native filter for this command; do not route it through proxy.",
+				details: [
+					`Use: rtk ${rewriteExecutable(proxied, proxiedRtkExecutable)}`,
+				],
+			};
+	}
 	if (normalized.startsWith("rtk ") || normalized === "rtk")
 		return { decision: "pass", reason: "Command already uses RTK." };
 
@@ -190,6 +211,13 @@ function shellInnerCommand(command) {
 			.replace(/^['"]|['"]$/g, "");
 	}
 	return undefined;
+}
+
+function rtkProxyInnerCommand(command) {
+	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	if (tokens[0] !== "rtk" || tokens[1] !== "proxy") return undefined;
+	const separator = tokens[2] === "--" ? 3 : 2;
+	return tokens.slice(separator).join(" ");
 }
 
 function rewriteExecutable(command, replacement) {
