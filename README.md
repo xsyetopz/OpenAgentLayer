@@ -39,7 +39,7 @@ bun install --frozen-lockfile
 bun run check
 ```
 
-`bun` is a required OAL runtime dependency. The Homebrew cask depends on Bun, and `bun run toolchain` includes Bun in OS package-manager setup plans so generated Bun shims do not fail at use time.
+`bun` is a required OAL runtime dependency. The Homebrew cask depends on Bun, and `bun run toolchain` includes Bun in OS package-manager setup plans so generated Bun shims do not fail at use time. `setup --toolchain` can include the same toolchain plan before deploying provider artifacts.
 
 RTK setup must use `rtk-ai/rtk`: install it, verify with `rtk gain`, then initialize provider policies with `rtk init -g --auto-patch`, `rtk init -g --codex`, and `rtk init -g --opencode`. OAL RTK hooks enforce RTK only when the binary works and `RTK.md` exists globally or in the project.
 
@@ -53,6 +53,7 @@ bun run preview -- --provider codex --path .codex/config.toml --content
 Dry-run deployment into a project before applying changes:
 
 ```bash
+bun run setup -- --target /path/to/project --scope project --provider all --dry-run
 bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
 ```
 
@@ -70,11 +71,21 @@ bun packages/cli/src/main.ts
 
 Detailed setup options are in [INSTALLATION.md](INSTALLATION.md).
 
+Convenience install scripts are available from the repository root:
+
+```bash
+./install.sh setup --scope global --provider all --toolchain --dry-run
+./install-online.sh setup --scope global --provider all --toolchain --dry-run
+```
+
+`install-online.sh` clones OAL into a temporary directory, copies it into `OAL_INSTALL_DIR` or `$HOME/.local/share/openagentlayer`, runs `install.sh`, and removes the temporary clone.
+
 ## Install paths
 
 | Path                 | Use when                                                                 | Commands                                                                                |
 | -------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
 | Source checkout      | You want the current repository behavior or plan to contribute.          | `git submodule update --init --recursive`, then `bun install --frozen-lockfile`.        |
+| Online install       | You want a persistent user install without manually cloning the repo.    | `./install-online.sh setup --scope global --provider all --toolchain --dry-run`.        |
 | Homebrew cask        | You want the packaged `oal` binary after a release archive exists.       | Use the tap cask described in [Homebrew](#homebrew).                                    |
 | Provider plugin sync | You want OAL available from provider plugin locations in your user home. | `bun run plugins -- --home "$HOME" --provider all --dry-run`.                           |
 | Project deploy       | You want OAL artifacts in one project repository.                        | `bun run deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
@@ -135,12 +146,14 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 | `check`            | Load source, validate policy, and prove renderability.                               | None.                                                                                               | `bun run check`.                                                                        |
 | `preview`          | Show generated artifact paths and optional file contents without writing.            | `--scope`, `--home`, `--provider`, `--path`, `--content`, `--plan`.                                 | `bun run preview -- --provider all`.                                                    |
 | `render`           | Write generated artifacts into an output directory.                                  | `--scope`, `--home`, `--provider`, `--out`, `--plan`.                                               | `bun run render -- --provider codex --out generated`.                                   |
+| `setup`            | Plan or apply toolchain, deploy, plugin sync, binary shim, and installed checks.     | `--target`, `--scope`, `--provider`, `--toolchain`, `--optional`, `--dry-run`, `--verbose`.         | `bun run setup -- --scope global --provider all --toolchain --dry-run`.                 |
 | `deploy`           | Merge OAL artifacts into a target project or global provider home.                   | `--target`, `--scope project\|global`, `--home`, `--provider`, `--dry-run`, `--verbose`, `--quiet`. | `bun run deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
 | `bin`              | Install, inspect, or remove the source-checkout `oal` executable shim.               | `--home`, `--bin-dir`, `--remove`, `--dry-run`.                                                     | `bun packages/cli/src/main.ts bin --dry-run`.                                           |
 | `uninstall`        | Remove one provider's OAL-owned artifacts from a target project or provider home.    | `--target`, `--scope project\|global`, `--home`, `--provider`.                                      | `bun run uninstall -- --target /path/to/project --scope project --provider codex`.      |
 | `plugins`          | Sync provider plugin payloads into user-level provider homes.                        | `--home`, `--provider`, `--dry-run`, `--plan`, `--opencode-models-file`.                            | `bun run plugins -- --home "$HOME" --provider all --dry-run`.                           |
-| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run toolchain -- --os macos --optional ctx7,playwright`.                           |
-| `features`         | Print optional feature install or removal commands.                                  | `--install`, `--remove`.                                                                            | `bun run features -- --install ctx7,playwright`.                                        |
+| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run toolchain -- --os macos --optional ctx7,anthropic-docs,opencode-docs`.         |
+| `features`         | Print optional feature install or removal commands.                                  | `--install`, `--remove`.                                                                            | `bun run features -- --install ctx7,anthropic-docs,opencode-docs`.                      |
+| `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve anthropic-docs`, `serve opencode-docs`.                                                      | `bun packages/cli/src/main.ts mcp serve anthropic-docs`.                                |
 | `rtk-gain`         | Check RTK token-savings policy.                                                      | `--from-file`, `--allow-empty-history`.                                                             | `bun run rtk-gain -- --allow-empty-history`.                                            |
 | `roadmap-evidence` | Print the acceptance evidence ledger.                                                | None.                                                                                               | `bun run roadmap:evidence`.                                                             |
 | `accept`           | Run full product acceptance over source, rendering, deploy, uninstall, and fixtures. | None.                                                                                               | `bun run accept`.                                                                       |
@@ -156,16 +169,16 @@ bun packages/cli/src/main.ts
 bun packages/cli/src/main.ts interactive
 ```
 
-Interactive mode supports preview, deploy, plugin sync, uninstall, and check. Provider prompts use multiselect where commands can act on multiple providers. Global deploy auto-detects the home directory and only asks when you override it. Non-interactive commands remain script-safe and print help instead of prompting when stdin is not a TTY.
+Interactive mode supports setup, preview, deploy, plugin sync, uninstall, and check. Setup is a high-level wrapper over the same low-level `setup` command used by scripts. Provider prompts use multiselect where commands can act on multiple providers. Global deploy auto-detects the home directory and only asks when you override it. Non-interactive commands remain script-safe and print help instead of prompting when stdin is not a TTY.
 
 Optional features are explicit add/remove commands on top of OAL:
 
 ```bash
-bun run features -- --install ctx7,playwright
-bun run features -- --remove playwright
+bun run features -- --install ctx7,playwright,anthropic-docs,opencode-docs
+bun run features -- --remove playwright,anthropic-docs,opencode-docs
 ```
 
-Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration.
+Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration. `anthropic-docs` and `opencode-docs` are normal OAL-owned MCP servers registered with provider MCP commands and served by `oal mcp serve`.
 
 Copy commands from fenced `bash` blocks. Do not paste Markdown list bullets.
 

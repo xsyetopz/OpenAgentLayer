@@ -38,6 +38,7 @@ export async function runSetupCommand(
 		home,
 		target: scope === "global" ? home : target,
 		optionalTools,
+		toolchain: flag(args, "--toolchain"),
 		rtk,
 		dryRun,
 	};
@@ -100,12 +101,20 @@ export async function runSetupCommand(
 function setupOptionalTools(args: string[]): OptionalTool[] {
 	const tools = new Set<OptionalTool>();
 	for (const tool of (option(args, "--optional") ?? "").split(",")) {
-		if (tool === "ctx7" || tool === "deepwiki" || tool === "playwright")
+		if (
+			tool === "ctx7" ||
+			tool === "deepwiki" ||
+			tool === "playwright" ||
+			tool === "anthropic-docs" ||
+			tool === "opencode-docs"
+		)
 			tools.add(tool);
 	}
 	if (flag(args, "--ctx7-cli")) tools.add("ctx7");
 	if (flag(args, "--playwright-cli")) tools.add("playwright");
 	if (flag(args, "--deepwiki-mcp")) tools.add("deepwiki");
+	if (flag(args, "--anthropic-docs-mcp")) tools.add("anthropic-docs");
+	if (flag(args, "--opencode-docs-mcp")) tools.add("opencode-docs");
 	return [...tools];
 }
 
@@ -142,9 +151,15 @@ async function runOptionalSetup(
 			new Response(child.stderr).text(),
 			child.exited,
 		]);
-		if (code !== 0)
-			throw new Error(
-				`Setup optional command failed (${command}) with exit code ${code}:\nstdout:\n${stdout}\nstderr:\n${stderr}`,
+		if (code !== 0 && !options.quiet)
+			console.warn(
+				[
+					`! optional setup command failed (${command})`,
+					`  exit: ${code}`,
+					`  stdout: ${stdout.trim() || "empty"}`,
+					`  stderr: ${stderr.trim() || "empty"}`,
+					"  continuing with provider-native setup and system CLI fallbacks",
+				].join("\n"),
 			);
 	}
 }

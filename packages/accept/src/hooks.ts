@@ -124,10 +124,6 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		input: { provider: "claude", route: "review" },
 		decision: "pass",
 	},
-	block_test_failure_loop: {
-		input: { failures: ["test", "test", "test"], threshold: 3 },
-		decision: "block",
-	},
 	block_unsafe_git: {
 		input: { command: "git push --force origin main" },
 		decision: "block",
@@ -140,12 +136,8 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		input: { status: "blocked", finalResponse: "blocked" },
 		decision: "block",
 	},
-	prefer_ripgrep_search: {
+	advise_command_tools: {
 		input: { command: "grep -R SentinelTag ." },
-		decision: "warn",
-	},
-	require_structured_config_tools: {
-		input: { command: "sed -i s/foo/bar/ config.json" },
 		decision: "warn",
 	},
 };
@@ -274,6 +266,54 @@ async function assertProviderNativeHookOutput(
 		"deny"
 	)
 		throw new Error("Claude PreToolUse hook did not emit native deny output.");
+	const codexPostToolBlock = await runNativeHook(
+		join(targetRoot, ".codex/openagentlayer/hooks/block-repeated-failures.mjs"),
+		{
+			hook_event_name: "PostToolUse",
+			failures: ["one", "two", "three"],
+			threshold: 3,
+		},
+		{ OAL_HOOK_PROVIDER: "codex", OAL_HOOK_EVENT: "PostToolUse" },
+	);
+	if (codexPostToolBlock.exitCode !== 2)
+		throw new Error("Codex PostToolUse block did not exit with code 2.");
+	if (!codexPostToolBlock.stderr.includes("Repeated failure circuit opened."))
+		throw new Error("Codex PostToolUse block did not emit stderr feedback.");
+	const claudePostToolFailureBlock = await runNativeHook(
+		join(targetRoot, ".claude/hooks/scripts/block-repeated-failures.mjs"),
+		{
+			hook_event_name: "PostToolUseFailure",
+			failures: ["one", "two", "three"],
+			threshold: 3,
+		},
+		{
+			OAL_HOOK_PROVIDER: "claude",
+			OAL_HOOK_EVENT: "PostToolUseFailure",
+		},
+	);
+	if (claudePostToolFailureBlock.exitCode !== 2)
+		throw new Error(
+			"Claude PostToolUseFailure block did not exit with code 2.",
+		);
+	if (
+		!claudePostToolFailureBlock.stderr.includes(
+			"Repeated failure circuit opened.",
+		)
+	)
+		throw new Error(
+			"Claude PostToolUseFailure block did not emit stderr feedback.",
+		);
+	const claudePostOutput = JSON.parse(claudePostToolFailureBlock.stdout) as {
+		hookSpecificOutput?: { additionalContext?: string };
+	};
+	if (
+		!claudePostOutput.hookSpecificOutput?.additionalContext?.includes(
+			"Repeated failure circuit opened.",
+		)
+	)
+		throw new Error(
+			"Claude PostToolUseFailure block did not emit native additional context.",
+		);
 	const plugin = await readFile(
 		join(targetRoot, ".opencode/plugins/openagentlayer.ts"),
 		"utf8",
@@ -283,6 +323,10 @@ async function assertProviderNativeHookOutput(
 		'"tool.execute.after"',
 		"output.args.command = replacement",
 		"throw new Error",
+		"evaluateFailureLoop",
+		"styleHookMessage",
+		"styleHookLines",
+		"blockIfNeeded(evaluateFailureLoop(output ?? {}))",
 	])
 		if (!plugin.includes(term))
 			throw new Error(`OpenCode plugin missing active hook behavior: ${term}`);

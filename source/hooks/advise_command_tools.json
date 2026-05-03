@@ -1,6 +1,6 @@
 {
-  "id": "require_structured_config_tools",
-  "script": "require-jq-yq-edits.mjs",
+  "id": "advise_command_tools",
+  "script": "advise-command-tools.mjs",
   "providers": [
     "codex",
     "claude",

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { readFileSync } from "node:fs";
+import { styleHookLines, styleHookMessage } from "./_hook-style.mjs";
 
 const DECISIONS = new Set(["pass", "warn", "block"]);
 
@@ -49,6 +50,11 @@ function printOutcome(outcome) {
 	process.stdout.write(`${JSON.stringify(outcome)}\n`);
 }
 
+function printFeedback(outcome, event) {
+	const reason = styledReasonText(outcome, event);
+	if (reason) process.stderr.write(`${reason}\n`);
+}
+
 function hookEvent(payload) {
 	return (
 		asString(payload.hook_event_name) ||
@@ -66,13 +72,24 @@ function hookProvider(payload) {
 	);
 }
 
-function reasonText(outcome) {
+function styledReasonText(outcome, event) {
+	const level = outcomeLevel(outcome, event);
 	return [
-		outcome.reason,
-		...(Array.isArray(outcome.details) ? outcome.details : []),
+		styleHookMessage(level, outcome.reason),
+		...styleHookLines(
+			"note",
+			Array.isArray(outcome.details) ? outcome.details : [],
+		),
 	]
 		.filter(Boolean)
 		.join("\n");
+}
+
+function outcomeLevel(outcome, event) {
+	if (outcome.decision === "warn") return "warn";
+	if (outcome.decision === "block" && event !== "PreToolUse") return "fatal";
+	if (outcome.decision === "block") return "error";
+	return "note";
 }
 
 function isStopEvent(event) {
@@ -90,7 +107,7 @@ function preToolUseDeny(reason) {
 }
 
 function codexOutcome(event, outcome) {
-	const reason = reasonText(outcome);
+	const reason = styledReasonText(outcome, event);
 	switch (outcome.decision) {
 		case "pass":
 			return undefined;
@@ -121,7 +138,7 @@ function codexOutcome(event, outcome) {
 }
 
 function claudeOutcome(event, outcome) {
-	const reason = reasonText(outcome);
+	const reason = styledReasonText(outcome, event);
 	switch (outcome.decision) {
 		case "pass":
 			return undefined;
@@ -194,8 +211,18 @@ export function createHookRunner(hook, evaluate) {
 		details: Array.isArray(outcome.details) ? outcome.details : undefined,
 	});
 	if (formatted) printOutcome(formatted);
-	if (outcome.decision === "block" && hookEvent(payload) !== "PreToolUse")
+	if (outcome.decision === "block" && hookEvent(payload) !== "PreToolUse") {
+		printFeedback(
+			{
+				hook,
+				decision: outcome.decision,
+				reason: outcome.reason,
+				details: Array.isArray(outcome.details) ? outcome.details : undefined,
+			},
+			hookEvent(payload),
+		);
 		process.exitCode = 2;
+	}
 }
 
 export function asArray(value) {

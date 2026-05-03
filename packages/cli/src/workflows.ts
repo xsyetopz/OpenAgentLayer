@@ -15,6 +15,7 @@ export interface SetupWorkflowSelection {
 	opencodePlan?: string;
 	cavemanMode?: string;
 	optionalTools?: OptionalTool[];
+	toolchain?: boolean;
 	rtk?: boolean;
 	dryRun?: boolean;
 	verbose?: boolean;
@@ -43,6 +44,7 @@ export function buildSetupArgs(selection: SetupWorkflowSelection): string[] {
 	if (selection.cavemanMode && selection.cavemanMode !== "source")
 		args.push("--caveman-mode", selection.cavemanMode);
 	if (selection.rtk) args.push("--rtk");
+	if (selection.toolchain) args.push("--toolchain");
 	if (selection.optionalTools && selection.optionalTools.length > 0)
 		args.push("--optional", selection.optionalTools.join(","));
 	if (selection.dryRun) args.push("--dry-run");

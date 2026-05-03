@@ -249,6 +249,8 @@ function renderOpenCodePlugin(source: OalSource): string {
 import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";
 import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";
 import { evaluateDestructiveCommand, evaluateUnsafeGit } from "../openagentlayer/hooks/_command-safety.mjs";
+import { evaluateFailureLoop } from "../openagentlayer/hooks/_failure-loop.mjs";
+import { styleHookLines, styleHookMessage } from "../openagentlayer/hooks/_hook-style.mjs";
 import { evaluateSecretGuard } from "../openagentlayer/hooks/_secret-guard.mjs";
 
 function commandArg(output: { args?: Record<string, unknown> }) {
@@ -258,7 +260,10 @@ function commandArg(output: { args?: Record<string, unknown> }) {
 
 function blockIfNeeded(result: { decision?: string; reason?: string; details?: unknown[] }) {
 	if (result.decision === "block")
-		throw new Error([result.reason, ...(result.details ?? [])].join("\\n"));
+		throw new Error([
+			styleHookMessage("error", result.reason ?? "OpenAgentLayer hook blocked."),
+			...styleHookLines("note", result.details ?? [])
+		].join("\\n"));
 }
 
 function replacementFrom(details: unknown) {
@@ -287,13 +292,17 @@ export const OpenAgentLayerPlugin: Plugin = async () => ({
 					output.args.command = replacement;
 					return;
 				}
-				throw new Error([result.reason, ...(result.details ?? [])].join("\\n"));
+				throw new Error([
+					styleHookMessage("error", result.reason ?? "OpenAgentLayer hook blocked."),
+					...styleHookLines("note", result.details ?? [])
+				].join("\\n"));
 			}
 		}
 	},
 	"tool.execute.after": async (_input, output) => {
 		const text = String(output.output ?? output.stdout ?? output.stderr ?? "");
 		blockIfNeeded(evaluateSecretGuard({ output: text }));
+		blockIfNeeded(evaluateFailureLoop(output ?? {}));
 	},
 	event: async ({ event }) => {
 		if (event.type === "session.idle") return;

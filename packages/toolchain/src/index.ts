@@ -6,7 +6,12 @@ export type PackageManager =
 	| "pacman"
 	| "zypper"
 	| "apk";
-export type OptionalTool = "ctx7" | "deepwiki" | "playwright";
+export type OptionalTool =
+	| "ctx7"
+	| "deepwiki"
+	| "playwright"
+	| "anthropic-docs"
+	| "opencode-docs";
 export type OptionalToolAction = "install" | "remove";
 export type OptionalToolProvider = "codex" | "claude" | "opencode";
 export type OptionalToolScope = "global" | "project";
@@ -36,6 +41,8 @@ const OPTIONAL_TOOL_LABELS: Record<OptionalTool, string> = {
 	ctx7: "ctx7 [CLI]",
 	deepwiki: "deepwiki [MCP]",
 	playwright: "playwright [CLI]",
+	"anthropic-docs": "Anthropic Docs [MCP]",
+	"opencode-docs": "OpenCode Docs [MCP]",
 };
 
 const CORE_TOOLS = [
@@ -58,6 +65,15 @@ const CORE_TOOLS = [
 	"gh",
 	"lazygit",
 	"tmux",
+	"btop",
+	"shellcheck",
+	"shfmt",
+	"ast-grep",
+	"sd",
+	"tokei",
+	"gitleaks",
+	"pre-commit",
+	"watchexec",
 ] as const;
 const BREW_INSTALL =
 	'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
@@ -98,6 +114,9 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 			"RTK init must create global or project RTK.md policy before OAL hooks enforce RTK-wrapped commands.",
 			"Keep `rtk gain` at or above 80%; drops below 80% require command/output efficiency work before release.",
 			"Use `rtk gain` to confirm token savings; prefer `rtk grep` and bounded `rtk find` for high-volume repository inspection.",
+			"Use `rg` and `fd` for provider-shared source discovery; both respect `.gitignore` by default.",
+			"Use `git ls-files` when a task explicitly requires tracked files only.",
+			"Use `jq`/`yq` for structured config, `shellcheck`/`shfmt` for shell, `hyperfine` for speed claims, `ast-grep`/`sd` for careful mechanical rewrites, and `gitleaks` for secret checks.",
 		],
 	};
 }
@@ -190,8 +209,20 @@ export function optionalFeatureCommands(
 	if (optionalTools.includes("deepwiki"))
 		commands.push(
 			action === "install"
-				? "echo 'Configure DeepWiki MCP manually from provider docs.'"
-				: "echo 'Remove DeepWiki MCP entries from provider config manually.'",
+				? "claude mcp add oal-deepwiki-docs --scope user -- bunx ctx7@latest mcp deepwiki && opencode mcp add oal-deepwiki-docs -- bunx ctx7@latest mcp deepwiki"
+				: "claude mcp remove oal-deepwiki-docs --scope user && opencode mcp remove oal-deepwiki-docs",
+		);
+	if (optionalTools.includes("anthropic-docs"))
+		commands.push(
+			action === "install"
+				? "claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs"
+				: "claude mcp remove oal-anthropic-docs --scope user",
+		);
+	if (optionalTools.includes("opencode-docs"))
+		commands.push(
+			action === "install"
+				? "opencode mcp add oal-opencode-docs -- oal mcp serve opencode-docs"
+				: "opencode mcp remove oal-opencode-docs",
 		);
 	if (optionalTools.includes("playwright"))
 		commands.push(

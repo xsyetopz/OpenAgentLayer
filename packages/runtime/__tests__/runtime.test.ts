@@ -29,7 +29,7 @@ async function runHookRaw(
 	hookName: string,
 	input: unknown,
 	env: Record<string, string> = {},
-): Promise<{ code: number; stdout: string }> {
+): Promise<{ code: number; stdout: string; stderr: string }> {
 	const hookPath = resolve(import.meta.dir, "../hooks", hookName);
 	const proc = Bun.spawn(["bun", hookPath], {
 		env: { ...process.env, ...env },
@@ -40,8 +40,9 @@ async function runHookRaw(
 	proc.stdin.write(JSON.stringify(input));
 	proc.stdin.end();
 	const stdout = await new Response(proc.stdout).text();
+	const stderr = await new Response(proc.stderr).text();
 	const code = await proc.exited;
-	return { code, stdout };
+	return { code, stdout, stderr };
 }
 
 test("RTK hook enforces supported commands and proxies unsupported commands", async () => {
@@ -97,6 +98,22 @@ test("RTK hook requires binary and RTK.md before enforcing supported commands", 
 	});
 });
 
+test("command policy enforces preferred QoL tool replacements", async () => {
+	for (const [command, replacement] of [
+		["ack Token", "rg Token"],
+		["ag Token", "rg Token"],
+		["exa -la", "eza -la"],
+		["du -sh .", "dust -sh ."],
+		["time bun test", "hyperfine bun test"],
+	] as const) {
+		await expect(runHook({ command })).resolves.toMatchObject({
+			decision: "block",
+			reason: "OpenAgentLayer has a preferred QoL tool for this command.",
+			details: [`Use: ${replacement}`],
+		});
+	}
+});
+
 test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", async () => {
 	for (const [command, replacement] of [
 		["npx prettier foo.js", "rtk proxy -- bunx prettier foo.js"],
@@ -122,7 +139,11 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 		tool_input: { command: "npx prettier foo.js" },
 	});
 	expect(codexPreToolUse.code).toBe(0);
-	expect(JSON.parse(codexPreToolUse.stdout)).toMatchObject({
+	const codexPreToolUseOutput = JSON.parse(codexPreToolUse.stdout) as {
+		hookSpecificOutput?: { permissionDecisionReason?: string };
+	};
+	const codexPreToolUseJson = JSON.stringify(codexPreToolUseOutput);
+	expect(codexPreToolUseOutput).toMatchObject({
 		hookSpecificOutput: {
 			hookEventName: "PreToolUse",
 			permissionDecision: "deny",
@@ -131,6 +152,8 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 			),
 		},
 	});
+	expect(codexPreToolUseJson).toContain("\\u001b[31m");
+	expect(codexPreToolUseJson).toContain("\\u001b[32m");
 	await expect(
 		runHook({ command: "yarn set version stable" }),
 	).resolves.toMatchObject({
@@ -207,6 +230,71 @@ test("context injection lifecycle passes emit no native provider output", async 
 	);
 	expect(claude.code).toBe(0);
 	expect(claude.stdout).toBe("");
+});
+
+test("command tool guidance advises search and structured config tools", async () => {
+	await expect(
+		runNamedHook("advise-command-tools.mjs", { command: "grep -R Token ." }),
+	).resolves.toMatchObject({
+		decision: "warn",
+		details: expect.arrayContaining([
+			"Use: git ls-files <pathspec>",
+			"Note: rg and fd respect .gitignore by default; git ls-files is tracked-only.",
+		]),
+	});
+	await expect(
+		runNamedHook("advise-command-tools.mjs", {
+			command: "git ls-files 'packages/**/*.ts'",
+		}),
+	).resolves.toMatchObject({
+		decision: "pass",
+		reason: "Search command uses bounded or tracked-file inventory.",
+	});
+	await expect(
+		runNamedHook("advise-command-tools.mjs", {
+			command: "sed -i s/foo/bar/ config.json",
+		}),
+	).resolves.toMatchObject({
+		decision: "warn",
+		reason: "JSON/YAML edits use 'jq'/'yq' or typed code.",
+	});
+});
+
+test("blocking post-tool hooks emit provider output and stderr feedback", async () => {
+	const input = {
+		hook_event_name: "PostToolUse",
+		failures: ["one", "two", "three"],
+		threshold: 3,
+	};
+	const codex = await runHookRaw("block-repeated-failures.mjs", input);
+	expect(codex.code).toBe(2);
+	expect(JSON.parse(codex.stdout)).toMatchObject({
+		continue: true,
+		systemMessage: expect.stringContaining("Repeated failure circuit opened."),
+	});
+	expect(codex.stderr).toContain("Repeated failure circuit opened.");
+	expect(codex.stderr).toContain("\u001b[35m");
+	expect(codex.stderr).toContain("one");
+
+	const claude = await runHookRaw(
+		"block-repeated-failures.mjs",
+		{
+			...input,
+			hook_event_name: "PostToolUseFailure",
+		},
+		{ OAL_HOOK_PROVIDER: "claude" },
+	);
+	expect(claude.code).toBe(2);
+	expect(JSON.parse(claude.stdout)).toMatchObject({
+		hookSpecificOutput: {
+			hookEventName: "PostToolUseFailure",
+			additionalContext: expect.stringContaining(
+				"Repeated failure circuit opened.",
+			),
+		},
+	});
+	expect(claude.stderr).toContain("Repeated failure circuit opened.");
+	expect(claude.stderr).toContain("three");
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {

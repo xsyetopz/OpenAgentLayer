@@ -145,6 +145,10 @@ export function validateProductSource(record: ProductSource): void {
 			"product promptContracts.rtkEfficiency",
 		);
 		requireText(
+			record.promptContracts.repoInspection,
+			"product promptContracts.repoInspection",
+		);
+		requireText(
 			record.promptContracts.responseBoundaries,
 			"product promptContracts.responseBoundaries",
 		);
@@ -155,6 +159,10 @@ export function validateProductSource(record: ProductSource): void {
 		requireText(
 			record.promptContracts.sourceBackedBehavior,
 			"product promptContracts.sourceBackedBehavior",
+		);
+		requireText(
+			record.promptContracts.correctionDiscipline,
+			"product promptContracts.correctionDiscipline",
 		);
 		requireText(
 			record.promptContracts.accountabilityPressure,

@@ -73,9 +73,11 @@ function renderProductPromptContracts(source: OalSource): string {
 	if (!contracts) return "";
 	return [
 		`- ${contracts.rtkEfficiency}`,
+		`- ${contracts.repoInspection}`,
 		`- ${contracts.responseBoundaries}`,
 		`- ${contracts.scopeDiscipline}`,
 		`- ${contracts.sourceBackedBehavior}`,
+		`- ${contracts.correctionDiscipline}`,
 		`- ${contracts.accountabilityPressure}`,
 		`- ${contracts.simplicityDiscipline}`,
 		renderCavemanContract(source),
@@ -87,11 +89,13 @@ function renderAgentPromptContracts(source: OalSource): string {
 	if (!contracts) return "";
 	return [
 		"- Artifact target: produce a current-state patch; repository artifacts describe behavior that exists now.",
+		"- Repository inspection: use rg/fd before broad reads; use git ls-files or git grep when tracked-file-only evidence is required.",
 		"- Edit envelope: derive ALLOWED_EDIT_SET from the user request and controlling source; docs, tests, comments, config, warnings, and guardrails enter the set through explicit request or current runtime/schema/security/validation need.",
 		"- Naming source: create names from existing symbols, formal API/schema terms, user-supplied names, or current behavior; path labels are location metadata.",
 		"- Removal transform: removed concepts become absence; current runtime behavior and explicitly requested history artifacts may carry needed text.",
 		"- Diff gate: inspect final diff and repair added residue before final response.",
 		"- Source evidence: inspect controlling source before claims; behavior changes need Source Evidence Map, Changed Behavior, and Validation Evidence.",
+		"- Correction discipline: verify before accepting a correction; separate checked facts from inference, and return STATUS BLOCKED with Attempted, Evidence, and Need when source truth is missing or contradictory.",
 		"- Boundaries: answer the requested task; extra guidance, alternatives, cleanup, and guardrails enter the answer through user request or validation need.",
 		"- Blocker path: missing, ambiguous, or contradictory source truth returns STATUS BLOCKED with Attempted, Evidence, and Need.",
 		renderCavemanContract(source),

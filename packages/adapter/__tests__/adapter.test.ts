@@ -1,10 +1,14 @@
 import { expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadSource } from "@openagentlayer/source";
 import { parseOpenCodeModels, renderProvider } from "../src";
 import { OPENCODE_MODEL_FALLBACKS } from "../src/opencode";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
+const SUPPORTED_COMMANDS_BLOCK_PATTERN =
+	/const SUPPORTED_COMMANDS = new Map\([\s\S]*?const SHELL_WRAPPERS/;
+const DOUBLE_QUOTED_STRING_PATTERN = /"([^"]+)"/g;
 
 test("OpenCode config renders OAL fallback models", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
@@ -105,6 +109,42 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	}
 });
 
+test("provider instructions render inspection and correction discipline contracts", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	for (const [provider, path] of [
+		["codex", "AGENTS.md"],
+		["claude", "CLAUDE.md"],
+		["opencode", ".opencode/instructions/openagentlayer.md"],
+	] as const) {
+		const rendered = await renderProvider(provider, graph.source, repoRoot);
+		const instructions = rendered.artifacts.find(
+			(artifact) => artifact.path === path,
+		)?.content;
+		expect(instructions).toContain("Repository inspection:");
+		expect(instructions).toContain("git ls-files");
+		expect(instructions).toContain("Correction discipline:");
+		expect(instructions).toContain("verify before accepting a correction");
+	}
+});
+
+test("provider agents render inspection and correction discipline contracts", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	for (const [provider, path] of [
+		["codex", ".codex/agents/hephaestus.toml"],
+		["claude", ".claude/agents/hephaestus.md"],
+		["opencode", ".opencode/agents/hephaestus.md"],
+	] as const) {
+		const rendered = await renderProvider(provider, graph.source, repoRoot);
+		const agent = rendered.artifacts.find(
+			(artifact) => artifact.path === path,
+		)?.content;
+		expect(agent).toContain("Repository inspection:");
+		expect(agent).toContain("git ls-files");
+		expect(agent).toContain("Correction discipline:");
+		expect(agent).toContain("verify before accepting a correction");
+	}
+});
+
 test("Codex shims use shared unshim helper and RTK command wrappers", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	const rendered = await renderProvider("codex", graph.source, repoRoot);
@@ -118,6 +158,17 @@ test("Codex shims use shared unshim helper and RTK command wrappers", async () =
 	)?.content;
 	expect(cargo).toContain(`source "\${shim_dir}/oal-shim.zsh"`);
 	expect(cargo).toContain('oal_shim_exec rtk cargo "$@"');
+});
+
+test("Codex shims cover RTK-supported command policy executables", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	const rendered = await renderProvider("codex", graph.source, repoRoot);
+	const artifactPaths = new Set(
+		rendered.artifacts.map((artifact) => artifact.path),
+	);
+	for (const command of rtkSupportedCommands()) {
+		expect(artifactPaths).toContain(`.codex/openagentlayer/shim/${command}`);
+	}
 });
 
 test("Codex renders hooks only in hooks.json with provider event env", async () => {
@@ -174,11 +225,15 @@ test("OpenCode renders real OAL command policy and RTK tools", async () => {
 	expect(plugin).not.toContain("export default OpenAgentLayerPlugin");
 	expect(plugin).toContain('"tool.execute.before"');
 	expect(plugin).toContain('"tool.execute.after"');
+	expect(plugin).toContain("styleHookMessage");
+	expect(plugin).toContain("styleHookLines");
 	expect(plugin).toContain("evaluateCommandPolicy");
 	expect(plugin).toContain("evaluateSecretGuard");
 	expect(plugin).toContain("evaluateDestructiveCommand");
 	expect(plugin).toContain("evaluateUnsafeGit");
+	expect(plugin).toContain("evaluateFailureLoop");
 	expect(plugin).toContain("output.args.command = replacement");
+	expect(plugin).toContain("blockIfNeeded(evaluateFailureLoop(output ?? {}))");
 	expect(plugin).not.toContain("output.metadata");
 });
 
@@ -187,4 +242,19 @@ function stripJsonComments(text: string): string {
 		.split("\n")
 		.filter((line) => !line.trimStart().startsWith("//"))
 		.join("\n");
+}
+
+function rtkSupportedCommands(): string[] {
+	const policy = readFileSync(
+		resolve(repoRoot, "packages/runtime/hooks/_command-policy.mjs"),
+		"utf8",
+	);
+	const body = policy.match(SUPPORTED_COMMANDS_BLOCK_PATTERN)?.[0] ?? "";
+	return [
+		...new Set(
+			[...body.matchAll(DOUBLE_QUOTED_STRING_PATTERN)].map((match) => match[1]),
+		),
+	]
+		.filter((command) => command !== undefined)
+		.sort();
 }

@@ -5,6 +5,7 @@ import { runAcceptCommand } from "./commands/accept";
 import { runBinCommand } from "./commands/bin";
 import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
+import { runMcpCommand } from "./commands/mcp";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
 import { runProviderE2eCommand } from "./commands/provider-e2e";
@@ -56,11 +57,17 @@ addRenderOptions(
 	.option("--dry-run", "print planned setup without writing")
 	.option("--verbose", "print detailed setup output")
 	.option("--quiet", "suppress normal setup output")
-	.option("--optional <tools>", "comma-separated ctx7,deepwiki,playwright")
+	.option(
+		"--optional <tools>",
+		"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
+	)
+	.option("--toolchain", "install OAL command-line toolchain when missing")
 	.option("--rtk", "install/init RTK policy surfaces")
 	.option("--ctx7-cli", "install/configure Context7 CLI")
 	.option("--playwright-cli", "install/configure Playwright CLI")
 	.option("--deepwiki-mcp", "configure DeepWiki MCP where supported")
+	.option("--anthropic-docs-mcp", "configure Anthropic/Claude docs MCP")
+	.option("--opencode-docs-mcp", "configure OpenCode docs MCP")
 	.action((options) => runSetupCommand(repoRoot, argsFromOptions(options)));
 
 program
@@ -155,7 +162,10 @@ program
 	.description("print OS package-manager setup commands")
 	.option("--os <os>", "macos or linux")
 	.option("--pkg <manager>", "brew, apt, dnf, pacman, zypper, or apk")
-	.option("--optional <tools>", "comma-separated optional tools")
+	.option(
+		"--optional <tools>",
+		"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
+	)
 	.option("--json", "print JSON")
 	.option("--homebrew-missing", "pretend Homebrew is missing on macOS")
 	.action((options) => runToolchainCommand(argsFromOptions(options)));
@@ -200,6 +210,13 @@ program
 	.action((options) =>
 		runProviderE2eCommand(repoRoot, argsFromOptions(options)),
 	);
+
+program
+	.command("mcp")
+	.description("run OAL-owned MCP servers")
+	.argument("<action>", "serve")
+	.argument("<server>", "anthropic-docs or opencode-docs")
+	.action((action: string, server: string) => runMcpCommand([action, server]));
 
 program
 	.command("interactive", { isDefault: true })
@@ -280,10 +297,13 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--db", options["db"]);
 	pushFlag(args, "--content", options["content"]);
 	pushFlag(args, "--installed", options["installed"]);
+	pushFlag(args, "--toolchain", options["toolchain"]);
 	pushFlag(args, "--rtk", options["rtk"]);
 	pushFlag(args, "--ctx7-cli", options["ctx7Cli"]);
 	pushFlag(args, "--playwright-cli", options["playwrightCli"]);
 	pushFlag(args, "--deepwiki-mcp", options["deepwikiMcp"]);
+	pushFlag(args, "--anthropic-docs-mcp", options["anthropicDocsMcp"]);
+	pushFlag(args, "--opencode-docs-mcp", options["opencodeDocsMcp"]);
 	pushFlag(args, "--dry-run", options["dryRun"]);
 	pushFlag(args, "--skip-bin", options["skipBin"]);
 	pushFlag(args, "--verbose", options["verbose"]);

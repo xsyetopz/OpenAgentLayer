@@ -64,8 +64,10 @@ function validateProductPromptContracts(
 		return;
 	}
 	const combined = [
+		contracts.repoInspection,
 		contracts.scopeDiscipline,
 		contracts.sourceBackedBehavior,
+		contracts.correctionDiscipline,
 		contracts.accountabilityPressure,
 		contracts.simplicityDiscipline,
 	].join("\n");

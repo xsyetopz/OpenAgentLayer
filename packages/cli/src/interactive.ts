@@ -118,6 +118,12 @@ async function interactiveSetup(
 	const rtk = await ask<boolean>(
 		confirm({ message: "Set up RTK enforcement?", initialValue: true }),
 	);
+	const toolchain = await ask<boolean>(
+		confirm({
+			message: "Install missing OAL command-line tools?",
+			initialValue: true,
+		}),
+	);
 	const optionalTools = await optionalToolPrompt();
 	const verbose = await ask<boolean>(
 		confirm({ message: "Show detailed command output?", initialValue: false }),
@@ -132,6 +138,7 @@ async function interactiveSetup(
 		...(opencodePlan ? { opencodePlan } : {}),
 		cavemanMode,
 		rtk,
+		toolchain,
 		optionalTools,
 		intent,
 	};
@@ -287,13 +294,15 @@ async function interactiveFeatures(): Promise<void> {
 			],
 		}),
 	);
-	const feature = await ask<"ctx7" | "deepwiki" | "playwright">(
+	const feature = await ask<OptionalTool>(
 		select({
 			message: "Feature",
 			options: [
 				{ value: "ctx7", label: "Context7 [CLI]" },
 				{ value: "playwright", label: "Playwright [CLI]" },
 				{ value: "deepwiki", label: "DeepWiki [MCP]" },
+				{ value: "anthropic-docs", label: "Anthropic Docs [MCP]" },
+				{ value: "opencode-docs", label: "OpenCode Docs [MCP]" },
 			],
 		}),
 	);
@@ -310,6 +319,7 @@ async function confirmApplyPrompt(selection: {
 	opencodePlan?: string;
 	cavemanMode?: string;
 	rtk: boolean;
+	toolchain: boolean;
 	optionalTools: OptionalTool[];
 	intent: "setup" | "repair";
 }): Promise<boolean> {
@@ -331,6 +341,7 @@ async function confirmApplyPrompt(selection: {
 	printStep("Options");
 	printDetail("caveman", selection.cavemanMode ?? "source");
 	printDetail("rtk", selection.rtk ? "yes" : "no");
+	printDetail("toolchain", selection.toolchain ? "yes" : "no");
 	printDetail(
 		"optional",
 		selection.optionalTools.length > 0
@@ -422,6 +433,16 @@ function optionalToolPrompt(): Promise<OptionalTool[]> {
 					value: "deepwiki",
 					label: "DeepWiki [MCP]",
 					hint: "repository knowledge MCP",
+				},
+				{
+					value: "anthropic-docs",
+					label: "Anthropic Docs [MCP]",
+					hint: "Claude Code and Anthropic docs",
+				},
+				{
+					value: "opencode-docs",
+					label: "OpenCode Docs [MCP]",
+					hint: "OpenCode config, tools, plugin docs",
 				},
 			],
 		}),

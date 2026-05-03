@@ -11,6 +11,11 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	expect(plan.commands[0]).toContain("Homebrew/install");
 	expect(plan.commands[1]).toContain("brew install bun ripgrep fd fzf");
 	expect(plan.requiredTools).toContain("bun");
+	expect(plan.requiredTools).toContain("shellcheck");
+	expect(plan.requiredTools).toContain("shfmt");
+	expect(plan.requiredTools).toContain("ast-grep");
+	expect(plan.requiredTools).toContain("gitleaks");
+	expect(plan.requiredTools).toContain("watchexec");
 	expect(plan.commands).toContain("rtk gain");
 	expect(plan.commands).toContain("rtk init -g --auto-patch");
 	expect(plan.commands).toContain("rtk init -g --codex");
@@ -19,6 +24,9 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	expect(plan.commands).toContain("rtk find --help");
 	expect(renderToolchainPlan(plan)).toContain("confirm token savings");
 	expect(renderToolchainPlan(plan)).toContain("at or above 80%");
+	expect(renderToolchainPlan(plan)).toContain("respect `.gitignore`");
+	expect(renderToolchainPlan(plan)).toContain("tracked files only");
+	expect(renderToolchainPlan(plan)).toContain("shellcheck");
 });
 
 test("Linux plan uses selected distro package manager and optional tools", () => {
@@ -53,4 +61,16 @@ test("optional feature commands support install and removal", () => {
 			scope: "project",
 		}),
 	).toEqual(["bunx ctx7 setup --cli --yes --codex --opencode --project"]);
+	expect(
+		optionalFeatureCommands("install", ["anthropic-docs", "opencode-docs"]),
+	).toEqual([
+		"claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs",
+		"opencode mcp add oal-opencode-docs -- oal mcp serve opencode-docs",
+	]);
+	expect(
+		optionalFeatureCommands("remove", ["anthropic-docs", "opencode-docs"]),
+	).toEqual([
+		"claude mcp remove oal-anthropic-docs --scope user",
+		"opencode mcp remove oal-opencode-docs",
+	]);
 });

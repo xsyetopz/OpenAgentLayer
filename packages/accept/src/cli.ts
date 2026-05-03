@@ -15,12 +15,15 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		"macos",
 		"--homebrew-missing",
 		"--optional",
-		"ctx7,playwright",
+		"ctx7,playwright,anthropic-docs,opencode-docs",
 	]);
 	if (
 		!(
 			toolchain.stdout.includes("Homebrew/install") &&
 			toolchain.stdout.includes("brew install bun ripgrep") &&
+			toolchain.stdout.includes("shellcheck") &&
+			toolchain.stdout.includes("gitleaks") &&
+			toolchain.stdout.includes("git ls-files") &&
 			toolchain.stdout.includes("rtk gain") &&
 			toolchain.stdout.includes("rtk grep --help") &&
 			toolchain.stdout.includes("rtk find --help") &&
@@ -28,7 +31,9 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			toolchain.stdout.includes(
 				"bunx -p playwright playwright install --with-deps",
 			) &&
-			!toolchain.stdout.includes("- bunx")
+			toolchain.stdout.includes("claude mcp add oal-anthropic-docs") &&
+			toolchain.stdout.includes("opencode mcp add oal-opencode-docs") &&
+			!toolchain.stdout.includes("\n- bunx")
 		)
 	)
 		throw new Error(
@@ -47,7 +52,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			"--provider",
 			"all",
 			"--optional",
-			"ctx7,playwright,deepwiki",
+			"ctx7,playwright,deepwiki,anthropic-docs,opencode-docs",
 			"--rtk",
 			"--dry-run",
 		],

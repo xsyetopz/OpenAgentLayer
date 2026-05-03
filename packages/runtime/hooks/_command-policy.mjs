@@ -54,6 +54,13 @@ const SUPPORTED_COMMANDS = new Map(
 );
 
 const SHELL_WRAPPERS = new Set(["bash", "sh", "zsh"]);
+const PREFERRED_REPLACEMENTS = new Map([
+	["ack", "rg"],
+	["ag", "rg"],
+	["exa", "eza"],
+	["du", "dust"],
+	["time", "hyperfine"],
+]);
 const SUDO_PREFIX_PATTERN = /^sudo\s+/;
 const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
 const WHITESPACE_PATTERN = /\s+/;
@@ -94,6 +101,14 @@ function evaluateSingleCommand(normalized, options) {
 		return {
 			decision: "pass",
 			reason: "Command inspection complete: executable command absent.",
+		};
+
+	const preferredReplacement = PREFERRED_REPLACEMENTS.get(executable);
+	if (preferredReplacement)
+		return {
+			decision: "block",
+			reason: "OpenAgentLayer has a preferred QoL tool for this command.",
+			details: [`Use: ${rewriteExecutable(normalized, preferredReplacement)}`],
 		};
 
 	const rtkExecutable = SUPPORTED_COMMANDS.get(executable);

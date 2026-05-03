@@ -2,6 +2,7 @@ import type { Provider } from "@openagentlayer/source";
 import {
 	type OptionalTool,
 	optionalFeatureCommands,
+	planToolchainInstall,
 } from "@openagentlayer/toolchain";
 
 export type SetupScope = "project" | "global";
@@ -15,6 +16,7 @@ export interface SetupPlanOptions {
 	target?: string;
 	binDir?: string;
 	optionalTools?: OptionalTool[];
+	toolchain?: boolean;
 	rtk?: boolean;
 	dryRun?: boolean;
 }
@@ -40,7 +42,18 @@ export interface SetupPlan {
 export function planSetup(options: SetupPlanOptions): SetupPlan {
 	const optionalTools = options.optionalTools ?? [];
 	const phases: SetupPhase[] = [];
-	if (options.rtk || optionalTools.length > 0) {
+	if (options.toolchain) {
+		const toolchainPlan = planToolchainInstall({
+			os: process.platform === "darwin" ? "macos" : "linux",
+			hasHomebrew: false,
+			includeOptional: optionalTools,
+		});
+		phases.push({
+			name: "toolchain",
+			action: "Install OAL command-line toolchain",
+			commands: toolchainPlan.commands,
+		});
+	} else if (options.rtk || optionalTools.length > 0) {
 		phases.push({
 			name: "toolchain",
 			action: "Install optional OAL tool surfaces",

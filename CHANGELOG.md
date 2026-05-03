@@ -5,29 +5,35 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.1.4-beta.1] - 2026-05-03
+## [0.2.0-beta.1] - 2026-05-04
 
 ### Added
 
-- Added Gitleaks upstream as the secret-rule source with an OAL patch layer for developer and provider gaps.
-- Added Codex/OpenCode provider-e2e live checks for hook and plugin behavior.
+- Added `oal mcp serve` for OAL-owned MCP servers, starting with Anthropic Docs and OpenCode Docs.
+- Added optional setup and feature commands for Anthropic Docs and OpenCode Docs MCP add/remove flows.
+- Added `install.sh` and `install-online.sh` convenience installers for source checkout and temporary-clone installs.
+- Added toolchain setup coverage for Homebrew, core OAL command-line tools, RTK checks, and fallback-oriented setup output.
+- Added styled hook feedback and provider-native post-tool blocking output for Codex, Claude Code, and OpenCode.
 
 ### Changed
 
-- Replaced OAL-maintained secret regex tables with synced Gitleaks rules plus `patches/gitleaks-oal-rules.patch`.
-- Removed provider schema drift checks tied to upstream schemas that OAL does not own.
-- Fixed provider hook output and deployment for Codex hooks, Claude hook events, and OpenCode plugin hooks.
-- Updated OpenCode plugin rendering to use documented local plugin paths and named plugin exports.
+- Reworked interactive setup as a high-level wrapper over the low-level setup command path.
+- Expanded low-level setup/toolchain CLI flags for optional docs MCPs and command-line tool installation.
+- Consolidated advisory command-tool hooks into `advise-command-tools`, while keeping RTK command enforcement separate.
+- Updated OpenCode runtime/plugin rendering for command policy, Bun rewrites, command safety, secret checks, and repeated-failure handling.
+
+### Removed
+
+- Removed duplicate failure-loop hook wiring.
+- Removed one-off `prefer-ripgrep` and `require-jq-yq-edits` hook records in favor of consolidated command-tool advice.
 
 ### Verified
 
-- `rtk proxy -- bun run gitleaks:check`
-- `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run biome:check`
-- `rtk proxy -- bun run test`
-- `rtk proxy -- bun run accept`
-- `rtk proxy -- bun packages/cli/src/main.ts provider-e2e --provider codex --live`
-- `rtk proxy -- bun packages/cli/src/main.ts provider-e2e --provider opencode --live`
+- `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/accept/__tests__/accept.test.ts`
+- `rtk proxy -- bun packages/cli/src/main.ts accept`
+- `rtk proxy -- bunx biome check . --error-on-warnings --max-diagnostics 16384`
+- `rtk proxy -- bun test packages/*/__tests__/*.test.ts tests/*.test.ts`
+- `rtk bunx tsc --noEmit`
 
 ## [0.1.3-beta.4] - 2026-05-03
 

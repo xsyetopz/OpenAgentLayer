@@ -30,7 +30,7 @@ export function runFeaturesCommand(args: string[]): void {
 	const remove = optionalTools(option(args, "--remove"));
 	if (install.length === 0 && remove.length === 0)
 		throw new Error(
-			"Expected --install or --remove with ctx7,deepwiki,playwright.",
+			"Expected --install or --remove with ctx7,deepwiki,playwright,anthropic-docs,opencode-docs.",
 		);
 	const commands = [
 		...optionalFeatureCommands("install", install),
@@ -61,6 +61,12 @@ function optionalTools(rawTools: string | undefined): OptionalTool[] {
 		.split(",")
 		.map((tool) => tool.trim())
 		.filter((tool): tool is OptionalTool =>
-			["ctx7", "deepwiki", "playwright"].includes(tool),
+			[
+				"ctx7",
+				"deepwiki",
+				"playwright",
+				"anthropic-docs",
+				"opencode-docs",
+			].includes(tool),
 		);
 }

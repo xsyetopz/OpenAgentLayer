@@ -8,15 +8,16 @@ This guide covers the supported OpenAgentLayer install and setup paths. Use `--d
    1. [Contents](#contents)
    2. [Prerequisites](#prerequisites)
    3. [Install from source](#install-from-source)
-   4. [Install with Homebrew](#install-with-homebrew)
-   5. [Interactive CLI](#interactive-cli)
-   6. [Set up provider plugins](#set-up-provider-plugins)
-   7. [Deploy into a project](#deploy-into-a-project)
-   8. [Deploy globally](#deploy-globally)
-   9. [Select model plans](#select-model-plans)
-   10. [Verify the install](#verify-the-install)
-   11. [Uninstall](#uninstall)
-   12. [Troubleshooting](#troubleshooting)
+   4. [Install online](#install-online)
+   5. [Install with Homebrew](#install-with-homebrew)
+   6. [Interactive CLI](#interactive-cli)
+   7. [Set up provider plugins](#set-up-provider-plugins)
+   8. [Deploy into a project](#deploy-into-a-project)
+   9. [Deploy globally](#deploy-globally)
+   10. [Select model plans](#select-model-plans)
+   11. [Verify the install](#verify-the-install)
+   12. [Uninstall](#uninstall)
+   13. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -30,13 +31,13 @@ OAL expects:
 Recommended toolchain plan:
 
 ```bash
-bun run toolchain -- --os macos --optional ctx7,playwright
-bun run toolchain -- --os linux --pkg apt --optional ctx7,playwright
+bun run toolchain -- --os macos --optional ctx7,playwright,anthropic-docs,opencode-docs
+bun run toolchain -- --os linux --pkg apt --optional ctx7,playwright,anthropic-docs,opencode-docs
 ```
 
 The plan prints copy-safe `bash` blocks. Paste command lines without Markdown list bullets.
 
-The toolchain plan includes Bun itself. OAL-generated npm/pnpm/yarn/npx shims rely on Bun being present before provider usage starts.
+The toolchain plan includes Bun itself. OAL-generated npm/pnpm/yarn/npx shims rely on Bun being present before provider usage starts. `setup --toolchain` can run the same toolchain plan as part of a full setup dry-run or apply.
 
 Install RTK when it is missing:
 
@@ -71,6 +72,36 @@ bun run preview -- --provider all
 bun run preview -- --provider codex --path .codex/config.toml --content
 ```
 
+Plan the full setup flow without writing:
+
+```bash
+bun run setup -- --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+```
+
+Use the source checkout convenience script to run dependency setup and the OAL CLI:
+
+```bash
+./install.sh setup --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+```
+
+Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7,anthropic-docs,opencode-docs`.
+
+## Install online
+
+Use `install-online.sh` when you want the script to handle the git checkout. It clones OAL into a temporary directory, initializes submodules, copies the checkout into `OAL_INSTALL_DIR` or `$HOME/.local/share/openagentlayer`, runs `install.sh`, and removes the temporary clone.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/master/install-online.sh -o install-online.sh
+chmod +x install-online.sh
+./install-online.sh setup --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+```
+
+Environment overrides:
+
+```bash
+OAL_REF=master OAL_INSTALL_DIR="$HOME/.local/share/openagentlayer" ./install-online.sh check
+```
+
 ## Install with Homebrew
 
 The repository includes `homebrew/Casks/openagentlayer.rb`. The cask expects a release archive named:
@@ -101,16 +132,23 @@ Run without a command in a TTY for guided prompts:
 bun packages/cli/src/main.ts
 ```
 
-The interactive path uses Commander-parsed commands plus Clack prompts. It covers preview, deploy, plugin sync, uninstall, and check. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
+The interactive path uses Commander-parsed commands plus Clack prompts. It covers setup, preview, deploy, plugin sync, uninstall, and check. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
 
 Optional feature commands can be printed separately:
 
 ```bash
-bun run features -- --install ctx7,playwright
-bun run features -- --remove ctx7,playwright
+bun run features -- --install ctx7,playwright,anthropic-docs,opencode-docs
+bun run features -- --remove ctx7,playwright,anthropic-docs,opencode-docs
 ```
 
-Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration.
+Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration. `anthropic-docs` and `opencode-docs` are normal OAL-owned MCP servers registered with provider MCP commands and served by `oal mcp serve`.
+
+Run an OAL-owned MCP server directly when a provider launches it:
+
+```bash
+bun packages/cli/src/main.ts mcp serve anthropic-docs
+bun packages/cli/src/main.ts mcp serve opencode-docs
+```
 
 ## Set up provider plugins
 
@@ -243,7 +281,7 @@ Installed binary smoke test:
 ```bash
 oal check
 oal preview --provider all
-oal toolchain --os macos --optional ctx7,playwright
+oal toolchain --os macos --optional ctx7,anthropic-docs,opencode-docs
 ```
 
 RTK policy check:
