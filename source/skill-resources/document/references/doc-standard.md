@@ -1,19 +1,14 @@
 # Documentation standard
 
-Document facts that are true in the current tree. Every usage example should map to a real command, generated path, provider artifact, package, or validation check.
+Docs describe current implemented behavior.
 
-**Keep docs short and operational:**
+Include:
 
-- what the feature does now
-- where authored source lives
-- what gets generated
-- how to run it
-- how to verify it
-- what is intentionally unsupported
+- what users can do now
+- exact commands and paths
+- provider-specific differences
+- setup requirements
+- validation evidence when relevant
+- current limits that affect user action
 
-Remove stale names, old product labels, speculative roadmaps, and implementation claims that are not backed by source loading, rendering, deployment, uninstall, or acceptance validation.
-
-## References
-
-- [Diataxis documentation framework](https://diataxis.fr/)
-- [Google developer documentation style guide](https://developers.google.com/style)
+Current-state cleanup removes stale names, outdated product labels, speculative roadmaps, and implementation claims lacking source loading, rendering, deployment, uninstall, or acceptance validation evidence.

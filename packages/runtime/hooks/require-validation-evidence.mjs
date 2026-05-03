@@ -73,7 +73,7 @@ function evaluate(payload) {
 	if (!isCompleted) {
 		return {
 			decision: "pass",
-			reason: "No completion check required for current route status.",
+			reason: "Completion check complete for current route status.",
 		};
 	}
 

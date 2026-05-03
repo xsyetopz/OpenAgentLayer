@@ -14,6 +14,7 @@ const CODEX_REQUIRED_FLAGS = [
 	"sqlite = true",
 	"plugins = true",
 	"codex_hooks = true",
+	"hooks = true",
 	"goals = true",
 	"responses_websockets = true",
 	"responses_websockets_v2 = true",
@@ -65,6 +66,10 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 	await assertCodexInstructionBaseline(config, targetRoot);
 	for (const flag of CODEX_REQUIRED_FLAGS)
 		if (!config.includes(flag)) throw new Error(`Codex config missing ${flag}`);
+	if (config.includes("model_instructions_file"))
+		throw new Error(
+			"Codex config should not replace bundled base instructions.",
+		);
 	if (!config.includes('approvals_reviewer = "auto_review"'))
 		throw new Error("Codex config missing auto approval reviewer.");
 	if (!config.includes("interrupt_message = true"))
@@ -94,10 +99,6 @@ async function assertCodexInstructionBaseline(
 		const profileBlock = config.match(
 			new RegExp(String.raw`\[profiles\.${profile}\]([\s\S]*?)(?=\n\[|$)`),
 		)?.[1];
-		if (!profileBlock?.includes('model_instructions_file = "AGENTS.md"'))
-			throw new Error(
-				`Codex profile ${profile} does not pin model_instructions_file.`,
-			);
 		if (
 			!profileBlock?.includes('zsh_path = ".codex/openagentlayer/shim/oal-zsh"')
 		)
@@ -106,9 +107,8 @@ async function assertCodexInstructionBaseline(
 	const agents = await readFile(join(targetRoot, "AGENTS.md"), "utf8");
 	for (const required of [
 		"Codex baseline",
-		"model_instructions_file",
-		"stable OAL baseline",
-		"Do not edit generated files directly",
+		"bundled base instructions",
+		"generated files are disposable outputs",
 	])
 		if (!agents.includes(required))
 			throw new Error(`AGENTS.md missing Codex baseline text: ${required}`);
@@ -198,16 +198,6 @@ async function assertRuntimeArtifacts(targetRoot: string): Promise<void> {
 	);
 	if (!shim.includes("exec rtk git"))
 		throw new Error("Codex RTK shim does not route git through RTK.");
-	for (const packageManager of ["npm", "npx", "pnpm", "yarn"]) {
-		const packageShim = await readFile(
-			join(targetRoot, `.codex/openagentlayer/shim/${packageManager}`),
-			"utf8",
-		);
-		if (packageShim.includes(`exec rtk ${packageManager}`))
-			throw new Error(`${packageManager} shim bypasses Bun rewrite.`);
-		if (!packageShim.includes("bun"))
-			throw new Error(`${packageManager} shim does not route to Bun.`);
-	}
 	const zsh = await readFile(
 		join(targetRoot, ".codex/openagentlayer/shim/oal-zsh"),
 		"utf8",

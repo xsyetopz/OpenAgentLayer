@@ -13,5 +13,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Review diff and generated artifacts for correctness, security, regression, shallow artifacts, unsupported provider features, missing acceptance coverage, and scope drift. Treat unrequested additions and rejected-idea memorialization as correctness defects, not style preferences. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Review diff and generated artifacts for correctness, security, regression, shallow artifacts, provider-surface gaps, missing acceptance coverage, scope drift, and current-state residue. Files outside the edit envelope are correctness defects. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

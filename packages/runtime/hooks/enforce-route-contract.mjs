@@ -12,13 +12,13 @@ function evaluate(payload) {
 	) {
 		return {
 			decision: "block",
-			reason: "Edit-required route completed without changed-file evidence.",
+			reason: "Edit-required route needs changed-file evidence.",
 		};
 	}
 	if (routeKind === "execution-required" && !commandEvidence) {
 		return {
 			decision: "block",
-			reason: "Execution-required route completed without command evidence.",
+			reason: "Execution-required route needs command evidence.",
 		};
 	}
 	if (payload.explanationOnly === true) {

@@ -18,10 +18,12 @@ ${renderTemplate(source, "agentContract", {
 })}
 
 Triggers: ${agent.triggers.join("; ")}
-Do not use for: ${agent.nonGoals.join("; ")}
+Route handoff signals: ${agent.nonGoals.join("; ")}
 Tool contract: ${agent.tools.join(", ")}
 Skill access: ${agent.skills.join(", ")}
 Owned routes: ${agent.routes.join(", ")}
+Owned route contracts:
+${renderOwnedRouteContracts(agent, source)}
 Final output must include concrete evidence or a precise blocker.`;
 }
 
@@ -84,18 +86,38 @@ function renderAgentPromptContracts(source: OalSource): string {
 	const contracts = source.promptContracts;
 	if (!contracts) return "";
 	return [
-		"- Scope control: unrequested additions are defects; do not preserve rejected ideas in docs, tests, comments, warnings, changelogs, or config.",
+		"- Artifact target: produce a current-state patch; repository artifacts describe behavior that exists now.",
+		"- Edit envelope: derive ALLOWED_EDIT_SET from the user request and controlling source; docs, tests, comments, config, warnings, and guardrails enter the set through explicit request or current runtime/schema/security/validation need.",
+		"- Naming source: create names from existing symbols, formal API/schema terms, user-supplied names, or current behavior; path labels are location metadata.",
+		"- Removal transform: removed concepts become absence; current runtime behavior and explicitly requested history artifacts may carry needed text.",
+		"- Diff gate: inspect final diff and repair added residue before final response.",
 		"- Source evidence: inspect controlling source before claims; behavior changes need Source Evidence Map, Changed Behavior, and Validation Evidence.",
-		"- Boundaries: answer only the requested task; do not add guidance, alternatives, cleanup, or guardrails unless requested or validation-required.",
-		"- Block honestly: if source truth is missing, ambiguous, or contradictory, return STATUS BLOCKED with Attempted, Evidence, and Need.",
+		"- Boundaries: answer the requested task; extra guidance, alternatives, cleanup, and guardrails enter the answer through user request or validation need.",
+		"- Blocker path: missing, ambiguous, or contradictory source truth returns STATUS BLOCKED with Attempted, Evidence, and Need.",
 		renderCavemanContract(source),
 	].join("\n");
+}
+
+function renderOwnedRouteContracts(
+	agent: AgentRecord,
+	source: OalSource,
+): string {
+	const routes = source.routes.filter((route) =>
+		agent.routes.includes(route.id),
+	);
+	if (routes.length === 0) return "- none";
+	return routes
+		.map(
+			(route) =>
+				`- ${route.id}: permissions=${route.permissions}; arguments=${route.arguments}; skills=${route.skills.join(", ")}; ${route.body}`,
+		)
+		.join("\n");
 }
 
 function renderCavemanContract(source: OalSource): string {
 	const mode = source.caveman?.mode ?? "off";
 	if (mode === "off")
-		return "- Caveman mode: off. Answer normally unless the user explicitly invokes Caveman output.";
+		return "- Caveman mode: off. Answer normally; user-invoked Caveman output activates compression.";
 	return `- Caveman mode: ${mode}. Compress assistant prose according to this mode while preserving code, commands, paths, URLs, exact errors, versions, commit messages, review findings, and file contents.`;
 }
 

@@ -1,0 +1,6 @@
+{
+  "id": "rtk_report",
+  "provider": "opencode",
+  "description": "Summarize RTK command history for the current project by filtered, proxy, and fallback routing.",
+  "body": "Run `oal rtk-report --project <cwd>` and return the by-kind totals plus top output leaks."
+}

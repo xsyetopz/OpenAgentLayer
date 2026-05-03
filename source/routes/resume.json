@@ -11,5 +11,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Recover session state, summarize durable context, and identify the next safe action without inventing completed work. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Recover session state, summarize durable context, and identify the next safe action from observed evidence. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

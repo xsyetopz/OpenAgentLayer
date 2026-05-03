@@ -1,3 +1,4 @@
+import { Database } from "bun:sqlite";
 import { expect, test } from "bun:test";
 import {
 	chmod,
@@ -724,6 +725,62 @@ test("CLI RTK gain check reports status", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain("STATUS PASS");
+	await rm(root, { recursive: true, force: true });
+});
+
+test("CLI RTK report groups project history by routing kind", async () => {
+	const root = await mkdtemp(join(tmpdir(), "oal-rtk-report-"));
+	const dbPath = join(root, "history.db");
+	const db = new Database(dbPath);
+	db.run(`create table commands (
+		id integer primary key,
+		timestamp text not null,
+		original_cmd text not null,
+		rtk_cmd text not null,
+		input_tokens integer not null,
+		output_tokens integer not null,
+		saved_tokens integer not null,
+		savings_pct real not null,
+		exec_time_ms integer default 0,
+		project_path text default ''
+	)`);
+	const insert = db.query(
+		"insert into commands (timestamp, original_cmd, rtk_cmd, input_tokens, output_tokens, saved_tokens, savings_pct, exec_time_ms, project_path) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+	);
+	insert.run("2026-05-03", "grep foo", "rtk grep", 100, 20, 80, 80, 100, root);
+	insert.run(
+		"2026-05-03",
+		"nl -ba file",
+		"rtk proxy nl -ba file",
+		100,
+		100,
+		0,
+		0,
+		200,
+		root,
+	);
+	insert.run("2026-05-03", "sort", "rtk fallback: sort", 0, 0, 0, 0, 300, root);
+	db.close();
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"rtk-report",
+			"--project",
+			root,
+			"--db",
+			dbPath,
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	expect(stdout).toContain("proxy: commands=1");
+	expect(stdout).toContain("filtered: commands=1");
+	expect(stdout).toContain("fallback: commands=1");
+	expect(stdout).toContain("nl -ba <file>");
 	await rm(root, { recursive: true, force: true });
 });
 

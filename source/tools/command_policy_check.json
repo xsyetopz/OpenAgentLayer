@@ -1,0 +1,6 @@
+{
+  "id": "command_policy_check",
+  "provider": "opencode",
+  "description": "Evaluate one shell command against OAL RTK and Bun command policy.",
+  "body": "Classify a shell command with the same RTK and Bun policy used by OAL runtime hooks."
+}

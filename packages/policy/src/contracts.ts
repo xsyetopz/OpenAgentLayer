@@ -5,7 +5,7 @@ const ROUTE_EVIDENCE_PATTERN = /validation|evidence|command|output/i;
 const REQUIRED_SOURCE_CONTRACT_TERMS = [
 	"Source-backed behaviour is mandatory",
 	"Source Evidence Map",
-	"A confident guess is failure",
+	"The route path is inspect, prove, change, validate, report",
 	"Simplicity discipline",
 ] as const;
 

@@ -148,7 +148,7 @@ function evaluate(payload) {
 	if (!(isFinalStatus(payload) && behaviorChanged(payload))) {
 		return {
 			decision: "pass",
-			reason: "Source evidence check not required for this payload.",
+			reason: "Source evidence check complete for this payload.",
 		};
 	}
 

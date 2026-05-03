@@ -12,6 +12,13 @@ test("runtime hook inventory uses executable mjs scripts", async () => {
 async function runHook(
 	input: unknown,
 ): Promise<{ decision?: string; details?: string[] }> {
+	const result = await runHookRaw(input);
+	return JSON.parse(result.stdout);
+}
+
+async function runHookRaw(
+	input: unknown,
+): Promise<{ code: number; stdout: string }> {
 	const hookPath = resolve(
 		import.meta.dir,
 		"../hooks/enforce-rtk-commands.mjs",
@@ -24,8 +31,8 @@ async function runHook(
 	proc.stdin.write(JSON.stringify(input));
 	proc.stdin.end();
 	const stdout = await new Response(proc.stdout).text();
-	await proc.exited;
-	return JSON.parse(stdout);
+	const code = await proc.exited;
+	return { code, stdout };
 }
 
 test("RTK hook enforces supported commands and proxies unsupported commands", async () => {
@@ -95,6 +102,26 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 			details: [`Use: ${replacement}`],
 		});
 	}
+	await expect(
+		runHook({ tool_input: { command: "npx prettier foo.js" } }),
+	).resolves.toMatchObject({
+		decision: "block",
+		details: ["Use: rtk proxy -- bunx prettier foo.js"],
+	});
+	const codexPreToolUse = await runHookRaw({
+		hook_event_name: "PreToolUse",
+		tool_input: { command: "npx prettier foo.js" },
+	});
+	expect(codexPreToolUse.code).toBe(0);
+	expect(JSON.parse(codexPreToolUse.stdout)).toMatchObject({
+		hookSpecificOutput: {
+			hookEventName: "PreToolUse",
+			permissionDecision: "deny",
+			permissionDecisionReason: expect.stringContaining(
+				"rtk proxy -- bunx prettier foo.js",
+			),
+		},
+	});
 	await expect(
 		runHook({ command: "yarn set version stable" }),
 	).resolves.toMatchObject({

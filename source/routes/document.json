@@ -11,5 +11,5 @@
   ],
   "permissions": "docs-only write",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Update documentation only when it describes current implemented behavior. Keep examples tied to real CLI commands and generated artifacts. Rejected ideas, abandoned approaches, and corrected mistakes disappear; do not preserve them as warnings, policy prose, or historical explanation unless the user explicitly asks for that record. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Update documentation for current implemented behavior. Keep examples tied to real CLI commands and generated artifacts. Removed concepts become absence in current-state docs; explicitly requested history records may carry history text. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

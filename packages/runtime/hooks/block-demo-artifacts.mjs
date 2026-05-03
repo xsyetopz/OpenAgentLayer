@@ -31,7 +31,7 @@ function evaluate(payload) {
 		};
 	}
 
-	return { decision: "pass", reason: "No demo artifact metadata detected." };
+	return { decision: "pass", reason: "Demo artifact metadata absent." };
 }
 
 createHookRunner("block-demo-artifacts", evaluate);

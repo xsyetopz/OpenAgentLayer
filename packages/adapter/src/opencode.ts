@@ -164,15 +164,76 @@ ${agentPrompt(agent, source)}
 }
 
 function renderOpenCodeTool(tool: ToolRecord): string {
+	if (tool.id === "command_policy_check") return renderCommandPolicyTool(tool);
+	if (tool.id === "rtk_report") return renderRtkReportTool(tool);
+	if (tool.id === "provider_surface_map")
+		return renderProviderSurfaceMapTool(tool);
 	return `import { tool } from "@opencode-ai/plugin";
 
 export const ${camelCase(tool.id)} = tool({
 	description: ${quoteToml(tool.description)},
 	args: {},
 	async execute() {
-		return {
-			output: ${quoteToml(tool.body)}
-		};
+		return ${quoteToml(tool.body)};
+	}
+});
+`;
+}
+
+function renderCommandPolicyTool(tool: ToolRecord): string {
+	return `import { tool } from "@opencode-ai/plugin";
+import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";
+import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";
+
+export const ${camelCase(tool.id)} = tool({
+	description: ${quoteToml(tool.description)},
+	args: {
+		command: tool.schema.string().describe("Shell command to evaluate")
+	},
+	async execute(args) {
+		const result = evaluateCommandPolicy(args.command, {
+			bunRewrite,
+			rtkInstalled: true,
+			rtkPolicyPresent: true
+		});
+		return JSON.stringify(result);
+	}
+});
+`;
+}
+
+function renderRtkReportTool(tool: ToolRecord): string {
+	return `import { tool } from "@opencode-ai/plugin";
+
+export const ${camelCase(tool.id)} = tool({
+	description: ${quoteToml(tool.description)},
+	args: {
+		project: tool.schema.string().optional().describe("Project directory; defaults to process cwd")
+	},
+	async execute(args) {
+		const project = args.project ?? process.cwd();
+		return [
+			"Run this command for the project-scoped RTK report:",
+			\`oal rtk-report --project "\${project}"\`,
+			"Use the output to replace proxy/fallback leaks with native RTK filters."
+		].join("\\n");
+	}
+});
+`;
+}
+
+function renderProviderSurfaceMapTool(tool: ToolRecord): string {
+	return `import { tool } from "@opencode-ai/plugin";
+
+export const ${camelCase(tool.id)} = tool({
+	description: ${quoteToml(tool.description)},
+	args: {},
+	async execute() {
+		return [
+			"codex: .codex/config.toml, AGENTS.md, .codex/agents/*.toml, .codex/openagentlayer/hooks/*.mjs, .codex/openagentlayer/shim/*",
+			"claude: .claude/settings.json, CLAUDE.md, .claude/agents/*.md, .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/hooks/scripts/*.mjs",
+			"opencode: opencode.jsonc, .opencode/agents/*.md, .opencode/commands/*.md, .opencode/tools/*.ts, .opencode/plugins/openagentlayer.ts, .opencode/skills/*/SKILL.md"
+		].join("\\n");
 	}
 });
 `;

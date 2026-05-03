@@ -269,11 +269,11 @@ After project uninstall, inspect the target project's git status. User-owned fil
 
 ## Troubleshooting
 
-| Symptom                                           | Check                                                                                         |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `bun run check` fails on missing upstream skills. | Run `git submodule update --init --recursive`.                                                |
-| Preview shows stale provider output.              | Edit `source/`, not generated artifacts, then rerun `bun run preview -- --provider all`.      |
-| Deploy wants to touch unexpected paths.           | Stop and inspect `--dry-run` output before applying.                                          |
-| Codex sessions do not show OAL instructions.      | Confirm generated `.codex/config.toml` sets `model_instructions_file = "AGENTS.md"`.          |
-| OpenCode tools fail to load.                      | Confirm dependencies include `@opencode-ai/plugin` and rerun `bun install --frozen-lockfile`. |
-| RTK gain fails in local release checks.           | Run RTK-wrapped commands, then rerun `bun run rtk-gain -- --allow-empty-history`.             |
+| Symptom                                           | Check                                                                                          |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `bun run check` fails on missing upstream skills. | Run `git submodule update --init --recursive`.                                                 |
+| Preview shows stale provider output.              | Edit `source/`, not generated artifacts, then rerun `bun run preview -- --provider all`.       |
+| Deploy wants to touch unexpected paths.           | Stop and inspect `--dry-run` output before applying.                                           |
+| Codex sessions do not show OAL instructions.      | Confirm `.codex/AGENTS.md` exists and the generated profile is active in `.codex/config.toml`. |
+| OpenCode tools fail to load.                      | Confirm dependencies include `@opencode-ai/plugin` and rerun `bun install --frozen-lockfile`.  |
+| RTK gain fails in local release checks.           | Run RTK-wrapped commands, then rerun `bun run rtk-gain -- --allow-empty-history`.              |

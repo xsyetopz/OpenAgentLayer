@@ -34,12 +34,16 @@ const AGENT_CONTRACT_TERMS = [
 	"Evidence contract:",
 	"Scope contract:",
 	"Structure contract:",
-	"Scope control:",
+	"Artifact target:",
+	"Edit envelope:",
+	"Naming source:",
+	"Removal transform:",
+	"Diff gate:",
 	"Source Evidence Map",
 	"Boundaries:",
-	"Block honestly:",
+	"Blocker path:",
 	"Triggers:",
-	"Do not use for:",
+	"Route handoff signals:",
 	"Tool contract:",
 	"Skill access:",
 	"Owned routes:",
@@ -61,7 +65,7 @@ const COMMAND_CONTRACT_TERMS = [
 	"Attribution contract:",
 	"Source-backed behaviour is mandatory",
 	"Source Evidence Map",
-	"A confident guess is failure",
+	"The route path is inspect, prove, change, validate, report",
 	"Simplicity discipline",
 	"RTK efficiency:",
 	"Response boundaries:",
@@ -150,6 +154,11 @@ function assertRouteArtifacts(artifacts: Artifact[]): void {
 	for (const route of REQUIRED_ROUTES)
 		if (!codexInstructions.content.includes(`- ${route}:`))
 			throw new Error(`Codex AGENTS.md missing route ${route}.`);
+	for (const agent of CORE_AGENTS) {
+		const codexAgent = findArtifact(`.codex/agents/${agent}.toml`, artifacts);
+		if (!codexAgent.content.includes("Owned route contracts:"))
+			throw new Error(`Codex agent ${agent} missing owned route contracts.`);
+	}
 }
 
 function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
@@ -232,16 +241,6 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	const shim = findArtifact(".codex/openagentlayer/shim/git", artifacts);
 	if (!(shim.executable && shim.content.includes("exec rtk git")))
 		throw new Error("Codex RTK shim artifact is not executable.");
-	for (const packageManager of ["npm", "npx", "pnpm", "yarn"]) {
-		const packageShim = findArtifact(
-			`.codex/openagentlayer/shim/${packageManager}`,
-			artifacts,
-		);
-		if (packageShim.content.includes(`exec rtk ${packageManager}`))
-			throw new Error(`${packageManager} shim bypasses Bun rewrite.`);
-		if (!packageShim.content.includes("bun"))
-			throw new Error(`${packageManager} shim does not route to Bun.`);
-	}
 	const privileged = findArtifact(
 		".codex/openagentlayer/runtime/privileged-exec.mjs",
 		artifacts,

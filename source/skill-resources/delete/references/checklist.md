@@ -1,31 +1,24 @@
 # Delete checklist
 
-Use this checklist before any file removal, generated artifact pruning, fixture cleanup, or uninstall path.
+Before removing paths, capture:
 
-## Required sequence
+1. User intent: exact requested path or artifact class.
+2. Ownership: git status, generated marker, manifest ownership entry, package owner, or source record.
+3. Scope: target root and glob expansion preview.
+4. Recovery: current branch, dirty files, and whether the file is generated.
+5. Execution: bounded delete command or patch deletion.
+6. Validation: status and targeted check.
 
-1. List exact paths targeted for removal.
-2. Inspect ownership:
-   - git status for tracked or dirty state
-   - OAL manifest ownership for generated artifacts
-   - OAL block markers for managed file sections
-   - fixture or cache root for temporary files
-3. Classify each path as generated, fixture/cache, user-authored, or unknown.
-4. Delete only generated or fixture/cache paths that match the user request.
-5. Stop when a path is dirty, user-authored, outside scope, or unknown.
-6. Verify removal and report the exact command.
+Safe delete evidence:
 
-## Deny conditions
+- path under target root
+- ownership proven by manifest, marker, generated output, or explicit user request
+- dirty user edits preserved or explicitly requested for removal
+- generated artifacts removed through source/deploy ownership when available
 
-- Broad patterns such as repository root globs, home directory globs, or unbounded `rm -rf`.
-- Replacing deletion with truncation, hidden moves, or permission changes.
-- Removing dirty user work without explicit request.
-- Removing untracked files when they may be user-authored.
-- Deleting generated artifacts by path guessing instead of manifest or marker evidence.
+Blocker signals:
 
-## Output contract
-
-- `Paths`: exact removals attempted.
-- `Ownership`: generated, fixture/cache, user-authored, or unknown.
-- `Command`: the removal command or API call.
-- `Verification`: status or filesystem evidence after removal.
+- dirty user work lacks explicit removal intent
+- generated artifact target lacks manifest or marker evidence
+- glob expands outside the named target root
+- path ownership is ambiguous

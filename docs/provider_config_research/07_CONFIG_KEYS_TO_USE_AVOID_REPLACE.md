@@ -14,7 +14,6 @@ Use:
 - `approvals_reviewer = "auto_review"`
 - `sandbox_mode`
 - `service_tier`
-- `model_instructions_file`
 - `[agents]` with `max_depth`, `job_max_runtime_seconds`, `interrupt_message`.
 - `[agents.<role>]` with `description`, `nickname_candidates`, `config_file`.
 - `features.codex_hooks`, `hooks`, `plugin_hooks`, `multi_agent`, `multi_agent_v2`, `child_agents_md`, `sqlite`, `memories`, `memory_tool`, `shell_tool`, `shell_snapshot`, `unified_exec`, `web_search`, `search_tool`, `plugins`, `goals`, `prevent_idle_sleep` as appropriate.
@@ -23,6 +22,7 @@ Avoid/replace:
 
 - `approval_policy = "on-failure"` → use `on-request` or `never`.
 - `approvals_reviewer = "deprecated approval alias"` → use `auto_review`.
+- `model_instructions_file` by default; use Codex bundled base instructions plus `AGENTS.md` project guidance.
 - deprecated no-op ghost snapshot fields.
 - prompt/agent hooks if the installed Codex version still skips them.
 - blocked Codex models, blocked model names.

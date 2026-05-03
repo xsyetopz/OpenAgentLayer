@@ -7,7 +7,7 @@
     "opencode"
   ],
   "description": "Check destructive actions, generated-file edits, secrets, permissions, and deploy/uninstall safety. Use for security-sensitive code, hooks, config, or release automation.",
-  "body": "Security work starts with what can be damaged or leaked. Classify the path, permission surface, and ownership boundary before editing.",
+  "body": "Security work starts with what can be damaged or leaked. Classify the path, permission surface, ownership boundary, and least-privilege runtime before editing.",
   "supportFiles": [
     {
       "path": "references/guards.md",

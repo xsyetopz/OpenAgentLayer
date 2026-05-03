@@ -93,7 +93,7 @@ function evaluate(payload) {
 
 	return {
 		decision: "pass",
-		reason: "No unresolved sentinel markers detected.",
+		reason: "Sentinel marker gate passed.",
 	};
 }
 

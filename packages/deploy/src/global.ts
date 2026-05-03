@@ -49,11 +49,6 @@ function globalContent(
 	if (provider === "codex" && path === ".codex/config.toml")
 		return content
 			.replaceAll(
-				'model_instructions_file = "AGENTS.md"',
-				() =>
-					`model_instructions_file = ${JSON.stringify(join(home, ".codex/AGENTS.md"))}`,
-			)
-			.replaceAll(
 				'zsh_path = ".codex/openagentlayer/shim/oal-zsh"',
 				() =>
 					`zsh_path = ${JSON.stringify(join(home, ".codex/openagentlayer/shim/oal-zsh"))}`,
@@ -63,6 +58,11 @@ function globalContent(
 				(_match, file) =>
 					`config_file = ${JSON.stringify(join(home, ".codex/agents", file))}`,
 			);
+	if (provider === "codex" && path === ".codex/hooks.json")
+		return content.replaceAll(
+			".codex/openagentlayer/hooks/",
+			() => `${join(home, ".codex/openagentlayer/hooks")}/`,
+		);
 	if (provider === "claude" && path === ".claude/settings.json")
 		return content
 			.replaceAll(

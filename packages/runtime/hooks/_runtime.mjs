@@ -49,6 +49,35 @@ function printOutcome(outcome) {
 	process.stdout.write(`${JSON.stringify(outcome)}\n`);
 }
 
+function providerOutcome(payload, outcome) {
+	if (outcome.decision !== "block") return outcome;
+	const reason = [
+		outcome.reason,
+		...(Array.isArray(outcome.details) ? outcome.details : []),
+	]
+		.filter(Boolean)
+		.join("\n");
+	if (payload.hook_event_name === "PreToolUse") {
+		return {
+			hookSpecificOutput: {
+				hookEventName: "PreToolUse",
+				permissionDecision: "deny",
+				permissionDecisionReason: reason,
+			},
+		};
+	}
+	return {
+		...outcome,
+		hookSpecificOutput: {
+			hookEventName: "PreToolUse",
+			permissionDecision: "deny",
+			permissionDecisionReason: reason,
+		},
+		permissionDecision: "deny",
+		permissionDecisionReason: reason,
+	};
+}
+
 export function createHookRunner(hook, evaluate) {
 	const rawInput = readRawInput();
 	const { payload, malformed } = parsePayload(rawInput);
@@ -75,12 +104,16 @@ export function createHookRunner(hook, evaluate) {
 		return;
 	}
 
-	printOutcome({
-		hook,
-		decision: outcome.decision,
-		reason: outcome.reason,
-		details: Array.isArray(outcome.details) ? outcome.details : undefined,
-	});
+	printOutcome(
+		providerOutcome(payload, {
+			hook,
+			decision: outcome.decision,
+			reason: outcome.reason,
+			details: Array.isArray(outcome.details) ? outcome.details : undefined,
+		}),
+	);
+	if (outcome.decision === "block" && payload.hook_event_name !== "PreToolUse")
+		process.exitCode = 2;
 }
 
 export function asArray(value) {

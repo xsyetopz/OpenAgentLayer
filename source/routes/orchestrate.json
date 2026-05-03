@@ -15,5 +15,5 @@
   ],
   "permissions": "coordination",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Split work across independent agents with non-overlapping paths, merge results, and produce a single verified outcome. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Split work across independent agents with non-overlapping paths, merge results, and produce a single verified outcome. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

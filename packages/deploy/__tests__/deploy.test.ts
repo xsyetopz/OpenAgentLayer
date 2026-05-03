@@ -32,7 +32,7 @@ test("global deploy maps provider artifacts into provider homes", async () => {
 			provider: "codex" as const,
 			path: ".codex/config.toml",
 			content:
-				'model_instructions_file = "AGENTS.md"\nzsh_path = ".codex/openagentlayer/shim/oal-zsh"\nconfig_file = "./agents/athena.toml"\n',
+				'zsh_path = ".codex/openagentlayer/shim/oal-zsh"\nconfig_file = "./agents/athena.toml"\n',
 			sourceId: "config:codex",
 			mode: "config" as const,
 		},
@@ -56,7 +56,6 @@ test("global deploy maps provider artifacts into provider homes", async () => {
 	);
 	await applyDeploy(plan);
 	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
-	expect(config).toContain(join(home, ".codex/AGENTS.md"));
 	expect(config).toContain(join(home, ".codex/openagentlayer/shim/oal-zsh"));
 	expect(config).toContain(join(home, ".codex/agents/athena.toml"));
 	expect(await readFile(join(home, ".codex/AGENTS.md"), "utf8")).toContain(

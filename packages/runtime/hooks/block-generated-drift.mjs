@@ -25,7 +25,7 @@ function evaluate(payload) {
 	if (payload.generatedEditWithoutSource === true) {
 		return {
 			decision: "block",
-			reason: "Generated artifact changed without matching source update.",
+			reason: "Generated artifact update needs matching source update.",
 		};
 	}
 
@@ -60,7 +60,7 @@ function evaluate(payload) {
 	if (violations.length > 0) {
 		return {
 			decision: "block",
-			reason: "Generated drift detected without corresponding source changes.",
+			reason: "Generated drift needs corresponding source changes.",
 			details: violations,
 		};
 	}
@@ -85,7 +85,7 @@ function evaluate(payload) {
 
 	return {
 		decision: "pass",
-		reason: "No generated drift violations detected.",
+		reason: "Generated drift gate passed.",
 	};
 }
 

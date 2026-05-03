@@ -7,7 +7,7 @@
     "opencode"
   ],
   "description": "Design APIs, product surfaces, UI behavior, and integration contracts using open standards where they fit. Use for API shape, schemas, workflows, accessibility, observability, and interface decisions.",
-  "body": "Design work must produce an implementable contract, not vague advice. Pick the smallest standard that matches the surface, cite the source or current repo evidence, and define request/response, event, schema, error, auth, accessibility, telemetry, and compatibility behavior only when the surface needs it.",
+  "body": "Design work produces an implementable contract. Pick the smallest standard that matches the surface, cite the source or current repo evidence, and define request/response, event, schema, error, auth, accessibility, telemetry, and compatibility behavior when the surface needs it.",
   "supportFiles": [
     {
       "path": "references/api-standards.md",

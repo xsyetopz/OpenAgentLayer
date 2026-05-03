@@ -1,23 +1,12 @@
-# API design standards
+# API standards
 
-Choose standards by interface type. Do not force a standard where a local typed interface is enough.
+Choose standards by interface type. A local typed interface fits small in-process seams.
 
-**Use these defaults:**
+- **HTTP API:** OpenAPI 3.1 plus JSON Schema 2020-12 and RFC 9110 HTTP semantics.
+- **Event API:** AsyncAPI or CloudEvents when events cross process or team boundaries.
+- **Graph data:** GraphQL SDL when clients select fields dynamically.
+- **Auth:** OAuth 2.0/OAuth 2.1 and OpenID Connect when third-party delegated auth exists; local tokens or mTLS when the surface is service-internal.
+- **Errors:** RFC 9457 Problem Details for HTTP APIs when the product error contract allows it.
+- **Telemetry:** OpenTelemetry traces, metrics, and logs when runtime observability is part of acceptance.
 
-- **HTTP APIs:** OpenAPI 3.1 or newer for operations, parameters, request bodies, responses, examples, security schemes, callbacks, links, tags, and reusable components.
-- **Data schemas:** JSON Schema 2020-12 for JSON payload validation, reusable schema definitions, and examples.
-- **Event-driven APIs:** AsyncAPI for channels, operations, messages, bindings, and broker-specific details.
-- **Graph APIs:** GraphQL SDL for schema shape, typed fields, mutations, subscriptions, directives, and deprecation markers.
-- **Event envelopes:** CloudEvents for interoperable event metadata when events cross service boundaries.
-- **Error payloads:** RFC 9457 Problem Details for HTTP APIs unless the product already has a stronger error contract.
-- **Auth and identity:** OAuth 2.0 and OpenID Connect terms when designing delegated auth, token exchange, scopes, claims, or identity flows.
-- **HTTP behavior:** RFC 9110 semantics for methods, status codes, caching, negotiation, and conditional requests.
-- **Webhooks:** OpenAPI webhooks or AsyncAPI depending on ownership and transport.
-
-**Output contract for API design:**
-
-1. name the interface type and chosen standard;
-2. define resources, operations, events, or fields;
-3. define schemas and examples;
-4. define auth, permissions, errors, idempotency, pagination, versioning, and compatibility when relevant;
-5. define validation and conformance checks.
+For each contract include: versioning, compatibility, auth, validation, errors, examples, and acceptance checks.

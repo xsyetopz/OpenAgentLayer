@@ -12,5 +12,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Map repository structure, source records, generated outputs, runtime hooks, deploy ownership, and validation paths with file evidence. Do not edit. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Map repository structure, source records, generated outputs, runtime hooks, deploy ownership, and validation paths with file evidence. Keep the working tree unchanged. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

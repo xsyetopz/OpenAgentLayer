@@ -3,7 +3,13 @@ import { join } from "node:path";
 import type { OalSource, Provider } from "@openagentlayer/source";
 
 export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
-	for (const tool of ["manifest_inspect", "generated_diff"]) {
+	for (const tool of [
+		"manifest_inspect",
+		"generated_diff",
+		"rtk_report",
+		"command_policy_check",
+		"provider_surface_map",
+	]) {
 		const toolPath = join(targetRoot, `.opencode/tools/${tool}.ts`);
 		const text = await readFile(toolPath, "utf8");
 		if (!text.includes('import { tool } from "@opencode-ai/plugin"'))
@@ -26,9 +32,14 @@ export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 		)
 			throw new Error(`OpenCode tool ${tool} does not export ${functionName}.`);
 		const output = await integration.execute({}, toolContext(targetRoot));
-		if (!output || typeof output !== "object")
+		if (
+			!(
+				(typeof output === "string" && output.trim().length > 0) ||
+				(output && typeof output === "object")
+			)
+		)
 			throw new Error(
-				`OpenCode tool ${tool} did not return an object contract.`,
+				`OpenCode tool ${tool} did not return a non-empty tool result.`,
 			);
 	}
 }
@@ -209,7 +220,7 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 		"<instructions>",
 		"<context>",
 		"**MUST**",
-		"**MUST NOT**",
+		"**SHOULD**",
 		"## References",
 	])
 		if (!promptMarkdown.includes(term))
@@ -222,10 +233,10 @@ function assertSimplicityDiscipline(source: OalSource): void {
 		if (!skill) throw new Error(`Missing ${skillId} skill.`);
 		const content = supportFileContent(skill, "references/simplicity.md");
 		for (const term of [
-			"Terry A. Davis",
-			"> “An idiot admires complexity",
-			"**Apply it as an engineering constraint:**",
-			"block when missing evidence would force invention",
+			"Direct source-backed code beats clever machinery",
+			"Use complexity when it",
+			"direct functions over factories",
+			"source-backed blockers",
 		])
 			if (!content.includes(term))
 				throw new Error(`${skillId} simplicity discipline missing ${term}.`);
@@ -235,8 +246,8 @@ function assertSimplicityDiscipline(source: OalSource): void {
 function assertRuntimeSafetySkills(source: OalSource): void {
 	const required = {
 		elevate: ["privileged execution", "argv", "dry-run", "allowlist"],
-		delete: ["git status", "OAL manifest ownership", "dirty", "unknown"],
-		parse: ["shell operators", "argv arrays", "exit code", "Regex-only"],
+		delete: ["git status", "manifest ownership", "dirty", "ambiguous"],
+		parse: ["shell operators", "argv", "exit code", "substring-only"],
 	} as const;
 	for (const [skillId, terms] of Object.entries(required)) {
 		const skill = source.skills.find((candidate) => candidate.id === skillId);

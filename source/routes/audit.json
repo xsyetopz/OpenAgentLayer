@@ -14,5 +14,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Audit product behavior against roadmap, provider surfaces, manifest ownership, source boundaries, and safety guardrails. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Audit product behavior against roadmap, provider surfaces, manifest ownership, source boundaries, and safety guardrails. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

@@ -1,13 +1,17 @@
-# Review standard
+# Review checklist
 
-Check in order:
+1. Does the diff implement the requested behavior?
+2. Are generated files changed through source or manifest ownership?
+3. Are tests behavior-focused and tied to public surfaces?
+4. Are provider-specific behaviors native to each provider?
+5. Are permissions, secrets, destructive commands, and deploy paths safe?
+6. Does validation cover the changed behavior?
+7. Does the final diff stay inside ALLOWED_EDIT_SET?
 
-1. Does the change satisfy the requested behavior?
-2. Is every new artifact consumed by product behavior?
-3. Are source records and generated outputs consistent?
-4. Are names self-documenting and short?
-5. Are provider-specific behaviors native, not fake parity?
-6. Are tests or acceptance gates checking behavior rather than prompt prose?
-7. Does uninstall remove only owned artifacts?
+Findings format:
 
-Report severity, path, issue, evidence, and fix.
+- Severity
+- Path and line
+- Evidence
+- Consequence
+- Concrete fix

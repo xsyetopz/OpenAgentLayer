@@ -23,6 +23,7 @@ const CODEX_FEATURES = [
 	{ key: "sqlite", enabled: true },
 	{ key: "plugins", enabled: true },
 	{ key: "codex_hooks", enabled: true },
+	{ key: "hooks", enabled: true },
 	{ key: "shell_zsh_fork", enabled: true },
 	{ key: "goals", enabled: true },
 	{ key: "responses_websockets", enabled: true },
@@ -49,6 +50,13 @@ export async function renderCodex(
 			path: ".codex/config.toml",
 			content: renderCodexConfig(source, options),
 			sourceId: "config:codex",
+			mode: "config",
+		}),
+		withProvenance({
+			provider: PROVIDER,
+			path: ".codex/hooks.json",
+			content: renderCodexHooksJson(source),
+			sourceId: "hooks:codex",
 			mode: "config",
 		}),
 	];
@@ -161,6 +169,8 @@ config_file = "./agents/${agent.id}.toml"`,
 
 [plugins."oal@openagentlayer-local"]
 enabled = true
+
+${renderCodexHooks(source)}
 `;
 }
 
@@ -190,7 +200,6 @@ model = ${quoteToml(profile.model)}
 ${profile.planReasoningEffort ? `plan_mode_reasoning_effort = ${quoteToml(profile.planReasoningEffort)}\n` : ""}${profile.modelReasoningEffort ? `model_reasoning_effort = ${quoteToml(profile.modelReasoningEffort)}\n` : ""}model_verbosity = "low"
 approval_policy = ${quoteToml(profile.approvalPolicy)}
 sandbox_mode = ${quoteToml(profile.sandboxMode)}
-model_instructions_file = "AGENTS.md"
 zsh_path = ".codex/openagentlayer/shim/oal-zsh"
 ${profile.toolsViewImage ? "tools_view_image = true\n" : ""}
 `;
@@ -242,6 +251,57 @@ function renderCodexFeatures(): string {
 	return CODEX_FEATURES.map(
 		(feature) => `${feature.key} = ${feature.enabled ? "true" : "false"}`,
 	).join("\n");
+}
+
+function renderCodexHooks(source: OalSource): string {
+	const groups = codexHookGroups(source);
+	if (groups.size === 0) return "";
+	return `[hooks]
+${[...groups.entries()]
+	.map(
+		([event, commands]) => `${event} = [
+${commands
+	.map(
+		(command) =>
+			`  { hooks = [{ type = "command", command = ${quoteToml(command)} }] },`,
+	)
+	.join("\n")}
+]`,
+	)
+	.join("\n")}`;
+}
+
+function renderCodexHooksJson(source: OalSource): string {
+	return `${JSON.stringify(
+		{
+			hooks: Object.fromEntries(
+				[...codexHookGroups(source).entries()].map(([event, commands]) => [
+					event,
+					commands.map((command) => ({
+						hooks: [{ type: "command", command }],
+					})),
+				]),
+			),
+		},
+		null,
+		2,
+	)}\n`;
+}
+
+function codexHookGroups(source: OalSource): Map<string, string[]> {
+	return source.hooks
+		.flatMap((hook) =>
+			(hook.events.codex ?? []).map((event) => ({
+				event,
+				command: `.codex/openagentlayer/hooks/${hook.script}`,
+			})),
+		)
+		.reduce((byEvent, hook) => {
+			const hooks = byEvent.get(hook.event) ?? [];
+			hooks.push(hook.command);
+			byEvent.set(hook.event, hooks);
+			return byEvent;
+		}, new Map<string, string[]>());
 }
 
 function renderCodexAgent(

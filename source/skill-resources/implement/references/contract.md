@@ -1,18 +1,19 @@
 # Implementation contract
 
-Before editing, identify:
+Implementation changes are current-state production changes.
 
-- owner package or source record
-- generated or runtime artifact affected
-- existing validation or acceptance gap
-- source truth that defines behavior
+Use this sequence:
 
-During editing:
+1. Identify owning package or source record.
+2. Inspect current callers and generated artifacts.
+3. Define ALLOWED_EDIT_SET.
+4. Make the smallest complete change.
+5. Validate with targeted commands.
+6. Inspect final diff for current-state residue.
 
-- prefer direct code over generic frameworks
-- do not leave placeholder branches
-- do not create disconnected catalogs
-- do not edit generated files directly when authored source exists
-- use scripts for safe mechanical rewrites, then inspect the result
+Current-state implementation means:
 
-Done means code is consumed by source loading, rendering, deployment, runtime execution, uninstall, or acceptance validation.
+- concrete runtime behavior or generated artifact behavior exists
+- placeholder branches are replaced by real behavior or a blocker
+- catalogs are connected to callers, renderers, or manifests
+- generated files update through authored source when authored source exists

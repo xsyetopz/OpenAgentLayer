@@ -1,12 +1,14 @@
 # Debug loop
 
-Use this order. Skip a phase only when the task explicitly makes it irrelevant.
+Use this order. A phase can be complete by task evidence or explicit irrelevance.
 
-1. Build a feedback loop that an agent can run. Prefer tests, CLI fixtures, replay scripts, browser automation, trace replay, fuzz loops, or bisect harnesses. Human clicking is the last resort and must produce captured output.
-2. Reproduce the exact user symptom. A nearby failure is not evidence.
-3. Write three to five ranked hypotheses. Each one must predict what observation would confirm or falsify it.
-4. Instrument the smallest boundary that separates hypotheses. Tag temporary probes with a unique prefix and delete them before completion.
-5. Fix after evidence points to one cause. Add the regression at the deepest stable public seam that reproduces the real pattern.
-6. Re-run the original loop and the targeted regression.
+1. Capture the exact user symptom and environment.
+2. Reproduce the exact user symptom. Nearby failures become separate evidence.
+3. Reduce the reproduction to the smallest command or fixture.
+4. Rank causes by falsifiability.
+5. Instrument one variable at a time.
+6. Fix the root cause.
+7. Re-run the original reproduction and a targeted regression check.
+8. Remove temporary probes.
 
-Block instead of guessing when no loop can be built. Report attempts, evidence captured, and the artifact or access needed.
+When a loop cannot be built, return STATUS BLOCKED with attempts, evidence captured, and the artifact or access needed.

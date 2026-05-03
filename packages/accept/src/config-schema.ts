@@ -36,6 +36,7 @@ const ALLOWED_CODEX_FEATURES = new Set([
 	"sqlite",
 	"plugins",
 	"codex_hooks",
+	"hooks",
 	"shell_zsh_fork",
 	"goals",
 	"responses_websockets",
@@ -184,6 +185,7 @@ function parseCodexToml(toml: string): CodexToml {
 			section = line.slice(1, -1);
 			continue;
 		}
+		if (section === "hooks") continue;
 		const [key, rawValue] = splitAssignment(line);
 		const value = parseTomlValue(rawValue);
 		if (section.startsWith("profiles.") && section.endsWith(".features")) {

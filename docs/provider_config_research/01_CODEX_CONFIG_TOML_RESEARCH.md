@@ -12,7 +12,7 @@ Sources studied:
 Codex is not just a prompt sink. It has multiple native surfaces OAL can render and deploy:
 
 - `~/.codex/config.toml` and project `.codex/config.toml` layers.
-- `AGENTS.md` and configured `model_instructions_file`.
+- `AGENTS.md` project guidance.
 - `[agents]` role definitions with spawn guidance and optional role-specific config files.
 - profile-scoped settings in `[profiles.<name>]`.
 - profile-scoped feature flags.
@@ -48,7 +48,6 @@ Use:
 - `approvals_reviewer`
 - `sandbox_mode`
 - `service_tier`
-- `model_instructions_file`
 - `tools`
 - `web_search`
 - profile-scoped `features`.

@@ -36,12 +36,28 @@ export async function renderHookArtifacts(
 		`${prefix}/_bun-rewrite.mjs`,
 		repoRoot,
 	);
+	const commandPolicySupport = await renderHookArtifact(
+		provider,
+		{
+			id: "command_policy_support",
+			script: "_command-policy.mjs",
+			providers: [provider],
+			events: {},
+		},
+		`${prefix}/_command-policy.mjs`,
+		repoRoot,
+	);
 	const hookArtifacts = await Promise.all(
 		providerHooks.map((hook) =>
 			renderHookArtifact(provider, hook, `${prefix}/${hook.script}`, repoRoot),
 		),
 	);
-	return [runtimeSupport, bunRewriteSupport, ...hookArtifacts];
+	return [
+		runtimeSupport,
+		bunRewriteSupport,
+		commandPolicySupport,
+		...hookArtifacts,
+	];
 }
 
 async function renderHookArtifact(

@@ -12,5 +12,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Trace call paths, source-to-artifact data flow, deploy ownership, hook execution, and provider-specific impact before a change. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Trace call paths, source-to-artifact data flow, deploy ownership, hook execution, and provider-specific impact before a change. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

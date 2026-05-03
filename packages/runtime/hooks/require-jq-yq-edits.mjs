@@ -9,8 +9,7 @@ function evaluate(payload) {
 	if (REGEX_CONFIG_EDIT_PATTERN.test(command)) {
 		return {
 			decision: "warn",
-			reason:
-				"Prefer jq/yq or typed code for JSON/YAML edits instead of regex rewrites.",
+			reason: "JSON/YAML edits use 'jq'/'yq' or typed code.",
 			details: [command],
 		};
 	}

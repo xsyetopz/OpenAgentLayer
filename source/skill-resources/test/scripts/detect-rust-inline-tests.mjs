@@ -12,9 +12,7 @@ const offenders = [];
 for (const root of roots) scan(root);
 
 if (offenders.length > 0) {
-	console.error(
-		"Rust inline test modules are forbidden. Use `mod tests;` plus `foo/tests.rs`.",
-	);
+	console.error("Rust module tests use `mod tests;` plus `foo/tests.rs`.");
 	for (const offender of offenders) console.error(offender);
 	process.exit(1);
 }

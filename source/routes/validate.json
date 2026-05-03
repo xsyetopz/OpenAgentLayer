@@ -13,5 +13,5 @@
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Run product validation over source loading, policy, renderer output, deploy/uninstall, hooks, model rules, drift, and runtime isolation. Validate durable product behavior, provider schemas, ownership, and acceptance outcomes; do not add or approve tests that only encode a one-off conversation correction. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Run product validation over source loading, policy, renderer output, deploy/uninstall, hooks, model rules, drift, and runtime isolation. Validate durable product behavior, provider schemas, ownership, acceptance outcomes, and current behavior assertions. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

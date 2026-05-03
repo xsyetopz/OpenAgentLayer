@@ -1,13 +1,14 @@
-# Plan structure
+# Plan shape
 
-A plan should include:
+A decision-complete plan includes:
 
-- objective in one sentence
-- source evidence already inspected
-- files or packages likely owned by the change
-- decisions that must be made now
-- rejected alternatives with reasons
-- validation command
-- blocker condition
+- objective
+- source evidence inspected
+- owner package or source record
+- explicit assumptions
+- implementation sequence
+- acceptance proof
+- alternatives selected with reasons when a decision matters
+- blockers with needed input
 
-Do not ask the user questions that the repo can answer. Ask only when source evidence is missing or choices are genuinely product decisions.
+Ask the user for product decisions. Repo-answerable questions are resolved through source inspection.

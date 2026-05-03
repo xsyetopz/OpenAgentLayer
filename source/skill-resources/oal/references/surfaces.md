@@ -1,12 +1,22 @@
 # OAL surfaces
 
-A valid OAL feature connects these layers:
+OAL owns authored source records and renders provider-native artifacts.
 
-1. authored source under `source/`;
-2. loading and validation in `packages/source`;
-3. provider rendering in `packages/adapter`;
-4. deploy, update, uninstall, and manifest ownership;
-5. provider-native artifact output for Codex, Claude Code, or OpenCode;
-6. acceptance checks that fail when the surface drifts.
+Source inputs:
 
-Do not add docs, JSON, or plugin files that are not consumed by this chain.
+- `source/product.json`
+- `source/agents/*.json`
+- `source/routes/*.json`
+- `source/skills/*.json`
+- `source/hooks/*.json`
+- `source/tools/*.json`
+- provider renderers in `packages/adapter/src`
+- deploy and manifest logic in `packages/deploy` and `packages/manifest`
+
+Artifact outputs:
+
+- Codex: `AGENTS.md`, `.codex/config.toml`, `.codex/agents/*.toml`, hooks, shims, skills
+- Claude Code: `CLAUDE.md`, `.claude/agents/*.md`, commands, hooks, skills, settings
+- OpenCode: `opencode.jsonc`, `.opencode/agents/*.md`, commands, plugin, tools, hooks, skills
+
+Source-to-artifact chain must be complete for new behavior: source record, renderer, deploy ownership, acceptance check.

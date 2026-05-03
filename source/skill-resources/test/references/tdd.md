@@ -1,13 +1,13 @@
-# Test discipline
+# Test strategy
 
-Use vertical slices:
+TDD loop:
 
-1. Pick one observable behavior.
-2. Write or run one failing check for that behavior.
-3. Implement only enough to pass.
-4. Refactor only while green.
-5. Repeat.
+1. Write the smallest failing behavior test.
+2. Run it and capture the failure.
+3. Implement the behavior.
+4. Run the targeted test.
+5. Run the nearest integration or acceptance check.
 
-Use Given/When/Then when it clarifies behavior. Use Arrange/Act/Assert when the test is code-centric. Use contract tests for provider/API boundaries, golden tests for stable rendered artifacts, property tests for invariants, snapshot tests only when reviewable, mutation testing when branch coverage is not enough, and acceptance tests for full product behavior.
+Use Given/When/Then when it clarifies behavior. Use Arrange/Act/Assert when the test is code-centric. Use contract tests for provider/API boundaries, golden tests for stable rendered artifacts, property tests for invariants, snapshot tests when reviewable, mutation testing when branch coverage needs safety-critical reinforcement, and acceptance tests for full product behavior.
 
-Avoid tests coupled to private structure, prompt prose, or incidental formatting unless that text is a parsed provider contract. For OAL, strong tests usually inspect source loading, generated artifact paths, deploy manifests, uninstall behavior, executable hooks, and acceptance output.
+For OAL, strong tests inspect source loading, generated artifact paths, deploy manifests, uninstall behavior, executable hooks, and acceptance output.

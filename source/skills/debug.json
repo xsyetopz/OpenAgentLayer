@@ -7,7 +7,7 @@
     "opencode"
   ],
   "description": "Build a reproducible failure loop, rank falsifiable causes, instrument one variable at a time, fix, and prove the original failure is gone. Use for bugs, broken flows, flaky behavior, and performance regressions.",
-  "body": "Start by making the failure observable. Do not patch from a hunch. A debugging run is valid only when it reproduces the user-described symptom, narrows the cause with falsifiable evidence, removes temporary probes, and leaves a regression signal or an explicit reason no correct seam exists.",
+  "body": "Start by making the failure observable. Patch from reproduced evidence. A debugging run is valid when it reproduces the user-described symptom, narrows the cause with falsifiable evidence, removes temporary probes, and leaves a regression signal or a blocker naming the missing seam.",
   "supportFiles": [
     {
       "path": "references/loop.md",

@@ -6,6 +6,6 @@ Answer in layers:
 2. Source records: authored JSON, prompt templates, runtime scripts, docs, or fixtures.
 3. Render/deploy path: which package consumes the source and emits behavior.
 4. Validation: tests or acceptance checks that prove the behavior.
-5. Unknowns: facts not proven by current source.
+5. Unknowns: facts still needing source proof.
 
-Zoom out when a local function is not enough. Name upstream callers and downstream generated surfaces.
+Zoom out when the local function gives partial evidence. Name upstream callers and downstream generated surfaces.

@@ -1,11 +1,10 @@
-# Git safety
+# Git workflow
 
-Order for git work:
+1. Run `git status --short` or `rtk git -C . status --short`.
+2. Classify user changes versus agent changes.
+3. Use path-specific diffs before staging.
+4. Stage owned paths only.
+5. Commit when requested or when the route requires a commit artifact.
+6. Include trailers required by the repo.
 
-1. `git status --short`.
-2. `git diff --stat` before detailed diffs.
-3. Separate user-owned changes from this task.
-4. Stage only intentional files.
-5. Commit with a why-focused message and required trailers.
-
-For pre-commit setup, detect the package manager from lockfiles. Add only hooks that run existing project commands. Do not add Husky, lint-staged, or formatter config unless the repo needs them and the user asked for that setup.
+For pre-commit setup, detect the package manager from lockfiles. Add hooks that run existing project commands. Husky, lint-staged, and formatter config enter the edit envelope through repo need plus user setup request.

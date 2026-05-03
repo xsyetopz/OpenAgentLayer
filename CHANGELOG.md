@@ -5,6 +5,28 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.3-beta.4] - 2026-05-03
+
+### Added
+
+- Added provider e2e and RTK reporting commands for real Codex/OpenCode hook verification and project command-efficiency inspection.
+- Added provider docs skills and OpenCode tools for command policy, provider surface maps, and RTK reports.
+
+### Changed
+
+- Reworked generated prompts, route contracts, skill bodies, and hook messages around affirmative current-state behavior and explicit evidence gates.
+- Removed Codex default `model_instructions_file` replacement so Codex keeps its bundled base instructions with OAL project guidance.
+- Replaced upstream negative-heavy Caveman and taste skill payloads with authored OAL skill prompts and support files.
+- Removed the regex-based zero-residue hook and related acceptance checks.
+
+### Verified
+
+- `rtk bun run biome:check`
+- `rtk bunx tsc --noEmit`
+- `rtk bun run test:unit`
+- `rtk bun run test:e2e`
+- `rtk bun run accept`
+
 ## [0.1.3-beta.3] - 2026-05-03
 
 ### Changed

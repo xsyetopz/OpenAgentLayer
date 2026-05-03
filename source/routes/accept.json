@@ -14,5 +14,5 @@
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Run full acceptance in clean fixture roots without touching user home. Acceptance must fail on stubs, bad models, drift, non-executable hooks, and metadata-only tools. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Run full acceptance in clean fixture roots with user home isolated from fixture writes. Acceptance covers stubs, model policy, drift, hook executability, and metadata-backed tools. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

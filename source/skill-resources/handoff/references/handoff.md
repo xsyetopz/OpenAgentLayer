@@ -1,13 +1,13 @@
-# Handoff contract
+# Handoff content
 
 Include:
 
-- current branch and dirty files
-- completed behavior with exact evidence
-- commands run and outcomes
-- failing command, if blocked
-- files changed by this task
-- files intentionally not touched
-- next concrete action
+- objective and current status
+- changed files with why
+- commands run with exit codes
+- failures and root cause evidence
+- files intentionally left unchanged
+- remaining decisions
+- next safe action
 
-Do not claim acceptance passed unless the acceptance command completed successfully in this session.
+Acceptance is recorded as passed when the acceptance command completed successfully in this session.

@@ -10,7 +10,10 @@ function evaluate(payload) {
 	const active =
 		payload.cavemanModeActive === true || mode.toLowerCase() === "caveman";
 	if (!active) {
-		return { decision: "pass", reason: "Caveman mode is not active." };
+		return {
+			decision: "pass",
+			reason: "Caveman mode inactive; standard output allowed.",
+		};
 	}
 
 	if (payload.cavemanCompliant === false) {
@@ -27,7 +30,7 @@ function evaluate(payload) {
 
 	return {
 		decision: "warn",
-		reason: "Caveman mode active without structured compliance signal.",
+		reason: "Caveman mode active; include structured compliance signal.",
 	};
 }
 

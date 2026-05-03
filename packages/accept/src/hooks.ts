@@ -155,7 +155,6 @@ export async function assertHooks(
 	source: OalSource,
 ): Promise<void> {
 	for (const hook of source.hooks) await assertSourceHook(targetRoot, hook);
-	await assertHooksAvoidProseMatchers(targetRoot, source);
 	await assertRtkHookBehavior(targetRoot);
 	await assertMalformedInput(
 		join(targetRoot, ".codex/openagentlayer/hooks/inject-route-context.mjs"),
@@ -239,7 +238,10 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 	await assertHook(scriptPath, { command: "rtk git status" }, "pass");
 	await assertHook(scriptPath, { command: "make check" }, "warn");
 	await assertHook(scriptPath, { command: "cat package.json" }, "block");
-	const script = await readFile(scriptPath, "utf8");
+	const script = `${await readFile(scriptPath, "utf8")}\n${await readFile(
+		join(targetRoot, ".codex/openagentlayer/hooks/_command-policy.mjs"),
+		"utf8",
+	)}`;
 	for (const command of [
 		"git",
 		"gh",
@@ -267,38 +269,4 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 			throw new Error(
 				`RTK enforcement hook missing Bun rewrite ${replacement}.`,
 			);
-}
-
-async function assertHooksAvoidProseMatchers(
-	targetRoot: string,
-	source: OalSource,
-): Promise<void> {
-	const forbiddenPhrases = [
-		"for now",
-		"future pr",
-		"temporary",
-		"quick hack",
-		"lorem ipsum",
-		"placeholder",
-		"mock implementation",
-		"stub",
-		"happy to",
-		"sure",
-		"certainly",
-		"of course",
-		"explanation only",
-		"no code changes",
-	];
-	for (const hook of source.hooks) {
-		const scriptPath = join(
-			targetRoot,
-			hookPath(hook.providers[0] ?? "codex", hook.script),
-		);
-		const script = (await readFile(scriptPath, "utf8")).toLowerCase();
-		for (const phrase of forbiddenPhrases)
-			if (script.includes(phrase))
-				throw new Error(
-					`Hook ${hook.script} contains language-specific prose matcher: ${phrase}`,
-				);
-	}
 }

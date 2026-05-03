@@ -13,5 +13,5 @@
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Reproduce failures, minimize cases, inspect exact evidence, and identify root cause before changing code. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Reproduce failures, minimize cases, inspect exact evidence, and identify root cause before changing code. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

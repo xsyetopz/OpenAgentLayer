@@ -7,9 +7,11 @@ import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
+import { runProviderE2eCommand } from "./commands/provider-e2e";
 import { runRenderCommand } from "./commands/render";
 import { runRoadmapEvidenceCommand } from "./commands/roadmap-evidence";
 import { runRtkGainCommand } from "./commands/rtk-gain";
+import { runRtkReportCommand } from "./commands/rtk-report";
 import { runSetupCommand } from "./commands/setup";
 import { runFeaturesCommand, runToolchainCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
@@ -173,9 +175,31 @@ program
 	.action((options) => runRtkGainCommand(repoRoot, argsFromOptions(options)));
 
 program
+	.command("rtk-report")
+	.description("summarize RTK project history by command routing kind")
+	.option("--project <dir>", "project path to filter")
+	.option("--db <path>", "RTK history sqlite database")
+	.action((options) => runRtkReportCommand(argsFromOptions(options)));
+
+program
 	.command("roadmap-evidence")
 	.description("print OAL acceptance evidence")
 	.action(() => runRoadmapEvidenceCommand(repoRoot));
+
+program
+	.command("provider-e2e")
+	.description(
+		"check real provider binaries and optionally run headless live prompts",
+	)
+	.option(
+		"--provider <provider>",
+		"all, codex, opencode, or comma-separated set",
+		"all",
+	)
+	.option("--live", "run live headless prompts in temp fixtures")
+	.action((options) =>
+		runProviderE2eCommand(repoRoot, argsFromOptions(options)),
+	);
 
 program
 	.command("interactive", { isDefault: true })
@@ -252,6 +276,8 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--install", options["install"]);
 	pushValue(args, "--remove", options["remove"]);
 	pushValue(args, "--from-file", options["fromFile"]);
+	pushValue(args, "--project", options["project"]);
+	pushValue(args, "--db", options["db"]);
 	pushFlag(args, "--content", options["content"]);
 	pushFlag(args, "--installed", options["installed"]);
 	pushFlag(args, "--rtk", options["rtk"]);
@@ -266,6 +292,7 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushFlag(args, "--json", options["json"]);
 	pushFlag(args, "--homebrew-missing", options["homebrewMissing"]);
 	pushFlag(args, "--allow-empty-history", options["allowEmptyHistory"]);
+	pushFlag(args, "--live", options["live"]);
 	return args;
 }
 

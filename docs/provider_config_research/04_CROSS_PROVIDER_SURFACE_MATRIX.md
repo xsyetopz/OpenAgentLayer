@@ -6,7 +6,7 @@ OAL should model capabilities, not assume identical provider surfaces. The sourc
 
 | OAL surface                 | Codex                                                                | Claude Code                       | OpenCode                                               |
 | --------------------------- | -------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------ |
-| global/project instructions | `AGENTS.md`, `model_instructions_file`                               | `CLAUDE.md`, `.claude/CLAUDE.md`  | `instructions` array and `.opencode/instructions/*.md` |
+| global/project instructions | `AGENTS.md`                                                          | `CLAUDE.md`, `.claude/CLAUDE.md`  | `instructions` array and `.opencode/instructions/*.md` |
 | agents/subagents            | `[agents]`, role config files, custom agent TOML                     | `.claude/agents/*.md`             | `.opencode/agents/*.md` and config `agent`             |
 | skills                      | plugin skills / `SKILL.md` where supported                           | skill directories with `SKILL.md` | `.opencode/skills/*/SKILL.md` where supported          |
 | commands/routes             | wrapper modes, prompt routes, possible plugin commands               | slash commands                    | config `command` and `.opencode/commands/*.md`         |

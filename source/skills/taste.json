@@ -6,11 +6,12 @@
     "claude",
     "opencode"
   ],
-  "description": "Improve UI, UX, copy, spacing, accessibility, and product feel with concrete evidence and no generic AI decoration.",
-  "body": "",
-  "supportFiles": [],
-  "upstream": {
-    "path": "third_party/taste-skill/skills/taste-skill/SKILL.md",
-    "verbatim": true
-  }
+  "description": "Improve UI, UX, copy, spacing, accessibility, and product feel with concrete evidence and product-specific fit.",
+  "body": "Improve product UI, UX, copy, spacing, and interaction quality from concrete evidence. Inspect the existing design system, component patterns, accessibility requirements, and user-visible behavior. Use consistent spacing, typography, color, motion, states, and responsive layout. Verify dependencies before using third-party UI or motion libraries. Prefer concrete data, reliable assets, accessible contrast, stable layout, and product-specific copy. Final output names changed files, visual behavior, accessibility checks, and validation evidence.",
+  "supportFiles": [
+    {
+      "path": "references/ui-quality.md",
+      "source": "skill-resources/taste/references/ui-quality.md"
+    }
+  ]
 }

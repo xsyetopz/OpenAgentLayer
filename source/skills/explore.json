@@ -7,7 +7,7 @@
     "opencode"
   ],
   "description": "Map code, docs, provider artifacts, and data flow before changing behavior. Use when the user asks where something lives, how it works, or why a generated artifact appears.",
-  "body": "Read the narrowest source set that can answer the question. Produce a map with exact paths and evidence. Do not turn exploration into a rewrite plan unless the user asked for one.",
+  "body": "Read the narrowest source set that can answer the question. Produce a map with exact paths and evidence. Rewrite planning appears when the user asks for it.",
   "supportFiles": [
     {
       "path": "references/map.md",

@@ -14,5 +14,5 @@
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Implement the requested production behavior in the owning package. Make the smallest complete change, preserve SRP/DRY, avoid god files, and run targeted validation. Adjacent cleanup is allowed only when source evidence or validation requires it. Do not add docs, tests, comments, config, warnings, or guardrails that merely memorialize a correction or rejected idea. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Implement the requested production behavior in the owning package. Make the smallest complete change, preserve SRP/DRY, and run targeted validation. Adjacent cleanup enters the edit envelope through source evidence or validation need. Current-state docs, tests, comments, config, warnings, and guardrails require explicit request or current runtime/schema/security/validation need. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

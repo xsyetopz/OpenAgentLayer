@@ -38,20 +38,19 @@ export function renderCodexShellShimArtifacts(): ArtifactSet {
 			executable: true,
 			mode: "file",
 		},
+		{
+			provider: "codex",
+			path: ".codex/openagentlayer/shim/oal-shim.zsh",
+			content: renderShimSupport(),
+			sourceId: "runtime:codex-rtk-shim",
+			executable: false,
+			mode: "file",
+		},
 		...Object.entries(RTK_SHIMS).map(([name, rtkArgs]) => ({
 			provider: "codex" as const,
 			path: `.codex/openagentlayer/shim/${name}`,
 			content: renderRtkShim(rtkArgs),
 			sourceId: "runtime:codex-rtk-shim",
-			executable: true,
-			mode: "file" as const,
-		})),
-		...["npm", "pnpm", "yarn", "npx"].map((name) => ({
-			provider: "codex" as const,
-			path: `.codex/openagentlayer/shim/${name}`,
-			content:
-				name === "npx" ? renderNpxShim() : renderPackageManagerShim(name),
-			sourceId: "runtime:codex-bun-shim",
 			executable: true,
 			mode: "file" as const,
 		})),
@@ -85,131 +84,52 @@ function renderZshForkEntrypoint(): string {
 	return `#!/usr/bin/env zsh
 set -e
 shim_dir="\${0:A:h}"
-export PATH="\${shim_dir}:\${PATH}"
+if [[ "\${OAL_SHIM_INTERNAL:-}" != "1" ]]; then
+  export PATH="\${shim_dir}:\${PATH}"
+fi
 exec /bin/zsh "$@"
 `;
 }
 
 function renderRtkShim(rtkArgs: string[]): string {
 	return `#!/usr/bin/env zsh
-${renderShimPathEscape()}exec rtk ${rtkArgs.map(shellQuote).join(" ")} "$@"
+set -euo pipefail
+shim_dir="\${0:A:h}"
+source "\${shim_dir}/oal-shim.zsh"
+oal_shim_exec rtk ${rtkArgs.map(shellQuote).join(" ")} "$@"
 `;
 }
 
-function renderShimPathEscape(): string {
-	return `shim_dir="\${0:A:h}"
-path_entries=("\${(@s/:/)PATH}")
-path_entries=("\${(@)path_entries:#\${shim_dir}}")
-export PATH="\${(j/:/)path_entries}"
-`;
-}
+function renderShimSupport(): string {
+	return `if [[ -n "\${functions[oal_strip_shim_path]:-}" ]]; then
+  return 0
+fi
 
-function renderNpxShim(): string {
-	return `#!/usr/bin/env zsh
-${renderShimPathEscape()}exec rtk proxy -- bunx "$@"
-`;
-}
-
-function renderPackageManagerShim(name: string): string {
-	const publishCase =
-		name === "yarn"
-			? `
-  npm)
-    shift
-    if [[ "$1" == "publish" ]]; then
-      shift
-      ${renderPackageManagerExec("bun publish")}
+oal_strip_shim_path() {
+  local shim_dir="\${1:-}"
+  local path_value="\${2:-}"
+  local rebuilt=""
+  local entry=""
+  local -a entries=("\${(@s/:/)path_value}")
+  for entry in "\${entries[@]}"; do
+    [[ -z "\${entry}" || "\${entry}" == "\${shim_dir}" ]] && continue
+    if [[ -n "\${rebuilt}" ]]; then
+      rebuilt="\${rebuilt}:\${entry}"
+    else
+      rebuilt="\${entry}"
     fi
-    echo "OAL has no Bun rewrite for yarn npm $1" >&2
-    exit 64
-    ;;`
-			: "";
-	const upgradeCase =
-		name === "yarn"
-			? `
-  upgrade|up)
-    shift
-    ${renderPackageManagerExec("bun update")}
-    ;;`
-			: "";
-	const execCase =
-		name === "pnpm" || name === "yarn"
-			? `
-  dlx|exec)
-    shift
-    [[ "$1" == "--" ]] && shift
-    ${renderPackageManagerExec("bunx")}
-    ;;`
-			: `
-  exec|x)
-    shift
-    [[ "$1" == "--" ]] && shift
-    ${renderPackageManagerExec("bunx")}
-    ;;`;
-	const runCase = name === "npm" ? "run|run-script" : "run";
-	const removeCase =
-		name === "npm" ? "remove|rm|uninstall|un" : "remove|rm|uninstall";
-	return `#!/usr/bin/env zsh
-set -e
-${renderShimPathEscape()}case "$1" in
-  ${execCase.trim()}
-  ${runCase})
-    shift
-    ${renderPackageManagerExec("bun run")}
-    ;;
-  install|i|ci)
-    shift
-    ${renderPackageManagerExec("bun install")}
-    ;;
-  add)
-    shift
-    ${renderPackageManagerExec("bun add")}
-    ;;
-  ${removeCase})
-    shift
-    ${renderPackageManagerExec("bun remove")}
-    ;;
-  update|up)
-    shift
-    ${renderPackageManagerExec("bun update")}
-    ;;${upgradeCase}
-  outdated)
-    shift
-    ${renderPackageManagerExec("bun outdated")}
-    ;;
-  publish)
-    shift
-    ${renderPackageManagerExec("bun publish")}
-    ;;
-  pack)
-    shift
-    ${renderPackageManagerExec("bun pm pack")}
-    ;;
-  link)
-    shift
-    ${renderPackageManagerExec("bun link")}
-    ;;
-  list|ls)
-    shift
-    ${renderPackageManagerExec("bun pm ls")}
-    ;;${publishCase}
-  "")
-    ${renderPackageManagerExec("bun install")}
-    ;;
-  *)
-    ${
-			name === "yarn"
-				? renderPackageManagerExec("bun run")
-				: `echo "OAL has no Bun rewrite for ${name} $1" >&2
-    exit 64`
-		}
-    ;;
-esac
-`;
+  done
+  printf '%s\\n' "\${rebuilt}"
 }
 
-function renderPackageManagerExec(command: string): string {
-	return `exec rtk proxy -- ${command} "$@"`;
+oal_unshim_current_path() {
+  oal_strip_shim_path "\${shim_dir}" "\${PATH:-}"
+}
+
+oal_shim_exec() {
+  OAL_SHIM_INTERNAL=1 PATH="$(oal_unshim_current_path)" exec "$@"
+}
+`;
 }
 
 function shellQuote(value: string): string {

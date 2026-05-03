@@ -30,7 +30,7 @@ function evaluate(payload) {
 	if (!currentBranch) {
 		return {
 			decision: "pass",
-			reason: "No branch context provided.",
+			reason: "Branch context absent.",
 		};
 	}
 
@@ -42,7 +42,7 @@ function evaluate(payload) {
 	if (!protectedBranches.includes(currentBranch)) {
 		return {
 			decision: "pass",
-			reason: "Current branch is not protected.",
+			reason: "Current branch outside protected set.",
 		};
 	}
 
@@ -54,7 +54,7 @@ function evaluate(payload) {
 	if (!command) {
 		return {
 			decision: "warn",
-			reason: `Protected branch detected (${currentBranch}) without command context.`,
+			reason: `Protected branch ${currentBranch} needs command context.`,
 		};
 	}
 

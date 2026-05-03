@@ -95,7 +95,7 @@ OAL acceptance must keep generated-output checks, but must add end-to-end deploy
 
 Evidence:
 
-- Codex docs say baseline behavior uses documented Codex surfaces only: `AGENTS.md`, custom agents with `developer_instructions`, plugin skills, managed profiles in `config.toml`, `model_instructions_file`, and hooks.
+- Codex docs say baseline behavior uses documented Codex surfaces only: `AGENTS.md`, custom agents with `developer_instructions`, plugin skills, managed profiles in `config.toml`, and hooks.
 - OpenCode docs say OpenCode stays native-first: role prompts, skills, generated commands, plugin guardrails, native continuation, `/sessions`, `/compact`, and `task_id`.
 - The subagent route context policy explicitly says Codex lacks the Claude-style `SubagentStart` event.
 

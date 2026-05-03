@@ -13,5 +13,5 @@
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Run targeted tests and fixture commands. Report exact command, exit code, output, and root cause before any fix proposal. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if reduced to a two-line descriptor."
+  "body": "Run targeted tests and fixture commands. Report exact command, exit code, output, and root cause before proposing a fix. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

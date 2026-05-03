@@ -94,7 +94,7 @@ function evaluate(payload) {
 	if (!text) {
 		return {
 			decision: "pass",
-			reason: "No secret-like file path or output detected.",
+			reason: "Secret-like file path or output absent.",
 		};
 	}
 
@@ -112,7 +112,7 @@ function evaluate(payload) {
 
 	return {
 		decision: "pass",
-		reason: "No secret-like file path or output detected.",
+		reason: "Secret-like file path or output absent.",
 	};
 }
 

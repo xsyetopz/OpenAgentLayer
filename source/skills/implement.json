@@ -6,8 +6,8 @@
     "claude",
     "opencode"
   ],
-  "description": "Make production code changes with source evidence, no stubs, no toy scaffolding, and targeted validation. Use for feature work, bug fixes, refactors, and generated artifact behavior.",
-  "body": "Implement the smallest complete production change in the owning package. Use whatever edit mechanism is clearest; patch tools are optional, not mandatory. Python or purpose-built scripts are fine for mechanical refactors when the result is reviewed and validated.",
+  "description": "Make production code changes with source evidence, current-state artifacts, and targeted validation. Use for feature work, bug fixes, refactors, and generated artifact behavior.",
+  "body": "Implement the smallest complete production change in the owning package. Use the clearest edit mechanism. Python or purpose-built scripts are valid for mechanical refactors when the result is reviewed and validated.",
   "supportFiles": [
     {
       "path": "references/contract.md",

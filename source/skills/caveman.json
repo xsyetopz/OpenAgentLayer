@@ -7,10 +7,11 @@
     "opencode"
   ],
   "description": "Compress prose when explicitly requested while preserving code, commands, paths, exact errors, configs, and validation evidence unchanged.",
-  "body": "",
-  "supportFiles": [],
-  "upstream": {
-    "path": "third_party/caveman/skills/caveman/SKILL.md",
-    "verbatim": true
-  }
+  "body": "Use compact output for explicit Caveman requests. Preserve code, commands, paths, URLs, exact errors, versions, commit messages, review findings, and file contents. Compression levels: lite keeps normal grammar with short sentences; full removes filler and keeps direct technical wording; ultra uses terse labels and symbols where meaning stays exact; wenyan modes apply the same compression with classical Chinese flavor when requested. Select the requested level, keep technical tokens intact, and report validation evidence in the final answer.",
+  "supportFiles": [
+    {
+      "path": "references/modes.md",
+      "source": "skill-resources/caveman/references/modes.md"
+    }
+  ]
 }

@@ -29,7 +29,7 @@ function evaluate(payload) {
 	if (!command) {
 		return {
 			decision: "pass",
-			reason: "No command input provided.",
+			reason: "Command input absent.",
 		};
 	}
 
@@ -45,7 +45,7 @@ function evaluate(payload) {
 
 	return {
 		decision: "pass",
-		reason: "Command did not match destructive patterns.",
+		reason: "Command matches safe pattern set.",
 	};
 }
 

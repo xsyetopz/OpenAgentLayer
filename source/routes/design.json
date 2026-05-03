@@ -12,5 +12,5 @@
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Design API, UI, workflow, or product-surface contracts with source evidence and standards where they fit. For APIs, choose OpenAPI, JSON Schema, AsyncAPI, GraphQL, CloudEvents, Problem Details, OAuth/OIDC, HTTP semantics, or another concrete standard instead of inventing wire shapes. The route must declare owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences. It is invalid if it leaves implementers to guess names, schemas, errors, state transitions, or acceptance checks."
+  "body": "Design API, UI, workflow, or product-surface contracts with source evidence and standards where they fit. For APIs, choose OpenAPI, JSON Schema, AsyncAPI, GraphQL, CloudEvents, Problem Details, OAuth/OIDC, HTTP semantics, or another concrete standard before defining wire shapes. The route declares names, schemas, errors, state transitions, acceptance checks, owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

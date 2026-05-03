@@ -1,0 +1,6 @@
+{
+  "id": "provider_surface_map",
+  "provider": "opencode",
+  "description": "Report which OAL provider-native surfaces are rendered for Codex, Claude Code, and OpenCode.",
+  "body": "Return the concrete OAL render surfaces: Codex shims/hooks/config, Claude settings/hooks/skills, OpenCode config/plugin/tools."
+}

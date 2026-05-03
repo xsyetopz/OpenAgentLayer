@@ -1,19 +1,13 @@
-# Prompt contract design
+# Prompt design
 
-Put critical rules first. Use direct instructions:
+Good operational prompts define:
 
-- inspect source before claims
-- stop when evidence is missing
-- separate action from report
-- define exact output shape
-- name forbidden shortcuts
-- include one correct compact example when format matters
+- source of truth
+- allowed edit set
+- ordered workflow
+- ambiguity/blocker path
+- validation gate
+- output contract
+- high-risk shortcuts as named blocker signals
 
-**Good pressure:** source evidence required, validation required, blocker format required, explicit consequences for scope drift.
-
-**Bad pressure:** vague encouragement, politeness that weakens the rule, or pressure unrelated to the task.
-
-## References
-
-- [OpenAI prompt engineering guide](https://platform.openai.com/docs/guides/prompt-engineering)
-- [Anthropic prompt engineering overview](https://docs.anthropic.com/en/docs/prompt-engineering)
+Use affirmative target states and mechanical gates. For current-state cleanup, say what the artifact should become and how the final diff is checked.

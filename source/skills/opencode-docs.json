@@ -1,0 +1,17 @@
+{
+  "id": "opencode-docs",
+  "title": "OpenCode Docs",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Use current OpenCode docs before answering OpenCode config, plugin, tool, command, agent, permission, or MCP questions.",
+  "body": "Use official OpenCode documentation as source truth. Prefer an installed OpenCode docs MCP when available. Context7 or official opencode.ai docs provide fallback source truth. For custom tools and plugins, verify the @opencode-ai/plugin API before implementation. Cite exact docs used. OpenCode behavior comes from matching OpenCode docs surfaces.",
+  "supportFiles": [
+    {
+      "path": "references/docs.md",
+      "source": "skill-resources/opencode-docs/references/docs.md"
+    }
+  ]
+}

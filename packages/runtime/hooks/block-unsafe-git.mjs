@@ -24,7 +24,7 @@ function evaluate(payload) {
 		asString(payload.input) ||
 		asString(payload.rawCommand);
 	if (!command) {
-		return { decision: "pass", reason: "No git command input provided." };
+		return { decision: "pass", reason: "Git command input absent." };
 	}
 
 	const unsafePattern = UNSAFE_GIT_PATTERNS.find((pattern) =>

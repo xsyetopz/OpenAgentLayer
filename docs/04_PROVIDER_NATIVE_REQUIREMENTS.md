@@ -10,7 +10,6 @@ Reference baseline behavior Codex surfaces:
 - custom agent TOML with `developer_instructions`
 - plugin skills
 - managed profiles in `config.toml`
-- `model_instructions_file`
 - hooks
 - wrappers/routes
 
