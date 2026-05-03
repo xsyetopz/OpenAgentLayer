@@ -85,7 +85,6 @@ Avoid `xhigh` in the baseline. Render it only for explicit break-glass routes.
 
 Codex supports an `[agents]` table with:
 
-- `max_threads`
 - `max_depth`
 - `job_max_runtime_seconds`
 - `interrupt_message`
@@ -101,7 +100,6 @@ This is important for OAL. Instead of compressing a whole agent into one shallow
 
 ```toml
 [agents]
-max_threads = 4
 max_depth = 1
 job_max_runtime_seconds = 1800
 

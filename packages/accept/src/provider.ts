@@ -19,7 +19,7 @@ const CODEX_REQUIRED_FLAGS = [
 	"responses_websockets_v2 = true",
 	"unified_exec = false",
 	"multi_agent = false",
-	"multi_agent_v2 = false",
+	"multi_agent_v2 = true",
 	"shell_snapshot = false",
 	"collaboration_modes = false",
 	"codex_git_commit = false",
@@ -65,6 +65,8 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 	await assertCodexInstructionBaseline(config, targetRoot);
 	for (const flag of CODEX_REQUIRED_FLAGS)
 		if (!config.includes(flag)) throw new Error(`Codex config missing ${flag}`);
+	if (!config.includes('approvals_reviewer = "auto_review"'))
+		throw new Error("Codex config missing auto approval reviewer.");
 	if (!config.includes("interrupt_message = true"))
 		throw new Error("Codex config has invalid agents.interrupt_message.");
 	if (config.includes('interrupt_message = "'))

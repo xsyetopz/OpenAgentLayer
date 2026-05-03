@@ -12,6 +12,7 @@ interface CodexProfile {
 
 interface CodexToml {
 	profile?: string;
+	approvals_reviewer?: string;
 	profiles: Record<string, CodexProfile>;
 	features: Record<string, Record<string, boolean>>;
 	agents: Record<string, unknown>;
@@ -61,6 +62,8 @@ export function assertCodexTomlSchema(toml: string): void {
 	const parsed = parseCodexToml(toml);
 	if (parsed.profile !== "openagentlayer")
 		throw new Error("Codex config does not activate OAL profile.");
+	if (parsed.approvals_reviewer !== "auto_review")
+		throw new Error("Codex config does not enable auto approval review.");
 	if (parsed.plugins["oal@openagentlayer-local"]?.enabled !== true)
 		throw new Error("Codex config does not activate $oal plugin.");
 	for (const [profileName, profile] of Object.entries(parsed.profiles)) {
@@ -104,8 +107,8 @@ export function assertCodexTomlSchema(toml: string): void {
 				throw new Error(`Codex feature ${feature} is not boolean.`);
 		}
 	}
-	if (!(parsed.agents["max_threads"] && parsed.agents["max_depth"]))
-		throw new Error("Codex agents table missing concurrency settings.");
+	if (!parsed.agents["max_depth"])
+		throw new Error("Codex agents table missing max_depth setting.");
 	if (
 		"interrupt_message" in parsed.agents &&
 		typeof parsed.agents["interrupt_message"] !== "boolean"
@@ -197,8 +200,10 @@ function parseCodexToml(toml: string): CodexToml {
 			const plugin = section.slice('plugins."'.length, -1);
 			parsed.plugins[plugin] ??= {};
 			parsed.plugins[plugin][key as "enabled"] = value as boolean;
-		} else if (section === "" && key === "profile") {
-			parsed.profile = value as string;
+		} else if (section === "") {
+			if (key === "profile") parsed.profile = value as string;
+			if (key === "approvals_reviewer")
+				parsed.approvals_reviewer = value as string;
 		}
 	}
 	return parsed;

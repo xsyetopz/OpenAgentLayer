@@ -5,6 +5,23 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.1.3-beta.3] - 2026-05-03
+
+### Changed
+
+- Enabled Codex `multi_agent_v2` in the managed profile feature block.
+- Switched generated Codex config to the `multi_agent_v2` agent surface.
+- Set Codex `approvals_reviewer = "auto_review"` in generated config.
+
+### Verified
+
+- `rtk proxy -- bunx tsc --noEmit`
+- `rtk proxy -- bun run test`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bun run schemas:check`
+- `rtk proxy -- bun run accept`
+- `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
+
 ## [0.1.3-beta.2] - 2026-05-03
 
 ### Added

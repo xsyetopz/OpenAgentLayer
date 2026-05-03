@@ -15,7 +15,7 @@ Use:
 - `sandbox_mode`
 - `service_tier`
 - `model_instructions_file`
-- `[agents]` with `max_threads`, `max_depth`, `job_max_runtime_seconds`, `interrupt_message`.
+- `[agents]` with `max_depth`, `job_max_runtime_seconds`, `interrupt_message`.
 - `[agents.<role>]` with `description`, `nickname_candidates`, `config_file`.
 - `features.codex_hooks`, `hooks`, `plugin_hooks`, `multi_agent`, `multi_agent_v2`, `child_agents_md`, `sqlite`, `memories`, `memory_tool`, `shell_tool`, `shell_snapshot`, `unified_exec`, `web_search`, `search_tool`, `plugins`, `goals`, `prevent_idle_sleep` as appropriate.
 

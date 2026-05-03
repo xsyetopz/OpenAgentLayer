@@ -25,9 +25,7 @@ export async function runSetupCommand(
 	const providers = availability.providers;
 	const home = resolve(option(args, "--home") ?? homedir());
 	const target = resolve(option(args, "--target") ?? process.cwd());
-	const binDir = resolve(
-		option(args, "--bin-dir") ?? join(homedir(), ".local/bin"),
-	);
+	const binDir = resolve(option(args, "--bin-dir") ?? join(home, ".local/bin"));
 	const optionalTools = setupOptionalTools(args);
 	const dryRun = flag(args, "--dry-run");
 	const quiet = flag(args, "--quiet");

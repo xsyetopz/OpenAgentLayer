@@ -26,7 +26,7 @@ const REQUIRED_CODEX_FLAGS = [
 	"responses_websockets_v2 = true",
 	"unified_exec = false",
 	"multi_agent = false",
-	"multi_agent_v2 = false",
+	"multi_agent_v2 = true",
 	"shell_snapshot = false",
 	"collaboration_modes = false",
 	"codex_git_commit = false",
@@ -71,6 +71,11 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			requireIncludes(
 				config,
 				'zsh_path = ".codex/openagentlayer/shim/oal-zsh"',
+				"Codex config",
+			);
+			requireIncludes(
+				config,
+				'approvals_reviewer = "auto_review"',
 				"Codex config",
 			);
 			for (const forbidden of [

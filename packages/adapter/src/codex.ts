@@ -29,7 +29,7 @@ const CODEX_FEATURES = [
 	{ key: "responses_websockets_v2", enabled: true },
 	{ key: "unified_exec", enabled: false },
 	{ key: "multi_agent", enabled: false },
-	{ key: "multi_agent_v2", enabled: false },
+	{ key: "multi_agent_v2", enabled: true },
 	{ key: "shell_snapshot", enabled: false },
 	{ key: "collaboration_modes", enabled: false },
 	{ key: "codex_git_commit", enabled: false },
@@ -115,6 +115,7 @@ export async function renderCodex(
 function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
 	return `profile = "openagentlayer"
+approvals_reviewer = "auto_review"
 
 [notice]
 hide_rate_limit_model_nudge = true
@@ -145,7 +146,6 @@ ${renderCodexProfile({
 	...optionalReasoningEfforts(profile.utilityPlan, profile.utilityModel),
 })}
 [agents]
-max_threads = 4
 max_depth = 1
 job_max_runtime_seconds = 1800
 interrupt_message = true

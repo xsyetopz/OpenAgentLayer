@@ -9,7 +9,7 @@ In other words: maximize useful native capability, not maximize `true` booleans.
 ## Important key corrections
 
 - Current Codex schema exposes image viewing as `tools_view_image` in the profile/top-level config shape. Some tested builds/config examples discuss image viewing as a feature-style toggle; OAL should prefer schema-validated `tools_view_image = true` unless the local schema cache explicitly supports `features.view_image`.
-- `multi_agent_v2` is schema-supported as a boolean or object. OAL should keep it explicitly off until OAL implements and validates a compatible orchestration contract.
+- `multi_agent_v2` is schema-supported as a boolean or object. OAL enables the boolean form after validating the generated agent role files, plugin payloads, and installed-state checks.
 - The current upstream schema gives `features` a default of `null` and does not declare per-feature defaults for OAL-managed flags. OAL should not infer runtime defaults from missing schema defaults.
 - `voice_transcription` is not in the current upstream schema, so OAL must not emit it.
 
@@ -30,7 +30,7 @@ responses_websockets = true
 responses_websockets_v2 = true
 unified_exec = false
 multi_agent = false
-multi_agent_v2 = false
+multi_agent_v2 = true
 shell_snapshot = false
 collaboration_modes = false
 codex_git_commit = false
@@ -64,7 +64,7 @@ If the local Codex schema for a target install supports `features.view_image`, O
 | `responses_websockets_v2` |            `true` | Use the newer faster websocket path where supported.                                                                                                                                           |
 | `unified_exec`            |           `false` | Controlled exclusion for the normal profile because parallel exec/stdin polling can conflict with wrapper expectations. Enable only in an owned long-runtime profile with acceptance coverage. |
 | `multi_agent`             |           `false` | Controlled exclusion because it is an incompatible orchestration pattern for OAL’s managed routing model.                                                                                      |
-| `multi_agent_v2`          |           `false` | Controlled exclusion because OAL routing owns delegation until the native v2 contract is implemented and validated.                                                                            |
+| `multi_agent_v2`          |            `true` | Use the provider-native v2 surface with OAL-rendered agent role files.                                                                                                                        |
 | `shell_snapshot`          |           `false` | Controlled exclusion because shell snapshots can interfere with shell wrappers.                                                                                                                |
 | `collaboration_modes`     |           `false` | Controlled exclusion because UX variants should be explicit OAL/user choices, not implicit mode drift.                                                                                         |
 | `codex_git_commit`        |           `false` | Controlled exclusion because commits should remain manual or OAL-managed with explicit attribution and guardrails.                                                                             |
@@ -91,7 +91,7 @@ responses_websockets_v2 = true
 unified_exec = true
 prevent_idle_sleep = true
 multi_agent = false
-multi_agent_v2 = false
+multi_agent_v2 = true
 shell_snapshot = false
 collaboration_modes = false
 codex_git_commit = false
@@ -121,7 +121,7 @@ The OAL acceptance suite should assert:
 - generated `config.toml` contains the native-capability feature block for every OAL Codex profile that needs it.
 - `tools_view_image = true` is emitted in the schema-supported location.
 - `shell_snapshot = false` is emitted.
-- `multi_agent = false` and `multi_agent_v2 = false` are explicitly emitted as controlled exclusions.
+- `multi_agent = false` remains a controlled exclusion, and `multi_agent_v2 = true` is emitted.
 - `unified_exec = true` appears only in a deliberately named long-runtime profile with fixture coverage.
 - `plugins = true` is emitted only if the plugin payload is deployed and manifest-owned.
 - `codex_hooks = true` is emitted only if hook runtime scripts are deployed.
