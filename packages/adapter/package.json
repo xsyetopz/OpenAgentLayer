@@ -1,13 +1,13 @@
 {
-  "name": "@openagentlayer/adapter",
-  "version": "0.0.0",
-  "type": "module",
-  "private": true,
-  "exports": "./src/index.ts",
+	"name": "@openagentlayer/adapter",
+	"version": "0.0.0",
+	"type": "module",
+	"private": true,
+	"exports": "./src/index.ts",
 	"dependencies": {
 		"@openagentlayer/artifact": "workspace:*",
 		"@openagentlayer/inspect": "workspace:*",
 		"@openagentlayer/source": "workspace:*",
-		"@opencode-ai/plugin": "^1.14.33"
+		"@opencode-ai/plugin": "^1.14.39"
 	}
 }

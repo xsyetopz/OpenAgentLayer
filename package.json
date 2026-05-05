@@ -48,7 +48,7 @@
 		"@openagentlayer/runtime": "workspace:*",
 		"@openagentlayer/source": "workspace:*",
 		"@openagentlayer/toolchain": "workspace:*",
-		"@opencode-ai/plugin": "1.14.33",
+		"@opencode-ai/plugin": "1.14.39",
 		"commander": "^14.0.3",
 		"@openagentlayer/setup": "workspace:*"
 	},
