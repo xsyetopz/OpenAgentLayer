@@ -63,15 +63,14 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		runHook({ command: "rtk proxy -- rg Token ." }),
 	).resolves.toMatchObject({
 		decision: "block",
-		reason: "RTK has a native filter for this command; use the native RTK form",
+		reason: "RTK native filter is available for this command",
 		details: ["Use: rtk grep Token ."],
 	});
 	await expect(
 		runHook({ command: "rtk proxy nl -ba file.ts" }),
 	).resolves.toMatchObject({
 		decision: "block",
-		reason:
-			"RTK proxy is leaking raw file output; use the bounded RTK read filter",
+		reason: "RTK read provides bounded file output for this command",
 	});
 	await expect(
 		runHook({
@@ -309,6 +308,28 @@ test("blocking post-tool hooks emit provider output and stderr feedback", async 
 	});
 	expect(claude.stderr).toContain("Repeated symptom circuit opened");
 	expect(claude.stderr).toContain("three");
+});
+
+test("hook feedback wraps colored lines before terminal word-wrap", async () => {
+	const command =
+		"rtk proxy -- dotnet test OsuDroid.App.Tests/OsuDroid.App.Tests.csproj --no-restore -nr:false -p:UseSharedCompilation=false -v:minimal";
+	const codex = await runHookRaw(
+		"enforce-rtk-commands.mjs",
+		{
+			hook_event_name: "PostToolUse",
+			command,
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		},
+		{ OAL_HOOK_WRAP_COLUMNS: "48" },
+	);
+	expect(codex.code).toBe(2);
+	const stderrLines = codex.stderr.trim().split("\n");
+	expect(stderrLines.length).toBeGreaterThan(2);
+	expect(stderrLines.every((line) => line.startsWith("\u001b["))).toBe(true);
+	expect(stderrLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
+	expect(codex.stderr).toContain("Use: rtk dotnet test");
+	expect(codex.stderr).toContain("OsuDroid.App.Tests.csproj");
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {

@@ -5,17 +5,17 @@ Provider differences are product behavior, not accidental implementation detail.
 
 ## Provider Matrix
 
-| Surface | Codex | Claude Code | OpenCode |
-| --- | --- | --- | --- |
-| Primary config | `.codex/config.toml` | `.claude/settings.json` | `opencode.jsonc` |
-| Agents | `.codex/agents/*.toml` | `.claude/agents/*.md` | `.opencode/agents/*.md` plus config references |
-| Skills | `.codex/openagentlayer/skills/*/SKILL.md` | `.claude/skills/*/SKILL.md` | `.opencode/skills/*/SKILL.md` when rendered or plugin-synced |
-| Commands/routes | `AGENTS.md` route text | `.claude/commands/*.md` | `.opencode/commands/*.md` |
-| Instructions | `AGENTS.md` | `CLAUDE.md` | `.opencode/instructions/openagentlayer.md` |
-| Hooks | `.codex/openagentlayer/hooks/*.mjs` | `.claude/hooks/scripts/*.mjs` | `.opencode/openagentlayer/hooks/*.mjs` plus plugin mediation |
-| Custom tools | no native OAL custom tool surface | no native OAL custom tool surface | `.opencode/tools/*.ts` |
-| Plugin payload | Codex marketplace and cache roots | Claude marketplace and cache roots | OpenCode plugin and cache roots |
-| MCP install | not currently OAL-managed config | provider CLI command for Anthropic Docs | OAL writes OpenCode MCP config |
+| Surface         | Codex                                     | Claude Code                             | OpenCode                                                     |
+| --------------- | ----------------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| Primary config  | `.codex/config.toml`                      | `.claude/settings.json`                 | `opencode.jsonc`                                             |
+| Agents          | `.codex/agents/*.toml`                    | `.claude/agents/*.md`                   | `.opencode/agents/*.md` plus config references               |
+| Skills          | `.codex/openagentlayer/skills/*/SKILL.md` | `.claude/skills/*/SKILL.md`             | `.opencode/skills/*/SKILL.md` when rendered or plugin-synced |
+| Commands/routes | `AGENTS.md` route text                    | `.claude/commands/*.md`                 | `.opencode/commands/*.md`                                    |
+| Instructions    | `AGENTS.md`                               | `CLAUDE.md`                             | `.opencode/instructions/openagentlayer.md`                   |
+| Hooks           | `.codex/openagentlayer/hooks/*.mjs`       | `.claude/hooks/scripts/*.mjs`           | `.opencode/openagentlayer/hooks/*.mjs` plus plugin mediation |
+| Custom tools    | no native OAL custom tool surface         | no native OAL custom tool surface       | `.opencode/tools/*.ts`                                       |
+| Plugin payload  | Codex marketplace and cache roots         | Claude marketplace and cache roots      | OpenCode plugin and cache roots                              |
+| MCP install     | not currently OAL-managed config          | provider CLI command for Anthropic Docs | OAL writes OpenCode MCP config                               |
 
 ## Shared Provider Rules
 

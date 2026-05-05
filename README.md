@@ -95,32 +95,32 @@ Convenience install scripts are available from the repository root:
 
 Legend: ✅ supported, ⚠️ partial/provider-limited, 🚧 under construction, ❌ unsupported by provider surface, - not applicable.
 
-| Capability                | Claude Code                            | Codex                                   | OpenCode                                   |
-| ------------------------- | -------------------------------------- | --------------------------------------- | ------------------------------------------ |
-| Agents/subagents          | ✅ Markdown agents.                     | ✅ TOML agents.                          | ✅ Markdown plus config agents.             |
-| Per-agent model routing   | ✅ Claude allowlist.                    | ✅ Codex allowlist.                      | ✅ Auth model detection plus free fallback. |
-| Per-agent colors          | ✅ Quoted hex frontmatter.              | ✅ Quoted hex TOML values.               | ✅ Quoted hex frontmatter.                  |
-| Skills                    | ✅ `skills/*/SKILL.md`.                 | ✅ `openagentlayer/skills/*/SKILL.md`.   | ✅ `skills/*/SKILL.md`.                     |
-| Commands/routes           | ✅ Slash-command Markdown.              | ⚠️ Rendered into `AGENTS.md`.            | ✅ Command Markdown plus config entries.    |
-| Hooks                     | ✅ Hook entries plus executable `.mjs`. | ✅ Executable `.mjs` plus feature flags. | ⚠️ Plugin-mediated executable `.mjs`.       |
-| Custom tools              | ❌ No matching provider surface.        | ❌ No matching provider surface.         | ✅ `@opencode-ai/plugin` TypeScript tools.  |
-| Provider instructions     | ✅ `CLAUDE.md`.                         | ✅ `AGENTS.md`.                          | ✅ instruction file plus config reference.  |
-| Structured config merge   | ✅ `settings.json`.                     | ✅ `config.toml`.                        | ✅ `opencode.jsonc`.                        |
-| Plugin payload sync       | ✅ Claude plugin layout.                | ✅ Codex plugin layout.                  | ✅ OpenCode plugin layout.                  |
+| Capability                | Claude Code                            | Codex                                       | OpenCode                                   |
+| ------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------------ |
+| Agents/subagents          | ✅ Markdown agents.                     | ✅ TOML agents.                              | ✅ Markdown plus config agents.             |
+| Per-agent model routing   | ✅ Claude allowlist.                    | ✅ Codex allowlist.                          | ✅ Auth model detection plus free fallback. |
+| Per-agent colors          | ✅ Quoted hex frontmatter.              | ✅ Quoted hex TOML values.                   | ✅ Quoted hex frontmatter.                  |
+| Skills                    | ✅ `skills/*/SKILL.md`.                 | ✅ `openagentlayer/skills/*/SKILL.md`.       | ✅ `skills/*/SKILL.md`.                     |
+| Commands/routes           | ✅ Slash-command Markdown.              | ⚠️ Rendered into `AGENTS.md`.                | ✅ Command Markdown plus config entries.    |
+| Hooks                     | ✅ Hook entries plus executable `.mjs`. | ✅ Executable `.mjs` plus feature flags.     | ⚠️ Plugin-mediated executable `.mjs`.       |
+| Custom tools              | ❌ No matching provider surface.        | ❌ No matching provider surface.             | ✅ `@opencode-ai/plugin` TypeScript tools.  |
+| Provider instructions     | ✅ `CLAUDE.md`.                         | ✅ `AGENTS.md`.                              | ✅ instruction file plus config reference.  |
+| Structured config merge   | ✅ `settings.json`.                     | ✅ `config.toml`.                            | ✅ `opencode.jsonc`.                        |
+| Plugin payload sync       | ✅ Claude plugin layout.                | ✅ Codex plugin layout.                      | ✅ OpenCode plugin layout.                  |
 | RTK command enforcement   | ⚠️ Requires `rtk init -g --auto-patch`. | ✅ Hook-enforced with `rtk init -g --codex`. | ⚠️ Requires `rtk init -g --opencode`.       |
-| Privileged exec helper    | ✅ Executable helper scripts.           | ✅ Executable helper scripts.            | ✅ Executable helper scripts.               |
-| Manifest deploy/uninstall | ✅ OAL-owned artifact tracking.         | ✅ OAL-owned artifact tracking.          | ✅ OAL-owned artifact tracking.             |
-| Drift checks              | ✅ Generated edit guards.               | ✅ Generated edit guards.                | ✅ Generated edit guards.                   |
+| Privileged exec helper    | ✅ Executable helper scripts.           | ✅ Executable helper scripts.                | ✅ Executable helper scripts.               |
+| Manifest deploy/uninstall | ✅ OAL-owned artifact tracking.         | ✅ OAL-owned artifact tracking.              | ✅ OAL-owned artifact tracking.             |
+| Drift checks              | ✅ Generated edit guards.               | ✅ Generated edit guards.                    | ✅ Generated edit guards.                   |
 
 ## Model plans
 
 OAL applies subscription-specific model and reasoning choices instead of giving every generated agent the same model. Use `--plan` with `preview`, `render`, `deploy`, or `plugins`.
 
-| Provider    | Plans                                             | Notes                                                                                                   |
-| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Provider    | Plans                                             | Notes                                                                                                             |
+| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`; plan-mode and edit-mode effort are balanced separately. |
-| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                 |
-| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set. |
+| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                           |
+| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.           |
 
 Examples:
 
@@ -151,7 +151,7 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 | `bin`              | Install, inspect, or remove the source-checkout `oal` executable shim.               | `--home`, `--bin-dir`, `--remove`, `--dry-run`.                                                     | `bun packages/cli/src/main.ts bin --dry-run`.                                           |
 | `uninstall`        | Remove one provider's OAL-owned artifacts from a target project or provider home.    | `--target`, `--scope project\|global`, `--home`, `--provider`.                                      | `bun run uninstall -- --target /path/to/project --scope project --provider codex`.      |
 | `plugins`          | Sync provider plugin payloads into user-level provider homes.                        | `--home`, `--provider`, `--dry-run`, `--plan`, `--opencode-models-file`.                            | `bun run plugins -- --home "$HOME" --provider all --dry-run`.                           |
-| `inspect`          | Print shared OAL capability, manifest, generated-input, policy, or release evidence. | `capabilities`, `manifest`, `generated-diff`, `rtk-report`, `command-policy`, `release-witness`.     | `bun packages/cli/src/main.ts inspect capabilities`.                                    |
+| `inspect`          | Print shared OAL capability, manifest, generated-input, policy, or release evidence. | `capabilities`, `manifest`, `generated-diff`, `rtk-report`, `command-policy`, `release-witness`.    | `bun packages/cli/src/main.ts inspect capabilities`.                                    |
 | `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run toolchain -- --os macos --optional ctx7,anthropic-docs,opencode-docs`.         |
 | `features`         | Print optional feature install or removal commands.                                  | `--install`, `--remove`.                                                                            | `bun run features -- --install ctx7,anthropic-docs,opencode-docs`.                      |
 | `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve anthropic-docs`, `serve opencode-docs`, `serve oal-inspect`.                                 | `bun packages/cli/src/main.ts mcp serve oal-inspect`.                                   |
@@ -250,21 +250,21 @@ rtk ruby -c homebrew/Casks/openagentlayer.rb
 
 ## Repository layout
 
-| Path                 | Responsibility                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `source/`            | Authored OAL source records, prompt templates, skills, routes, hooks, tools, and provider inputs. |
+| Path                 | Responsibility                                                                                     |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| `source/`            | Authored OAL source records, prompt templates, skills, routes, hooks, tools, and provider inputs.  |
 | `docs/`              | Indexed user-facing operation docs for install, CLI, provider setup, validation, and release.      |
 | `specs/`             | Indexed product, provider, runtime, acceptance, and reference-evidence contracts for implementers. |
-| `packages/source`    | Source loading and record validation.                                                             |
-| `packages/policy`    | Product policy validation, model allowlists, and generated text checks.                           |
-| `packages/adapter`   | Provider-native rendering for Claude Code, Codex, and OpenCode.                                   |
-| `packages/deploy`    | Deploy planning, merging, backup, and uninstall behavior.                                         |
-| `packages/manifest`  | OAL ownership metadata.                                                                           |
-| `packages/runtime`   | Executable `.mjs` hooks and runtime helpers.                                                      |
-| `packages/accept`    | Full product acceptance gates.                                                                    |
-| `packages/cli`       | User-facing command entrypoint.                                                                   |
-| `packages/toolchain` | OS toolchain setup plan rendering.                                                                |
-| `plugins/`           | Provider plugin metadata and sync roots, not duplicated generated content.                        |
+| `packages/source`    | Source loading and record validation.                                                              |
+| `packages/policy`    | Product policy validation, model allowlists, and generated text checks.                            |
+| `packages/adapter`   | Provider-native rendering for Claude Code, Codex, and OpenCode.                                    |
+| `packages/deploy`    | Deploy planning, merging, backup, and uninstall behavior.                                          |
+| `packages/manifest`  | OAL ownership metadata.                                                                            |
+| `packages/runtime`   | Executable `.mjs` hooks and runtime helpers.                                                       |
+| `packages/accept`    | Full product acceptance gates.                                                                     |
+| `packages/cli`       | User-facing command entrypoint.                                                                    |
+| `packages/toolchain` | OS toolchain setup plan rendering.                                                                 |
+| `plugins/`           | Provider plugin metadata and sync roots, not duplicated generated content.                         |
 
 ## Validation
 

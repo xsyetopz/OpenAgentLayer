@@ -80,11 +80,11 @@ sequenceDiagram
 
 ## Provider Output Contract
 
-| Decision | Codex PreToolUse | Codex Stop/SubagentStop | Codex other events | Claude PreToolUse | Claude Stop/SubagentStop | Claude other events |
-| --- | --- | --- | --- | --- | --- | --- |
-| `pass` | no output | no output | no output | no output | no output | no output |
-| `warn` | usually no output | usually no output | session context when supported | additional context | additional context | additional context |
-| `block` | `permissionDecision = "deny"` | `continue = false` with stop reason | system message | `permissionDecision = "deny"` | `decision = "block"` | additional context |
+| Decision | Codex PreToolUse              | Codex Stop/SubagentStop             | Codex other events             | Claude PreToolUse             | Claude Stop/SubagentStop | Claude other events |
+| -------- | ----------------------------- | ----------------------------------- | ------------------------------ | ----------------------------- | ------------------------ | ------------------- |
+| `pass`   | no output                     | no output                           | no output                      | no output                     | no output                | no output           |
+| `warn`   | usually no output             | usually no output                   | session context when supported | additional context            | additional context       | additional context  |
+| `block`  | `permissionDecision = "deny"` | `continue = false` with stop reason | system message                 | `permissionDecision = "deny"` | `decision = "block"`     | additional context  |
 
 OpenCode hook behavior is mediated by rendered OpenCode plugin/runtime files.
 OpenCode receives its provider-native plugin/runtime shape. Shared envelopes are

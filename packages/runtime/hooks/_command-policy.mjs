@@ -89,16 +89,14 @@ function evaluateSingleCommand(normalized, options) {
 		if (proxiedExecutable === "nl")
 			return {
 				decision: "block",
-				reason:
-					"RTK proxy is leaking raw file output; use the bounded RTK read filter",
+				reason: "RTK read provides bounded file output for this command",
 				details: ["Use: rtk read --line-numbers --max-lines <n> <file>"],
 			};
 		const proxiedRtkExecutable = SUPPORTED_COMMANDS.get(proxiedExecutable);
 		if (proxiedRtkExecutable)
 			return {
 				decision: "block",
-				reason:
-					"RTK has a native filter for this command; use the native RTK form",
+				reason: "RTK native filter is available for this command",
 				details: [
 					`Use: rtk ${rewriteExecutable(proxied, proxiedRtkExecutable)}`,
 				],
@@ -113,7 +111,7 @@ function evaluateSingleCommand(normalized, options) {
 		return {
 			decision: "block",
 			reason:
-				"Bun supports this Node.js package-manager command; use the Bun form instead",
+				"Bun supports this Node.js package-manager command; use the Bun form",
 			details: [`Use: rtk proxy -- ${bunReplacement}`],
 		};
 
@@ -157,7 +155,7 @@ function evaluateSingleCommand(normalized, options) {
 			};
 		return {
 			decision: "block",
-			reason: "RTK supports this command; run the RTK form instead",
+			reason: "RTK supports this command; use the RTK form",
 			details: [`Use: rtk ${rewriteExecutable(normalized, rtkExecutable)}`],
 		};
 	}

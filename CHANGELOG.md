@@ -33,6 +33,7 @@ material only and is not part of the OAL release line.
 - Reworked `specs/` as formal technical specifications with normative package ownership, source/render/deploy contracts, provider surfaces, hook semantics, architecture graphs, and acceptance obligations.
 - Renamed indexed files under `docs/` and `specs/` from all-caps names to lower-case descriptive names.
 - Reframed model-facing prompts, specs, docs, hooks, and CLI output around affirmative contracts, capability gaps, supported paths, and next valid actions.
+- Wrapped colored hook feedback before terminal word-wrap so every visible line keeps its ANSI styling.
 
 ### Removed
 

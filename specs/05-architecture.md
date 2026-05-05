@@ -341,13 +341,13 @@ The following states define the supported architecture:
 
 ## Change Routing
 
-| Change | Owning paths | Required validation |
-| --- | --- | --- |
-| Source schema or record semantics | `packages/source`, `source/`, `packages/policy` | source tests, `bun run check`, acceptance |
-| Provider file output | `packages/adapter` | adapter tests, config parse fixtures, acceptance |
-| Hook policy | `packages/runtime/hooks`, `source/hooks` | runtime hook tests, acceptance hook fixtures |
-| Deploy or uninstall | `packages/deploy`, `packages/manifest` | deploy tests, uninstall fixture, acceptance |
-| Plugin sync | `packages/plugins`, `plugins/*` | plugin tests or acceptance plugin fixture |
-| MCP behavior | `packages/cli/src/commands/mcp.ts`, `packages/inspect` | CLI MCP tests, acceptance if product-wide |
-| Setup/toolchain | `packages/setup`, `packages/toolchain`, CLI setup path | setup tests, dry-run output checks |
-| Docs/specs only | `docs/`, `specs/`, link references | markdown/link grep, biome if configured |
+| Change                            | Owning paths                                           | Required validation                              |
+| --------------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| Source schema or record semantics | `packages/source`, `source/`, `packages/policy`        | source tests, `bun run check`, acceptance        |
+| Provider file output              | `packages/adapter`                                     | adapter tests, config parse fixtures, acceptance |
+| Hook policy                       | `packages/runtime/hooks`, `source/hooks`               | runtime hook tests, acceptance hook fixtures     |
+| Deploy or uninstall               | `packages/deploy`, `packages/manifest`                 | deploy tests, uninstall fixture, acceptance      |
+| Plugin sync                       | `packages/plugins`, `plugins/*`                        | plugin tests or acceptance plugin fixture        |
+| MCP behavior                      | `packages/cli/src/commands/mcp.ts`, `packages/inspect` | CLI MCP tests, acceptance if product-wide        |
+| Setup/toolchain                   | `packages/setup`, `packages/toolchain`, CLI setup path | setup tests, dry-run output checks               |
+| Docs/specs only                   | `docs/`, `specs/`, link references                     | markdown/link grep, biome if configured          |
