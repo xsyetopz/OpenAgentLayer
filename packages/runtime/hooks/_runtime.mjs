@@ -96,11 +96,10 @@ function plainReasonText(outcome) {
 	const details = Array.isArray(outcome.details) ? outcome.details : [];
 	const hints = details.map((detail) => renderedHint(detail)).filter(Boolean);
 	const notes = details.filter((detail) => !renderedHint(detail));
-	const suffix = [
-		...hints.map((hint) => `; ${hint}`),
-		...notes.map((note) => `; note: ${note}`),
-	].join("");
-	return `${outcome.reason}${suffix}`;
+	const suffix = [...hints, ...notes.map((note) => `note: ${note}`)].join(
+		" | ",
+	);
+	return suffix ? `${outcome.reason}: ${suffix}` : outcome.reason;
 }
 
 function outcomeLevel(outcome, event) {

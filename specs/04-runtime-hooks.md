@@ -165,7 +165,7 @@ Adding a hook MUST update:
 5. runtime or acceptance tests
 6. specs when semantics add a new category or provider behavior
 
-## Affirmative Message Style
+## Diagnostic Message Style
 
 All errors, warnings, notes, fix-its, hook feedback, and normal CLI status text
 MUST follow a compiler-like style:
@@ -173,8 +173,13 @@ MUST follow a compiler-like style:
 - no terminal period
 - quote concrete values with backticks
 - in template literals, wrap substituted values as `` `${value}` ``
-- name the violated contract or expected command
-- include a fix-it when the next command is known
+- start with the contract, supported path, or observed diagnostic category
+- render known replacements as `` use `<command>` ``
+- render optional suggestions as `` use `<command>` when useful ``
+- render explanatory support as `note: <detail>`
+- join compact provider feedback as `<message>: <suggestion>`
+- use separate lines for styled stderr/system feedback
+- avoid question-style hints such as `did you mean`
 - keep model-facing output affirmative, reward-shaped, and action-oriented
 - lead with the valid behavior or supported path
 - phrase boundaries as "use this path" with the valid next action first
@@ -182,8 +187,9 @@ MUST follow a compiler-like style:
 Examples:
 
 ```text
-RTK supports this command; run the RTK form
-Use: rtk grep "pattern" source packages --max 80 --file-type ts
+RTK command form is available: use `rtk grep "pattern" source packages --max 80 --file-type ts`
+use `rtk grep "pattern" source packages --max 80 --file-type ts`
+use `rtk proxy -- make check` when useful
 Provider value `other` needs `codex`, `claude`, `opencode`, or `all`
 ```
 

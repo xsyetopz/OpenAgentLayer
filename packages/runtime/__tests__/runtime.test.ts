@@ -224,7 +224,7 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 		},
 	});
 	expect(codexPreToolUseJson).not.toContain("\\u001b[");
-	expect(codexPreToolUseJson).toContain("; did you mean `");
+	expect(codexPreToolUseJson).toContain(": use `");
 	await expect(
 		runHook({ command: "yarn set version stable" }),
 	).resolves.toMatchObject({
@@ -386,7 +386,7 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	expect(stderrLines.length).toBeGreaterThan(2);
 	expect(stderrLines.every((line) => line.startsWith("\u001b["))).toBe(true);
 	expect(stderrLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
-	expect(codex.stderr).toContain("did you mean `rtk dotnet test");
+	expect(codex.stderr).toContain("use `rtk dotnet test");
 	expect(codex.stderr).toContain("OsuDroid.App.Tests.csproj");
 
 	const preToolUse = await runHookRaw(
@@ -407,7 +407,7 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 		preToolUseOutput.hookSpecificOutput.permissionDecisionReason;
 	expect(preToolUseReason).not.toContain("\u001b[");
 	expect(preToolUseReason).not.toContain("\n");
-	expect(preToolUseReason).toContain("; did you mean `rtk dotnet test");
+	expect(preToolUseReason).toContain(": use `rtk dotnet test");
 	expect(preToolUseReason).toContain("OsuDroid.App.Tests.csproj");
 
 	const pathCommand =

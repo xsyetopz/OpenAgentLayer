@@ -130,7 +130,10 @@ still inspect changed output strings for:
 - meaningful contract names
 - quoted concrete values
 - affirmative model-facing wording
-- actionable fix-its when the next action is known
+- fix-its in the form `` use `<command>` `` when the next action is known
+- hints in the form `` use `<command>` when useful `` for optional commands
+- compact provider feedback shaped as `<message>: <suggestion>`
+- no question-style diagnostic hints such as `did you mean`
 
 ## Test Style
 

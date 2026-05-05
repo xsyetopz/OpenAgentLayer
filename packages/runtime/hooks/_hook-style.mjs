@@ -36,9 +36,9 @@ export function styleHookLines(level, lines) {
 }
 
 export function renderedHint(text) {
-	if (text.startsWith("Use: ")) return `did you mean \`${text.slice(5)}\`?`;
+	if (text.startsWith("Use: ")) return `use \`${text.slice(5)}\``;
 	if (text.startsWith("Use when useful: "))
-		return `when useful, try \`${text.slice(17)}\``;
+		return `use \`${text.slice(17)}\` when useful`;
 	return "";
 }
 

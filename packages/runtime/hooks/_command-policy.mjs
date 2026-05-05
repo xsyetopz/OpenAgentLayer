@@ -133,8 +133,7 @@ function evaluateSingleCommand(command, options) {
 	if (bunReplacement)
 		return {
 			decision: "block",
-			reason:
-				"Bun supports this Node.js package-manager command; use the Bun form",
+			reason: "Bun command form is available for this package-manager command",
 			details: [`Use: rtk proxy -- ${bunReplacement}`],
 		};
 
@@ -178,7 +177,7 @@ function evaluateSingleCommand(command, options) {
 			};
 		return {
 			decision: "block",
-			reason: "RTK supports this command; use the RTK form",
+			reason: "RTK command form is available",
 			details: [`Use: rtk ${rewriteExecutable(normalized, rtkExecutable)}`],
 		};
 	}
