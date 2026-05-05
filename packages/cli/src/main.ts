@@ -9,12 +9,14 @@ import { runInspectCommand } from "./commands/inspect";
 import { runMcpCommand } from "./commands/mcp";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
+import { runProfilesCommand } from "./commands/profiles";
 import { runProviderE2eCommand } from "./commands/provider-e2e";
 import { runRenderCommand } from "./commands/render";
 import { runRoadmapEvidenceCommand } from "./commands/roadmap-evidence";
 import { runRtkGainCommand } from "./commands/rtk-gain";
 import { runRtkReportCommand } from "./commands/rtk-report";
 import { runSetupCommand } from "./commands/setup";
+import { runStateCommand } from "./commands/state";
 import { runFeaturesCommand, runToolchainCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
 import { runInteractiveCommand } from "./interactive";
@@ -54,6 +56,8 @@ addRenderOptions(
 		.description("set up or update OAL across provider homes"),
 )
 	.option("--target <dir>", "project target directory")
+	.option("--profile <name>", "saved setup profile")
+	.option("--config <path>", "OAL config file")
 	.option("--bin-dir <dir>", "global executable directory")
 	.option("--dry-run", "print planned setup without writing")
 	.option("--verbose", "print detailed setup output")
@@ -70,6 +74,49 @@ addRenderOptions(
 	.option("--anthropic-docs-mcp", "configure Anthropic/Claude docs MCP")
 	.option("--opencode-docs-mcp", "configure OpenCode docs MCP")
 	.action((options) => runSetupCommand(repoRoot, argsFromOptions(options)));
+
+addRenderOptions(
+	program
+		.command("profiles")
+		.description("list, show, save, activate, or remove setup profiles")
+		.argument("[action]", "list, show, save, use, remove, or args", "list")
+		.argument("[name]", "profile name")
+		.option("--config <path>", "OAL config file")
+		.option("--target <dir>", "project target directory")
+		.option("--bin-dir <dir>", "global executable directory")
+		.option(
+			"--optional <tools>",
+			"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
+		)
+		.option("--toolchain", "install OAL command-line toolchain when missing")
+		.option("--rtk", "install/init RTK policy surfaces")
+		.option("--verbose", "print detailed setup output")
+		.option("--activate", "activate the saved profile")
+		.action((action: string, name: string | undefined, options) =>
+			runProfilesCommand([
+				action,
+				...(name ? [name] : []),
+				...argsFromOptions(options),
+			]),
+		),
+);
+
+addRenderOptions(
+	program
+		.command("state")
+		.description(
+			"inspect selected profile, provider availability, and deploy state",
+		)
+		.argument("[action]", "inspect", "inspect")
+		.option("--profile <name>", "saved setup profile")
+		.option("--config <path>", "OAL config file")
+		.option("--target <dir>", "project target directory")
+		.option("--bin-dir <dir>", "global executable directory")
+		.option("--json", "print structured JSON")
+		.action((action: string, options) =>
+			runStateCommand(repoRoot, [action, ...argsFromOptions(options)]),
+		),
+);
 
 program
 	.command("bin")
@@ -271,9 +318,8 @@ function addRenderOptions(command: Command): Command {
 		.option(
 			"--provider <provider>",
 			"all, codex, claude, opencode, or comma-separated set",
-			"all",
 		)
-		.option("--scope <scope>", "project or global", "project")
+		.option("--scope <scope>", "project or global")
 		.option("--home <dir>", "home directory for global scope")
 		.option("--plan <plan>", "legacy shared model plan")
 		.option("--codex-plan <plan>", "Codex plan: plus, pro-5, or pro-20")
@@ -306,6 +352,8 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--path", options["path"]);
 	pushValue(args, "--out", options["out"]);
 	pushValue(args, "--target", options["target"]);
+	pushValue(args, "--profile", options["profile"]);
+	pushValue(args, "--config", options["config"]);
 	pushValue(args, "--bin-dir", options["binDir"]);
 	pushValue(args, "--os", options["os"]);
 	pushValue(args, "--pkg", options["pkg"]);
@@ -333,6 +381,7 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushFlag(args, "--homebrew-missing", options["homebrewMissing"]);
 	pushFlag(args, "--allow-empty-history", options["allowEmptyHistory"]);
 	pushFlag(args, "--live", options["live"]);
+	pushFlag(args, "--activate", options["activate"]);
 	return args;
 }
 

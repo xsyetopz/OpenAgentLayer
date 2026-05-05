@@ -573,6 +573,128 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	await rm(home, { recursive: true, force: true });
 });
 
+test("CLI profiles save ordered setup state and drive setup dry-run", async () => {
+	const root = await mkdtemp(join(tmpdir(), "oal-profile-"));
+	const config = join(root, "config.json");
+	const env = await fakeProviderPath(root, ["codex", "opencode"]);
+	const save = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"profiles",
+			"save",
+			"work",
+			"--config",
+			config,
+			"--provider",
+			"opencode,codex",
+			"--scope",
+			"global",
+			"--home",
+			root,
+			"--codex-plan",
+			"pro-20",
+			"--opencode-plan",
+			"opencode-free",
+			"--optional",
+			"ctx7,opencode-docs",
+			"--rtk",
+			"--activate",
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const saveStdout = await new Response(save.stdout).text();
+	const saveStderr = await new Response(save.stderr).text();
+	expect(await save.exited).toBe(0);
+	expect(saveStderr).toBe("");
+	expect(saveStdout).toContain("Saved profile `work`");
+	const stored = JSON.parse(await readFile(config, "utf8")) as {
+		activeProfile?: string;
+		profiles?: { work?: { providers?: string[] } };
+	};
+	expect(stored.activeProfile).toBe("work");
+	expect(stored.profiles?.work?.providers).toEqual(["opencode", "codex"]);
+
+	const setup = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"setup",
+			"--config",
+			config,
+			"--profile",
+			"work",
+			"--dry-run",
+			"--quiet",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const setupStdout = await new Response(setup.stdout).text();
+	const setupStderr = await new Response(setup.stderr).text();
+	expect(await setup.exited).toBe(0);
+	expect(setupStderr).toBe("");
+	expect(setupStdout).toContain("providers: opencode, codex");
+	expect(setupStdout).toContain("selected: ctx7, opencode-docs");
+	await rm(root, { recursive: true, force: true });
+});
+
+test("CLI state inspect reports availability changes removal and optional feature state", async () => {
+	const root = await mkdtemp(join(tmpdir(), "oal-state-"));
+	const config = join(root, "config.json");
+	const env = await fakeProviderPath(root, ["codex"]);
+	await writeFile(
+		config,
+		JSON.stringify({
+			version: 1,
+			activeProfile: "global",
+			profiles: {
+				global: {
+					providers: ["codex", "claude"],
+					scope: "global",
+					home: root,
+					optionalTools: ["ctx7"],
+				},
+			},
+		}),
+	);
+	const command = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"state",
+			"inspect",
+			"--config",
+			config,
+			"--json",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const stdout = await new Response(command.stdout).text();
+	const stderr = await new Response(command.stderr).text();
+	expect(await command.exited).toBe(0);
+	expect(stderr).toBe("");
+	const report = JSON.parse(stdout) as {
+		profile?: string;
+		requested?: string[];
+		available?: string[];
+		skipped?: { provider?: string }[];
+		changes?: { write?: number };
+		removable?: { provider?: string; allowed?: boolean }[];
+		optionalFeatures?: { selected?: string[]; installCommands?: number };
+	};
+	expect(report.profile).toBe("global");
+	expect(report.requested).toEqual(["codex", "claude"]);
+	expect(report.available).toEqual(["codex"]);
+	expect(report.skipped?.[0]?.provider).toBe("claude");
+	expect((report.changes?.write ?? 0) > 0).toBe(true);
+	expect(
+		report.removable?.find((item) => item.provider === "codex")?.allowed,
+	).toBe(false);
+	expect(report.optionalFeatures?.selected).toEqual(["ctx7"]);
+	expect(report.optionalFeatures?.installCommands).toBeGreaterThan(0);
+	await rm(root, { recursive: true, force: true });
+});
+
 test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-setup-apply-codex-"));
 	const env = await fakeProviderPath(home, ["codex"]);

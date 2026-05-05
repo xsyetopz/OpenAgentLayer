@@ -66,7 +66,7 @@ function wrapColumns() {
 function wrapLine(line, width) {
 	if (line.length <= width) return [line];
 	const indent = line.match(INDENT_PATTERN)?.[0] ?? "";
-	const continuationIndent = `${indent}  `;
+	const continuationIndent = indent || " ";
 	const words = line.trimEnd().split(WORD_SPLIT_PATTERN);
 	const lines = [];
 	let current = "";

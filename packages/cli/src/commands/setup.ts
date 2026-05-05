@@ -8,12 +8,26 @@ import {
 } from "@openagentlayer/setup";
 import type { OptionalTool } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
+import { loadProfileSelection, setupArgsForProfile } from "../config-state";
 import { installableProviders } from "../provider-binaries";
 import { runCheckCommand } from "./check";
 import { runDeployCommand } from "./deploy";
 import { runPluginsCommand } from "./plugins";
 
 export async function runSetupCommand(
+	repoRoot: string,
+	args: string[],
+): Promise<void> {
+	const profileSelection = await loadProfileSelection(args);
+	if (profileSelection.profile)
+		return runSetupWithArgs(
+			repoRoot,
+			setupArgsForProfile(profileSelection.profile, args),
+		);
+	return runSetupWithArgs(repoRoot, args);
+}
+
+async function runSetupWithArgs(
 	repoRoot: string,
 	args: string[],
 ): Promise<void> {

@@ -17,9 +17,18 @@ import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
+import { runProfilesCommand } from "./commands/profiles";
 import { runSetupCommand } from "./commands/setup";
+import { runStateCommand } from "./commands/state";
 import { runFeaturesCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
+import {
+	configPathFromArgs,
+	loadConfig,
+	type OalProfile,
+	PROFILE_NAME_PATTERN,
+	saveConfig,
+} from "./config-state";
 import { printDetail, printHeader, printStep, printWarning } from "./output";
 import { installableProviders } from "./provider-binaries";
 import { cavemanModes } from "./source";
@@ -36,6 +45,8 @@ type AdvancedAction =
 	| "deploy"
 	| "plugins"
 	| "features"
+	| "profiles"
+	| "state"
 	| "uninstall"
 	| "check";
 type ProviderMulti = WorkflowProvider[];
@@ -142,6 +153,7 @@ async function interactiveSetup(
 		optionalTools,
 		intent,
 	};
+	await maybeSaveProfile(workflowSelection);
 	const dryRun = await confirmApplyPrompt(workflowSelection);
 	await runSetupCommand(
 		repoRoot,
@@ -155,10 +167,17 @@ async function interactiveSetup(
 }
 
 async function interactiveInspect(repoRoot: string): Promise<void> {
-	const action = await ask<"check" | "installed" | "preview" | "content">(
+	const action = await ask<
+		"state" | "check" | "installed" | "preview" | "content"
+	>(
 		select({
 			message: "Inspect target",
 			options: [
+				{
+					value: "state",
+					label: "State summary",
+					hint: "profile, provider availability, deploy plan",
+				},
 				{ value: "check", label: "Check source", hint: "renderability only" },
 				{
 					value: "installed",
@@ -174,6 +193,10 @@ async function interactiveInspect(repoRoot: string): Promise<void> {
 			],
 		}),
 	);
+	if (action === "state") {
+		await runStateCommand(repoRoot, ["inspect"]);
+		return;
+	}
 	if (action === "check") {
 		await runCheckCommand(repoRoot);
 		return;
@@ -215,6 +238,8 @@ async function interactiveAdvanced(repoRoot: string): Promise<void> {
 					label: "features",
 					hint: "optional feature commands",
 				},
+				{ value: "state", label: "state", hint: "profile and install state" },
+				{ value: "profiles", label: "profiles", hint: "saved setup profiles" },
 				{ value: "uninstall", label: "uninstall", hint: "remove owned files" },
 				{ value: "check", label: "check", hint: "validate source" },
 			],
@@ -225,7 +250,28 @@ async function interactiveAdvanced(repoRoot: string): Promise<void> {
 	else if (action === "deploy") await interactiveDeploy(repoRoot);
 	else if (action === "plugins") await interactivePlugins(repoRoot);
 	else if (action === "features") await interactiveFeatures();
+	else if (action === "state") await runStateCommand(repoRoot, ["inspect"]);
+	else if (action === "profiles") await interactiveProfiles();
 	else await interactiveUninstall();
+}
+
+async function interactiveProfiles(): Promise<void> {
+	const action = await ask<"list" | "show" | "use">(
+		select({
+			message: "Profiles",
+			options: [
+				{ value: "list", label: "List profiles" },
+				{ value: "show", label: "Show active profile" },
+				{ value: "use", label: "Activate profile" },
+			],
+		}),
+	);
+	if (action === "use") {
+		const name = await profileNamePrompt("Profile name");
+		await runProfilesCommand(["use", name]);
+		return;
+	}
+	await runProfilesCommand([action]);
 }
 
 async function interactivePreview(repoRoot: string): Promise<void> {
@@ -352,6 +398,50 @@ async function confirmApplyPrompt(selection: {
 		confirm({ message: "Apply changes now?", initialValue: false }),
 	);
 	return !apply;
+}
+
+async function maybeSaveProfile(selection: OalProfile): Promise<void> {
+	const save = await ask<boolean>(
+		confirm({ message: "Save this setup as a profile?", initialValue: false }),
+	);
+	if (!save) return;
+	const name = await profileNamePrompt("Profile name");
+	const activate = await ask<boolean>(
+		confirm({ message: "Make this the active profile?", initialValue: true }),
+	);
+	const configPath = configPathFromArgs([]);
+	const config = await loadConfig(configPath);
+	config.profiles[name] = {
+		providers: selection.providers,
+		scope: selection.scope,
+		...(selection.home ? { home: selection.home } : {}),
+		...(selection.target ? { target: selection.target } : {}),
+		...(selection.codexPlan ? { codexPlan: selection.codexPlan } : {}),
+		...(selection.claudePlan ? { claudePlan: selection.claudePlan } : {}),
+		...(selection.opencodePlan ? { opencodePlan: selection.opencodePlan } : {}),
+		...(selection.cavemanMode ? { cavemanMode: selection.cavemanMode } : {}),
+		...(selection.optionalTools
+			? { optionalTools: selection.optionalTools }
+			: {}),
+		...(selection.toolchain ? { toolchain: true } : {}),
+		...(selection.rtk ? { rtk: true } : {}),
+	};
+	if (activate) config.activeProfile = name;
+	await saveConfig(configPath, config);
+	log.success(`Saved profile ${name}`);
+}
+
+function profileNamePrompt(message: string): Promise<string> {
+	return ask<string>(
+		text({
+			message,
+			placeholder: "default",
+			validate: (value) =>
+				PROFILE_NAME_PATTERN.test(value ?? "")
+					? undefined
+					: "Use letters, digits, dot, dash, or underscore",
+		}),
+	);
 }
 
 function codexPlanPrompt(): Promise<string> {

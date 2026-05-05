@@ -1,6 +1,6 @@
 {
 	"name": "openagentlayer",
-	"version": "0.2.0-beta.7",
+	"version": "0.2.0-beta.8",
 	"private": true,
 	"type": "module",
 	"workspaces": [
@@ -18,6 +18,8 @@
 		"check": "bun packages/cli/src/main.ts check",
 		"deploy": "bun packages/cli/src/main.ts deploy",
 		"bin": "bun packages/cli/src/main.ts bin",
+		"profiles": "bun packages/cli/src/main.ts profiles",
+		"state": "bun packages/cli/src/main.ts state",
 		"uninstall": "bun packages/cli/src/main.ts uninstall",
 		"plugins": "bun packages/cli/src/main.ts plugins",
 		"render": "bun packages/cli/src/main.ts render",

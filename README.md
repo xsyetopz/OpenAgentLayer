@@ -147,6 +147,8 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 | `preview`          | Show generated artifact paths and optional file contents without writing.            | `--scope`, `--home`, `--provider`, `--path`, `--content`, `--plan`.                                 | `bun run preview -- --provider all`.                                                    |
 | `render`           | Write generated artifacts into an output directory.                                  | `--scope`, `--home`, `--provider`, `--out`, `--plan`.                                               | `bun run render -- --provider codex --out generated`.                                   |
 | `setup`            | Plan or apply toolchain, deploy, plugin sync, binary shim, and installed checks.     | `--target`, `--scope`, `--provider`, `--toolchain`, `--optional`, `--dry-run`, `--verbose`.         | `bun run setup -- --scope global --provider all --toolchain --dry-run`.                 |
+| `profiles`         | Save, show, activate, or remove reusable setup profiles.                             | `list`, `show`, `save`, `use`, `remove`, `--config`, setup flags.                                   | `bun run profiles -- save global --scope global --provider codex,opencode --activate`.  |
+| `state`            | Inspect active profile, provider availability, deploy changes, and removal state.    | `inspect`, `--profile`, `--config`, `--provider`, `--json`.                                         | `bun run state -- inspect --json`.                                                      |
 | `deploy`           | Merge OAL artifacts into a target project or global provider home.                   | `--target`, `--scope project\|global`, `--home`, `--provider`, `--dry-run`, `--verbose`, `--quiet`. | `bun run deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
 | `bin`              | Install, inspect, or remove the source-checkout `oal` executable shim.               | `--home`, `--bin-dir`, `--remove`, `--dry-run`.                                                     | `bun packages/cli/src/main.ts bin --dry-run`.                                           |
 | `uninstall`        | Remove one provider's OAL-owned artifacts from a target project or provider home.    | `--target`, `--scope project\|global`, `--home`, `--provider`.                                      | `bun run uninstall -- --target /path/to/project --scope project --provider codex`.      |
@@ -161,6 +163,14 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 
 Providers accepted by provider-aware commands are `all`, `codex`, `claude`, `opencode`, or a comma-separated set such as `codex,opencode`. `uninstall` requires one provider, not `all`.
 
+Profiles live in `~/.openagentlayer/config.json` by default. They preserve provider order, scope, target/home paths, model plans, optional tools, and setup toggles:
+
+```bash
+bun run profiles -- save work --scope global --provider opencode,codex --optional ctx7,opencode-docs --activate
+bun run state -- inspect --profile work
+bun run setup -- --profile work --dry-run
+```
+
 ## Interactive CLI
 
 OAL uses Commander for option parsing and Clack for simple terminal prompts. Run without a command in a TTY, or call `interactive` explicitly:
@@ -170,7 +180,7 @@ bun packages/cli/src/main.ts
 bun packages/cli/src/main.ts interactive
 ```
 
-Interactive mode supports setup, preview, deploy, plugin sync, uninstall, and check. Setup is a high-level wrapper over the same low-level `setup` command used by scripts. Provider prompts use multiselect where commands can act on multiple providers. Global deploy auto-detects the home directory and only asks when you override it. Non-interactive commands remain script-safe and print help instead of prompting when stdin is not a TTY.
+Interactive mode supports setup, profile saving, state inspection, preview, deploy, plugin sync, uninstall, and check. Setup is a high-level wrapper over the same low-level `setup` command used by scripts. Provider prompts use multiselect where commands can act on multiple providers. Global deploy auto-detects the home directory and only asks when you override it. Non-interactive commands remain script-safe and print help instead of prompting when stdin is not a TTY.
 
 Optional features are explicit add/remove commands on top of OAL:
 

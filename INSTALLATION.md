@@ -11,13 +11,14 @@ This guide covers the supported OpenAgentLayer install and setup paths. Use `--d
    4. [Install online](#install-online)
    5. [Install with Homebrew](#install-with-homebrew)
    6. [Interactive CLI](#interactive-cli)
-   7. [Set up provider plugins](#set-up-provider-plugins)
-   8. [Deploy into a project](#deploy-into-a-project)
-   9. [Deploy globally](#deploy-globally)
-   10. [Select model plans](#select-model-plans)
-   11. [Verify the install](#verify-the-install)
-   12. [Uninstall](#uninstall)
-   13. [Troubleshooting](#troubleshooting)
+   7. [Profiles and State](#profiles-and-state)
+   8. [Set up provider plugins](#set-up-provider-plugins)
+   9. [Deploy into a project](#deploy-into-a-project)
+   10. [Deploy globally](#deploy-globally)
+   11. [Select model plans](#select-model-plans)
+   12. [Verify the install](#verify-the-install)
+   13. [Uninstall](#uninstall)
+   14. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -132,7 +133,7 @@ Run without a command in a TTY for guided prompts:
 bun packages/cli/src/main.ts
 ```
 
-The interactive path uses Commander-parsed commands plus Clack prompts. It covers setup, preview, deploy, plugin sync, uninstall, and check. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
+The interactive path uses Commander-parsed commands plus Clack prompts. It covers setup, profile saving, state inspection, preview, deploy, plugin sync, uninstall, and check. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
 
 Optional feature commands can be printed separately:
 
@@ -150,6 +151,39 @@ bun packages/cli/src/main.ts mcp serve anthropic-docs
 bun packages/cli/src/main.ts mcp serve opencode-docs
 bun packages/cli/src/main.ts mcp serve oal-inspect
 ```
+
+## Profiles and State
+
+Profiles preserve reusable setup choices in `~/.openagentlayer/config.json` by default. Use `--config /path/to/config.json` for fixtures or team-specific profiles.
+
+Save and activate a profile:
+
+```bash
+bun run profiles -- save global --scope global --provider opencode,codex --optional ctx7,opencode-docs --codex-plan pro-20 --opencode-plan opencode-free --activate
+```
+
+Inspect available profiles:
+
+```bash
+bun run profiles -- list
+bun run profiles -- show global
+bun run profiles -- args global
+```
+
+Use a profile with setup:
+
+```bash
+bun run setup -- --profile global --dry-run
+```
+
+Inspect what OAL can apply or remove for the active profile:
+
+```bash
+bun run state -- inspect
+bun run state -- inspect --profile global --json
+```
+
+`state inspect` reports requested providers, provider binaries available in `PATH`, skipped provider reasons, deploy write/update/skip counts, owned-manifest removal eligibility, optional feature command counts, and the setup argument vector selected from the profile.
 
 ## Set up provider plugins
 

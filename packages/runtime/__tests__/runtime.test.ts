@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { assertRuntimeHooksExecutable, runtimeHooks } from "../src";
 
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
 test("runtime hook inventory uses executable mjs scripts", async () => {
 	expect(runtimeHooks.every((hook) => hook.endsWith(".mjs"))).toBe(true);
 	await assertRuntimeHooksExecutable(resolve(import.meta.dir, "../../.."));
@@ -429,7 +431,7 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	);
 	expect(postToolUse.stderr).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
 	expect(postToolUse.stderr).toContain(
-		"\u001b[32m   /Library/Developer/Frameworks",
+		"\u001b[32m /Library/Developer/Frameworks",
 	);
 
 	const secretOutput = await runHookRaw(
@@ -443,9 +445,29 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	expect(secretOutput.code).toBe(2);
 	expect(secretOutput.stderr).toContain("\u001b[36m generic-api-key:\u001b[0m");
 	expect(secretOutput.stderr).toContain(
-		"\u001b[36m   Self.outputModeDefaultsKey\u001b[0m",
+		"\u001b[36m Self.outputModeDefaultsKey\u001b[0m",
 	);
 	expect(secretOutput.stderr).not.toContain("generic-api-\u001b[0m\n");
+});
+
+test("hook color wrapping keeps one separator when provider UIs flatten lines", async () => {
+	const output = await runHookRaw(
+		"block-secret-output.mjs",
+		{
+			hook_event_name: "PostToolUse",
+			output: `generic-api-${"key"}:artifact.mode`,
+		},
+		{ OAL_HOOK_WRAP_COLUMNS: "40" },
+	);
+	expect(output.code).toBe(2);
+	const flattened = output.stderr.replace(ANSI_PATTERN, "").replace(/\n/g, "");
+	expect(flattened).toContain("Potential secret detected by Gitleaks rules");
+	expect(flattened).not.toContain("Gitleaks  rules");
+	expect(
+		output.stderr
+			.split("\n")
+			.every((line) => line === "" || line.startsWith("\u001b[")),
+	).toBe(true);
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {

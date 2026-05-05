@@ -5,10 +5,13 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.2.0-beta.7] - 2026-05-05
+## [0.2.0-beta.8] - 2026-05-05
 
 ### Added
 
+- Added persisted setup profiles with `oal profiles list`, `show`, `save`, `use`, `remove`, and `args`.
+- Added `oal state inspect` for profile selection, provider availability, deploy write/update/skip counts, owned-manifest removal eligibility, and optional feature command state.
+- Added interactive setup profile saving plus interactive state/profile workflows.
 - Added `oal mcp serve` for OAL-owned MCP servers, starting with Anthropic Docs and OpenCode Docs.
 - Added `oal inspect` and `oal mcp serve oal-inspect` for shared capability, manifest, generated-input, command-policy, RTK, and release-witness reports.
 - Added optional setup and feature commands for Anthropic Docs and OpenCode Docs MCP add/remove flows.
@@ -18,6 +21,8 @@ material only and is not part of the OAL release line.
 
 ### Changed
 
+- Changed setup so `--profile` can load saved setup choices while explicit CLI flags override matching profile flags.
+- Changed hook feedback wrapping to keep one separator when provider UIs flatten wrapped lines and to reapply ANSI color to every wrapped line.
 - Reworked interactive setup as a high-level wrapper over the low-level setup command path.
 - Expanded low-level setup/toolchain CLI flags for optional docs MCPs and command-line tool installation.
 - Fixed setup toolchain planning so Bun uses the Bun installer, Homebrew does not try to install a nonexistent `bun` formula, and provider-specific optional MCP commands are skipped when that provider is unavailable.
@@ -42,6 +47,9 @@ material only and is not part of the OAL release line.
 
 ### Verified
 
+- `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts tests/e2e.test.ts packages/cli/__tests__/cli.test.ts`
+- `rtk proxy -- bunx biome check packages/runtime/hooks packages/runtime/__tests__/runtime.test.ts packages/cli/src tests/e2e.test.ts README.md INSTALLATION.md package.json --max-diagnostics 300`
+- `rtk bunx tsc --noEmit`
 - `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/accept/__tests__/accept.test.ts`
 - `rtk proxy -- bun packages/cli/src/main.ts accept`
 - `rtk proxy -- bunx biome check . --error-on-warnings --max-diagnostics 16384`
