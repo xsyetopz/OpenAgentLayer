@@ -150,6 +150,7 @@ async function liveTextPaths(repoRoot: string): Promise<string[]> {
 		"packages",
 		"plugins",
 		"source",
+		"specs",
 		"tests",
 	] as const;
 	const paths = ["CHANGELOG.md", "CONTRIBUTING.md", "README.md"];

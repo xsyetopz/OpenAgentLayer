@@ -39,6 +39,7 @@
 		"@openagentlayer/artifact": "workspace:*",
 		"@openagentlayer/cli": "workspace:*",
 		"@openagentlayer/deploy": "workspace:*",
+		"@openagentlayer/inspect": "workspace:*",
 		"@openagentlayer/manifest": "workspace:*",
 		"@openagentlayer/plugins": "workspace:*",
 		"@openagentlayer/policy": "workspace:*",

@@ -1,0 +1,17 @@
+{
+  "id": "inspect",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "agent": "hermes",
+  "skills": [
+    "explore",
+    "parse",
+    "oal"
+  ],
+  "permissions": "read-only plus OAL inspect command",
+  "arguments": "topic: capabilities, manifest, generated-diff, rtk-report, command-policy, or release-witness",
+  "body": "Inspect OAL provider capabilities, manifest ownership, generated source inputs, RTK efficiency guidance, command policy guidance, or release witness data through `oal inspect <topic>` or the OAL Inspect MCP server. Keep the working tree unchanged and report exact provider gaps, artifact counts, manifest paths, or witness hashes."
+}

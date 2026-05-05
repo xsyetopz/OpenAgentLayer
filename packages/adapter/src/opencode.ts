@@ -171,7 +171,11 @@ function renderOpenCodeTool(tool: ToolRecord): string {
 	if (tool.id === "command_policy_check") return renderCommandPolicyTool(tool);
 	if (tool.id === "rtk_report") return renderRtkReportTool(tool);
 	if (tool.id === "provider_surface_map")
-		return renderProviderSurfaceMapTool(tool);
+		return renderInspectTool(tool, "capabilities");
+	if (tool.id === "manifest_inspect")
+		return renderInspectTool(tool, "manifest");
+	if (tool.id === "generated_diff")
+		return renderInspectTool(tool, "generated-diff");
 	return `import { tool } from "@opencode-ai/plugin";
 
 export const ${camelCase(tool.id)} = tool({
@@ -179,6 +183,29 @@ export const ${camelCase(tool.id)} = tool({
 	args: {},
 	async execute() {
 		return ${quoteToml(tool.body)};
+	}
+});
+`;
+}
+
+function renderInspectTool(tool: ToolRecord, topic: string): string {
+	return `import { tool } from "@opencode-ai/plugin";
+
+export const ${camelCase(tool.id)} = tool({
+	description: ${quoteToml(tool.description)},
+	args: {},
+	async execute() {
+		const proc = Bun.spawn(["oal", "inspect", ${quoteToml(topic)}], {
+			stdout: "pipe",
+			stderr: "pipe"
+		});
+		const [stdout, stderr, code] = await Promise.all([
+			new Response(proc.stdout).text(),
+			new Response(proc.stderr).text(),
+			proc.exited
+		]);
+		if (code !== 0) throw new Error(stderr || stdout);
+		return stdout;
 	}
 });
 `;
@@ -220,23 +247,6 @@ export const ${camelCase(tool.id)} = tool({
 			"Run this command for the project-scoped RTK report:",
 			\`oal rtk-report --project "\${project}"\`,
 			"Use the output to replace proxy/fallback leaks with native RTK filters."
-		].join("\\n");
-	}
-});
-`;
-}
-
-function renderProviderSurfaceMapTool(tool: ToolRecord): string {
-	return `import { tool } from "@opencode-ai/plugin";
-
-export const ${camelCase(tool.id)} = tool({
-	description: ${quoteToml(tool.description)},
-	args: {},
-	async execute() {
-		return [
-			"codex: .codex/config.toml, AGENTS.md, .codex/agents/*.toml, .codex/openagentlayer/hooks/*.mjs",
-			"claude: .claude/settings.json, CLAUDE.md, .claude/agents/*.md, .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/hooks/scripts/*.mjs",
-			"opencode: opencode.jsonc, .opencode/agents/*.md, .opencode/commands/*.md, .opencode/tools/*.ts, .opencode/plugins/openagentlayer.ts, .opencode/skills/*/SKILL.md"
 		].join("\\n");
 	}
 });

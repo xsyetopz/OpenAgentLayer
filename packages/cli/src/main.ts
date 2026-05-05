@@ -5,6 +5,7 @@ import { runAcceptCommand } from "./commands/accept";
 import { runBinCommand } from "./commands/bin";
 import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
+import { runInspectCommand } from "./commands/inspect";
 import { runMcpCommand } from "./commands/mcp";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
@@ -197,6 +198,19 @@ program
 	.action(() => runRoadmapEvidenceCommand(repoRoot));
 
 program
+	.command("inspect")
+	.description(
+		"print OAL capability, manifest, diff, policy, and witness reports",
+	)
+	.argument(
+		"[topic]",
+		"capabilities, manifest, generated-diff, rtk-report, command-policy, or release-witness",
+	)
+	.action((topic: string | undefined) =>
+		runInspectCommand(repoRoot, topic ? [topic] : []),
+	);
+
+program
 	.command("provider-e2e")
 	.description(
 		"check real provider binaries and optionally run headless live prompts",
@@ -215,13 +229,13 @@ program
 	.command("mcp")
 	.description("run or configure OAL-owned MCP servers")
 	.argument("<action>", "serve, install, or remove")
-	.argument("<server>", "anthropic-docs or opencode-docs")
+	.argument("<server>", "anthropic-docs, opencode-docs, or oal-inspect")
 	.option("--provider <provider>", "opencode for config install/remove")
 	.option("--scope <scope>", "project or global", "global")
 	.option("--home <dir>", "home directory for global scope")
 	.option("--target <dir>", "project target directory")
 	.action((action: string, server: string, options) =>
-		runMcpCommand([action, server, ...argsFromOptions(options)]),
+		runMcpCommand(repoRoot, [action, server, ...argsFromOptions(options)]),
 	);
 
 program

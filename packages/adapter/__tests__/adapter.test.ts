@@ -207,7 +207,11 @@ test("OpenCode renders real OAL command policy and RTK tools", async () => {
 	const surfaceTool = rendered.artifacts.find(
 		(artifact) => artifact.path === ".opencode/tools/provider_surface_map.ts",
 	)?.content;
-	expect(surfaceTool).toContain(".opencode/plugins/openagentlayer.ts");
+	expect(surfaceTool).toContain('["oal", "inspect", "capabilities"]');
+	const manifestTool = rendered.artifacts.find(
+		(artifact) => artifact.path === ".opencode/tools/manifest_inspect.ts",
+	)?.content;
+	expect(manifestTool).toContain('["oal", "inspect", "manifest"]');
 	const plugin = rendered.artifacts.find(
 		(artifact) => artifact.path === ".opencode/plugins/openagentlayer.ts",
 	)?.content;

@@ -115,7 +115,7 @@ async function queryRowsWithSqliteCli<T>(
 		new Response(proc.stderr).text(),
 		proc.exited,
 	]);
-	if (code !== 0) throw new Error(`sqlite3 RTK query failed: ${stderr}`);
+	if (code !== 0) throw new Error(`\`sqlite3\` RTK query failed: ${stderr}`);
 	return JSON.parse(stdout || "[]") as T[];
 }
 

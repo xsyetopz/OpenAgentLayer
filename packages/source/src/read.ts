@@ -29,7 +29,9 @@ function assertUniqueIds<T extends { id: string }>(
 	const seen = new Set<string>();
 	for (const record of records) {
 		if (seen.has(record.id))
-			throw new Error(`Duplicate source id in ${directory}: ${record.id}`);
+			throw new Error(
+				`Duplicate source id in \`${directory}\`: \`${record.id}\``,
+			);
 		seen.add(record.id);
 	}
 }

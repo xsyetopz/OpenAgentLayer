@@ -30,6 +30,7 @@
   ],
   "routes": [
     "explore",
+    "inspect",
     "trace"
   ],
   "models": {

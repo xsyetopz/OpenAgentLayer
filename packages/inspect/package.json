@@ -1,0 +1,12 @@
+{
+	"name": "@openagentlayer/inspect",
+	"version": "0.0.0",
+	"type": "module",
+	"private": true,
+	"exports": "./src/index.ts",
+	"dependencies": {
+		"@openagentlayer/artifact": "workspace:*",
+		"@openagentlayer/manifest": "workspace:*",
+		"@openagentlayer/source": "workspace:*"
+	}
+}

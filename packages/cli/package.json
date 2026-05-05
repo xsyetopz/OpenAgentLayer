@@ -13,6 +13,7 @@
 		"@openagentlayer/artifact": "workspace:*",
 		"@openagentlayer/accept": "workspace:*",
 		"@openagentlayer/deploy": "workspace:*",
+		"@openagentlayer/inspect": "workspace:*",
 		"@openagentlayer/plugins": "workspace:*",
 		"@openagentlayer/policy": "workspace:*",
 		"@openagentlayer/source": "workspace:*",

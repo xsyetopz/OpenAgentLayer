@@ -29,7 +29,7 @@ export async function runPreviewCommand(
 		selectedPath,
 	);
 	if (selectedPath && artifacts.length === 0)
-		throw new Error(`No generated artifact path matched ${selectedPath}.`);
+		throw new Error(`No generated artifact path matched \`${selectedPath}\`.`);
 	console.log(renderPreview({ ...rendered, artifacts }, { includeContent }));
 }
 

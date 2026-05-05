@@ -6,6 +6,7 @@
   "exports": "./src/index.ts",
 	"dependencies": {
 		"@openagentlayer/artifact": "workspace:*",
+		"@openagentlayer/inspect": "workspace:*",
 		"@openagentlayer/source": "workspace:*",
 		"@opencode-ai/plugin": "^1.14.33"
 	}

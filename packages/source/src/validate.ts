@@ -51,7 +51,7 @@ export function validateSkillRecordShape(
 	requireText(record.id, "skill id");
 	if (!AGENT_SKILL_ID_PATTERN.test(record.id))
 		throw new Error(
-			`skill ${record.id} id must use Agent Skills lowercase hyphen format.`,
+			`skill \`${record.id}\` id must use Agent Skills lowercase hyphen format.`,
 		);
 	requireText(record.title, `skill ${record.id} title`);
 	requireProviderList(record.providers, `skill ${record.id}`);
@@ -60,13 +60,13 @@ export function validateSkillRecordShape(
 	if (record.upstream) {
 		requireText(record.upstream.path, `skill ${record.id} upstream path`);
 		if (record.upstream.verbatim !== true)
-			throw new Error(`skill ${record.id} upstream must be verbatim.`);
+			throw new Error(`skill \`${record.id}\` upstream must be verbatim.`);
 	}
 	for (const supportFile of record.supportFiles ?? []) {
-		requireText(supportFile.path, `skill ${record.id} support file path`);
+		requireText(supportFile.path, `skill \`${record.id}\` support file path`);
 		if (!isSkillSupportPath(supportFile.path))
 			throw new Error(
-				`skill ${record.id} support file ${supportFile.path} must live under scripts, references, or assets.`,
+				`skill \`${record.id}\` support file \`${supportFile.path}\` must live under scripts, references, or assets.`,
 			);
 		if (
 			supportFile.content &&
@@ -74,19 +74,22 @@ export function validateSkillRecordShape(
 			options.allowHydratedSupportFiles !== true
 		)
 			throw new Error(
-				`skill ${record.id} support file ${supportFile.path} cannot define content and source.`,
+				`skill \`${record.id}\` support file \`${supportFile.path}\` cannot define content and source.`,
 			);
 		if (!(supportFile.content || supportFile.source))
 			throw new Error(
-				`skill ${record.id} support file ${supportFile.path} needs content or source.`,
+				`skill \`${record.id}\` support file \`${supportFile.path}\` needs content or source.`,
 			);
 		if (supportFile.content)
 			requireText(
 				supportFile.content,
-				`skill ${record.id} support file content`,
+				`skill \`${record.id}\` support file content`,
 			);
 		if (supportFile.source)
-			requireText(supportFile.source, `skill ${record.id} support file source`);
+			requireText(
+				supportFile.source,
+				`skill \`${record.id}\` support file source`,
+			);
 	}
 }
 
@@ -116,7 +119,7 @@ export function validateHookRecord(record: HookRecord): void {
 	for (const provider of Object.keys(record.events))
 		if (!PROVIDERS.has(provider as Provider))
 			throw new Error(
-				`hook ${record.id} has unsupported event provider ${provider}`,
+				`hook \`${record.id}\` has unsupported event provider \`${provider}\``,
 			);
 }
 
@@ -131,7 +134,7 @@ export function validateProductSource(record: ProductSource): void {
 	if (record.caveman) {
 		if (!CAVEMAN_MODES.has(record.caveman.mode))
 			throw new Error(
-				`Product caveman mode ${String(record.caveman.mode)} is unsupported.`,
+				`Product caveman mode \`${String(record.caveman.mode)}\` is unsupported.`,
 			);
 	}
 	if (
@@ -199,13 +202,13 @@ export function validateProductSource(record: ProductSource): void {
 
 function requireProviderList(value: Provider[], label: string): void {
 	if (!Array.isArray(value) || value.length === 0)
-		throw new Error(`${label} providers must be a non-empty array.`);
+		throw new Error(`\`${label}\` providers must be a non-empty array.`);
 	for (const provider of value) requireProvider(provider, label);
 }
 
 function requireProvider(value: Provider, label: string): void {
 	if (!PROVIDERS.has(value))
-		throw new Error(`${label} has unsupported provider ${String(value)}.`);
+		throw new Error(`\`${label}\` has unsupported provider ${String(value)}.`);
 }
 
 function requireStringList(value: string[], label: string): void {
@@ -214,12 +217,12 @@ function requireStringList(value: string[], label: string): void {
 		value.length === 0 ||
 		value.some((entry) => typeof entry !== "string" || entry.length === 0)
 	)
-		throw new Error(`${label} must be a non-empty string array.`);
+		throw new Error(`\`${label}\` must be a non-empty string array.`);
 }
 
 function requireText(value: string, label: string): void {
 	if (typeof value !== "string" || value.trim().length === 0)
-		throw new Error(`${label} must be a non-empty string.`);
+		throw new Error(`\`${label}\` must be a non-empty string.`);
 }
 
 function requireHydratedSupportContent(
@@ -228,5 +231,7 @@ function requireHydratedSupportContent(
 	content: string | undefined,
 ): void {
 	if (content) return;
-	throw new Error(`skill ${skillId} support file ${path} was not hydrated.`);
+	throw new Error(
+		`skill \`${skillId}\` support file \`${path}\` was not hydrated.`,
+	);
 }

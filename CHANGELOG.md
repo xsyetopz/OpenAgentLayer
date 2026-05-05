@@ -10,6 +10,7 @@ material only and is not part of the OAL release line.
 ### Added
 
 - Added `oal mcp serve` for OAL-owned MCP servers, starting with Anthropic Docs and OpenCode Docs.
+- Added `oal inspect` and `oal mcp serve oal-inspect` for shared capability, manifest, generated-input, command-policy, RTK, and release-witness reports.
 - Added optional setup and feature commands for Anthropic Docs and OpenCode Docs MCP add/remove flows.
 - Added `install.sh` and `install-online.sh` convenience installers for source checkout and temporary-clone installs.
 - Added toolchain setup coverage for Homebrew, core OAL command-line tools, RTK checks, and fallback-oriented setup output.
@@ -28,6 +29,7 @@ material only and is not part of the OAL release line.
 - Consolidated advisory command-tool hooks into `advise-command-tools`, while keeping RTK command enforcement separate.
 - Updated OpenCode runtime/plugin rendering for command policy, Bun rewrites, command safety, secret checks, and repeated-failure handling.
 - Recorded Ruflo/Symphony harness ideas as future product inputs instead of runtime dependencies.
+- Moved product requirements, design specs, provider research, and acceptance requirements from `docs/` into `specs/`, leaving `docs/` for user-facing documentation.
 
 ### Removed
 

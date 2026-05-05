@@ -21,6 +21,6 @@ function valueAfter(args: string[], flag: string): string | undefined {
 	const index = args.indexOf(flag);
 	if (index === -1) return undefined;
 	const value = args[index + 1];
-	if (!value) throw new Error(`${flag} requires a path.`);
+	if (!value) throw new Error(`\`${flag}\` requires a path.`);
 	return value;
 }

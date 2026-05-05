@@ -9,7 +9,7 @@ const TRACKED_PRODUCT_ROOTS = [
 	"plugins",
 	"scripts",
 ] as const;
-const REFERENCE_ROOTS = ["docs", "third_party"] as const;
+const REFERENCE_ROOTS = ["docs", "specs", "third_party"] as const;
 const ROOT_PRODUCT_FILES = [
 	"package.json",
 	"tsconfig.json",

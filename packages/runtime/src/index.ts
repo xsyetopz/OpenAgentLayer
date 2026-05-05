@@ -41,16 +41,16 @@ export async function assertRuntimeHooksExecutable(
 	const discovered = await readdir(hookRoot);
 	for (const hookName of runtimeHooks) {
 		if (!discovered.includes(hookName))
-			throw new Error(`Missing runtime hook ${hookName}`);
+			throw new Error(`Missing runtime hook \`${hookName}\``);
 		const hookStat = await stat(join(hookRoot, hookName));
 		if ((hookStat.mode & 0o111) === 0)
-			throw new Error(`Runtime hook is not executable: ${hookName}`);
+			throw new Error(`Runtime hook \`${hookName}\` is not executable`);
 	}
 	const privilegedRoot = join(repoRoot, "packages/runtime/privileged");
 	const privilegedDiscovered = await readdir(privilegedRoot);
 	for (const script of privilegedRuntimeScripts) {
 		if (!privilegedDiscovered.includes(script))
-			throw new Error(`Missing privileged runtime script ${script}`);
+			throw new Error(`Missing privileged runtime script: ${script}`);
 		const hookStat = await stat(join(privilegedRoot, script));
 		if ((hookStat.mode & 0o111) === 0)
 			throw new Error(`Privileged runtime is not executable: ${script}`);

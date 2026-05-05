@@ -30,7 +30,7 @@ export function runFeaturesCommand(args: string[]): void {
 	const remove = optionalTools(option(args, "--remove"));
 	if (install.length === 0 && remove.length === 0)
 		throw new Error(
-			"Expected --install or --remove with ctx7,deepwiki,playwright,anthropic-docs,opencode-docs.",
+			"Expected `--install` or `--remove` with `ctx7,deepwiki,playwright,anthropic-docs,opencode-docs`",
 		);
 	const commands = [
 		...optionalFeatureCommands("install", install),
@@ -52,7 +52,9 @@ export function runFeaturesCommand(args: string[]): void {
 function osOption(rawOs: string | undefined): OperatingSystem {
 	if (rawOs === "macos" || rawOs === "linux") return rawOs;
 	if (!rawOs) return process.platform === "darwin" ? "macos" : "linux";
-	throw new Error(`Unsupported OS ${rawOs}. Expected macos or linux.`);
+	throw new Error(
+		`Unsupported OS \`${rawOs}\`. Expected \`macos\` or \`linux\`.`,
+	);
 }
 
 function optionalTools(rawTools: string | undefined): OptionalTool[] {

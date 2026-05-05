@@ -2,9 +2,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline";
+import { renderAllProviders } from "@openagentlayer/adapter";
+import { type InspectTopic, inspectTopic } from "@openagentlayer/inspect";
+import { loadSource } from "@openagentlayer/source";
 import { option } from "../arguments";
 
-type McpServer = "anthropic-docs" | "opencode-docs";
+type McpServer = "anthropic-docs" | "opencode-docs" | "oal-inspect";
 type McpAction = "serve" | "install" | "remove";
 
 interface JsonRpcRequest {
@@ -48,33 +51,61 @@ const MCP_SERVERS = {
 			["OpenCode agents", "https://opencode.ai/docs/agents/"],
 		],
 	},
+	"oal-inspect": {
+		name: "oal-inspect",
+		title: "OAL Inspect",
+		skill: "oal",
+		description:
+			"Inspect rendered OAL capabilities, manifest ownership, generated source inputs, command policy, RTK reporting guidance, and release witness data.",
+		references: [
+			["OAL capability report", "oal inspect capabilities"],
+			["OAL manifest report", "oal inspect manifest"],
+			["OAL release witness", "oal inspect release-witness"],
+		],
+	},
 } as const;
 
-export async function runMcpCommand(args: string[]): Promise<void> {
+export async function runMcpCommand(
+	repoRoot: string,
+	args: string[],
+): Promise<void> {
 	const action = mcpAction(args[0]);
 	if (!action)
 		throw new Error("Expected MCP action: serve, install, or remove.");
 	const server = mcpServer(args[1]);
 	if (!server)
-		throw new Error("Expected MCP server: anthropic-docs or opencode-docs.");
-	if (action === "serve") await runMcpServer(server);
+		throw new Error(
+			"Expected MCP server: anthropic-docs, opencode-docs, or oal-inspect.",
+		);
+	if (action === "serve") await runMcpServer(repoRoot, server);
 	else await configureMcpServer(action, server, args.slice(2));
 }
 
-async function runMcpServer(server: McpServer): Promise<void> {
+async function runMcpServer(
+	repoRoot: string,
+	server: McpServer,
+): Promise<void> {
 	const lines = createInterface({ input: process.stdin });
-	for await (const line of lines) handleLine(server, line);
+	for await (const line of lines) await handleLine(repoRoot, server, line);
 }
 
-function handleLine(server: McpServer, line: string): void {
+async function handleLine(
+	repoRoot: string,
+	server: McpServer,
+	line: string,
+): Promise<void> {
 	const trimmed = line.trim();
 	if (!trimmed) return;
 	const request = JSON.parse(trimmed) as JsonRpcRequest;
-	const response = handleRequest(server, request);
+	const response = await handleRequest(repoRoot, server, request);
 	if (response) process.stdout.write(`${JSON.stringify(response)}\n`);
 }
 
-function handleRequest(server: McpServer, request: JsonRpcRequest): unknown {
+async function handleRequest(
+	repoRoot: string,
+	server: McpServer,
+	request: JsonRpcRequest,
+): Promise<unknown> {
 	const docs = MCP_SERVERS[server];
 	if (request.method === "initialize")
 		return {
@@ -91,30 +122,11 @@ function handleRequest(server: McpServer, request: JsonRpcRequest): unknown {
 			jsonrpc: "2.0",
 			id: request.id,
 			result: {
-				tools: [
-					{
-						name: "search_docs",
-						description: docs.description,
-						inputSchema: {
-							type: "object",
-							properties: {
-								query: {
-									type: "string",
-									description:
-										"Question or topic to match against OAL docs references.",
-								},
-							},
-						},
-					},
-					{
-						name: "list_docs",
-						description: `List ${docs.title} URLs and OAL skill instructions.`,
-						inputSchema: { type: "object", properties: {} },
-					},
-				],
+				tools: server === "oal-inspect" ? inspectTools() : docsTools(docs),
 			},
 		};
-	if (request.method === "tools/call") return toolCall(server, request);
+	if (request.method === "tools/call")
+		return await toolCall(repoRoot, server, request);
 	return {
 		jsonrpc: "2.0",
 		id: request.id,
@@ -122,8 +134,28 @@ function handleRequest(server: McpServer, request: JsonRpcRequest): unknown {
 	};
 }
 
-function toolCall(server: McpServer, request: JsonRpcRequest): unknown {
+async function toolCall(
+	repoRoot: string,
+	server: McpServer,
+	request: JsonRpcRequest,
+): Promise<unknown> {
 	const toolName = String(request.params?.["name"] ?? "");
+	if (server === "oal-inspect") {
+		const topic = inspectTopicName(toolName);
+		if (!topic)
+			return {
+				jsonrpc: "2.0",
+				id: request.id,
+				error: { code: -32602, message: "Unknown OAL inspect tool" },
+			};
+		return {
+			jsonrpc: "2.0",
+			id: request.id,
+			result: {
+				content: [{ type: "text", text: await inspectText(repoRoot, topic) }],
+			},
+		};
+	}
 	if (toolName !== "search_docs" && toolName !== "list_docs")
 		return {
 			jsonrpc: "2.0",
@@ -144,6 +176,68 @@ function toolCall(server: McpServer, request: JsonRpcRequest): unknown {
 	};
 }
 
+function docsTools(docs: (typeof MCP_SERVERS)[McpServer]): unknown[] {
+	return [
+		{
+			name: "search_docs",
+			description: docs.description,
+			inputSchema: {
+				type: "object",
+				properties: {
+					query: {
+						type: "string",
+						description:
+							"Question or topic to match against OAL docs references.",
+					},
+				},
+			},
+		},
+		{
+			name: "list_docs",
+			description: `List ${docs.title} URLs and OAL skill instructions.`,
+			inputSchema: { type: "object", properties: {} },
+		},
+	];
+}
+
+function inspectTools(): unknown[] {
+	return [
+		["capabilities", "Report rendered provider capabilities and gaps."],
+		["manifest", "Report manifest ownership by provider."],
+		["generated_diff", "Report generated artifact source inputs."],
+		["rtk_report", "Return RTK report command guidance."],
+		["command_policy", "Return command policy inspection guidance."],
+		["release_witness", "Return deterministic release witness JSON."],
+	].map(([name, description]) => ({
+		name,
+		description,
+		inputSchema: { type: "object", properties: {} },
+	}));
+}
+
+async function inspectText(
+	repoRoot: string,
+	topic: InspectTopic,
+): Promise<string> {
+	const graph = await loadSource(join(repoRoot, "source"));
+	const rendered = await renderAllProviders(graph.source, repoRoot);
+	return await inspectTopic(topic, {
+		repoRoot,
+		source: graph.source,
+		artifacts: rendered.artifacts,
+		unsupported: rendered.unsupported,
+	});
+}
+
+function inspectTopicName(name: string): InspectTopic | undefined {
+	if (name === "generated_diff") return "generated-diff";
+	if (name === "rtk_report") return "rtk-report";
+	if (name === "command_policy") return "command-policy";
+	if (name === "release_witness") return "release-witness";
+	if (name === "capabilities" || name === "manifest") return name;
+	return undefined;
+}
+
 function docsText(server: McpServer, query: string): string {
 	const docs = MCP_SERVERS[server];
 	return [
@@ -159,7 +253,12 @@ function docsText(server: McpServer, query: string): string {
 }
 
 function mcpServer(value: string | undefined): McpServer | undefined {
-	if (value === "anthropic-docs" || value === "opencode-docs") return value;
+	if (
+		value === "anthropic-docs" ||
+		value === "opencode-docs" ||
+		value === "oal-inspect"
+	)
+		return value;
 	return undefined;
 }
 
@@ -174,11 +273,13 @@ async function configureMcpServer(
 	server: McpServer,
 	args: string[],
 ): Promise<void> {
-	if (server !== "opencode-docs")
-		throw new Error("Only opencode-docs has OAL-managed MCP config install.");
+	if (server !== "opencode-docs" && server !== "oal-inspect")
+		throw new Error(
+			"Only `opencode-docs` and `oal-inspect` have OAL-managed MCP config install.",
+		);
 	const provider = option(args, "--provider") ?? "opencode";
 	if (provider !== "opencode")
-		throw new Error("Only --provider opencode is supported for MCP config.");
+		throw new Error("Only `--provider opencode` is supported for MCP config.");
 	const scope = option(args, "--scope") === "project" ? "project" : "global";
 	const configPath =
 		scope === "global"

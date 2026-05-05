@@ -88,11 +88,39 @@ test("MCP command installs OpenCode docs server into config", async () => {
 	});
 });
 
+test("MCP command serves OAL inspect tools", async () => {
+	const inspect = await runMcp("oal-inspect", [
+		{ jsonrpc: "2.0", id: 1, method: "initialize" },
+		{ jsonrpc: "2.0", id: 2, method: "tools/list" },
+		{
+			jsonrpc: "2.0",
+			id: 3,
+			method: "tools/call",
+			params: { name: "capabilities", arguments: {} },
+		},
+	]);
+	expect(inspect[0]?.result?.serverInfo?.name).toBe("oal-inspect");
+	expect(inspect[1]?.result?.tools?.map((tool) => tool.name)).toContain(
+		"release_witness",
+	);
+	expect(inspect[2]?.result?.content?.[0]?.text).toContain(
+		"# OAL Capability Report",
+	);
+	expect(inspect[2]?.result?.content?.[0]?.text).toContain("codex");
+});
+
 async function runDocsMcp(
 	kind: "anthropic" | "opencode",
 	requests: unknown[],
 ): Promise<JsonRpcResponse[]> {
 	const server = kind === "anthropic" ? "anthropic-docs" : "opencode-docs";
+	return await runMcp(server, requests);
+}
+
+async function runMcp(
+	server: "anthropic-docs" | "opencode-docs" | "oal-inspect",
+	requests: unknown[],
+): Promise<JsonRpcResponse[]> {
 	const proc = Bun.spawn(
 		["bun", "packages/cli/src/main.ts", "mcp", "serve", server],
 		{ cwd: repoRoot, stdin: "pipe", stdout: "pipe", stderr: "pipe" },

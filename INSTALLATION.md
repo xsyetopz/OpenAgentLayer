@@ -148,6 +148,7 @@ Run an OAL-owned MCP server directly when a provider launches it:
 ```bash
 bun packages/cli/src/main.ts mcp serve anthropic-docs
 bun packages/cli/src/main.ts mcp serve opencode-docs
+bun packages/cli/src/main.ts mcp serve oal-inspect
 ```
 
 ## Set up provider plugins

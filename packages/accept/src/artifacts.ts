@@ -196,7 +196,7 @@ function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
 				const content = supportFile.content;
 				if (!content)
 					throw new Error(
-						`Skill support file ${skill.id}/${supportFile.path} was not hydrated.`,
+						`Skill support file \`${skill.id}/${supportFile.path}\` was not hydrated.`,
 					);
 				assertArtifact(`${root}/${skill.id}/${supportFile.path}`, artifacts, [
 					content.slice(0, 20),
@@ -249,7 +249,7 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	if (
 		!(privileged.executable && privileged.content.includes("ALLOWED_COMMANDS"))
 	)
-		throw new Error("Privileged exec artifact is not executable.");
+		throw new Error("Privileged executable artifact is not executable.");
 }
 
 function assertArtifact(
@@ -260,12 +260,12 @@ function assertArtifact(
 	const artifact = findArtifact(path, artifacts);
 	for (const term of terms)
 		if (!artifact.content.includes(term))
-			throw new Error(`${path} missing contract term ${term}`);
+			throw new Error(`\`${path}\` missing contract term ${term}`);
 }
 
 function findArtifact(path: string, artifacts: Artifact[]): Artifact {
 	const artifact = artifacts.find((candidate) => candidate.path === path);
-	if (!artifact) throw new Error(`Missing generated artifact ${path}`);
+	if (!artifact) throw new Error(`Missing generated artifact \`${path}\``);
 	return artifact;
 }
 
@@ -274,10 +274,12 @@ function assertDistinctAgentColors(artifacts: Artifact[]): void {
 	for (const agent of CORE_AGENTS) {
 		const artifact = findArtifact(`.claude/agents/${agent}.md`, artifacts);
 		const color = artifact.content.match(HEX_COLOR_PATTERN)?.[0];
-		if (!color) throw new Error(`Agent ${agent} missing hex color.`);
+		if (!color) throw new Error(`Agent \`${agent}\` missing hex color.`);
 		const owner = colors.get(color);
 		if (owner)
-			throw new Error(`Agents ${owner} and ${agent} share color ${color}.`);
+			throw new Error(
+				`Agents \`${owner}\` and \`${agent}\` share color \`${color}\`.`,
+			);
 		colors.set(color, agent);
 	}
 }
@@ -288,12 +290,14 @@ function assertNoUnsupportedCodexAgentFields(
 ): void {
 	const artifact = findArtifact(path, artifacts);
 	if (CODEX_COLOR_PATTERN.test(artifact.content))
-		throw new Error(`${path} emitted unsupported Codex color field.`);
+		throw new Error(`\`${path}\` emitted unsupported Codex color field.`);
 }
 
 function assertNoForbiddenModels(artifacts: Artifact[]): void {
 	for (const artifact of artifacts)
 		for (const model of FORBIDDEN_MODEL_TERMS)
 			if (artifact.content.includes(model))
-				throw new Error(`${artifact.path} contains forbidden model ${model}.`);
+				throw new Error(
+					`\`${artifact.path}\` contains forbidden model \`${model}\`.`,
+				);
 }

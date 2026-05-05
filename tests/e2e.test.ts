@@ -788,6 +788,32 @@ test("CLI RTK report groups project history by routing kind", async () => {
 	await rm(root, { recursive: true, force: true });
 });
 
+test("CLI inspect reports capabilities and release witness", async () => {
+	const capabilities = Bun.spawn(
+		["bun", "packages/cli/src/main.ts", "inspect", "capabilities"],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const capabilitiesStdout = await new Response(capabilities.stdout).text();
+	const capabilitiesStderr = await new Response(capabilities.stderr).text();
+	expect(await capabilities.exited).toBe(0);
+	expect(capabilitiesStderr).toBe("");
+	expect(capabilitiesStdout).toContain("# OAL Capability Report");
+	expect(capabilitiesStdout).toContain("## codex");
+	expect(capabilitiesStdout).toContain("## claude");
+	expect(capabilitiesStdout).toContain("## opencode");
+
+	const witness = Bun.spawn(
+		["bun", "packages/cli/src/main.ts", "inspect", "release-witness"],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const witnessStdout = await new Response(witness.stdout).text();
+	const witnessStderr = await new Response(witness.stderr).text();
+	expect(await witness.exited).toBe(0);
+	expect(witnessStderr).toBe("");
+	const parsed = JSON.parse(witnessStdout) as { artifactCount?: number };
+	expect(parsed.artifactCount).toBeGreaterThan(100);
+});
+
 test("CLI plugins dry-run reports provider plugin payloads without writing", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-plugins-e2e-"));
 	const env = await fakeProviderPath(home, ["codex", "claude", "opencode"]);

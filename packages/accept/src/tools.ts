@@ -1,47 +1,56 @@
-import { readFile, symlink } from "node:fs/promises";
+import { chmod, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import type { OalSource, Provider } from "@openagentlayer/source";
 
 export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 	await linkToolDependencies(targetRoot);
-	for (const tool of [
-		"manifest_inspect",
-		"generated_diff",
-		"rtk_report",
-		"command_policy_check",
-		"provider_surface_map",
-	]) {
-		const toolPath = join(targetRoot, `.opencode/tools/${tool}.ts`);
-		const text = await readFile(toolPath, "utf8");
-		if (!text.includes('import { tool } from "@opencode-ai/plugin"'))
-			throw new Error(`OpenCode tool is not runnable: ${tool}`);
-		const moduleUrl = new URL(toolPath, "file://").href;
-		const module = (await import(
-			`${moduleUrl}?accept=${Date.now()}`
-		)) as Record<string, unknown>;
-		const functionName = tool.replace(/_([a-z])/g, (_match, letter: string) =>
-			letter.toUpperCase(),
-		);
-		const integration = module[functionName];
-		if (
-			!(
-				integration &&
-				typeof integration === "object" &&
-				"execute" in integration &&
-				typeof integration.execute === "function"
-			)
-		)
-			throw new Error(`OpenCode tool ${tool} does not export ${functionName}.`);
-		const output = await integration.execute({}, toolContext(targetRoot));
-		if (
-			!(
-				(typeof output === "string" && output.trim().length > 0) ||
-				(output && typeof output === "object")
-			)
-		)
-			throw new Error(
-				`OpenCode tool ${tool} did not return a non-empty tool result.`,
+	const previousPath = process.env["PATH"] ?? "";
+	process.env["PATH"] =
+		`${await installAcceptanceOalShim(targetRoot)}:${previousPath}`;
+	try {
+		for (const tool of [
+			"manifest_inspect",
+			"generated_diff",
+			"rtk_report",
+			"command_policy_check",
+			"provider_surface_map",
+		]) {
+			const toolPath = join(targetRoot, `.opencode/tools/${tool}.ts`);
+			const text = await readFile(toolPath, "utf8");
+			if (!text.includes('import { tool } from "@opencode-ai/plugin"'))
+				throw new Error(`OpenCode tool is not runnable: ${tool}`);
+			const moduleUrl = new URL(toolPath, "file://").href;
+			const module = (await import(
+				`${moduleUrl}?accept=${Date.now()}`
+			)) as Record<string, unknown>;
+			const functionName = tool.replace(/_([a-z])/g, (_match, letter: string) =>
+				letter.toUpperCase(),
 			);
+			const integration = module[functionName];
+			if (
+				!(
+					integration &&
+					typeof integration === "object" &&
+					"execute" in integration &&
+					typeof integration.execute === "function"
+				)
+			)
+				throw new Error(
+					`OpenCode tool ${tool} does not export ${functionName}.`,
+				);
+			const output = await integration.execute({}, toolContext(targetRoot));
+			if (
+				!(
+					(typeof output === "string" && output.trim().length > 0) ||
+					(output && typeof output === "object")
+				)
+			)
+				throw new Error(
+					`OpenCode tool ${tool} did not return a non-empty tool result.`,
+				);
+		}
+	} finally {
+		process.env["PATH"] = previousPath;
 	}
 }
 
@@ -53,6 +62,20 @@ async function linkToolDependencies(targetRoot: string): Promise<void> {
 	).catch((error: NodeJS.ErrnoException) => {
 		if (error.code !== "EEXIST") throw error;
 	});
+}
+
+async function installAcceptanceOalShim(targetRoot: string): Promise<string> {
+	const repoRoot = resolve(dirname(import.meta.dir), "../..");
+	const binRoot = join(targetRoot, ".openagentlayer-accept", "bin");
+	await mkdir(binRoot, { recursive: true });
+	const shimPath = join(binRoot, "oal");
+	await writeFile(
+		shimPath,
+		`#!/usr/bin/env bash\nexec bun "${join(repoRoot, "packages/cli/src/main.ts")}" "$@"\n`,
+		"utf8",
+	);
+	await chmod(shimPath, 0o755);
+	return binRoot;
 }
 
 function toolContext(targetRoot: string): Record<string, unknown> {

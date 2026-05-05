@@ -280,11 +280,11 @@ async function runDeployedRuntimeChecks(
 	);
 	if (!hookResult.stdout.includes('"decision":"block"'))
 		throw new Error(
-			`${provider} deployed RTK hook did not block npx: ${hookResult.stderr || hookResult.stdout}`,
+			`${provider}: deployed RTK hook did not block npx: ${hookResult.stderr || hookResult.stdout}`,
 		);
 	if (!hookResult.stdout.includes("rtk proxy -- bunx prettier foo.js"))
 		throw new Error(
-			`${provider} deployed RTK hook did not enforce bunx: ${hookResult.stderr || hookResult.stdout}`,
+			`${provider}: deployed RTK hook did not enforce bunx: ${hookResult.stderr || hookResult.stdout}`,
 		);
 	console.log(`${provider}: deployed hook checks PASS`);
 }

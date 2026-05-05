@@ -90,7 +90,7 @@ function assertClaudePluginActive(settings: string): void {
 		extraKnownMarketplaces?: Record<string, unknown>;
 	};
 	if (parsed.enabledPlugins?.["oal@openagentlayer"] !== true)
-		throw new Error("Installed Claude settings do not activate $oal plugin.");
+		throw new Error("Installed Claude settings do not activate `$oal` plugin.");
 	if (!parsed.extraKnownMarketplaces?.["openagentlayer"])
 		throw new Error(
 			"Installed Claude settings do not register OAL marketplace.",
@@ -104,7 +104,7 @@ function assertOpenCodeInstalledConfig(config: string): void {
 	};
 	if ("model_fallbacks" in parsed)
 		throw new Error(
-			"Installed OpenCode config contains stale model_fallbacks.",
+			"Installed OpenCode config contains stale `model_fallbacks`.",
 		);
 	if (
 		!(
@@ -125,19 +125,21 @@ async function assertCodexInstalled(
 		"Codex config",
 	);
 	if (CODEX_COLOR_FIELD.test(config.content))
-		throw new Error(`${config.path} contains unsupported Codex color field.`);
+		throw new Error(
+			`\`${config.path}\` contains unsupported Codex \`color\` field.`,
+		);
 	const agentDir = config.path.startsWith(home)
 		? join(home, ".codex/agents")
 		: join(target, ".codex/agents");
 	const agent = await readFile(join(agentDir, "athena.toml"), "utf8");
 	if (CODEX_COLOR_FIELD.test(agent))
 		throw new Error(
-			"Installed Codex agent TOML contains unsupported color field.",
+			"Installed Codex agent TOML contains unsupported `color` field.",
 		);
 	if (!config.content.includes('profile = "openagentlayer"'))
 		throw new Error("Installed Codex config does not activate OAL profile.");
 	if (!config.content.includes('[plugins."oal@openagentlayer-local"]'))
-		throw new Error("Installed Codex config does not activate $oal plugin.");
+		throw new Error("Installed Codex config does not activate `$oal` plugin.");
 	await assertReadable(
 		join(home, ".agents/plugins/marketplace.json"),
 		"Codex plugin marketplace",
@@ -156,7 +158,7 @@ async function assertReadable(path: string, label: string): Promise<string> {
 	try {
 		return await readFile(path, "utf8");
 	} catch {
-		throw new Error(`${label} missing at ${path}`);
+		throw new Error(`\`${label}\` missing at \`${path}\``);
 	}
 }
 
@@ -166,7 +168,7 @@ async function assertNonEmptyDir(path: string, label: string): Promise<void> {
 	} catch {
 		// Report the same missing error for unreadable and absent cache roots.
 	}
-	throw new Error(`${label} missing at ${path}`);
+	throw new Error(`\`${label}\` missing at \`${path}\``);
 }
 
 async function readFirst(
@@ -180,7 +182,7 @@ async function readFirst(
 			// Try next installed scope.
 		}
 	}
-	throw new Error(`${label} missing at ${paths.join(" or ")}`);
+	throw new Error(`\`${label}\` missing at \`${paths.join(" or ")}\``);
 }
 
 function stripJsonComments(text: string): string {

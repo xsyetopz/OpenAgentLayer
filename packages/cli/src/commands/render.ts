@@ -29,10 +29,10 @@ export async function runRenderCommand(
 	const artifacts = scopeArtifacts(context, rendered);
 	if (artifacts.length === 0)
 		throw new Error(
-			`No artifacts rendered for provider ${providers.join(",")}.`,
+			`No artifacts rendered for provider \`${providers.join(",")}\`.`,
 		);
 	await writeArtifacts(out, artifacts);
 	console.log(
-		`Generated OpenAgentLayer ${providers.join(",")} artifacts at ${out}`,
+		`Generated OpenAgentLayer \`${providers.join(",")}\` artifacts at \`${out}\``,
 	);
 }
