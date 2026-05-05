@@ -1,24 +1,73 @@
-# OpenAgentLayer Specs
+# OpenAgentLayer Specifications
 
-This directory is for product and implementation contracts. It tells AI coding
-agents what OAL must be, what provider surfaces exist, and what acceptance must
-prove. User-facing setup and workflow docs live in [docs/](../docs/).
+This directory is the formal technical specification for OpenAgentLayer. It is
+written for AI coding agents and maintainers who need to change OAL internals
+without guessing at package ownership, provider behavior, hook semantics, or
+release proof.
+
+User-facing setup and workflow documentation lives in [docs/](../docs/).
+Specifications describe required product behavior, internal boundaries,
+rendered surfaces, algorithms, invariants, and acceptance evidence.
 
 Read in this order:
 
-1. [Product contract](01_PRODUCT.md)
-2. [Source, render, deploy contract](02_SOURCE_RENDER_DEPLOY.md)
-3. [Provider surfaces](03_PROVIDER_SURFACES.md)
-4. [Runtime hooks and message style](04_RUNTIME_HOOKS.md)
-5. [Architecture under the hood](05_ARCHITECTURE.md)
-6. [Acceptance contract](06_ACCEPTANCE.md)
-7. [Reference evidence](07_REFERENCE_EVIDENCE.md)
+1. [Product contract](01-product.md)
+2. [Source, render, deploy contract](02-source-render-deploy.md)
+3. [Provider surfaces](03-provider-surfaces.md)
+4. [Runtime hooks and message style](04-runtime-hooks.md)
+5. [Architecture under the hood](05-architecture.md)
+6. [Acceptance contract](06-acceptance.md)
+7. [Reference evidence](07-reference-evidence.md)
 
-Specs must be current-state contracts:
+## Specification Language
 
-- write requirements as behavior OAL owns now or must validate before release
-- keep provider differences explicit
-- avoid vague roadmap prose
-- make every rule easy for an AI coding model to cite while editing code
-- include Mermaid graphs when a flow, dependency, or lifecycle is easier to scan
-  visually
+The terms `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, and `MAY` are normative.
+
+- `MUST` defines required behavior for current OAL product code
+- `MUST NOT` defines invalid behavior that should fail validation or review
+- `SHOULD` defines the default unless source evidence requires another choice
+- `MAY` defines optional behavior that still needs owner package and acceptance
+  evidence before release
+
+## Global Rules
+
+Every specification in this directory follows these rules:
+
+- authored source records in `source/` define OAL intent
+- generated artifacts are disposable outputs
+- provider renderers MUST emit provider-native files, not fake shared parity
+- deploy and uninstall MUST use manifest ownership rather than path guessing
+- hooks are runtime behavior and MUST be executable, fixture-tested, and
+  provider-shaped
+- docs and specs MUST describe current behavior, except explicit reference
+  evidence that is labeled as historical input
+- acceptance MUST prove product behavior that crosses package or provider
+  boundaries
+
+## Architecture Index
+
+```mermaid
+flowchart TD
+    Product[01 product contract] --> Source[02 source render deploy]
+    Source --> Providers[03 provider surfaces]
+    Source --> Hooks[04 runtime hooks]
+    Source --> Architecture[05 architecture]
+    Providers --> Acceptance[06 acceptance]
+    Hooks --> Acceptance
+    Architecture --> Acceptance
+    Evidence[07 reference evidence] --> Product
+```
+
+Use the most specific file when editing:
+
+- product meaning, non-goals, release identity: `01-product.md`
+- source records, renderer contracts, artifact metadata, deploy, uninstall:
+  `02-source-render-deploy.md`
+- Codex, Claude Code, OpenCode files and provider-specific behavior:
+  `03-provider-surfaces.md`
+- runtime hooks, command policy, hook output, message style:
+  `04-runtime-hooks.md`
+- package graph, dependency direction, CLI, plugin, MCP, acceptance topology:
+  `05-architecture.md`
+- release gates and fixture requirements: `06-acceptance.md`
+- preserved research conclusions: `07-reference-evidence.md`

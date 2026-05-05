@@ -12,11 +12,11 @@ Before large changes, read:
 - `CHANGELOG.md`
 - `docs/README.md`
 - `specs/README.md`
-- `specs/01_PRODUCT.md`
-- `specs/02_SOURCE_RENDER_DEPLOY.md`
-- `specs/03_PROVIDER_SURFACES.md`
-- `specs/05_ARCHITECTURE.md`
-- `specs/06_ACCEPTANCE.md`
+- `specs/01-product.md`
+- `specs/02-source-render-deploy.md`
+- `specs/03-provider-surfaces.md`
+- `specs/05-architecture.md`
+- `specs/06-acceptance.md`
 
 `reference notes/` is read-only reference material. Do not modify it and do not import
 it from runtime code.

@@ -6,10 +6,10 @@ and implementation contracts live in [specs/](../specs/).
 
 Read in this order:
 
-1. [Install OAL](01_INSTALL.md)
-2. [Use the CLI](02_CLI.md)
-3. [Configure providers](03_PROVIDERS.md)
-4. [Validate and release](04_VALIDATE_RELEASE.md)
+1. [Install OAL](01-install.md)
+2. [Use the CLI](02-cli.md)
+3. [Configure providers](03-providers.md)
+4. [Validate and release](04-validate-release.md)
 
 Keep documentation here factual and user-facing:
 

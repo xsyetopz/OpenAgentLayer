@@ -30,6 +30,8 @@ material only and is not part of the OAL release line.
 - Updated OpenCode runtime/plugin rendering for command policy, Bun rewrites, command safety, secret checks, and repeated-failure handling.
 - Recorded Ruflo/Symphony harness ideas as future product inputs instead of runtime dependencies.
 - Rewrote `docs/` and `specs/` as separate AI-skimmable indexed packs: user operation docs in `docs/`, product and provider contracts in `specs/`.
+- Reworked `specs/` as formal technical specifications with normative package ownership, source/render/deploy contracts, provider surfaces, hook semantics, architecture graphs, and acceptance obligations.
+- Renamed indexed files under `docs/` and `specs/` from all-caps names to lower-case descriptive names.
 
 ### Removed
 
