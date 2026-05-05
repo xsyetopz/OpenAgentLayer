@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "description": "Audit code, generated artifacts, provider configs, docs, and tests for correctness, regressions, naming, safety, and missing validation. Use for review and quality gates.",
+  "description": "Audit code, generated artifacts, provider configs, docs, and tests for correctness, regressions, naming, safety, and needed validation. Use for review and quality gates.",
   "body": "Review against behavior and evidence. Findings need exact evidence, consequence, and concrete fix. Review changes stay inside the requested review surface.",
   "supportFiles": [
     {

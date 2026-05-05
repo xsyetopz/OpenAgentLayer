@@ -19,27 +19,27 @@ OAL requires:
 - route contracts with permissions, arguments, completion expectations, hook
   expectations, and provider differences
 - executable hooks with deterministic fixtures
-- provider-specific rendering instead of fake parity
+- provider-specific rendering with explicit capability reports
 - installer and deploy workflows that preserve user config
 - manifest-backed uninstall
 - plugin payload sync that works without mandatory provider CLI activation
 - shared inspection so CLI, MCP, and provider tools stay aligned
 - acceptance gates that prove end-to-end behavior
 
-## Rejected Patterns
+## Product-Positive Patterns
 
-OAL MUST avoid:
+OAL stays strongest with these patterns:
 
-- generated role cards with generic instructions
-- source records that no renderer consumes
-- docs that describe behavior not implemented in code
-- compatibility naming from old reference material
-- provider stubs that imply unsupported capabilities exist
-- broad monolithic generator logic without package ownership
-- hook behavior expressed only as prompt text
-- install scripts that require interactive provider CLIs for safe file payload
-  writes
-- message text that hides the contract or lacks the next valid action
+- generated agents with operational instructions and acceptance evidence
+- source records consumed by renderers
+- docs that describe implemented behavior
+- current OAL naming
+- provider capability reports tied to real surfaces
+- package-owned generator logic
+- hook behavior expressed as executable runtime decisions
+- install scripts that write safe file payloads independently of interactive
+  provider CLI activation
+- message text that names the contract and next valid action
 
 ## Provider Research Summary
 
@@ -61,8 +61,8 @@ before changing renderer behavior.
 
 ## Future-Input Rule
 
-External repositories and third-party ideas MAY inform OAL, but they MUST NOT
-enter runtime dependencies or product claims until:
+External repositories and third-party ideas MAY inform OAL. They become runtime
+dependencies or product claims after:
 
 1. source evidence is inspected
 2. the OAL-owned package boundary is named

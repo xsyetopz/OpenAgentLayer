@@ -52,9 +52,9 @@ flowchart TD
     Accept --> Manifest
 ```
 
-Dependency direction MUST follow product flow. Lower-level packages MUST NOT
-import the CLI. Runtime hook scripts MUST remain executable without importing
-TypeScript-only CLI modules.
+Dependency direction MUST follow product flow. Lower-level packages expose APIs
+the CLI can call. Runtime hook scripts MUST remain executable with runtime-safe
+JavaScript dependencies.
 
 ## Data Model
 
@@ -73,7 +73,7 @@ erDiagram
     InspectReport ||--o{ Artifact : observes
 ```
 
-Source records, artifacts, and manifest entries MUST NOT be conflated:
+Source records, artifacts, and manifest entries stay distinct:
 
 - source records answer what OAL should produce
 - artifacts answer which bytes and paths were rendered
@@ -108,7 +108,7 @@ CLI command responsibilities are fixed:
 - `uninstall` acts only on manifest-owned material for a provider
 - `setup` orchestrates provider checks, optional toolchain setup, deploy,
   plugin sync, binary shim, and installed-state validation
-- `plugins` syncs provider plugin payloads and prunes OAL-owned stale caches
+- `plugins` syncs provider plugin payloads and keeps OAL-owned caches current
 - `features` installs optional feature surfaces where applicable
 - `inspect` calls `packages/inspect`
 - `mcp` serves or configures OAL-owned MCP servers
@@ -130,9 +130,9 @@ flowchart LR
 ```
 
 Policy validation MUST run before release-grade rendering and acceptance.
-Policy checks SHOULD catch invalid providers, unsupported models, missing route
-or skill references, generated prompt quality issues, unsupported hook shape,
-and missing support-file content.
+Policy checks SHOULD identify provider values, model choices, route and skill
+references, generated prompt quality, hook shape, and support-file content that
+need a supported source path.
 
 ## Renderer Architecture
 
@@ -163,7 +163,7 @@ artifacts, and common artifact creation.
 Provider renderers MUST own provider config schema and serialization, provider
 agent file format, provider command or route format, provider instruction file
 format, provider plugin entrypoint expectations, and provider-specific
-unsupported capability decisions.
+capability-boundary decisions.
 
 ## Deploy Architecture
 
@@ -226,8 +226,8 @@ flowchart TD
 ```
 
 Plugin sync MUST copy static plugin metadata, render provider artifacts through
-provider renderers, omit config artifacts that do not belong inside plugin
-payloads, write versioned cache entries, prune stale OAL-owned cache versions,
+provider renderers, include plugin-suitable artifacts, write versioned cache
+entries, keep OAL-owned cache versions current,
 preserve unrelated user plugin material, and keep native provider activation
 best-effort when the provider CLI is absent.
 
@@ -298,8 +298,8 @@ flowchart LR
     Inspect --> Report[report text or JSON]
 ```
 
-Inspection MUST be read-only. It MAY read manifests and generated source inputs,
-but it MUST NOT write deploy targets or plugin caches.
+Inspection MUST be read-only. It MAY read manifests and generated source inputs
+while keeping deploy targets and plugin caches unchanged.
 
 ## Acceptance Architecture
 
@@ -320,25 +320,24 @@ flowchart TD
     Accept --> MessageFixture[message style]
 ```
 
-Acceptance is a product simulation. It MUST fail when a cross-package behavior
-is shallow, disconnected, unowned, or unverified.
+Acceptance is a product simulation. It MUST require cross-package behavior to
+be substantial, connected, owned, and verified.
 
-## Invalid Architecture States
+## Required Architecture States
 
-The following states are invalid:
+The following states define the supported architecture:
 
-- renderer behavior exists only in docs
-- provider output exists without source record ownership or renderer ownership
-- hook source records point to missing scripts
-- runtime hook scripts are not executable after deploy
-- deploy mutates files without manifest ownership
-- uninstall touches paths without manifest ownership
-- plugin sync requires a missing provider CLI for file payload sync
-- OpenCode tools duplicate inspect logic instead of calling shared OAL surfaces
-- MCP servers exist outside the `oal mcp serve` command path without acceptance
-  coverage
-- acceptance passes while generated artifacts are shallow placeholders
-- docs/specs use old file names or links that no longer exist
+- renderer behavior is implemented in source-owned packages and described in specs
+- provider output has source record ownership or renderer-owned source ids
+- hook source records point to existing runtime scripts
+- runtime hook scripts are executable after deploy
+- deploy mutates manifest-owned material
+- uninstall uses manifest ownership
+- plugin sync writes file payloads even when provider CLI activation is unavailable
+- OpenCode tools call shared OAL inspect and command-policy surfaces
+- MCP servers are exposed through `oal mcp serve` with acceptance coverage
+- acceptance requires substantial generated artifacts
+- docs/specs use current lower-case file names and live links
 
 ## Change Routing
 

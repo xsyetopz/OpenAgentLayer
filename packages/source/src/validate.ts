@@ -119,7 +119,7 @@ export function validateHookRecord(record: HookRecord): void {
 	for (const provider of Object.keys(record.events))
 		if (!PROVIDERS.has(provider as Provider))
 			throw new Error(
-				`hook \`${record.id}\` has unsupported event provider \`${provider}\``,
+				`hook \`${record.id}\` needs supported event provider \`${provider}\``,
 			);
 }
 
@@ -134,7 +134,7 @@ export function validateProductSource(record: ProductSource): void {
 	if (record.caveman) {
 		if (!CAVEMAN_MODES.has(record.caveman.mode))
 			throw new Error(
-				`Product caveman mode \`${String(record.caveman.mode)}\` is unsupported.`,
+				`Product caveman mode \`${String(record.caveman.mode)}\` needs a supported value`,
 			);
 	}
 	if (
@@ -209,7 +209,7 @@ function requireProviderList(value: Provider[], label: string): void {
 function requireProvider(value: Provider, label: string): void {
 	if (!PROVIDERS.has(value))
 		throw new Error(
-			`\`${label}\` has unsupported provider \`${String(value)}\``,
+			`\`${label}\` needs supported provider \`${String(value)}\``,
 		);
 }
 

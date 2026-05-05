@@ -120,7 +120,7 @@ async function interactiveSetup(
 	);
 	const toolchain = await ask<boolean>(
 		confirm({
-			message: "Install missing OAL command-line tools?",
+			message: "Install OAL command-line tools?",
 			initialValue: true,
 		}),
 	);
@@ -410,7 +410,7 @@ function opencodePlanPrompt(): Promise<string> {
 				{
 					value: "opencode-auth",
 					label: "Require auth",
-					hint: "fail if auth models missing",
+					hint: "require auth model detection",
 				},
 			],
 		}),
@@ -481,7 +481,7 @@ async function availableProviderPrompt(): Promise<ProviderMulti> {
 		printWarning(`${skipped.provider} disabled: ${skipped.reason}`);
 	if (availability.providers.length === 0)
 		throw new Error(
-			"No provider binaries found. Install `codex`, `claude`, or `opencode` first.",
+			"Install `codex`, `claude`, or `opencode` to run provider setup",
 		);
 	return providerPrompt(availability.providers);
 }

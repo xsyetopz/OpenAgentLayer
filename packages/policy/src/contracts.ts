@@ -58,7 +58,7 @@ function validateProductPromptContracts(
 		issues.push({
 			severity: "error",
 			code: "source-backed-contract",
-			message: "Product prompt contracts are missing",
+			message: "Product prompt contracts need authored source entries",
 			sourceId: "product",
 		});
 		return;
@@ -76,7 +76,7 @@ function validateProductPromptContracts(
 			issues.push({
 				severity: "error",
 				code: "source-backed-contract",
-				message: `Product prompt contracts lack required term: \`${term}\``,
+				message: `Product prompt contracts need required term \`${term}\``,
 				sourceId: "product",
 			});
 }

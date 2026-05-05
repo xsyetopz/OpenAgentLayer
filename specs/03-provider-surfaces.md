@@ -24,18 +24,18 @@ Every provider renderer MUST:
 - filter source records by `providers`
 - preserve source ids in artifact metadata
 - render only capabilities with a real provider surface
-- report unsupported capabilities with provider, capability, and reason
+- report capability gaps with provider, capability, and reason
 - preserve executable mode for runtime scripts
 - keep generated artifacts reproducible from `source/`
 - keep provider-native config parseable where possible
 
-Renderers MUST NOT:
+Renderers stay provider-native by:
 
-- emit placeholder support for missing provider features
-- copy another provider's file shape to simulate parity
-- hide provider limitations in generic prose
-- place provider-specific behavior in shared helpers unless the behavior and
-  output shape are actually shared
+- emitting only surfaces the provider supports
+- using each provider's own file shape
+- describing provider limits with explicit capability reports
+- placing provider-specific behavior in the provider renderer unless behavior
+  and output shape are truly shared
 
 ## Codex
 
@@ -58,7 +58,7 @@ Codex output MAY include:
 ### Codex Config Contract
 
 `.codex/config.toml` MUST contain only schema-supported keys accepted by current
-Codex validation fixtures. Deprecated or invented keys MUST fail acceptance.
+Codex validation fixtures. Acceptance requires current schema keys.
 
 Codex model routing MUST use valid Codex effort values:
 
@@ -68,15 +68,15 @@ Codex model routing MUST use valid Codex effort values:
 - `high`
 - `xhigh`
 
-`minimal` MUST NOT be emitted for Codex. Plan-mode effort and edit-mode model
-effort are separate controls. A model plan MAY choose different values for lead,
+Codex effort output MUST use the listed values. Plan-mode effort and edit-mode
+model effort are separate controls. A model plan MAY choose different values for lead,
 implementation, review, and utility agents when the plan specification and
 tests cover the choice.
 
 ### Codex Agent Contract
 
-Codex agents MUST render as TOML files. Agent color values MUST NOT be emitted
-when the Codex schema does not support them. Agent prompts MUST include OAL
+Codex agents MUST render as TOML files. Agent color values are emitted only for
+provider schemas that support them. Agent prompts MUST include OAL
 source-backed contracts and route/skill references relevant to that agent.
 
 ### Codex Hooks
@@ -94,7 +94,7 @@ Codex plugin sync MUST write:
 - marketplace entry under `.agents/plugins/marketplace.json`
 - best-effort native marketplace activation when the Codex CLI exists
 
-Missing Codex CLI MUST NOT block payload sync.
+Codex plugin payload sync remains available when the Codex CLI is absent.
 
 ## Claude Code
 
@@ -174,8 +174,7 @@ OpenCode output MAY include:
 ### OpenCode Config Contract
 
 `opencode.jsonc` MUST remain parseable as JSONC. OAL-managed MCP install for
-OpenCode MUST write the `mcp` config object directly instead of relying on an
-interactive `opencode mcp add` path.
+OpenCode MUST write the `mcp` config object directly through OAL's config path.
 
 ### OpenCode Tool Contract
 
@@ -185,14 +184,14 @@ OpenCode custom tools MUST call shared OAL behavior where possible:
 - command policy tools call the same command-policy logic or shared CLI surface
 - RTK report tools call shared RTK reporting guidance
 
-Tool files MUST be TypeScript and provider-native. They MUST NOT duplicate large
-renderer or inspect implementations.
+Tool files MUST be TypeScript and provider-native. Large renderer or inspect
+implementations stay in shared OAL packages.
 
 ### OpenCode Plugin Contract
 
 OpenCode plugin payloads MUST include plugin code and rendered artifacts in the
-provider plugin root and versioned cache root. Cache pruning MUST remove stale
-OAL-owned version cache entries while preserving unrelated user material.
+provider plugin root and versioned cache root. Cache maintenance MUST keep
+OAL-owned version cache entries current while preserving unrelated user material.
 
 ### OpenCode Docs and Inspect MCP
 
@@ -211,15 +210,14 @@ The generated config entry MUST use:
 - `command: ["oal", "mcp", "serve", server]`
 - `enabled: true`
 
-## Unsupported Capability Handling
+## Capability Gap Handling
 
-Unsupported capability records MUST include:
+Capability gap records MUST include:
 
 - `provider`
 - `capability`
 - `reason`
 
-Acceptance SHOULD assert known unsupported surfaces so the product does not
-silently regress into fake support. Documentation MUST describe unsupported
-provider behavior as a provider limitation or omitted surface, not as planned
-current behavior.
+Acceptance SHOULD assert known provider-limited surfaces so capability reports
+stay explicit. Documentation MUST describe provider-limited behavior as a
+current capability boundary or omitted surface.

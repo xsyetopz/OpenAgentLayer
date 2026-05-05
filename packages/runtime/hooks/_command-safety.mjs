@@ -48,7 +48,7 @@ export function evaluateDestructiveCommand(payload) {
 		extractCommands(payload),
 		DESTRUCTIVE_COMMAND_PATTERNS,
 		"Command input absent.",
-		"Destructive command blocked.",
+		"Use bounded file and git operations for this command",
 		"Command matches safe pattern set.",
 	);
 }
@@ -64,7 +64,7 @@ export function evaluateUnsafeGit(payload) {
 		extractCommands(payload),
 		UNSAFE_GIT_PATTERNS,
 		"Git command input absent.",
-		"Unsafe git operation blocked.",
+		"Use reviewed git operations for this command",
 		"Git command passed safety checks.",
 	);
 }

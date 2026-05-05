@@ -1,6 +1,6 @@
 # Privileged runtime
 
-Use privileged execution for bounded host commands that the normal sandbox cannot run.
+Use privileged execution for bounded host commands that need host access beyond the normal sandbox.
 
 Checklist:
 
@@ -13,7 +13,7 @@ Checklist:
 
 Blocker signals:
 
-- executable missing from runtime allowlist
+- executable needs a runtime allowlist entry
 - delete, history-change, publish, and signing requests need explicit user intent
 - cwd outside approved roots
 - command shape needs a shell string, pipeline, glob, or unbounded user-provided segment

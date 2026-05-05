@@ -19,7 +19,7 @@ export async function runCheckCommand(
 		console.log(`source: ${report.sourceRoot}`);
 		console.log(`providers: ${report.providers.join(", ")}`);
 		console.log(`artifacts: ${report.artifacts}`);
-		console.log(`unsupported capabilities: ${report.unsupported}`);
+		console.log(`capability gaps: ${report.unsupported}`);
 	}
 	if (flag(args, "--installed")) await assertInstalledState(args, verbose);
 	console.log("└ ✓ OAL source and render checks passed");
@@ -90,10 +90,10 @@ function assertClaudePluginActive(settings: string): void {
 		extraKnownMarketplaces?: Record<string, unknown>;
 	};
 	if (parsed.enabledPlugins?.["oal@openagentlayer"] !== true)
-		throw new Error("Installed Claude settings do not activate `$oal` plugin");
+		throw new Error("Installed Claude settings need `$oal` plugin activation");
 	if (!parsed.extraKnownMarketplaces?.["openagentlayer"])
 		throw new Error(
-			"Installed Claude settings do not register OAL marketplace.",
+			"Installed Claude settings need OAL marketplace registration",
 		);
 }
 
@@ -104,7 +104,7 @@ function assertOpenCodeInstalledConfig(config: string): void {
 	};
 	if ("model_fallbacks" in parsed)
 		throw new Error(
-			"Installed OpenCode config contains stale `model_fallbacks`.",
+			"Installed OpenCode config needs current model routing without `model_fallbacks`",
 		);
 	if (
 		!(
@@ -113,7 +113,7 @@ function assertOpenCodeInstalledConfig(config: string): void {
 				parsed.plugin.includes("./.opencode/plugins/openagentlayer.ts"))
 		)
 	)
-		throw new Error("Installed OpenCode config does not activate OAL plugin");
+		throw new Error("Installed OpenCode config needs OAL plugin activation");
 }
 
 async function assertCodexInstalled(
@@ -126,7 +126,7 @@ async function assertCodexInstalled(
 	);
 	if (CODEX_COLOR_FIELD.test(config.content))
 		throw new Error(
-			`\`${config.path}\` contains unsupported Codex \`color\` field.`,
+			`\`${config.path}\` needs Codex schema fields without \`color\``,
 		);
 	const agentDir = config.path.startsWith(home)
 		? join(home, ".codex/agents")
@@ -134,12 +134,12 @@ async function assertCodexInstalled(
 	const agent = await readFile(join(agentDir, "athena.toml"), "utf8");
 	if (CODEX_COLOR_FIELD.test(agent))
 		throw new Error(
-			"Installed Codex agent TOML contains unsupported `color` field.",
+			"Installed Codex agent TOML needs Codex schema fields without `color`",
 		);
 	if (!config.content.includes('profile = "openagentlayer"'))
-		throw new Error("Installed Codex config does not activate OAL profile");
+		throw new Error("Installed Codex config needs OAL profile activation");
 	if (!config.content.includes('[plugins."oal@openagentlayer-local"]'))
-		throw new Error("Installed Codex config does not activate `$oal` plugin");
+		throw new Error("Installed Codex config needs `$oal` plugin activation");
 	await assertReadable(
 		join(home, ".agents/plugins/marketplace.json"),
 		"Codex plugin marketplace",
@@ -158,7 +158,7 @@ async function assertReadable(path: string, label: string): Promise<string> {
 	try {
 		return await readFile(path, "utf8");
 	} catch {
-		throw new Error(`\`${label}\` missing at \`${path}\``);
+		throw new Error(`\`${label}\` needs readable path \`${path}\``);
 	}
 }
 
@@ -166,9 +166,9 @@ async function assertNonEmptyDir(path: string, label: string): Promise<void> {
 	try {
 		if ((await readdir(path)).length > 0) return;
 	} catch {
-		// Report the same missing error for unreadable and absent cache roots.
+		// Report the same readable-path error for unavailable cache roots.
 	}
-	throw new Error(`\`${label}\` missing at \`${path}\``);
+	throw new Error(`\`${label}\` needs readable path \`${path}\``);
 }
 
 async function readFirst(
@@ -182,7 +182,9 @@ async function readFirst(
 			// Try next installed scope.
 		}
 	}
-	throw new Error(`\`${label}\` missing at \`${paths.join(" or ")}\``);
+	throw new Error(
+		`\`${label}\` needs one readable path from \`${paths.join(" or ")}\``,
+	);
 }
 
 function stripJsonComments(text: string): string {

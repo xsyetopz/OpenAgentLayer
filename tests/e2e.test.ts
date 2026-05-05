@@ -142,7 +142,7 @@ test("CLI check uses concise output and verbose internals", async () => {
 	expect(verboseStderr).toBe("");
 	expect(verboseStdout).toContain("providers: codex, claude, opencode");
 	expect(verboseStdout).toContain("artifacts:");
-	expect(verboseStdout).toContain("unsupported capabilities:");
+	expect(verboseStdout).toContain("capability gaps:");
 });
 
 test("CLI global dry-run maps provider artifacts into global homes", async () => {

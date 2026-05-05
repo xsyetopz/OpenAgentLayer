@@ -21,13 +21,17 @@ Read in this order:
 
 ## Specification Language
 
-The terms `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT`, and `MAY` are normative.
+The terms `MUST`, `SHOULD`, and `MAY` are normative.
 
 - `MUST` defines required behavior for current OAL product code
-- `MUST NOT` defines invalid behavior that should fail validation or review
 - `SHOULD` defines the default unless source evidence requires another choice
 - `MAY` defines optional behavior that still needs owner package and acceptance
   evidence before release
+
+Specifications use affirmative framing. They state the desired architecture,
+valid action, and rewardable behavior first. When a boundary is required, the
+spec names the positive owner, supported path, or release gate instead of
+centering the wording on prohibited behavior.
 
 ## Global Rules
 
@@ -35,7 +39,8 @@ Every specification in this directory follows these rules:
 
 - authored source records in `source/` define OAL intent
 - generated artifacts are disposable outputs
-- provider renderers MUST emit provider-native files, not fake shared parity
+- provider renderers MUST emit provider-native files with explicit provider
+  capability reports
 - deploy and uninstall MUST use manifest ownership rather than path guessing
 - hooks are runtime behavior and MUST be executable, fixture-tested, and
   provider-shaped

@@ -18,31 +18,33 @@ let request;
 try {
 	request = JSON.parse(raw || "{}");
 } catch (error) {
-	fail("Malformed JSON request.", { error: String(error?.message ?? error) });
+	fail("JSON request needs valid syntax", {
+		error: String(error?.message ?? error),
+	});
 }
 
 if (!Array.isArray(request.argv) || request.argv.length === 0)
-	fail("argv must be a non-empty string array.");
+	fail("argv needs a non-empty string array");
 if (
 	!request.argv.every((value) => typeof value === "string" && value.length > 0)
 )
-	fail("argv must contain only non-empty strings.");
+	fail("argv needs only non-empty strings");
 
 const command = request.argv[0];
 if (!ALLOWED_COMMANDS.has(command))
-	fail(`Command is not privileged-exec allowlisted: ${command}`);
+	fail(`Command needs a privileged-exec allowlist entry: ${command}`);
 if (request.argv.some((value) => SHELL_METACHARACTER_PATTERN.test(value))) {
-	fail("Shell metacharacters are not allowed in argv values.");
+	fail("argv values need plain command arguments without shell metacharacters");
 }
 
 const cwd = String(request.cwd ?? process.cwd());
 const allowedRoot = String(request.allowedRoot ?? process.cwd());
 if (!isInside(cwd, allowedRoot))
-	fail("cwd is outside allowedRoot.", { cwd, allowedRoot });
+	fail("cwd needs to stay inside allowedRoot", { cwd, allowedRoot });
 
 const timeoutMs = Number(request.timeoutMs ?? DEFAULT_TIMEOUT_MS);
 if (!Number.isFinite(timeoutMs) || timeoutMs < 1 || timeoutMs > 600_000)
-	fail("timeoutMs must be between 1 and 600000.");
+	fail("timeoutMs needs a value between 1 and 600000");
 
 if (request.dryRun === true) {
 	succeed({ dryRun: true, argv: request.argv, cwd });

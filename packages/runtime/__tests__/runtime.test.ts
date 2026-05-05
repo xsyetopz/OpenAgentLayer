@@ -63,8 +63,7 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		runHook({ command: "rtk proxy -- rg Token ." }),
 	).resolves.toMatchObject({
 		decision: "block",
-		reason:
-			"RTK has a native filter for this command; do not route it through proxy",
+		reason: "RTK has a native filter for this command; use the native RTK form",
 		details: ["Use: rtk grep Token ."],
 	});
 	await expect(
@@ -285,9 +284,9 @@ test("blocking post-tool hooks emit provider output and stderr feedback", async 
 	expect(codex.code).toBe(2);
 	expect(JSON.parse(codex.stdout)).toMatchObject({
 		continue: true,
-		systemMessage: expect.stringContaining("Repeated failure circuit opened"),
+		systemMessage: expect.stringContaining("Repeated symptom circuit opened"),
 	});
-	expect(codex.stderr).toContain("Repeated failure circuit opened");
+	expect(codex.stderr).toContain("Repeated symptom circuit opened");
 	expect(codex.stderr).toContain("\u001b[35m");
 	expect(codex.stderr).toContain("one");
 
@@ -304,11 +303,11 @@ test("blocking post-tool hooks emit provider output and stderr feedback", async 
 		hookSpecificOutput: {
 			hookEventName: "PostToolUseFailure",
 			additionalContext: expect.stringContaining(
-				"Repeated failure circuit opened",
+				"Repeated symptom circuit opened",
 			),
 		},
 	});
-	expect(claude.stderr).toContain("Repeated failure circuit opened");
+	expect(claude.stderr).toContain("Repeated symptom circuit opened");
 	expect(claude.stderr).toContain("three");
 });
 

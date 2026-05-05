@@ -75,7 +75,9 @@ export async function inspectTopic(
 			return JSON.stringify(await releaseWitness(context), undefined, 2);
 		default: {
 			const unsupported: never = topic;
-			throw new Error(`Unsupported inspect topic \`${unsupported}\``);
+			throw new Error(
+				`Inspect topic \`${unsupported}\` needs a supported value`,
+			);
 		}
 	}
 }
@@ -103,7 +105,7 @@ export function capabilityReport(context: InspectContext): string {
 			(item) => item.provider === provider,
 		);
 		lines.push(
-			`unsupported: ${gaps.length === 0 ? "none" : gaps.map((gap) => `${gap.capability}: ${gap.reason}`).join("; ")}`,
+			`capability gaps: ${gaps.length === 0 ? "none" : gaps.map((gap) => `${gap.capability}: ${gap.reason}`).join("; ")}`,
 		);
 		lines.push("");
 	}

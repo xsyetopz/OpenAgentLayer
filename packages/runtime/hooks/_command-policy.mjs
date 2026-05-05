@@ -98,7 +98,7 @@ function evaluateSingleCommand(normalized, options) {
 			return {
 				decision: "block",
 				reason:
-					"RTK has a native filter for this command; do not route it through proxy",
+					"RTK has a native filter for this command; use the native RTK form",
 				details: [
 					`Use: rtk ${rewriteExecutable(proxied, proxiedRtkExecutable)}`,
 				],

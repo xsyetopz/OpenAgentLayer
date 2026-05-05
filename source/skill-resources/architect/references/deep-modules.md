@@ -8,6 +8,6 @@ Look for:
 
 - repeated conditional logic across packages
 - many callers knowing private details
-- tests forced through private details because a public seam is missing
+- tests that become clearer through a public seam
 - config objects passed everywhere with tiny slices used
 - provider-specific behavior leaking across generic layers

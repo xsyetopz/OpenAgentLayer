@@ -278,7 +278,7 @@ async function assertProviderNativeHookOutput(
 	);
 	if (codexPostToolBlock.exitCode !== 2)
 		throw new Error("Codex PostToolUse block did not exit with code 2");
-	if (!codexPostToolBlock.stderr.includes("Repeated failure circuit opened"))
+	if (!codexPostToolBlock.stderr.includes("Repeated symptom circuit opened"))
 		throw new Error("Codex PostToolUse block did not emit stderr feedback");
 	const claudePostToolFailureBlock = await runNativeHook(
 		join(targetRoot, ".claude/hooks/scripts/block-repeated-failures.mjs"),
@@ -298,7 +298,7 @@ async function assertProviderNativeHookOutput(
 		);
 	if (
 		!claudePostToolFailureBlock.stderr.includes(
-			"Repeated failure circuit opened",
+			"Repeated symptom circuit opened",
 		)
 	)
 		throw new Error(
@@ -309,7 +309,7 @@ async function assertProviderNativeHookOutput(
 	};
 	if (
 		!claudePostOutput.hookSpecificOutput?.additionalContext?.includes(
-			"Repeated failure circuit opened",
+			"Repeated symptom circuit opened",
 		)
 	)
 		throw new Error(

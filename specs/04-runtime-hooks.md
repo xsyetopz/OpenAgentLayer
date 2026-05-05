@@ -87,8 +87,8 @@ sequenceDiagram
 | `block` | `permissionDecision = "deny"` | `continue = false` with stop reason | system message | `permissionDecision = "deny"` | `decision = "block"` | additional context |
 
 OpenCode hook behavior is mediated by rendered OpenCode plugin/runtime files.
-OpenCode MUST NOT receive copied Codex or Claude envelopes unless the provider
-surface requires the same shape.
+OpenCode receives its provider-native plugin/runtime shape. Shared envelopes are
+used only where the provider surface explicitly matches.
 
 ## Command Policy
 
@@ -144,11 +144,11 @@ Hook categories are:
 - generated artifact edit and drift guards
 - source evidence and validation evidence gates
 - route contract and completion evidence gates
-- weak blocked-result guard
+- `STATUS BLOCKED` evidence quality guard
 - explanation-only result guard
 - package script, project memory, git context, route context, changed-file, and
   subagent context injection
-- repeated failure circuit checks
+- repeated symptom circuit checks
 - large diff warnings
 - demo artifact, sentinel marker, and caveman filler guards
 
@@ -161,7 +161,7 @@ Adding a hook MUST update:
 5. runtime or acceptance tests
 6. specs when semantics add a new category or provider behavior
 
-## Message Style
+## Affirmative Message Style
 
 All errors, warnings, notes, fix-its, hook feedback, and normal CLI status text
 MUST follow a compiler-like style:
@@ -171,32 +171,31 @@ MUST follow a compiler-like style:
 - in template literals, wrap substituted values as `` `${value}` ``
 - name the violated contract or expected command
 - include a fix-it when the next command is known
-- keep model-facing output affirmative and action-oriented
+- keep model-facing output affirmative, reward-shaped, and action-oriented
+- lead with the valid behavior or supported path
+- phrase boundaries as "use this path" with the valid next action first
 
 Examples:
 
 ```text
 RTK supports this command; run the RTK form
 Use: rtk grep -n "pattern" source packages
-Unsupported provider `other`; expected `codex`, `claude`, `opencode`, or `all`
+Provider value `other` needs `codex`, `claude`, `opencode`, or `all`
 ```
 
-Invalid examples:
-
-```text
-RTK supports this command.
-Unsupported provider other.
-You did this wrong.
-```
+Style tests should use short fixture strings that demonstrate the expected
+shape, such as `Use the supported provider value`, without making that fixture
+the recommended runtime copy.
 
 ## Secret and Safety Output
 
 Secret checks MUST identify the rule and specific safe label without exposing
 secret material. If a secret-like match comes from a false positive, the message
-MUST still avoid copying the sensitive value.
+MUST keep the sensitive value out of output.
 
 Generated drift and destructive command messages MUST state the protected
-contract and the allowed next action. They MUST NOT shame or blame the model.
+contract and the allowed next action. Model-facing wording stays neutral and
+focused on the next valid action.
 
 ## Fixture Requirements
 
@@ -210,4 +209,4 @@ Hook fixtures MUST cover:
 - stderr feedback for visible blocks
 
 Acceptance MAY call runtime scripts directly with fixture JSON. Provider E2E
-checks MAY supplement acceptance but MUST NOT replace deterministic fixtures.
+checks MAY supplement deterministic fixtures.

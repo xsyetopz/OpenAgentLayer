@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "description": "Design and run behavior-focused tests, TDD loops, acceptance checks, fixtures, regression signals, and language-native test suites. Use for test-first work, validation failures, acceptance coverage, and framework-specific test layout.",
+  "description": "Design and run behavior-focused tests, TDD loops, acceptance checks, fixtures, regression signals, and language-native test suites. Use for test-first work, validation observed symptoms, acceptance coverage, and framework-specific test layout.",
   "body": "Tests verify behavior through stable public surfaces. Detect the repo existing language, runner, fixture, and file-layout conventions before adding tests. Keep tests beside owned code: Rust uses `mod tests;` plus `foo/tests.rs`, TypeScript uses `foo.test.ts` or `__tests__/foo.test.ts`, .NET usually uses separate test projects, Swift uses Swift Testing or XCTest, Dart uses package or Flutter test conventions, and other ecosystems follow native external test-file conventions.",
   "supportFiles": [
     {

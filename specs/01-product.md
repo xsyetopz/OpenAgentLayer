@@ -37,8 +37,7 @@ OAL MUST:
 2. validate product, provider, model, route, hook, skill, support-file, and
    prompt policy before rendering
 3. render real provider-native artifacts for Codex, Claude Code, and OpenCode
-4. report unsupported provider capabilities explicitly instead of emitting fake
-   placeholders
+4. report provider capability gaps explicitly with the supported provider path
 5. keep generated artifacts disposable and reproducible from source records
 6. preserve user-owned files, marked blocks, and structured config during deploy
 7. record every OAL-owned file, block, and structured key in a manifest entry
@@ -53,17 +52,18 @@ OAL MUST:
 14. keep release metadata, changelog entries, package versions, Homebrew cask
     metadata, tests, and acceptance fixtures in agreement
 
-## Non-Goals
+## Product Focus
 
-OAL MUST NOT become:
+OAL is strongest when each surface stays connected to executable product
+behavior:
 
-- a prompt-card repository without executable product behavior
-- a fake common abstraction that hides provider-native differences
-- a demo scaffold whose generated files are shallow placeholders
-- a docs-only product where specs describe behavior absent from code
-- a schema collection disconnected from renderer, deploy, and acceptance paths
-- an installer that mutates user configuration without manifest ownership
-- a hook bundle that relies on prose instead of executable runtime decisions
+- prompts are backed by rendered artifacts, hooks, tools, or acceptance checks
+- shared source intent renders through provider-native adapters
+- generated files contain substantial provider behavior
+- specs describe behavior present in source, renderer, deploy, or acceptance
+- schemas stay connected to renderer, deploy, and acceptance paths
+- installers mutate only manifest-owned material
+- hooks make executable runtime decisions
 
 ## Product Invariants
 
@@ -78,8 +78,8 @@ The following invariants are global:
 - acceptance is a product simulation
 
 These concepts MUST remain separate in code and documentation. A package MAY
-consume another package's public API, but it MUST NOT duplicate that package's
-owned behavior.
+consume another package's public API, while the owner package remains the single
+implementation source for that behavior.
 
 ## Source Truth
 
@@ -93,9 +93,8 @@ behavior:
 - acceptance tests or runtime hook tests
 - exact user-provided source snippets
 
-When source truth is missing, unreadable, ambiguous, or contradictory, the
-correct result is a blocked report with attempted work, evidence inspected, and
-the specific input needed.
+When source truth needs more evidence, the correct result is a completion-ready
+handoff with attempted work, evidence inspected, and the specific input needed.
 
 ## Provider-Native Requirement
 
@@ -110,7 +109,7 @@ to the richest stable native surface for each provider:
   tools, instructions, plugin code, hooks, and MCP config entries
 
 If a provider does not expose a capability, OAL MUST either omit it or report an
-unsupported capability with provider, capability, and reason.
+capability-gap entry with provider, capability, and reason.
 
 ## Release Identity
 
@@ -122,5 +121,5 @@ Each release MUST have one coherent identity:
 - Homebrew cask metadata when release packaging changes
 - acceptance release witness
 
-Acceptance MUST detect mismatches that would allow a release to ship with stale
-or contradictory metadata.
+Acceptance MUST detect release metadata divergence and keep shipped metadata
+current and coherent.

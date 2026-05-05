@@ -272,7 +272,7 @@ function assertSimplicityDiscipline(source: OalSource): void {
 			"Direct source-backed code beats clever machinery",
 			"Use complexity when it",
 			"direct functions over factories",
-			"source-backed blockers",
+			"source-backed handoffs",
 		])
 			if (!content.includes(term))
 				throw new Error(

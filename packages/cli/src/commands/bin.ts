@@ -27,7 +27,7 @@ export async function runBinCommand(
 	const plan = await refineBinPlan(planBinInstall(binDir, entrypoint));
 	console.log(`binary: ${plan.action} ${plan.path} (${plan.reason})`);
 	console.log(`manifest: ${binManifestPath(home)}`);
-	console.log(`path: ${pathContains(binDir) ? "ready" : `missing ${binDir}`}`);
+	console.log(`path: ${pathContains(binDir) ? "ready" : `add ${binDir}`}`);
 	if (!pathContains(binDir)) console.log(`next: export PATH="${binDir}:$PATH"`);
 	if (!dryRun) await applyBinInstall(home, plan, entrypoint);
 }

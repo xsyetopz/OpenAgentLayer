@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "description": "Parse shell commands and noisy command output with structured evidence. Use for hook enforcement, RTK command routing, shell safety checks, CI log extraction, and command failure summaries.",
+  "description": "Parse shell commands and noisy command output with structured evidence. Use for hook enforcement, RTK command routing, shell safety checks, CI log extraction, and command outcome summaries.",
   "body": "Treat command text as structured input. Separate argv words, shell operators, redirection, environment assignments, glob expansion, and command segments before enforcing policy. For noisy output, extract actionable errors, warnings, file paths, exit codes, and requested facts.",
   "supportFiles": [
     {

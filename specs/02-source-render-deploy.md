@@ -28,9 +28,9 @@ flowchart TD
     Accept --> Manifest
 ```
 
-The CLI MUST orchestrate these packages. It MUST NOT become the owner of source
-loading, rendering, artifact metadata, deploy mutation, manifest semantics, hook
-policy, plugin sync, or inspection logic.
+The CLI MUST orchestrate these packages. Source loading, rendering, artifact
+metadata, deploy mutation, manifest semantics, hook policy, plugin sync, and
+inspection logic stay in their owner packages.
 
 ## Source Records
 
@@ -63,8 +63,8 @@ target provider is not listed.
 - prompt templates loaded from `source/prompts`
 
 Product source is the only place for global prompt contract text. Provider
-renderers MAY format that text for native output, but MUST NOT author divergent
-copies.
+renderers MAY format that text for native output while preserving one authored
+contract source.
 
 ### Agent Records
 
@@ -82,8 +82,8 @@ copies.
 - `models`: provider model map
 - `prompt`: source-backed prompt body
 
-Renderers MUST use provider model plans to resolve final model choices. Renderers
-MUST NOT invent models outside provider allowlists.
+Renderers MUST use provider model plans to resolve final model choices from
+provider allowlists.
 
 ### Skill Records
 
@@ -132,8 +132,8 @@ against fixture payloads.
 ### Tool Records
 
 `ToolRecord` describes provider tools. Current custom tools are OpenCode-owned.
-Tool records MUST NOT imply Codex or Claude custom tool support where no provider
-surface exists.
+Tool records MUST map only to provider custom-tool surfaces that OAL renders and
+validates.
 
 ## Source Loading Algorithm
 
@@ -166,8 +166,8 @@ flowchart TD
 8. validate hydrated records
 9. return a `SourceGraph` with source provenance
 
-Production render paths MUST call `loadSource`. Production code MUST NOT walk
-`source/` directly to render provider output.
+Production render paths MUST call `loadSource` so provider output comes from the
+validated source graph.
 
 ## Render Contract
 
@@ -213,9 +213,9 @@ A provider renderer MUST:
 - render skills through shared skill helpers where surfaces match
 - render runtime hooks through `renderHookArtifacts`
 - render privileged runtime files through runtime artifact helpers
-- use model routing options rather than source-level fake model classes
-- include unsupported capability entries when source intent cannot map to the
-  provider
+- use model routing options as the source for final provider model choices
+- include capability-gap entries when source intent maps to a provider-limited
+  surface
 
 ## Artifact Contract
 
@@ -252,11 +252,11 @@ Artifact provenance MUST be added where the file format supports comments:
 - Markdown uses `<!-- >>> oal provider >>> -->`
 - JSONC uses `// >>> oal provider >>>`
 - TOML uses `# >>> oal provider >>>`
-- executable `.mjs` and `.ts` artifacts do not receive comment provenance from
-  `withProvenance`
+- executable `.mjs` and `.ts` artifacts preserve their executable source text
+  without added comment provenance from `withProvenance`
 
 Artifact hashing MUST compare exact rendered content. Drift detection MUST
-report missing or modified file artifacts.
+report artifact paths that need install or refresh.
 
 ## Deploy Plan Contract
 
@@ -287,9 +287,9 @@ manifest state. It MUST produce a deploy plan that carries:
 - backup requirement
 - manifest ownership update
 
-`applyDeploy` MUST execute the plan. It MUST NOT rediscover source intent or
-rerender artifacts. Dry-run output MUST describe the plan without mutating the
-target.
+`applyDeploy` MUST execute the plan. Source intent and rendered artifacts are
+resolved before apply. Dry-run output MUST describe the plan while keeping the
+target unchanged.
 
 ## Deploy Mutation Rules
 
@@ -321,8 +321,8 @@ Manifest entries MUST cover:
 - content hash or equivalent ownership witness
 - source id
 
-Acceptance MUST fail when the number of manifest entries does not match the
-rendered artifact count for deployable artifacts.
+Acceptance MUST require the number of manifest entries to match the rendered
+artifact count for deployable artifacts.
 
 ## Uninstall Contract
 
@@ -332,7 +332,7 @@ Uninstall MUST read the manifest before touching files. It MUST remove only:
 - blocks owned by manifest entries
 - structured config keys owned by manifest entries
 
-Uninstall MUST NOT infer ownership from:
+Uninstall MUST use manifest entries as the ownership source instead of:
 
 - filename
 - provider directory
@@ -359,13 +359,13 @@ the same source/render path feeding it.
 
 Inspect reports MAY cover:
 
-- provider capabilities and unsupported gaps
+- provider capabilities and capability gaps
 - manifest ownership
 - generated artifact source inputs
 - RTK report guidance
 - command policy guidance
 - release witness data
 
-Inspect MUST NOT duplicate renderer logic. If inspect output disagrees with
-rendered artifacts, fix the renderer, artifact metadata, or inspect package
-input contract.
+Inspect MUST reuse rendered artifacts and shared metadata. If inspect output and
+rendered artifacts diverge, align the renderer, artifact metadata, or inspect
+package input contract.

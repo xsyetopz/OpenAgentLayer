@@ -16,4 +16,4 @@ Keep documentation here factual and user-facing:
 - explain commands that exist now
 - use copyable shell examples
 - point to specs when a rule explains why the product works that way
-- avoid design history unless it affects current operation
+- keep design history in reference notes unless it affects current operation

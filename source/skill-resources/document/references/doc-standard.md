@@ -11,4 +11,4 @@ Include:
 - validation evidence when relevant
 - current limits that affect user action
 
-Current-state cleanup removes stale names, outdated product labels, speculative roadmaps, and implementation claims lacking source loading, rendering, deployment, uninstall, or acceptance validation evidence.
+Current-state cleanup keeps current names, active product labels, implemented roadmap language, and implementation claims backed by source loading, rendering, deployment, uninstall, or acceptance validation evidence.

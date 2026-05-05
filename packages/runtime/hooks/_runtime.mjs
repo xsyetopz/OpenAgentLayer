@@ -36,12 +36,15 @@ function parsePayload(raw) {
 
 		return {
 			payload: {},
-			malformed: "Input JSON must be an object.",
+			malformed: "Input JSON needs an object shape",
 		};
 	} catch (error) {
 		return {
 			payload: {},
-			malformed: error instanceof Error ? error.message : "Invalid JSON input",
+			malformed:
+				error instanceof Error
+					? error.message
+					: "JSON input needs valid syntax",
 		};
 	}
 }
@@ -180,7 +183,7 @@ export function createHookRunner(hook, evaluate) {
 			providerOutcome(payload, {
 				hook,
 				decision: "block",
-				reason: "Malformed hook input",
+				reason: "Hook input needs valid JSON",
 				details: [malformed],
 			}) ?? { continue: false, systemMessage: malformed },
 		);
@@ -194,10 +197,10 @@ export function createHookRunner(hook, evaluate) {
 			providerOutcome(payload, {
 				hook,
 				decision: "block",
-				reason: "Hook returned an invalid decision",
+				reason: "Hook decision needs pass, warn, or block",
 			}) ?? {
 				continue: false,
-				systemMessage: "Hook returned an invalid decision.",
+				systemMessage: "Hook decision needs pass, warn, or block",
 			},
 		);
 		process.exitCode = 1;

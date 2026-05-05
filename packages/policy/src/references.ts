@@ -11,7 +11,7 @@ export function validateReferences(
 				issues.push({
 					severity: "error",
 					code: "missing-skill",
-					message: `Agent \`${agent.id}\` references missing skill \`${skill}\``,
+					message: `Agent \`${agent.id}\` needs referenced skill \`${skill}\``,
 					sourceId: agent.id,
 				});
 		for (const route of agent.routes)
@@ -19,7 +19,7 @@ export function validateReferences(
 				issues.push({
 					severity: "error",
 					code: "missing-route",
-					message: `Agent \`${agent.id}\` references missing route \`${route}\``,
+					message: `Agent \`${agent.id}\` needs referenced route \`${route}\``,
 					sourceId: agent.id,
 				});
 	}
@@ -28,7 +28,7 @@ export function validateReferences(
 			issues.push({
 				severity: "error",
 				code: "missing-agent",
-				message: `Route \`${route.id}\` references missing agent \`${route.agent}\``,
+				message: `Route \`${route.id}\` needs referenced agent \`${route.agent}\``,
 				sourceId: route.id,
 			});
 		for (const skill of route.skills)
@@ -36,7 +36,7 @@ export function validateReferences(
 				issues.push({
 					severity: "error",
 					code: "missing-route-skill",
-					message: `Route \`${route.id}\` references missing skill \`${skill}\``,
+					message: `Route \`${route.id}\` needs referenced skill \`${skill}\``,
 					sourceId: route.id,
 				});
 	}

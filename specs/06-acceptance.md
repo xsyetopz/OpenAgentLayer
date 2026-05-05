@@ -1,8 +1,7 @@
 # Acceptance Contract
 
-Acceptance proves OAL as a product. It is not a unit-test collection and it is
-not satisfied by prose, manifests, or green proxy checks unless they cover the
-required behavior.
+Acceptance proves OAL as a product. It combines tests, fixtures, manifests, and
+green command output with direct evidence for the required behavior.
 
 ## Required Command
 
@@ -44,12 +43,12 @@ Acceptance MUST verify:
 
 1. source records load through `packages/source`
 2. source graph policy passes
-3. source inventory has no stale legacy command aliases
+3. source inventory uses current command aliases
 4. authored Markdown style meets repository rules
 5. repository inventory includes required packages and generated-surface owners
 6. CLI help and expected command errors are clean
 7. installed CLI smoke flow works in isolated roots
-8. model allowlists reject unsupported models
+8. model allowlists keep rendered output on supported models
 9. provider renderers produce substantial real artifacts
 10. generated configs parse where possible
 11. provider config schema contracts hold
@@ -67,7 +66,7 @@ Acceptance MUST verify:
 22. uninstall acts only on manifest-owned material
 23. user-owned config and blocks remain after uninstall
 24. plugin payload sync writes current provider payloads
-25. plugin payload sync prunes stale OAL-owned cache entries
+25. plugin payload sync keeps OAL-owned cache entries current
 26. generated/source drift checks are active
 27. docs and specs are connected active product paths
 28. release version files agree
@@ -80,11 +79,10 @@ Acceptance MUST verify:
 
 ## Artifact Threshold
 
-Acceptance MUST fail when provider rendering produces shallow output. Current
-acceptance requires more than 100 rendered artifacts. Raising the threshold is
-allowed when OAL gains durable product surfaces. Lowering the threshold requires
-source evidence that artifact count is no longer a meaningful shallow-output
-guard.
+Acceptance MUST require substantial provider output. Current acceptance requires
+more than 100 rendered artifacts. Raising the threshold is allowed when OAL gains
+durable product surfaces. Lowering the threshold requires source evidence that a
+different guard now proves substantial output better.
 
 ## Fixture Root Contract
 
@@ -122,9 +120,9 @@ blocks remain.
 ## Message Style Contract
 
 Acceptance MUST scan code paths that emit normal textual output, hook feedback,
-warnings, notes, fix-its, and errors. It MUST reject simple terminal-period
-violations in message-bearing strings and template literals where the repository
-guard can detect them.
+warnings, notes, fix-its, and errors. It MUST keep simple terminal-period
+violations out of message-bearing strings and template literals where the
+repository guard can detect them.
 
 Message-style acceptance is a guardrail, not complete proof. Reviewers MUST
 still inspect changed output strings for:
@@ -148,7 +146,8 @@ includes:
 - release witness fields
 - provider plugin payload paths
 
-Tests SHOULD NOT only check that prose exists.
+Tests SHOULD connect prose checks to behavior, rendered artifacts, or release
+evidence.
 
 ## Completion Audit Requirement
 

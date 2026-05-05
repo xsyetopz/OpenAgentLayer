@@ -32,6 +32,7 @@ material only and is not part of the OAL release line.
 - Rewrote `docs/` and `specs/` as separate AI-skimmable indexed packs: user operation docs in `docs/`, product and provider contracts in `specs/`.
 - Reworked `specs/` as formal technical specifications with normative package ownership, source/render/deploy contracts, provider surfaces, hook semantics, architecture graphs, and acceptance obligations.
 - Renamed indexed files under `docs/` and `specs/` from all-caps names to lower-case descriptive names.
+- Reframed model-facing prompts, specs, docs, hooks, and CLI output around affirmative contracts, capability gaps, supported paths, and next valid actions.
 
 ### Removed
 

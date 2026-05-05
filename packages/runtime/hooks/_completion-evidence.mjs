@@ -60,13 +60,13 @@ export function evaluateCompletionEvidence(payload) {
 			return {
 				decision: "block",
 				reason:
-					"Blocked result missing required attempted/evidence/need fields",
+					"STATUS BLOCKED result needs Attempted, Evidence, and Need fields",
 			};
 		}
 
 		return {
 			decision: "pass",
-			reason: "Blocked result includes required blocker contract",
+			reason: "STATUS BLOCKED result includes the required handoff contract",
 		};
 	}
 
@@ -84,7 +84,7 @@ export function evaluateCompletionEvidence(payload) {
 	if (finalResponse.trim().length === 0) {
 		return {
 			decision: "block",
-			reason: "Completion result missing final response text",
+			reason: "Completion result needs final response text",
 		};
 	}
 
@@ -93,7 +93,7 @@ export function evaluateCompletionEvidence(payload) {
 	if (evidenceItems.length < minimumEvidence) {
 		return {
 			decision: "block",
-			reason: "Completion result missing required validation evidence",
+			reason: "Completion result needs required validation evidence",
 			details: [
 				`required=${minimumEvidence}`,
 				`received=${evidenceItems.length}`,

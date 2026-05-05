@@ -75,7 +75,7 @@ function renderPreview(
 	}
 
 	if (rendered.unsupported.length > 0) {
-		lines.push("", "## Unsupported Provider Capabilities");
+		lines.push("", "## Provider Capability Gaps");
 		for (const unsupported of rendered.unsupported) {
 			lines.push(
 				`- ${unsupported.provider}: ${unsupported.capability} — ${unsupported.reason}`,

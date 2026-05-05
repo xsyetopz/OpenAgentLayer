@@ -6,9 +6,12 @@ export function evaluateFailureLoop(payload) {
 	if (failures.length >= threshold) {
 		return {
 			decision: "block",
-			reason: "Repeated failure circuit opened",
+			reason: "Repeated symptom circuit opened",
 			details: failures.map((failure) => String(failure)).slice(0, threshold),
 		};
 	}
-	return { decision: "pass", reason: "Failure count below circuit threshold" };
+	return {
+		decision: "pass",
+		reason: "Symptom count is below circuit threshold",
+	};
 }

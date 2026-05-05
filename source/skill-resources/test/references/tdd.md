@@ -2,8 +2,8 @@
 
 TDD loop:
 
-1. Write the smallest failing behavior test.
-2. Run it and capture the failure.
+1. Write the smallest behavior test that demonstrates the target symptom.
+2. Run it and capture the observed result.
 3. Implement the behavior.
 4. Run the targeted test.
 5. Run the nearest integration or acceptance check.

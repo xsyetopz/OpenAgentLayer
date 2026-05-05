@@ -6,8 +6,8 @@
     "claude",
     "opencode"
   ],
-  "description": "Create continuation notes from actual repo state, commands, failures, and remaining decisions. Use when transferring work across agents, tools, or sessions.",
-  "body": "A handoff is a restart artifact. Include repo state, evidence, commands, failures, remaining decisions, and enough detail for the next agent to resume from current source.",
+  "description": "Create continuation notes from actual repo state, commands, observed symptoms, and remaining decisions. Use when transferring work across agents, tools, or sessions.",
+  "body": "A handoff is a restart artifact. Include repo state, evidence, commands, observed symptoms, remaining decisions, and enough detail for the next agent to resume from current source.",
   "supportFiles": [
     {
       "path": "references/handoff.md",

@@ -1,4 +1,4 @@
-# Failure report
+# Symptom report
 
 - Symptom:
 - Reproduction command or artifact:
@@ -10,5 +10,5 @@
 - Probe evidence:
 - Fix evidence:
 - Regression signal:
-- Temporary probes removed:
-- Remaining blocker, if any:
+- Temporary probes cleaned up:
+- Remaining handoff need, if any:

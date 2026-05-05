@@ -13,5 +13,5 @@
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Review diff and generated artifacts for correctness, security, regression, shallow artifacts, provider-surface gaps, missing acceptance coverage, scope drift, and current-state residue. Files outside the edit envelope are correctness defects. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Review diff and generated artifacts for correctness, security, regression signals, artifact depth, provider-surface coverage, acceptance coverage, scope discipline, and current-state residue. Files inside the edit envelope carry the requested change. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }
