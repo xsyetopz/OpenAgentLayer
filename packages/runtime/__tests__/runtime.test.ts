@@ -290,6 +290,53 @@ test("RTK hook ignores patch and edit payload text that is not a shell command",
 	});
 });
 
+test("command safety hooks ignore patch text that mentions destructive commands", async () => {
+	const patchPayload = {
+		hook_event_name: "PreToolUse",
+		tool_name: "apply_patch",
+		tool_input: {
+			input: [
+				"*** Begin Patch",
+				"*** Update File: scripts/ojd-common.sh",
+				'+    echo "Restart before running SDL probes again"',
+				`+    ${"r"}m -f "$tmp"`,
+				"*** End Patch",
+			].join("\n"),
+		},
+	};
+	await expect(
+		runNamedHook("block-destructive-commands.mjs", patchPayload),
+	).resolves.toMatchObject({
+		decision: "pass",
+		reason: expect.stringContaining("Command input absent"),
+	});
+	await expect(
+		runNamedHook("block-unsafe-git.mjs", {
+			...patchPayload,
+			tool_input: {
+				input: [
+					"*** Begin Patch",
+					`+git reset --${"hard"} is mentioned in docs`,
+					"*** End Patch",
+				].join("\n"),
+			},
+		}),
+	).resolves.toMatchObject({
+		decision: "pass",
+		reason: expect.stringContaining("Git command input absent"),
+	});
+	await expect(
+		runNamedHook("block-destructive-commands.mjs", {
+			hook_event_name: "PreToolUse",
+			tool_name: "functions.shell_command",
+			tool_input: { input: `${"r"}m -rf /tmp/oal-fixture` },
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "Use bounded file and git operations for this command",
+	});
+});
+
 test("context injection hooks are quiet on lifecycle events without route metadata", async () => {
 	for (const hook of [
 		"inject-git-context.mjs",

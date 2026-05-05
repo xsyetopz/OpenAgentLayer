@@ -1,12 +1,7 @@
 import { asArray, asObject, asString } from "./_runtime.mjs";
 
-const COMMAND_FIELDS = [
-	"command",
-	"toolCommand",
-	"input",
-	"rawCommand",
-	"script",
-];
+const COMMAND_FIELDS = ["command", "toolCommand", "rawCommand", "script"];
+const GENERIC_COMMAND_FIELDS = ["input"];
 const PATH_FIELDS = [
 	"path",
 	"filePath",
@@ -48,8 +43,33 @@ export function extractCommands(payload) {
 			const value = asString(object[field]);
 			if (value) commands.push(value);
 		}
+		if (shellToolPayload(payload) || shellToolPayload(object)) {
+			for (const field of GENERIC_COMMAND_FIELDS) {
+				const value = asString(object[field]);
+				if (value) commands.push(value);
+			}
+		}
 	}
 	return [...new Set(commands)];
+}
+
+function shellToolPayload(payload) {
+	const object = asObject(payload);
+	const toolName = (
+		asString(object.tool_name) ||
+		asString(object.toolName) ||
+		asString(object.name) ||
+		asString(object.tool)
+	).toLowerCase();
+	return [
+		"bash",
+		"shell",
+		"sh",
+		"zsh",
+		"terminal",
+		"shell_command",
+		"functions.shell_command",
+	].includes(toolName);
 }
 
 export function extractPaths(payload) {

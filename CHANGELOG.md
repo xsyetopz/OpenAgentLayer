@@ -5,7 +5,7 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.2.0-beta.11] - 2026-05-05
+## [0.2.0-beta.12] - 2026-05-05
 
 ### Added
 
@@ -22,6 +22,7 @@ material only and is not part of the OAL release line.
 
 ### Changed
 
+- Fixed shared command extraction so destructive-command and unsafe-git hooks ignore patch/edit payload text unless it arrives through an explicit command field or shell-like tool payload.
 - Changed Codex SessionStart scope receipts to emit one plain-text hook context without a duplicate warning or ANSI styling inside model context.
 - Documented bounded `python3` rewrites as the preferred path for broad mechanical edits when many manual patch hunks would be fragile, with final diff inspection required.
 - Fixed RTK command enforcement so edit/patch payload text is treated as patch content unless it arrives through an explicit shell command field or shell tool payload.
