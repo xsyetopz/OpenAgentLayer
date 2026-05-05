@@ -19,4 +19,10 @@ Artifact outputs:
 - Claude Code: `CLAUDE.md`, `.claude/agents/*.md`, commands, hooks, skills, settings
 - OpenCode: `opencode.jsonc`, `.opencode/agents/*.md`, commands, plugin, tools, hooks, skills
 
+Agent use:
+
+- Prefer provider-native subagent or agent launch when the active provider exposes it.
+- Codex CLI sessions can use OAL-managed delegation commands: `oal codex agent <agent> <task>`, `oal codex route <route> <task>`, or `oal codex peer batch <task>`.
+- `oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/` handoff directory with orchestrator, validate, worker, and review passes.
+
 Source-to-artifact chain must be complete for new behavior: source record, renderer, deploy ownership, acceptance check.

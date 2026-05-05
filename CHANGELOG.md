@@ -5,7 +5,7 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.3.0-beta.5] - 2026-05-05
+## [0.3.0-beta.6] - 2026-05-05
 
 ### Added
 
@@ -13,6 +13,8 @@ material only and is not part of the OAL release line.
 - Added Codex provider guidance for native subagent workflows through generated `.codex/agents/` and explicit focused-agent spawning, without implying an OAL shell launcher.
 - Added command-policy guidance that routes `codex exec` delegation attempts back to native Codex subagent workflow unless explicit automation is requested.
 - Added `oal codex agent`, `oal codex route`, and `oal codex peer batch` for OAL-managed Codex delegation when the current session lacks a native subagent launcher.
+- Added SessionStart and primary OAL skill guidance for using provider agents and OAL-managed Codex delegation commands.
+- Added plugin sync cleanup for stale OAL plugin roots, caches, marketplace entries, and Codex activation tables from earlier package names.
 - Added `inject-session-scope` SessionStart hook for Codex, Claude Code, and OpenCode so new sessions receive a concise scope, consent-boundary, workflow, and blocker-path receipt before work starts.
 - Added persisted setup profiles with `oal profiles list`, `show`, `save`, `use`, `remove`, and `args`.
 - Added `oal state inspect` for profile selection, provider availability, deploy write/update/skip counts, owned-manifest removal eligibility, and optional feature command state.

@@ -98,6 +98,12 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 		expect(await readFile(join(home, ".codex/config.toml"), "utf8")).toContain(
 			'[plugins."oal@openagentlayer-local"]',
 		);
+		expect(
+			await readFile(join(home, ".codex/config.toml"), "utf8"),
+		).not.toContain("openagentsbtw");
+		expect(
+			await readFile(join(home, ".agents/plugins/marketplace.json"), "utf8"),
+		).not.toContain("openagentsbtw");
 		await expect(
 			readFile(
 				join(
@@ -113,6 +119,15 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 				"utf8",
 			),
 		).toBe("keep");
+		for (const path of [
+			".codex/plugins/openagentsbtw/stale.txt",
+			".codex/plugins/cache/openagentsbtw-local/oal/stale.txt",
+			".claude/plugins/marketplaces/openagentsbtw/stale.txt",
+			".claude/plugins/cache/openagentsbtw/stale.txt",
+			".config/opencode/plugins/openagentsbtw/stale.txt",
+			".config/opencode/plugins/cache/openagentsbtw/stale.txt",
+		])
+			await expect(readFile(join(home, path), "utf8")).rejects.toThrow();
 	} finally {
 		await rm(home, { recursive: true, force: true });
 	}
@@ -135,8 +150,47 @@ async function seedStaleCaches(home: string): Promise<void> {
 		home,
 		".config/opencode/plugins/cache/openagentlayer/0.0.1",
 	);
-	for (const path of [staleCodex, otherCodex, staleClaude, staleOpenCode])
-		await mkdir(path, { recursive: true });
+	const stalePaths = [
+		staleCodex,
+		otherCodex,
+		staleClaude,
+		staleOpenCode,
+		join(home, ".codex/plugins/openagentsbtw"),
+		join(home, ".codex/plugins/cache/openagentsbtw-local/oal"),
+		join(home, ".claude/plugins/marketplaces/openagentsbtw"),
+		join(home, ".claude/plugins/cache/openagentsbtw"),
+		join(home, ".config/opencode/plugins/openagentsbtw"),
+		join(home, ".config/opencode/plugins/cache/openagentsbtw"),
+	];
+	for (const path of stalePaths) await mkdir(path, { recursive: true });
 	await writeFile(join(staleCodex, "stale.txt"), "stale");
 	await writeFile(join(otherCodex, "keep.txt"), "keep");
+	for (const path of stalePaths.filter((path) => path !== otherCodex))
+		await writeFile(join(path, "stale.txt"), "stale");
+	await writeFile(
+		join(home, ".codex/config.toml"),
+		[
+			'[plugins."oal@openagentsbtw-local"]',
+			"enabled = true",
+			"",
+			'[plugins."openagentsbtw@openagentsbtw-local"]',
+			"enabled = true",
+			"",
+		].join("\n"),
+	);
+	await mkdir(join(home, ".agents/plugins"), { recursive: true });
+	await writeFile(
+		join(home, ".agents/plugins/marketplace.json"),
+		JSON.stringify(
+			{
+				name: "openagentlayer-local",
+				plugins: [
+					{ name: "openagentsbtw", source: { path: "/old" } },
+					{ name: "oal", source: { path: "/old-oal" } },
+				],
+			},
+			undefined,
+			2,
+		),
+	);
 }

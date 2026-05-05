@@ -40,6 +40,12 @@ const PROVIDERS = ["codex", "claude", "opencode"] as const;
 const PLUGIN_NAME = "oal";
 const PLUGIN_ROOT_NAME = "openagentlayer";
 const CODEX_MARKETPLACE_NAME = "openagentlayer-local";
+const LEGACY_PLUGIN_NAMES = [
+	"openagentsbtw",
+	"openagentsbtw-local",
+	"oabtw",
+	"oabtw-local",
+] as const;
 const TOML_TABLE_PATTERN = /^\[[^\]]+\]/;
 const REPO_PLUGIN_ROOTS: Record<Provider, string> = {
 	codex: "plugins/codex/openagentlayer",
@@ -97,6 +103,12 @@ async function syncCodex(options: ProviderSyncOptions): Promise<void> {
 	await writeCodexPluginActivation(options);
 	await activateCodexMarketplace(options);
 	await pruneVersionCache(options, cacheRoot);
+	await removeCodexStaleTraces(options);
+}
+
+async function removeCodexStaleTraces(
+	options: ProviderSyncOptions,
+): Promise<void> {
 	await removePath(
 		options,
 		join(
@@ -105,6 +117,18 @@ async function syncCodex(options: ProviderSyncOptions): Promise<void> {
 		),
 		"stale Codex plugin cache",
 	);
+	for (const name of LEGACY_PLUGIN_NAMES) {
+		await removePath(
+			options,
+			join(options.home, `.codex/plugins/${name}`),
+			"stale Codex plugin root",
+		);
+		await removePath(
+			options,
+			join(options.home, `.codex/plugins/cache/${name}`),
+			"stale Codex plugin cache",
+		);
+	}
 }
 
 async function syncClaude(options: ProviderSyncOptions): Promise<void> {
@@ -124,6 +148,24 @@ async function syncClaude(options: ProviderSyncOptions): Promise<void> {
 		options,
 		join(options.home, ".claude/plugins/cache"),
 	);
+	await removeClaudeStaleTraces(options);
+}
+
+async function removeClaudeStaleTraces(
+	options: ProviderSyncOptions,
+): Promise<void> {
+	for (const name of LEGACY_PLUGIN_NAMES) {
+		await removePath(
+			options,
+			join(options.home, `.claude/plugins/marketplaces/${name}`),
+			"stale Claude plugin marketplace",
+		);
+		await removePath(
+			options,
+			join(options.home, `.claude/plugins/cache/${name}`),
+			"stale Claude plugin cache",
+		);
+	}
 }
 
 async function syncOpenCode(options: ProviderSyncOptions): Promise<void> {
@@ -134,6 +176,25 @@ async function syncOpenCode(options: ProviderSyncOptions): Promise<void> {
 	await copyPluginPayload(options, "opencode", pluginRoot);
 	await copyPluginPayload(options, "opencode", cacheTarget);
 	await pruneVersionCache(options, cacheRoot);
+	await removeOpenCodeStaleTraces(options);
+}
+
+async function removeOpenCodeStaleTraces(
+	options: ProviderSyncOptions,
+): Promise<void> {
+	const configRoot = join(options.home, ".config/opencode");
+	for (const name of LEGACY_PLUGIN_NAMES) {
+		await removePath(
+			options,
+			join(configRoot, `plugins/${name}`),
+			"stale OpenCode plugin root",
+		);
+		await removePath(
+			options,
+			join(configRoot, `plugins/cache/${name}`),
+			"stale OpenCode plugin cache",
+		);
+	}
 }
 
 async function copyPluginPayload(
@@ -270,7 +331,9 @@ async function writeCodexMarketplace(
 		(entry) =>
 			!(
 				isRecord(entry) &&
-				[PLUGIN_NAME, PLUGIN_ROOT_NAME].includes(String(entry["name"]))
+				[PLUGIN_NAME, PLUGIN_ROOT_NAME, ...LEGACY_PLUGIN_NAMES].includes(
+					String(entry["name"]),
+				)
 			),
 	);
 	nextPlugins.push({
@@ -318,6 +381,11 @@ function removeCodexPluginActivation(content: string): string {
 		`${PLUGIN_NAME}@${CODEX_MARKETPLACE_NAME}`,
 		`${PLUGIN_ROOT_NAME}@${CODEX_MARKETPLACE_NAME}`,
 		`${PLUGIN_ROOT_NAME}@${PLUGIN_ROOT_NAME}`,
+		"oal@openagentlayer",
+		"oal@openagentsbtw-local",
+		"openagentsbtw@openagentsbtw-local",
+		"openagentsbtw@openagentsbtw",
+		"oabtw@oabtw-local",
 	])
 		current = removeTomlTable(current, `plugins."${key}"`);
 	return current;

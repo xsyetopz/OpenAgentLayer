@@ -49,7 +49,7 @@ export async function runCodexCommand(
 			await runCodexPeer(repoRoot, args);
 			return;
 		default:
-			throw new Error("Usage: oal codex <agent|route|peer> ...");
+			throw new Error("Usage: oal codex <agent|route|peer>");
 	}
 }
 
@@ -161,7 +161,7 @@ export function renderPeerSummary(
 
 async function runCodexAgent(repoRoot: string, args: string[]): Promise<void> {
 	const agent = args.shift();
-	if (!agent) throw new Error("Usage: oal codex agent <agent> [prompt...]");
+	if (!agent) throw new Error("Usage: oal codex agent <agent> [prompt]");
 	const cwd = resolve(option(args, "--cwd") ?? process.cwd());
 	const out = option(args, "--out");
 	const dryRun = flag(args, "--dry-run");
@@ -179,7 +179,7 @@ async function runCodexAgent(repoRoot: string, args: string[]): Promise<void> {
 
 async function runCodexRoute(repoRoot: string, args: string[]): Promise<void> {
 	const routeId = args.shift();
-	if (!routeId) throw new Error("Usage: oal codex route <route> [prompt...]");
+	if (!routeId) throw new Error("Usage: oal codex route <route> [prompt]");
 	const cwd = resolve(option(args, "--cwd") ?? process.cwd());
 	const out = option(args, "--out");
 	const dryRun = flag(args, "--dry-run");
@@ -209,7 +209,7 @@ async function runCodexRoute(repoRoot: string, args: string[]): Promise<void> {
 async function runCodexPeer(repoRoot: string, args: string[]): Promise<void> {
 	const mode = args.shift();
 	if (!(mode === "batch" || mode === "tmux"))
-		throw new Error("Usage: oal codex peer <batch|tmux> [task...]");
+		throw new Error("Usage: oal codex peer <batch|tmux> [task]");
 	const cwd = resolve(option(args, "--cwd") ?? process.cwd());
 	const dryRun = flag(args, "--dry-run");
 	const task = promptFromArgs(args);

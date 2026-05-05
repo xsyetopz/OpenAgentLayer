@@ -93,6 +93,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	for (const [skill, expected] of [
 		["caveman", "Use compact output"],
 		["taste", "Improve product UI"],
+		["oal", "oal codex peer batch <task>"],
 	] as const) {
 		for (const provider of ["codex", "claude", "opencode"] as const) {
 			const rendered = await renderProvider(provider, graph.source, repoRoot);
