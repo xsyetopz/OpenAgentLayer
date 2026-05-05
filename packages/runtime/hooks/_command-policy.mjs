@@ -63,18 +63,20 @@ const PREFERRED_REPLACEMENTS = new Map([
 ]);
 const SUDO_PREFIX_PATTERN = /^sudo\s+/;
 const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
+const RAW_DIAGNOSTIC_ENV_PATTERN =
+	/(?:^|\s)(?:env\s+)?OAL_RTK_RAW_DIAGNOSTIC=1(?:\s|$)/;
 const WHITESPACE_PATTERN = /\s+/;
 
 export function evaluateCommandPolicy(command, options = {}) {
-	const normalizedCommands = commandLines(command).map(stripCommandPrefixes);
-	if (normalizedCommands.length === 0)
+	const commands = commandLines(command);
+	if (commands.length === 0)
 		return {
 			decision: "pass",
 			reason: "Command inspection complete: executable command absent",
 		};
 	let firstWarning;
-	for (const normalized of normalizedCommands) {
-		const result = evaluateSingleCommand(normalized, options);
+	for (const commandLine of commands) {
+		const result = evaluateSingleCommand(commandLine, options);
 		if (result.decision === "block") return result;
 		if (result.decision === "warn") firstWarning ??= result;
 	}
@@ -82,7 +84,16 @@ export function evaluateCommandPolicy(command, options = {}) {
 	return { decision: "pass", reason: "Command already uses RTK" };
 }
 
-function evaluateSingleCommand(normalized, options) {
+function evaluateSingleCommand(command, options) {
+	if (rawDiagnosticRequested(command))
+		return {
+			decision: "warn",
+			reason: "Raw RTK diagnostic command allowed for parser verification",
+			details: [
+				"Use when useful: compare this output with the matching RTK command",
+			],
+		};
+	const normalized = stripCommandPrefixes(command);
 	const proxied = rtkProxyInnerCommand(normalized);
 	if (proxied) {
 		const proxiedExecutable = commandExecutable(proxied);
@@ -190,7 +201,7 @@ function stripCommandPrefixes(command) {
 export function commandExecutable(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
 	if (tokens.length === 0) return "";
-	if (SHELL_WRAPPERS.has(tokens[0]) && tokens[1] === "-lc") {
+	if (SHELL_WRAPPERS.has(shellWrapperName(tokens[0])) && tokens[1] === "-lc") {
 		const nested = tokens
 			.slice(2)
 			.join(" ")
@@ -202,13 +213,23 @@ export function commandExecutable(command) {
 
 function shellInnerCommand(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
-	if (SHELL_WRAPPERS.has(tokens[0]) && tokens[1] === "-lc") {
+	if (SHELL_WRAPPERS.has(shellWrapperName(tokens[0])) && tokens[1] === "-lc") {
 		return tokens
 			.slice(2)
 			.join(" ")
 			.replace(/^['"]|['"]$/g, "");
 	}
 	return undefined;
+}
+
+function shellWrapperName(command) {
+	return command.split("/").pop() ?? command;
+}
+
+function rawDiagnosticRequested(command) {
+	if (RAW_DIAGNOSTIC_ENV_PATTERN.test(command)) return true;
+	const nested = shellInnerCommand(command);
+	return nested ? RAW_DIAGNOSTIC_ENV_PATTERN.test(nested) : false;
 }
 
 function rtkProxyInnerCommand(command) {

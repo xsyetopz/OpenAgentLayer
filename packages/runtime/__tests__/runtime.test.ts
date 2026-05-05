@@ -86,6 +86,28 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "warn",
 		details: ["Use when useful: rtk proxy -- make check"],
 	});
+	await expect(
+		runHook({
+			command:
+				"OAL_RTK_RAW_DIAGNOSTIC=1 dotnet build OsuDroid.App.Android/OsuDroid.App.Android.csproj -v:diag",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "warn",
+		reason: "Raw RTK diagnostic command allowed for parser verification",
+	});
+	await expect(
+		runHook({
+			command:
+				"/bin/zsh -lc 'OAL_RTK_RAW_DIAGNOSTIC=1 dotnet build OsuDroid.App.Android/OsuDroid.App.Android.csproj -v:diag'",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "warn",
+		reason: "Raw RTK diagnostic command allowed for parser verification",
+	});
 });
 
 test("RTK hook requires binary and RTK.md before enforcing supported commands", async () => {
