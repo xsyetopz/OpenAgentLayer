@@ -10,8 +10,9 @@ Read in this order:
 2. [Source, render, deploy contract](02_SOURCE_RENDER_DEPLOY.md)
 3. [Provider surfaces](03_PROVIDER_SURFACES.md)
 4. [Runtime hooks and message style](04_RUNTIME_HOOKS.md)
-5. [Acceptance contract](05_ACCEPTANCE.md)
-6. [Reference evidence](06_REFERENCE_EVIDENCE.md)
+5. [Architecture under the hood](05_ARCHITECTURE.md)
+6. [Acceptance contract](06_ACCEPTANCE.md)
+7. [Reference evidence](07_REFERENCE_EVIDENCE.md)
 
 Specs must be current-state contracts:
 
@@ -19,3 +20,5 @@ Specs must be current-state contracts:
 - keep provider differences explicit
 - avoid vague roadmap prose
 - make every rule easy for an AI coding model to cite while editing code
+- include Mermaid graphs when a flow, dependency, or lifecycle is easier to scan
+  visually

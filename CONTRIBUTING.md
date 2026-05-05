@@ -15,7 +15,8 @@ Before large changes, read:
 - `specs/01_PRODUCT.md`
 - `specs/02_SOURCE_RENDER_DEPLOY.md`
 - `specs/03_PROVIDER_SURFACES.md`
-- `specs/05_ACCEPTANCE.md`
+- `specs/05_ARCHITECTURE.md`
+- `specs/06_ACCEPTANCE.md`
 
 `reference notes/` is read-only reference material. Do not modify it and do not import
 it from runtime code.
