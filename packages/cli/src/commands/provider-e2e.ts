@@ -1,11 +1,4 @@
-import {
-	chmod,
-	copyFile,
-	mkdir,
-	mkdtemp,
-	rm,
-	writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { flag, option, providerOptions } from "../arguments";
@@ -37,7 +30,7 @@ export async function runProviderE2eCommand(
 		if (live) await runLivePrompt(repoRoot, provider);
 		else
 			console.log(
-				`${provider}: STATUS READY live prompt skipped; pass --live to spend provider tokens and test hooks/shims.`,
+				`${provider}: STATUS READY live prompt skipped; pass --live to spend provider tokens and test hooks.`,
 			);
 	}
 }
@@ -250,7 +243,6 @@ codex_hooks = true
 model = "gpt-5.4-mini"
 approval_policy = "never"
 sandbox_mode = "read-only"
-zsh_path = ${JSON.stringify(join(home, ".codex/openagentlayer/shim/oal-zsh"))}
 `,
 	);
 }
@@ -294,37 +286,7 @@ async function runDeployedRuntimeChecks(
 		throw new Error(
 			`${provider} deployed RTK hook did not enforce bunx: ${hookResult.stderr || hookResult.stdout}`,
 		);
-	if (provider === "codex") await runCodexShimCheck(fixture);
-	console.log(`${provider}: deployed hook/shim checks PASS`);
-}
-
-async function runCodexShimCheck(fixture: string): Promise<void> {
-	const bin = join(fixture, "fake-bin");
-	await mkdir(bin, { recursive: true });
-	const rtk = join(bin, "rtk");
-	await writeFile(rtk, "#!/usr/bin/env sh\nprintf '%s\\n' \"$@\"\n", {
-		mode: 0o755,
-	});
-	await chmod(rtk, 0o755);
-	const shim = join(fixture, ".codex/openagentlayer/shim/cargo");
-	const proc = Bun.spawn([shim, "check"], {
-		cwd: fixture,
-		env: {
-			...process.env,
-			PATH: `${join(fixture, ".codex/openagentlayer/shim")}:${bin}:${process.env["PATH"] ?? ""}`,
-		},
-		stdout: "pipe",
-		stderr: "pipe",
-	});
-	const [stdout, stderr, code] = await Promise.all([
-		new Response(proc.stdout).text(),
-		new Response(proc.stderr).text(),
-		proc.exited,
-	]);
-	if (code !== 0 || !stdout.includes("cargo\ncheck"))
-		throw new Error(
-			`Codex cargo shim did not route through RTK: ${stderr || stdout}`,
-		);
+	console.log(`${provider}: deployed hook checks PASS`);
 }
 
 function snippet(text: string): string {

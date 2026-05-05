@@ -107,7 +107,7 @@ Legend: ✅ supported, ⚠️ partial/provider-limited, 🚧 under construction,
 | Provider instructions     | ✅ `CLAUDE.md`.                         | ✅ `AGENTS.md`.                          | ✅ instruction file plus config reference.  |
 | Structured config merge   | ✅ `settings.json`.                     | ✅ `config.toml`.                        | ✅ `opencode.jsonc`.                        |
 | Plugin payload sync       | ✅ Claude plugin layout.                | ✅ Codex plugin layout.                  | ✅ OpenCode plugin layout.                  |
-| RTK command enforcement   | ⚠️ Requires `rtk init -g --auto-patch`. | ✅ OAL shims plus `rtk init -g --codex`. | ⚠️ Requires `rtk init -g --opencode`.       |
+| RTK command enforcement   | ⚠️ Requires `rtk init -g --auto-patch`. | ✅ Hook-enforced with `rtk init -g --codex`. | ⚠️ Requires `rtk init -g --opencode`.       |
 | Privileged exec helper    | ✅ Executable helper scripts.           | ✅ Executable helper scripts.            | ✅ Executable helper scripts.               |
 | Manifest deploy/uninstall | ✅ OAL-owned artifact tracking.         | ✅ OAL-owned artifact tracking.          | ✅ OAL-owned artifact tracking.             |
 | Drift checks              | ✅ Generated edit guards.               | ✅ Generated edit guards.                | ✅ Generated edit guards.                   |
@@ -118,7 +118,7 @@ OAL applies subscription-specific model and reasoning choices instead of giving 
 
 | Provider    | Plans                                             | Notes                                                                                                   |
 | ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`.                                               |
+| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`; plan-mode and edit-mode effort are balanced separately. |
 | Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                 |
 | OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set. |
 

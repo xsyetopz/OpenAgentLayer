@@ -68,11 +68,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				requireIncludes(config, flag, "Codex config");
 			for (const model of ["gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex"])
 				requireIncludes(config, model, "Codex config");
-			requireIncludes(
-				config,
-				'zsh_path = ".codex/openagentlayer/shim/oal-zsh"',
-				"Codex config",
-			);
+			rejectIncludes(config, "zsh_path", "Codex config");
 			requireIncludes(
 				config,
 				'approvals_reviewer = "auto_review"',

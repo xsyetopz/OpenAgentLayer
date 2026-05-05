@@ -1,8 +1,9 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { readFile, symlink } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import type { OalSource, Provider } from "@openagentlayer/source";
 
 export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
+	await linkToolDependencies(targetRoot);
 	for (const tool of [
 		"manifest_inspect",
 		"generated_diff",
@@ -42,6 +43,16 @@ export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 				`OpenCode tool ${tool} did not return a non-empty tool result.`,
 			);
 	}
+}
+
+async function linkToolDependencies(targetRoot: string): Promise<void> {
+	const repoRoot = resolve(dirname(import.meta.dir), "../..");
+	await symlink(
+		join(repoRoot, "node_modules"),
+		join(targetRoot, "node_modules"),
+	).catch((error: NodeJS.ErrnoException) => {
+		if (error.code !== "EEXIST") throw error;
+	});
 }
 
 function toolContext(targetRoot: string): Record<string, unknown> {

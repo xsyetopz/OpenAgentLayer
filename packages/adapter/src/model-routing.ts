@@ -10,7 +10,7 @@ export type ModelPlan =
 	| "opencode-auto"
 	| "opencode-auth"
 	| "opencode-free";
-export type ReasoningEffort = "low" | "medium" | "high" | "xhigh";
+export type ReasoningEffort = "none" | "low" | "medium" | "high" | "xhigh";
 
 export interface RenderOptions {
 	plan?: ModelPlan;
@@ -37,87 +37,6 @@ export const OPENCODE_FREE_MODELS = [
 ] as const;
 
 const LINE_BREAK = /\r?\n/;
-
-const CODEX_PLANS: Record<
-	Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
-	Record<string, RoutedModel>
-> = {
-	plus: {
-		aphrodite: { model: "gpt-5.5", reasoningEffort: "low" },
-		apollo: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		ares: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		artemis: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		asclepius: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		atalanta: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		athena: { model: "gpt-5.5", reasoningEffort: "low" },
-		calliope: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		chronos: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		daedalus: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		demeter: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		dionysus: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		hecate: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		hephaestus: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		hermes: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		hestia: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		janus: { model: "gpt-5.5", reasoningEffort: "low" },
-		mnemosyne: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		morpheus: { model: "gpt-5.5", reasoningEffort: "low" },
-		nemesis: { model: "gpt-5.5", reasoningEffort: "low" },
-		odysseus: { model: "gpt-5.5", reasoningEffort: "low" },
-		prometheus: { model: "gpt-5.3-codex", reasoningEffort: "medium" },
-		themis: { model: "gpt-5.5", reasoningEffort: "low" },
-	},
-	"pro-5": {
-		aphrodite: { model: "gpt-5.5", reasoningEffort: "medium" },
-		apollo: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		ares: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		artemis: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		asclepius: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		atalanta: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		athena: { model: "gpt-5.5", reasoningEffort: "high" },
-		calliope: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		chronos: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		daedalus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		demeter: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		dionysus: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		hecate: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		hephaestus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		hermes: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		hestia: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		janus: { model: "gpt-5.5", reasoningEffort: "high" },
-		mnemosyne: { model: "gpt-5.4-mini", reasoningEffort: "low" },
-		morpheus: { model: "gpt-5.5", reasoningEffort: "medium" },
-		nemesis: { model: "gpt-5.5", reasoningEffort: "medium" },
-		odysseus: { model: "gpt-5.5", reasoningEffort: "high" },
-		prometheus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		themis: { model: "gpt-5.5", reasoningEffort: "medium" },
-	},
-	"pro-20": {
-		aphrodite: { model: "gpt-5.5", reasoningEffort: "high" },
-		apollo: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		ares: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		artemis: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		asclepius: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		atalanta: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		athena: { model: "gpt-5.5", reasoningEffort: "high" },
-		calliope: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		chronos: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		daedalus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		demeter: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		dionysus: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		hecate: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		hephaestus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		hermes: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		hestia: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		janus: { model: "gpt-5.5", reasoningEffort: "high" },
-		mnemosyne: { model: "gpt-5.4-mini", reasoningEffort: "medium" },
-		morpheus: { model: "gpt-5.5", reasoningEffort: "xhigh" },
-		nemesis: { model: "gpt-5.5", reasoningEffort: "xhigh" },
-		odysseus: { model: "gpt-5.5", reasoningEffort: "high" },
-		prometheus: { model: "gpt-5.3-codex", reasoningEffort: "high" },
-		themis: { model: "gpt-5.5", reasoningEffort: "xhigh" },
-	},
-};
 
 const CLAUDE_PLANS: Record<
 	Extract<ModelPlan, "max-5" | "max-20" | "max-20-long">,
@@ -265,13 +184,11 @@ export function resolveCodexModel(
 ): RoutedModel {
 	const plan =
 		options.codexPlan ?? (isCodexPlan(options.plan) ? options.plan : undefined);
-	if (plan)
-		return (
-			CODEX_PLANS[plan][agent.id] ?? {
-				model: agent.models.codex ?? "gpt-5.4-mini",
-			}
-		);
-	return { model: agent.models.codex ?? "gpt-5.4-mini" };
+	const model = agent.models.codex ?? "gpt-5.4-mini";
+	return {
+		model,
+		...(plan ? { reasoningEffort: codexReasoningEffort(model, plan) } : {}),
+	};
 }
 
 export function resolveClaudeModel(
@@ -286,6 +203,16 @@ export function resolveClaudeModel(
 			CLAUDE_PLANS[plan][agent.id] ?? agent.models.claude ?? "claude-haiku-4-5"
 		);
 	return agent.models.claude ?? "claude-haiku-4-5";
+}
+
+function codexReasoningEffort(
+	model: string,
+	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
+): ReasoningEffort {
+	if (model === "gpt-5.3-codex") return plan === "plus" ? "medium" : "high";
+	if (model === "gpt-5.5") return plan === "plus" ? "low" : "medium";
+	if (model === "gpt-5.4-mini") return plan === "pro-20" ? "medium" : "low";
+	return "low";
 }
 
 export function resolveOpenCodeModel(

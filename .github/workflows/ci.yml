@@ -24,8 +24,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          submodules: recursive
+          submodules: false
           persist-credentials: false
+      - name: Fetch upstream skill submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --jobs 1
+          git submodule status --recursive
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md
@@ -73,8 +78,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          submodules: recursive
+          submodules: false
           persist-credentials: false
+      - name: Fetch upstream skill submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --jobs 1
+          git submodule status --recursive
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md
@@ -130,8 +140,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          submodules: recursive
+          submodules: false
           persist-credentials: false
+      - name: Fetch upstream skill submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --jobs 1
+          git submodule status --recursive
       - name: Verify upstream skill submodules
         run: |
           test -f third_party/caveman/skills/caveman/SKILL.md

@@ -99,3 +99,17 @@ OAL is production-quality when it can:
 - reject generated/source drift.
 - keep baseline behavior reference isolated.
 - pass a single full-product acceptance command.
+
+## Future harness inputs
+
+Ruflo and Symphony are product-shape inputs, not implementation dependencies
+for the provider renderer.
+
+- Ruflo-style capability discovery can become an OAL command that reads source
+  records and reports available agents, tools, MCPs, hooks, and provider gaps.
+- Ruflo-style cost and verification reports can become OAL acceptance outputs:
+  token/command cost summaries plus a release witness manifest that hashes
+  rendered artifacts and source provenance.
+- Symphony-style orchestration belongs in a separate harness layer if OAL adds
+  issue-backed workspaces, repo-owned workflow files, Codex app-server runs, and
+  proof-of-work logs.

@@ -234,7 +234,7 @@ export const ${camelCase(tool.id)} = tool({
 	args: {},
 	async execute() {
 		return [
-			"codex: .codex/config.toml, AGENTS.md, .codex/agents/*.toml, .codex/openagentlayer/hooks/*.mjs, .codex/openagentlayer/shim/*",
+			"codex: .codex/config.toml, AGENTS.md, .codex/agents/*.toml, .codex/openagentlayer/hooks/*.mjs",
 			"claude: .claude/settings.json, CLAUDE.md, .claude/agents/*.md, .claude/commands/*.md, .claude/skills/*/SKILL.md, .claude/hooks/scripts/*.mjs",
 			"opencode: opencode.jsonc, .opencode/agents/*.md, .opencode/commands/*.md, .opencode/tools/*.ts, .opencode/plugins/openagentlayer.ts, .opencode/skills/*/SKILL.md"
 		].join("\\n");

@@ -238,9 +238,10 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	);
 	if (!hook.content.startsWith("#!/usr/bin/env node"))
 		throw new Error("Codex hook shebang was not preserved.");
-	const shim = findArtifact(".codex/openagentlayer/shim/git", artifacts);
-	if (!(shim.executable && shim.content.includes("exec rtk git")))
-		throw new Error("Codex RTK shim artifact is not executable.");
+	if (artifacts.some((artifact) => artifact.path.includes("/shim/")))
+		throw new Error(
+			"Codex default render should not emit PATH shim artifacts.",
+		);
 	const privileged = findArtifact(
 		".codex/openagentlayer/runtime/privileged-exec.mjs",
 		artifacts,

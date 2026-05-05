@@ -1,14 +1,10 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadSource } from "@openagentlayer/source";
 import { parseOpenCodeModels, renderProvider } from "../src";
 import { OPENCODE_MODEL_FALLBACKS } from "../src/opencode";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
-const SUPPORTED_COMMANDS_BLOCK_PATTERN =
-	/const SUPPORTED_COMMANDS = new Map\([\s\S]*?const SHELL_WRAPPERS/;
-const DOUBLE_QUOTED_STRING_PATTERN = /"([^"]+)"/g;
 
 test("OpenCode config renders OAL fallback models", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
@@ -33,7 +29,7 @@ test("model plans route Greek agents by subscription", async () => {
 		(artifact) => artifact.path === ".codex/agents/athena.toml",
 	)?.content;
 	expect(athena).toContain('model = "gpt-5.5"');
-	expect(athena).toContain('model_reasoning_effort = "high"');
+	expect(athena).toContain('model_reasoning_effort = "medium"');
 	const hephaestus = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
 	)?.content;
@@ -145,30 +141,24 @@ test("provider agents render inspection and correction discipline contracts", as
 	}
 });
 
-test("Codex shims use shared unshim helper and RTK command wrappers", async () => {
+test("Codex default render uses normal shell and hook-based RTK enforcement", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	const rendered = await renderProvider("codex", graph.source, repoRoot);
-	const helper = rendered.artifacts.find(
-		(artifact) => artifact.path === ".codex/openagentlayer/shim/oal-shim.zsh",
+	const config = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
-	expect(helper).toContain("oal_shim_exec");
-	expect(helper).toContain("OAL_SHIM_INTERNAL=1");
-	const cargo = rendered.artifacts.find(
-		(artifact) => artifact.path === ".codex/openagentlayer/shim/cargo",
-	)?.content;
-	expect(cargo).toContain(`source "\${shim_dir}/oal-shim.zsh"`);
-	expect(cargo).toContain('oal_shim_exec rtk cargo "$@"');
-});
-
-test("Codex shims cover RTK-supported command policy executables", async () => {
-	const graph = await loadSource(resolve(repoRoot, "source"));
-	const rendered = await renderProvider("codex", graph.source, repoRoot);
-	const artifactPaths = new Set(
-		rendered.artifacts.map((artifact) => artifact.path),
-	);
-	for (const command of rtkSupportedCommands()) {
-		expect(artifactPaths).toContain(`.codex/openagentlayer/shim/${command}`);
-	}
+	expect(config).not.toContain("zsh_path");
+	expect(config).toContain("shell_zsh_fork = false");
+	expect(
+		rendered.artifacts.some((artifact) => artifact.path.includes("/shim/")),
+	).toBe(false);
+	expect(
+		rendered.artifacts.some(
+			(artifact) =>
+				artifact.path ===
+				".codex/openagentlayer/hooks/enforce-rtk-commands.mjs",
+		),
+	).toBe(true);
 });
 
 test("Codex renders hooks only in hooks.json with provider event env", async () => {
@@ -242,19 +232,4 @@ function stripJsonComments(text: string): string {
 		.split("\n")
 		.filter((line) => !line.trimStart().startsWith("//"))
 		.join("\n");
-}
-
-function rtkSupportedCommands(): string[] {
-	const policy = readFileSync(
-		resolve(repoRoot, "packages/runtime/hooks/_command-policy.mjs"),
-		"utf8",
-	);
-	const body = policy.match(SUPPORTED_COMMANDS_BLOCK_PATTERN)?.[0] ?? "";
-	return [
-		...new Set(
-			[...body.matchAll(DOUBLE_QUOTED_STRING_PATTERN)].map((match) => match[1]),
-		),
-	]
-		.filter((command) => command !== undefined)
-		.sort();
 }

@@ -86,13 +86,8 @@ export function assertCodexTomlSchema(toml: string): void {
 			throw new Error(
 				`Codex profile ${profileName} has unsupported sandbox mode ${profile.sandbox_mode}`,
 			);
-		if (
-			profile.zsh_path &&
-			profile.zsh_path !== ".codex/openagentlayer/shim/oal-zsh"
-		)
-			throw new Error(
-				`Codex profile ${profileName} has unmanaged zsh_path ${profile.zsh_path}`,
-			);
+		if (profile.zsh_path)
+			throw new Error(`Codex profile ${profileName} should use normal shell.`);
 		if (profile.model_verbosity && profile.model_verbosity !== "low")
 			throw new Error(
 				`Codex profile ${profileName} has unsupported verbosity ${profile.model_verbosity}`,

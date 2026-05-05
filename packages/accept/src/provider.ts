@@ -41,11 +41,6 @@ const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/big-pickle",
 	"opencode/gpt-5-nano",
 ] as const;
-const CODEX_ZSH_PATH_EXPORT = [
-	'export PATH="$',
-	"{shim_dir}:$",
-	'{PATH}"',
-].join("");
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/;
 
 export async function assertProviderConfigContracts(
@@ -99,10 +94,8 @@ async function assertCodexInstructionBaseline(
 		const profileBlock = config.match(
 			new RegExp(String.raw`\[profiles\.${profile}\]([\s\S]*?)(?=\n\[|$)`),
 		)?.[1];
-		if (
-			!profileBlock?.includes('zsh_path = ".codex/openagentlayer/shim/oal-zsh"')
-		)
-			throw new Error(`Codex profile ${profile} does not pin zsh_path.`);
+		if (profileBlock?.includes("zsh_path"))
+			throw new Error(`Codex profile ${profile} should use the normal shell.`);
 	}
 	const agents = await readFile(join(targetRoot, "AGENTS.md"), "utf8");
 	for (const required of [
@@ -192,18 +185,6 @@ async function assertRuntimeArtifacts(targetRoot: string): Promise<void> {
 		)
 	)
 		throw new Error("OpenCode plugin does not use native plugin typing.");
-	const shim = await readFile(
-		join(targetRoot, ".codex/openagentlayer/shim/git"),
-		"utf8",
-	);
-	if (!shim.includes("exec rtk git"))
-		throw new Error("Codex RTK shim does not route git through RTK.");
-	const zsh = await readFile(
-		join(targetRoot, ".codex/openagentlayer/shim/oal-zsh"),
-		"utf8",
-	);
-	if (!zsh.includes(CODEX_ZSH_PATH_EXPORT))
-		throw new Error("Codex zsh fork shim does not prepend shim PATH.");
 	for (const runtimePath of [
 		".codex/openagentlayer/runtime/privileged-exec.mjs",
 		".claude/openagentlayer/runtime/privileged-exec.mjs",

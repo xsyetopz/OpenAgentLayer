@@ -47,17 +47,11 @@ function globalContent(
 	content: string,
 ): string {
 	if (provider === "codex" && path === ".codex/config.toml")
-		return content
-			.replaceAll(
-				'zsh_path = ".codex/openagentlayer/shim/oal-zsh"',
-				() =>
-					`zsh_path = ${JSON.stringify(join(home, ".codex/openagentlayer/shim/oal-zsh"))}`,
-			)
-			.replaceAll(
-				CODEX_AGENT_CONFIG_FILE,
-				(_match, file) =>
-					`config_file = ${JSON.stringify(join(home, ".codex/agents", file))}`,
-			);
+		return content.replaceAll(
+			CODEX_AGENT_CONFIG_FILE,
+			(_match, file) =>
+				`config_file = ${JSON.stringify(join(home, ".codex/agents", file))}`,
+		);
 	if (provider === "codex" && path === ".codex/hooks.json")
 		return content.replaceAll(
 			".codex/openagentlayer/hooks/",

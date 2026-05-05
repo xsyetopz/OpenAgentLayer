@@ -384,7 +384,7 @@ test("CLI preview applies subscription model plans", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain('model = "gpt-5.5"');
-	expect(stdout).toContain('model_reasoning_effort = "high"');
+	expect(stdout).toContain('model_reasoning_effort = "medium"');
 	expect(stdout).toContain("developer_instructions =");
 	expect(stdout).not.toContain("color =");
 });
@@ -599,7 +599,7 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
 	expect(config).toContain('profile = "openagentlayer"');
 	expect(config).toContain('plan_mode_reasoning_effort = "high"');
-	expect(config).toContain('model_reasoning_effort = "high"');
+	expect(config).toContain('model_reasoning_effort = "medium"');
 	expect(config).toContain('[plugins."oal@openagentlayer-local"]');
 	expect(
 		await readFile(

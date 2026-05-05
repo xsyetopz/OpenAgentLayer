@@ -22,8 +22,12 @@ material only and is not part of the OAL release line.
 - Fixed setup toolchain planning so Bun uses the Bun installer, Homebrew does not try to install a nonexistent `bun` formula, and provider-specific optional MCP commands are skipped when that provider is unavailable.
 - Fixed OpenCode Docs MCP setup to write OpenCode `mcp` config instead of calling an interactive `opencode mcp add` path.
 - Hardened RTK command policy so `rtk proxy` is rejected when a native RTK filter exists or when raw file dumps should use bounded `rtk read`.
+- Switched default Codex shell handling back to the normal shell and kept RTK efficiency enforcement in visible hooks instead of the transparent PATH shim.
+- Rebalanced Codex plan-mode and edit-mode effort defaults so `gpt-5.5` defaults top out at medium edit effort, `gpt-5.3-codex` carries high implementation effort on Pro plans, and no default plan emits `xhigh`.
+- Changed CI checkout to fetch submodules in explicit diagnostic steps after checkout.
 - Consolidated advisory command-tool hooks into `advise-command-tools`, while keeping RTK command enforcement separate.
 - Updated OpenCode runtime/plugin rendering for command policy, Bun rewrites, command safety, secret checks, and repeated-failure handling.
+- Recorded Ruflo/Symphony harness ideas as future product inputs instead of runtime dependencies.
 
 ### Removed
 

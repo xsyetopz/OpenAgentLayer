@@ -8,10 +8,7 @@ import { agentPrompt, instructions, quoteToml } from "./common";
 import { renderHookArtifacts } from "./hooks";
 import type { RenderOptions } from "./model-routing";
 import { resolveCodexModel } from "./model-routing";
-import {
-	renderCodexShellShimArtifacts,
-	renderPrivilegedExecArtifacts,
-} from "./runtime";
+import { renderPrivilegedExecArtifacts } from "./runtime";
 import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "codex";
@@ -24,7 +21,7 @@ const CODEX_FEATURES = [
 	{ key: "plugins", enabled: true },
 	{ key: "codex_hooks", enabled: true },
 	{ key: "hooks", enabled: true },
-	{ key: "shell_zsh_fork", enabled: true },
+	{ key: "shell_zsh_fork", enabled: false },
 	{ key: "goals", enabled: true },
 	{ key: "responses_websockets", enabled: true },
 	{ key: "responses_websockets_v2", enabled: true },
@@ -98,8 +95,6 @@ export async function renderCodex(
 			repoRoot,
 		)),
 	);
-	const shim = renderCodexShellShimArtifacts();
-	artifacts.push(...shim.artifacts);
 	artifacts.push(
 		...(await renderPrivilegedExecArtifacts(
 			PROVIDER,
@@ -177,8 +172,8 @@ interface CodexProfileConfig {
 	model: string;
 	approvalPolicy: "never" | "on-request";
 	sandboxMode: "read-only" | "workspace-write";
-	planReasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
-	modelReasoningEffort?: "minimal" | "low" | "medium" | "high" | "xhigh";
+	planReasoningEffort?: "none" | "low" | "medium" | "high" | "xhigh";
+	modelReasoningEffort?: "none" | "low" | "medium" | "high" | "xhigh";
 	toolsViewImage?: boolean;
 }
 
@@ -198,7 +193,6 @@ model = ${quoteToml(profile.model)}
 ${profile.planReasoningEffort ? `plan_mode_reasoning_effort = ${quoteToml(profile.planReasoningEffort)}\n` : ""}${profile.modelReasoningEffort ? `model_reasoning_effort = ${quoteToml(profile.modelReasoningEffort)}\n` : ""}model_verbosity = "low"
 approval_policy = ${quoteToml(profile.approvalPolicy)}
 sandbox_mode = ${quoteToml(profile.sandboxMode)}
-zsh_path = ".codex/openagentlayer/shim/oal-zsh"
 ${profile.toolsViewImage ? "tools_view_image = true\n" : ""}
 `;
 }
@@ -215,9 +209,9 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 	switch (plan) {
 		case "plus":
 			return {
-				plan: "medium",
+				plan: "low",
 				model: "low",
-				implementPlan: "low",
+				implementPlan: "medium",
 				implementModel: "medium",
 				utilityPlan: "low",
 				utilityModel: "low",
@@ -229,7 +223,7 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 				implementPlan: "medium",
 				implementModel: "high",
 				utilityPlan: "low",
-				utilityModel: "medium",
+				utilityModel: "low",
 			};
 		case "pro-20":
 			return {
@@ -237,7 +231,7 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 				model: "medium",
 				implementPlan: "medium",
 				implementModel: "high",
-				utilityPlan: "low",
+				utilityPlan: "medium",
 				utilityModel: "medium",
 			};
 		default:
