@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
 import { readFileSync } from "node:fs";
-import { styleHookLines, styleHookMessage } from "./_hook-style.mjs";
+import {
+	renderedHint,
+	styleHookLines,
+	styleHookMessage,
+} from "./_hook-style.mjs";
 
 const DECISIONS = new Set(["pass", "warn", "block"]);
 
@@ -88,6 +92,17 @@ function styledReasonText(outcome, event) {
 		.join("\n");
 }
 
+function plainReasonText(outcome) {
+	const details = Array.isArray(outcome.details) ? outcome.details : [];
+	const hints = details.map((detail) => renderedHint(detail)).filter(Boolean);
+	const notes = details.filter((detail) => !renderedHint(detail));
+	const suffix = [
+		...hints.map((hint) => `; ${hint}`),
+		...notes.map((note) => `; note: ${note}`),
+	].join("");
+	return `${outcome.reason}${suffix}`;
+}
+
 function outcomeLevel(outcome, event) {
 	if (outcome.decision === "warn") return "warn";
 	if (outcome.decision === "block" && event !== "PreToolUse") return "fatal";
@@ -127,7 +142,7 @@ function codexOutcome(event, outcome) {
 				: undefined;
 		default:
 			if (event === "PreToolUse") {
-				return preToolUseDeny(reason);
+				return preToolUseDeny(plainReasonText(outcome));
 			}
 			if (isStopEvent(event)) {
 				return {
@@ -154,7 +169,8 @@ function claudeOutcome(event, outcome) {
 				},
 			};
 		default:
-			if (event === "PreToolUse") return preToolUseDeny(reason);
+			if (event === "PreToolUse")
+				return preToolUseDeny(plainReasonText(outcome));
 			if (isStopEvent(event)) return { decision: "block", reason };
 			return {
 				suppressOutput: false,

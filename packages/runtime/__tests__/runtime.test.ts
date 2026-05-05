@@ -45,18 +45,6 @@ async function runHookRaw(
 	return { code, stdout, stderr };
 }
 
-function stripAnsi(text: string): string {
-	let output = "";
-	for (let index = 0; index < text.length; index += 1) {
-		if (text.charCodeAt(index) !== 27) {
-			output += text[index];
-			continue;
-		}
-		while (index < text.length && text[index] !== "m") index += 1;
-	}
-	return output;
-}
-
 test("RTK hook enforces supported commands and proxies unsupported commands", async () => {
 	await expect(
 		runHook({
@@ -159,10 +147,14 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 		decision: "block",
 		details: ["Use: rtk proxy -- bunx prettier foo.js"],
 	});
-	const codexPreToolUse = await runHookRaw("enforce-rtk-commands.mjs", {
-		hook_event_name: "PreToolUse",
-		tool_input: { command: "npx prettier foo.js" },
-	});
+	const codexPreToolUse = await runHookRaw(
+		"enforce-rtk-commands.mjs",
+		{
+			hook_event_name: "PreToolUse",
+			tool_input: { command: "npx prettier foo.js" },
+		},
+		{ OAL_HOOK_RAW_OUTCOME: "0" },
+	);
 	expect(codexPreToolUse.code).toBe(0);
 	const codexPreToolUseOutput = JSON.parse(codexPreToolUse.stdout) as {
 		hookSpecificOutput?: { permissionDecisionReason?: string };
@@ -177,8 +169,8 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 			),
 		},
 	});
-	expect(codexPreToolUseJson).toContain("\\u001b[31m");
-	expect(codexPreToolUseJson).toContain("\\u001b[32m");
+	expect(codexPreToolUseJson).not.toContain("\\u001b[");
+	expect(codexPreToolUseJson).toContain("; did you mean `");
 	await expect(
 		runHook({ command: "yarn set version stable" }),
 	).resolves.toMatchObject({
@@ -340,7 +332,7 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	expect(stderrLines.length).toBeGreaterThan(2);
 	expect(stderrLines.every((line) => line.startsWith("\u001b["))).toBe(true);
 	expect(stderrLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
-	expect(codex.stderr).toContain("Use: rtk dotnet test");
+	expect(codex.stderr).toContain("did you mean `rtk dotnet test");
 	expect(codex.stderr).toContain("OsuDroid.App.Tests.csproj");
 
 	const preToolUse = await runHookRaw(
@@ -351,22 +343,38 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 			rtkInstalled: true,
 			rtkPolicyPresent: true,
 		},
-		{ COLUMNS: "80" },
+		{ COLUMNS: "80", OAL_HOOK_RAW_OUTCOME: "0" },
 	);
 	expect(preToolUse.code).toBe(0);
 	const preToolUseOutput = JSON.parse(preToolUse.stdout) as {
 		hookSpecificOutput: { permissionDecisionReason: string };
 	};
-	const feedbackLines =
-		preToolUseOutput.hookSpecificOutput.permissionDecisionReason.split("\n");
-	expect(feedbackLines.length).toBeGreaterThan(2);
-	expect(feedbackLines.every((line) => line.startsWith("\u001b["))).toBe(true);
-	expect(feedbackLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
-	expect(
-		feedbackLines.every(
-			(line) => `  feedback: ${stripAnsi(line)}`.length <= 64,
-		),
-	).toBe(true);
+	const preToolUseReason =
+		preToolUseOutput.hookSpecificOutput.permissionDecisionReason;
+	expect(preToolUseReason).not.toContain("\u001b[");
+	expect(preToolUseReason).not.toContain("\n");
+	expect(preToolUseReason).toContain("; did you mean `rtk dotnet test");
+	expect(preToolUseReason).toContain("OsuDroid.App.Tests.csproj");
+
+	const pathCommand =
+		"rtk proxy -- ls -R /Library/Developer/CommandLineTools/Library/Developer/Frameworks/Testing.framework";
+	const postToolUse = await runHookRaw(
+		"enforce-rtk-commands.mjs",
+		{
+			hook_event_name: "PostToolUse",
+			command: pathCommand,
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		},
+		{ COLUMNS: "80" },
+	);
+	expect(postToolUse.code).toBe(2);
+	const postToolUseLines = postToolUse.stderr.trim().split("\n");
+	expect(postToolUseLines.every((line) => line.startsWith("\u001b["))).toBe(
+		true,
+	);
+	expect(postToolUse.stderr).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
+	expect(postToolUse.stderr).toContain("\u001b[32m   /Developer/Frameworks");
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {
