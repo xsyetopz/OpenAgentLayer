@@ -481,7 +481,7 @@ async function availableProviderPrompt(): Promise<ProviderMulti> {
 		printWarning(`${skipped.provider} disabled: ${skipped.reason}`);
 	if (availability.providers.length === 0)
 		throw new Error(
-			"No provider binaries found. Install codex, claude, or opencode first.",
+			"No provider binaries found. Install `codex`, `claude`, or `opencode` first.",
 		);
 	return providerPrompt(availability.providers);
 }

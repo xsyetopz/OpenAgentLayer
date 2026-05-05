@@ -11,7 +11,7 @@ export function flag(args: string[], name: string): boolean {
 
 export function required(args: string[], name: string): string {
 	const found = option(args, name);
-	if (!found) throw new Error(`Missing ${name}`);
+	if (!found) throw new Error(`Missing \`${name}\``);
 	return found;
 }
 
@@ -24,7 +24,7 @@ export function providerOption(rawProvider: string): Provider | "all" {
 	)
 		return rawProvider;
 	throw new Error(
-		`Unsupported provider ${rawProvider}. Expected codex, claude, opencode, or all.`,
+		`Unsupported provider \`${rawProvider}\`. Expected \`codex, claude, opencode\`, or \`all\`.`,
 	);
 }
 
