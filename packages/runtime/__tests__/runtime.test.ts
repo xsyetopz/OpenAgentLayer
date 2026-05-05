@@ -428,7 +428,24 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 		true,
 	);
 	expect(postToolUse.stderr).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
-	expect(postToolUse.stderr).toContain("\u001b[32m   /Developer/Frameworks");
+	expect(postToolUse.stderr).toContain(
+		"\u001b[32m   /Library/Developer/Frameworks",
+	);
+
+	const secretOutput = await runHookRaw(
+		"block-secret-output.mjs",
+		{
+			hook_event_name: "PostToolUse",
+			output: `generic-api-${"key"}:Self.outputModeDefaultsKey`,
+		},
+		{ COLUMNS: "80" },
+	);
+	expect(secretOutput.code).toBe(2);
+	expect(secretOutput.stderr).toContain("\u001b[36m generic-api-key:\u001b[0m");
+	expect(secretOutput.stderr).toContain(
+		"\u001b[36m   Self.outputModeDefaultsKey\u001b[0m",
+	);
+	expect(secretOutput.stderr).not.toContain("generic-api-\u001b[0m\n");
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {

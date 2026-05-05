@@ -8,7 +8,7 @@ const COLORS = {
 };
 const DEFAULT_WRAP_COLUMNS = 88;
 const DEFAULT_TERMINAL_COLUMNS = 80;
-const DEFAULT_PROVIDER_PREFIX_COLUMNS = 28;
+const DEFAULT_PROVIDER_PREFIX_COLUMNS = 42;
 const INDENT_PATTERN = /^\s*/;
 const WORD_SPLIT_PATTERN = /(\s+)/;
 const WHITESPACE_ONLY_PATTERN = /^\s+$/;
@@ -99,6 +99,10 @@ function longTokenBreakIndex(content, width) {
 	const boundedWidth = Math.max(1, width);
 	const slashIndex = content.lastIndexOf("/", boundedWidth);
 	if (slashIndex > 0) return slashIndex;
+	const colonIndex = content.lastIndexOf(":", boundedWidth);
+	if (colonIndex > 0) return colonIndex + 1;
+	const equalsIndex = content.lastIndexOf("=", boundedWidth);
+	if (equalsIndex > 0) return equalsIndex + 1;
 	return boundedWidth;
 }
 
