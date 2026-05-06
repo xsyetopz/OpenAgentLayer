@@ -1,11 +1,3 @@
-const COLORS = {
-	fatal: "\x1b[35m",
-	error: "\x1b[31m",
-	warn: "\x1b[33m",
-	info: "\x1b[36m",
-	fix: "\x1b[32m",
-	reset: "\x1b[0m",
-};
 const DEFAULT_WRAP_COLUMNS = 88;
 const DEFAULT_TERMINAL_COLUMNS = 80;
 const DEFAULT_PROVIDER_PREFIX_COLUMNS = 42;
@@ -13,15 +5,10 @@ const INDENT_PATTERN = /^\s*/;
 const WORD_SPLIT_PATTERN = /(\s+)/;
 const WHITESPACE_ONLY_PATTERN = /^\s+$/;
 
-function colorEnabled() {
-	return process.env.NO_COLOR !== "1" && process.env.OAL_HOOK_COLOR !== "0";
-}
-
-export function styleHookMessage(level, text) {
-	if (!(colorEnabled() && text)) return text;
-	const color = COLORS[level] ?? COLORS.info;
+export function styleHookMessage(_level, text) {
+	if (!text) return text;
 	return wrapHookText(String(text))
-		.map((line) => `${color}${line}${COLORS.reset}`)
+		.map((line) => line)
 		.join("\n");
 }
 

@@ -117,6 +117,26 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 		);
 		expect(artifact?.content).toContain("Modern CSS Skill");
 		expect(artifact?.content).toContain("container queries");
+		const impeccable = rendered.artifacts.find((candidate) =>
+			candidate.path.endsWith("/impeccable/SKILL.md"),
+		);
+		const brandReference = rendered.artifacts.find((candidate) =>
+			candidate.path.endsWith("/impeccable/reference/brand.md"),
+		);
+		const loadContextScript = rendered.artifacts.find((candidate) =>
+			candidate.path.endsWith("/impeccable/scripts/load-context.mjs"),
+		);
+		const designWorker = rendered.artifacts.find((candidate) =>
+			candidate.path.endsWith("/design-worker/SKILL.md"),
+		);
+		const designWorkerReference = rendered.artifacts.find((candidate) =>
+			candidate.path.endsWith("/design-worker/references/worker.md"),
+		);
+		expect(impeccable?.content).toContain("IMPECCABLE_PREFLIGHT");
+		expect(brandReference?.content).toContain("Brand");
+		expect(loadContextScript?.content).toContain("PRODUCT.md");
+		expect(designWorker?.content).toContain("Design Worker");
+		expect(designWorkerReference?.content).toContain("Worker");
 	}
 });
 
@@ -276,7 +296,7 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	)?.content;
 	expect(config).not.toContain("zsh_path");
 	expect(config).not.toContain("model_instructions_file");
-	expect(config).toContain("[memories]\nextract_model = \"gpt-5.4-mini\"");
+	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain('model_verbosity = "low"');
 	expect(config).toContain("shell_zsh_fork = false");

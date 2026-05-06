@@ -1,0 +1,244 @@
+{
+  "id": "impeccable",
+  "title": "Impeccable Frontend Design",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Design, critique, audit, polish, and iterate production-grade frontend interfaces with Impeccable's product, brand, accessibility, motion, typography, and responsive design guidance.",
+  "upstream": {
+    "path": "third_party/impeccable/skill/SKILL.md",
+    "verbatim": true
+  },
+  "supportFiles": [
+    {
+      "path": "reference/adapt.md",
+      "source": "../third_party/impeccable/skill/reference/adapt.md"
+    },
+    {
+      "path": "reference/animate.md",
+      "source": "../third_party/impeccable/skill/reference/animate.md"
+    },
+    {
+      "path": "reference/audit.md",
+      "source": "../third_party/impeccable/skill/reference/audit.md"
+    },
+    {
+      "path": "reference/bolder.md",
+      "source": "../third_party/impeccable/skill/reference/bolder.md"
+    },
+    {
+      "path": "reference/brand.md",
+      "source": "../third_party/impeccable/skill/reference/brand.md"
+    },
+    {
+      "path": "reference/clarify.md",
+      "source": "../third_party/impeccable/skill/reference/clarify.md"
+    },
+    {
+      "path": "reference/cognitive-load.md",
+      "source": "../third_party/impeccable/skill/reference/cognitive-load.md"
+    },
+    {
+      "path": "reference/color-and-contrast.md",
+      "source": "../third_party/impeccable/skill/reference/color-and-contrast.md"
+    },
+    {
+      "path": "reference/colorize.md",
+      "source": "../third_party/impeccable/skill/reference/colorize.md"
+    },
+    {
+      "path": "reference/craft.md",
+      "source": "../third_party/impeccable/skill/reference/craft.md"
+    },
+    {
+      "path": "reference/critique.md",
+      "source": "../third_party/impeccable/skill/reference/critique.md"
+    },
+    {
+      "path": "reference/delight.md",
+      "source": "../third_party/impeccable/skill/reference/delight.md"
+    },
+    {
+      "path": "reference/distill.md",
+      "source": "../third_party/impeccable/skill/reference/distill.md"
+    },
+    {
+      "path": "reference/document.md",
+      "source": "../third_party/impeccable/skill/reference/document.md"
+    },
+    {
+      "path": "reference/extract.md",
+      "source": "../third_party/impeccable/skill/reference/extract.md"
+    },
+    {
+      "path": "reference/harden.md",
+      "source": "../third_party/impeccable/skill/reference/harden.md"
+    },
+    {
+      "path": "reference/heuristics-scoring.md",
+      "source": "../third_party/impeccable/skill/reference/heuristics-scoring.md"
+    },
+    {
+      "path": "reference/interaction-design.md",
+      "source": "../third_party/impeccable/skill/reference/interaction-design.md"
+    },
+    {
+      "path": "reference/layout.md",
+      "source": "../third_party/impeccable/skill/reference/layout.md"
+    },
+    {
+      "path": "reference/live.md",
+      "source": "../third_party/impeccable/skill/reference/live.md"
+    },
+    {
+      "path": "reference/motion-design.md",
+      "source": "../third_party/impeccable/skill/reference/motion-design.md"
+    },
+    {
+      "path": "reference/onboard.md",
+      "source": "../third_party/impeccable/skill/reference/onboard.md"
+    },
+    {
+      "path": "reference/optimize.md",
+      "source": "../third_party/impeccable/skill/reference/optimize.md"
+    },
+    {
+      "path": "reference/overdrive.md",
+      "source": "../third_party/impeccable/skill/reference/overdrive.md"
+    },
+    {
+      "path": "reference/personas.md",
+      "source": "../third_party/impeccable/skill/reference/personas.md"
+    },
+    {
+      "path": "reference/polish.md",
+      "source": "../third_party/impeccable/skill/reference/polish.md"
+    },
+    {
+      "path": "reference/product.md",
+      "source": "../third_party/impeccable/skill/reference/product.md"
+    },
+    {
+      "path": "reference/quieter.md",
+      "source": "../third_party/impeccable/skill/reference/quieter.md"
+    },
+    {
+      "path": "reference/responsive-design.md",
+      "source": "../third_party/impeccable/skill/reference/responsive-design.md"
+    },
+    {
+      "path": "reference/shape.md",
+      "source": "../third_party/impeccable/skill/reference/shape.md"
+    },
+    {
+      "path": "reference/spatial-design.md",
+      "source": "../third_party/impeccable/skill/reference/spatial-design.md"
+    },
+    {
+      "path": "reference/teach.md",
+      "source": "../third_party/impeccable/skill/reference/teach.md"
+    },
+    {
+      "path": "reference/typeset.md",
+      "source": "../third_party/impeccable/skill/reference/typeset.md"
+    },
+    {
+      "path": "reference/typography.md",
+      "source": "../third_party/impeccable/skill/reference/typography.md"
+    },
+    {
+      "path": "reference/ux-writing.md",
+      "source": "../third_party/impeccable/skill/reference/ux-writing.md"
+    },
+    {
+      "path": "scripts/cleanup-deprecated.mjs",
+      "source": "../third_party/impeccable/skill/scripts/cleanup-deprecated.mjs"
+    },
+    {
+      "path": "scripts/command-metadata.json",
+      "source": "../third_party/impeccable/skill/scripts/command-metadata.json"
+    },
+    {
+      "path": "scripts/design-parser.mjs",
+      "source": "../third_party/impeccable/skill/scripts/design-parser.mjs"
+    },
+    {
+      "path": "scripts/detect-csp.mjs",
+      "source": "../third_party/impeccable/skill/scripts/detect-csp.mjs"
+    },
+    {
+      "path": "scripts/impeccable-paths.mjs",
+      "source": "../third_party/impeccable/skill/scripts/impeccable-paths.mjs"
+    },
+    {
+      "path": "scripts/is-generated.mjs",
+      "source": "../third_party/impeccable/skill/scripts/is-generated.mjs"
+    },
+    {
+      "path": "scripts/live-accept.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-accept.mjs"
+    },
+    {
+      "path": "scripts/live-browser-session.js",
+      "source": "../third_party/impeccable/skill/scripts/live-browser-session.js"
+    },
+    {
+      "path": "scripts/live-browser.js",
+      "source": "../third_party/impeccable/skill/scripts/live-browser.js"
+    },
+    {
+      "path": "scripts/live-complete.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-complete.mjs"
+    },
+    {
+      "path": "scripts/live-completion.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-completion.mjs"
+    },
+    {
+      "path": "scripts/live-inject.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-inject.mjs"
+    },
+    {
+      "path": "scripts/live-poll.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-poll.mjs"
+    },
+    {
+      "path": "scripts/live-resume.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-resume.mjs"
+    },
+    {
+      "path": "scripts/live-server.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-server.mjs"
+    },
+    {
+      "path": "scripts/live-session-store.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-session-store.mjs"
+    },
+    {
+      "path": "scripts/live-status.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-status.mjs"
+    },
+    {
+      "path": "scripts/live-wrap.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live-wrap.mjs"
+    },
+    {
+      "path": "scripts/live.mjs",
+      "source": "../third_party/impeccable/skill/scripts/live.mjs"
+    },
+    {
+      "path": "scripts/load-context.mjs",
+      "source": "../third_party/impeccable/skill/scripts/load-context.mjs"
+    },
+    {
+      "path": "scripts/modern-screenshot.umd.js",
+      "source": "../third_party/impeccable/skill/scripts/modern-screenshot.umd.js"
+    },
+    {
+      "path": "scripts/pin.mjs",
+      "source": "../third_party/impeccable/skill/scripts/pin.mjs"
+    }
+  ]
+}

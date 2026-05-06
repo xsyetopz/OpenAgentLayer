@@ -14,3 +14,11 @@
 	path = third_party/css-modern-features
 	url = https://github.com/rushenn/css-modern-features.git
 	branch = main
+[submodule "third_party/impeccable"]
+	path = third_party/impeccable
+	url = https://github.com/pbakaus/impeccable.git
+	branch = main
+[submodule "third_party/robertmsale-codex"]
+	path = third_party/robertmsale-codex
+	url = https://github.com/robertmsale/.codex.git
+	branch = main

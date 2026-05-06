@@ -8,10 +8,33 @@ test("loadSource loads authored prompt skills", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	const caveman = graph.source.skills.find((skill) => skill.id === "caveman");
 	const taste = graph.source.skills.find((skill) => skill.id === "taste");
+	const impeccable = graph.source.skills.find(
+		(skill) => skill.id === "impeccable",
+	);
+	const designWorker = graph.source.skills.find(
+		(skill) => skill.id === "design-worker",
+	);
 	expect(caveman?.body).toContain("Use compact output");
 	expect(taste?.body).toContain("Improve product UI");
+	expect(impeccable?.body).toContain("IMPECCABLE_PREFLIGHT");
+	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
+		"reference/brand.md",
+	);
+	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
+		"scripts/load-context.mjs",
+	);
+	expect(designWorker?.body).toContain("Design Worker");
+	expect(designWorker?.supportFiles?.map((file) => file.path)).toContain(
+		"references/worker.md",
+	);
 	expect(caveman?.upstream).toBeUndefined();
 	expect(taste?.upstream).toBeUndefined();
+	expect(impeccable?.upstream?.path).toBe(
+		"third_party/impeccable/skill/SKILL.md",
+	);
+	expect(designWorker?.upstream?.path).toBe(
+		"third_party/robertmsale-codex/skills/design-worker/SKILL.md",
+	);
 });
 
 test("loadSource reports provenance for authored records", async () => {

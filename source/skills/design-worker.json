@@ -1,0 +1,24 @@
+{
+  "id": "design-worker",
+  "title": "Design Worker",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Orchestrate or execute screenshot-driven Flutter redesign work where workers generate references, compare rendered UI screenshots, and implement only after visual approval.",
+  "upstream": {
+    "path": "third_party/robertmsale-codex/skills/design-worker/SKILL.md",
+    "verbatim": true
+  },
+  "supportFiles": [
+    {
+      "path": "references/orchestrator.md",
+      "source": "../third_party/robertmsale-codex/skills/design-worker/references/orchestrator.md"
+    },
+    {
+      "path": "references/worker.md",
+      "source": "../third_party/robertmsale-codex/skills/design-worker/references/worker.md"
+    }
+  ]
+}

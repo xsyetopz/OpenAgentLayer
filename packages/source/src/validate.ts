@@ -97,7 +97,7 @@ function isSkillSupportPath(path: string): boolean {
 	const parts = path.split("/");
 	return (
 		parts.length === 2 &&
-		["scripts", "references", "assets"].includes(parts[0] ?? "") &&
+		["scripts", "references", "reference", "assets"].includes(parts[0] ?? "") &&
 		parts.every((part) => part.length > 0 && !part.includes(".."))
 	);
 }

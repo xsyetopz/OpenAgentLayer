@@ -5,6 +5,29 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.5.1-beta.3] - 2026-05-07
+
+### Added
+
+- Added upstream `impeccable` and `design-worker` skill submodules, source records, provider-rendered skill artifacts, CI submodule guards, and design-route integration for Apollo and Aphrodite.
+
+### Changed
+
+- Improved interactive CLI flows by replacing manual profile removal, uninstall cleanup, and optional feature selection with selectable or checkbox prompts where the repo already has bounded choices.
+- Changed optional setup apply output to stream command output in real time, show compact ASCII progress, add readable color to setup phases, and time out stuck optional install commands.
+- Removed hook feedback colors while keeping plain wrapped provider messages, and narrowed secret-guard path handling so regex-scoped Gitleaks rules do not block normal YAML or skill paths without matching content.
+- Changed release metadata from `0.5.1-beta.2` to `0.5.1-beta.3` across package, plugin, marketplace, Homebrew, and source product records.
+
+### Verified
+
+- `rtk proxy -- bunx tsc --noEmit`
+- `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run test`
+- `rtk git -C . diff --check`
+- `rtk git -C . submodule status --recursive`
+
 ## [0.5.1-beta.2] - 2026-05-07
 
 ### Changed

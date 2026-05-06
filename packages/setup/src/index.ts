@@ -108,23 +108,51 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 
 export function renderSetupPlan(plan: SetupPlan): string {
 	const lines = [
-		`OpenAgentLayer setup · ${plan.dryRun ? "dry-run" : "apply"}`,
-		"◇ Provider check",
+		paint(
+			"bold",
+			`OpenAgentLayer setup · ${plan.dryRun ? "dry-run" : "apply"}`,
+		),
+		paint("cyan", "◇ Provider check"),
 		`  providers: ${plan.providers.join(", ") || "none"}`,
 	];
 	for (const skipped of plan.skippedProviders)
-		lines.push(`  ! skip ${skipped.provider}: ${skipped.reason}`);
-	lines.push("◇ Target");
+		lines.push(
+			paint("yellow", `  ! skip ${skipped.provider}: ${skipped.reason}`),
+		);
+	lines.push(paint("cyan", "◇ Target"));
 	lines.push(`  scope: ${plan.scope}`);
 	lines.push(`  home: ${plan.home}`);
 	lines.push(`  target: ${plan.target}`);
 	if (plan.binDir) lines.push(`  bin: ${plan.binDir}`);
-	lines.push("◇ Optional tools");
+	lines.push(paint("cyan", "◇ Optional tools"));
 	lines.push(`  selected: ${plan.optionalTools.join(", ") || "none"}`);
 	for (const phase of plan.phases) {
-		lines.push(`◇ ${phase.action}`);
-		for (const command of phase.commands) lines.push(`  $ ${command}`);
+		lines.push(paint("cyan", `◇ ${phase.action}`));
+		for (const command of phase.commands)
+			lines.push(paint("dim", `  $ ${command}`));
 	}
-	lines.push("└ ✓ Setup plan ready");
+	lines.push(paint("green", "└ ✓ Setup plan ready"));
 	return `${lines.join("\n")}\n`;
+}
+
+function paint(
+	name: "bold" | "cyan" | "dim" | "green" | "yellow",
+	text: string,
+): string {
+	if (!colorEnabled()) return text;
+	const codes = {
+		bold: 1,
+		cyan: 36,
+		dim: 2,
+		green: 32,
+		yellow: 33,
+	} as const;
+	return `\u001b[${codes[name]}m${text}\u001b[0m`;
+}
+
+function colorEnabled(): boolean {
+	if (process.env["NO_COLOR"]) return false;
+	if (process.env["FORCE_COLOR"] && process.env["FORCE_COLOR"] !== "0")
+		return true;
+	return process.stdout.isTTY === true;
 }

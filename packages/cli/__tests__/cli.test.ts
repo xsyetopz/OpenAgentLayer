@@ -11,11 +11,15 @@ import {
 	peerRunPaths,
 	renderPeerSummary,
 } from "../src/commands/codex";
+import { runOptionalSetupCommand } from "../src/commands/setup";
 import {
 	CLAUDE_PLAN_OPTIONS,
 	CODEX_PLAN_OPTIONS,
 	OPENCODE_PLAN_OPTIONS,
+	OPTIONAL_FEATURE_OPTIONS,
+	PROFILE_ACTION_OPTIONS,
 	setupProfileChoices,
+	UNINSTALL_PROVIDER_OPTIONS,
 } from "../src/interactive";
 import { buildSetupArgs } from "../src/workflows";
 
@@ -328,6 +332,73 @@ test("interactive setup asks to use active and saved profiles", () => {
 			},
 		}).map((choice) => choice.value),
 	).toEqual(["manual", "profile:daily", "profile:project"]);
+});
+
+test("interactive profile menu exposes removal", () => {
+	expect(PROFILE_ACTION_OPTIONS.map((option) => option.value)).toEqual([
+		"list",
+		"show",
+		"use",
+		"remove",
+	]);
+});
+
+test("interactive cleanup menus expose multi-selectable choices", () => {
+	expect(UNINSTALL_PROVIDER_OPTIONS.map((option) => option.value)).toEqual([
+		"codex",
+		"claude",
+		"opencode",
+	]);
+	expect(OPTIONAL_FEATURE_OPTIONS.map((option) => option.value)).toEqual([
+		"ctx7",
+		"playwright",
+		"deepwiki",
+		"anthropic-docs",
+		"opencode-docs",
+	]);
+});
+
+test("setup optional commands stream readable progress and time out", async () => {
+	const originalForceColor = process.env["FORCE_COLOR"];
+	process.env["FORCE_COLOR"] = "1";
+	const logs: string[] = [];
+	const writes: string[] = [];
+	const originalLog = console.log;
+	const originalWrite = process.stdout.write;
+	console.log = (message?: unknown) => {
+		logs.push(String(message ?? ""));
+	};
+	process.stdout.write = ((chunk: string | Uint8Array) => {
+		writes.push(String(chunk));
+		return true;
+	}) as typeof process.stdout.write;
+	try {
+		await expect(
+			runOptionalSetupCommand("true", {
+				quiet: false,
+				index: 1,
+				total: 1,
+				timeoutMs: 1000,
+			}),
+		).resolves.toMatchObject({ ok: true, timedOut: false });
+	} finally {
+		console.log = originalLog;
+		process.stdout.write = originalWrite;
+		if (originalForceColor === undefined) delete process.env["FORCE_COLOR"];
+		else process.env["FORCE_COLOR"] = originalForceColor;
+	}
+	expect(logs.join("\n")).toContain("\u001b[36m◇ Optional setup 1/1");
+	expect(logs.join("\n")).toContain("\u001b[32m└ ✓ optional setup completed");
+	expect(writes.join("")).toContain("running optional setup 1/1");
+
+	await expect(
+		runOptionalSetupCommand('node -e "setTimeout(() => {}, 1000)"', {
+			quiet: true,
+			index: 1,
+			total: 1,
+			timeoutMs: 20,
+		}),
+	).resolves.toMatchObject({ ok: false, timedOut: true });
 });
 
 test("state inspect explicit setup args override active profile", async () => {

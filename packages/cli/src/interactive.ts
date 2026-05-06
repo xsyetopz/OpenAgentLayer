@@ -90,6 +90,51 @@ export const OPENCODE_PLAN_OPTIONS = [
 	},
 ];
 
+export const PROFILE_ACTION_OPTIONS = [
+	{ value: "list", label: "List profiles" },
+	{ value: "show", label: "Show active profile" },
+	{ value: "use", label: "Activate profile" },
+	{ value: "remove", label: "Remove profile" },
+] as const;
+
+export const UNINSTALL_PROVIDER_OPTIONS = [
+	{ value: "codex", label: "Codex", hint: "owned Codex artifacts" },
+	{
+		value: "claude",
+		label: "Claude Code",
+		hint: "owned Claude artifacts",
+	},
+	{
+		value: "opencode",
+		label: "OpenCode",
+		hint: "owned OpenCode artifacts",
+	},
+] as const;
+
+export const OPTIONAL_FEATURE_OPTIONS = [
+	{ value: "ctx7", label: "Context7 [CLI]", hint: "current docs lookup" },
+	{
+		value: "playwright",
+		label: "Playwright [CLI]",
+		hint: "browser automation",
+	},
+	{
+		value: "deepwiki",
+		label: "DeepWiki [MCP]",
+		hint: "repository knowledge MCP",
+	},
+	{
+		value: "anthropic-docs",
+		label: "Anthropic Docs [MCP]",
+		hint: "Claude Code and Anthropic docs",
+	},
+	{
+		value: "opencode-docs",
+		label: "OpenCode Docs [MCP]",
+		hint: "OpenCode config, tools, plugin docs",
+	},
+] as const;
+
 export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	if (!process.stdin.isTTY)
 		throw new Error("Interactive mode requires a TTY. Pass a command instead");
@@ -406,19 +451,15 @@ async function interactiveAdvanced(repoRoot: string): Promise<void> {
 }
 
 async function interactiveProfiles(): Promise<void> {
-	const action = await ask<"list" | "show" | "use">(
+	const action = await ask<"list" | "show" | "use" | "remove">(
 		select({
 			message: "Profiles",
-			options: [
-				{ value: "list", label: "List profiles" },
-				{ value: "show", label: "Show active profile" },
-				{ value: "use", label: "Activate profile" },
-			],
+			options: [...PROFILE_ACTION_OPTIONS],
 		}),
 	);
-	if (action === "use") {
-		const name = await profileNamePrompt("Profile name");
-		await runProfilesCommand(["use", name]);
+	if (action === "use" || action === "remove") {
+		const name = await profileNameSelectionPrompt(action);
+		await runProfilesCommand([action, name]);
 		return;
 	}
 	await runProfilesCommand([action]);
@@ -472,12 +513,19 @@ async function interactivePlugins(repoRoot: string): Promise<void> {
 }
 
 async function interactiveUninstall(): Promise<void> {
-	const provider = await providerSinglePrompt();
+	const providers = await ask<ProviderMulti>(
+		multiselect({
+			message: "Providers to remove",
+			required: true,
+			options: [...UNINSTALL_PROVIDER_OPTIONS],
+		}),
+	);
 	const scope = await scopePrompt();
-	const args = ["--provider", provider, "--scope", scope];
-	if (scope === "global") args.push("--home", await globalHomePrompt());
-	else args.push("--target", await targetPrompt());
-	await runUninstallCommand(args);
+	const targetArgs = ["--scope", scope];
+	if (scope === "global") targetArgs.push("--home", await globalHomePrompt());
+	else targetArgs.push("--target", await targetPrompt());
+	for (const provider of providers)
+		await runUninstallCommand(["--provider", provider, ...targetArgs]);
 }
 
 async function interactiveFeatures(): Promise<void> {
@@ -490,19 +538,14 @@ async function interactiveFeatures(): Promise<void> {
 			],
 		}),
 	);
-	const feature = await ask<OptionalTool>(
-		select({
-			message: "Feature",
-			options: [
-				{ value: "ctx7", label: "Context7 [CLI]" },
-				{ value: "playwright", label: "Playwright [CLI]" },
-				{ value: "deepwiki", label: "DeepWiki [MCP]" },
-				{ value: "anthropic-docs", label: "Anthropic Docs [MCP]" },
-				{ value: "opencode-docs", label: "OpenCode Docs [MCP]" },
-			],
+	const features = await ask<OptionalTool[]>(
+		multiselect({
+			message: "Features",
+			required: true,
+			options: [...OPTIONAL_FEATURE_OPTIONS],
 		}),
 	);
-	runFeaturesCommand([`--${action}`, feature]);
+	runFeaturesCommand([`--${action}`, features.join(",")]);
 }
 
 async function confirmApplyPrompt(
@@ -598,6 +641,28 @@ function profileNamePrompt(message: string): Promise<string> {
 	);
 }
 
+async function profileNameSelectionPrompt(
+	action: "use" | "remove",
+): Promise<string> {
+	const config = await loadConfig(configPathFromArgs([]));
+	const names = Object.keys(config.profiles).sort();
+	if (names.length === 0) return profileNamePrompt("Profile name");
+	const activeProfile =
+		config.activeProfile && config.profiles[config.activeProfile]
+			? config.activeProfile
+			: undefined;
+	return ask<string>(
+		select({
+			message: action === "use" ? "Profile to activate" : "Profile to remove",
+			options: names.map((name) => ({
+				value: name,
+				label: activeProfile === name ? `${name} [active]` : name,
+				hint: profileSummary(config.profiles[name]),
+			})),
+		}),
+	);
+}
+
 function codexPlanPrompt(): Promise<string> {
 	return ask<string>(
 		select({
@@ -630,29 +695,7 @@ function optionalToolPrompt(): Promise<OptionalTool[]> {
 		multiselect({
 			message: "Optional tool phases",
 			required: false,
-			options: [
-				{ value: "ctx7", label: "Context7 [CLI]", hint: "current docs lookup" },
-				{
-					value: "playwright",
-					label: "Playwright [CLI]",
-					hint: "browser automation",
-				},
-				{
-					value: "deepwiki",
-					label: "DeepWiki [MCP]",
-					hint: "repository knowledge MCP",
-				},
-				{
-					value: "anthropic-docs",
-					label: "Anthropic Docs [MCP]",
-					hint: "Claude Code and Anthropic docs",
-				},
-				{
-					value: "opencode-docs",
-					label: "OpenCode Docs [MCP]",
-					hint: "OpenCode config, tools, plugin docs",
-				},
-			],
+			options: [...OPTIONAL_FEATURE_OPTIONS],
 		}),
 	);
 }
@@ -706,27 +749,6 @@ function providerPrompt(
 				label: providerLabel(provider),
 				hint: providerHint(provider),
 			})),
-		}),
-	);
-}
-
-function providerSinglePrompt(): Promise<WorkflowProvider> {
-	return ask<WorkflowProvider>(
-		select({
-			message: "Provider to remove",
-			options: [
-				{ value: "codex", label: "Codex", hint: "owned Codex artifacts" },
-				{
-					value: "claude",
-					label: "Claude Code",
-					hint: "owned Claude artifacts",
-				},
-				{
-					value: "opencode",
-					label: "OpenCode",
-					hint: "owned OpenCode artifacts",
-				},
-			],
 		}),
 	);
 }

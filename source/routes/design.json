@@ -8,6 +8,8 @@
   "agent": "apollo",
   "skills": [
     "design",
+    "impeccable",
+    "design-worker",
     "parse"
   ],
   "permissions": "write with guarded shell",

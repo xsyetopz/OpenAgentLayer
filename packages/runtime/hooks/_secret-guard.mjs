@@ -61,6 +61,7 @@ function pathFindings(paths) {
 	for (const path of paths) {
 		for (const rule of GITLEAKS_RULES) {
 			if (!rule.path) continue;
+			if (rule.regex) continue;
 			const pattern = new RegExp(rule.path.source, rule.path.flags);
 			if (pattern.test(path)) findings.push(`${rule.id}:${path}`);
 		}

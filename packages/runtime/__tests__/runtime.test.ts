@@ -4,8 +4,6 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { assertRuntimeHooksExecutable, runtimeHooks } from "../src";
 
-const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
-
 test("runtime hook inventory uses executable mjs scripts", async () => {
 	expect(runtimeHooks.every((hook) => hook.endsWith(".mjs"))).toBe(true);
 	await assertRuntimeHooksExecutable(resolve(import.meta.dir, "../../.."));
@@ -26,11 +24,7 @@ test("Codex PostToolUse secret blocks are handled without hook failure", async (
 	);
 	expect(result.code).toBe(0);
 	expect(result.stdout).toContain('"continue":true');
-	expect(
-		JSON.parse(result.stdout)
-			.systemMessage.replace(ANSI_PATTERN, "")
-			.replace(/\n/g, ""),
-	).toContain(
+	expect(JSON.parse(result.stdout).systemMessage.replace(/\n/g, "")).toContain(
 		"Secret guard paused this output because a configured rule matched possible credentials",
 	);
 	expect(result.stderr).toBe("");
@@ -65,6 +59,21 @@ test("secret guard ignores documented provider identifier values", async () => {
 		decision: "pass",
 		reason: "Secret guard found no credential-shaped matches",
 	});
+});
+
+test("secret guard does not treat regex-scoped yaml paths as secrets", async () => {
+	await expect(
+		runNamedHook("block-secret-files.mjs", {
+			tool_input: {
+				file_path: [".github", "workflows", "ci.yml"].join("/"),
+			},
+		}),
+	).resolves.toMatchObject({ decision: "pass" });
+	await expect(
+		runNamedHook("block-secret-files.mjs", {
+			tool_input: { file_path: [".aws", "credentials"].join("/") },
+		}),
+	).resolves.toMatchObject({ decision: "block" });
 });
 
 function runHook(
@@ -375,7 +384,7 @@ test("RTK hook blocks detached Codex delegation escape forms", async () => {
 	for (const command of [
 		'tmux new-session -d -s some-agent "codex exec --ephemeral hidden work"',
 		'rtk proxy -- tmux new -s some-agent "codex exec --ephemeral hidden work"',
-		'/bin/zsh -lc \'tmux new -s some-agent "codex exec --ephemeral hidden work"\'',
+		"/bin/zsh -lc 'tmux new -s some-agent \"codex exec --ephemeral hidden work\"'",
 		'screen -dmS some-agent codex exec --ephemeral "hidden work"',
 		'nohup codex exec --ephemeral "hidden work" &',
 		'setsid codex exec --ephemeral "hidden work"',
@@ -667,7 +676,7 @@ test("blocking post-tool hooks emit provider output and stderr feedback", async 
 	expect(claude.stderr).toContain("three");
 });
 
-test("hook feedback wraps colored lines before terminal word-wrap", async () => {
+test("hook feedback wraps plain lines before terminal word-wrap", async () => {
 	const command =
 		"rtk proxy -- dotnet test OsuDroid.App.Tests/OsuDroid.App.Tests.csproj --no-restore -nr:false -p:UseSharedCompilation=false -v:minimal";
 	const codex = await runHookRaw(
@@ -684,8 +693,7 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	const codexMessage = JSON.parse(codex.stdout).systemMessage as string;
 	const stderrLines = codexMessage.trim().split("\n");
 	expect(stderrLines.length).toBeGreaterThan(2);
-	expect(stderrLines.every((line) => line.startsWith("\u001b["))).toBe(true);
-	expect(stderrLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
+	expect(codexMessage).not.toContain("\u001b[");
 	expect(codexMessage).toContain("use `rtk dotnet test");
 	expect(codexMessage).toContain("OsuDroid.App.Tests.csproj");
 	expect(codex.stderr).toBe("");
@@ -726,14 +734,9 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	expect(postToolUse.code).toBe(0);
 	const postToolUseMessage = JSON.parse(postToolUse.stdout)
 		.systemMessage as string;
-	const postToolUseLines = postToolUseMessage.trim().split("\n");
-	expect(postToolUseLines.every((line) => line.startsWith("\u001b["))).toBe(
-		true,
-	);
-	expect(postToolUseMessage).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
-	expect(postToolUseMessage).toContain(
-		"\u001b[32m /Library/Developer/Frameworks",
-	);
+	expect(postToolUseMessage).not.toContain("\u001b[");
+	expect(postToolUseMessage).not.toContain("Devel\n   oper");
+	expect(postToolUseMessage).toContain(" /Library/Developer/Frameworks");
 	expect(postToolUse.stderr).toBe("");
 
 	const secretOutput = await runHookRaw(
@@ -746,15 +749,15 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 	);
 	expect(secretOutput.code).toBe(0);
 	const secretMessage = JSON.parse(secretOutput.stdout).systemMessage as string;
-	expect(secretMessage.replace(ANSI_PATTERN, "").replace(/\n/g, "")).toContain(
+	expect(secretMessage.replace(/\n/g, "")).toContain(
 		"Review possible credential match Self.outputModeDefaultsKey from generic-api-key",
 	);
-	expect(secretMessage).not.toContain("generic-api-\u001b[0m\n");
-	expect(secretMessage.replace(ANSI_PATTERN, "")).not.toContain("note:");
+	expect(secretMessage).not.toContain("\u001b[");
+	expect(secretMessage).not.toContain("note:");
 	expect(secretOutput.stderr).toBe("");
 });
 
-test("hook color wrapping keeps one separator when provider UIs flatten lines", async () => {
+test("hook wrapping keeps one separator when provider UIs flatten lines", async () => {
 	const output = await runHookRaw(
 		"block-secret-output.mjs",
 		{
@@ -765,16 +768,12 @@ test("hook color wrapping keeps one separator when provider UIs flatten lines", 
 	);
 	expect(output.code).toBe(0);
 	const outputMessage = JSON.parse(output.stdout).systemMessage as string;
-	const flattened = outputMessage.replace(ANSI_PATTERN, "").replace(/\n/g, "");
+	const flattened = outputMessage.replace(/\n/g, "");
 	expect(flattened).toContain(
 		"Secret guard paused this output because a configured rule matched possible credentials",
 	);
 	expect(flattened).not.toContain("configured  rule");
-	expect(
-		outputMessage
-			.split("\n")
-			.every((line) => line === "" || line.startsWith("\u001b[")),
-	).toBe(true);
+	expect(outputMessage).not.toContain("\u001b[");
 });
 
 test("secret guard blocks nested provider inputs, auth headers, db URLs, and encoded secrets", async () => {

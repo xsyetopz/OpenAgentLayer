@@ -18,6 +18,9 @@ import { runCheckCommand } from "./check";
 import { runDeployCommand } from "./deploy";
 import { runPluginsCommand } from "./plugins";
 
+const INTEGER_PATTERN = /^\d+$/;
+const noop = () => undefined;
+
 export async function runSetupCommand(
 	repoRoot: string,
 	args: string[],
@@ -170,26 +173,229 @@ async function runOptionalSetup(
 ): Promise<void> {
 	if (commands.length === 0) return;
 	if (options.dryRun) return;
-	for (const command of commands) {
-		if (!options.quiet) console.log(`$ ${command}`);
-		const child = Bun.spawn(["sh", "-lc", command], {
-			stdout: "pipe",
-			stderr: "pipe",
+	for (const [index, command] of commands.entries()) {
+		const result = await runOptionalSetupCommand(command, {
+			...options,
+			index: index + 1,
+			total: commands.length,
 		});
-		const [stdout, stderr, code] = await Promise.all([
-			new Response(child.stdout).text(),
-			new Response(child.stderr).text(),
-			child.exited,
-		]);
-		if (code !== 0 && !options.quiet)
-			console.warn(
-				[
-					`! optional setup command failed (${command})`,
-					`  exit: ${code}`,
-					`  stdout: ${stdout.trim() || "empty"}`,
-					`  stderr: ${stderr.trim() || "empty"}`,
-					"  continuing with provider-native setup and system CLI fallbacks",
-				].join("\n"),
-			);
+		if (result.ok) continue;
+		if (!options.quiet) printOptionalSetupFailure(command, result);
 	}
+}
+
+interface OptionalSetupRunOptions {
+	quiet: boolean;
+	index: number;
+	total: number;
+	timeoutMs?: number;
+}
+
+interface OptionalSetupRunResult {
+	ok: boolean;
+	code: number | null;
+	timedOut: boolean;
+	stdout: string;
+	stderr: string;
+}
+
+export async function runOptionalSetupCommand(
+	command: string,
+	options: OptionalSetupRunOptions,
+): Promise<OptionalSetupRunResult> {
+	const timeoutMs = options.timeoutMs ?? optionalSetupTimeoutMs();
+	if (!options.quiet)
+		console.log(
+			color("cyan", `◇ Optional setup ${options.index}/${options.total}`),
+		);
+	if (!options.quiet) console.log(color("dim", `  $ ${command}`));
+	const child = Bun.spawn(["sh", "-lc", command], {
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	const spinner = options.quiet
+		? undefined
+		: startSpinner(`running optional setup ${options.index}/${options.total}`);
+	let stdout = "";
+	let stderr = "";
+	let timedOut = false;
+	const timeout = setTimeout(() => {
+		timedOut = true;
+		spinner?.stop("timed out");
+		terminateProcessTree(child.pid);
+		child.kill();
+	}, timeoutMs);
+	const [, , code] = await Promise.all([
+		streamCommandOutput(child.stdout, {
+			quiet: options.quiet,
+			write: (chunk) => process.stdout.write(chunk),
+			beforeWrite: () => spinner?.clear(),
+			remember: (chunk) => {
+				stdout = tail(`${stdout}${chunk}`);
+			},
+		}),
+		streamCommandOutput(child.stderr, {
+			quiet: options.quiet,
+			write: (chunk) => process.stderr.write(chunk),
+			beforeWrite: () => spinner?.clear(),
+			remember: (chunk) => {
+				stderr = tail(`${stderr}${chunk}`);
+			},
+		}),
+		child.exited,
+	]).finally(() => clearTimeout(timeout));
+	spinner?.finish();
+	if (!options.quiet && code === 0)
+		console.log(color("green", "└ ✓ optional setup completed"));
+	return { ok: code === 0, code, timedOut, stdout, stderr };
+}
+
+async function streamCommandOutput(
+	stream: ReadableStream<Uint8Array> | null,
+	options: {
+		quiet: boolean;
+		write: (chunk: string) => void;
+		beforeWrite: () => void;
+		remember: (chunk: string) => void;
+	},
+): Promise<void> {
+	if (!stream) return;
+	const reader = stream.getReader();
+	const decoder = new TextDecoder();
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		const chunk = decoder.decode(value, { stream: true });
+		options.remember(chunk);
+		if (!options.quiet) {
+			options.beforeWrite();
+			options.write(chunk);
+		}
+	}
+	const final = decoder.decode();
+	if (!final) return;
+	options.remember(final);
+	if (!options.quiet) {
+		options.beforeWrite();
+		options.write(final);
+	}
+}
+
+function printOptionalSetupFailure(
+	command: string,
+	result: OptionalSetupRunResult,
+): void {
+	const lines = [
+		color("yellow", `! optional setup command failed (${command})`),
+		`  exit: ${result.code ?? "unknown"}`,
+		...(result.timedOut ? ["  reason: timed out"] : []),
+		...(result.stdout.trim() ? [`  stdout: ${result.stdout.trim()}`] : []),
+		...(result.stderr.trim() ? [`  stderr: ${result.stderr.trim()}`] : []),
+		"  continuing with provider-native setup and system CLI fallbacks",
+	];
+	console.warn(lines.join("\n"));
+}
+
+function tail(text: string, limit = 4000): string {
+	return text.length <= limit ? text : text.slice(text.length - limit);
+}
+
+function optionalSetupTimeoutMs(): number {
+	const raw = process.env["OAL_SETUP_COMMAND_TIMEOUT_MS"];
+	if (raw && INTEGER_PATTERN.test(raw)) return Number(raw);
+	return 15 * 60 * 1000;
+}
+
+function terminateProcessTree(pid: number | undefined): void {
+	if (!pid) return;
+	const children = spawnSync("pgrep", ["-P", String(pid)], {
+		encoding: "utf8",
+	});
+	for (const childPid of children.stdout
+		.split("\n")
+		.map((line) => Number(line.trim()))
+		.filter((value) => Number.isInteger(value) && value > 0)) {
+		terminateProcessTree(childPid);
+		try {
+			process.kill(childPid, "SIGTERM");
+		} catch {
+			// Best effort: the process may have exited between pgrep and kill.
+		}
+	}
+}
+
+function startSpinner(message: string): {
+	clear: () => void;
+	finish: () => void;
+	stop: (finalMessage: string) => void;
+} {
+	if (!spinnerEnabled()) {
+		console.log(color("dim", `  ${message}...`));
+		return {
+			clear: noop,
+			finish: noop,
+			stop: noop,
+		};
+	}
+	const frames = ["|", "/", "-", "\\"];
+	let index = 0;
+	let active = true;
+	const render = () => {
+		if (!active) return;
+		process.stdout.write(
+			`\r${color("cyan", frames[index % frames.length])} ${message}...`,
+		);
+		index += 1;
+	};
+	const clear = () => {
+		if (!active) return;
+		process.stdout.write("\r\u001b[2K");
+	};
+	render();
+	const timer = setInterval(render, 120);
+	return {
+		clear,
+		finish: () => {
+			if (!active) return;
+			active = false;
+			clearInterval(timer);
+			process.stdout.write("\r\u001b[2K");
+		},
+		stop: (finalMessage: string) => {
+			if (!active) return;
+			active = false;
+			clearInterval(timer);
+			process.stdout.write(
+				`\r\u001b[2K${color("yellow", `! ${finalMessage}`)}\n`,
+			);
+		},
+	};
+}
+
+function spinnerEnabled(): boolean {
+	if (process.env["NO_COLOR"]) return false;
+	if (process.env["FORCE_COLOR"] && process.env["FORCE_COLOR"] !== "0")
+		return true;
+	return process.stdout.isTTY === true;
+}
+
+function color(
+	name: "cyan" | "dim" | "green" | "yellow",
+	text: string,
+): string {
+	if (!colorEnabled()) return text;
+	const codes = {
+		cyan: 36,
+		dim: 2,
+		green: 32,
+		yellow: 33,
+	} as const;
+	return `\u001b[${codes[name]}m${text}\u001b[0m`;
+}
+
+function colorEnabled(): boolean {
+	if (process.env["NO_COLOR"]) return false;
+	if (process.env["FORCE_COLOR"] && process.env["FORCE_COLOR"] !== "0")
+		return true;
+	return process.stdout.isTTY === true;
 }
