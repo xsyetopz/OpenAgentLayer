@@ -28,6 +28,7 @@ import {
 	type OalProfile,
 	PROFILE_NAME_PATTERN,
 	saveConfig,
+	setupArgsForProfile,
 } from "./config-state";
 import { printDetail, printHeader, printStep, printWarning } from "./output";
 import { installableProviders } from "./provider-binaries";
@@ -50,6 +51,44 @@ type AdvancedAction =
 	| "uninstall"
 	| "check";
 type ProviderMulti = WorkflowProvider[];
+type SetupIntent = "setup" | "repair";
+type SetupProfileChoice =
+	| { value: "manual"; label: string; hint: string }
+	| { value: string; label: string; hint: string; name: string };
+
+export const CODEX_PLAN_OPTIONS = [
+	{ value: "plus", label: "Plus", hint: "low lead, medium code" },
+	{ value: "pro-5", label: "Pro 5x", hint: "medium lead, high code" },
+	{ value: "pro-20", label: "Pro 20x", hint: "high lead, high code" },
+];
+
+export const CLAUDE_PLAN_OPTIONS = [
+	{ value: "max-5", label: "Max 5x", hint: "Opus/Sonnet/Haiku routing" },
+	{ value: "max-20", label: "Max 20x", hint: "more Sonnet worker routes" },
+	{
+		value: "max-20-long",
+		label: "Max 20x + 1M Opus",
+		hint: "1M Opus for lead/review",
+	},
+];
+
+export const OPENCODE_PLAN_OPTIONS = [
+	{
+		value: "opencode-free",
+		label: "Free fallback",
+		hint: "OpenCode free models only",
+	},
+	{
+		value: "opencode-auto",
+		label: "Auto",
+		hint: "detected auth models, free fallback",
+	},
+	{
+		value: "opencode-auth",
+		label: "Require auth",
+		hint: "require auth model detection",
+	},
+];
 
 export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	if (!process.stdin.isTTY)
@@ -80,8 +119,8 @@ function workflowPrompt(): Promise<InteractiveAction> {
 			options: [
 				{
 					value: "setup",
-					label: "Set up / update OAL",
-					hint: "preflight, optional tools, deploy, plugins, check",
+					label: "Review / apply setup",
+					hint: "profile, current state, optional tools, deploy",
 				},
 				{
 					value: "inspect",
@@ -90,8 +129,8 @@ function workflowPrompt(): Promise<InteractiveAction> {
 				},
 				{
 					value: "repair",
-					label: "Repair installed OAL",
-					hint: "rerun setup against selected providers",
+					label: "Repair existing OAL",
+					hint: "preview state, then reapply selected providers",
 				},
 				{
 					value: "remove",
@@ -110,8 +149,32 @@ function workflowPrompt(): Promise<InteractiveAction> {
 
 async function interactiveSetup(
 	repoRoot: string,
-	intent: "setup" | "repair",
+	intent: SetupIntent,
 ): Promise<void> {
+	const savedProfile = await savedProfilePrompt();
+	if (savedProfile) {
+		const verbose = await ask<boolean>(
+			confirm({
+				message: "Show detailed command output?",
+				initialValue: savedProfile.profile.verbose ?? false,
+			}),
+		);
+		const selection = selectionFromProfile(savedProfile.profile, intent);
+		const baseArgs = setupArgsForProfile(savedProfile.profile, [
+			...(verbose ? ["--verbose"] : []),
+		]);
+		await printSetupStatePreview(repoRoot, baseArgs);
+		const dryRun = await confirmApplyPrompt(selection, savedProfile.name);
+		await runSetupCommand(
+			repoRoot,
+			setupArgsForProfile(savedProfile.profile, [
+				...(dryRun ? ["--dry-run"] : []),
+				...(verbose ? ["--verbose"] : []),
+			]),
+		);
+		log.success(dryRun ? "Setup dry-run complete." : "Setup applied.");
+		return;
+	}
 	const providers = await availableProviderPrompt();
 	const scope = await scopePrompt();
 	const home = scope === "global" ? await globalHomePrompt() : undefined;
@@ -153,6 +216,11 @@ async function interactiveSetup(
 		optionalTools,
 		intent,
 	};
+	const baseArgs = buildSetupArgs({
+		...workflowSelection,
+		verbose,
+	});
+	await printSetupStatePreview(repoRoot, baseArgs);
 	await maybeSaveProfile(workflowSelection);
 	const dryRun = await confirmApplyPrompt(workflowSelection);
 	await runSetupCommand(
@@ -164,6 +232,88 @@ async function interactiveSetup(
 		}),
 	);
 	log.success(dryRun ? "Setup dry-run complete." : "Setup applied.");
+}
+
+async function savedProfilePrompt(): Promise<
+	{ name: string; profile: OalProfile } | undefined
+> {
+	const configPath = configPathFromArgs([]);
+	const config = await loadConfig(configPath);
+	const choices = setupProfileChoices(config);
+	printHeader("Profile config");
+	printDetail("path", configPath);
+	printDetail("profiles", Object.keys(config.profiles).length.toString());
+	if (choices.length === 1) return undefined;
+	const choice = await ask<string>(
+		select({
+			message: "Setup profile",
+			options: choices,
+		}),
+	);
+	if (choice === "manual") return undefined;
+	const name = choice.slice("profile:".length);
+	const profile = config.profiles[name];
+	if (!profile)
+		throw new Error(`Profile \`${name}\` is available to save first`);
+	return { name, profile };
+}
+
+export function setupProfileChoices(config: {
+	activeProfile?: string;
+	profiles: Record<string, OalProfile>;
+}): SetupProfileChoice[] {
+	const names = Object.keys(config.profiles).sort();
+	const choices: SetupProfileChoice[] = [
+		{
+			value: "manual",
+			label: "Create or update setup",
+			hint: "choose providers, plans, tools, and target",
+		},
+	];
+	if (config.activeProfile && config.profiles[config.activeProfile]) {
+		choices.push({
+			value: `profile:${config.activeProfile}`,
+			label: `Use active profile: ${config.activeProfile}`,
+			hint: profileSummary(config.profiles[config.activeProfile]),
+			name: config.activeProfile,
+		});
+	}
+	for (const name of names) {
+		if (name === config.activeProfile) continue;
+		choices.push({
+			value: `profile:${name}`,
+			label: `Use saved profile: ${name}`,
+			hint: profileSummary(config.profiles[name]),
+			name,
+		});
+	}
+	return choices;
+}
+
+function selectionFromProfile(profile: OalProfile, intent: SetupIntent) {
+	return {
+		...profile,
+		rtk: profile.rtk ?? false,
+		toolchain: profile.toolchain ?? false,
+		optionalTools: profile.optionalTools ?? [],
+		intent,
+	};
+}
+
+function profileSummary(profile: OalProfile): string {
+	const target =
+		profile.scope === "global"
+			? `home ${profile.home ?? homedir()}`
+			: `target ${profile.target ?? process.cwd()}`;
+	return `${providerSetArg(profile.providers)} ${profile.scope}, ${target}`;
+}
+
+async function printSetupStatePreview(
+	repoRoot: string,
+	args: string[],
+): Promise<void> {
+	printHeader("Current install state", "before apply");
+	await runStateCommand(repoRoot, ["inspect", ...args]);
 }
 
 async function interactiveInspect(repoRoot: string): Promise<void> {
@@ -355,21 +505,25 @@ async function interactiveFeatures(): Promise<void> {
 	runFeaturesCommand([`--${action}`, feature]);
 }
 
-async function confirmApplyPrompt(selection: {
-	providers: Provider[];
-	scope: WorkflowScope;
-	home?: string;
-	target?: string;
-	codexPlan?: string;
-	claudePlan?: string;
-	opencodePlan?: string;
-	cavemanMode?: string;
-	rtk: boolean;
-	toolchain: boolean;
-	optionalTools: OptionalTool[];
-	intent: "setup" | "repair";
-}): Promise<boolean> {
+async function confirmApplyPrompt(
+	selection: {
+		providers: Provider[];
+		scope: WorkflowScope;
+		home?: string;
+		target?: string;
+		codexPlan?: string;
+		claudePlan?: string;
+		opencodePlan?: string;
+		cavemanMode?: string;
+		rtk: boolean;
+		toolchain: boolean;
+		optionalTools: OptionalTool[];
+		intent: SetupIntent;
+	},
+	profileName?: string,
+): Promise<boolean> {
 	printHeader("OpenAgentLayer workflow", selection.intent);
+	if (profileName) printDetail("profile", profileName);
 	printStep("Selected providers");
 	printDetail("providers", providerSetArg(selection.providers));
 	printStep("Target");
@@ -448,15 +602,7 @@ function codexPlanPrompt(): Promise<string> {
 	return ask<string>(
 		select({
 			message: "ChatGPT/Codex subscription",
-			options: [
-				{ value: "pro-5", label: "Pro 5x", hint: "medium lead, high code" },
-				{
-					value: "pro-20",
-					label: "Pro 20x",
-					hint: "high lead, high code",
-				},
-				{ value: "plus", label: "Plus", hint: "low lead, medium code" },
-			],
+			options: CODEX_PLAN_OPTIONS,
 		}),
 	);
 }
@@ -465,19 +611,7 @@ function claudePlanPrompt(): Promise<string> {
 	return ask<string>(
 		select({
 			message: "Claude subscription",
-			options: [
-				{ value: "max-5", label: "Max 5x", hint: "Opus/Sonnet/Haiku routing" },
-				{
-					value: "max-20",
-					label: "Max 20x",
-					hint: "more Sonnet worker routes",
-				},
-				{
-					value: "max-20-long",
-					label: "Max 20x long",
-					hint: "1M Opus for lead/review",
-				},
-			],
+			options: CLAUDE_PLAN_OPTIONS,
 		}),
 	);
 }
@@ -486,23 +620,7 @@ function opencodePlanPrompt(): Promise<string> {
 	return ask<string>(
 		select({
 			message: "OpenCode model mode",
-			options: [
-				{
-					value: "opencode-auto",
-					label: "Auto",
-					hint: "detected auth models, free fallback",
-				},
-				{
-					value: "opencode-free",
-					label: "Free fallback",
-					hint: "OpenCode free models only",
-				},
-				{
-					value: "opencode-auth",
-					label: "Require auth",
-					hint: "require auth model detection",
-				},
-			],
+			options: OPENCODE_PLAN_OPTIONS,
 		}),
 	);
 }

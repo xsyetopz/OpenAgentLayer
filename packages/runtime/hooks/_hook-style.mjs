@@ -2,7 +2,7 @@ const COLORS = {
 	fatal: "\x1b[35m",
 	error: "\x1b[31m",
 	warn: "\x1b[33m",
-	note: "\x1b[36m",
+	info: "\x1b[36m",
 	fix: "\x1b[32m",
 	reset: "\x1b[0m",
 };
@@ -19,7 +19,7 @@ function colorEnabled() {
 
 export function styleHookMessage(level, text) {
 	if (!(colorEnabled() && text)) return text;
-	const color = COLORS[level] ?? COLORS.note;
+	const color = COLORS[level] ?? COLORS.info;
 	return wrapHookText(String(text))
 		.map((line) => `${color}${line}${COLORS.reset}`)
 		.join("\n");

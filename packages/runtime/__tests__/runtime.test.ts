@@ -11,6 +11,62 @@ test("runtime hook inventory uses executable mjs scripts", async () => {
 	await assertRuntimeHooksExecutable(resolve(import.meta.dir, "../../.."));
 });
 
+test("Codex PostToolUse secret blocks are handled without hook failure", async () => {
+	const fakeToken = `ghp_${"123456789012345678901234567890123456"}`;
+	const result = await runHookRaw(
+		"block-secret-output.mjs",
+		{
+			hook_event_name: "PostToolUse",
+			provider: "codex",
+			tool_response: {
+				output: `token = "${fakeToken}"`,
+			},
+		},
+		{},
+	);
+	expect(result.code).toBe(0);
+	expect(result.stdout).toContain('"continue":true');
+	expect(
+		JSON.parse(result.stdout)
+			.systemMessage.replace(ANSI_PATTERN, "")
+			.replace(/\n/g, ""),
+	).toContain(
+		"Secret guard paused this output because a configured rule matched possible credentials",
+	);
+	expect(result.stderr).toBe("");
+});
+
+test("Codex hook malformed input reports without hook failure", async () => {
+	const result = await runHookText("block-secret-output.mjs", "{", {
+		OAL_HOOK_PROVIDER: "codex",
+		OAL_HOOK_EVENT: "PostToolUse",
+	});
+	expect(result.code).toBe(0);
+	expect(result.stdout).toContain("Hook input needs valid JSON");
+	expect(result.stderr).toBe("");
+});
+
+test("Codex hooks drain large piped stdin without broken pipe", async () => {
+	const result = await runLargePipedHook("block-secret-output.mjs");
+	expect(result.code).toBe(0);
+	expect(result.stdout).toBe("");
+	expect(result.stderr).toBe("");
+});
+
+test("secret guard ignores documented provider identifier values", async () => {
+	const result = await runNamedHook("block-secret-output.mjs", {
+		output: [
+			`config key = "market${"place"}"`,
+			'config key = "multi_agent_v2"',
+			'config key = "enable_fanout"',
+		].join("\n"),
+	});
+	expect(result).toMatchObject({
+		decision: "pass",
+		reason: "Secret guard found no credential-shaped matches",
+	});
+});
+
 function runHook(
 	input: unknown,
 ): Promise<{ decision?: string; details?: string[] }> {
@@ -27,9 +83,43 @@ async function runNamedHook(
 	return JSON.parse(result.stdout);
 }
 
-async function runHookRaw(
+function runHookRaw(
 	hookName: string,
 	input: unknown,
+	env: Record<string, string> = {},
+): Promise<{ code: number; stdout: string; stderr: string }> {
+	return runHookText(hookName, JSON.stringify(input), env);
+}
+
+async function runLargePipedHook(
+	hookName: string,
+): Promise<{ code: number; stdout: string; stderr: string }> {
+	const hookPath = resolve(import.meta.dir, "../hooks", hookName);
+	const command = [
+		"node",
+		"-e",
+		JSON.stringify(
+			`process.stdout.write(JSON.stringify({hook_event_name:"PostToolUse",provider:"codex",tool_response:{output:("market"+"place ").repeat(200000)}}))`,
+		),
+		"|",
+		"OAL_HOOK_PROVIDER=codex",
+		"OAL_HOOK_EVENT=PostToolUse",
+		"node",
+		JSON.stringify(hookPath),
+	].join(" ");
+	const proc = Bun.spawn(["sh", "-lc", command], {
+		stdout: "pipe",
+		stderr: "pipe",
+	});
+	const stdout = await new Response(proc.stdout).text();
+	const stderr = await new Response(proc.stderr).text();
+	const code = await proc.exited;
+	return { code, stdout, stderr };
+}
+
+async function runHookText(
+	hookName: string,
+	input: string,
 	env: Record<string, string> = {},
 ): Promise<{ code: number; stdout: string; stderr: string }> {
 	const hookPath = resolve(import.meta.dir, "../hooks", hookName);
@@ -39,7 +129,7 @@ async function runHookRaw(
 		stdout: "pipe",
 		stderr: "pipe",
 	});
-	proc.stdin.write(JSON.stringify(input));
+	proc.stdin.write(input);
 	proc.stdin.end();
 	const stdout = await new Response(proc.stdout).text();
 	const stderr = await new Response(proc.stderr).text();
@@ -269,7 +359,8 @@ test("RTK hook routes Codex delegation to OAL-managed Codex commands", async () 
 	]) {
 		await expect(runHook({ command })).resolves.toMatchObject({
 			decision: "block",
-			reason: "Use OAL-managed Codex delegation for delegated Codex work",
+			reason:
+				"Codex delegation should use the managed OAL path so agent runs stay visible and auditable",
 			details: [
 				"Use: oal codex agent <agent> <task>",
 				"Use: oal codex route <route> <task>",
@@ -278,6 +369,32 @@ test("RTK hook routes Codex delegation to OAL-managed Codex commands", async () 
 			],
 		});
 	}
+});
+
+test("RTK hook allows Codex exec help probes", async () => {
+	await expect(
+		runHook({ command: "codex exec --help" }),
+	).resolves.toMatchObject({
+		decision: "warn",
+		reason: "RTK proxy handles this command when output may be noisy",
+	});
+	await expect(
+		runHook({ command: "rtk proxy -- codex exec --help" }),
+	).resolves.toMatchObject({
+		decision: "pass",
+	});
+});
+
+test("Codex PreToolUse block feedback avoids note prefixes", async () => {
+	const result = await runHookRaw("enforce-rtk-commands.mjs", {
+		hook_event_name: "PreToolUse",
+		command: "cat package.json",
+	});
+	const parsed = JSON.parse(result.stdout);
+	const reason = parsed.hookSpecificOutput.permissionDecisionReason as string;
+	expect(reason).toContain("RTK command form is available");
+	expect(reason).toContain("use `rtk read package.json`");
+	expect(reason).not.toContain("note:");
 });
 
 test("RTK hook ignores patch and edit payload text that is not a shell command", async () => {
@@ -414,9 +531,12 @@ test("session scope hook injects consent boundary at session start", async () =>
 			expect.stringContaining("need explicit user request"),
 			expect.stringContaining("bounded python3 rewrites"),
 			expect.stringContaining("Delegation rule"),
-			expect.stringContaining("stay solo only for narrow single-owner edits"),
+			expect.stringContaining(
+				"narrow single-owner edits begin with a recorded solo ownership reason",
+			),
 			expect.stringContaining("Agent use"),
-			expect.stringContaining("oal codex agent <agent> <task>"),
+			expect.stringContaining("spawn rendered OAL custom agents by name"),
+			expect.stringContaining("Native subagent launch is the Codex path"),
 			expect.stringContaining("oal codex peer batch <task>"),
 			expect.stringContaining("ask when blocked"),
 			expect.stringContaining("STATUS BLOCKED"),
@@ -481,14 +601,12 @@ test("blocking post-tool hooks emit provider output and stderr feedback", async 
 		threshold: 3,
 	};
 	const codex = await runHookRaw("block-repeated-failures.mjs", input);
-	expect(codex.code).toBe(2);
+	expect(codex.code).toBe(0);
 	expect(JSON.parse(codex.stdout)).toMatchObject({
 		continue: true,
 		systemMessage: expect.stringContaining("Repeated symptom circuit opened"),
 	});
-	expect(codex.stderr).toContain("Repeated symptom circuit opened");
-	expect(codex.stderr).toContain("\u001b[35m");
-	expect(codex.stderr).toContain("one");
+	expect(codex.stderr).toBe("");
 
 	const claude = await runHookRaw(
 		"block-repeated-failures.mjs",
@@ -524,13 +642,15 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 		},
 		{ OAL_HOOK_WRAP_COLUMNS: "48" },
 	);
-	expect(codex.code).toBe(2);
-	const stderrLines = codex.stderr.trim().split("\n");
+	expect(codex.code).toBe(0);
+	const codexMessage = JSON.parse(codex.stdout).systemMessage as string;
+	const stderrLines = codexMessage.trim().split("\n");
 	expect(stderrLines.length).toBeGreaterThan(2);
 	expect(stderrLines.every((line) => line.startsWith("\u001b["))).toBe(true);
 	expect(stderrLines.every((line) => line.endsWith("\u001b[0m"))).toBe(true);
-	expect(codex.stderr).toContain("use `rtk dotnet test");
-	expect(codex.stderr).toContain("OsuDroid.App.Tests.csproj");
+	expect(codexMessage).toContain("use `rtk dotnet test");
+	expect(codexMessage).toContain("OsuDroid.App.Tests.csproj");
+	expect(codex.stderr).toBe("");
 
 	const preToolUse = await runHookRaw(
 		"enforce-rtk-commands.mjs",
@@ -565,15 +685,18 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 		},
 		{ COLUMNS: "80" },
 	);
-	expect(postToolUse.code).toBe(2);
-	const postToolUseLines = postToolUse.stderr.trim().split("\n");
+	expect(postToolUse.code).toBe(0);
+	const postToolUseMessage = JSON.parse(postToolUse.stdout)
+		.systemMessage as string;
+	const postToolUseLines = postToolUseMessage.trim().split("\n");
 	expect(postToolUseLines.every((line) => line.startsWith("\u001b["))).toBe(
 		true,
 	);
-	expect(postToolUse.stderr).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
-	expect(postToolUse.stderr).toContain(
+	expect(postToolUseMessage).not.toContain("Devel\u001b[0m\n\u001b[32m   oper");
+	expect(postToolUseMessage).toContain(
 		"\u001b[32m /Library/Developer/Frameworks",
 	);
+	expect(postToolUse.stderr).toBe("");
 
 	const secretOutput = await runHookRaw(
 		"block-secret-output.mjs",
@@ -583,12 +706,14 @@ test("hook feedback wraps colored lines before terminal word-wrap", async () => 
 		},
 		{ COLUMNS: "80" },
 	);
-	expect(secretOutput.code).toBe(2);
-	expect(secretOutput.stderr).toContain("\u001b[36m generic-api-key:\u001b[0m");
-	expect(secretOutput.stderr).toContain(
-		"\u001b[36m Self.outputModeDefaultsKey\u001b[0m",
+	expect(secretOutput.code).toBe(0);
+	const secretMessage = JSON.parse(secretOutput.stdout).systemMessage as string;
+	expect(secretMessage.replace(ANSI_PATTERN, "").replace(/\n/g, "")).toContain(
+		"Review possible credential match Self.outputModeDefaultsKey from generic-api-key",
 	);
-	expect(secretOutput.stderr).not.toContain("generic-api-\u001b[0m\n");
+	expect(secretMessage).not.toContain("generic-api-\u001b[0m\n");
+	expect(secretMessage.replace(ANSI_PATTERN, "")).not.toContain("note:");
+	expect(secretOutput.stderr).toBe("");
 });
 
 test("hook color wrapping keeps one separator when provider UIs flatten lines", async () => {
@@ -600,12 +725,15 @@ test("hook color wrapping keeps one separator when provider UIs flatten lines", 
 		},
 		{ OAL_HOOK_WRAP_COLUMNS: "40" },
 	);
-	expect(output.code).toBe(2);
-	const flattened = output.stderr.replace(ANSI_PATTERN, "").replace(/\n/g, "");
-	expect(flattened).toContain("Potential secret detected by Gitleaks rules");
-	expect(flattened).not.toContain("Gitleaks  rules");
+	expect(output.code).toBe(0);
+	const outputMessage = JSON.parse(output.stdout).systemMessage as string;
+	const flattened = outputMessage.replace(ANSI_PATTERN, "").replace(/\n/g, "");
+	expect(flattened).toContain(
+		"Secret guard paused this output because a configured rule matched possible credentials",
+	);
+	expect(flattened).not.toContain("configured  rule");
 	expect(
-		output.stderr
+		outputMessage
 			.split("\n")
 			.every((line) => line === "" || line.startsWith("\u001b[")),
 	).toBe(true);
@@ -649,6 +777,19 @@ test("secret guard blocks nested provider inputs, auth headers, db URLs, and enc
 				`  KUBE_CONFIG: ${"$"}{{ secrets.KUBE_CONFIG }}`,
 				`  APP_STORE_KEY: ${"$"}{{secrets.APP_STORE_CONNECT_API_KEY}}`,
 			].join("\n"),
+		}),
+	).resolves.toMatchObject({ decision: "pass" });
+	const featureFalsePositives = [
+		"unified_exec",
+		"enable_fanout",
+		"multi_agent",
+		"multi_agent_v2",
+	]
+		.map((feature) => `{ key: "${feature}", enabled: true },`)
+		.join("\n");
+	await expect(
+		runNamedHook("block-secret-files.mjs", {
+			output: featureFalsePositives,
 		}),
 	).resolves.toMatchObject({ decision: "pass" });
 });

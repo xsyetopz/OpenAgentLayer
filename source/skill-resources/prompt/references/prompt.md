@@ -10,10 +10,10 @@ Good operational prompts define:
 - output contract
 - high-risk shortcuts as named blocker signals
 
-Use affirmative target states and mechanical gates. For current-state cleanup, say what the artifact should become and how the final diff is checked.
+Use affirmative target states and balanced mechanical gates: enough structure to route work, short enough to preserve task context. For current-state cleanup, say what the artifact should become and how the final diff is checked.
 
 Corrections and examples are evidence for the requested result. They approve only the requested result; compatibility aliases, parser fallbacks, extra behavior, guardrails, adjacent cleanup, and docs enter scope when the user says them out loud or controlling source requires them.
 
 For edits, prefer `apply_patch` for focused manual changes. Use bounded `python3` rewrites for broad mechanical changes when many patch hunks would be fragile; constrain paths first and inspect the final diff.
 
-For broad implementation prompts, include a delegation check. Use subagents or an orchestration route when work can split by owner, provider, package, test tier, or investigation path. Solo work is for narrow single-owner edits or blocked subagent launch, with the reason recorded before editing.
+For broad implementation prompts, include a delegation check. Use subagents or an orchestration route when work can split by owner, provider, package, test tier, or investigation path. Narrow single-owner edits begin with a recorded solo ownership reason.

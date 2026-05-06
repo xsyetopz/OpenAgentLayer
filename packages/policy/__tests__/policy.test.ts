@@ -10,16 +10,15 @@ test("policy rejects forbidden Codex models", async () => {
 	const candidate = structuredClone(graph);
 	const firstAgent = candidate.source.agents[0];
 	if (!firstAgent) throw new Error("Source has no agents");
-	for (const model of [
-		["gpt", "5", "2"].join("-"),
-		`${["gpt", "5", "3", "codex"].join("-")}-spark`,
-	]) {
+	for (const model of [`${["gpt", "5", "3", "codex"].join("-")}-spark`]) {
 		firstAgent.models.codex = model;
 		const report = validateSourceGraph(candidate);
 		expect(
 			report.issues.some((issue) => issue.code === "model-allowlist"),
 		).toBe(true);
 	}
+	firstAgent.models.codex = "gpt-5.2";
+	expect(validateSourceGraph(candidate).issues).toEqual([]);
 });
 
 test("policy rejects stale Claude Opus models", async () => {

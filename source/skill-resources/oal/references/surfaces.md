@@ -22,7 +22,7 @@ Artifact outputs:
 Agent use:
 
 - Prefer provider-native subagent or agent launch when the active provider exposes it.
-- Codex CLI sessions can use OAL-managed delegation commands: `oal codex agent <agent> <task>`, `oal codex route <route> <task>`, or `oal codex peer batch <task>`.
+- Codex CLI sessions with the native subagent surface enabled spawn rendered OAL custom agents by name and wait for their results. Use `oal codex peer batch <task>` for explicit top-level peer-thread automation requests.
 - `oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/` handoff directory with orchestrator, validate, worker, and review passes.
 
 Source-to-artifact chain must be complete for new behavior: source record, renderer, deploy ownership, acceptance check.

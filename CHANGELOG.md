@@ -5,10 +5,14 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.3.0-beta.6] - 2026-05-05
+## [0.4.0-beta.1] - 2026-05-06
 
 ### Added
 
+- Added Codex `multi_agent_v2` rendering with native `.codex/agents/` custom-agent loading and explicit `multi_agent` disablement so both subagent systems are not enabled together.
+- Added Codex native subagent launch support through `oal codex peer` helpers that start visible Codex profiles with `multi_agent_v2`, wait for evidence, and summarize peer runs.
+- Added interactive setup profile selection at the start of the setup flow so active and saved profiles can be applied directly.
+- Added pre-apply install-state previews to interactive setup through `oal state inspect`, including provider availability, deploy write/update/skip counts, optional feature command counts, and global CLI binary action/path readiness.
 - Added Claude provider-native tool rendering for OAL agents so delegation-capable agents receive Claude `Task` access and generic OAL tool names render as Claude tools.
 - Added Codex provider guidance for native subagent workflows through generated `.codex/agents/` and explicit focused-agent spawning, without implying an OAL shell launcher.
 - Added command-policy guidance that routes `codex exec` delegation attempts back to native Codex subagent workflow unless explicit automation is requested.
@@ -28,6 +32,12 @@ material only and is not part of the OAL release line.
 
 ### Changed
 
+- Reworked interactive setup workflow labels and ordering around review/apply versus repair so the user sees current state before deciding whether to write changes.
+- Ordered subscription prompts from lowest to highest tier for Codex, Claude, and OpenCode, and clarified the Claude long-context plan as `Max 20x + 1M Opus`.
+- Changed `oal state inspect` so explicit setup flags override the active saved profile and `--optional` is included in state previews.
+- Reframed agentic delegation prompts around affirmative task split, child launch, evidence merge, and final decision gates while keeping prompt guidance balanced instead of oversized.
+- Hardened Codex hooks so secret-guard matches and large/malformed hook payloads report cleanly without broken-pipe post-tool failures.
+- Updated model policy for current Codex and OpenCode routing, including `gpt-5.5` and `gpt-5.4-mini` plan support with forbidden OpenCode model filtering.
 - Added delegation discipline to product prompt contracts, implementation routes, orchestration prompts, and SessionStart receipts so broad implementation work starts by splitting owned subagent tasks when the work spans providers, packages, test tiers, or independent investigation paths.
 - Fixed shared command extraction so destructive-command and unsafe-git hooks ignore patch/edit payload text unless it arrives through an explicit command field or shell-like tool payload.
 - Changed Codex SessionStart scope receipts to emit one plain-text hook context without a duplicate warning or ANSI styling inside model context.

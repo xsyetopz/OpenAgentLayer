@@ -7,6 +7,31 @@ const GITHUB_ACTIONS_SECRET_REF_PATTERN =
 	/\$\{\{\s*secrets\.[A-Za-z_][A-Za-z0-9_]*\s*\}\}/g;
 const MIN_DECODED_LENGTH = 12;
 const MAX_DECODE_DEPTH = 2;
+const NON_SECRET_IDENTIFIER_VALUES = new Set([
+	"apps",
+	"codex_git_commit",
+	"codex_hooks",
+	"collaboration_modes",
+	"enable_fanout",
+	"fast_mode",
+	"goals",
+	"hooks",
+	"js_repl",
+	"marketplace",
+	"memories",
+	"multi_agent",
+	"multi_agent_v2",
+	"plugins",
+	"responses_websockets",
+	"responses_websockets_v2",
+	"shell_snapshot",
+	"shell_zsh_fork",
+	"sqlite",
+	"steer",
+	"tui_app_server",
+	"undo",
+	"unified_exec",
+]);
 
 function structuredObjects(payload) {
 	const objects = [asObject(payload)];
@@ -101,6 +126,29 @@ function redact(value) {
 	return `${value.slice(0, 80)}${value.length > 80 ? "…" : ""}`;
 }
 
+function findingRule(finding) {
+	return finding.slice(0, finding.indexOf(":"));
+}
+
+function findingValue(finding) {
+	return finding.slice(finding.indexOf(":") + 1);
+}
+
+function isKnownNonSecretFinding(finding) {
+	return (
+		findingRule(finding) === "generic-api-key" &&
+		NON_SECRET_IDENTIFIER_VALUES.has(findingValue(finding))
+	);
+}
+
+function describeFinding(finding) {
+	const rule = findingRule(finding);
+	const value = findingValue(finding);
+	if (!(rule && value))
+		return `Review possible credential match ${redact(finding)}`;
+	return `Review possible credential match ${redact(value)} from ${rule}`;
+}
+
 export function evaluateSecretGuard(payload) {
 	if (payload.allowSecretAccess === true) {
 		return {
@@ -112,17 +160,18 @@ export function evaluateSecretGuard(payload) {
 	const findings = uniqueValues([
 		...pathFindings(extractPaths(payload)),
 		...textFindings(textCorpus(payload)),
-	]);
+	]).filter((finding) => !isKnownNonSecretFinding(finding));
 	if (findings.length > 0) {
 		return {
 			decision: "block",
-			reason: "Potential secret detected by Gitleaks rules",
-			details: findings.map(redact),
+			reason:
+				"Secret guard paused this output because a configured rule matched possible credentials",
+			details: findings.map(describeFinding),
 		};
 	}
 
 	return {
 		decision: "pass",
-		reason: "Gitleaks secret rules found no match",
+		reason: "Secret guard found no credential-shaped matches",
 	};
 }

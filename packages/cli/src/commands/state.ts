@@ -2,11 +2,17 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { renderProvider } from "@openagentlayer/adapter";
-import { planDeploy } from "@openagentlayer/deploy";
+import {
+	pathContains,
+	planBinInstall,
+	planDeploy,
+	refineBinPlan,
+} from "@openagentlayer/deploy";
 import type { Provider } from "@openagentlayer/source";
 import { optionalFeatureCommands } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
 import {
+	buildProfileFromArgs,
 	loadProfileSelection,
 	type OalProfile,
 	setupArgsForProfile,
@@ -32,6 +38,12 @@ interface StateReport {
 		installCommands: number;
 		removeCommands: number;
 	};
+	binary?: {
+		path: string;
+		action: string;
+		reason: string;
+		pathReady: boolean;
+	};
 	setupArgs: string[];
 }
 
@@ -45,10 +57,17 @@ export async function runStateCommand(
 		throw new Error(`State action \`${action}\` uses inspect`);
 	const selection = await loadProfileSelection(rest);
 	const stateArgs = rest.filter((arg) => arg !== "--json");
-	const profile = selection.profile ?? profileFromArgs(stateArgs);
-	const setupArgs = selection.profile
-		? setupArgsForProfile(selection.profile, stateArgs)
-		: setupArgsForProfile(profile, stateArgs);
+	const useSavedProfile =
+		Boolean(option(stateArgs, "--profile")) ||
+		(Boolean(selection.profile) && !hasExplicitSetupArgs(stateArgs));
+	const profile =
+		useSavedProfile && selection.profile
+			? selection.profile
+			: buildProfileFromArgs(stateArgs);
+	const setupArgs =
+		useSavedProfile && selection.profile
+			? setupArgsForProfile(selection.profile, stateArgs)
+			: setupArgsForProfile(profile, stateArgs);
 	const context = scopeContext(setupArgs, {
 		requireTarget: profile.scope === "project",
 	});
@@ -73,8 +92,17 @@ export async function runStateCommand(
 		scopeArtifacts(context, artifacts),
 		{ scope: context.scope, manifestRoot: context.manifestRoot },
 	);
+	const binDir = resolve(
+		option(setupArgs, "--bin-dir") ?? join(homedir(), ".local/bin"),
+	);
+	const binary =
+		context.scope === "global"
+			? await refineBinPlan(
+					planBinInstall(binDir, join(repoRoot, "packages/cli/src/main.ts")),
+				)
+			: undefined;
 	const report: StateReport = {
-		...(selection.name ? { profile: selection.name } : {}),
+		...(useSavedProfile && selection.name ? { profile: selection.name } : {}),
 		scope: context.scope,
 		target: context.targetRoot,
 		manifest: context.manifestRoot,
@@ -88,22 +116,37 @@ export async function runStateCommand(
 		changes: countActions(plan.changes),
 		removable: await removableProviders(context.manifestRoot, requested),
 		optionalFeatures: optionalFeatureState(profile),
+		...(binary
+			? {
+					binary: {
+						path: binary.path,
+						action: binary.action,
+						reason: binary.reason,
+						pathReady: pathContains(binDir),
+					},
+				}
+			: {}),
 		setupArgs,
 	};
 	if (flag(rest, "--json")) console.log(JSON.stringify(report, undefined, 2));
 	else printStateReport(report);
 }
 
-function profileFromArgs(args: string[]): OalProfile {
-	const requested = expandProviders(
-		providerOptions(option(args, "--provider") ?? "all"),
-	);
-	return {
-		providers: requested,
-		scope: option(args, "--scope") === "project" ? "project" : "global",
-		home: resolve(option(args, "--home") ?? homedir()),
-		target: resolve(option(args, "--target") ?? "."),
-	};
+function hasExplicitSetupArgs(args: string[]): boolean {
+	return [
+		"--provider",
+		"--scope",
+		"--home",
+		"--target",
+		"--bin-dir",
+		"--plan",
+		"--codex-plan",
+		"--claude-plan",
+		"--opencode-plan",
+		"--opencode-models-file",
+		"--caveman-mode",
+		"--optional",
+	].some((name) => Boolean(option(args, name)));
 }
 
 async function removableProviders(
@@ -159,6 +202,10 @@ function printStateReport(report: StateReport): void {
 	console.log(
 		`optional commands: install ${report.optionalFeatures.installCommands}, remove ${report.optionalFeatures.removeCommands}`,
 	);
+	if (report.binary)
+		console.log(
+			`binary: ${report.binary.action} ${report.binary.path} (${report.binary.reason}; path ${report.binary.pathReady ? "ready" : "missing"})`,
+		);
 }
 
 function countActions(changes: { action: string }[]): Record<string, number> {

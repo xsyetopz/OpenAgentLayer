@@ -85,7 +85,6 @@ const HEX_COLOR_PATTERN = /#[0-9a-f]{6}/;
 const CODEX_COLOR_PATTERN = /^color\s*=/m;
 const FORBIDDEN_MODEL_TERMS = [
 	'gpt-5.4"',
-	"gpt-5.2",
 	"gpt-5.3-codex-spark",
 	"claude-opus-4-7",
 ] as const;

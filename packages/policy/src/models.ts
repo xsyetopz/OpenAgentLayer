@@ -5,6 +5,7 @@ export const CODEX_MODELS = [
 	"gpt-5.5",
 	"gpt-5.4-mini",
 	"gpt-5.3-codex",
+	"gpt-5.2",
 ] as const;
 export const CLAUDE_MODELS = [
 	"claude-opus-4-6",
@@ -14,7 +15,6 @@ export const CLAUDE_MODELS = [
 ] as const;
 export const FORBIDDEN_CODEX = [
 	["gpt", "5", "4"].join("-"),
-	["gpt", "5", "2"].join("-"),
 	`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 ] as const;
 export const FORBIDDEN_CLAUDE = [

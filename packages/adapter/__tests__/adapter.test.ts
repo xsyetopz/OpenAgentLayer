@@ -102,6 +102,12 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 			);
 			expect(artifact?.content).toContain(expected);
 			expect(artifact?.content).toContain("## Prompt contract");
+			if (provider === "codex" && skill === "oal") {
+				expect(artifact?.content).toContain(
+					"spawn custom agents by their rendered OAL agent name",
+				);
+				expect(artifact?.content).not.toContain("oal codex agent <agent>");
+			}
 		}
 	}
 });
@@ -131,6 +137,12 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain(
 			"broad implementation work starts with a delegation check",
 		);
+		if (provider === "codex") {
+			expect(instructions).toContain("spawn subagents: have hermes");
+			expect(instructions).toContain(
+				"The parent thread owns task split, child launch, evidence merge, and final decision",
+			);
+		}
 	}
 });
 
@@ -163,8 +175,13 @@ test("provider agents render inspection and correction discipline contracts", as
 			"broad implementation work uses subagents or the orchestrate route",
 		);
 		expect(agent).toContain(
-			"stay solo only for narrow single-owner edits or blocked subagent launch",
+			"narrow single-owner edits begin with a recorded solo ownership reason",
 		);
+		if (provider === "codex") {
+			expect(agent).toContain('name = "hephaestus"');
+			expect(agent).toContain("description = ");
+			expect(agent).toContain('nickname_candidates = ["hephaestus"]');
+		}
 	}
 });
 
@@ -183,6 +200,13 @@ test("orchestration agents render concrete delegation task contracts", async () 
 		expect(agent).toContain("Record subagent task");
 		expect(agent).toContain("owned paths");
 		expect(agent).toContain("merge order");
+		if (provider === "codex") {
+			expect(agent).toContain("explicitly ask Codex to spawn subagents");
+			expect(agent).toContain("have rendered OAL agents");
+			expect(agent).toContain(
+				"The parent thread owns task split, child launch, evidence merge, and final decision",
+			);
+		}
 	}
 });
 
@@ -208,7 +232,13 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
 	expect(config).not.toContain("zsh_path");
+	expect(config).not.toContain("model_instructions_file");
+	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain("shell_zsh_fork = false");
+	expect(config).toContain("enable_fanout = true");
+	expect(config).toContain("multi_agent = false");
+	expect(config).toContain("multi_agent_v2 = true");
+	expect(config).not.toContain("max_threads");
 	expect(
 		rendered.artifacts.some((artifact) => artifact.path.includes("/shim/")),
 	).toBe(false);
@@ -223,8 +253,8 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		(artifact) => artifact.path === "AGENTS.md",
 	)?.content;
 	expect(instructions).toContain("Subagent surface:");
-	expect(instructions).toContain("use Codex native subagent workflow");
-	expect(instructions).toContain("This is not an OAL shell launcher");
+	expect(instructions).toContain("spawn subagents: have hermes");
+	expect(instructions).toContain("This is provider-native Codex delegation");
 });
 
 test("Codex renders hooks only in hooks.json with provider event env", async () => {

@@ -26,6 +26,7 @@ const CODEX_FEATURES = [
 	{ key: "responses_websockets", enabled: true },
 	{ key: "responses_websockets_v2", enabled: true },
 	{ key: "unified_exec", enabled: false },
+	{ key: "enable_fanout", enabled: true },
 	{ key: "multi_agent", enabled: false },
 	{ key: "multi_agent_v2", enabled: true },
 	{ key: "shell_snapshot", enabled: false },
@@ -122,6 +123,9 @@ approvals_reviewer = "auto_review"
 
 [notice]
 hide_rate_limit_model_nudge = true
+
+[features]
+${renderCodexFeatures()}
 
 ${renderCodexProfile({
 	name: "openagentlayer",
@@ -284,8 +288,16 @@ function renderCodexAgent(
 	options: RenderOptions,
 ): string {
 	const model = resolveCodexModel(agent, options);
-	return `model = ${quoteToml(model.model)}
-sandbox_mode = ${quoteToml(agent.tools.includes("write") ? "workspace-write" : "read-only")}
-${model.reasoningEffort ? `model_reasoning_effort = ${quoteToml(model.reasoningEffort)}\n` : ""}developer_instructions = ${quoteToml(agentPrompt(agent, source))}
-`;
+	return [
+		`name = ${quoteToml(agent.id)}`,
+		`description = ${quoteToml(agent.role)}`,
+		`nickname_candidates = [${quoteToml(agent.id)}]`,
+		`model = ${quoteToml(model.model)}`,
+		`sandbox_mode = ${quoteToml(agent.tools.includes("write") ? "workspace-write" : "read-only")}`,
+		...(model.reasoningEffort
+			? [`model_reasoning_effort = ${quoteToml(model.reasoningEffort)}`]
+			: []),
+		`developer_instructions = ${quoteToml(agentPrompt(agent, source))}`,
+		"",
+	].join("\n");
 }

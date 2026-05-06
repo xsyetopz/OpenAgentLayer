@@ -24,6 +24,7 @@ const TOML_INTEGER_PATTERN = /^\d+$/;
 const ALLOWED_CODEX_MODELS = new Set([
 	"gpt-5.5",
 	"gpt-5.4-mini",
+	"gpt-5.2",
 	"gpt-5.3-codex",
 ]);
 const ALLOWED_APPROVAL_POLICIES = new Set(["on-request", "never"]);
@@ -42,6 +43,7 @@ const ALLOWED_CODEX_FEATURES = new Set([
 	"responses_websockets",
 	"responses_websockets_v2",
 	"unified_exec",
+	"enable_fanout",
 	"multi_agent",
 	"multi_agent_v2",
 	"shell_snapshot",
@@ -189,6 +191,9 @@ function parseCodexToml(toml: string): CodexToml {
 			const profile = section.split(".")[1] ?? "";
 			parsed.features[profile] ??= {};
 			parsed.features[profile][key] = value as boolean;
+		} else if (section === "features") {
+			parsed.features[""] ??= {};
+			parsed.features[""][key] = value as boolean;
 		} else if (section.startsWith("profiles.")) {
 			const profile = section.split(".")[1] ?? "";
 			parsed.profiles[profile] ??= {};

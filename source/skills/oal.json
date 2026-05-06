@@ -7,7 +7,7 @@
     "opencode"
   ],
   "description": "Work on OpenAgentLayer source records, provider renderers, deployment, plugin payloads, manifests, and acceptance gates. Use for OAL-specific generator/deployer behavior.",
-  "body": "Authored OAL source is the product input. Generated provider files are outputs. Change source records, prompt templates, runtime hooks, renderers, deploy logic, or acceptance checks so behavior is owned end to end. Use provider-native agents when available. For Codex CLI delegation, use OAL-managed commands: `oal codex agent <agent> <task>`, `oal codex route <route> <task>`, or `oal codex peer batch <task>`.",
+  "body": "Authored OAL source is the product input. Generated provider files are outputs. Change source records, prompt templates, runtime hooks, renderers, deploy logic, or acceptance checks so behavior is owned end to end. Use provider-native agents when available. In Codex CLI sessions with the native subagent surface enabled, spawn custom agents by their rendered OAL agent name, wait for their results, and merge the evidence in the parent thread. Use `oal codex peer batch <task>` for explicit top-level peer-thread automation requests.",
   "supportFiles": [
     {
       "path": "references/surfaces.md",

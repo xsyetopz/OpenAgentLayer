@@ -1,14 +1,21 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { providerOption, providerOptions, scopeOption } from "../src/arguments";
 import {
 	buildPeerSteps,
+	codexLaunchRun,
 	makeRunId,
 	peerRunPaths,
 	renderPeerSummary,
 } from "../src/commands/codex";
+import {
+	CLAUDE_PLAN_OPTIONS,
+	CODEX_PLAN_OPTIONS,
+	OPENCODE_PLAN_OPTIONS,
+	setupProfileChoices,
+} from "../src/interactive";
 import { buildSetupArgs } from "../src/workflows";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
@@ -132,6 +139,24 @@ test("Codex peer runner builds v3-style role steps", () => {
 	);
 });
 
+test("Codex launch runner starts interactive native subagent profile", () => {
+	const run = codexLaunchRun("/repo", "spawn hermes and wait");
+	expect(run.command).toBe("codex");
+	expect(run.args).toEqual([
+		"--profile",
+		"openagentlayer",
+		"--enable",
+		"multi_agent_v2",
+		"--enable",
+		"enable_fanout",
+		"--disable",
+		"multi_agent",
+		"-C",
+		"/repo",
+		"spawn hermes and wait",
+	]);
+});
+
 test("Codex peer summary renders status evidence", () => {
 	const summary = renderPeerSummary(
 		"fix the auth race",
@@ -242,4 +267,89 @@ test("interactive setup workflow builds low-level setup args", () => {
 		"--dry-run",
 		"--verbose",
 	]);
+});
+
+test("interactive subscription prompts are ordered from lowest to highest", () => {
+	expect(CODEX_PLAN_OPTIONS.map((option) => option.value)).toEqual([
+		"plus",
+		"pro-5",
+		"pro-20",
+	]);
+	expect(CLAUDE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
+		"max-5",
+		"max-20",
+		"max-20-long",
+	]);
+	expect(OPENCODE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
+		"opencode-free",
+		"opencode-auto",
+		"opencode-auth",
+	]);
+});
+
+test("interactive setup asks to use active and saved profiles", () => {
+	expect(
+		setupProfileChoices({
+			activeProfile: "daily",
+			profiles: {
+				daily: { providers: ["codex"], scope: "global", home: "/tmp/home" },
+				project: {
+					providers: ["claude", "opencode"],
+					scope: "project",
+					target: "/tmp/repo",
+				},
+			},
+		}).map((choice) => choice.value),
+	).toEqual(["manual", "profile:daily", "profile:project"]);
+});
+
+test("state inspect explicit setup args override active profile", async () => {
+	const root = await mkdtemp(`${tmpdir()}/oal-state-`);
+	const config = `${root}/config.json`;
+	const target = `${root}/target`;
+	await writeFile(
+		config,
+		JSON.stringify({
+			version: 1,
+			activeProfile: "daily",
+			profiles: {
+				daily: {
+					providers: ["opencode"],
+					scope: "global",
+					optionalTools: ["deepwiki", "ctx7"],
+				},
+			},
+		}),
+	);
+	const proc = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"state",
+			"inspect",
+			"--config",
+			config,
+			"--provider",
+			"codex",
+			"--scope",
+			"project",
+			"--target",
+			target,
+			"--optional",
+			"ctx7",
+			"--json",
+		],
+		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
+	);
+	const [stdout, stderr, code] = await Promise.all([
+		new Response(proc.stdout).text(),
+		new Response(proc.stderr).text(),
+		proc.exited,
+	]);
+	expect(stderr).toBe("");
+	expect(code).toBe(0);
+	const report = JSON.parse(stdout);
+	expect(report.profile).toBeUndefined();
+	expect(report.requested).toEqual(["codex"]);
+	expect(report.optionalFeatures.selected).toEqual(["ctx7"]);
 });

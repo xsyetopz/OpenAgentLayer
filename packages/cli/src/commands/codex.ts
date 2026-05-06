@@ -39,6 +39,9 @@ export async function runCodexCommand(
 ): Promise<void> {
 	const action = args.shift();
 	switch (action) {
+		case "launch":
+			await runCodexLaunch(args);
+			return;
 		case "agent":
 			await runCodexAgent(repoRoot, args);
 			return;
@@ -49,7 +52,7 @@ export async function runCodexCommand(
 			await runCodexPeer(repoRoot, args);
 			return;
 		default:
-			throw new Error("Usage: oal codex <agent|route|peer>");
+			throw new Error("Usage: oal codex <launch|agent|route|peer>");
 	}
 }
 
@@ -157,6 +160,18 @@ export function renderPeerSummary(
 		),
 		"",
 	].join("\n");
+}
+
+async function runCodexLaunch(args: string[]): Promise<void> {
+	const cwd = resolve(option(args, "--cwd") ?? process.cwd());
+	const dryRun = flag(args, "--dry-run");
+	const prompt = optionalPromptFromArgs(args);
+	const run = codexLaunchRun(cwd, prompt);
+	if (dryRun) {
+		console.log(JSON.stringify(run, undefined, 2));
+		return;
+	}
+	await executeCodexInteractive(run);
 }
 
 async function runCodexAgent(repoRoot: string, args: string[]): Promise<void> {
@@ -288,6 +303,14 @@ function codexExecRun(
 		command: "codex",
 		args: [
 			"exec",
+			"--enable",
+			"multi_agent_v2",
+			"--enable",
+			"enable_fanout",
+			"--disable",
+			"multi_agent",
+			"-c",
+			`projects.${JSON.stringify(cwd)}.trust_level="trusted"`,
 			"-m",
 			model,
 			"-s",
@@ -299,6 +322,26 @@ function codexExecRun(
 		],
 		cwd,
 		...(out ? { output: out } : {}),
+	};
+}
+
+export function codexLaunchRun(cwd: string, prompt = ""): CodexRun {
+	return {
+		command: "codex",
+		args: [
+			"--profile",
+			"openagentlayer",
+			"--enable",
+			"multi_agent_v2",
+			"--enable",
+			"enable_fanout",
+			"--disable",
+			"multi_agent",
+			"-C",
+			cwd,
+			...(prompt ? [prompt] : []),
+		],
+		cwd,
 	};
 }
 
@@ -320,6 +363,28 @@ async function executeCodexRun(run: CodexRun): Promise<void> {
 	if (result.stderr) process.stderr.write(result.stderr);
 	if (result.code !== 0)
 		throw new Error(`Codex run exited with status \`${result.code}\``);
+}
+
+async function executeCodexInteractive(run: CodexRun): Promise<void> {
+	const proc = Bun.spawn([run.command, ...run.args], {
+		cwd: run.cwd,
+		stdin: "inherit",
+		stdout: "inherit",
+		stderr: "inherit",
+	});
+	const code = await proc.exited;
+	if (code !== 0)
+		throw new Error(`Codex launch exited with status \`${code}\``);
+}
+
+function optionalPromptFromArgs(args: string[]): string {
+	return args
+		.filter(
+			(arg, index) =>
+				!(["--dry-run", "--cwd"].includes(arg) || args[index - 1] === "--cwd"),
+		)
+		.join(" ")
+		.trim();
 }
 
 function promptFromArgs(args: string[]): string {

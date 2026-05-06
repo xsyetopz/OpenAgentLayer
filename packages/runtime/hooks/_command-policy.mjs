@@ -196,9 +196,16 @@ function evaluateSingleCommand(command, options) {
 function evaluateCodexExecDelegation(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
 	if (tokens[0] !== "codex" || tokens[1] !== "exec") return undefined;
+	if (
+		tokens.some((token) =>
+			["--help", "-h", "help", "--version", "-V"].includes(token),
+		)
+	)
+		return undefined;
 	return {
 		decision: "block",
-		reason: "Use OAL-managed Codex delegation for delegated Codex work",
+		reason:
+			"Codex delegation should use the managed OAL path so agent runs stay visible and auditable",
 		details: [
 			"Use: oal codex agent <agent> <task>",
 			"Use: oal codex route <route> <task>",

@@ -113,6 +113,10 @@ addRenderOptions(
 		.option("--config <path>", "OAL config file")
 		.option("--target <dir>", "project target directory")
 		.option("--bin-dir <dir>", "global executable directory")
+		.option(
+			"--optional <tools>",
+			"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
+		)
 		.option("--json", "print structured JSON")
 		.action((action: string, options) =>
 			runStateCommand(repoRoot, [action, ...argsFromOptions(options)]),
@@ -139,8 +143,8 @@ Examples:
 
 program
 	.command("codex")
-	.description("run OAL-managed Codex agent, route, or peer workflows")
-	.argument("<action>", "agent, route, or peer")
+	.description("run OAL-managed Codex launch, agent, route, or peer workflows")
+	.argument("<action>", "launch, agent, route, or peer")
 	.argument("[values...]", "agent/route/mode plus prompt text")
 	.option("--cwd <dir>", "working directory for Codex")
 	.option("--out <path>", "write Codex output to a file")
@@ -149,6 +153,7 @@ program
 		"after",
 		`
 Examples:
+  $ oal codex launch "spawn hermes to map the runtime hooks, wait, then summarize"
   $ oal codex agent hermes --dry-run "map the runtime hooks"
   $ oal codex route review --dry-run "audit the current diff"
   $ oal codex peer batch --dry-run "investigate, implement, validate, and review"

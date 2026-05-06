@@ -100,7 +100,7 @@ function renderAgentPromptContracts(source: OalSource): string {
 		"- Diff gate: inspect final diff and repair added residue before final response.",
 		"- Source evidence: inspect controlling source before claims; behavior changes need Source Evidence Map, Changed Behavior, and Validation Evidence.",
 		"- Correction discipline: verify before accepting a correction; separate checked facts from inference, and return STATUS BLOCKED with Attempted, Evidence, and Need when source truth is missing or contradictory.",
-		"- Delegation check: broad implementation work uses subagents or the orchestrate route when ownership, providers, packages, test tiers, or investigation paths can split; stay solo only for narrow single-owner edits or blocked subagent launch, and record that reason before editing.",
+		"- Delegation check: broad implementation work uses subagents or the orchestrate route when ownership, providers, packages, test tiers, or investigation paths can split; narrow single-owner edits begin with a recorded solo ownership reason.",
 		"- Boundaries: answer the requested task; extra guidance, alternatives, cleanup, and guardrails enter the answer through user request or validation need.",
 		"- Blocker path: missing, ambiguous, or contradictory source truth returns STATUS BLOCKED with Attempted, Evidence, and Need.",
 		renderCavemanContract(source),

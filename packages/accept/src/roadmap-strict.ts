@@ -75,7 +75,6 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				"Codex config",
 			);
 			for (const forbidden of [
-				["gpt", "5", "2"].join("-"),
 				`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 				'approval_policy = "on-failure"',
 				["guardian", "subagent"].join("_"),

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readSync } from "node:fs";
 import {
 	renderedHint,
 	styleHookLines,
@@ -14,7 +14,22 @@ function readInputFromStdin() {
 		return "";
 	}
 
-	return readFileSync(0, "utf8");
+	const chunks = [];
+	const buffer = Buffer.allocUnsafe(64 * 1024);
+	for (;;) {
+		try {
+			const bytesRead = readSync(0, buffer, 0, buffer.length, null);
+			if (bytesRead === 0) break;
+			chunks.push(Buffer.from(buffer.subarray(0, bytesRead)));
+		} catch (error) {
+			if (error?.code === "EAGAIN") {
+				Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+				continue;
+			}
+			throw error;
+		}
+	}
+	return Buffer.concat(chunks).toString("utf8");
 }
 
 function readRawInput() {
@@ -84,7 +99,7 @@ function styledReasonText(outcome, event) {
 	return [
 		styleHookMessage(level, outcome.reason),
 		...styleHookLines(
-			"note",
+			"info",
 			Array.isArray(outcome.details) ? outcome.details : [],
 		),
 	]
@@ -96,9 +111,7 @@ function plainReasonText(outcome) {
 	const details = Array.isArray(outcome.details) ? outcome.details : [];
 	const hints = details.map((detail) => renderedHint(detail)).filter(Boolean);
 	const notes = details.filter((detail) => !renderedHint(detail));
-	const suffix = [...hints, ...notes.map((note) => `note: ${note}`)].join(
-		" | ",
-	);
+	const suffix = [...hints, ...notes].join(" | ");
 	return suffix ? `${outcome.reason}: ${suffix}` : outcome.reason;
 }
 
@@ -116,7 +129,7 @@ function outcomeLevel(outcome, event) {
 	if (outcome.decision === "warn") return "warn";
 	if (outcome.decision === "block" && event !== "PreToolUse") return "fatal";
 	if (outcome.decision === "block") return "error";
-	return "note";
+	return "info";
 }
 
 function isStopEvent(event) {
@@ -212,7 +225,7 @@ export function createHookRunner(hook, evaluate) {
 				details: [malformed],
 			}) ?? { continue: false, systemMessage: malformed },
 		);
-		process.exitCode = 1;
+		if (hookProvider(payload) !== "codex") process.exitCode = 1;
 		return;
 	}
 
@@ -228,7 +241,7 @@ export function createHookRunner(hook, evaluate) {
 				systemMessage: "Hook decision needs pass, warn, or block",
 			},
 		);
-		process.exitCode = 1;
+		if (hookProvider(payload) !== "codex") process.exitCode = 1;
 		return;
 	}
 
@@ -239,7 +252,11 @@ export function createHookRunner(hook, evaluate) {
 		details: Array.isArray(outcome.details) ? outcome.details : undefined,
 	});
 	if (formatted) printOutcome(formatted);
-	if (outcome.decision === "block" && hookEvent(payload) !== "PreToolUse") {
+	if (
+		outcome.decision === "block" &&
+		hookEvent(payload) !== "PreToolUse" &&
+		hookProvider(payload) !== "codex"
+	) {
 		printFeedback(
 			{
 				hook,
