@@ -379,6 +379,7 @@ test("setup optional commands stream readable progress and time out", async () =
 				index: 1,
 				total: 1,
 				timeoutMs: 1000,
+				idleTimeoutMs: 1000,
 			}),
 		).resolves.toMatchObject({ ok: true, timedOut: false });
 	} finally {
@@ -397,8 +398,22 @@ test("setup optional commands stream readable progress and time out", async () =
 			index: 1,
 			total: 1,
 			timeoutMs: 20,
+			idleTimeoutMs: 1000,
 		}),
 	).resolves.toMatchObject({ ok: false, timedOut: true });
+	await expect(
+		runOptionalSetupCommand('node -e "setTimeout(() => {}, 1000)"', {
+			quiet: true,
+			index: 1,
+			total: 1,
+			timeoutMs: 1000,
+			idleTimeoutMs: 20,
+		}),
+	).resolves.toMatchObject({
+		ok: false,
+		timedOut: true,
+		timedOutReason: "no output for 1s",
+	});
 });
 
 test("state inspect explicit setup args override active profile", async () => {

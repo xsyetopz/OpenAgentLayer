@@ -189,12 +189,14 @@ interface OptionalSetupRunOptions {
 	index: number;
 	total: number;
 	timeoutMs?: number;
+	idleTimeoutMs?: number;
 }
 
 interface OptionalSetupRunResult {
 	ok: boolean;
 	code: number | null;
 	timedOut: boolean;
+	timedOutReason?: string;
 	stdout: string;
 	stderr: string;
 }
@@ -204,6 +206,7 @@ export async function runOptionalSetupCommand(
 	options: OptionalSetupRunOptions,
 ): Promise<OptionalSetupRunResult> {
 	const timeoutMs = options.timeoutMs ?? optionalSetupTimeoutMs();
+	const idleTimeoutMs = options.idleTimeoutMs ?? optionalSetupIdleTimeoutMs();
 	if (!options.quiet)
 		console.log(
 			color("cyan", `◇ Optional setup ${options.index}/${options.total}`),
@@ -219,12 +222,27 @@ export async function runOptionalSetupCommand(
 	let stdout = "";
 	let stderr = "";
 	let timedOut = false;
-	const timeout = setTimeout(() => {
+	let timedOutReason: string | undefined;
+	const stopForTimeout = (reason: string) => {
+		if (timedOut) return;
 		timedOut = true;
-		spinner?.stop("timed out");
+		timedOutReason = reason;
+		spinner?.stop(reason);
 		terminateProcessTree(child.pid);
 		child.kill();
+	};
+	const timeout = setTimeout(() => {
+		stopForTimeout(`timed out after ${formatDuration(timeoutMs)}`);
 	}, timeoutMs);
+	let idleTimeout: ReturnType<typeof setTimeout> | undefined;
+	const resetIdleTimeout = () => {
+		if (idleTimeout) clearTimeout(idleTimeout);
+		if (idleTimeoutMs <= 0) return;
+		idleTimeout = setTimeout(() => {
+			stopForTimeout(`no output for ${formatDuration(idleTimeoutMs)}`);
+		}, idleTimeoutMs);
+	};
+	resetIdleTimeout();
 	const [, , code] = await Promise.all([
 		streamCommandOutput(child.stdout, {
 			quiet: options.quiet,
@@ -232,6 +250,7 @@ export async function runOptionalSetupCommand(
 			beforeWrite: () => spinner?.clear(),
 			remember: (chunk) => {
 				stdout = tail(`${stdout}${chunk}`);
+				resetIdleTimeout();
 			},
 		}),
 		streamCommandOutput(child.stderr, {
@@ -240,14 +259,25 @@ export async function runOptionalSetupCommand(
 			beforeWrite: () => spinner?.clear(),
 			remember: (chunk) => {
 				stderr = tail(`${stderr}${chunk}`);
+				resetIdleTimeout();
 			},
 		}),
 		child.exited,
-	]).finally(() => clearTimeout(timeout));
+	]).finally(() => {
+		clearTimeout(timeout);
+		if (idleTimeout) clearTimeout(idleTimeout);
+	});
 	spinner?.finish();
 	if (!options.quiet && code === 0)
 		console.log(color("green", "└ ✓ optional setup completed"));
-	return { ok: code === 0, code, timedOut, stdout, stderr };
+	return {
+		ok: code === 0,
+		code,
+		timedOut,
+		...(timedOutReason ? { timedOutReason } : {}),
+		stdout,
+		stderr,
+	};
 }
 
 async function streamCommandOutput(
@@ -288,7 +318,9 @@ function printOptionalSetupFailure(
 	const lines = [
 		color("yellow", `! optional setup command failed (${command})`),
 		`  exit: ${result.code ?? "unknown"}`,
-		...(result.timedOut ? ["  reason: timed out"] : []),
+		...(result.timedOut
+			? [`  reason: ${result.timedOutReason ?? "timed out"}`]
+			: []),
 		...(result.stdout.trim() ? [`  stdout: ${result.stdout.trim()}`] : []),
 		...(result.stderr.trim() ? [`  stderr: ${result.stderr.trim()}`] : []),
 		"  continuing with provider-native setup and system CLI fallbacks",
@@ -304,6 +336,12 @@ function optionalSetupTimeoutMs(): number {
 	const raw = process.env["OAL_SETUP_COMMAND_TIMEOUT_MS"];
 	if (raw && INTEGER_PATTERN.test(raw)) return Number(raw);
 	return 15 * 60 * 1000;
+}
+
+function optionalSetupIdleTimeoutMs(): number {
+	const raw = process.env["OAL_SETUP_IDLE_TIMEOUT_MS"];
+	if (raw && INTEGER_PATTERN.test(raw)) return Number(raw);
+	return 2 * 60 * 1000;
 }
 
 function terminateProcessTree(pid: number | undefined): void {
@@ -340,10 +378,11 @@ function startSpinner(message: string): {
 	const frames = ["|", "/", "-", "\\"];
 	let index = 0;
 	let active = true;
+	const startedAt = Date.now();
 	const render = () => {
 		if (!active) return;
 		process.stdout.write(
-			`\r${color("cyan", frames[index % frames.length])} ${message}...`,
+			`\r${color("cyan", frames[index % frames.length])} ${message} (${formatDuration(Date.now() - startedAt)})...`,
 		);
 		index += 1;
 	};
@@ -377,6 +416,14 @@ function spinnerEnabled(): boolean {
 	if (process.env["FORCE_COLOR"] && process.env["FORCE_COLOR"] !== "0")
 		return true;
 	return process.stdout.isTTY === true;
+}
+
+function formatDuration(ms: number): string {
+	const seconds = Math.max(0, Math.ceil(ms / 1000));
+	const minutes = Math.floor(seconds / 60);
+	const remainingSeconds = seconds % 60;
+	if (minutes === 0) return `${remainingSeconds}s`;
+	return `${minutes}m ${String(remainingSeconds).padStart(2, "0")}s`;
 }
 
 function color(
