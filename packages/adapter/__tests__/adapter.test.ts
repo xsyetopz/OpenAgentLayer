@@ -133,16 +133,16 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain(
 			"Treat inferred compatibility, aliases, fallbacks, extra behavior, guardrails, docs, and cleanup as out of scope",
 		);
-			expect(instructions).toContain("Delegation discipline:");
-			expect(instructions).toContain(
-				"broad implementation work starts with a delegation check",
-			);
-			expect(instructions).toContain("Continuity discipline:");
-			expect(instructions).toContain("Continuation Record");
-			expect(instructions).toContain(
-				"current user messages and verified repo evidence",
-			);
-			if (provider === "codex") {
+		expect(instructions).toContain("Delegation discipline:");
+		expect(instructions).toContain(
+			"broad implementation work starts with a delegation check",
+		);
+		expect(instructions).toContain("Continuity discipline:");
+		expect(instructions).toContain("Continuation Record");
+		expect(instructions).toContain(
+			"current user messages and verified repo evidence",
+		);
+		if (provider === "codex") {
 			expect(instructions).toContain("spawn subagents: have hermes");
 			expect(instructions).toContain(
 				"The parent thread owns task split, child launch, evidence merge, and final decision",
@@ -179,18 +179,18 @@ test("provider agents render inspection and correction discipline contracts", as
 		expect(agent).toContain(
 			"broad implementation work uses subagents or the orchestrate route",
 		);
-			expect(agent).toContain(
-				"narrow single-owner edits begin with a recorded solo ownership reason",
-			);
-			expect(agent).toContain("Continuity check:");
-			expect(agent).toContain("short user-visible Continuation Record");
-			if (provider === "codex") {
+		expect(agent).toContain(
+			"narrow single-owner edits begin with a recorded solo ownership reason",
+		);
+		expect(agent).toContain("Continuity check:");
+		expect(agent).toContain("short user-visible Continuation Record");
+		if (provider === "codex") {
 			expect(agent).toContain('name = "hephaestus"');
 			expect(agent).toContain("description = ");
 			expect(agent).toContain('nickname_candidates = ["hephaestus"]');
 		}
 	}
-	});
+});
 
 test("continuity agent and resume route render user-pasteable handoff contracts", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
