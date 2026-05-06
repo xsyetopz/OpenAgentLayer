@@ -276,13 +276,27 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	)?.content;
 	expect(config).not.toContain("zsh_path");
 	expect(config).not.toContain("model_instructions_file");
+	expect(config).toContain("[memories]\nextract_model = \"gpt-5.4-mini\"");
 	expect(config).toContain("[features]\nsteer = true");
+	expect(config).toContain('model_verbosity = "low"');
 	expect(config).toContain("shell_zsh_fork = false");
 	expect(config).toContain("enable_fanout = false");
 	expect(config).toContain("multi_agent = false");
 	expect(config).toContain("multi_agent_v2 = false");
 	expect(config).toContain("max_threads = 6");
 	expect(config).toContain("job_max_runtime_seconds = 1800");
+	expect(config).toContain("[tui]");
+	for (const item of [
+		"model-with-reasoning",
+		"task-progress",
+		"context-remaining",
+		"five-hour-limit",
+		"weekly-limit",
+	]) {
+		expect(config).toContain(`"${item}"`);
+	}
+	expect(config).not.toContain('"session-id"');
+	expect(config).not.toContain('"total-input-tokens"');
 	expect(
 		rendered.artifacts.some((artifact) => artifact.path.includes("/shim/")),
 	).toBe(false);

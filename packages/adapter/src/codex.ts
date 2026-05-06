@@ -127,6 +127,12 @@ approvals_reviewer = "auto_review"
 [notice]
 hide_rate_limit_model_nudge = true
 
+[memories]
+extract_model = "gpt-5.4-mini"
+
+[tui]
+status_line = ["model-with-reasoning", "task-progress", "context-remaining", "five-hour-limit", "weekly-limit"]
+
 [features]
 ${renderCodexFeatures()}
 

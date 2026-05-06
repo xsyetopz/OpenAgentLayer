@@ -5,6 +5,24 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.5.1-beta.2] - 2026-05-07
+
+### Changed
+
+- Hardened Codex command policy against hidden `codex exec` delegation and detached launcher escapes through `tmux`, `screen`, `nohup`, `setsid`, and Docker.
+- Added compact Codex statusline defaults for model, task progress, context remaining, and rate-limit visibility.
+- Set Codex memory extraction to `gpt-5.4-mini` while keeping profile `model_verbosity = "low"` enabled.
+- Changed release metadata from `0.5.1-beta.1` to `0.5.1-beta.2` across package, plugin, marketplace, Homebrew, and source product records.
+
+### Verified
+
+- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts`
+- `rtk proxy -- bun test packages/accept/__tests__/accept.test.ts`
+- `rtk proxy -- bun test tests/e2e.test.ts`
+- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run test`
+- `rtk git -C . diff --check`
+
 ## [0.5.1-beta.1] - 2026-05-06
 
 ### Added

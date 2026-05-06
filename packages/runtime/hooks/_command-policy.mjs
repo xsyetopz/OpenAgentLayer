@@ -66,6 +66,14 @@ const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
 const RAW_DIAGNOSTIC_ENV_PATTERN =
 	/(?:^|\s)(?:env\s+)?OAL_RTK_RAW_DIAGNOSTIC=1(?:\s|$)/;
 const WHITESPACE_PATTERN = /\s+/;
+const CODEX_EXEC_PATTERN = /(?:^|[\s"'`])codex\s+exec(?:\s|$)/;
+const DETACHED_CODEX_LAUNCHERS = new Set([
+	"docker",
+	"nohup",
+	"screen",
+	"setsid",
+	"tmux",
+]);
 const RTK_GREP_LEGACY_FLAGS = new Set(["-R", "-r", "--include", "--exclude"]);
 const RTK_GREP_MAX_FLAGS = new Set(["-m", "--max"]);
 const RTK_READ_BOUND_FLAGS = new Set([
@@ -195,13 +203,32 @@ function evaluateSingleCommand(command, options) {
 
 function evaluateCodexExecDelegation(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
-	if (tokens[0] !== "codex" || tokens[1] !== "exec") return undefined;
+	if (tokens[0] !== "codex" || tokens[1] !== "exec") {
+		if (!CODEX_EXEC_PATTERN.test(command)) return undefined;
+		if (usesDetachedLauncher(tokens)) {
+			return {
+				decision: "block",
+				reason:
+					"Detached Codex delegation can hide quota usage from the managed OAL run ledger",
+				details: [
+					"Use: oal codex peer batch <task>",
+					"Use: oal codex agent <agent> <task>",
+					"Use: oal codex route <route> <task>",
+				],
+			};
+		}
+		return managedCodexDelegationBlock();
+	}
 	if (
 		tokens.some((token) =>
 			["--help", "-h", "help", "--version", "-V"].includes(token),
 		)
 	)
 		return undefined;
+	return managedCodexDelegationBlock();
+}
+
+function managedCodexDelegationBlock() {
 	return {
 		decision: "block",
 		reason:
@@ -210,9 +237,13 @@ function evaluateCodexExecDelegation(command) {
 			"Use: oal codex agent <agent> <task>",
 			"Use: oal codex route <route> <task>",
 			"Use: oal codex peer batch <task>",
-			"Use when explicit automation is requested: codex exec",
 		],
 	};
+}
+
+function usesDetachedLauncher(tokens) {
+	const executable = shellWrapperName(tokens[0] ?? "");
+	return DETACHED_CODEX_LAUNCHERS.has(executable);
 }
 
 export function normalizeCommand(command) {

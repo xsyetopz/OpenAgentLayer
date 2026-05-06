@@ -13,6 +13,7 @@ interface CodexProfile {
 interface CodexToml {
 	profile?: string;
 	approvals_reviewer?: string;
+	memories: Record<string, unknown>;
 	profiles: Record<string, CodexProfile>;
 	features: Record<string, Record<string, boolean>>;
 	agents: Record<string, unknown>;
@@ -67,6 +68,8 @@ export function assertCodexTomlSchema(toml: string): void {
 		throw new Error("Codex config does not activate OAL profile");
 	if (parsed.approvals_reviewer !== "auto_review")
 		throw new Error("Codex config does not enable auto approval review");
+	if (parsed.memories["extract_model"] !== "gpt-5.4-mini")
+		throw new Error("Codex memories.extract_model must use gpt-5.4-mini");
 	if (parsed.plugins["oal@openagentlayer-local"]?.enabled !== true)
 		throw new Error("Codex config does not activate $oal plugin");
 	for (const [profileName, profile] of Object.entries(parsed.profiles)) {
@@ -171,6 +174,7 @@ export function assertOpenCodeConfigSchema(config: unknown): void {
 
 function parseCodexToml(toml: string): CodexToml {
 	const parsed: CodexToml = {
+		memories: {},
 		profiles: {},
 		features: {},
 		agents: {},
@@ -200,6 +204,8 @@ function parseCodexToml(toml: string): CodexToml {
 			parsed.profiles[profile][key as keyof CodexProfile] = value as never;
 		} else if (section === "agents") {
 			parsed.agents[key] = value;
+		} else if (section === "memories") {
+			parsed.memories[key] = value;
 		} else if (section.startsWith('plugins."')) {
 			const plugin = section.slice('plugins."'.length, -1);
 			parsed.plugins[plugin] ??= {};

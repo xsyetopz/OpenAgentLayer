@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { resolve } from "node:path";
 import { buildRoadmapEvidence } from "../src";
+import { assertCodexTomlSchema } from "../src/config-schema";
 import {
 	assertRtkGainPolicyFixtures,
 	assertRtkGainThreshold,
@@ -13,6 +14,36 @@ test("roadmap evidence has no uncovered entries", async () => {
 		resolve(import.meta.dir, "../../.."),
 	);
 	expect(evidence.filter((entry) => entry.status === "uncovered")).toEqual([]);
+});
+
+test("Codex config schema requires cheap memory extraction model", () => {
+	const config = [
+		'profile = "openagentlayer"',
+		'approvals_reviewer = "auto_review"',
+		"",
+		"[memories]",
+		'extract_model = "gpt-5.4-mini"',
+		"",
+		"[profiles.openagentlayer]",
+		'model = "gpt-5.5"',
+		'model_verbosity = "low"',
+		'approval_policy = "on-request"',
+		'sandbox_mode = "workspace-write"',
+		"",
+		"[features]",
+		"steer = true",
+		"",
+		"[agents]",
+		"max_depth = 1",
+		"",
+		'[plugins."oal@openagentlayer-local"]',
+		"enabled = true",
+		"",
+	].join("\n");
+	expect(() => assertCodexTomlSchema(config)).not.toThrow();
+	expect(() =>
+		assertCodexTomlSchema(config.replace("gpt-5.4-mini", "gpt-5.5")),
+	).toThrow("Codex memories.extract_model must use gpt-5.4-mini");
 });
 
 test("RTK gain parser reads current-style percentage output", () => {

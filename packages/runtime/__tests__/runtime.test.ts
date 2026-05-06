@@ -356,6 +356,7 @@ test("RTK hook routes Codex delegation to OAL-managed Codex commands", async () 
 	for (const command of [
 		'codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review this"',
 		'rtk proxy -- codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review this"',
+		'true && codex exec --ephemeral "hidden work"',
 	]) {
 		await expect(runHook({ command })).resolves.toMatchObject({
 			decision: "block",
@@ -365,7 +366,29 @@ test("RTK hook routes Codex delegation to OAL-managed Codex commands", async () 
 				"Use: oal codex agent <agent> <task>",
 				"Use: oal codex route <route> <task>",
 				"Use: oal codex peer batch <task>",
-				"Use when explicit automation is requested: codex exec",
+			],
+		});
+	}
+});
+
+test("RTK hook blocks detached Codex delegation escape forms", async () => {
+	for (const command of [
+		'tmux new-session -d -s some-agent "codex exec --ephemeral hidden work"',
+		'rtk proxy -- tmux new -s some-agent "codex exec --ephemeral hidden work"',
+		'/bin/zsh -lc \'tmux new -s some-agent "codex exec --ephemeral hidden work"\'',
+		'screen -dmS some-agent codex exec --ephemeral "hidden work"',
+		'nohup codex exec --ephemeral "hidden work" &',
+		'setsid codex exec --ephemeral "hidden work"',
+		'docker run --rm codex-runner codex exec --ephemeral "hidden work"',
+	]) {
+		await expect(runHook({ command })).resolves.toMatchObject({
+			decision: "block",
+			reason:
+				"Detached Codex delegation can hide quota usage from the managed OAL run ledger",
+			details: [
+				"Use: oal codex peer batch <task>",
+				"Use: oal codex agent <agent> <task>",
+				"Use: oal codex route <route> <task>",
 			],
 		});
 	}
