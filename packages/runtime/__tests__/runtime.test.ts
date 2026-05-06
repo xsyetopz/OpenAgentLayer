@@ -392,6 +392,8 @@ test("Codex PreToolUse block feedback avoids note prefixes", async () => {
 			hook_event_name: "PreToolUse",
 			provider: "codex",
 			command: "cat package.json",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
 		},
 		{
 			OAL_HOOK_RAW_OUTCOME: "0",
