@@ -582,9 +582,10 @@ test("session scope hook injects consent boundary at session start", async () =>
 				"current user messages and verified repo evidence define the active path",
 			),
 			expect.stringContaining("Agent use"),
+			expect.stringContaining("OpenDex/Symphony as the Codex default"),
 			expect.stringContaining("spawn rendered OAL custom agents by name"),
-			expect.stringContaining("Native subagent launch is the Codex path"),
-			expect.stringContaining("oal codex peer batch <task>"),
+			expect.stringContaining("explicit profile opt-in only"),
+			expect.stringContaining("oal opendex"),
 			expect.stringContaining("ask when blocked"),
 			expect.stringContaining("STATUS BLOCKED"),
 		]),
@@ -610,6 +611,24 @@ test("session scope hook injects consent boundary at session start", async () =>
 		}),
 	).resolves.toMatchObject({
 		decision: "pass",
+	});
+});
+
+test("subagent context hook guides Codex agents toward OpenDex orchestration", async () => {
+	await expect(
+		runNamedHook("inject-subagent-context.mjs", {
+			hook_event_name: "SubagentStart",
+		}),
+	).resolves.toMatchObject({
+		decision: "warn",
+		reason: "OAL OpenDex/Symphony subagent context",
+		details: expect.arrayContaining([
+			expect.stringContaining("OpenDex/Symphony is OAL's default"),
+			expect.stringContaining("native multi_agent and multi_agent_v2 disabled"),
+			expect.stringContaining("Parent thread owns task split"),
+			expect.stringContaining("do not spawn extra pooled threads"),
+			expect.stringContaining("oal opendex"),
+		]),
 	});
 });
 

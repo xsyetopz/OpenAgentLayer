@@ -116,7 +116,8 @@ export async function renderCodex(
 function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
 	const orchestration = resolveCodexOrchestration(options);
-	return `profile = "openagentlayer"
+	const primaryProfile = codexPrimaryProfileName(orchestration.mode);
+	return `profile = ${quoteToml(primaryProfile)}
 approvals_reviewer = "auto_review"
 
 [notice]
@@ -132,6 +133,17 @@ status_line = ["model-with-reasoning", "task-progress", "context-remaining", "fi
 ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
+	name: primaryProfile,
+	model: "gpt-5.5",
+	approvalPolicy: "on-request",
+	sandboxMode: "workspace-write",
+	...optionalReasoningEfforts(profile.plan, profile.model),
+	toolsViewImage: true,
+})}
+[profiles.${primaryProfile}.features]
+${renderCodexFeatures(orchestration)}
+
+${renderCodexProfile({
 	name: "openagentlayer",
 	model: "gpt-5.5",
 	approvalPolicy: "on-request",
@@ -143,14 +155,14 @@ ${renderCodexProfile({
 ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
-	name: "openagentlayer-implement",
+	name: `${primaryProfile}-implement`,
 	model: "gpt-5.3-codex",
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.implementPlan, profile.implementModel),
 })}
 ${renderCodexProfile({
-	name: "openagentlayer-utility",
+	name: `${primaryProfile}-utility`,
 	model: "gpt-5.4-mini",
 	approvalPolicy: "never",
 	sandboxMode: "read-only",
@@ -173,6 +185,17 @@ config_file = "./agents/${agent.id}.toml"`,
 [plugins."oal@openagentlayer-local"]
 enabled = true
 `;
+}
+
+function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
+	switch (mode) {
+		case "multi_agent":
+			return "openagentlayer-multi-agent";
+		case "multi_agent_v2":
+			return "openagentlayer-multi-agent-v2";
+		default:
+			return "openagentlayer-symphony";
+	}
 }
 
 interface CodexProfileConfig {

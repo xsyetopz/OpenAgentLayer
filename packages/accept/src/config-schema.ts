@@ -64,8 +64,10 @@ const ALLOWED_OPENCODE_PERMISSION_VALUES = new Set(["allow", "ask", "deny"]);
 
 export function assertCodexTomlSchema(toml: string): void {
 	const parsed = parseCodexToml(toml);
-	if (parsed.profile !== "openagentlayer")
+	if (!parsed.profile?.startsWith("openagentlayer"))
 		throw new Error("Codex config does not activate OAL profile");
+	if (!parsed.profiles[parsed.profile])
+		throw new Error("Codex config active profile is not rendered");
 	if (parsed.approvals_reviewer !== "auto_review")
 		throw new Error("Codex config does not enable auto approval review");
 	if (parsed.memories["extract_model"] !== "gpt-5.4-mini")

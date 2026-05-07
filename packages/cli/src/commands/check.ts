@@ -6,6 +6,7 @@ import { expandProviders } from "../provider-binaries";
 import { renderableSourceReport } from "../source";
 
 const CODEX_COLOR_FIELD = /^color\s*=/m;
+const CODEX_OAL_PROFILE = /profile = "openagentlayer(?:-[^"]+)?"/;
 
 export async function runCheckCommand(
 	repoRoot: string,
@@ -136,7 +137,7 @@ async function assertCodexInstalled(
 		throw new Error(
 			"Installed Codex agent TOML needs Codex schema fields without `color`",
 		);
-	if (!config.content.includes('profile = "openagentlayer"'))
+	if (!CODEX_OAL_PROFILE.test(config.content))
 		throw new Error("Installed Codex config needs OAL profile activation");
 	if (!config.content.includes('[plugins."oal@openagentlayer-local"]'))
 		throw new Error("Installed Codex config needs `$oal` plugin activation");

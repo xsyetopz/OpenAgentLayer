@@ -295,6 +295,11 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
 	expect(config).not.toContain("zsh_path");
+	expect(config).toContain('profile = "openagentlayer-symphony"');
+	expect(config).toContain("[profiles.openagentlayer-symphony]");
+	expect(config).toContain("[profiles.openagentlayer-symphony.features]");
+	expect(config).toContain("[profiles.openagentlayer-symphony-implement]");
+	expect(config).toContain("[profiles.openagentlayer-symphony-utility]");
 	expect(config).not.toContain("model_instructions_file");
 	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
@@ -342,6 +347,17 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		"Operators can opt into stable `multi_agent` or `multi_agent_v2` through OAL CLI setup options",
 	);
 	expect(instructions).toContain("Use Symphony or peer-thread orchestration");
+	const hooks = JSON.parse(
+		rendered.artifacts.find((artifact) => artifact.path === ".codex/hooks.json")
+			?.content ?? "{}",
+	) as { hooks: Record<string, Array<{ hooks: Array<{ command: string }> }>> };
+	expect(
+		hooks.hooks["SubagentStart"]?.some((group) =>
+			group.hooks.some((hook) =>
+				hook.command.includes("inject-subagent-context.mjs"),
+			),
+		),
+	).toBe(true);
 });
 
 test("Codex native orchestration modes render bounded settings", async () => {
@@ -357,6 +373,11 @@ test("Codex native orchestration modes render bounded settings", async () => {
 	const stableConfig = stable.artifacts.find(
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
+	expect(stableConfig).toContain('profile = "openagentlayer-multi-agent"');
+	expect(stableConfig).toContain("[profiles.openagentlayer-multi-agent]");
+	expect(stableConfig).toContain(
+		"[profiles.openagentlayer-multi-agent.features]",
+	);
 	expect(stableConfig).toContain("apps = false");
 	expect(stableConfig).toContain("multi_agent = true");
 	expect(stableConfig).toContain("multi_agent_v2 = false");
@@ -382,6 +403,11 @@ test("Codex native orchestration modes render bounded settings", async () => {
 	const v2Config = v2.artifacts.find(
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
+	expect(v2Config).toContain('profile = "openagentlayer-multi-agent-v2"');
+	expect(v2Config).toContain("[profiles.openagentlayer-multi-agent-v2]");
+	expect(v2Config).toContain(
+		"[profiles.openagentlayer-multi-agent-v2.features]",
+	);
 	expect(v2Config).toContain("apps = false");
 	expect(v2Config).toContain("multi_agent = false");
 	expect(v2Config).toContain("max_depth = 2");

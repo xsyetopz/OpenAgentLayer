@@ -2,10 +2,14 @@
   "id": "inject_subagent_context",
   "script": "inject-subagent-context.mjs",
   "providers": [
+    "codex",
     "claude",
     "opencode"
   ],
   "events": {
+    "codex": [
+      "SubagentStart"
+    ],
     "claude": [
       "SubagentStart"
     ],
