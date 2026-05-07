@@ -9,6 +9,8 @@ export interface BinPlan {
 	path: string;
 	reason: string;
 	content: string;
+	opendexPath: string;
+	opendexContent: string;
 }
 
 export interface BinManifest {
@@ -17,24 +19,35 @@ export interface BinManifest {
 	path: string;
 	hash: string;
 	source: string;
+	opendexPath?: string;
+	opendexHash?: string;
 }
 
 export function planBinInstall(binDir: string, entrypoint: string): BinPlan {
 	const path = join(binDir, "oal");
+	const opendexPath = join(binDir, "opendex");
 	return {
 		action: "write",
 		path,
 		reason: "owned CLI shim",
 		content: renderShim(entrypoint),
+		opendexPath,
+		opendexContent: renderShim(entrypoint, ["opendex"]),
 	};
 }
 
 export async function refineBinPlan(plan: BinPlan): Promise<BinPlan> {
 	try {
-		const current = await readFile(plan.path, "utf8");
+		const [current, opendexCurrent] = await Promise.all([
+			readFile(plan.path, "utf8"),
+			readFile(plan.opendexPath, "utf8"),
+		]);
 		return {
 			...plan,
-			action: current === plan.content ? "skip" : "update",
+			action:
+				current === plan.content && opendexCurrent === plan.opendexContent
+					? "skip"
+					: "update",
 		};
 	} catch {
 		return plan;
@@ -49,12 +62,16 @@ export async function applyBinInstall(
 	await mkdir(dirname(plan.path), { recursive: true });
 	await writeFile(plan.path, plan.content, { mode: 0o755 });
 	await chmod(plan.path, 0o755);
+	await writeFile(plan.opendexPath, plan.opendexContent, { mode: 0o755 });
+	await chmod(plan.opendexPath, 0o755);
 	await writeManifest(home, {
 		product: "OpenAgentLayer",
 		version: 1,
 		path: plan.path,
 		hash: hash(plan.content),
 		source: entrypoint,
+		opendexPath: plan.opendexPath,
+		opendexHash: hash(plan.opendexContent),
 	});
 }
 
@@ -67,12 +84,15 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 		const current = await readFile(manifest.path, "utf8");
 		if (hash(current) === manifest.hash) {
 			await rm(manifest.path);
+			await removeOwnedOpenDexShim(manifest);
 			await rm(manifestPath);
 			return {
 				action: "remove",
 				path: manifest.path,
 				reason: "owned CLI shim hash matched",
 				content: current,
+				opendexPath: manifest.opendexPath ?? "",
+				opendexContent: "",
 			};
 		}
 		return {
@@ -80,14 +100,19 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 			path: manifest.path,
 			reason: "user modified CLI shim",
 			content: current,
+			opendexPath: manifest.opendexPath ?? "",
+			opendexContent: "",
 		};
 	} catch {
+		await removeOwnedOpenDexShim(manifest);
 		await rm(manifestPath);
 		return {
 			action: "skip",
 			path: manifest.path,
 			reason: "CLI shim already absent",
 			content: "",
+			opendexPath: manifest.opendexPath ?? "",
+			opendexContent: "",
 		};
 	}
 }
@@ -103,13 +128,24 @@ export function pathContains(
 	return pathEnv.split(":").includes(directory);
 }
 
-function renderShim(entrypoint: string): string {
+function renderShim(entrypoint: string, prefixArgs: string[] = []): string {
+	const prefix = prefixArgs.map((arg) => JSON.stringify(arg)).join(" ");
 	return [
 		"#!/usr/bin/env sh",
 		"set -eu",
-		`exec bun ${JSON.stringify(entrypoint)} "$@"`,
+		`exec bun ${JSON.stringify(entrypoint)}${prefix ? ` ${prefix}` : ""} "$@"`,
 		"",
 	].join("\n");
+}
+
+async function removeOwnedOpenDexShim(manifest: BinManifest): Promise<void> {
+	if (!(manifest.opendexPath && manifest.opendexHash)) return;
+	try {
+		const current = await readFile(manifest.opendexPath, "utf8");
+		if (hash(current) === manifest.opendexHash) await rm(manifest.opendexPath);
+	} catch {
+		// Missing secondary shim is already the desired removal state.
+	}
 }
 
 async function writeManifest(

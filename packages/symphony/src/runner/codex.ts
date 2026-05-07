@@ -348,7 +348,7 @@ function linearGraphqlToolSpec(): Record<string, unknown> {
 	return {
 		name: "linear_graphql",
 		description:
-			"Run a raw Linear GraphQL query or mutation with Symphony's configured Linear authentication.",
+			"Run a raw Linear GraphQL query or mutation with Symphony's configured Linear authentication",
 		inputSchema: {
 			type: "object",
 			additionalProperties: false,

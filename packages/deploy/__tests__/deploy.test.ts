@@ -3,10 +3,14 @@ import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+	applyBinInstall,
 	applyDeploy,
+	binManifestPath,
 	globalArtifacts,
+	planBinInstall,
 	planDeploy,
 	planDeployDiffs,
+	removeBinInstall,
 	renderDeployDiffs,
 	uninstall,
 } from "../src";
@@ -136,4 +140,25 @@ test("dry-run diffs render merged generated artifact changes without writing", a
 		readFile(join(root, ".codex/openagentlayer/new.txt"), "utf8"),
 	).rejects.toThrow();
 	await rm(root, { recursive: true, force: true });
+});
+
+test("bin install owns oal and opendex shims", async () => {
+	const home = await mkdtemp(join(tmpdir(), "oal-bin-install-"));
+	const binDir = join(home, "bin");
+	const entrypoint = "/repo/packages/cli/src/main.ts";
+	const plan = planBinInstall(binDir, entrypoint);
+	await applyBinInstall(home, plan, entrypoint);
+	expect(await readFile(join(binDir, "oal"), "utf8")).toContain(
+		`exec bun ${JSON.stringify(entrypoint)} "$@"`,
+	);
+	expect(await readFile(join(binDir, "opendex"), "utf8")).toContain(
+		`exec bun ${JSON.stringify(entrypoint)} "opendex" "$@"`,
+	);
+	expect(await readFile(binManifestPath(home), "utf8")).toContain(
+		'"opendexPath"',
+	);
+	await removeBinInstall(home);
+	await expect(readFile(join(binDir, "oal"), "utf8")).rejects.toThrow();
+	await expect(readFile(join(binDir, "opendex"), "utf8")).rejects.toThrow();
+	await rm(home, { recursive: true, force: true });
 });

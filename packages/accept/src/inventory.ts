@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const TRACKED_PRODUCT_ROOTS = [
+	"crates",
 	"packages",
 	"source",
 	"tests",
@@ -22,6 +23,8 @@ const ROOT_PRODUCT_FILES = [
 	"SECURITY.md",
 	"upstream-sources.lock.json",
 	"bunfig.toml",
+	"Cargo.toml",
+	"Cargo.lock",
 ] as const;
 const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin"] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;

@@ -15,6 +15,7 @@ cask "openagentlayer" do
   depends_on formula: "bun"
 
   binary "bin/oal", target: "oal"
+  binary "bin/opendex", target: "opendex"
 
   caveats do
     <<~EOS

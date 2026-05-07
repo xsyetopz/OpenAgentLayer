@@ -11,6 +11,7 @@ material only and is not part of the OAL release line.
 
 - Added OpenDex as an OAL product surface with a Rust `opendex` workspace crate, binary entry point, split control-plane modules, usage guardrails, snapshot persistence, and daemon routes for Robdex-style project, thread, handoff, approval, process, state, replay, and orchestrator bridge workflows.
 - Added OAL CLI `opendex` command wiring so Codex/OAL can run the Rust binary through the existing CLI.
+- Added `opendex` as an owned installed shim next to `oal` so users get an OpenDex command on PATH from `oal bin` and packaged installs.
 - Added Codex orchestration setup options for `symphony`, `multi_agent`, and `multi_agent_v2`, including v2-specific bounds and usage-hint settings from the upstream Codex schema.
 - Added upstream Symphony submodule integration and Symphony/OpenDex package exports for OAL-managed orchestration.
 
@@ -19,6 +20,7 @@ material only and is not part of the OAL release line.
 - Changed managed Codex defaults to prefer OpenDex/Symphony with `apps = true`, bounded depth/thread defaults, and native multi-agent modes disabled unless explicitly selected.
 - Changed Codex baseline prompts to reject god objects and require module seams before broad implementation work.
 - Changed release metadata from `0.5.1-beta.3` to `0.6.0-beta.1` across package, Rust workspace, plugin, Homebrew, and source product records.
+- Changed acceptance inventory to treat the Rust workspace and `crates/` OpenDex sources as connected product files.
 
 ### Verified
 
