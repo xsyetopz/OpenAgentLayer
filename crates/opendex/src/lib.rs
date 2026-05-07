@@ -24,6 +24,9 @@ pub use types::{
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env::temp_dir;
+    use std::fs::{read_to_string, remove_file};
+    use std::process::id;
 
     fn project_input() -> ProjectInput {
         ProjectInput {
@@ -412,18 +415,23 @@ mod tests {
     fn file_snapshot_store_persists_control_plane_state() {
         let mut control_plane = ControlPlane::new();
         control_plane.register_project(project_input()).unwrap();
-        let path = std::env::temp_dir().join(format!(
+        let path = temp_dir().join(format!(
             "opendex-test-{}-{}.json",
-            std::process::id(),
+            id(),
             control_plane.snapshot()[0].created_at_ms
         ));
         let store = FileSnapshotStore::new(path.clone());
 
         store.save(&control_plane).unwrap();
-        let saved = std::fs::read_to_string(&path).unwrap();
-        assert!(saved.contains("\"schema\":\"opendex.snapshot.v1\""));
+        let saved = read_to_string(&path).unwrap();
+        assert!(saved.contains("\"schema\": \"opendex.snapshot.v1\""));
         assert!(saved.contains("\"project-oal\""));
-        std::fs::remove_file(path).unwrap();
+        let loaded = store.load().unwrap().unwrap();
+        assert_eq!(
+            loaded.project("project-oal").unwrap().name,
+            "OpenAgentLayer"
+        );
+        remove_file(path).unwrap();
     }
 }
 

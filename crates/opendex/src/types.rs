@@ -1,12 +1,13 @@
 use crate::events::Event;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum WorkerRole {
     Worker,
     Qa,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum AgentStatus {
     Running,
     Waiting,
@@ -15,7 +16,7 @@ pub enum AgentStatus {
     Archived,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum ArtifactKind {
     Handoff,
     Diff,
@@ -26,14 +27,14 @@ pub enum ArtifactKind {
     Log,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum DecisionKind {
     Continue,
     Approved,
     Blocked,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ProjectInput {
     pub id: Option<String>,
     pub name: String,
@@ -41,7 +42,7 @@ pub struct ProjectInput {
     pub orchestrator_thread_id: Option<String>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SpawnInput {
     pub role: WorkerRole,
     pub task: String,
@@ -53,7 +54,7 @@ pub struct SpawnInput {
     pub depth: u32,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ArtifactInput {
     pub kind: ArtifactKind,
     pub path: Option<String>,
@@ -61,20 +62,20 @@ pub struct ArtifactInput {
     pub description: Option<String>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct MessageInput {
     pub text: String,
     pub final_message: bool,
     pub artifact_ids: Vec<String>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct DecisionInput {
     pub kind: DecisionKind,
     pub note: Option<String>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Project {
     pub id: String,
     pub name: String,
@@ -86,7 +87,7 @@ pub struct Project {
     pub created_at_ms: u128,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Agent {
     pub id: String,
     pub project_id: String,
@@ -104,7 +105,7 @@ pub struct Agent {
     pub archived_at_ms: Option<u128>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Artifact {
     pub id: String,
     pub project_id: String,
@@ -116,7 +117,7 @@ pub struct Artifact {
     pub created_at_ms: u128,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Message {
     pub id: String,
     pub thread_id: String,
@@ -126,7 +127,7 @@ pub struct Message {
     pub created_at_ms: u128,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InboxEntry {
     pub id: String,
     pub project_id: String,

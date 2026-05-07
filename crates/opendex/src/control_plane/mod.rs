@@ -11,6 +11,7 @@ use crate::error::{OpenDexError, OpenDexResult};
 use crate::guardrails::{ThreadUsage, UsageGuardrails};
 use crate::runtime::{LiveProcess, PendingApproval};
 use crate::store::StoredProject;
+use crate::types::Project;
 
 #[derive(Default)]
 pub struct ControlPlane {
@@ -66,4 +67,55 @@ impl ControlPlane {
         self.sequence += 1;
         format!("{prefix}-{}", self.sequence)
     }
+
+    pub fn from_projects(projects: Vec<Project>) -> Self {
+        let mut control_plane = Self::new();
+        for project in projects {
+            let project_id = project.id.clone();
+            let agents = project
+                .agents
+                .into_iter()
+                .map(|agent| {
+                    control_plane
+                        .agent_ids_by_thread
+                        .insert(agent.thread_id.clone(), agent.id.clone());
+                    control_plane
+                        .project_ids_by_thread
+                        .insert(agent.thread_id.clone(), project_id.clone());
+                    control_plane.sequence = control_plane.sequence.max(id_suffix(&agent.id));
+                    control_plane.sequence =
+                        control_plane.sequence.max(id_suffix(&agent.thread_id));
+                    (agent.id.clone(), agent)
+                })
+                .collect();
+            for event in &project.events {
+                control_plane.sequence = control_plane.sequence.max(id_suffix(&event.id));
+            }
+            for entry in &project.inbox {
+                control_plane.sequence = control_plane.sequence.max(id_suffix(&entry.id));
+            }
+            control_plane.sequence = control_plane.sequence.max(id_suffix(&project.id));
+            control_plane.projects.insert(
+                project_id.clone(),
+                StoredProject {
+                    id: project.id,
+                    name: project.name,
+                    root: project.root,
+                    orchestrator_thread_id: project.orchestrator_thread_id,
+                    agents,
+                    inbox: project.inbox,
+                    events: project.events,
+                    created_at_ms: project.created_at_ms,
+                },
+            );
+        }
+        control_plane
+    }
+}
+
+fn id_suffix(value: &str) -> u64 {
+    value
+        .rsplit_once('-')
+        .and_then(|(_, suffix)| suffix.parse().ok())
+        .unwrap_or_default()
 }

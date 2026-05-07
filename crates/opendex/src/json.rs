@@ -17,13 +17,6 @@ pub(crate) fn events_json(events: &[Event]) -> String {
     format!("{{\"events\":[{body}]}}")
 }
 
-pub(crate) fn snapshot_json(projects: &[Project]) -> String {
-    format!(
-        "{{\"schema\":\"opendex.snapshot.v1\",\"state\":{}}}",
-        projects_json(projects)
-    )
-}
-
 pub(crate) fn event_json(event: &Event) -> String {
     format!(
         "{{\"id\":\"{}\",\"project_id\":\"{}\",\"kind\":\"{}\",\"thread_id\":{},\"agent_id\":{},\"message\":{},\"created_at_ms\":{}}}",

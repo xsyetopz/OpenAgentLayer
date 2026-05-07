@@ -1,4 +1,6 @@
-#[derive(Clone, Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct UsageGuardrails {
     pub max_open_workers: usize,
     pub max_depth: u32,
@@ -19,7 +21,7 @@ impl Default for UsageGuardrails {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ThreadUsage {
     pub thread_id: String,
     pub input_units: u64,
@@ -28,7 +30,7 @@ pub struct ThreadUsage {
     pub last_active_ms: u128,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct UsageInput {
     pub thread_id: String,
     pub input_units: u64,

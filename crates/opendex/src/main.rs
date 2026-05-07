@@ -1,9 +1,11 @@
 use std::env;
 use std::path::PathBuf;
+use std::process::exit;
 
 use opendex::{ControlPlane, DaemonConfig, OpenDexDaemon};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut args = env::args().skip(1);
     let Some(command) = args.next() else {
         println!("opendex {}", env!("CARGO_PKG_VERSION"));
@@ -38,14 +40,14 @@ fn main() {
                     request_limit,
                 },
             );
-            if let Err(error) = daemon.serve(address) {
+            if let Err(error) = daemon.serve_async(&address).await {
                 eprintln!("opendex serve failed: {error}");
-                std::process::exit(1);
+                exit(1);
             }
         }
         _ => {
             eprintln!("unknown opendex command: {command}");
-            std::process::exit(2);
+            exit(2);
         }
     }
 }

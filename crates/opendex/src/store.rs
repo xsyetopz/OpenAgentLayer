@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::error::{OpenDexError, OpenDexResult};
 use crate::events::Event;
-use crate::types::{Agent, Project, WorkerRole};
+use crate::types::{Agent, InboxEntry, Project, WorkerRole};
 
 #[derive(Clone)]
 pub(crate) struct StoredProject {
@@ -12,7 +12,7 @@ pub(crate) struct StoredProject {
     pub(crate) root: String,
     pub(crate) orchestrator_thread_id: Option<String>,
     pub(crate) agents: BTreeMap<String, Agent>,
-    pub(crate) inbox: Vec<crate::types::InboxEntry>,
+    pub(crate) inbox: Vec<InboxEntry>,
     pub(crate) events: Vec<Event>,
     pub(crate) created_at_ms: u128,
 }

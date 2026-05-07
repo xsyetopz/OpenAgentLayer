@@ -1,4 +1,6 @@
-#[derive(Clone, Debug, Eq, PartialEq)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct PendingApproval {
     pub id: String,
     pub thread_id: String,
@@ -9,13 +11,13 @@ pub struct PendingApproval {
     pub resolved_at_ms: Option<u128>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ApprovalInput {
     pub thread_id: String,
     pub prompt: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct LiveProcess {
     pub id: String,
     pub thread_id: String,
@@ -27,7 +29,7 @@ pub struct LiveProcess {
     pub completed_at_ms: Option<u128>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct LiveProcessInput {
     pub thread_id: String,
     pub pid: u32,

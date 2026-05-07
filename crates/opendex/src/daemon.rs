@@ -1,18 +1,32 @@
 use std::io::{self, Read, Write};
+use std::mem::take;
 use std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use std::path::PathBuf;
+use std::str::from_utf8;
+use std::sync::Arc;
 use std::time::Duration;
+
+use axum::extract::ws::{Message as WsMessage, WebSocket, WebSocketUpgrade};
+use axum::extract::{Path as AxumPath, State};
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::routing::{delete, get, post};
+use axum::{Json, Router};
+use serde::Deserialize;
+use serde_json::json;
+use tokio::sync::Mutex;
 
 use crate::control_plane::ControlPlane;
 use crate::json::{events_json, projects_json};
 use crate::persistence::{FileSnapshotStore, SnapshotStore};
 use crate::{
     ApprovalInput, ArtifactInput, ArtifactKind, DecisionInput, DecisionKind, LiveProcessInput,
-    MessageInput, ProjectInput, SpawnInput, UsageInput, WorkerRole,
+    MessageInput, OpenDexResult, ProjectInput, SpawnInput, UsageInput, WorkerRole,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DaemonConfig {
-    pub state_path: Option<std::path::PathBuf>,
+    pub state_path: Option<PathBuf>,
     pub request_limit: Option<usize>,
 }
 
@@ -27,6 +41,12 @@ impl Default for DaemonConfig {
 
 pub struct OpenDexDaemon {
     control_plane: ControlPlane,
+    config: DaemonConfig,
+}
+
+#[derive(Clone)]
+struct AppState {
+    control_plane: Arc<Mutex<ControlPlane>>,
     config: DaemonConfig,
 }
 
@@ -58,6 +78,22 @@ impl OpenDexDaemon {
             }
         }
         self.persist()
+    }
+
+    pub async fn serve_async(&mut self, address: &str) -> io::Result<()> {
+        if let Some(path) = self.config.state_path.clone()
+            && let Some(loaded) = FileSnapshotStore::new(path).load()?
+        {
+            self.control_plane = loaded;
+        }
+        let state = AppState {
+            control_plane: Arc::new(Mutex::new(take(&mut self.control_plane))),
+            config: self.config.clone(),
+        };
+        let listener = tokio::net::TcpListener::bind(address).await?;
+        axum::serve(listener, router(state))
+            .await
+            .map_err(io::Error::other)
     }
 
     pub fn handle_request(&mut self, request: &str) -> HttpResponse {
@@ -483,6 +519,411 @@ fn response(status_code: u16, status_text: &'static str, body: &str) -> HttpResp
     }
 }
 
+fn router(state: AppState) -> Router {
+    Router::new()
+        .route("/health", get(health))
+        .route("/healthz", get(health))
+        .route("/info", get(info))
+        .route("/state", get(state_snapshot))
+        .route("/state/app", get(state_snapshot))
+        .route("/state/snapshot", get(state_snapshot))
+        .route("/workbench/bootstrap", get(state_snapshot))
+        .route("/events/replay", get(events_replay))
+        .route("/projects", post(project_create))
+        .route(
+            "/projects/{project_id}/orchestrator",
+            post(project_orchestrator),
+        )
+        .route("/projects/{project_id}/agents", post(project_agent_spawn))
+        .route("/projects/{project_id}/events", get(project_events))
+        .route(
+            "/threads/{thread_id}/artifacts",
+            post(thread_artifact_create),
+        )
+        .route("/threads/{thread_id}/messages", post(thread_message_create))
+        .route("/threads/{thread_id}/usage", post(thread_usage_record))
+        .route(
+            "/threads/{thread_id}/approvals",
+            post(thread_approval_create),
+        )
+        .route("/approvals/{approval_id}/resolve", post(approval_resolve))
+        .route(
+            "/threads/{thread_id}/processes/register",
+            post(thread_process_register),
+        )
+        .route(
+            "/threads/{thread_id}/processes/{process_id}/complete",
+            post(thread_process_complete),
+        )
+        .route("/threads/{thread_id}/decide", post(thread_decide))
+        .route("/threads/{thread_id}/archive", post(thread_archive))
+        .route("/threads/{thread_id}", delete(thread_archive))
+        .route("/orchestrator/spawn-agent", post(orchestrator_spawn_agent))
+        .route("/orchestrator/agent-message", post(orchestrator_message))
+        .route("/orchestrator/warm-handoff", post(orchestrator_message))
+        .route(
+            "/orchestrator/archive-agent",
+            post(orchestrator_archive_agent),
+        )
+        .route(
+            "/orchestrator/approval-decision",
+            post(orchestrator_approval_decision),
+        )
+        .route("/orchestrator/pending-approvals", get(pending_approvals))
+        .route("/orchestrator/lookup", get(state_snapshot))
+        .route("/orchestrator/threads", get(state_snapshot))
+        .route("/orchestrator/agents", get(state_snapshot))
+        .route("/ws", get(ws_events))
+        .route("/workbench/ws", get(ws_events))
+        .with_state(state)
+}
+
+async fn health() -> impl IntoResponse {
+    Json(json!({ "status": "ok", "product": "OpenDex" }))
+}
+
+async fn info(State(state): State<AppState>) -> impl IntoResponse {
+    Json(json!({
+        "product": "OpenDex",
+        "version": env!("CARGO_PKG_VERSION"),
+        "state_path": state.config.state_path.map(|path| path.display().to_string())
+    }))
+}
+
+async fn state_snapshot(State(state): State<AppState>) -> impl IntoResponse {
+    let control_plane = state.control_plane.lock().await;
+    Json(json!({ "projects": control_plane.snapshot() }))
+}
+
+async fn events_replay(State(state): State<AppState>) -> impl IntoResponse {
+    let control_plane = state.control_plane.lock().await;
+    Json(json!({ "events": control_plane.replay_all_events() }))
+}
+
+async fn project_events(
+    State(state): State<AppState>,
+    AxumPath(project_id): AxumPath<String>,
+) -> impl IntoResponse {
+    let control_plane = state.control_plane.lock().await;
+    Json(json!({ "events": control_plane.replay_events(&project_id, None) }))
+}
+
+async fn project_create(
+    State(state): State<AppState>,
+    Json(input): Json<ProjectInput>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.register_project(input)?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct AttachOrchestratorRequest {
+    thread_id: String,
+}
+
+async fn project_orchestrator(
+    State(state): State<AppState>,
+    AxumPath(project_id): AxumPath<String>,
+    Json(input): Json<AttachOrchestratorRequest>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.attach_orchestrator(&project_id, input.thread_id)?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct SpawnAgentRequest {
+    orchestrator_thread_id: String,
+    #[serde(flatten)]
+    input: SpawnInput,
+}
+
+async fn project_agent_spawn(
+    State(state): State<AppState>,
+    AxumPath(project_id): AxumPath<String>,
+    Json(request): Json<SpawnAgentRequest>,
+) -> impl IntoResponse {
+    spawn_agent(state, &project_id, request).await
+}
+
+#[derive(Deserialize)]
+struct OrchestratorSpawnRequest {
+    project_id: String,
+    #[serde(flatten)]
+    request: SpawnAgentRequest,
+}
+
+async fn orchestrator_spawn_agent(
+    State(state): State<AppState>,
+    Json(input): Json<OrchestratorSpawnRequest>,
+) -> impl IntoResponse {
+    spawn_agent(state, &input.project_id, input.request).await
+}
+
+async fn spawn_agent(
+    state: AppState,
+    project_id: &str,
+    request: SpawnAgentRequest,
+) -> axum::response::Response {
+    mutate(state, |control_plane| {
+        control_plane.spawn_agent(project_id, &request.orchestrator_thread_id, request.input)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn thread_artifact_create(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(input): Json<ArtifactInput>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.record_artifact(&thread_id, input)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn thread_message_create(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(input): Json<MessageInput>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.record_message(&thread_id, input)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn orchestrator_message(
+    State(state): State<AppState>,
+    Json(input): Json<OrchestratorMessageRequest>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.record_message(
+            &input.thread_id,
+            MessageInput {
+                text: input.text,
+                final_message: true,
+                artifact_ids: input.artifact_ids,
+            },
+        )?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct OrchestratorMessageRequest {
+    thread_id: String,
+    text: String,
+    #[serde(default)]
+    artifact_ids: Vec<String>,
+}
+
+async fn thread_usage_record(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(mut input): Json<UsageInput>,
+) -> impl IntoResponse {
+    input.thread_id = thread_id;
+    mutate(state, |control_plane| {
+        control_plane.record_usage(input)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn thread_approval_create(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(mut input): Json<ApprovalInput>,
+) -> impl IntoResponse {
+    input.thread_id = thread_id;
+    mutate(state, |control_plane| {
+        control_plane.request_approval(input)?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct ApprovalDecisionRequest {
+    approved: bool,
+}
+
+async fn approval_resolve(
+    State(state): State<AppState>,
+    AxumPath(approval_id): AxumPath<String>,
+    Json(input): Json<ApprovalDecisionRequest>,
+) -> impl IntoResponse {
+    resolve_approval(state, &approval_id, input.approved).await
+}
+
+#[derive(Deserialize)]
+struct OrchestratorApprovalDecisionRequest {
+    approval_id: String,
+    approved: bool,
+}
+
+async fn orchestrator_approval_decision(
+    State(state): State<AppState>,
+    Json(input): Json<OrchestratorApprovalDecisionRequest>,
+) -> impl IntoResponse {
+    resolve_approval(state, &input.approval_id, input.approved).await
+}
+
+async fn resolve_approval(
+    state: AppState,
+    approval_id: &str,
+    approved: bool,
+) -> axum::response::Response {
+    mutate(state, |control_plane| {
+        control_plane.resolve_approval(approval_id, approved)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn thread_process_register(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(mut input): Json<LiveProcessInput>,
+) -> impl IntoResponse {
+    input.thread_id = thread_id;
+    mutate(state, |control_plane| {
+        control_plane.register_live_process(input)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn thread_process_complete(
+    State(state): State<AppState>,
+    AxumPath((thread_id, process_id)): AxumPath<(String, String)>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.complete_live_process(&thread_id, &process_id)?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct ContinuationRequest {
+    orchestrator_thread_id: String,
+    #[serde(flatten)]
+    input: DecisionInput,
+}
+
+async fn thread_decide(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(input): Json<ContinuationRequest>,
+) -> impl IntoResponse {
+    mutate(state, |control_plane| {
+        control_plane.decide_continuation(
+            &input.orchestrator_thread_id,
+            &thread_id,
+            input.input,
+        )?;
+        Ok(())
+    })
+    .await
+}
+
+#[derive(Deserialize)]
+struct ArchiveRequest {
+    orchestrator_thread_id: String,
+}
+
+async fn thread_archive(
+    State(state): State<AppState>,
+    AxumPath(thread_id): AxumPath<String>,
+    Json(input): Json<ArchiveRequest>,
+) -> impl IntoResponse {
+    archive_agent(state, &input.orchestrator_thread_id, &thread_id).await
+}
+
+#[derive(Deserialize)]
+struct OrchestratorArchiveRequest {
+    orchestrator_thread_id: String,
+    thread_id: String,
+}
+
+async fn orchestrator_archive_agent(
+    State(state): State<AppState>,
+    Json(input): Json<OrchestratorArchiveRequest>,
+) -> impl IntoResponse {
+    archive_agent(state, &input.orchestrator_thread_id, &input.thread_id).await
+}
+
+async fn archive_agent(
+    state: AppState,
+    orchestrator_thread_id: &str,
+    thread_id: &str,
+) -> axum::response::Response {
+    mutate(state, |control_plane| {
+        control_plane.archive_agent(orchestrator_thread_id, thread_id)?;
+        Ok(())
+    })
+    .await
+}
+
+async fn pending_approvals(State(state): State<AppState>) -> impl IntoResponse {
+    let control_plane = state.control_plane.lock().await;
+    Json(json!({ "pending_approvals": control_plane.pending_approvals() }))
+}
+
+async fn ws_events(State(state): State<AppState>, ws: WebSocketUpgrade) -> impl IntoResponse {
+    ws.on_upgrade(|socket| async move { send_ws_events(state, socket).await })
+}
+
+async fn send_ws_events(state: AppState, mut socket: WebSocket) {
+    let events = {
+        let control_plane = state.control_plane.lock().await;
+        control_plane.replay_all_events()
+    };
+    if let Ok(text) = serde_json::to_string(&json!({ "events": events })) {
+        let _ = socket.send(WsMessage::Text(text.into())).await;
+    }
+    let _ = socket.send(WsMessage::Close(None)).await;
+}
+
+async fn mutate(
+    state: AppState,
+    action: impl FnOnce(&mut ControlPlane) -> OpenDexResult<()>,
+) -> axum::response::Response {
+    let mut control_plane = state.control_plane.lock().await;
+    match action(&mut control_plane) {
+        Ok(()) => {
+            let persist_result = match state.config.state_path.clone() {
+                Some(path) => FileSnapshotStore::new(path).save(&control_plane),
+                None => Ok(()),
+            };
+            match persist_result {
+                Ok(()) => (StatusCode::OK, Json(json!({ "ok": true }))).into_response(),
+                Err(error) => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": format!("persist failed: {error}") })),
+                )
+                    .into_response(),
+            }
+        }
+        Err(error) => (
+            StatusCode::CONFLICT,
+            Json(json!({ "error": error.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
 struct Query {
     values: Vec<(String, String)>,
 }
@@ -590,7 +1031,7 @@ fn decode(value: &str) -> String {
                 let high = bytes.next();
                 let low = bytes.next();
                 if let (Some(high), Some(low)) = (high, low)
-                    && let Ok(hex) = std::str::from_utf8(&[high, low])
+                    && let Ok(hex) = from_utf8(&[high, low])
                     && let Ok(decoded) = u8::from_str_radix(hex, 16)
                 {
                     output.push(decoded as char);
