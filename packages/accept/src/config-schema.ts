@@ -15,7 +15,7 @@ interface CodexToml {
 	approvals_reviewer?: string;
 	memories: Record<string, unknown>;
 	profiles: Record<string, CodexProfile>;
-	features: Record<string, Record<string, boolean>>;
+	features: Record<string, Record<string, unknown>>;
 	agents: Record<string, unknown>;
 	plugins: Record<string, { enabled?: boolean }>;
 }
@@ -106,7 +106,8 @@ export function assertCodexTomlSchema(toml: string): void {
 				throw new Error(
 					`Codex profile ${profileName} emits unsupported feature ${feature}`,
 				);
-			if (typeof value !== "boolean")
+			if (feature === "multi_agent_v2") assertMultiAgentV2Feature(value);
+			else if (typeof value !== "boolean")
 				throw new Error(`Codex feature \`${feature}\` is not boolean`);
 		}
 	}
@@ -194,10 +195,10 @@ function parseCodexToml(toml: string): CodexToml {
 		if (section.startsWith("profiles.") && section.endsWith(".features")) {
 			const profile = section.split(".")[1] ?? "";
 			parsed.features[profile] ??= {};
-			parsed.features[profile][key] = value as boolean;
+			parsed.features[profile][key] = value;
 		} else if (section === "features") {
 			parsed.features[""] ??= {};
-			parsed.features[""][key] = value as boolean;
+			parsed.features[""][key] = value;
 		} else if (section.startsWith("profiles.")) {
 			const profile = section.split(".")[1] ?? "";
 			parsed.profiles[profile] ??= {};
@@ -225,14 +226,71 @@ function splitAssignment(line: string): [string, string] {
 	return [line.slice(0, index).trim(), line.slice(index + 1).trim()];
 }
 
-function parseTomlValue(rawValue: string): string | boolean | number {
+function assertMultiAgentV2Feature(value: unknown): void {
+	if (typeof value === "boolean") return;
+	const record = asRecord(value, "Codex multi_agent_v2 feature");
+	if (record["enabled"] !== true)
+		throw new Error("Codex multi_agent_v2 object must set enabled = true");
+	if (
+		"max_concurrent_threads_per_session" in record &&
+		!(typeof record["max_concurrent_threads_per_session"] === "number")
+	)
+		throw new Error(
+			"Codex multi_agent_v2 max_concurrent_threads_per_session must be numeric",
+		);
+}
+
+function parseTomlValue(
+	rawValue: string,
+): string | boolean | number | Record<string, unknown> {
 	const value = stripTomlComment(rawValue);
 	if (value === "true") return true;
 	if (value === "false") return false;
 	if (TOML_INTEGER_PATTERN.test(value)) return Number(value);
 	if (value.startsWith('"') && value.endsWith('"'))
 		return JSON.parse(value) as string;
+	if (value.startsWith("{") && value.endsWith("}"))
+		return parseTomlInlineTable(value);
 	return value;
+}
+
+function parseTomlInlineTable(value: string): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	const body = value.slice(1, -1).trim();
+	if (!body) return result;
+	for (const entry of splitInlineTableEntries(body)) {
+		const [key, rawEntryValue] = splitAssignment(entry.trim());
+		result[key] = parseTomlValue(rawEntryValue);
+	}
+	return result;
+}
+
+function splitInlineTableEntries(body: string): string[] {
+	const entries: string[] = [];
+	let current = "";
+	let isQuoted = false;
+	let isEscaped = false;
+	for (const character of body) {
+		if (isEscaped) {
+			current += character;
+			isEscaped = false;
+			continue;
+		}
+		if (character === "\\") {
+			current += character;
+			isEscaped = true;
+			continue;
+		}
+		if (character === '"') isQuoted = !isQuoted;
+		if (character === "," && !isQuoted) {
+			entries.push(current);
+			current = "";
+			continue;
+		}
+		current += character;
+	}
+	if (current.trim()) entries.push(current);
+	return entries;
 }
 
 function stripTomlComment(rawValue: string): string {

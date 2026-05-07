@@ -15,7 +15,7 @@ export interface StrictRoadmapContext {
 
 const REQUIRED_CODEX_FLAGS = [
 	"steer = true",
-	"apps = false",
+	"apps = true",
 	"tui_app_server = true",
 	"memories = true",
 	"sqlite = true",
@@ -76,7 +76,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				"Codex config",
 			);
 			requireIncludes(config, "max_depth = 1", "Codex config");
-			requireIncludes(config, "max_threads = 6", "Codex config");
+			requireIncludes(config, "max_threads = 1", "Codex config");
 			requireIncludes(config, "job_max_runtime_seconds = 1800", "Codex config");
 			for (const forbidden of [
 				`${["gpt", "5", "3", "codex"].join("-")}-spark`,

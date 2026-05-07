@@ -1,0 +1,14 @@
+{
+  "id": "commit",
+  "title": "Symphony Commit",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Create a well-formed repository commit from current changes using session history for rationale and summary.",
+  "upstream": {
+    "path": "third_party/openai-symphony/.codex/skills/commit/SKILL.md",
+    "verbatim": true
+  }
+}

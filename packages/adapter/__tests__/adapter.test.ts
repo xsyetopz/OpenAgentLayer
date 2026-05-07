@@ -178,7 +178,7 @@ test("provider instructions render inspection and correction discipline contract
 			expect(instructions).toContain("session-loaded project guidance");
 			expect(instructions).toContain("reads invoked skill bodies from disk");
 			expect(instructions).toContain(
-				"OAL no longer enables Codex `multi_agent_v2`",
+				"OAL defaults Codex orchestration to OpenDex/Symphony",
 			);
 			expect(instructions).toContain(
 				"The parent thread owns task split, child launch, evidence merge, and final decision",
@@ -299,11 +299,12 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain('model_verbosity = "low"');
+	expect(config).toContain("apps = true");
 	expect(config).toContain("shell_zsh_fork = false");
 	expect(config).toContain("enable_fanout = false");
 	expect(config).toContain("multi_agent = false");
 	expect(config).toContain("multi_agent_v2 = false");
-	expect(config).toContain("max_threads = 6");
+	expect(config).toContain("max_threads = 1");
 	expect(config).toContain("job_max_runtime_seconds = 1800");
 	expect(config).toContain("[tui]");
 	for (const item of [
@@ -332,36 +333,64 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	)?.content;
 	expect(instructions).toContain("Subagent surface:");
 	expect(instructions).toContain(
-		"OAL no longer enables Codex `multi_agent_v2`, `multi_agent`, or fanout",
+		"OAL defaults Codex orchestration to OpenDex/Symphony",
 	);
 	expect(instructions).toContain(
-		"`multi_agent_v2` rejects OAL's `agents.max_threads` throttle",
+		"`multi_agent_v2` uses its own `max_concurrent_threads_per_session` throttle",
 	);
 	expect(instructions).toContain(
-		"stable `multi_agent` is reserved for explicit operator opt-in",
+		"Operators can opt into stable `multi_agent` or `multi_agent_v2` through OAL CLI setup options",
 	);
 	expect(instructions).toContain("Use Symphony or peer-thread orchestration");
 });
 
-test("Codex agent concurrency scales by subscription plan", async () => {
+test("Codex native orchestration modes render bounded settings", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
-	for (const [plan, maxThreads, jobRuntime] of [
-		["plus", 2, 600],
-		["pro-5", 4, 900],
-		["pro-20", 6, 1800],
-	] as const) {
-		const rendered = await renderProvider("codex", graph.source, repoRoot, {
-			plan,
-		});
-		const config = rendered.artifacts.find(
-			(artifact) => artifact.path === ".codex/config.toml",
-		)?.content;
-		expect(config).toContain(`max_threads = ${maxThreads}`);
-		expect(config).toContain(`job_max_runtime_seconds = ${jobRuntime}`);
-		expect(config).toContain("multi_agent = false");
-		expect(config).toContain("multi_agent_v2 = false");
-		expect(config).toContain("enable_fanout = false");
-	}
+	const stable = await renderProvider("codex", graph.source, repoRoot, {
+		codexOrchestration: {
+			mode: "multi_agent",
+			maxDepth: 2,
+			maxThreads: 3,
+			jobMaxRuntimeSeconds: 120,
+		},
+	});
+	const stableConfig = stable.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(stableConfig).toContain("apps = false");
+	expect(stableConfig).toContain("multi_agent = true");
+	expect(stableConfig).toContain("multi_agent_v2 = false");
+	expect(stableConfig).toContain("max_depth = 2");
+	expect(stableConfig).toContain("max_threads = 3");
+	expect(stableConfig).toContain("job_max_runtime_seconds = 120");
+
+	const v2 = await renderProvider("codex", graph.source, repoRoot, {
+		codexOrchestration: {
+			mode: "multi_agent_v2",
+			maxDepth: 2,
+			maxThreads: 4,
+			multiAgentV2: {
+				minWaitTimeoutMs: 250,
+				hideSpawnAgentMetadata: true,
+				usageHintEnabled: true,
+				usageHintText: "Use sparingly.",
+				rootAgentUsageHintText: "Parent owns merge.",
+				subagentUsageHintText: "Return evidence.",
+			},
+		},
+	});
+	const v2Config = v2.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(v2Config).toContain("apps = false");
+	expect(v2Config).toContain("multi_agent = false");
+	expect(v2Config).toContain("max_depth = 2");
+	expect(v2Config).not.toContain("max_threads = 4");
+	expect(v2Config).toContain(
+		"multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 4",
+	);
+	expect(v2Config).toContain("min_wait_timeout_ms = 250");
+	expect(v2Config).toContain('usage_hint_text = "Use sparingly."');
 });
 
 test("Codex renders hooks only in hooks.json with provider event env", async () => {

@@ -75,6 +75,7 @@ export interface RetryEntry {
 	identifier: string;
 	attempt: number;
 	due_at_ms: number;
+	timer_handle: unknown | null;
 	error: string | null;
 }
 
@@ -112,6 +113,9 @@ export interface SymphonyTrackerClient {
 export interface AgentRunResult {
 	status: "succeeded" | "failed" | "timed_out" | "stalled" | "canceled";
 	error?: string;
+	session_id?: string | undefined;
+	thread_id?: string | undefined;
+	turn_id?: string | undefined;
 	input_tokens?: number;
 	output_tokens?: number;
 	total_tokens?: number;
@@ -138,7 +142,9 @@ export interface SymphonyLogEntry {
 	level: "info" | "warn" | "error";
 	event: string;
 	issue_id?: string;
+	issue_identifier?: string | undefined;
 	identifier?: string;
+	session_id?: string | undefined;
 	message?: string;
 	data?: Record<string, unknown>;
 }

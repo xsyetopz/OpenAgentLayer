@@ -5,6 +5,32 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.6.0-beta.1] - 2026-05-07
+
+### Added
+
+- Added OpenDex as an OAL product surface with a Rust `opendex` workspace crate, binary entry point, split control-plane modules, usage guardrails, snapshot persistence, and daemon routes for Robdex-style project, thread, handoff, approval, process, state, replay, and orchestrator bridge workflows.
+- Added OAL CLI `opendex` command wiring so Codex/OAL can run the Rust binary through the existing CLI.
+- Added Codex orchestration setup options for `symphony`, `multi_agent`, and `multi_agent_v2`, including v2-specific bounds and usage-hint settings from the upstream Codex schema.
+- Added upstream Symphony submodule integration and Symphony/OpenDex package exports for OAL-managed orchestration.
+
+### Changed
+
+- Changed managed Codex defaults to prefer OpenDex/Symphony with `apps = true`, bounded depth/thread defaults, and native multi-agent modes disabled unless explicitly selected.
+- Changed Codex baseline prompts to reject god objects and require module seams before broad implementation work.
+- Changed release metadata from `0.5.1-beta.3` to `0.6.0-beta.1` across package, Rust workspace, plugin, Homebrew, and source product records.
+
+### Verified
+
+- `rtk cargo fmt --all --check`
+- `rtk cargo check --workspace --tests`
+- `rtk cargo clippy --locked --workspace --tests -- -D warnings`
+- `rtk cargo test --workspace`
+- `rtk bunx tsc --noEmit`
+- `rtk proxy -- bunx biome check . --error-on-warnings --max-diagnostics 16384`
+- `rtk proxy -- bun packages/cli/src/main.ts check`
+- `rtk proxy -- bun test packages/*/__tests__/*.test.ts`
+
 ## [0.5.1-beta.3] - 2026-05-07
 
 ### Added

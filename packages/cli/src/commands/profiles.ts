@@ -100,6 +100,8 @@ function profileSummary(profile: OalProfile): string {
 		`providers=${profile.providers.join(",")}`,
 	];
 	if (profile.codexPlan) parts.push(`codex=${profile.codexPlan}`);
+	if (profile.codexOrchestration)
+		parts.push(`codex-orchestration=${profile.codexOrchestration}`);
 	if (profile.claudePlan) parts.push(`claude=${profile.claudePlan}`);
 	if (profile.opencodePlan) parts.push(`opencode=${profile.opencodePlan}`);
 	if (profile.optionalTools && profile.optionalTools.length > 0)

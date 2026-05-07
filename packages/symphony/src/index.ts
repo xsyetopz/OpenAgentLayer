@@ -1,3 +1,5 @@
+export * from "./cli";
+export * from "./opendex";
 export * from "./runner/codex";
 export * from "./scheduler";
 export * from "./service";

@@ -11,6 +11,28 @@ export type ModelPlan =
 	| "opencode-auth"
 	| "opencode-free";
 export type ReasoningEffort = "none" | "low" | "medium" | "high" | "xhigh";
+export type CodexOrchestrationMode =
+	| "symphony"
+	| "multi_agent"
+	| "multi_agent_v2";
+
+export interface CodexMultiAgentV2Options {
+	hideSpawnAgentMetadata?: boolean;
+	maxConcurrentThreadsPerSession?: number;
+	minWaitTimeoutMs?: number;
+	rootAgentUsageHintText?: string;
+	subagentUsageHintText?: string;
+	usageHintEnabled?: boolean;
+	usageHintText?: string;
+}
+
+export interface CodexOrchestrationOptions {
+	mode?: CodexOrchestrationMode;
+	maxDepth?: number;
+	maxThreads?: number;
+	jobMaxRuntimeSeconds?: number;
+	multiAgentV2?: CodexMultiAgentV2Options;
+}
 
 export interface RenderOptions {
 	plan?: ModelPlan;
@@ -21,6 +43,7 @@ export interface RenderOptions {
 		"opencode-auto" | "opencode-auth" | "opencode-free"
 	>;
 	opencodeModels?: readonly string[];
+	codexOrchestration?: CodexOrchestrationOptions;
 }
 
 export interface RoutedModel {

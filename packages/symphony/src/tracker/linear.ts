@@ -5,8 +5,11 @@ import type {
 	SymphonyTrackerClient,
 } from "../types";
 
-const LINEAR_ISSUES_QUERY = `query SymphonyIssues($projectSlug: String!, $states: [String!]) {
-  issues(filter: { project: { slug: { eq: $projectSlug } }, state: { name: { in: $states } } }) {
+const LINEAR_PAGE_SIZE = 50;
+
+const LINEAR_ISSUES_QUERY = `query SymphonyIssues($projectSlug: String!, $states: [String!], $first: Int!, $after: String) {
+  issues(first: $first, after: $after, filter: { project: { slugId: { eq: $projectSlug } }, state: { name: { in: $states } } }) {
+    pageInfo { hasNextPage endCursor }
     nodes {
       id
       identifier
@@ -19,7 +22,7 @@ const LINEAR_ISSUES_QUERY = `query SymphonyIssues($projectSlug: String!, $states
       updatedAt
       state { name }
       labels { nodes { name } }
-      relations {
+      inverseRelations {
         nodes {
           relatedIssue {
             id
@@ -34,7 +37,7 @@ const LINEAR_ISSUES_QUERY = `query SymphonyIssues($projectSlug: String!, $states
     }
   }
 }`;
-const LINEAR_ISSUES_BY_ID_QUERY = `query SymphonyIssuesById($issueIds: [String!]) {
+const LINEAR_ISSUES_BY_ID_QUERY = `query SymphonyIssuesById($issueIds: [ID!]) {
   issues(filter: { id: { in: $issueIds } }) {
     nodes {
       id
@@ -48,7 +51,7 @@ const LINEAR_ISSUES_BY_ID_QUERY = `query SymphonyIssuesById($issueIds: [String!]
       updatedAt
       state { name }
       labels { nodes { name } }
-      relations {
+      inverseRelations {
         nodes {
           relatedIssue {
             id
@@ -71,16 +74,8 @@ export class LinearTrackerClient implements SymphonyTrackerClient {
 		this.#fetchImpl = fetchImpl;
 	}
 
-	async fetchCandidateIssues(config: SymphonyConfig): Promise<Issue[]> {
-		const states = [
-			...config.tracker.active_states,
-			...config.tracker.terminal_states,
-		];
-		const data = await this.#request(config, LINEAR_ISSUES_QUERY, {
-			projectSlug: config.tracker.project_slug,
-			states,
-		});
-		return normalizeLinearIssues(data);
+	fetchCandidateIssues(config: SymphonyConfig): Promise<Issue[]> {
+		return this.fetchIssuesByStates(config, config.tracker.active_states);
 	}
 
 	async fetchIssueStates(
@@ -94,12 +89,31 @@ export class LinearTrackerClient implements SymphonyTrackerClient {
 		return normalizeLinearIssues(data);
 	}
 
-	async fetchTerminalIssues(config: SymphonyConfig): Promise<Issue[]> {
-		const data = await this.#request(config, LINEAR_ISSUES_QUERY, {
-			projectSlug: config.tracker.project_slug,
-			states: config.tracker.terminal_states,
-		});
-		return normalizeLinearIssues(data);
+	fetchTerminalIssues(config: SymphonyConfig): Promise<Issue[]> {
+		return this.fetchIssuesByStates(config, config.tracker.terminal_states);
+	}
+
+	async fetchIssuesByStates(
+		config: SymphonyConfig,
+		states: string[],
+	): Promise<Issue[]> {
+		if (states.length === 0) return [];
+		const result: Issue[] = [];
+		let after: string | null = null;
+		for (;;) {
+			const data = await this.#request(config, LINEAR_ISSUES_QUERY, {
+				projectSlug: config.tracker.project_slug,
+				states,
+				first: LINEAR_PAGE_SIZE,
+				after,
+			});
+			const page = normalizeLinearIssuePage(data);
+			result.push(...page.issues);
+			if (!page.hasNextPage) return result;
+			if (!page.endCursor)
+				throw new Error("linear_missing_end_cursor: missing pagination cursor");
+			after = page.endCursor;
+		}
 	}
 
 	async #request(
@@ -130,23 +144,35 @@ export class LinearTrackerClient implements SymphonyTrackerClient {
 	}
 }
 
-function normalizeLinearIssues(data: unknown): Issue[] {
+function normalizeLinearIssuePage(data: unknown): {
+	issues: Issue[];
+	hasNextPage: boolean;
+	endCursor: string | null;
+} {
 	const issues = asRecord(
 		asRecord(data, "Linear data")["issues"],
 		"Linear issues",
 	);
 	const nodes = issues["nodes"];
-	if (!Array.isArray(nodes)) return [];
-	return nodes.map(normalizeLinearIssue);
+	const pageInfo = asRecord(issues["pageInfo"], "Linear page info", true);
+	return {
+		issues: Array.isArray(nodes) ? nodes.map(normalizeLinearIssue) : [],
+		hasNextPage: pageInfo["hasNextPage"] === true,
+		endCursor: optionalString(pageInfo["endCursor"]),
+	};
+}
+
+function normalizeLinearIssues(data: unknown): Issue[] {
+	return normalizeLinearIssuePage(data).issues;
 }
 
 function normalizeLinearIssue(node: unknown): Issue {
 	const issue = asRecord(node, "Linear issue");
 	const state = asRecord(issue["state"], "Linear issue state", true);
 	const labels = asRecord(issue["labels"], "Linear issue labels", true);
-	const relations = asRecord(
-		issue["relations"],
-		"Linear issue relations",
+	const inverseRelations = asRecord(
+		issue["inverseRelations"],
+		"Linear issue inverse relations",
 		true,
 	);
 	return {
@@ -166,7 +192,7 @@ function normalizeLinearIssue(node: unknown): Issue {
 					.filter((label): label is string => typeof label === "string")
 					.map((label) => label.toLowerCase())
 			: [],
-		blocked_by: normalizeLinearBlockers(relations["nodes"]),
+		blocked_by: normalizeLinearBlockers(inverseRelations["nodes"]),
 		created_at:
 			typeof issue["createdAt"] === "string" ? issue["createdAt"] : null,
 		updated_at:

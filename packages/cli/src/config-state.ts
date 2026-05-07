@@ -40,6 +40,17 @@ const VALUE_FLAGS = new Set([
 	"--bin-dir",
 	"--plan",
 	"--codex-plan",
+	"--codex-orchestration",
+	"--codex-agent-max-depth",
+	"--codex-agent-max-threads",
+	"--codex-agent-job-max-runtime-seconds",
+	"--codex-multi-agent-v2-max-concurrent-threads-per-session",
+	"--codex-multi-agent-v2-min-wait-timeout-ms",
+	"--codex-multi-agent-v2-hide-spawn-agent-metadata",
+	"--codex-multi-agent-v2-usage-hint-enabled",
+	"--codex-multi-agent-v2-usage-hint-text",
+	"--codex-multi-agent-v2-root-usage-hint-text",
+	"--codex-multi-agent-v2-subagent-usage-hint-text",
 	"--claude-plan",
 	"--opencode-plan",
 	"--opencode-models-file",
@@ -105,6 +116,61 @@ export function buildProfileFromArgs(args: string[]): OalProfile {
 	assignValue(profile, "target", option(args, "--target"));
 	assignValue(profile, "binDir", option(args, "--bin-dir"));
 	assignValue(profile, "codexPlan", option(args, "--codex-plan"));
+	assignValue(
+		profile,
+		"codexOrchestration",
+		option(args, "--codex-orchestration"),
+	);
+	assignValue(
+		profile,
+		"codexAgentMaxDepth",
+		option(args, "--codex-agent-max-depth"),
+	);
+	assignValue(
+		profile,
+		"codexAgentMaxThreads",
+		option(args, "--codex-agent-max-threads"),
+	);
+	assignValue(
+		profile,
+		"codexAgentJobMaxRuntimeSeconds",
+		option(args, "--codex-agent-job-max-runtime-seconds"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2MaxConcurrentThreadsPerSession",
+		option(args, "--codex-multi-agent-v2-max-concurrent-threads-per-session"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2MinWaitTimeoutMs",
+		option(args, "--codex-multi-agent-v2-min-wait-timeout-ms"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2HideSpawnAgentMetadata",
+		option(args, "--codex-multi-agent-v2-hide-spawn-agent-metadata"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2UsageHintEnabled",
+		option(args, "--codex-multi-agent-v2-usage-hint-enabled"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2UsageHintText",
+		option(args, "--codex-multi-agent-v2-usage-hint-text"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2RootUsageHintText",
+		option(args, "--codex-multi-agent-v2-root-usage-hint-text"),
+	);
+	assignValue(
+		profile,
+		"codexMultiAgentV2SubagentUsageHintText",
+		option(args, "--codex-multi-agent-v2-subagent-usage-hint-text"),
+	);
 	assignValue(profile, "claudePlan", option(args, "--claude-plan"));
 	assignValue(profile, "opencodePlan", option(args, "--opencode-plan"));
 	assignValue(profile, "cavemanMode", option(args, "--caveman-mode"));
@@ -163,6 +229,53 @@ function normalizeProfile(
 	assignValue(normalized, "target", profile?.target);
 	assignValue(normalized, "binDir", profile?.binDir);
 	assignValue(normalized, "codexPlan", profile?.codexPlan);
+	assignValue(normalized, "codexOrchestration", profile?.codexOrchestration);
+	assignValue(normalized, "codexAgentMaxDepth", profile?.codexAgentMaxDepth);
+	assignValue(
+		normalized,
+		"codexAgentMaxThreads",
+		profile?.codexAgentMaxThreads,
+	);
+	assignValue(
+		normalized,
+		"codexAgentJobMaxRuntimeSeconds",
+		profile?.codexAgentJobMaxRuntimeSeconds,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2MaxConcurrentThreadsPerSession",
+		profile?.codexMultiAgentV2MaxConcurrentThreadsPerSession,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2MinWaitTimeoutMs",
+		profile?.codexMultiAgentV2MinWaitTimeoutMs,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2HideSpawnAgentMetadata",
+		profile?.codexMultiAgentV2HideSpawnAgentMetadata,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2UsageHintEnabled",
+		profile?.codexMultiAgentV2UsageHintEnabled,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2UsageHintText",
+		profile?.codexMultiAgentV2UsageHintText,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2RootUsageHintText",
+		profile?.codexMultiAgentV2RootUsageHintText,
+	);
+	assignValue(
+		normalized,
+		"codexMultiAgentV2SubagentUsageHintText",
+		profile?.codexMultiAgentV2SubagentUsageHintText,
+	);
 	assignValue(normalized, "claudePlan", profile?.claudePlan);
 	assignValue(normalized, "opencodePlan", profile?.opencodePlan);
 	assignValue(normalized, "cavemanMode", profile?.cavemanMode);

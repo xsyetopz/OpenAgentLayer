@@ -8,7 +8,7 @@ import {
 
 const CODEX_REQUIRED_FLAGS = [
 	"steer = true",
-	"apps = false",
+	"apps = true",
 	"tui_app_server = true",
 	"memories = true",
 	"sqlite = true",
@@ -71,7 +71,7 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		throw new Error("Codex config missing auto approval reviewer");
 	if (!config.includes("interrupt_message = true"))
 		throw new Error("Codex config has invalid agents.interrupt_message");
-	if (!config.includes("max_threads = 6"))
+	if (!config.includes("max_threads = 1"))
 		throw new Error("Codex config missing agents.max_threads");
 	if (!config.includes("job_max_runtime_seconds = 1800"))
 		throw new Error("Codex config missing bounded agents job runtime");

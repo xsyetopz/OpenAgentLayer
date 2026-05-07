@@ -11,6 +11,17 @@ export interface SetupWorkflowSelection {
 	target?: string;
 	binDir?: string;
 	codexPlan?: string;
+	codexOrchestration?: string;
+	codexAgentMaxDepth?: string;
+	codexAgentMaxThreads?: string;
+	codexAgentJobMaxRuntimeSeconds?: string;
+	codexMultiAgentV2MaxConcurrentThreadsPerSession?: string;
+	codexMultiAgentV2MinWaitTimeoutMs?: string;
+	codexMultiAgentV2HideSpawnAgentMetadata?: string;
+	codexMultiAgentV2UsageHintEnabled?: string;
+	codexMultiAgentV2UsageHintText?: string;
+	codexMultiAgentV2RootUsageHintText?: string;
+	codexMultiAgentV2SubagentUsageHintText?: string;
 	claudePlan?: string;
 	opencodePlan?: string;
 	cavemanMode?: string;
@@ -34,6 +45,7 @@ export function buildSetupArgs(selection: SetupWorkflowSelection): string[] {
 		args.push("--target", selection.target);
 	if (selection.binDir) args.push("--bin-dir", selection.binDir);
 	appendProviderPlan(args, "codex", selection.codexPlan, selection.providers);
+	appendCodexOrchestrationArgs(args, selection);
 	appendProviderPlan(args, "claude", selection.claudePlan, selection.providers);
 	appendProviderPlan(
 		args,
@@ -52,6 +64,60 @@ export function buildSetupArgs(selection: SetupWorkflowSelection): string[] {
 	return args;
 }
 
+function appendCodexOrchestrationArgs(
+	args: string[],
+	selection: SetupWorkflowSelection,
+): void {
+	if (!selection.providers.includes("codex")) return;
+	appendValue(args, "--codex-orchestration", selection.codexOrchestration);
+	appendValue(args, "--codex-agent-max-depth", selection.codexAgentMaxDepth);
+	appendValue(
+		args,
+		"--codex-agent-max-threads",
+		selection.codexAgentMaxThreads,
+	);
+	appendValue(
+		args,
+		"--codex-agent-job-max-runtime-seconds",
+		selection.codexAgentJobMaxRuntimeSeconds,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-max-concurrent-threads-per-session",
+		selection.codexMultiAgentV2MaxConcurrentThreadsPerSession,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-min-wait-timeout-ms",
+		selection.codexMultiAgentV2MinWaitTimeoutMs,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-hide-spawn-agent-metadata",
+		selection.codexMultiAgentV2HideSpawnAgentMetadata,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-usage-hint-enabled",
+		selection.codexMultiAgentV2UsageHintEnabled,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-usage-hint-text",
+		selection.codexMultiAgentV2UsageHintText,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-root-usage-hint-text",
+		selection.codexMultiAgentV2RootUsageHintText,
+	);
+	appendValue(
+		args,
+		"--codex-multi-agent-v2-subagent-usage-hint-text",
+		selection.codexMultiAgentV2SubagentUsageHintText,
+	);
+}
+
 export function providerSetArg(providers: readonly WorkflowProvider[]): string {
 	const unique = [...new Set(providers)];
 	if (unique.length === 3) return "all";
@@ -66,4 +132,12 @@ function appendProviderPlan(
 ): void {
 	if (value && providers.includes(provider))
 		args.push(`--${provider}-plan`, value);
+}
+
+function appendValue(
+	args: string[],
+	name: string,
+	value: string | undefined,
+): void {
+	if (value) args.push(name, value);
 }

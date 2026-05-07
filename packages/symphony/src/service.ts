@@ -110,9 +110,19 @@ export class SymphonyService {
 		const workflow = this.#workflow;
 		if (!workflow) return;
 		await this.#dispatchDueRetries(workflow);
-		const candidates = await this.#options.tracker.fetchCandidateIssues(
-			this.#config,
-		);
+		let candidates: Issue[];
+		try {
+			candidates = await this.#options.tracker.fetchCandidateIssues(
+				this.#config,
+			);
+		} catch (error) {
+			this.#log({
+				level: "error",
+				event: "candidate_fetch_failed",
+				message: String(error),
+			});
+			return;
+		}
 		for (const issue of eligibleIssues(candidates, this.#config, this.state))
 			this.#startWorker(issue, workflow, null);
 	}
@@ -134,10 +144,20 @@ export class SymphonyService {
 				);
 			}
 		}
-		const states = await this.#options.tracker.fetchIssueStates(
-			runningIds,
-			this.#config,
-		);
+		let states: Issue[];
+		try {
+			states = await this.#options.tracker.fetchIssueStates(
+				runningIds,
+				this.#config,
+			);
+		} catch (error) {
+			this.#log({
+				level: "warn",
+				event: "reconcile_state_refresh_failed",
+				message: String(error),
+			});
+			return;
+		}
 		const byId = new Map(states.map((issue) => [issue.id, issue]));
 		const active = normalizedSet(this.#config.tracker.active_states);
 		const terminal = normalizedSet(this.#config.tracker.terminal_states);
@@ -158,10 +178,18 @@ export class SymphonyService {
 	}
 
 	async cleanupTerminalWorkspaces(): Promise<void> {
-		for (const issue of await this.#options.tracker.fetchTerminalIssues(
-			this.#config,
-		))
-			await removeWorkspace(this.#config, issue, this.#options.hookRunner);
+		try {
+			for (const issue of await this.#options.tracker.fetchTerminalIssues(
+				this.#config,
+			))
+				await removeWorkspace(this.#config, issue, this.#options.hookRunner);
+		} catch (error) {
+			this.#log({
+				level: "warn",
+				event: "terminal_workspace_cleanup_failed",
+				message: String(error),
+			});
+		}
 	}
 
 	async drain(): Promise<void> {
@@ -173,7 +201,7 @@ export class SymphonyService {
 		workflow: WorkflowDefinition,
 		attempt: number | null,
 	): void {
-		claimIssue(this.state, issue);
+		if (!this.state.claimed.has(issue.id)) claimIssue(this.state, issue);
 		const work = this.#runWorker(issue, workflow, attempt).finally(() => {
 			this.#inflight.delete(work);
 		});
@@ -184,9 +212,25 @@ export class SymphonyService {
 		const nowMs = this.#nowMs();
 		for (const retry of [...this.state.retry_attempts.values()]) {
 			if (retry.due_at_ms > nowMs) continue;
-			const candidates = await this.#options.tracker.fetchCandidateIssues(
-				this.#config,
-			);
+			let candidates: Issue[];
+			try {
+				candidates = await this.#options.tracker.fetchCandidateIssues(
+					this.#config,
+				);
+			} catch (error) {
+				this.state.retry_attempts.set(retry.issue_id, {
+					...retry,
+					attempt: retry.attempt + 1,
+					due_at_ms:
+						nowMs +
+						Math.min(
+							10000 * 2 ** retry.attempt,
+							this.#config.agent.max_retry_backoff_ms,
+						),
+					error: `retry poll failed: ${String(error)}`,
+				});
+				continue;
+			}
 			const issue = candidates.find(
 				(candidate) => candidate.id === retry.issue_id,
 			);
@@ -194,9 +238,14 @@ export class SymphonyService {
 				releaseIssue(this.state, retry.issue_id);
 				continue;
 			}
-			if (eligibleIssues([issue], this.#config, this.state).length === 0) {
+			if (
+				eligibleIssues([issue], this.#config, this.state, {
+					allowClaimedIssueId: retry.issue_id,
+				}).length === 0
+			) {
 				this.state.retry_attempts.set(retry.issue_id, {
 					...retry,
+					attempt: retry.attempt + 1,
 					due_at_ms: nowMs + 1000,
 					error: "no available orchestrator slots",
 				});
@@ -213,6 +262,7 @@ export class SymphonyService {
 		attempt: number | null,
 	): Promise<void> {
 		let issue = initialIssue;
+		let lastSessionId: string | undefined;
 		const workspace = await ensureWorkspace(
 			this.#config,
 			issue,
@@ -245,6 +295,7 @@ export class SymphonyService {
 					prompt,
 				});
 				this.#applyRunResult(result);
+				lastSessionId = result.session_id ?? lastSessionId;
 				if (result.status !== "succeeded")
 					throw new Error(result.error ?? result.status);
 				const [current] = await this.#options.tracker.fetchIssueStates(
@@ -271,7 +322,8 @@ export class SymphonyService {
 				level: "info",
 				event: "worker_succeeded",
 				issue_id: issue.id,
-				identifier: issue.identifier,
+				issue_identifier: issue.identifier,
+				session_id: lastSessionId,
 			});
 		} catch (error) {
 			this.state.retry_attempts.set(
@@ -288,16 +340,28 @@ export class SymphonyService {
 				level: "error",
 				event: "worker_failed",
 				issue_id: issue.id,
-				identifier: issue.identifier,
+				issue_identifier: issue.identifier,
+				session_id: lastSessionId,
 				message: String(error),
 			});
 		} finally {
 			if (this.#config.hooks.after_run)
-				await (this.#options.hookRunner ?? runShellHook)(
-					this.#config.hooks.after_run,
-					workspace.path,
-					this.#config.hooks.timeout_ms,
-				);
+				try {
+					await (this.#options.hookRunner ?? runShellHook)(
+						this.#config.hooks.after_run,
+						workspace.path,
+						this.#config.hooks.timeout_ms,
+					);
+				} catch (error) {
+					this.#log({
+						level: "warn",
+						event: "after_run_hook_failed",
+						issue_id: issue.id,
+						issue_identifier: issue.identifier,
+						session_id: lastSessionId,
+						message: String(error),
+					});
+				}
 			this.state.running.delete(issue.id);
 		}
 	}

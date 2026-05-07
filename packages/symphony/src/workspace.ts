@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
-import { mkdir, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, realpath, rm, stat } from "node:fs/promises";
+import { relative, resolve } from "node:path";
 import type { Issue, SymphonyConfig, Workspace } from "./types";
 
 export type HookRunner = (
@@ -19,14 +19,22 @@ export async function ensureWorkspace(
 	runHook: HookRunner = runShellHook,
 ): Promise<Workspace> {
 	const key = workspaceKey(issue.identifier);
-	const path = join(config.workspace.root, key);
+	const root = resolve(config.workspace.root);
+	const path = resolve(root, key);
+	if (!isContained(root, path))
+		throw new Error(`Workspace path escapes root: ${issue.identifier}`);
+	await mkdir(root, { recursive: true });
 	let createdNow = false;
 	try {
 		await mkdir(path);
 		createdNow = true;
 	} catch (error) {
 		if (!isExistsError(error)) throw error;
+		const existing = await stat(path);
+		if (!existing.isDirectory())
+			throw new Error(`Workspace path exists and is not a directory: ${path}`);
 	}
+	await assertRealPathContained(root, path);
 	if (createdNow && config.hooks.after_create)
 		await runHook(config.hooks.after_create, path, config.hooks.timeout_ms);
 	return { path, workspace_key: key, created_now: createdNow };
@@ -37,9 +45,17 @@ export async function removeWorkspace(
 	issue: Issue,
 	runHook: HookRunner = runShellHook,
 ): Promise<void> {
-	const path = join(config.workspace.root, workspaceKey(issue.identifier));
-	if (config.hooks.before_remove)
-		await runHook(config.hooks.before_remove, path, config.hooks.timeout_ms);
+	const root = resolve(config.workspace.root);
+	const path = resolve(root, workspaceKey(issue.identifier));
+	if (!isContained(root, path))
+		throw new Error(`Workspace path escapes root: ${issue.identifier}`);
+	if (config.hooks.before_remove) {
+		try {
+			await runHook(config.hooks.before_remove, path, config.hooks.timeout_ms);
+		} catch {
+			// Best-effort by spec: cleanup proceeds even when before_remove fails.
+		}
+	}
 	await rm(path, { recursive: true, force: true });
 }
 
@@ -73,4 +89,21 @@ function isExistsError(error: unknown): boolean {
 			"code" in error &&
 			error.code === "EEXIST",
 	);
+}
+
+function isContained(root: string, child: string): boolean {
+	const rel = relative(root, child);
+	return rel === "" || !(rel.startsWith("..") || rel.startsWith("/"));
+}
+
+async function assertRealPathContained(
+	root: string,
+	child: string,
+): Promise<void> {
+	const [realRoot, realChild] = await Promise.all([
+		realpath(root),
+		realpath(child),
+	]);
+	if (!isContained(realRoot, realChild))
+		throw new Error(`Workspace real path escapes root: ${child}`);
 }

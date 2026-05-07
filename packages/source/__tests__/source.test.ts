@@ -35,6 +35,15 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(designWorker?.upstream?.path).toBe(
 		"third_party/robertmsale-codex/skills/design-worker/SKILL.md",
 	);
+	const linear = graph.source.skills.find((skill) => skill.id === "linear");
+	expect(linear?.body).toContain("linear_graphql");
+	expect(linear?.upstream?.path).toBe(
+		"third_party/openai-symphony/.codex/skills/linear/SKILL.md",
+	);
+	for (const skillId of ["commit", "push", "pull", "land"])
+		expect(
+			graph.source.skills.find((skill) => skill.id === skillId)?.upstream?.path,
+		).toBe(`third_party/openai-symphony/.codex/skills/${skillId}/SKILL.md`);
 });
 
 test("loadSource reports provenance for authored records", async () => {

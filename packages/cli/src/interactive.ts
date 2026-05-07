@@ -56,11 +56,31 @@ type SetupProfileChoice =
 	| { value: "manual"; label: string; hint: string }
 	| { value: string; label: string; hint: string; name: string };
 
+const POSITIVE_INTEGER_PATTERN = /^\d+$/;
+
 export const CODEX_PLAN_OPTIONS = [
 	{ value: "plus", label: "Plus", hint: "low lead, medium code" },
 	{ value: "pro-5", label: "Pro 5x", hint: "medium lead, high code" },
 	{ value: "pro-20", label: "Pro 20x", hint: "high lead, high code" },
 ];
+
+export const CODEX_ORCHESTRATION_OPTIONS = [
+	{
+		value: "symphony",
+		label: "OpenDex / Symphony",
+		hint: "safe default, native multi-agent disabled",
+	},
+	{
+		value: "multi_agent",
+		label: "Codex multi_agent",
+		hint: "native shallow agents, bounded by agents table",
+	},
+	{
+		value: "multi_agent_v2",
+		label: "Codex multi_agent_v2",
+		hint: "native v2, uses v2 thread limit instead of agents.max_threads",
+	},
+] as const;
 
 export const CLAUDE_PLAN_OPTIONS = [
 	{ value: "max-5", label: "Max 5x", hint: "Opus/Sonnet/Haiku routing" },
@@ -227,6 +247,9 @@ async function interactiveSetup(
 	const codexPlan = providers.includes("codex")
 		? await codexPlanPrompt()
 		: undefined;
+	const codexOrchestration = providers.includes("codex")
+		? await codexOrchestrationPrompt()
+		: undefined;
 	const claudePlan = providers.includes("claude")
 		? await claudePlanPrompt()
 		: undefined;
@@ -253,6 +276,7 @@ async function interactiveSetup(
 		...(home ? { home } : {}),
 		...(target ? { target } : {}),
 		...(codexPlan ? { codexPlan } : {}),
+		...(codexOrchestration ?? {}),
 		...(claudePlan ? { claudePlan } : {}),
 		...(opencodePlan ? { opencodePlan } : {}),
 		cavemanMode,
@@ -555,6 +579,17 @@ async function confirmApplyPrompt(
 		home?: string;
 		target?: string;
 		codexPlan?: string;
+		codexOrchestration?: string;
+		codexAgentMaxDepth?: string;
+		codexAgentMaxThreads?: string;
+		codexAgentJobMaxRuntimeSeconds?: string;
+		codexMultiAgentV2MaxConcurrentThreadsPerSession?: string;
+		codexMultiAgentV2MinWaitTimeoutMs?: string;
+		codexMultiAgentV2HideSpawnAgentMetadata?: string;
+		codexMultiAgentV2UsageHintEnabled?: string;
+		codexMultiAgentV2UsageHintText?: string;
+		codexMultiAgentV2RootUsageHintText?: string;
+		codexMultiAgentV2SubagentUsageHintText?: string;
 		claudePlan?: string;
 		opencodePlan?: string;
 		cavemanMode?: string;
@@ -579,6 +614,12 @@ async function confirmApplyPrompt(
 	);
 	printStep("Model plans");
 	if (selection.codexPlan) printDetail("codex", selection.codexPlan);
+	if (selection.codexOrchestration)
+		printDetail("codex orchestration", selection.codexOrchestration);
+	if (selection.codexAgentMaxDepth)
+		printDetail("codex max depth", selection.codexAgentMaxDepth);
+	if (selection.codexAgentMaxThreads)
+		printDetail("codex max threads", selection.codexAgentMaxThreads);
 	if (selection.claudePlan) printDetail("claude", selection.claudePlan);
 	if (selection.opencodePlan) printDetail("opencode", selection.opencodePlan);
 	printStep("Options");
@@ -614,6 +655,63 @@ async function maybeSaveProfile(selection: OalProfile): Promise<void> {
 		...(selection.home ? { home: selection.home } : {}),
 		...(selection.target ? { target: selection.target } : {}),
 		...(selection.codexPlan ? { codexPlan: selection.codexPlan } : {}),
+		...(selection.codexOrchestration
+			? { codexOrchestration: selection.codexOrchestration }
+			: {}),
+		...(selection.codexAgentMaxDepth
+			? { codexAgentMaxDepth: selection.codexAgentMaxDepth }
+			: {}),
+		...(selection.codexAgentMaxThreads
+			? { codexAgentMaxThreads: selection.codexAgentMaxThreads }
+			: {}),
+		...(selection.codexAgentJobMaxRuntimeSeconds
+			? {
+					codexAgentJobMaxRuntimeSeconds:
+						selection.codexAgentJobMaxRuntimeSeconds,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2MaxConcurrentThreadsPerSession
+			? {
+					codexMultiAgentV2MaxConcurrentThreadsPerSession:
+						selection.codexMultiAgentV2MaxConcurrentThreadsPerSession,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2MinWaitTimeoutMs
+			? {
+					codexMultiAgentV2MinWaitTimeoutMs:
+						selection.codexMultiAgentV2MinWaitTimeoutMs,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2HideSpawnAgentMetadata
+			? {
+					codexMultiAgentV2HideSpawnAgentMetadata:
+						selection.codexMultiAgentV2HideSpawnAgentMetadata,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2UsageHintEnabled
+			? {
+					codexMultiAgentV2UsageHintEnabled:
+						selection.codexMultiAgentV2UsageHintEnabled,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2UsageHintText
+			? {
+					codexMultiAgentV2UsageHintText:
+						selection.codexMultiAgentV2UsageHintText,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2RootUsageHintText
+			? {
+					codexMultiAgentV2RootUsageHintText:
+						selection.codexMultiAgentV2RootUsageHintText,
+				}
+			: {}),
+		...(selection.codexMultiAgentV2SubagentUsageHintText
+			? {
+					codexMultiAgentV2SubagentUsageHintText:
+						selection.codexMultiAgentV2SubagentUsageHintText,
+				}
+			: {}),
 		...(selection.claudePlan ? { claudePlan: selection.claudePlan } : {}),
 		...(selection.opencodePlan ? { opencodePlan: selection.opencodePlan } : {}),
 		...(selection.cavemanMode ? { cavemanMode: selection.cavemanMode } : {}),
@@ -670,6 +768,128 @@ function codexPlanPrompt(): Promise<string> {
 			options: CODEX_PLAN_OPTIONS,
 		}),
 	);
+}
+
+async function codexOrchestrationPrompt(): Promise<
+	Partial<OalProfile> | undefined
+> {
+	const codexOrchestration = await ask<string>(
+		select({
+			message: "Codex orchestration",
+			options: [...CODEX_ORCHESTRATION_OPTIONS],
+		}),
+	);
+	const codexAgentMaxDepth = await positiveIntegerPrompt(
+		"Codex agents.max_depth",
+		"1",
+	);
+	const codexAgentMaxThreads = await positiveIntegerPrompt(
+		codexOrchestration === "multi_agent_v2"
+			? "Codex v2 thread limit"
+			: "Codex agents.max_threads",
+		"1",
+	);
+	const codexAgentJobMaxRuntimeSeconds = await positiveIntegerPrompt(
+		"Codex agent job max runtime seconds",
+		"900",
+	);
+	const result: Partial<OalProfile> = {
+		codexOrchestration,
+		codexAgentMaxDepth,
+		codexAgentMaxThreads,
+		codexAgentJobMaxRuntimeSeconds,
+	};
+	if (codexOrchestration !== "multi_agent_v2") return result;
+	result.codexMultiAgentV2MaxConcurrentThreadsPerSession = codexAgentMaxThreads;
+	const minWaitTimeoutMs = await optionalIntegerPrompt(
+		"Codex multi_agent_v2 min_wait_timeout_ms",
+	);
+	if (minWaitTimeoutMs)
+		result.codexMultiAgentV2MinWaitTimeoutMs = minWaitTimeoutMs;
+	result.codexMultiAgentV2HideSpawnAgentMetadata = booleanText(
+		await ask<boolean>(
+			confirm({
+				message: "Hide Codex multi_agent_v2 spawn metadata?",
+				initialValue: true,
+			}),
+		),
+	);
+	result.codexMultiAgentV2UsageHintEnabled = booleanText(
+		await ask<boolean>(
+			confirm({
+				message: "Enable Codex multi_agent_v2 usage hints?",
+				initialValue: true,
+			}),
+		),
+	);
+	const usageHintText = await optionalTextPrompt(
+		"Codex multi_agent_v2 usage_hint_text",
+	);
+	if (usageHintText) result.codexMultiAgentV2UsageHintText = usageHintText;
+	const rootUsageHintText = await optionalTextPrompt(
+		"Codex multi_agent_v2 root_agent_usage_hint_text",
+	);
+	if (rootUsageHintText)
+		result.codexMultiAgentV2RootUsageHintText = rootUsageHintText;
+	const subagentUsageHintText = await optionalTextPrompt(
+		"Codex multi_agent_v2 subagent_usage_hint_text",
+	);
+	if (subagentUsageHintText)
+		result.codexMultiAgentV2SubagentUsageHintText = subagentUsageHintText;
+	return result;
+}
+
+function positiveIntegerPrompt(
+	message: string,
+	initialValue: string,
+): Promise<string> {
+	return ask<string>(
+		text({
+			message,
+			initialValue,
+			validate: positiveIntegerValidation,
+		}),
+	);
+}
+
+async function optionalIntegerPrompt(
+	message: string,
+): Promise<string | undefined> {
+	const value = await ask<string>(
+		text({
+			message,
+			placeholder: "leave blank",
+			validate: (candidate) =>
+				candidate && candidate.length > 0
+					? positiveIntegerValidation(candidate)
+					: undefined,
+		}),
+	);
+	return value || undefined;
+}
+
+async function optionalTextPrompt(
+	message: string,
+): Promise<string | undefined> {
+	const value = await ask<string>(
+		text({
+			message,
+			placeholder: "leave blank",
+		}),
+	);
+	return value || undefined;
+}
+
+function positiveIntegerValidation(
+	value: string | undefined,
+): string | undefined {
+	return value && POSITIVE_INTEGER_PATTERN.test(value) && Number(value) >= 1
+		? undefined
+		: "Use a positive integer";
+}
+
+function booleanText(value: boolean): string {
+	return value ? "true" : "false";
 }
 
 function claudePlanPrompt(): Promise<string> {

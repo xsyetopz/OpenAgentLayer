@@ -1,0 +1,14 @@
+{
+  "id": "land",
+  "title": "Symphony Land",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Land a PR by monitoring conflicts, resolving them, waiting for checks, and squash-merging when green.",
+  "upstream": {
+    "path": "third_party/openai-symphony/.codex/skills/land/SKILL.md",
+    "verbatim": true
+  }
+}

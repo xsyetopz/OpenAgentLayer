@@ -8,6 +8,7 @@ import { runCodexCommand } from "./commands/codex";
 import { runDeployCommand } from "./commands/deploy";
 import { runInspectCommand } from "./commands/inspect";
 import { runMcpCommand } from "./commands/mcp";
+import { runOpenDexCommand } from "./commands/opendex";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
 import { runProfilesCommand } from "./commands/profiles";
@@ -287,6 +288,16 @@ program
 	);
 
 program
+	.command("opendex")
+	.description("run the Rust OpenDex control-plane binary")
+	.argument("[values...]", "arguments passed to opendex")
+	.option("--dry-run", "print the planned OpenDex command without launching")
+	.allowUnknownOption(true)
+	.action((values: string[], options) =>
+		runOpenDexCommand(repoRoot, [...values, ...argsFromOptions(options)]),
+	);
+
+program
 	.command("provider-e2e")
 	.description(
 		"check real provider binaries and optionally run headless live prompts",
@@ -362,6 +373,44 @@ function addRenderOptions(command: Command): Command {
 		)
 		.option("--opencode-models-file <path>", "saved `opencode models` output")
 		.option(
+			"--codex-orchestration <mode>",
+			"Codex orchestration: symphony, multi_agent, or multi_agent_v2",
+		)
+		.option("--codex-agent-max-depth <n>", "Codex agents.max_depth")
+		.option("--codex-agent-max-threads <n>", "Codex agents.max_threads")
+		.option(
+			"--codex-agent-job-max-runtime-seconds <n>",
+			"Codex agents.job_max_runtime_seconds",
+		)
+		.option(
+			"--codex-multi-agent-v2-max-concurrent-threads-per-session <n>",
+			"Codex multi_agent_v2 max_concurrent_threads_per_session",
+		)
+		.option(
+			"--codex-multi-agent-v2-min-wait-timeout-ms <n>",
+			"Codex multi_agent_v2 min_wait_timeout_ms",
+		)
+		.option(
+			"--codex-multi-agent-v2-hide-spawn-agent-metadata <boolean>",
+			"Codex multi_agent_v2 hide_spawn_agent_metadata",
+		)
+		.option(
+			"--codex-multi-agent-v2-usage-hint-enabled <boolean>",
+			"Codex multi_agent_v2 usage_hint_enabled",
+		)
+		.option(
+			"--codex-multi-agent-v2-usage-hint-text <text>",
+			"Codex multi_agent_v2 usage_hint_text",
+		)
+		.option(
+			"--codex-multi-agent-v2-root-usage-hint-text <text>",
+			"Codex multi_agent_v2 root_agent_usage_hint_text",
+		)
+		.option(
+			"--codex-multi-agent-v2-subagent-usage-hint-text <text>",
+			"Codex multi_agent_v2 subagent_usage_hint_text",
+		)
+		.option(
 			"--caveman-mode <mode>",
 			"off, lite, full, ultra, wenyan-lite, wenyan, or wenyan-ultra",
 		);
@@ -377,6 +426,49 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--claude-plan", options["claudePlan"]);
 	pushValue(args, "--opencode-plan", options["opencodePlan"]);
 	pushValue(args, "--opencode-models-file", options["opencodeModelsFile"]);
+	pushValue(args, "--codex-orchestration", options["codexOrchestration"]);
+	pushValue(args, "--codex-agent-max-depth", options["codexAgentMaxDepth"]);
+	pushValue(args, "--codex-agent-max-threads", options["codexAgentMaxThreads"]);
+	pushValue(
+		args,
+		"--codex-agent-job-max-runtime-seconds",
+		options["codexAgentJobMaxRuntimeSeconds"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-max-concurrent-threads-per-session",
+		options["codexMultiAgentV2MaxConcurrentThreadsPerSession"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-min-wait-timeout-ms",
+		options["codexMultiAgentV2MinWaitTimeoutMs"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-hide-spawn-agent-metadata",
+		options["codexMultiAgentV2HideSpawnAgentMetadata"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-usage-hint-enabled",
+		options["codexMultiAgentV2UsageHintEnabled"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-usage-hint-text",
+		options["codexMultiAgentV2UsageHintText"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-root-usage-hint-text",
+		options["codexMultiAgentV2RootUsageHintText"],
+	);
+	pushValue(
+		args,
+		"--codex-multi-agent-v2-subagent-usage-hint-text",
+		options["codexMultiAgentV2SubagentUsageHintText"],
+	);
 	pushValue(args, "--caveman-mode", options["cavemanMode"]);
 	pushValue(args, "--path", options["path"]);
 	pushValue(args, "--out", options["out"]);

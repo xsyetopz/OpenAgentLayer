@@ -1,0 +1,14 @@
+{
+  "id": "linear",
+  "title": "Symphony Linear GraphQL",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Use Symphony's linear_graphql client tool for raw Linear GraphQL operations such as comment editing and upload flows.",
+  "upstream": {
+    "path": "third_party/openai-symphony/.codex/skills/linear/SKILL.md",
+    "verbatim": true
+  }
+}

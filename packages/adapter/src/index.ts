@@ -5,7 +5,12 @@ import { renderCodex } from "./codex";
 import type { RenderOptions } from "./model-routing";
 import { renderOpenCode } from "./opencode";
 
-export type { ModelPlan, RenderOptions } from "./model-routing";
+export type {
+	CodexOrchestrationMode,
+	CodexOrchestrationOptions,
+	ModelPlan,
+	RenderOptions,
+} from "./model-routing";
 export {
 	assertKnownModelPlan,
 	isClaudePlan,

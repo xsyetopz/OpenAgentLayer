@@ -11,9 +11,11 @@ import {
 	peerRunPaths,
 	renderPeerSummary,
 } from "../src/commands/codex";
+import { opendexRun } from "../src/commands/opendex";
 import { runOptionalSetupCommand } from "../src/commands/setup";
 import {
 	CLAUDE_PLAN_OPTIONS,
+	CODEX_ORCHESTRATION_OPTIONS,
 	CODEX_PLAN_OPTIONS,
 	OPENCODE_PLAN_OPTIONS,
 	OPTIONAL_FEATURE_OPTIONS,
@@ -21,6 +23,7 @@ import {
 	setupProfileChoices,
 	UNINSTALL_PROVIDER_OPTIONS,
 } from "../src/interactive";
+import { renderOptions } from "../src/model-options";
 import { buildSetupArgs } from "../src/workflows";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
@@ -204,6 +207,15 @@ test("Codex peer summary renders status evidence", () => {
 	expect(summary).toContain("fix the auth race");
 });
 
+test("OpenDex command runs the Rust workspace binary", () => {
+	const run = opendexRun(repoRoot, ["--version"]);
+	expect(run.cwd).toBe(repoRoot);
+	expect(
+		run.command.endsWith("target/debug/opendex") ||
+			run.args.join(" ").startsWith("run -p opendex --"),
+	).toBe(true);
+});
+
 async function runDocsMcp(
 	kind: "anthropic" | "opencode",
 	requests: unknown[],
@@ -306,6 +318,11 @@ test("interactive subscription prompts are ordered from lowest to highest", () =
 		"pro-5",
 		"pro-20",
 	]);
+	expect(CODEX_ORCHESTRATION_OPTIONS.map((option) => option.value)).toEqual([
+		"symphony",
+		"multi_agent",
+		"multi_agent_v2",
+	]);
 	expect(CLAUDE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
 		"max-5",
 		"max-20",
@@ -316,6 +333,35 @@ test("interactive subscription prompts are ordered from lowest to highest", () =
 		"opencode-auto",
 		"opencode-auth",
 	]);
+});
+
+test("Codex orchestration setup args and render options preserve v2 bounds", async () => {
+	const args = buildSetupArgs({
+		providers: ["codex"],
+		scope: "global",
+		codexOrchestration: "multi_agent_v2",
+		codexAgentMaxDepth: "2",
+		codexAgentMaxThreads: "3",
+		codexMultiAgentV2MinWaitTimeoutMs: "250",
+		codexMultiAgentV2HideSpawnAgentMetadata: "true",
+		codexMultiAgentV2UsageHintEnabled: "true",
+		codexMultiAgentV2UsageHintText: "Use sparingly.",
+	});
+	expect(args).toContain("--codex-orchestration");
+	expect(args).toContain("multi_agent_v2");
+	await expect(renderOptions(args)).resolves.toMatchObject({
+		codexOrchestration: {
+			mode: "multi_agent_v2",
+			maxDepth: 2,
+			maxThreads: 3,
+			multiAgentV2: {
+				minWaitTimeoutMs: 250,
+				hideSpawnAgentMetadata: true,
+				usageHintEnabled: true,
+				usageHintText: "Use sparingly.",
+			},
+		},
+	});
 });
 
 test("interactive setup asks to use active and saved profiles", () => {

@@ -29,6 +29,7 @@ export function eligibleIssues(
 	issues: Issue[],
 	config: SymphonyConfig,
 	state: OrchestratorState,
+	options: { allowClaimedIssueId?: string } = {},
 ): Issue[] {
 	const terminal = normalizedSet(config.tracker.terminal_states);
 	const active = normalizedSet(config.tracker.active_states);
@@ -48,7 +49,11 @@ export function eligibleIssues(
 			if (!(issue.id && issue.identifier && issue.title && issue.state))
 				return false;
 			if (!active.has(issueState) || terminal.has(issueState)) return false;
-			if (state.running.has(issue.id) || state.claimed.has(issue.id))
+			if (state.running.has(issue.id)) return false;
+			if (
+				state.claimed.has(issue.id) &&
+				issue.id !== options.allowClaimedIssueId
+			)
 				return false;
 			if (
 				issueState === "todo" &&
@@ -99,6 +104,7 @@ export function scheduleRetry(
 		identifier: issue.identifier,
 		attempt,
 		due_at_ms: nowMs + delay,
+		timer_handle: null,
 		error,
 	};
 }

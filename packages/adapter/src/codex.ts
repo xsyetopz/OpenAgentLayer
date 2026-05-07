@@ -6,37 +6,32 @@ import {
 import type { AgentRecord, OalSource, Provider } from "@openagentlayer/source";
 import { agentPrompt, instructions, quoteToml } from "./common";
 import { renderHookArtifacts } from "./hooks";
-import type { RenderOptions } from "./model-routing";
+import type { CodexOrchestrationMode, RenderOptions } from "./model-routing";
 import { resolveCodexModel } from "./model-routing";
 import { renderPrivilegedExecArtifacts } from "./runtime";
 import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "codex";
-// Managed OAL runs use peer orchestration. If an operator explicitly re-enables
-// stable Codex multi_agent, keep its native spawn surface shallow and bounded.
 const CODEX_FEATURES = [
-	{ key: "steer", enabled: true },
-	{ key: "apps", enabled: false },
-	{ key: "tui_app_server", enabled: true },
-	{ key: "memories", enabled: true },
-	{ key: "sqlite", enabled: true },
-	{ key: "plugins", enabled: true },
-	{ key: "codex_hooks", enabled: true },
-	{ key: "hooks", enabled: true },
-	{ key: "shell_zsh_fork", enabled: false },
-	{ key: "goals", enabled: true },
-	{ key: "responses_websockets", enabled: true },
-	{ key: "responses_websockets_v2", enabled: true },
-	{ key: "unified_exec", enabled: false },
-	{ key: "enable_fanout", enabled: false },
-	{ key: "multi_agent", enabled: false },
-	{ key: "multi_agent_v2", enabled: false },
-	{ key: "shell_snapshot", enabled: false },
-	{ key: "collaboration_modes", enabled: false },
-	{ key: "codex_git_commit", enabled: false },
-	{ key: "fast_mode", enabled: false },
-	{ key: "undo", enabled: false },
-	{ key: "js_repl", enabled: false },
+	["steer", true],
+	["apps", false],
+	["tui_app_server", true],
+	["memories", true],
+	["sqlite", true],
+	["plugins", true],
+	["codex_hooks", true],
+	["hooks", true],
+	["shell_zsh_fork", false],
+	["goals", true],
+	["responses_websockets", true],
+	["responses_websockets_v2", true],
+	["unified_exec", false],
+	["shell_snapshot", false],
+	["collaboration_modes", false],
+	["codex_git_commit", false],
+	["fast_mode", false],
+	["undo", false],
+	["js_repl", false],
 ] as const;
 
 export async function renderCodex(
@@ -120,7 +115,7 @@ export async function renderCodex(
 
 function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
-	const agents = resolveCodexAgentPlan(options);
+	const orchestration = resolveCodexOrchestration(options);
 	return `profile = "openagentlayer"
 approvals_reviewer = "auto_review"
 
@@ -134,7 +129,7 @@ extract_model = "gpt-5.4-mini"
 status_line = ["model-with-reasoning", "task-progress", "context-remaining", "five-hour-limit", "weekly-limit"]
 
 [features]
-${renderCodexFeatures()}
+${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: "openagentlayer",
@@ -145,7 +140,7 @@ ${renderCodexProfile({
 	toolsViewImage: true,
 })}
 [profiles.openagentlayer.features]
-${renderCodexFeatures()}
+${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: "openagentlayer-implement",
@@ -162,9 +157,8 @@ ${renderCodexProfile({
 	...optionalReasoningEfforts(profile.utilityPlan, profile.utilityModel),
 })}
 [agents]
-max_depth = 1
-max_threads = ${agents.maxThreads}
-job_max_runtime_seconds = ${agents.jobMaxRuntimeSeconds}
+max_depth = ${orchestration.maxDepth}
+${orchestration.mode === "multi_agent_v2" ? "" : `max_threads = ${orchestration.maxThreads}\n`}job_max_runtime_seconds = ${orchestration.jobMaxRuntimeSeconds}
 interrupt_message = true
 ${source.agents
 	.map(
@@ -254,26 +248,129 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 }
 
 function resolveCodexAgentPlan(options: RenderOptions): {
-	maxThreads: number;
 	jobMaxRuntimeSeconds: number;
 } {
 	const plan = options.codexPlan ?? options.plan;
 	switch (plan) {
 		case "plus":
-			return { maxThreads: 2, jobMaxRuntimeSeconds: 600 };
+			return { jobMaxRuntimeSeconds: 600 };
 		case "pro-5":
-			return { maxThreads: 4, jobMaxRuntimeSeconds: 900 };
+			return { jobMaxRuntimeSeconds: 900 };
 		case "pro-20":
-			return { maxThreads: 6, jobMaxRuntimeSeconds: 1800 };
+			return { jobMaxRuntimeSeconds: 1800 };
 		default:
-			return { maxThreads: 6, jobMaxRuntimeSeconds: 1800 };
+			return { jobMaxRuntimeSeconds: 1800 };
 	}
 }
 
-function renderCodexFeatures(): string {
-	return CODEX_FEATURES.map(
-		(feature) => `${feature.key} = ${feature.enabled ? "true" : "false"}`,
-	).join("\n");
+interface ResolvedCodexOrchestration {
+	mode: CodexOrchestrationMode;
+	maxDepth: number;
+	maxThreads: number;
+	jobMaxRuntimeSeconds: number;
+	multiAgentV2: {
+		hideSpawnAgentMetadata?: boolean;
+		maxConcurrentThreadsPerSession: number;
+		minWaitTimeoutMs?: number;
+		rootAgentUsageHintText?: string;
+		subagentUsageHintText?: string;
+		usageHintEnabled?: boolean;
+		usageHintText?: string;
+	};
+}
+
+function resolveCodexOrchestration(
+	options: RenderOptions,
+): ResolvedCodexOrchestration {
+	const plan = resolveCodexAgentPlan(options);
+	const input = options.codexOrchestration ?? {};
+	const mode = input.mode ?? "symphony";
+	const maxThreads = input.maxThreads ?? 1;
+	const maxDepth = input.maxDepth ?? 1;
+	const v2Threads =
+		input.multiAgentV2?.maxConcurrentThreadsPerSession ?? maxThreads;
+	return {
+		mode,
+		maxDepth,
+		maxThreads,
+		jobMaxRuntimeSeconds:
+			input.jobMaxRuntimeSeconds ?? plan.jobMaxRuntimeSeconds,
+		multiAgentV2: {
+			...input.multiAgentV2,
+			maxConcurrentThreadsPerSession: v2Threads,
+		},
+	};
+}
+
+function renderCodexFeatures(
+	orchestration: ResolvedCodexOrchestration,
+): string {
+	const baseFeatures = CODEX_FEATURES.map(([name, defaultEnabled]) => {
+		const enabled =
+			name === "apps" ? orchestration.mode === "symphony" : defaultEnabled;
+		return `${name} = ${enabled ? "true" : "false"}`;
+	});
+	return [
+		...baseFeatures,
+		"enable_fanout = false",
+		`multi_agent = ${orchestration.mode === "multi_agent" ? "true" : "false"}`,
+		renderMultiAgentV2Feature(orchestration),
+	].join("\n");
+}
+
+function renderMultiAgentV2Feature(
+	orchestration: ResolvedCodexOrchestration,
+): string {
+	if (orchestration.mode !== "multi_agent_v2") return "multi_agent_v2 = false";
+	const entries = [
+		"enabled = true",
+		`max_concurrent_threads_per_session = ${orchestration.multiAgentV2.maxConcurrentThreadsPerSession}`,
+		...optionalBooleanEntry(
+			"hide_spawn_agent_metadata",
+			orchestration.multiAgentV2.hideSpawnAgentMetadata,
+		),
+		...optionalIntegerEntry(
+			"min_wait_timeout_ms",
+			orchestration.multiAgentV2.minWaitTimeoutMs,
+		),
+		...optionalStringEntry(
+			"root_agent_usage_hint_text",
+			orchestration.multiAgentV2.rootAgentUsageHintText,
+		),
+		...optionalStringEntry(
+			"subagent_usage_hint_text",
+			orchestration.multiAgentV2.subagentUsageHintText,
+		),
+		...optionalBooleanEntry(
+			"usage_hint_enabled",
+			orchestration.multiAgentV2.usageHintEnabled,
+		),
+		...optionalStringEntry(
+			"usage_hint_text",
+			orchestration.multiAgentV2.usageHintText,
+		),
+	];
+	return `multi_agent_v2 = { ${entries.join(", ")} }`;
+}
+
+function optionalBooleanEntry(
+	key: string,
+	value: boolean | undefined,
+): string[] {
+	return typeof value === "boolean"
+		? [`${key} = ${value ? "true" : "false"}`]
+		: [];
+}
+
+function optionalIntegerEntry(
+	key: string,
+	value: number | undefined,
+): string[] {
+	return typeof value === "number" ? [`${key} = ${value}`] : [];
+}
+
+function optionalStringEntry(key: string, value: string | undefined): string[] {
+	return value ? [`${key} = ${quoteToml(value)}`] : [];
 }
 
 function renderCodexHooksJson(source: OalSource): string {
