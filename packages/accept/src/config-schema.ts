@@ -37,7 +37,6 @@ const ALLOWED_CODEX_FEATURES = new Set([
 	"memories",
 	"sqlite",
 	"plugins",
-	"codex_hooks",
 	"hooks",
 	"shell_zsh_fork",
 	"goals",

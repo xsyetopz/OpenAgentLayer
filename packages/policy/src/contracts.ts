@@ -65,6 +65,7 @@ function validateProductPromptContracts(
 	}
 	const combined = [
 		contracts.repoInspection,
+		contracts.contextDiscipline,
 		contracts.scopeDiscipline,
 		contracts.sourceBackedBehavior,
 		contracts.correctionDiscipline,

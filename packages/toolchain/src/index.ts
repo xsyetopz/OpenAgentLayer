@@ -99,7 +99,13 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		"rtk init -g --opencode",
 		"rtk init --show",
 		"rtk grep --help",
+		"rtk read --help",
 		"rtk find --help",
+		"rg --help",
+		"fd --help",
+		...(optionalTools.includes("ctx7")
+			? ["bunx ctx7 --help", "bunx ctx7 setup --help"]
+			: []),
 		...optionalFeatureCommands("install", optionalTools, {
 			providers,
 			scope: "global",
@@ -118,6 +124,8 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 			"RTK init must create global or project RTK.md policy before OAL hooks enforce RTK-wrapped commands.",
 			"Keep `rtk gain` at or above 80%; drops below 80% require command/output efficiency work before release.",
 			"Use `rtk gain` to confirm token savings; prefer capped `rtk grep`, bounded `rtk read`, and bounded `rtk find` for high-volume repository inspection.",
+			"RTK flags are not raw tool flags: do not pass `--max` or `--file-type` to plain `rg`/`grep`, and do not pass `--max-lines` or `--level` to shell `read`.",
+			"When RTK is unavailable or a command fails from flag mismatch, use plain Linux fallbacks: `rg -n <pattern> <path> -g '<glob>' | head -n <n>` and `sed -n '1,<n>p' <file>`.",
 			"Use `rg` and `fd` for provider-shared source discovery; both respect `.gitignore` by default.",
 			"Use `git ls-files` when a task explicitly requires tracked files only.",
 			"Use `jq`/`yq` for structured config, `shellcheck`/`shfmt` for shell, `hyperfine` for speed claims, `ast-grep`/`sd` for careful mechanical rewrites, and `gitleaks` for secret checks.",

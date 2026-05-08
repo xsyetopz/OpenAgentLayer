@@ -152,6 +152,10 @@ export function validateProductSource(record: ProductSource): void {
 			"product promptContracts.repoInspection",
 		);
 		requireText(
+			record.promptContracts.contextDiscipline,
+			"product promptContracts.contextDiscipline",
+		);
+		requireText(
 			record.promptContracts.responseBoundaries,
 			"product promptContracts.responseBoundaries",
 		);

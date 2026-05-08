@@ -74,6 +74,7 @@ function renderProductPromptContracts(source: OalSource): string {
 	return [
 		`- ${contracts.rtkEfficiency}`,
 		`- ${contracts.repoInspection}`,
+		`- ${contracts.contextDiscipline}`,
 		`- ${contracts.responseBoundaries}`,
 		`- ${contracts.scopeDiscipline}`,
 		`- ${contracts.sourceBackedBehavior}`,
@@ -92,6 +93,8 @@ function renderAgentPromptContracts(source: OalSource): string {
 	return [
 		"- Artifact target: produce a current-state patch; repository artifacts describe behavior that exists now.",
 		"- Repository inspection: use rg/fd before broad reads; use git ls-files or git grep when tracked-file-only evidence is required.",
+		"- Context discipline: classify the task area and name the owning package/module/route/provider surface before broad exploration; unrelated directories need a one-line reason tied to the task.",
+		"- Navigation order: read package maps, local instructions, or source records before scanning implementation; use tracked inventories and bounded searches first.",
 		"- Edit tools: use apply_patch for focused manual edits; use bounded python3 rewrites for broad mechanical changes when many patch hunks would be fragile, then inspect the final diff.",
 		"- Edit envelope: derive ALLOWED_EDIT_SET from the user request and controlling source; docs, tests, comments, config, warnings, and guardrails enter the set through explicit request or current runtime/schema/security/validation need.",
 		"- Consent boundary: examples, corrections, suggested names, and partial ideas are input evidence for the requested behavior only; compatibility, aliases, fallbacks, extra behavior, guardrails, docs, cleanup, and adjacent changes need explicit user request or controlling source requirement.",

@@ -22,7 +22,8 @@ Artifact outputs:
 Agent use:
 
 - Prefer provider-native subagent or agent launch when the active provider exposes it.
-- Codex CLI sessions with the native subagent surface enabled spawn rendered OAL custom agents by name and wait for their results. Use `oal codex peer batch <task>` for explicit top-level peer-thread automation requests.
+- Default Codex CLI sessions use `oal codex peer batch <task>`, `oal opendex`, `opendex`, or Symphony workflow commands for bounded OpenDex/Symphony orchestration.
+- Codex CLI sessions with the native subagent surface explicitly enabled spawn rendered OAL custom agents by name, wait for their results, and merge only final summaries, diff evidence, and validation results.
 - `oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/` handoff directory with orchestrator, validate, worker, and review passes.
 
 Source-to-artifact chain must be complete for new behavior: source record, renderer, deploy ownership, acceptance check.

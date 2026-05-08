@@ -13,7 +13,6 @@ const CODEX_REQUIRED_FLAGS = [
 	"memories = true",
 	"sqlite = true",
 	"plugins = true",
-	"codex_hooks = true",
 	"hooks = true",
 	"goals = true",
 	"responses_websockets = true",

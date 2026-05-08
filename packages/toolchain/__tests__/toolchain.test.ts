@@ -28,9 +28,16 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	expect(plan.commands).toContain("rtk init -g --codex");
 	expect(plan.commands).toContain("rtk init -g --opencode");
 	expect(plan.commands).toContain("rtk grep --help");
+	expect(plan.commands).toContain("rtk read --help");
 	expect(plan.commands).toContain("rtk find --help");
+	expect(plan.commands).toContain("rg --help");
+	expect(plan.commands).toContain("fd --help");
 	expect(renderToolchainPlan(plan)).toContain("confirm token savings");
 	expect(renderToolchainPlan(plan)).toContain("at or above 80%");
+	expect(renderToolchainPlan(plan)).toContain(
+		"RTK flags are not raw tool flags",
+	);
+	expect(renderToolchainPlan(plan)).toContain("plain Linux fallbacks");
 	expect(renderToolchainPlan(plan)).toContain("respect `.gitignore`");
 	expect(renderToolchainPlan(plan)).toContain("tracked files only");
 	expect(renderToolchainPlan(plan)).toContain("shellcheck");
@@ -46,6 +53,8 @@ test("Linux plan uses selected distro package manager and optional tools", () =>
 	expect(renderToolchainPlan(plan)).toContain(
 		"bunx ctx7 setup --cli --yes --codex --claude --opencode",
 	);
+	expect(renderToolchainPlan(plan)).toContain("bunx ctx7 --help");
+	expect(renderToolchainPlan(plan)).toContain("bunx ctx7 setup --help");
 	expect(renderToolchainPlan(plan)).toContain(
 		"bunx -p playwright playwright install --with-deps",
 	);

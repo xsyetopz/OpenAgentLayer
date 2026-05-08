@@ -48,7 +48,6 @@ export async function assertRenderedConfigs(targetRoot: string): Promise<void> {
 		"gpt-5.5",
 		"gpt-5.4-mini",
 		"gpt-5.3-codex",
-		"codex_hooks = true",
 		"shell_snapshot = false",
 		"codex_git_commit = false",
 	])

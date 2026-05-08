@@ -451,7 +451,7 @@ test("CLI preview applies subscription model plans", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain('model = "gpt-5.5"');
-	expect(stdout).toContain('model_reasoning_effort = "medium"');
+	expect(stdout).toContain('model_reasoning_effort = "high"');
 	expect(stdout).toContain("developer_instructions =");
 	expect(stdout).not.toContain("color =");
 });
@@ -560,7 +560,7 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	const pro5Lead = tomlSection(pro5Stdout, "profiles.openagentlayer");
 	const pro5Implement = tomlSection(
 		pro5Stdout,
-		"profiles.openagentlayer-implement",
+		"profiles.openagentlayer-symphony-implement",
 	);
 	expect(pro5Lead).toContain('plan_mode_reasoning_effort = "high"');
 	expect(pro5Lead).toContain('model_reasoning_effort = "medium"');
@@ -588,10 +588,10 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	const pro20Lead = tomlSection(pro20Stdout, "profiles.openagentlayer");
 	const pro20Implement = tomlSection(
 		pro20Stdout,
-		"profiles.openagentlayer-implement",
+		"profiles.openagentlayer-symphony-implement",
 	);
 	expect(pro20Lead).toContain('plan_mode_reasoning_effort = "high"');
-	expect(pro20Lead).toContain('model_reasoning_effort = "medium"');
+	expect(pro20Lead).toContain('model_reasoning_effort = "high"');
 	expect(pro20Lead).toContain('model_verbosity = "low"');
 	expect(pro20Implement).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(pro20Implement).toContain('model_reasoning_effort = "high"');
@@ -786,9 +786,9 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
-	expect(config).toContain('profile = "openagentlayer"');
+	expect(config).toContain('profile = "openagentlayer-symphony"');
 	expect(config).toContain('plan_mode_reasoning_effort = "high"');
-	expect(config).toContain('model_reasoning_effort = "medium"');
+	expect(config).toContain('model_reasoning_effort = "high"');
 	expect(config).toContain('[plugins."oal@openagentlayer-local"]');
 	expect(
 		await readFile(
@@ -859,7 +859,12 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	expect(stdout).toContain("rtk init -g --codex");
 	expect(stdout).toContain("rtk init -g --opencode");
 	expect(stdout).toContain("rtk grep --help");
+	expect(stdout).toContain("rtk read --help");
 	expect(stdout).toContain("rtk find --help");
+	expect(stdout).toContain("rg --help");
+	expect(stdout).toContain("fd --help");
+	expect(stdout).toContain("bunx ctx7 --help");
+	expect(stdout).toContain("bunx ctx7 setup --help");
 	expect(stdout).toContain(
 		"bunx ctx7 setup --cli --yes --codex --claude --opencode",
 	);
@@ -974,6 +979,8 @@ test("CLI RTK report groups project history by routing kind", async () => {
 	expect(stdout).toContain("filtered: commands=1");
 	expect(stdout).toContain("fallback: commands=1");
 	expect(stdout).toContain("nl -ba <file>");
+	expect(stdout).toContain("rg -n ... | head -n <n>");
+	expect(stdout).toContain("sed -n '1,<n>p' <file>");
 	await rm(root, { recursive: true, force: true });
 });
 

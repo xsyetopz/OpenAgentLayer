@@ -10,7 +10,6 @@ const MAX_DECODE_DEPTH = 2;
 const NON_SECRET_IDENTIFIER_VALUES = new Set([
 	"apps",
 	"codex_git_commit",
-	"codex_hooks",
 	"collaboration_modes",
 	"enable_fanout",
 	"fast_mode",

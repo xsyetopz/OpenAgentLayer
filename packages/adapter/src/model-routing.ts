@@ -207,7 +207,8 @@ export function resolveCodexModel(
 ): RoutedModel {
 	const plan =
 		options.codexPlan ?? (isCodexPlan(options.plan) ? options.plan : undefined);
-	const model = agent.models.codex ?? "gpt-5.4-mini";
+	const sourceModel = agent.models.codex ?? "gpt-5.4-mini";
+	const model = plan ? codexPlanModel(sourceModel, plan) : sourceModel;
 	return {
 		model,
 		...(plan ? { reasoningEffort: codexReasoningEffort(model, plan) } : {}),
@@ -233,9 +234,18 @@ function codexReasoningEffort(
 	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
 ): ReasoningEffort {
 	if (model === "gpt-5.3-codex") return plan === "plus" ? "medium" : "high";
-	if (model === "gpt-5.5") return plan === "plus" ? "low" : "medium";
+	if (model === "gpt-5.5") return plan === "pro-20" ? "high" : "medium";
 	if (model === "gpt-5.4-mini") return plan === "pro-20" ? "medium" : "low";
 	return "low";
+}
+
+function codexPlanModel(
+	model: string,
+	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
+): string {
+	if (plan !== "plus") return model;
+	if (model === "gpt-5.5") return "gpt-5.3-codex";
+	return model;
 }
 
 export function resolveOpenCodeModel(

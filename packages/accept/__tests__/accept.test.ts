@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { resolve } from "node:path";
 import { buildRoadmapEvidence } from "../src";
+import { assertCodebaseShape } from "../src/codebase-shape";
 import { assertCodexTomlSchema } from "../src/config-schema";
 import {
 	assertRtkGainPolicyFixtures,
@@ -14,6 +15,12 @@ test("roadmap evidence has no uncovered entries", async () => {
 		resolve(import.meta.dir, "../../.."),
 	);
 	expect(evidence.filter((entry) => entry.status === "uncovered")).toEqual([]);
+});
+
+test("codebase shape gate accepts current source owners", async () => {
+	await expect(
+		assertCodebaseShape(resolve(import.meta.dir, "../../..")),
+	).resolves.toBeUndefined();
 });
 
 test("Codex config schema requires cheap memory extraction model", () => {

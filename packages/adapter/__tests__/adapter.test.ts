@@ -29,7 +29,7 @@ test("model plans route Greek agents by subscription", async () => {
 		(artifact) => artifact.path === ".codex/agents/athena.toml",
 	)?.content;
 	expect(athena).toContain('model = "gpt-5.5"');
-	expect(athena).toContain('model_reasoning_effort = "medium"');
+	expect(athena).toContain('model_reasoning_effort = "high"');
 	const hephaestus = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
 	)?.content;
@@ -153,6 +153,9 @@ test("provider instructions render inspection and correction discipline contract
 		)?.content;
 		expect(instructions).toContain("Repository inspection:");
 		expect(instructions).toContain("git ls-files");
+		expect(instructions).toContain("Context discipline:");
+		expect(instructions).toContain("classify the task area");
+		expect(instructions).toContain("unrelated directories unusual");
 		expect(instructions).toContain("Correction discipline:");
 		expect(instructions).toContain("verify before accepting a correction");
 		expect(instructions).toContain(
@@ -200,6 +203,11 @@ test("provider agents render inspection and correction discipline contracts", as
 		)?.content;
 		expect(agent).toContain("Repository inspection:");
 		expect(agent).toContain("git ls-files");
+		expect(agent).toContain("Context discipline:");
+		expect(agent).toContain(
+			"name the owning package/module/route/provider surface",
+		);
+		expect(agent).toContain("Navigation order:");
 		expect(agent).toContain("Correction discipline:");
 		expect(agent).toContain("verify before accepting a correction");
 		expect(agent).toContain(
@@ -260,12 +268,12 @@ test("orchestration agents render concrete delegation task contracts", async () 
 			(artifact) => artifact.path === path,
 		)?.content;
 		expect(agent).toContain("Broad implementation work");
-		expect(agent).toContain("Record subagent task");
+		expect(agent).toContain("Record peer task");
 		expect(agent).toContain("owned paths");
 		expect(agent).toContain("merge order");
 		if (provider === "codex") {
-			expect(agent).toContain("explicitly ask Codex to spawn subagents");
-			expect(agent).toContain("have rendered OAL agents");
+			expect(agent).toContain("use `oal codex peer batch <task>`");
+			expect(agent).toContain("native subagents are explicitly enabled");
 			expect(agent).toContain(
 				"The parent thread owns task split, child launch, evidence merge, and final decision",
 			);
@@ -295,6 +303,7 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
 	expect(config).not.toContain("zsh_path");
+	expect(config).not.toContain("codex_hooks");
 	expect(config).toContain('profile = "openagentlayer-symphony"');
 	expect(config).toContain("[profiles.openagentlayer-symphony]");
 	expect(config).toContain("[profiles.openagentlayer-symphony.features]");
@@ -314,13 +323,16 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("[tui]");
 	for (const item of [
 		"model-with-reasoning",
+		"run-state",
+		"git-branch",
 		"task-progress",
 		"context-remaining",
-		"five-hour-limit",
-		"weekly-limit",
+		"used-tokens",
 	]) {
 		expect(config).toContain(`"${item}"`);
 	}
+	expect(config).not.toContain('"five-hour-limit"');
+	expect(config).not.toContain('"weekly-limit"');
 	expect(config).not.toContain('"session-id"');
 	expect(config).not.toContain('"total-input-tokens"');
 	expect(
@@ -346,7 +358,8 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(instructions).toContain(
 		"Operators can opt into stable `multi_agent` or `multi_agent_v2` through OAL CLI setup options",
 	);
-	expect(instructions).toContain("Use Symphony or peer-thread orchestration");
+	expect(instructions).toContain("use `oal codex peer batch <task>`");
+	expect(instructions).toContain("should not ask native Codex agents to spawn");
 	const hooks = JSON.parse(
 		rendered.artifacts.find((artifact) => artifact.path === ".codex/hooks.json")
 			?.content ?? "{}",
@@ -358,6 +371,24 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 			),
 		),
 	).toBe(true);
+});
+
+test("Codex Plus plan avoids GPT-5.5 for rendered agents and primary profile", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	const rendered = await renderProvider("codex", graph.source, repoRoot, {
+		plan: "plus",
+	});
+	const config = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(config).toContain(
+		'[profiles.openagentlayer-symphony]\nmodel = "gpt-5.3-codex"',
+	);
+	const athena = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/agents/athena.toml",
+	)?.content;
+	expect(athena).toContain('model = "gpt-5.3-codex"');
+	expect(athena).toContain('model_reasoning_effort = "medium"');
 });
 
 test("Codex native orchestration modes render bounded settings", async () => {

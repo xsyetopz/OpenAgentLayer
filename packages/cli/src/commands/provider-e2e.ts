@@ -237,7 +237,6 @@ async function writeCodexHookFixtureConfig(home: string): Promise<void> {
 
 [features]
 hooks = true
-codex_hooks = true
 
 [profiles.oal-hook-e2e]
 model = "gpt-5.4-mini"

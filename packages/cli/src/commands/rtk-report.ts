@@ -167,7 +167,13 @@ function printReport(
 		"- raw/proxy `grep` or `rg` -> `rtk grep <pattern> <path> --max <n> --file-type <type>`",
 	);
 	console.log(
+		"- RTK search flag on raw `rg`/`grep` -> `rtk grep ... --max <n>` or fallback `rg -n ... | head -n <n>`",
+	);
+	console.log(
 		"- full `rtk read <file>` -> `rtk read --max-lines <n> <file>` or `rtk read --level minimal <file>`",
+	);
+	console.log(
+		"- RTK read flag on shell `read` -> `rtk read --max-lines <n> <file>` or fallback `sed -n '1,<n>p' <file>`",
 	);
 	console.log(
 		"- raw/proxy `dotnet build|test|format` -> `rtk dotnet build|test|format`",

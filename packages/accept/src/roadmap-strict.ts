@@ -20,7 +20,6 @@ const REQUIRED_CODEX_FLAGS = [
 	"memories = true",
 	"sqlite = true",
 	"plugins = true",
-	"codex_hooks = true",
 	"goals = true",
 	"responses_websockets = true",
 	"responses_websockets_v2 = true",

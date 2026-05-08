@@ -182,6 +182,21 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "pass",
 	});
 	await expect(
+		runHook({
+			command: 'rg "touch" third_party --max 80 --file-type java',
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK-only search flags were used with a raw search command",
+		details: expect.arrayContaining([
+			'Use: rtk grep "touch" third_party --max 80 --file-type java',
+			"Fallback: rg -n <pattern> <path> -g '<glob>' | head -n <n>",
+			"Note: raw rg uses --max-count/-m per file, not RTK's global --max result cap.",
+		]),
+	});
+	await expect(
 		runHook({ command: "rtk read package.json" }),
 	).resolves.toMatchObject({
 		decision: "block",
@@ -191,6 +206,43 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		runHook({ command: "rtk read --max-lines 80 package.json" }),
 	).resolves.toMatchObject({
 		decision: "pass",
+	});
+	await expect(runHook({ command: "rtk find ." })).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK find needs an explicit traversal bound",
+	});
+	await expect(
+		runHook({ command: "rtk find packages -maxdepth 2" }),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK find needs a narrowing predicate for large codebases",
+	});
+	await expect(
+		runHook({ command: "rtk find packages -maxdepth 2 -type f" }),
+	).resolves.toMatchObject({
+		decision: "pass",
+	});
+	await expect(runHook({ command: "rtk tree ." })).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK tree needs an explicit depth for large codebases",
+	});
+	await expect(runHook({ command: "rtk ls -R ." })).resolves.toMatchObject({
+		decision: "block",
+		reason: "Recursive ls is too broad for large codebases",
+	});
+	await expect(
+		runHook({
+			command: "read --max-lines 80 package.json",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK-only read flags were used with the shell read command",
+		details: expect.arrayContaining([
+			"Use: rtk read --max-lines 80 package.json",
+			"Fallback: sed -n '1,<n>p' <file>",
+		]),
 	});
 	await expect(
 		runHook({ command: "rtk proxy -- rg Token ." }),
@@ -639,6 +691,7 @@ test("command tool guidance advises search and structured config tools", async (
 		decision: "warn",
 		details: expect.arrayContaining([
 			"Use: git ls-files <pathspec>",
+			"Fallback after RTK mismatch: inspect help first, then use plain `rg -n ... | head -n <n>` and `sed -n '1,<n>p' <file>`.",
 			"Note: rg and fd respect .gitignore by default; git ls-files is tracked-only.",
 		]),
 	});

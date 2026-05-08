@@ -21,6 +21,7 @@ import { assertGeneratedArtifactContracts } from "./artifacts";
 import { assertCheckboxDiscipline } from "./checkboxes";
 import { assertCiCdWorkflow } from "./ci";
 import { assertCliContracts } from "./cli";
+import { assertCodebaseShape } from "./codebase-shape";
 import {
 	assertBackupsCreated,
 	assertMarkedBlocksInstalled,
@@ -67,6 +68,7 @@ export async function runAcceptance(
 	await assertAuthoredMarkdownStyle(repoRoot);
 	await assertCheckboxDiscipline(repoRoot);
 	await assertRepositoryInventory(repoRoot);
+	await assertCodebaseShape(repoRoot);
 	await assertMessageStyle(repoRoot);
 	await assertHomebrewCask(repoRoot);
 	await assertCiCdWorkflow(repoRoot);

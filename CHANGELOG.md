@@ -5,6 +5,29 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.6.0-beta.2] - 2026-05-08
+
+### Added
+
+- Added subscription-plan routing for Codex, Claude Code, and OpenCode so generated agents and primary profiles select provider-native models by plan class.
+- Added RTK command help checks, RTK gain report grouping, and a codebase-shape acceptance gate for oversized owners, crowded source roots, and deep source paths.
+- Added context-discipline prompt contracts so rendered provider instructions and agents classify task ownership before broad repository exploration.
+
+### Changed
+
+- Removed deprecated Codex `codex_hooks` config output and kept hook installation owned by provider hook artifacts.
+- Changed Codex statusline defaults to model, run state, git branch, task progress, context remaining, and used tokens.
+- Hardened command policy against RTK-only flags on raw tools and unbounded large-codebase inventory commands such as broad `rtk find`, `rtk tree`, and recursive `rtk ls`.
+- Updated Codex orchestration guidance toward OpenDex/Symphony and refreshed the tracked upstream Codex source snapshot.
+
+### Verified
+
+- `bun test packages/*/__tests__/*.test.ts tests/*.test.ts`
+- `bun run biome:check`
+- `bunx tsc --noEmit`
+- `bun packages/cli/src/main.ts accept`
+- `git diff --check`
+
 ## [0.6.0-beta.1] - 2026-05-07
 
 ### Added

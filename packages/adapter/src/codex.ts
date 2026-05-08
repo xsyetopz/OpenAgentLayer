@@ -19,7 +19,6 @@ const CODEX_FEATURES = [
 	["memories", true],
 	["sqlite", true],
 	["plugins", true],
-	["codex_hooks", true],
 	["hooks", true],
 	["shell_zsh_fork", false],
 	["goals", true],
@@ -127,14 +126,14 @@ hide_rate_limit_model_nudge = true
 extract_model = "gpt-5.4-mini"
 
 [tui]
-status_line = ["model-with-reasoning", "task-progress", "context-remaining", "five-hour-limit", "weekly-limit"]
+status_line = ["model-with-reasoning", "run-state", "git-branch", "task-progress", "context-remaining", "used-tokens"]
 
 [features]
 ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: primaryProfile,
-	model: "gpt-5.5",
+	model: profile.primaryModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.plan, profile.model),
@@ -145,7 +144,7 @@ ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: "openagentlayer",
-	model: "gpt-5.5",
+	model: profile.primaryModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.plan, profile.model),
@@ -156,14 +155,14 @@ ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: `${primaryProfile}-implement`,
-	model: "gpt-5.3-codex",
+	model: profile.implementProfileModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.implementPlan, profile.implementModel),
 })}
 ${renderCodexProfile({
 	name: `${primaryProfile}-utility`,
-	model: "gpt-5.4-mini",
+	model: profile.utilityProfileModel,
 	approvalPolicy: "never",
 	sandboxMode: "read-only",
 	...optionalReasoningEfforts(profile.utilityPlan, profile.utilityModel),
@@ -229,6 +228,9 @@ ${profile.toolsViewImage ? "tools_view_image = true\n" : ""}
 }
 
 function resolveCodexProfilePlan(options: RenderOptions): {
+	primaryModel: string;
+	implementProfileModel: string;
+	utilityProfileModel: string;
 	plan?: CodexProfileConfig["planReasoningEffort"];
 	model?: CodexProfileConfig["modelReasoningEffort"];
 	implementPlan?: CodexProfileConfig["planReasoningEffort"];
@@ -240,8 +242,11 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 	switch (plan) {
 		case "plus":
 			return {
+				primaryModel: "gpt-5.3-codex",
+				implementProfileModel: "gpt-5.3-codex",
+				utilityProfileModel: "gpt-5.4-mini",
 				plan: "low",
-				model: "low",
+				model: "medium",
 				implementPlan: "medium",
 				implementModel: "medium",
 				utilityPlan: "low",
@@ -249,6 +254,9 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		case "pro-5":
 			return {
+				primaryModel: "gpt-5.5",
+				implementProfileModel: "gpt-5.3-codex",
+				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
 				model: "medium",
 				implementPlan: "medium",
@@ -258,15 +266,22 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		case "pro-20":
 			return {
+				primaryModel: "gpt-5.5",
+				implementProfileModel: "gpt-5.3-codex",
+				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
-				model: "medium",
+				model: "high",
 				implementPlan: "medium",
 				implementModel: "high",
 				utilityPlan: "medium",
 				utilityModel: "medium",
 			};
 		default:
-			return {};
+			return {
+				primaryModel: "gpt-5.5",
+				implementProfileModel: "gpt-5.3-codex",
+				utilityProfileModel: "gpt-5.4-mini",
+			};
 	}
 }
 

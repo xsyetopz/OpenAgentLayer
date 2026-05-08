@@ -25,6 +25,8 @@ const ROOT_PRODUCT_FILES = [
 	"bunfig.toml",
 	"Cargo.toml",
 	"Cargo.lock",
+	"rust-toolchain.toml",
+	".rscheck.toml",
 ] as const;
 const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin"] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;

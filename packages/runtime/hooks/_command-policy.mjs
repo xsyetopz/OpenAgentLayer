@@ -83,6 +83,24 @@ const RTK_READ_BOUND_FLAGS = new Set([
 	"-l",
 	"--level",
 ]);
+const RTK_FIND_BOUND_FLAGS = new Set(["-maxdepth", "--max-depth"]);
+const RTK_FIND_NARROWING_FLAGS = new Set([
+	"-name",
+	"-iname",
+	"-path",
+	"-ipath",
+	"-regex",
+	"-type",
+	"-mtime",
+	"-newer",
+]);
+const RTK_ONLY_SEARCH_FLAGS = new Set(["--max", "--file-type"]);
+const RTK_ONLY_READ_FLAGS = new Set([
+	"--max-lines",
+	"--tail-lines",
+	"--level",
+	"--line-numbers",
+]);
 
 export function evaluateCommandPolicy(command, options = {}) {
 	const commands = commandLines(command);
@@ -141,6 +159,8 @@ function evaluateSingleCommand(command, options) {
 	const rewriteCandidate = shellInnerCommand(normalized) ?? normalized;
 	const delegatedCodex = evaluateCodexExecDelegation(rewriteCandidate);
 	if (delegatedCodex) return delegatedCodex;
+	const toolMismatch = evaluateToolMismatch(rewriteCandidate);
+	if (toolMismatch) return toolMismatch;
 	const bunReplacement = options.bunRewrite?.(rewriteCandidate);
 	if (bunReplacement)
 		return {
@@ -199,6 +219,37 @@ function evaluateSingleCommand(command, options) {
 		reason: "RTK proxy handles this command when output may be noisy",
 		details: [`Use when useful: rtk proxy -- ${normalized}`],
 	};
+}
+
+function evaluateToolMismatch(command) {
+	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const executable = shellWrapperName(tokens[0] ?? "");
+	if (
+		(executable === "rg" || executable === "grep") &&
+		hasOption(tokens, RTK_ONLY_SEARCH_FLAGS)
+	) {
+		return {
+			decision: "block",
+			reason: "RTK-only search flags were used with a raw search command",
+			details: [
+				`Use: rtk ${rewriteExecutable(command, executable === "rg" ? "grep" : executable)}`,
+				"Fallback: rg -n <pattern> <path> -g '<glob>' | head -n <n>",
+				"Note: raw rg uses --max-count/-m per file, not RTK's global --max result cap.",
+			],
+		};
+	}
+	if (executable === "read" && hasOption(tokens, RTK_ONLY_READ_FLAGS)) {
+		return {
+			decision: "block",
+			reason: "RTK-only read flags were used with the shell read command",
+			details: [
+				`Use: rtk ${rewriteExecutable(command, "read")}`,
+				"Fallback: sed -n '1,<n>p' <file>",
+				"Fallback with line numbers: nl -ba <file> | sed -n '1,<n>p'",
+			],
+		};
+	}
+	return undefined;
 }
 
 function evaluateCodexExecDelegation(command) {
@@ -306,6 +357,9 @@ function evaluateRtkCommandBounds(command) {
 	const subcommand = tokens[1] ?? "";
 	if (subcommand === "grep") return evaluateRtkGrepBounds(tokens);
 	if (subcommand === "read") return evaluateRtkReadBounds(tokens);
+	if (subcommand === "find") return evaluateRtkFindBounds(tokens);
+	if (subcommand === "tree") return evaluateRtkTreeBounds(tokens);
+	if (subcommand === "ls") return evaluateRtkLsBounds(tokens);
 	return undefined;
 }
 
@@ -333,6 +387,51 @@ function evaluateRtkReadBounds(tokens) {
 			details: [
 				"Use: rtk read --max-lines <n> <file>",
 				"Use: rtk read --level minimal <file>",
+			],
+		};
+	return undefined;
+}
+
+function evaluateRtkFindBounds(tokens) {
+	if (!hasOption(tokens, RTK_FIND_BOUND_FLAGS))
+		return {
+			decision: "block",
+			reason: "RTK find needs an explicit traversal bound",
+			details: [
+				"Use: rtk find <path> -maxdepth <n> -type f -name '<glob>'",
+				"Use: fd <pattern> <path> --max-depth <n> --max-results <n>",
+			],
+		};
+	if (!hasOption(tokens, RTK_FIND_NARROWING_FLAGS))
+		return {
+			decision: "block",
+			reason: "RTK find needs a narrowing predicate for large codebases",
+			details: [
+				"Use: rtk find <path> -maxdepth <n> -type f -name '<glob>'",
+				"Use: git ls-files <pathspec> for tracked-file inventory",
+			],
+		};
+	return undefined;
+}
+
+function evaluateRtkTreeBounds(tokens) {
+	if (!hasOption(tokens, new Set(["-L", "--level"])))
+		return {
+			decision: "block",
+			reason: "RTK tree needs an explicit depth for large codebases",
+			details: ["Use: rtk tree <path> -L <n>"],
+		};
+	return undefined;
+}
+
+function evaluateRtkLsBounds(tokens) {
+	if (tokens.some((token) => token === "-R" || token === "--recursive"))
+		return {
+			decision: "block",
+			reason: "Recursive ls is too broad for large codebases",
+			details: [
+				"Use: rtk find <path> -maxdepth <n> -type f -name '<glob>'",
+				"Use: fd <pattern> <path> --max-depth <n> --max-results <n>",
 			],
 		};
 	return undefined;
