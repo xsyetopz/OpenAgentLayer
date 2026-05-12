@@ -4,6 +4,7 @@ import { buildRoadmapEvidence } from "../src";
 import { assertCodebaseShape } from "../src/codebase-shape";
 import { assertCodexUpstreamPatch } from "../src/codex-upstream";
 import { assertCodexTomlSchema } from "../src/config-schema";
+import { assertRepositoryInventory } from "../src/inventory";
 import {
 	assertRtkGainPolicyFixtures,
 	assertRtkGainThreshold,
@@ -21,6 +22,12 @@ test("roadmap evidence has no uncovered entries", async () => {
 test("codebase shape gate accepts current source owners", async () => {
 	await expect(
 		assertCodebaseShape(resolve(import.meta.dir, "../../..")),
+	).resolves.toBeUndefined();
+});
+
+test("repository inventory accepts root community policy docs", async () => {
+	await expect(
+		assertRepositoryInventory(resolve(import.meta.dir, "../../..")),
 	).resolves.toBeUndefined();
 });
 

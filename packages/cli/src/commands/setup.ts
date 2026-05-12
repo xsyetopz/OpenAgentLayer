@@ -60,7 +60,7 @@ async function runSetupWithArgs(
 	const rtk = flag(args, "--rtk");
 	const context7ApiKey = option(args, "--context7-api-key");
 	if (context7ApiKey && !isExpectedContext7ApiKey(context7ApiKey))
-		throw new Error("Context7 API key must look like ctx7sk-...");
+		throw new Error("Context7 API key must start with ctx7sk-");
 	const setupOptions = {
 		providers,
 		skippedProviders: availability.skipped,

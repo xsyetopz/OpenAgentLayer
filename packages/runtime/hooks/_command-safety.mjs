@@ -117,7 +117,7 @@ function evaluateGitCommitCommand(command, blockReason) {
 	if (subject && !CONVENTIONAL_COMMIT_SUBJECT_PATTERN.test(subject.trim())) {
 		return {
 			decision: "block",
-			reason: "Git commit subject must follow Conventional Commits.",
+			reason: "Commit subject must follow Conventional Commits",
 			details: [command],
 		};
 	}

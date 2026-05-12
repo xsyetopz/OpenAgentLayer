@@ -94,8 +94,10 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 			throw new Error(`Codex requirements missing \`${required}\``);
 	if (requirements.includes("codex_hooks"))
 		throw new Error("Codex requirements emitted legacy codex_hooks feature");
-	if (!config.includes("max_threads = 1"))
-		throw new Error("Codex config missing agents.max_threads");
+	if (!config.includes("max_concurrent_threads_per_session = 1"))
+		throw new Error(
+			"Codex config missing multi_agent_v2.max_concurrent_threads_per_session",
+		);
 	if (!config.includes("job_max_runtime_seconds = 1800"))
 		throw new Error("Codex config missing bounded agents job runtime");
 	if (config.includes('interrupt_message = "'))

@@ -27,17 +27,17 @@ const REQUIRED_ROUTES = [
 	"audit",
 ] as const;
 const AGENT_CONTRACT_TERMS = [
-	"## Prompt contract",
-	"Inspect only source needed",
-	"smallest current-state change",
-	"Validate only when",
+	"## Narrow Agent Contract",
+	"Own routes:",
+	"Use only these tools:",
+	"Use these skills when relevant:",
+	"Accept work when:",
+	"Refuse or hand back when:",
+	"Stay narrow:",
+	"Workspace consequence:",
+	"Evidence consequence:",
+	"Output consequence:",
 	"STATUS BLOCKED",
-	"Triggers:",
-	"Route handoff signals:",
-	"Tool contract:",
-	"Skill access:",
-	"Owned routes:",
-	"Final output",
 ] as const;
 const COMMAND_CONTRACT_TERMS = [
 	"Owner:",

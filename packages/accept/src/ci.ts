@@ -4,7 +4,7 @@ import { join } from "node:path";
 const CI_WORKFLOW = ".github/workflows/ci.yml";
 const REQUIRED_WORKFLOW_TERMS = [
 	"pull_request:",
-	"branches: [ master ]",
+	"branches: [master]",
 	'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"',
 	"actions/checkout@v6",
 	"submodules: false",
@@ -27,7 +27,7 @@ const REQUIRED_WORKFLOW_TERMS = [
 	"test -f third_party/impeccable/skill/SKILL.md",
 	"test -f third_party/robertmsale-codex/skills/design-worker/SKILL.md",
 	"test -f third_party/gitleaks/config/gitleaks.toml",
-	"needs: [ quality, dry-run ]",
+	"needs: [quality, dry-run]",
 	"github.event_name == 'push'",
 	"github.ref == 'refs/heads/master'",
 	"github.repository == 'xsyetopz/OpenAgentLayer'",

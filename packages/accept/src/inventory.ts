@@ -19,6 +19,7 @@ const ROOT_PRODUCT_FILES = [
 	"README.md",
 	"INSTALLATION.md",
 	"CHANGELOG.md",
+	"CODE_OF_CONDUCT.md",
 	"CONTRIBUTING.md",
 	"SECURITY.md",
 	"upstream-sources.lock.json",

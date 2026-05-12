@@ -16,7 +16,7 @@ export function runToolchainCommand(args: string[]): void {
 	const includeOptional = optionalTools(option(args, "--optional"));
 	const context7ApiKey = option(args, "--context7-api-key");
 	if (context7ApiKey && !isExpectedContext7ApiKey(context7ApiKey))
-		throw new Error("Context7 API key must look like ctx7sk-...");
+		throw new Error("Context7 API key must start with ctx7sk-");
 	const baseOptions = {
 		os,
 		hasHomebrew: !args.includes("--homebrew-missing"),
@@ -35,7 +35,7 @@ export function runFeaturesCommand(args: string[]): void {
 	const remove = optionalTools(option(args, "--remove"));
 	const context7ApiKey = option(args, "--context7-api-key");
 	if (context7ApiKey && !isExpectedContext7ApiKey(context7ApiKey))
-		throw new Error("Context7 API key must look like ctx7sk-...");
+		throw new Error("Context7 API key must start with ctx7sk-");
 	if (install.length === 0 && remove.length === 0)
 		throw new Error(
 			"Expected `--install` or `--remove` with `ctx7,deepwiki,playwright,anthropic-docs,opencode-docs`",

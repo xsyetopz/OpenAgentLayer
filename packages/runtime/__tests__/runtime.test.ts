@@ -997,7 +997,7 @@ test("unsafe git hook enforces coauthor and Conventional Commit subjects", async
 		}),
 	).resolves.toMatchObject({
 		decision: "block",
-		reason: "Git commit subject must follow Conventional Commits.",
+		reason: "Commit subject must follow Conventional Commits",
 	});
 	await expect(
 		runNamedHook("block-unsafe-git.mjs", {
