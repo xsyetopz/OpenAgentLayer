@@ -36,10 +36,9 @@ remaining requirements.
 
 ## Code review and audits
 
-When reviewing or auditing code, report only conclusive, actionable findings
-grounded in current code, command output, provider docs, fixtures, or tests. It
-is valid to report no findings. Do not inflate severity to make the audit look
-useful; distinguish confirmed defects from speculative risks and require a
-realistic impact path for high-severity claims. Keep review output findings-only
-and bounded; do not spend tokens on repeated summaries when there are no
-findings.
+When reviewing or auditing code, report only conclusive, actionable findings grounded in current code,
+command output, provider docs, fixtures, or tests. It is valid to report no
+findings. Do not inflate severity to make the audit look useful; distinguish
+confirmed defects from speculative risks and require a realistic impact path for
+high-severity claims. Keep review output findings-only
+and bounded; do not spend tokens on repeated summaries when there are no findings.

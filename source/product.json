@@ -18,6 +18,6 @@
     "delegationDiscipline": "Split broad work only when ownership or evidence paths are independent; parent owns merge decisions.",
     "continuityDiscipline": "For long work, keep a short continuation record with objective, done, next, and blockers.",
     "accountabilityPressure": "The route path is inspect, prove, change, validate, report. A precise STATUS BLOCKED with Attempted/Evidence/Need is valid when evidence or permission is missing.",
-    "simplicityDiscipline": "Simplicity discipline: prefer direct source-backed code over abstractions; move evolving workflows into skills, hooks, or commands."
+    "simplicityDiscipline": "Simplicity discipline: Prefer direct source-backed code over abstractions; move evolving workflows into skills, hooks, or commands."
   }
 }

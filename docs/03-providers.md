@@ -21,8 +21,8 @@ OAL renders `.codex/openagentlayer/codex-base-instructions.md` from upstream
 `openai/codex` base instructions plus the tracked OAL patch in
 `patches/openai-codex-base-instructions-default-md.patch`, then points
 `model_instructions_file` at that patched file.
-Generated Codex config also includes
-`#:schema https://developers.openai.com/codex/config-schema.json`.
+Generated Codex config also includes a `#:schema` comment that points to the
+[Codex config schema](https://developers.openai.com/codex/config-schema.json).
 The research disposition for the reddit-derived changes lives in
 `docs/codex-reddit-research.md`.
 
