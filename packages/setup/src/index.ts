@@ -15,7 +15,9 @@ export interface SetupPlanOptions {
 	home: string;
 	target?: string;
 	binDir?: string;
+	repoRoot?: string;
 	optionalTools?: OptionalTool[];
+	context7ApiKey?: string;
 	toolchain?: boolean;
 	hasHomebrew?: boolean;
 	rtk?: boolean;
@@ -42,12 +44,24 @@ export interface SetupPlan {
 
 export function planSetup(options: SetupPlanOptions): SetupPlan {
 	const optionalTools = options.optionalTools ?? [];
+	const optionalFeatureOptions = {
+		providers: options.providers,
+		scope: options.scope,
+		targetRoot: options.target ?? options.home,
+		...(options.repoRoot ? { repoRoot: options.repoRoot } : {}),
+		...(options.context7ApiKey
+			? { context7ApiKey: options.context7ApiKey }
+			: {}),
+	};
 	const phases: SetupPhase[] = [];
 	if (options.toolchain) {
 		const toolchainPlan = planToolchainInstall({
 			os: process.platform === "darwin" ? "macos" : "linux",
 			includeOptional: optionalTools,
 			providers: options.providers,
+			...(options.context7ApiKey
+				? { context7ApiKey: options.context7ApiKey }
+				: {}),
 			...(options.hasHomebrew === undefined
 				? {}
 				: { hasHomebrew: options.hasHomebrew }),
@@ -55,7 +69,14 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 		phases.push({
 			name: "toolchain",
 			action: "Install OAL command-line toolchain",
-			commands: toolchainPlan.commands,
+			commands: [
+				...toolchainPlan.commands,
+				...optionalFeatureCommands(
+					"install",
+					optionalTools.includes("playwright") ? ["playwright"] : [],
+					optionalFeatureOptions,
+				).filter((command) => command.includes("openai-skills")),
+			],
 		});
 	} else if (options.rtk || optionalTools.length > 0) {
 		phases.push({
@@ -70,10 +91,11 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 							"rtk init -g --opencode",
 						]
 					: []),
-				...optionalFeatureCommands("install", optionalTools, {
-					providers: options.providers,
-					scope: options.scope,
-				}),
+				...optionalFeatureCommands(
+					"install",
+					optionalTools,
+					optionalFeatureOptions,
+				),
 			],
 		});
 	}

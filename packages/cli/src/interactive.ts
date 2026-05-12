@@ -12,7 +12,11 @@ import {
 	text,
 } from "@clack/prompts";
 import type { Provider } from "@openagentlayer/source";
-import type { OptionalTool } from "@openagentlayer/toolchain";
+import {
+	context7ApiKeyStatus,
+	isExpectedContext7ApiKey,
+	type OptionalTool,
+} from "@openagentlayer/toolchain";
 import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
 import { runPluginsCommand } from "./commands/plugins";
@@ -225,14 +229,29 @@ async function interactiveSetup(
 			}),
 		);
 		const selection = selectionFromProfile(savedProfile.profile, intent);
-		const baseArgs = setupArgsForProfile(savedProfile.profile, [
+		const context7ApiKey = selection.optionalTools.includes("ctx7")
+			? await context7ApiKeyPrompt()
+			: undefined;
+		const previewExtraArgs = [
+			...(context7ApiKey ? ["--context7-api-key", context7ApiKey] : []),
 			...(verbose ? ["--verbose"] : []),
-		]);
+		];
+		const baseArgs = setupArgsForProfile(
+			savedProfile.profile,
+			previewExtraArgs,
+		);
 		await printSetupStatePreview(repoRoot, baseArgs);
-		const dryRun = await confirmApplyPrompt(selection, savedProfile.name);
+		const dryRun = await confirmApplyPrompt(
+			{
+				...selection,
+				...(context7ApiKey ? { context7ApiKey } : {}),
+			},
+			savedProfile.name,
+		);
 		await runSetupCommand(
 			repoRoot,
 			setupArgsForProfile(savedProfile.profile, [
+				...(context7ApiKey ? ["--context7-api-key", context7ApiKey] : []),
 				...(dryRun ? ["--dry-run"] : []),
 				...(verbose ? ["--verbose"] : []),
 			]),
@@ -267,6 +286,9 @@ async function interactiveSetup(
 		}),
 	);
 	const optionalTools = await optionalToolPrompt();
+	const context7ApiKey = optionalTools.includes("ctx7")
+		? await context7ApiKeyPrompt()
+		: undefined;
 	const verbose = await ask<boolean>(
 		confirm({ message: "Show detailed command output?", initialValue: false }),
 	);
@@ -283,6 +305,7 @@ async function interactiveSetup(
 		rtk,
 		toolchain,
 		optionalTools,
+		...(context7ApiKey ? { context7ApiKey } : {}),
 		intent,
 	};
 	const baseArgs = buildSetupArgs({
@@ -596,6 +619,7 @@ async function confirmApplyPrompt(
 		rtk: boolean;
 		toolchain: boolean;
 		optionalTools: OptionalTool[];
+		context7ApiKey?: string;
 		intent: SetupIntent;
 	},
 	profileName?: string,
@@ -632,6 +656,11 @@ async function confirmApplyPrompt(
 			? selection.optionalTools.join(", ")
 			: "none",
 	);
+	if (selection.optionalTools.includes("ctx7"))
+		printDetail(
+			"context7 key",
+			selection.context7ApiKey ? "provided" : "environment or not configured",
+		);
 	const apply = await ask<boolean>(
 		confirm({ message: "Apply changes now?", initialValue: false }),
 	);
@@ -916,6 +945,32 @@ function optionalToolPrompt(): Promise<OptionalTool[]> {
 			message: "Optional tool phases",
 			required: false,
 			options: [...OPTIONAL_FEATURE_OPTIONS],
+		}),
+	);
+}
+
+async function context7ApiKeyPrompt(): Promise<string | undefined> {
+	const status = context7ApiKeyStatus();
+	if (status.valid) {
+		log.info(`Context7 API key detected in ${status.source}.`);
+		return undefined;
+	}
+	const message = status.present
+		? "Context7 API key format was not recognized. Provide one now for higher rate limits?"
+		: "Provide a Context7 API key for higher rate limits?";
+	const provide = await ask<boolean>(confirm({ message, initialValue: false }));
+	if (!provide) {
+		log.info("Get a Context7 API key at https://context7.com/dashboard.");
+		return undefined;
+	}
+	return ask<string>(
+		text({
+			message: "Context7 API key",
+			placeholder: "ctx7sk-...",
+			validate: (value) =>
+				isExpectedContext7ApiKey(value ?? "")
+					? undefined
+					: "Expected a Context7 API key like ctx7sk-...",
 		}),
 	);
 }

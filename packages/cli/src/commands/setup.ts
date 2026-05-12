@@ -6,7 +6,10 @@ import {
 	renderSetupPlan,
 	type SetupScope,
 } from "@openagentlayer/setup";
-import type { OptionalTool } from "@openagentlayer/toolchain";
+import {
+	isExpectedContext7ApiKey,
+	type OptionalTool,
+} from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
 import {
 	configPathFromArgs,
@@ -55,17 +58,22 @@ async function runSetupWithArgs(
 	const quiet = flag(args, "--quiet");
 	const verbose = flag(args, "--verbose");
 	const rtk = flag(args, "--rtk");
+	const context7ApiKey = option(args, "--context7-api-key");
+	if (context7ApiKey && !isExpectedContext7ApiKey(context7ApiKey))
+		throw new Error("Context7 API key must look like ctx7sk-...");
 	const setupOptions = {
 		providers,
 		skippedProviders: availability.skipped,
 		scope,
 		home,
 		target: scope === "global" ? home : target,
+		repoRoot,
 		optionalTools,
 		toolchain: flag(args, "--toolchain"),
 		hasHomebrew: commandExists("brew"),
 		rtk,
 		dryRun,
+		...(context7ApiKey ? { context7ApiKey } : {}),
 	};
 	const plan = planSetup(
 		scope === "global" ? { ...setupOptions, binDir } : setupOptions,

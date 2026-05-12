@@ -321,6 +321,7 @@ test("interactive setup workflow builds low-level setup args", () => {
 			opencodePlan: "opencode-free",
 			cavemanMode: "full",
 			optionalTools: ["ctx7", "deepwiki", "anthropic-docs"],
+			context7ApiKey: ["ctx7sk", "abcdefghijklmnop"].join("-"),
 			toolchain: true,
 			rtk: true,
 			dryRun: true,
@@ -343,6 +344,8 @@ test("interactive setup workflow builds low-level setup args", () => {
 		"--toolchain",
 		"--optional",
 		"ctx7,deepwiki,anthropic-docs",
+		"--context7-api-key",
+		["ctx7sk", "abcdefghijklmnop"].join("-"),
 		"--dry-run",
 		"--verbose",
 	]);

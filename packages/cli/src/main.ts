@@ -73,6 +73,7 @@ addRenderOptions(
 	.option("--toolchain", "install OAL command-line toolchain when missing")
 	.option("--rtk", "install/init RTK policy surfaces")
 	.option("--ctx7-cli", "install/configure Context7 CLI")
+	.option("--context7-api-key <key>", "Context7 API key for higher rate limits")
 	.option("--playwright-cli", "install/configure Playwright CLI")
 	.option("--deepwiki-mcp", "configure DeepWiki MCP where supported")
 	.option("--anthropic-docs-mcp", "configure Anthropic/Claude docs MCP")
@@ -257,6 +258,7 @@ program
 		"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
 	)
 	.option("--json", "print JSON")
+	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.option("--homebrew-missing", "pretend Homebrew is missing on macOS")
 	.action((options) => runToolchainCommand(argsFromOptions(options)));
 
@@ -265,6 +267,7 @@ program
 	.description("print optional feature install or removal commands")
 	.option("--install <tools>", "comma-separated optional tools")
 	.option("--remove <tools>", "comma-separated optional tools")
+	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.action((options) => runFeaturesCommand(argsFromOptions(options)));
 
 program
@@ -498,6 +501,7 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--os", options["os"]);
 	pushValue(args, "--pkg", options["pkg"]);
 	pushValue(args, "--optional", options["optional"]);
+	pushValue(args, "--context7-api-key", options["context7ApiKey"]);
 	pushValue(args, "--install", options["install"]);
 	pushValue(args, "--remove", options["remove"]);
 	pushValue(args, "--from-file", options["fromFile"]);

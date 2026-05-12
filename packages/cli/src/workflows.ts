@@ -26,6 +26,7 @@ export interface SetupWorkflowSelection {
 	opencodePlan?: string;
 	cavemanMode?: string;
 	optionalTools?: OptionalTool[];
+	context7ApiKey?: string;
 	toolchain?: boolean;
 	rtk?: boolean;
 	dryRun?: boolean;
@@ -59,6 +60,8 @@ export function buildSetupArgs(selection: SetupWorkflowSelection): string[] {
 	if (selection.toolchain) args.push("--toolchain");
 	if (selection.optionalTools && selection.optionalTools.length > 0)
 		args.push("--optional", selection.optionalTools.join(","));
+	if (selection.context7ApiKey)
+		args.push("--context7-api-key", selection.context7ApiKey);
 	if (selection.dryRun) args.push("--dry-run");
 	if (selection.verbose) args.push("--verbose");
 	return args;

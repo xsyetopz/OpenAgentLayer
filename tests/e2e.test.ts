@@ -635,8 +635,10 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	expect(stdout).toContain("providers: codex, opencode");
 	expect(stdout).toContain("skip claude");
 	expect(stdout).toContain("rtk init -g --codex");
-	expect(stdout).toContain("bunx ctx7 setup --cli --yes --codex --opencode");
+	expect(stdout).toContain("ctx7 setup --cli --yes --codex --opencode");
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
+	expect(stdout).toContain("third_party/openai-skills");
+	expect(stdout).toContain(".codex/openagentlayer/skills/playwright");
 	expect(stdout).not.toContain("claude mcp add oal-deepwiki-docs");
 	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
 	expect(stdout).toContain("OpenAgentLayer plugins · dry-run");
@@ -912,10 +914,11 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	expect(stdout).toContain("rtk find --help");
 	expect(stdout).toContain("rg --help");
 	expect(stdout).toContain("fd --help");
-	expect(stdout).toContain("bunx ctx7 --help");
-	expect(stdout).toContain("bunx ctx7 setup --help");
+	expect(stdout).toContain("bun install -g ctx7");
+	expect(stdout).toContain("ctx7 --version");
+	expect(stdout).toContain("https://context7.com/dashboard");
 	expect(stdout).toContain(
-		"bunx ctx7 setup --cli --yes --codex --claude --opencode",
+		"ctx7 setup --cli --yes --codex --claude --opencode",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain("claude mcp add oal-anthropic-docs");
@@ -941,7 +944,7 @@ test("CLI features shows optional install and removal commands", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	expect(stdout).toContain(
-		"bunx ctx7 setup --cli --yes --codex --claude --opencode",
+		"ctx7 setup --cli --yes --codex --claude --opencode",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain("claude mcp add oal-anthropic-docs");

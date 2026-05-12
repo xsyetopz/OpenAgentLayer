@@ -22,6 +22,7 @@ export interface ToolchainOptions {
 	hasHomebrew?: boolean;
 	includeOptional?: OptionalTool[];
 	providers?: OptionalToolProvider[];
+	context7ApiKey?: string;
 }
 
 export interface ToolchainPlan {
@@ -36,7 +37,19 @@ export interface ToolchainPlan {
 export interface OptionalFeatureCommandOptions {
 	providers?: OptionalToolProvider[];
 	scope?: OptionalToolScope;
+	context7ApiKey?: string;
+	repoRoot?: string;
+	targetRoot?: string;
 }
+
+export interface Context7ApiKeyStatus {
+	present: boolean;
+	valid: boolean;
+	source?: string;
+}
+
+const CONTEXT7_DASHBOARD_URL = "https://context7.com/dashboard";
+const CONTEXT7_API_KEY_PATTERN = /^ctx7sk-[A-Za-z0-9_-]{16,}$/;
 
 const OPTIONAL_TOOL_LABELS: Record<OptionalTool, string> = {
 	ctx7: "ctx7 [CLI]",
@@ -104,11 +117,18 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		"rg --help",
 		"fd --help",
 		...(optionalTools.includes("ctx7")
-			? ["bunx ctx7 --help", "bunx ctx7 setup --help"]
+			? [
+					"bun install -g ctx7",
+					"ctx7 --version",
+					`# Optional: get a Context7 API key for higher rate limits at ${CONTEXT7_DASHBOARD_URL}`,
+				]
 			: []),
 		...optionalFeatureCommands("install", optionalTools, {
 			providers,
 			scope: "global",
+			...(options.context7ApiKey
+				? { context7ApiKey: options.context7ApiKey }
+				: {}),
 		}),
 	];
 	return {
@@ -155,6 +175,28 @@ export function renderToolchainPlan(plan: ToolchainPlan): string {
 
 export function optionalToolLabel(tool: OptionalTool): string {
 	return OPTIONAL_TOOL_LABELS[tool];
+}
+
+export function context7ApiKeyStatus(
+	env: NodeJS.ProcessEnv = process.env,
+): Context7ApiKeyStatus {
+	const entries = [
+		["CONTEXT7_API_KEY", env["CONTEXT7_API_KEY"]],
+		["CTX7_API_KEY", env["CTX7_API_KEY"]],
+	] as const;
+	const found = entries.find(([, value]) => typeof value === "string");
+	if (!found) return { present: false, valid: false };
+	const [source, rawValue] = found;
+	const value = rawValue?.trim() ?? "";
+	return {
+		present: value.length > 0,
+		valid: isExpectedContext7ApiKey(value),
+		source,
+	};
+}
+
+export function isExpectedContext7ApiKey(value: string): boolean {
+	return CONTEXT7_API_KEY_PATTERN.test(value.trim());
 }
 
 function defaultPackageManager(os: OperatingSystem): PackageManager {
@@ -245,13 +287,51 @@ export function optionalFeatureCommands(
 				? `oal mcp install opencode-docs --provider opencode --scope ${options.scope ?? "global"}`
 				: `oal mcp remove opencode-docs --provider opencode --scope ${options.scope ?? "global"}`,
 		);
-	if (optionalTools.includes("playwright"))
+	if (optionalTools.includes("playwright")) {
 		commands.push(
 			action === "install"
 				? "bunx -p playwright playwright install --with-deps"
 				: "bunx -p playwright playwright uninstall --all",
 		);
+		commands.push(...playwrightSkillCommands(action, options));
+	}
 	return commands;
+}
+
+function playwrightSkillCommands(
+	action: OptionalToolAction,
+	options: OptionalFeatureCommandOptions,
+): string[] {
+	if (!(options.repoRoot && options.targetRoot)) return [];
+	const providers = options.providers ?? ["codex", "claude", "opencode"];
+	const sourcePath = `${options.repoRoot}/third_party/openai-skills/skills/.curated/playwright`;
+	if (action !== "install") return [];
+	return [
+		`git -C ${shellQuote(options.repoRoot)} submodule update --init --recursive third_party/openai-skills`,
+		...playwrightSkillDestinationRoots(options.targetRoot, providers).map(
+			(destinationRoot) =>
+				[
+					`mkdir -p ${shellQuote(`${destinationRoot}/playwright`)}`,
+					`cp -R ${shellQuote(`${sourcePath}/.`)} ${shellQuote(`${destinationRoot}/playwright`)}`,
+				].join(" && "),
+		),
+	];
+}
+
+function playwrightSkillDestinationRoots(
+	targetRoot: string,
+	providers: OptionalToolProvider[],
+): string[] {
+	return providers.map((provider) => {
+		switch (provider) {
+			case "codex":
+				return `${targetRoot}/.codex/openagentlayer/skills`;
+			case "claude":
+				return `${targetRoot}/.claude/skills`;
+			default:
+				return `${targetRoot}/.opencode/skills`;
+		}
+	});
 }
 
 function ctx7Command(
@@ -263,12 +343,18 @@ function ctx7Command(
 	const providerFlags = providers.map((provider) => `--${provider}`);
 	const scopeFlags = options.scope === "project" ? ["--project"] : [];
 	return [
-		"bunx",
 		"ctx7",
 		verb,
 		"--cli",
 		"--yes",
 		...providerFlags,
 		...scopeFlags,
+		...(action === "install" && options.context7ApiKey
+			? [`--api-key=${shellQuote(options.context7ApiKey)}`]
+			: []),
 	].join(" ");
+}
+
+function shellQuote(value: string): string {
+	return `'${value.replaceAll("'", "'\\''")}'`;
 }

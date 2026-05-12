@@ -30,9 +30,10 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			toolchain.stdout.includes("rtk find --help") &&
 			toolchain.stdout.includes("rg --help") &&
 			toolchain.stdout.includes("fd --help") &&
-			toolchain.stdout.includes("bunx ctx7 --help") &&
-			toolchain.stdout.includes("bunx ctx7 setup --help") &&
-			toolchain.stdout.includes("bunx ctx7 setup") &&
+			toolchain.stdout.includes("bun install -g ctx7") &&
+			toolchain.stdout.includes("ctx7 --version") &&
+			toolchain.stdout.includes("https://context7.com/dashboard") &&
+			toolchain.stdout.includes("ctx7 setup") &&
 			toolchain.stdout.includes(
 				"bunx -p playwright playwright install --with-deps",
 			) &&

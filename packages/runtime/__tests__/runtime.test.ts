@@ -53,6 +53,8 @@ test("secret guard ignores documented provider identifier values", async () => {
 			`config key = "market${"place"}"`,
 			'config key = "multi_agent_v2"',
 			'config key = "enable_fanout"',
+			`generic-api-${"key"}:options.context7ApiKey`,
+			`generic-api-${"key"}:Self.outputModeDefaultsKey`,
 		].join("\n"),
 	});
 	expect(result).toMatchObject({
@@ -861,18 +863,19 @@ test("hook feedback wraps plain lines before terminal word-wrap", async () => {
 	expect(postToolUseMessage).toContain(" /Library/Developer/Frameworks");
 	expect(postToolUse.stderr).toBe("");
 
+	const fakeToken = `ghp_${"123456789012345678901234567890123456"}`;
 	const secretOutput = await runHookRaw(
 		"block-secret-output.mjs",
 		{
 			hook_event_name: "PostToolUse",
-			output: `generic-api-${"key"}:Self.outputModeDefaultsKey`,
+			output: `token = "${fakeToken}"`,
 		},
 		{ COLUMNS: "80" },
 	);
 	expect(secretOutput.code).toBe(0);
 	const secretMessage = JSON.parse(secretOutput.stdout).systemMessage as string;
 	expect(secretMessage.replace(/\n/g, "")).toContain(
-		"Review possible credential match Self.outputModeDefaultsKey from generic-api-key",
+		"Secret guard paused this output because a configured rule matched possible credentials",
 	);
 	expect(secretMessage).not.toContain("\u001b[");
 	expect(secretMessage).not.toContain("note:");
@@ -884,7 +887,7 @@ test("hook wrapping keeps one separator when provider UIs flatten lines", async 
 		"block-secret-output.mjs",
 		{
 			hook_event_name: "PostToolUse",
-			output: `generic-api-${"key"}:artifact.mode`,
+			output: `token = "ghp_${"123456789012345678901234567890123456"}"`,
 		},
 		{ OAL_HOOK_WRAP_COLUMNS: "40" },
 	);

@@ -5,25 +5,24 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.6] - 2026-05-12
+## [0.6.0-beta.7] - 2026-05-13
 
 ### Added
 
-- Added the upstream OpenAI `skills` repository as `third_party/openai-skills`.
-- Added rendered OAL skill records for OpenAI's `gh-fix-ci`, `gh-address-comments`, and `openai-docs` curated skills.
-- Included text support files for those skills, including GitHub PR/CI helper scripts and OpenAI docs model-upgrade references.
+- Added Context7 API-key detection, validation, setup prompts, and CLI flag plumbing for higher-rate-limit setup flows.
+- Added optional Playwright setup commands that initialize the git-module `third_party/openai-skills` and install OpenAI's Playwright skill for selected providers.
 
 ### Changed
 
-- Updated release metadata from `0.6.0-beta.5` to `0.6.0-beta.6`.
-- Updated Codex e2e expectations for the current `pro-20` high/xhigh implementation profile routing.
+- Changed Context7 optional setup from slow `bunx ctx7 --help` probes to global CLI setup commands.
+- Changed secret-guard false-positive handling so generic API-key findings ignore identifier/property references without adding tool-specific allowlists.
+- Updated release metadata from `0.6.0-beta.6` to `0.6.0-beta.7`.
 
 ### Verified
 
-- `rtk proxy -- bun test packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts`
-- `rtk proxy -- bun test tests/e2e.test.ts`
-- `rtk proxy -- bun run test`
-- `rtk proxy -- bun packages/cli/src/main.ts check --provider all`
+- `rtk proxy -- bun test packages/toolchain/__tests__/toolchain.test.ts packages/runtime/__tests__/runtime.test.ts tests/e2e.test.ts`
+- `rtk proxy -- bunx tsc --noEmit --pretty false`
+- `rtk git diff --check`
 
 ## [0.6.0-beta.3] - 2026-05-12
 

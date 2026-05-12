@@ -5,6 +5,8 @@ import { asArray, asObject, uniqueValues } from "./_runtime.mjs";
 const BASE64_CANDIDATE_PATTERN = /\b[A-Za-z0-9+/]{32,}={0,2}\b/g;
 const GITHUB_ACTIONS_SECRET_REF_PATTERN =
 	/\$\{\{\s*secrets\.[A-Za-z_][A-Za-z0-9_]*\s*\}\}/g;
+const IDENTIFIER_REFERENCE_PATTERN =
+	/^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*$/;
 const MIN_DECODED_LENGTH = 12;
 const MAX_DECODE_DEPTH = 2;
 const NON_SECRET_IDENTIFIER_VALUES = new Set([
@@ -135,10 +137,15 @@ function findingValue(finding) {
 }
 
 function isKnownNonSecretFinding(finding) {
+	if (findingRule(finding) !== "generic-api-key") return false;
+	const value = findingValue(finding);
 	return (
-		findingRule(finding) === "generic-api-key" &&
-		NON_SECRET_IDENTIFIER_VALUES.has(findingValue(finding))
+		NON_SECRET_IDENTIFIER_VALUES.has(value) || isIdentifierReference(value)
 	);
+}
+
+function isIdentifierReference(value) {
+	return IDENTIFIER_REFERENCE_PATTERN.test(value);
 }
 
 function describeFinding(finding) {
