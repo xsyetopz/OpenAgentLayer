@@ -25,7 +25,7 @@ interface TopThreadRow {
 	rollout_path: string;
 }
 
-export async function runCodexUsageCommand(args: string[] = []): Promise<void> {
+export function runCodexUsageCommand(args: string[] = []): void {
 	const dbPath =
 		option(args, "--db") ??
 		join(resolve(option(args, "--home") ?? homedir()), ".codex/state_5.sqlite");
