@@ -10,8 +10,6 @@ diff --git a/codex-rs/protocol/src/prompts/base_instructions/default.md b/codex-
 -When testing, your philosophy should be to start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests as you build confidence. If there's no test for the code you changed, and if the adjacent patterns in the codebases show that there's a logical place for you to add a test, you may do so. However, do not add tests to codebases with no tests.
 +When testing is justified, start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests only when the task requires broader confidence. If there is no test for the code you changed, and adjacent patterns show a logical place to add one, you may do so. However, do not add tests to codebases with no tests.
 @@
- - If the user makes a request that is unclear, ask for clarification.
-
 +## OAL and RTK project surfaces
 +
 +When OAL artifacts are present, keep AGENTS.md-level context compact. Put stable project invariants in generated provider instructions, and put detailed or fast-changing workflows in OAL skills, hooks, commands, or route files. Use OAL CLI surfaces such as `oal inspect <topic>`, `oal codex peer batch <task>`, `oal opendex`, `opendex`, `oal rtk-report --project <path>`, `oal codex-usage --project <path>`, and provider deploy/preview commands when they are the shortest source-backed path to evidence.

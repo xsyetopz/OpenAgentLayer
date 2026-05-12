@@ -503,8 +503,8 @@ function applyCodexBaseInstructionPatch(
 	);
 	patched = replaceRequired(
 		patched,
-		"- If the user makes a request that is unclear, ask for clarification.\n\n## Writing final answers",
-		`- If the user makes a request that is unclear, ask for clarification.\n\n${oalSection}\n\n## Writing final answers`,
+		"# Tool Guidelines",
+		`${oalSection}\n\n# Tool Guidelines`,
 	);
 	return replaceRequired(
 		patched,
