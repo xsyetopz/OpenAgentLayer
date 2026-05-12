@@ -809,8 +809,25 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	expect(requirements).toContain("hooks = true");
 	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");
 	expect(requirements).toContain(join(home, ".codex/openagentlayer/hooks"));
+	expect(baseInstructions).toContain("Be respectful but not deferential");
+	expect(baseInstructions).toContain(
+		"Push back on requests, names, designs, or assumptions",
+	);
+	expect(baseInstructions).toContain(
+		"Do not paper over symptoms with compatibility shims, aliases, parser fallbacks",
+	);
+	expect(baseInstructions).toContain(
+		"Do not add adjacent behavior, hidden fallback paths, defensive layers",
+	);
 	expect(baseInstructions).toContain("OAL and RTK project surfaces");
 	expect(baseInstructions).toContain("rtk proxy -- <command>");
+	expect(baseInstructions).not.toContain("OAL scope fidelity");
+	expect(baseInstructions).toContain(
+		"documentation-only work unless the user explicitly asks",
+	);
+	expect(baseInstructions).toContain(
+		"implementation request into future-work documentation",
+	);
 	expect(baseInstructions).toContain("Code review and audits");
 	expect(
 		await readFile(

@@ -101,6 +101,16 @@ const RTK_ONLY_READ_FLAGS = new Set([
 	"--level",
 	"--line-numbers",
 ]);
+const RTK_META_COMMANDS = new Set([
+	"--help",
+	"--version",
+	"-h",
+	"-V",
+	"config",
+	"gain",
+	"init",
+	"proxy",
+]);
 
 export function evaluateCommandPolicy(command, options = {}) {
 	const commands = commandLines(command);
@@ -153,6 +163,8 @@ function evaluateSingleCommand(command, options) {
 	if (normalized.startsWith("rtk ") || normalized === "rtk") {
 		const rtkBounds = evaluateRtkCommandBounds(normalized);
 		if (rtkBounds) return rtkBounds;
+		const unsupportedRtkCommand = evaluateUnsupportedRtkCommand(normalized);
+		if (unsupportedRtkCommand) return unsupportedRtkCommand;
 		return { decision: "pass", reason: "Command already uses RTK" };
 	}
 
@@ -361,6 +373,22 @@ function evaluateRtkCommandBounds(command) {
 	if (subcommand === "tree") return evaluateRtkTreeBounds(tokens);
 	if (subcommand === "ls") return evaluateRtkLsBounds(tokens);
 	return undefined;
+}
+
+function evaluateUnsupportedRtkCommand(command) {
+	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const subcommand = tokens[1] ?? "";
+	if (!subcommand) return undefined;
+	if (RTK_META_COMMANDS.has(subcommand)) return undefined;
+	if ([...SUPPORTED_COMMANDS.values()].includes(subcommand)) return undefined;
+	return {
+		decision: "block",
+		reason: "RTK needs proxy mode for commands without a native RTK route",
+		details: [
+			`Use: rtk proxy -- ${tokens.slice(1).join(" ")}`,
+			"Use a native RTK command only when it appears in RTK help, such as `rtk grep`, `rtk read`, or `rtk find`.",
+		],
+	};
 }
 
 function evaluateRtkGrepBounds(tokens) {

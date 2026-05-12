@@ -5,6 +5,20 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.6.0-beta.4] - 2026-05-12
+
+### Changed
+
+- Hardened Codex base-instruction patches so technical disagreement, scope fidelity, and user-facing UX copy requests are enforced in upstream-native prompt sections instead of duplicated OAL-specific headings.
+- Hardened Codex coding guidance against common LLM workaround patterns such as compatibility shims, aliases, parser fallbacks, hidden fallback paths, broad guardrails, mocks, skipped tests, and scope-widening that makes partial work look complete.
+- Hardened RTK command policy so `rtk <non-native-command>` is blocked with explicit `rtk proxy -- <command>` guidance while native RTK and meta commands remain available.
+
+### Verified
+
+- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/accept/__tests__/accept.test.ts`
+- `rtk proxy -- bun test tests/e2e.test.ts`
+- `OAL_RTK_RAW_DIAGNOSTIC=1 git diff --check`
+
 ## [0.6.0-beta.3] - 2026-05-12
 
 ### Added

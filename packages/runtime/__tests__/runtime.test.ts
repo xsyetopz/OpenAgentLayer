@@ -162,6 +162,36 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 	});
 	await expect(
 		runHook({
+			command:
+				"rtk /Applications/OpenJoystickDriver.app/Contents/MacOS/OpenJoystickDriver --headless compat generic-hid",
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK needs proxy mode for commands without a native RTK route",
+		details: [
+			"Use: rtk proxy -- /Applications/OpenJoystickDriver.app/Contents/MacOS/OpenJoystickDriver --headless compat generic-hid",
+			"Use a native RTK command only when it appears in RTK help, such as `rtk grep`, `rtk read`, or `rtk find`.",
+		],
+	});
+	await expect(
+		runHook({
+			command:
+				"rtk /Applications/OpenJoystickDriver.app/Contents/MacOS/OpenJoystickDriver --headless compat generic-hid && rtk /Applications/OpenJoystickDriver.app/Contents/MacOS/OpenJoystickDriver --headless output secondary",
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK needs proxy mode for commands without a native RTK route",
+	});
+	await expect(
+		runHook({
+			command:
+				"rtk proxy -- /Applications/OpenJoystickDriver.app/Contents/MacOS/OpenJoystickDriver --headless compat generic-hid",
+		}),
+	).resolves.toMatchObject({
+		decision: "pass",
+	});
+	await expect(
+		runHook({
 			command: 'rtk grep -R -n "touch" third_party --include="*.java"',
 		}),
 	).resolves.toMatchObject({

@@ -25,10 +25,19 @@ export async function assertCodexUpstreamPatch(
 	const patch = await readFile(join(repoRoot, CODEX_PATCH), "utf8");
 	for (const required of [
 		"codex-rs/protocol/src/prompts/base_instructions/default.md",
+		"Be respectful but not deferential",
+		"do not add emotional validation, people-pleasing agreement, or apology-centered phrasing",
+		"Push back on requests, names, designs, or assumptions",
+		"Do not paper over symptoms with compatibility shims, aliases, parser fallbacks",
+		"Do not add adjacent behavior, hidden fallback paths, defensive layers",
+		"Do not widen scope to make a partial solution look complete",
 		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
 		"## OAL and RTK project surfaces",
 		"keep AGENTS.md-level context compact",
 		"rtk proxy -- <command>",
+		"documentation-only work unless the user explicitly asks",
+		"implementation request into future-work documentation",
+		"add concise end-user copy where the behavior is selected or explained",
 		"## Code review and audits",
 		"Unknown or potentially large command output must be bounded before it reaches context.",
 	])

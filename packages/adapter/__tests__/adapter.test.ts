@@ -330,11 +330,37 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 		(artifact) =>
 			artifact.path === ".codex/openagentlayer/codex-base-instructions.md",
 	)?.content;
+	expect(baseInstructions).toContain("Be respectful but not deferential");
+	expect(baseInstructions).toContain(
+		"do not add emotional validation, people-pleasing agreement, or apology-centered phrasing",
+	);
+	expect(baseInstructions).toContain(
+		"Push back on requests, names, designs, or assumptions",
+	);
+	expect(baseInstructions).toContain(
+		"Do not paper over symptoms with compatibility shims, aliases, parser fallbacks",
+	);
+	expect(baseInstructions).toContain(
+		"Do not add adjacent behavior, hidden fallback paths, defensive layers",
+	);
+	expect(baseInstructions).toContain(
+		"Do not widen scope to make a partial solution look complete",
+	);
 	expect(baseInstructions).toContain(
 		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
 	);
 	expect(baseInstructions).toContain("OAL and RTK project surfaces");
 	expect(baseInstructions).toContain("rtk proxy -- <command>");
+	expect(baseInstructions).not.toContain("OAL scope fidelity");
+	expect(baseInstructions).toContain(
+		"documentation-only work unless the user explicitly asks",
+	);
+	expect(baseInstructions).toContain(
+		"implementation request into future-work documentation",
+	);
+	expect(baseInstructions).toContain(
+		"add concise end-user copy where the behavior is selected or explained",
+	);
 	expect(baseInstructions).toContain("OAL parent-session quota guard");
 	expect(baseInstructions).toContain("oal codex-usage --project <path>");
 	expect(baseInstructions).toContain("session-complete\nhandoff");
