@@ -4,11 +4,11 @@ import { evaluateLifecycleContextInjection } from "./_context-injection.mjs";
 import { asString, createHookRunner } from "./_runtime.mjs";
 
 const SUBAGENT_EVENTS = new Set(["SubagentStart", "subagent.started"]);
-const OPENDEX_GUIDANCE = [
-	"OpenDex/Symphony is OAL's default orchestration path: keep native multi_agent and multi_agent_v2 disabled unless the rendered profile explicitly selected them. Default Codex profiles should use `oal codex peer batch <task>`, `opendex`, `oal opendex`, or Symphony workflow commands instead of asking native subagents to spawn",
+const SUBAGENT_GUIDANCE = [
+	"Native multi_agent_v2 is OAL's default Codex orchestration path: use rendered OAL agent names and stay inside the assigned ownership scope",
 	"Parent thread owns task split, child launch, evidence merge, continuation, and final decision",
 	"Workers return final evidence and artifacts to the parent; do not spawn extra pooled threads or keep idle workers open",
-	"Use `opendex` or `oal opendex` for OpenDex daemon/control-plane checks, and use Symphony workflow commands for bounded issue/workspace orchestration",
+	"Use `opendex`, `oal opendex`, or `oal symphony <WORKFLOW.md>` only when the task explicitly needs those external control planes",
 ];
 
 function hookEvent(payload) {
@@ -26,8 +26,8 @@ export function evaluateSubagentContextInjection(payload) {
 		return evaluateLifecycleContextInjection(payload);
 	return {
 		decision: "warn",
-		reason: "OAL OpenDex/Symphony subagent context",
-		details: OPENDEX_GUIDANCE,
+		reason: "OAL native multi-agent subagent context",
+		details: SUBAGENT_GUIDANCE,
 	};
 }
 

@@ -20,6 +20,7 @@ import { runRtkGainCommand } from "./commands/rtk-gain";
 import { runRtkReportCommand } from "./commands/rtk-report";
 import { runSetupCommand } from "./commands/setup";
 import { runStateCommand } from "./commands/state";
+import { runSymphonyCommand } from "./commands/symphony";
 import { runFeaturesCommand, runToolchainCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
 import { runInteractiveCommand } from "./interactive";
@@ -307,6 +308,12 @@ program
 	.action((values: string[], options) =>
 		runOpenDexCommand(repoRoot, [...values, ...argsFromOptions(options)]),
 	);
+
+program
+	.command("symphony")
+	.description("run the Symphony issue-workflow service")
+	.argument("[workflow]", "WORKFLOW.md path", "WORKFLOW.md")
+	.action((workflow: string) => runSymphonyCommand([workflow]));
 
 program
 	.command("provider-e2e")

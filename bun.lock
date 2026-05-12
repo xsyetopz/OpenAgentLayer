@@ -18,6 +18,7 @@
         "@openagentlayer/runtime": "workspace:*",
         "@openagentlayer/setup": "workspace:*",
         "@openagentlayer/source": "workspace:*",
+        "@openagentlayer/symphony": "workspace:*",
         "@openagentlayer/toolchain": "workspace:*",
         "@opencode-ai/plugin": "1.14.48",
         "commander": "^14.0.3",
@@ -76,6 +77,7 @@
         "@openagentlayer/policy": "workspace:*",
         "@openagentlayer/setup": "workspace:*",
         "@openagentlayer/source": "workspace:*",
+        "@openagentlayer/symphony": "workspace:*",
         "@openagentlayer/toolchain": "workspace:*",
         "commander": "^14.0.3",
       },
@@ -140,6 +142,9 @@
     "packages/symphony": {
       "name": "@openagentlayer/symphony",
       "version": "0.0.0",
+      "bin": {
+        "symphony": "./src/cli.ts",
+      },
     },
     "packages/toolchain": {
       "name": "@openagentlayer/toolchain",

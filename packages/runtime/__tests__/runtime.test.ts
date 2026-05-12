@@ -652,6 +652,9 @@ test("session scope hook injects consent boundary at session start", async () =>
 		details: expect.arrayContaining([
 			expect.stringContaining("Before work"),
 			expect.stringContaining("input evidence for the requested behavior only"),
+			expect.stringContaining("Shared workspace rule"),
+			expect.stringContaining("you are not alone in the codebase"),
+			expect.stringContaining("do not revert, reformat, overwrite"),
 			expect.stringContaining("need explicit user request"),
 			expect.stringContaining("bounded python3 rewrites"),
 			expect.stringContaining("Delegation rule"),
@@ -664,9 +667,9 @@ test("session scope hook injects consent boundary at session start", async () =>
 				"current user messages and verified repo evidence define the active path",
 			),
 			expect.stringContaining("Agent use"),
-			expect.stringContaining("OpenDex/Symphony as the Codex default"),
-			expect.stringContaining("spawn rendered OAL custom agents by name"),
-			expect.stringContaining("explicit profile opt-in only"),
+			expect.stringContaining("native Codex multi_agent_v2"),
+			expect.stringContaining("Spawn rendered OAL custom agents by name"),
+			expect.stringContaining("oal symphony"),
 			expect.stringContaining("oal opendex"),
 			expect.stringContaining("ask when blocked"),
 			expect.stringContaining("STATUS BLOCKED"),
@@ -696,20 +699,21 @@ test("session scope hook injects consent boundary at session start", async () =>
 	});
 });
 
-test("subagent context hook guides Codex agents toward OpenDex orchestration", async () => {
+test("subagent context hook guides Codex agents toward native OAL agents", async () => {
 	await expect(
 		runNamedHook("inject-subagent-context.mjs", {
 			hook_event_name: "SubagentStart",
 		}),
 	).resolves.toMatchObject({
 		decision: "warn",
-		reason: "OAL OpenDex/Symphony subagent context",
+		reason: "OAL native multi-agent subagent context",
 		details: expect.arrayContaining([
-			expect.stringContaining("OpenDex/Symphony is OAL's default"),
-			expect.stringContaining("native multi_agent and multi_agent_v2 disabled"),
+			expect.stringContaining("Native multi_agent_v2 is OAL's default"),
+			expect.stringContaining("rendered OAL agent names"),
 			expect.stringContaining("Parent thread owns task split"),
 			expect.stringContaining("do not spawn extra pooled threads"),
 			expect.stringContaining("oal opendex"),
+			expect.stringContaining("oal symphony"),
 		]),
 	});
 });
@@ -957,6 +961,33 @@ test("command safety hooks inspect nested commands and subtle destructive forms"
 		decision: "block",
 		details: ["Use: rtk proxy -- bunx prettier foo.js"],
 	});
+});
+
+test("unsafe git hook enforces coauthor and Conventional Commit subjects", async () => {
+	const commitCommand = "git commit";
+	await expect(
+		runNamedHook("block-unsafe-git.mjs", {
+			command: `${commitCommand} -m "fix: release setup" --trailer "Codex-Reviewed: yes"`,
+		}),
+	).resolves.toMatchObject({ decision: "block" });
+	await expect(
+		runNamedHook("block-unsafe-git.mjs", {
+			command: `${commitCommand} -m "release setup" --trailer "Co-authored-by: Codex <noreply@openai.com>"`,
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "Git commit subject must follow Conventional Commits.",
+	});
+	await expect(
+		runNamedHook("block-unsafe-git.mjs", {
+			command: `${commitCommand} -m "fix(ci): release setup" --trailer "Co-authored-by: Codex <noreply@openai.com>"`,
+		}),
+	).resolves.toMatchObject({ decision: "pass" });
+	await expect(
+		runNamedHook("block-unsafe-git.mjs", {
+			command: `${commitCommand} -F /tmp/message`,
+		}),
+	).resolves.toMatchObject({ decision: "pass" });
 });
 
 test("privileged exec helper denies by default and supports dry-run allowlist", async () => {

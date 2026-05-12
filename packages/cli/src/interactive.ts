@@ -66,9 +66,9 @@ export const CODEX_PLAN_OPTIONS = [
 
 export const CODEX_ORCHESTRATION_OPTIONS = [
 	{
-		value: "symphony",
-		label: "OpenDex / Symphony",
-		hint: "safe default, native multi-agent disabled",
+		value: "multi_agent_v2",
+		label: "Codex multi_agent_v2",
+		hint: "default native OAL agents, uses v2 thread limit",
 	},
 	{
 		value: "multi_agent",
@@ -76,9 +76,9 @@ export const CODEX_ORCHESTRATION_OPTIONS = [
 		hint: "native shallow agents, bounded by agents table",
 	},
 	{
-		value: "multi_agent_v2",
-		label: "Codex multi_agent_v2",
-		hint: "native v2, uses v2 thread limit instead of agents.max_threads",
+		value: "symphony",
+		label: "OpenDex / Symphony",
+		hint: "external control-plane mode, native multi-agent disabled",
 	},
 ] as const;
 

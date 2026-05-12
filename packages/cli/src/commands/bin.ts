@@ -29,6 +29,9 @@ export async function runBinCommand(
 	console.log(
 		`binary: ${plan.action} ${plan.opendexPath} (owned OpenDex shim)`,
 	);
+	console.log(
+		`binary: ${plan.action} ${plan.symphonyPath} (owned Symphony shim)`,
+	);
 	console.log(`manifest: ${binManifestPath(home)}`);
 	console.log(`path: ${pathContains(binDir) ? "ready" : `add ${binDir}`}`);
 	if (!pathContains(binDir)) console.log(`next: export PATH="${binDir}:$PATH"`);

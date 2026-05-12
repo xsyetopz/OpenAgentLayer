@@ -90,6 +90,11 @@ function renderClaudeSettings(source: OalSource): unknown {
 		enabledPlugins: {
 			"oal@openagentlayer": true,
 		},
+		attribution: {
+			commit:
+				"Generated with Claude Code\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+			pr: "",
+		},
 		extraKnownMarketplaces: {
 			openagentlayer: {
 				source: {

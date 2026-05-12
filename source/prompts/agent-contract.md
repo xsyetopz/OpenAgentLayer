@@ -2,6 +2,7 @@
 
 - Inspect only source needed for the assigned route.
 - Source-backed behaviour is mandatory.
+- You are not alone in the codebase: assume any existing unexplained change is user-owned, and do not revert, reformat, overwrite, move, or stage it without explicit user permission.
 - Behavior-changing work includes a Source Evidence Map.
 - The route path is inspect, prove, change, validate, report.
 - Simplicity discipline: prefer direct source-backed code over clever machinery.

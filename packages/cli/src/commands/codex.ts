@@ -11,14 +11,6 @@ const PEER_ROLES = [
 	["worker", "implement"],
 	["review", "review"],
 ] as const;
-const CODEX_NATIVE_AGENT_DISABLE_ARGS = [
-	"--disable",
-	"multi_agent_v2",
-	"--disable",
-	"enable_fanout",
-	"--disable",
-	"multi_agent",
-] as const;
 const ISO_MILLISECONDS_PATTERN = /\..+$/;
 
 type PeerRole = (typeof PEER_ROLES)[number][0];
@@ -315,7 +307,6 @@ export function codexExecRun(
 		command: "codex",
 		args: [
 			"exec",
-			...CODEX_NATIVE_AGENT_DISABLE_ARGS,
 			"-c",
 			`projects.${JSON.stringify(cwd)}.trust_level="trusted"`,
 			"-m",
@@ -338,7 +329,6 @@ export function codexLaunchRun(cwd: string, prompt = ""): CodexRun {
 		args: [
 			"--profile",
 			"openagentlayer",
-			...CODEX_NATIVE_AGENT_DISABLE_ARGS,
 			"-C",
 			cwd,
 			...(prompt ? [prompt] : []),

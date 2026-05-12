@@ -153,7 +153,7 @@ test("Codex peer runner builds v3-style role steps", () => {
 	}
 });
 
-test("Codex exec runner disables native multi-agent surfaces", () => {
+test("Codex exec runner leaves native multi-agent surfaces available", () => {
 	const run = codexExecRun(
 		{
 			id: "hermes",
@@ -163,15 +163,9 @@ test("Codex exec runner disables native multi-agent surfaces", () => {
 		"/repo",
 		"map files",
 	);
-	expect(run.args.slice(0, 7)).toEqual([
-		"exec",
-		"--disable",
-		"multi_agent_v2",
-		"--disable",
-		"enable_fanout",
-		"--disable",
-		"multi_agent",
-	]);
+	expect(run.args[0]).toBe("exec");
+	expect(run.args).not.toContain("--disable");
+	expect(run.args).not.toContain("multi_agent_v2");
 });
 
 test("Codex launch runner starts interactive native subagent profile", () => {
@@ -180,12 +174,6 @@ test("Codex launch runner starts interactive native subagent profile", () => {
 	expect(run.args).toEqual([
 		"--profile",
 		"openagentlayer",
-		"--disable",
-		"multi_agent_v2",
-		"--disable",
-		"enable_fanout",
-		"--disable",
-		"multi_agent",
 		"-C",
 		"/repo",
 		"spawn hermes and wait",
@@ -367,9 +355,9 @@ test("interactive subscription prompts are ordered from lowest to highest", () =
 		"pro-20",
 	]);
 	expect(CODEX_ORCHESTRATION_OPTIONS.map((option) => option.value)).toEqual([
-		"symphony",
-		"multi_agent",
 		"multi_agent_v2",
+		"multi_agent",
+		"symphony",
 	]);
 	expect(CLAUDE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
 		"max-5",

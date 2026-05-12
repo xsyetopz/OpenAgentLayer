@@ -8,7 +8,7 @@ import {
 
 const CODEX_REQUIRED_FLAGS = [
 	"steer = true",
-	"apps = true",
+	"apps = false",
 	"tui_app_server = true",
 	"memories = true",
 	"sqlite = true",
@@ -20,7 +20,7 @@ const CODEX_REQUIRED_FLAGS = [
 	"unified_exec = false",
 	"enable_fanout = false",
 	"multi_agent = false",
-	"multi_agent_v2 = false",
+	"multi_agent_v2 = { enabled = true",
 	"shell_snapshot = false",
 	"collaboration_modes = false",
 	"codex_git_commit = false",

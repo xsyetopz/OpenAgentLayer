@@ -40,7 +40,16 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(linear?.upstream?.path).toBe(
 		"third_party/openai-symphony/.codex/skills/linear/SKILL.md",
 	);
-	for (const skillId of ["commit", "push", "pull", "land"])
+	const commit = graph.source.skills.find((skill) => skill.id === "commit");
+	expect(commit?.upstream).toBeUndefined();
+	expect(commit?.body).toContain("Conventional Commits 1.0.0");
+	expect(commit?.body).toContain("Codex <noreply@openai.com>");
+	expect(commit?.body).toContain("Claude <noreply@anthropic.com>");
+	expect(commit?.body).toContain("OpenCode: use the current agent model");
+	const git = graph.source.skills.find((skill) => skill.id === "git");
+	expect(git?.body).toContain("not alone in the codebase");
+	expect(git?.body).toContain("must not be reverted");
+	for (const skillId of ["push", "pull", "land"])
 		expect(
 			graph.source.skills.find((skill) => skill.id === skillId)?.upstream?.path,
 		).toBe(`third_party/openai-symphony/.codex/skills/${skillId}/SKILL.md`);

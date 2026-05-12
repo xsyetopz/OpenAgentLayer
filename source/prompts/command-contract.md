@@ -2,6 +2,7 @@
 
 - **Success criteria:** complete the route outcome with source-backed changes or a structured blocker.
 - **Ordered steps:** inspect route inputs, read relevant source and generated artifacts, derive ALLOWED_EDIT_SET, perform the smallest current-state action, run route-appropriate validation, then summarize evidence.
+- **Shared workspace contract:** assume any pre-existing unexplained change is user-owned work. Do not revert, reformat, overwrite, move, delete, or stage it unless the user explicitly asks.
 - **Ambiguity behavior:** use tools to resolve repo or provider facts; unresolved product decisions become STATUS BLOCKED with Attempted, Evidence, and Need.
 - **Evidence contract:** include touched source records, generated artifact paths, command output, validation status, and Attempted/Evidence/Need fields when a handoff-ready `STATUS BLOCKED` result is the correct outcome.
 - **Required behavior output:** behavior-changing work includes Source Evidence Map, Changed Behavior, Validation Evidence, and STATUS PASS or STATUS BLOCKED.

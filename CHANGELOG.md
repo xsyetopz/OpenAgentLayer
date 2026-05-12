@@ -5,19 +5,21 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.4] - 2026-05-12
+## [0.6.0-beta.5] - 2026-05-12
 
 ### Changed
 
-- Hardened Codex base-instruction patches so technical disagreement, scope fidelity, and user-facing UX copy requests are enforced in upstream-native prompt sections instead of duplicated OAL-specific headings.
-- Hardened Codex coding guidance against common LLM workaround patterns such as compatibility shims, aliases, parser fallbacks, hidden fallback paths, broad guardrails, mocks, skipped tests, and scope-widening that makes partial work look complete.
-- Hardened RTK command policy so `rtk <non-native-command>` is blocked with explicit `rtk proxy -- <command>` guidance while native RTK and meta commands remain available.
+- Switched default Codex orchestration to native `multi_agent_v2` with rendered OAL agent hints, while keeping OpenDex and Symphony available as explicit control-plane commands.
+- Exposed Symphony through `oal symphony`, `bun run symphony`, and the installed `symphony` shim next to `oal` and `opendex`.
+- Hardened AI commit attribution so commit skills and hooks require Conventional Commits plus provider-appropriate `Co-authored-by` trailers for Codex, Claude Code, and OpenCode model identities.
+- Hardened shared-workspace prompt contracts so agents treat unexplained pre-existing changes as user-owned work that must not be reverted, reformatted, overwritten, moved, deleted, or staged without explicit permission.
+- Refreshed tracked Codex-related upstream submodule pointers.
 
 ### Verified
 
-- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/accept/__tests__/accept.test.ts`
-- `rtk proxy -- bun test tests/e2e.test.ts`
-- `OAL_RTK_RAW_DIAGNOSTIC=1 git diff --check`
+- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts packages/deploy/__tests__/deploy.test.ts packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts tests/e2e.test.ts`
+- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts`
+- `rtk proxy -- bun packages/cli/src/main.ts check --provider all`
 
 ## [0.6.0-beta.3] - 2026-05-12
 

@@ -1,6 +1,6 @@
 {
 	"name": "openagentlayer",
-	"version": "0.6.0-beta.4",
+	"version": "0.6.0-beta.5",
 	"private": true,
 	"type": "module",
 	"workspaces": [
@@ -22,6 +22,7 @@
 		"state": "bun packages/cli/src/main.ts state",
 		"uninstall": "bun packages/cli/src/main.ts uninstall",
 		"plugins": "bun packages/cli/src/main.ts plugins",
+		"symphony": "bun packages/cli/src/main.ts symphony",
 		"render": "bun packages/cli/src/main.ts render",
 		"preview": "bun packages/cli/src/main.ts preview",
 		"features": "bun packages/cli/src/main.ts features",
@@ -48,6 +49,7 @@
 		"@openagentlayer/policy": "workspace:*",
 		"@openagentlayer/runtime": "workspace:*",
 		"@openagentlayer/source": "workspace:*",
+		"@openagentlayer/symphony": "workspace:*",
 		"@openagentlayer/toolchain": "workspace:*",
 		"@opencode-ai/plugin": "1.14.48",
 		"commander": "^14.0.3",

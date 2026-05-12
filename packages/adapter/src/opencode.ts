@@ -25,6 +25,8 @@ import { renderSkillArtifacts } from "./skills";
 
 const PROVIDER: Provider = "opencode";
 export const OPENCODE_MODEL_FALLBACKS = [...OPENCODE_FREE_MODELS] as const;
+const MODEL_SUFFIX_PATTERN = /\[[^\]]+\]$/;
+const MODEL_VERSION_PATTERN = /^\d+(?:\.\d+)*$/;
 
 export async function renderOpenCode(
 	source: OalSource,
@@ -50,7 +52,7 @@ export async function renderOpenCode(
 		artifacts.push({
 			provider: PROVIDER,
 			path: `.opencode/agents/${agent.id}.md`,
-			content: renderOpenCodeAgent(agent, source),
+			content: renderOpenCodeAgent(agent, source, options),
 			sourceId: `agent:${agent.id}`,
 			mode: "file",
 		});
@@ -157,14 +159,62 @@ function renderOpenCodeConfig(
 	};
 }
 
-function renderOpenCodeAgent(agent: AgentRecord, source: OalSource): string {
+function renderOpenCodeAgent(
+	agent: AgentRecord,
+	source: OalSource,
+	options: RenderOptions,
+): string {
+	const model = resolveOpenCodeModel(agent, options);
 	return `---
 color: "${agentHexColor(agent.id)}"
 ---
 # ${agent.name}
 
 ${agentPrompt(agent, source)}
+
+Git attribution: use \`Co-authored-by: ${openCodeCommitIdentity(model)}\` for commits created by this OpenCode agent. This identity is derived from the agent model configured in \`opencode.jsonc\`: \`${model}\`.
 `;
+}
+
+export function openCodeCommitIdentity(model: string): string {
+	const displayName = openCodeModelDisplayName(model);
+	const email = openCodeModelAttributionEmail(model);
+	return `${displayName} <${email}>`;
+}
+
+function openCodeModelDisplayName(model: string): string {
+	const modelName = model.split("/").pop() ?? model;
+	if (modelName.startsWith("gpt-")) {
+		const [, ...parts] = modelName
+			.replace(MODEL_SUFFIX_PATTERN, "")
+			.split("-")
+			.filter(Boolean);
+		const versionParts: string[] = [];
+		while (parts[0] && MODEL_VERSION_PATTERN.test(parts[0]))
+			versionParts.push(parts.shift() as string);
+		const suffix = parts.map(capitalizeWord).join(" ");
+		return `GPT-${versionParts.join(".")}${suffix ? ` ${suffix}` : ""}`;
+	}
+	return modelName
+		.replace(MODEL_SUFFIX_PATTERN, "")
+		.split("-")
+		.filter(Boolean)
+		.map(capitalizeWord)
+		.join(" ")
+		.replace(/\b(\d+) (\d+)\b/g, "$1.$2");
+}
+
+function capitalizeWord(part: string): string {
+	return part.charAt(0).toUpperCase() + part.slice(1);
+}
+
+function openCodeModelAttributionEmail(model: string): string {
+	const modelName = model.toLowerCase();
+	if (modelName.includes("/claude-") || modelName.includes("claude-"))
+		return "noreply@anthropic.com";
+	if (modelName.includes("/gpt-") || modelName.includes("gpt-"))
+		return "noreply@openai.com";
+	return "noreply@opencode.ai";
 }
 
 function renderOpenCodeTool(tool: ToolRecord): string {

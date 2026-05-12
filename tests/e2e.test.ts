@@ -560,7 +560,7 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	const pro5Lead = tomlSection(pro5Stdout, "profiles.openagentlayer");
 	const pro5Implement = tomlSection(
 		pro5Stdout,
-		"profiles.openagentlayer-symphony-implement",
+		"profiles.openagentlayer-multi-agent-v2-implement",
 	);
 	expect(pro5Lead).toContain('model = "gpt-5.5"');
 	expect(pro5Lead).toContain('plan_mode_reasoning_effort = "high"');
@@ -590,7 +590,7 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	const pro20Lead = tomlSection(pro20Stdout, "profiles.openagentlayer");
 	const pro20Implement = tomlSection(
 		pro20Stdout,
-		"profiles.openagentlayer-symphony-implement",
+		"profiles.openagentlayer-multi-agent-v2-implement",
 	);
 	expect(pro20Lead).toContain('model = "gpt-5.5"');
 	expect(pro20Lead).toContain('plan_mode_reasoning_effort = "high"');
@@ -798,7 +798,7 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 		join(home, ".codex/openagentlayer/codex-base-instructions.md"),
 		"utf8",
 	);
-	expect(config).toContain('profile = "openagentlayer-symphony"');
+	expect(config).toContain('profile = "openagentlayer-multi-agent-v2"');
 	expect(config.startsWith("#:schema ")).toBe(true);
 	expect(config).toContain(
 		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',

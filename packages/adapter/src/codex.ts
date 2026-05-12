@@ -344,7 +344,7 @@ function resolveCodexOrchestration(
 ): ResolvedCodexOrchestration {
 	const plan = resolveCodexAgentPlan(options);
 	const input = options.codexOrchestration ?? {};
-	const mode = input.mode ?? "symphony";
+	const mode = input.mode ?? "multi_agent_v2";
 	const maxThreads = input.maxThreads ?? 1;
 	const maxDepth = input.maxDepth ?? 1;
 	const v2Threads =
@@ -356,6 +356,15 @@ function resolveCodexOrchestration(
 		jobMaxRuntimeSeconds:
 			input.jobMaxRuntimeSeconds ?? plan.jobMaxRuntimeSeconds,
 		multiAgentV2: {
+			...(mode === "multi_agent_v2"
+				? {
+						usageHintEnabled: true,
+						rootAgentUsageHintText:
+							"Use native spawn_agent for broad or parallel OAL work. Prefer rendered OAL agent_type names from [agents], such as hermes, hephaestus, atalanta, nemesis, or athena, and merge only final evidence.",
+						subagentUsageHintText:
+							"You are an OAL native subagent. Complete the assigned task, return concise evidence and changed paths, and do not create nested peer orchestrators.",
+					}
+				: {}),
 			...input.multiAgentV2,
 			maxConcurrentThreadsPerSession: v2Threads,
 		},

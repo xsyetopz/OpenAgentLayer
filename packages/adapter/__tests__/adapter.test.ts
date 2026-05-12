@@ -2,7 +2,10 @@ import { expect, test } from "bun:test";
 import { resolve } from "node:path";
 import { loadSource } from "@openagentlayer/source";
 import { parseOpenCodeModels, renderProvider } from "../src";
-import { OPENCODE_MODEL_FALLBACKS } from "../src/opencode";
+import {
+	OPENCODE_MODEL_FALLBACKS,
+	openCodeCommitIdentity,
+} from "../src/opencode";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
 
@@ -74,6 +77,16 @@ opencode/nemotron-3-super-free
 	expect(config.agent["hephaestus"]?.model).toBe("opencode/gpt-5.3-codex");
 	expect(JSON.stringify(config)).not.toContain('opencode/gpt-5.4"');
 	expect(JSON.stringify(config)).not.toContain("opencode/gpt-5.3-codex-spark");
+	const athenaAgent = auth.artifacts.find(
+		(artifact) => artifact.path === ".opencode/agents/athena.md",
+	)?.content;
+	expect(athenaAgent).toContain("Co-authored-by: GPT-5.5 <noreply@openai.com>");
+	const apolloAgent = auth.artifacts.find(
+		(artifact) => artifact.path === ".opencode/agents/apollo.md",
+	)?.content;
+	expect(apolloAgent).toContain(
+		"Co-authored-by: GPT-5.3 Codex <noreply@openai.com>",
+	);
 
 	const free = await renderProvider("opencode", graph.source, repoRoot, {
 		plan: "opencode-free",
@@ -91,6 +104,45 @@ opencode/nemotron-3-super-free
 			),
 		),
 	).toBe(true);
+});
+
+test("provider commit attribution renders for Claude and OpenCode", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	const claude = await renderProvider("claude", graph.source, repoRoot);
+	const settings = JSON.parse(
+		claude.artifacts.find(
+			(artifact) => artifact.path === ".claude/settings.json",
+		)?.content ?? "{}",
+	) as { attribution?: { commit?: string; pr?: string } };
+	expect(settings.attribution?.commit).toContain(
+		"Co-authored-by: Claude <noreply@anthropic.com>",
+	);
+	expect(settings.attribution?.pr).toBe("");
+	const commitSkill = claude.artifacts.find(
+		(artifact) => artifact.path === ".claude/skills/commit/SKILL.md",
+	)?.content;
+	expect(commitSkill).toContain("Claude <noreply@anthropic.com>");
+	expect(commitSkill).toContain("OpenCode: use the current agent model");
+	const opencode = await renderProvider("opencode", graph.source, repoRoot, {
+		plan: "opencode-auto",
+		opencodeModels: ["opencode/claude-sonnet-4-6"],
+	});
+	const apolloAgent = opencode.artifacts.find(
+		(artifact) => artifact.path === ".opencode/agents/apollo.md",
+	)?.content;
+	expect(apolloAgent).toContain(
+		"Co-authored-by: Claude Sonnet 4.6 <noreply@anthropic.com>",
+	);
+
+	expect(openCodeCommitIdentity("opencode/gpt-5.3-codex")).toBe(
+		"GPT-5.3 Codex <noreply@openai.com>",
+	);
+	expect(openCodeCommitIdentity("opencode/claude-opus-4-6[1m]")).toBe(
+		"Claude Opus 4.6 <noreply@anthropic.com>",
+	);
+	expect(openCodeCommitIdentity("opencode/nemotron-3-super-free")).toBe(
+		"Nemotron 3 Super Free <noreply@opencode.ai>",
+	);
 });
 
 test("Codex source models split intelligence from worker agents", async () => {
@@ -171,6 +223,8 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain("Source of truth:");
 		expect(instructions).toContain("Change source:");
 		expect(instructions).toContain("Provider-native behavior:");
+		expect(instructions).toContain("Shared workspace:");
+		expect(instructions).toContain("not alone in the codebase");
 		expect(instructions).toContain("Context budget:");
 		expect(instructions).toContain("- implement:");
 		if (provider === "codex") {
@@ -209,6 +263,8 @@ test("provider agents render inspection and correction discipline contracts", as
 		);
 		expect(agent).toContain("## Prompt contract");
 		expect(agent).toContain("Inspect only source needed");
+		expect(agent).toContain("not alone in the codebase");
+		expect(agent).toContain("existing unexplained change is user-owned");
 		expect(agent).toContain("smallest current-state change");
 		expect(agent).toContain("Validate only when");
 		if (provider === "codex") {
@@ -294,23 +350,29 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	);
 	expect(config).not.toContain("zsh_path");
 	expect(config).not.toContain("codex_hooks");
-	expect(config).toContain('profile = "openagentlayer-symphony"');
-	expect(config).toContain("[profiles.openagentlayer-symphony]");
-	expect(config).toContain("[profiles.openagentlayer-symphony.features]");
-	expect(config).toContain("[profiles.openagentlayer-symphony-implement]");
-	expect(config).toContain("[profiles.openagentlayer-symphony-utility]");
+	expect(config).toContain('profile = "openagentlayer-multi-agent-v2"');
+	expect(config).toContain("[profiles.openagentlayer-multi-agent-v2]");
+	expect(config).toContain("[profiles.openagentlayer-multi-agent-v2.features]");
+	expect(config).toContain(
+		"[profiles.openagentlayer-multi-agent-v2-implement]",
+	);
+	expect(config).toContain("[profiles.openagentlayer-multi-agent-v2-utility]");
 	expect(config).toContain(
 		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
 	);
 	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain('model_verbosity = "low"');
-	expect(config).toContain("apps = true");
+	expect(config).toContain("apps = false");
 	expect(config).toContain("shell_zsh_fork = false");
 	expect(config).toContain("enable_fanout = false");
 	expect(config).toContain("multi_agent = false");
-	expect(config).toContain("multi_agent_v2 = false");
-	expect(config).toContain("max_threads = 1");
+	expect(config).toContain(
+		"multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 1",
+	);
+	expect(config).not.toContain("max_threads = 1");
+	expect(config).toContain("root_agent_usage_hint_text");
+	expect(config).toContain("subagent_usage_hint_text");
 	expect(config).toContain("job_max_runtime_seconds = 1800");
 	expect(config).toContain("[tui]");
 	const requirements = rendered.artifacts.find(
@@ -424,15 +486,15 @@ test("Codex Plus plan routes intelligence to GPT-5.5 and workers to GPT-5.3", as
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
 	expect(config).toContain(
-		'[profiles.openagentlayer-symphony]\nmodel = "gpt-5.5"',
+		'[profiles.openagentlayer-multi-agent-v2]\nmodel = "gpt-5.5"',
 	);
 	expect(config).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(config).toContain('model_reasoning_effort = "medium"');
 	expect(config).toContain(
-		'[profiles.openagentlayer-symphony-implement]\nmodel = "gpt-5.3-codex"',
+		'[profiles.openagentlayer-multi-agent-v2-implement]\nmodel = "gpt-5.3-codex"',
 	);
 	expect(config).toContain(
-		'[profiles.openagentlayer-symphony-utility]\nmodel = "gpt-5.4-mini"',
+		'[profiles.openagentlayer-multi-agent-v2-utility]\nmodel = "gpt-5.4-mini"',
 	);
 	expect(config).toContain('plan_mode_reasoning_effort = "low"');
 	expect(config).not.toContain("xhigh");

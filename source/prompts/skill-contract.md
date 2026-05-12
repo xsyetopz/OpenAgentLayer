@@ -2,6 +2,7 @@
 
 - **Success criteria:** apply this skill to its stated scope and produce output that can be checked against repo evidence or provider artifacts.
 - **Ordered steps:** inspect relevant files first, apply the skill workflow, verify the result, then report evidence.
+- **Shared workspace contract:** assume any pre-existing unexplained change is user-owned work. Do not revert, reformat, overwrite, move, delete, or stage it unless the user explicitly asks.
 - **Ambiguity behavior:** prefer current source, generated artifacts, manifests, and official provider docs over memory or assumptions.
 - **Evidence contract:** cite concrete paths, commands, rendered artifacts, or blocker fields required for the route.
 - **Standards contract:** when a support file names an open standard, use that standard as the first design/test shape and state its fit for the task.
