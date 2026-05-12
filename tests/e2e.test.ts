@@ -597,8 +597,8 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 	expect(pro20Lead).toContain('model_reasoning_effort = "medium"');
 	expect(pro20Lead).toContain('model_verbosity = "low"');
 	expect(pro20Implement).toContain('model = "gpt-5.3-codex"');
-	expect(pro20Implement).toContain('plan_mode_reasoning_effort = "medium"');
-	expect(pro20Implement).toContain('model_reasoning_effort = "high"');
+	expect(pro20Implement).toContain('plan_mode_reasoning_effort = "high"');
+	expect(pro20Implement).toContain('model_reasoning_effort = "xhigh"');
 	expect(pro20Stdout).toContain("hide_rate_limit_model_nudge = true");
 });
 
@@ -803,8 +803,18 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	expect(config).toContain(
 		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
 	);
-	expect(config).toContain('plan_mode_reasoning_effort = "high"');
-	expect(config).toContain('model_reasoning_effort = "high"');
+	const activeProfile = tomlSection(
+		config,
+		"profiles.openagentlayer-multi-agent-v2",
+	);
+	const implementProfile = tomlSection(
+		config,
+		"profiles.openagentlayer-multi-agent-v2-implement",
+	);
+	expect(activeProfile).toContain('plan_mode_reasoning_effort = "high"');
+	expect(activeProfile).toContain('model_reasoning_effort = "medium"');
+	expect(implementProfile).toContain('plan_mode_reasoning_effort = "high"');
+	expect(implementProfile).toContain('model_reasoning_effort = "xhigh"');
 	expect(config).toContain('[plugins."oal@openagentlayer-local"]');
 	expect(requirements).toContain("hooks = true");
 	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");

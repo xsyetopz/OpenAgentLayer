@@ -1,0 +1,38 @@
+{
+  "id": "openai-docs",
+  "title": "OpenAI Docs",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, model-selection help, or model and prompt upgrade guidance.",
+  "body": "",
+  "upstream": {
+    "path": "third_party/openai-skills/skills/.curated/openai-docs/SKILL.md",
+    "verbatim": true
+  },
+  "supportFiles": [
+    {
+      "path": "scripts/resolve-latest-model-info.js",
+      "source": "../third_party/openai-skills/skills/.curated/openai-docs/scripts/resolve-latest-model-info.js",
+      "executable": true
+    },
+    {
+      "path": "references/latest-model.md",
+      "source": "../third_party/openai-skills/skills/.curated/openai-docs/references/latest-model.md"
+    },
+    {
+      "path": "references/prompting-guide.md",
+      "source": "../third_party/openai-skills/skills/.curated/openai-docs/references/prompting-guide.md"
+    },
+    {
+      "path": "references/upgrade-guide.md",
+      "source": "../third_party/openai-skills/skills/.curated/openai-docs/references/upgrade-guide.md"
+    },
+    {
+      "path": "assets/openai-small.svg",
+      "source": "../third_party/openai-skills/skills/.curated/openai-docs/assets/openai-small.svg"
+    }
+  ]
+}

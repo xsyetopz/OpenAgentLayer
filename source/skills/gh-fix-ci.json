@@ -1,0 +1,26 @@
+{
+  "id": "gh-fix-ci",
+  "title": "GitHub Fix CI",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use gh to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval.",
+  "body": "",
+  "upstream": {
+    "path": "third_party/openai-skills/skills/.curated/gh-fix-ci/SKILL.md",
+    "verbatim": true
+  },
+  "supportFiles": [
+    {
+      "path": "scripts/inspect_pr_checks.py",
+      "source": "../third_party/openai-skills/skills/.curated/gh-fix-ci/scripts/inspect_pr_checks.py",
+      "executable": true
+    },
+    {
+      "path": "assets/github-small.svg",
+      "source": "../third_party/openai-skills/skills/.curated/gh-fix-ci/assets/github-small.svg"
+    }
+  ]
+}

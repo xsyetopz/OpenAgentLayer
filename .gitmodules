@@ -30,3 +30,7 @@
 	path = third_party/openai-codex
 	url = https://github.com/openai/codex.git
 	branch = main
+[submodule "third_party/openai-skills"]
+	path = third_party/openai-skills
+	url = https://github.com/openai/skills.git
+	branch = main

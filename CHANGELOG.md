@@ -5,20 +5,24 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.5] - 2026-05-12
+## [0.6.0-beta.6] - 2026-05-12
+
+### Added
+
+- Added the upstream OpenAI `skills` repository as `third_party/openai-skills`.
+- Added rendered OAL skill records for OpenAI's `gh-fix-ci`, `gh-address-comments`, and `openai-docs` curated skills.
+- Included text support files for those skills, including GitHub PR/CI helper scripts and OpenAI docs model-upgrade references.
 
 ### Changed
 
-- Switched default Codex orchestration to native `multi_agent_v2` with rendered OAL agent hints, while keeping OpenDex and Symphony available as explicit control-plane commands.
-- Exposed Symphony through `oal symphony`, `bun run symphony`, and the installed `symphony` shim next to `oal` and `opendex`.
-- Hardened AI commit attribution so commit skills and hooks require Conventional Commits plus provider-appropriate `Co-authored-by` trailers for Codex, Claude Code, and OpenCode model identities.
-- Hardened shared-workspace prompt contracts so agents treat unexplained pre-existing changes as user-owned work that must not be reverted, reformatted, overwritten, moved, deleted, or staged without explicit permission.
-- Refreshed tracked Codex-related upstream submodule pointers.
+- Updated release metadata from `0.6.0-beta.5` to `0.6.0-beta.6`.
+- Updated Codex e2e expectations for the current `pro-20` high/xhigh implementation profile routing.
 
 ### Verified
 
-- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts packages/deploy/__tests__/deploy.test.ts packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts tests/e2e.test.ts`
-- `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts`
+- `rtk proxy -- bun test packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts`
+- `rtk proxy -- bun test tests/e2e.test.ts`
+- `rtk proxy -- bun run test`
 - `rtk proxy -- bun packages/cli/src/main.ts check --provider all`
 
 ## [0.6.0-beta.3] - 2026-05-12
