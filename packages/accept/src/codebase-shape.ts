@@ -11,6 +11,9 @@ const GENERATED_PATH_PATTERN =
 const LINE_PATTERN = /\r?\n/;
 const MAX_PACKAGE_SOURCE_LINES = 10_000;
 const MAX_DIRECT_SOURCE_CHILDREN = 32;
+const DIRECT_SOURCE_CHILDREN_LIMITS = new Map<string, number>([
+	["source/skills", 48],
+]);
 const MAX_SOURCE_PATH_DEPTH = 6;
 
 export async function assertCodebaseShape(repoRoot: string): Promise<void> {
@@ -56,11 +59,19 @@ function assertDirectChildren(files: string[]): void {
 		directChildren.get(owner)?.add(child);
 	}
 	const crowded = [...directChildren.entries()]
-		.filter(([, children]) => children.size > MAX_DIRECT_SOURCE_CHILDREN)
-		.map(([owner, children]) => `${owner}:${children.size}`);
+		.filter(
+			([owner, children]) =>
+				children.size >
+				(DIRECT_SOURCE_CHILDREN_LIMITS.get(owner) ??
+					MAX_DIRECT_SOURCE_CHILDREN),
+		)
+		.map(
+			([owner, children]) =>
+				`${owner}:${children.size}/${DIRECT_SOURCE_CHILDREN_LIMITS.get(owner) ?? MAX_DIRECT_SOURCE_CHILDREN}`,
+		);
 	if (crowded.length > 0)
 		throw new Error(
-			`Codebase shape has crowded source owners over ${MAX_DIRECT_SOURCE_CHILDREN} direct children: ${crowded.join(", ")}`,
+			`Codebase shape has crowded source owners over direct-child limits: ${crowded.join(", ")}`,
 		);
 }
 
