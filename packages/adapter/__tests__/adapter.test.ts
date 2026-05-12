@@ -28,6 +28,16 @@ test("model plans route Greek agents by subscription", async () => {
 	const codex = await renderProvider("codex", graph.source, repoRoot, {
 		plan: "pro-20",
 	});
+	const codexConfig = codex.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(codexConfig).toContain(
+		'[profiles.openagentlayer-multi-agent-v2]\nmodel = "gpt-5.5"',
+	);
+	expect(codexConfig).toContain(
+		'[profiles.openagentlayer-multi-agent-v2-implement]\nmodel = "gpt-5.3-codex"',
+	);
+	expect(codexConfig).toContain('model_reasoning_effort = "xhigh"');
 	const athena = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/athena.toml",
 	)?.content;
@@ -37,12 +47,29 @@ test("model plans route Greek agents by subscription", async () => {
 		(artifact) => artifact.path === ".codex/agents/hermes.toml",
 	)?.content;
 	expect(hermes).toContain('model = "gpt-5.5"');
-	expect(hermes).toContain('model_reasoning_effort = "high"');
+	expect(hermes).toContain('model_reasoning_effort = "medium"');
 	const hephaestus = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
 	)?.content;
 	expect(hephaestus).toContain('model = "gpt-5.3-codex"');
-	expect(hephaestus).toContain('model_reasoning_effort = "high"');
+	expect(hephaestus).toContain('model_reasoning_effort = "xhigh"');
+	const apollo = codex.artifacts.find(
+		(artifact) => artifact.path === ".codex/agents/apollo.toml",
+	)?.content;
+	expect(apollo).toContain('model = "gpt-5.3-codex"');
+	expect(apollo).toContain('model_reasoning_effort = "xhigh"');
+
+	const codexPro5 = await renderProvider("codex", graph.source, repoRoot, {
+		plan: "pro-5",
+	});
+	const pro5Hephaestus = codexPro5.artifacts.find(
+		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
+	)?.content;
+	expect(pro5Hephaestus).toContain('model_reasoning_effort = "xhigh"');
+	const pro5Apollo = codexPro5.artifacts.find(
+		(artifact) => artifact.path === ".codex/agents/apollo.toml",
+	)?.content;
+	expect(pro5Apollo).toContain('model_reasoning_effort = "high"');
 
 	const claude = await renderProvider("claude", graph.source, repoRoot, {
 		plan: "max-20-long",
@@ -493,6 +520,7 @@ test("Codex Plus plan routes intelligence to GPT-5.5 and workers to GPT-5.3", as
 	expect(config).toContain(
 		'[profiles.openagentlayer-multi-agent-v2-implement]\nmodel = "gpt-5.3-codex"',
 	);
+	expect(config).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(config).toContain(
 		'[profiles.openagentlayer-multi-agent-v2-utility]\nmodel = "gpt-5.4-mini"',
 	);

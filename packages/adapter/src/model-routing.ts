@@ -10,7 +10,7 @@ export type ModelPlan =
 	| "opencode-auto"
 	| "opencode-auth"
 	| "opencode-free";
-export type ReasoningEffort = "low" | "medium" | "high";
+export type ReasoningEffort = "low" | "medium" | "high" | "xhigh";
 export type CodexOrchestrationMode =
 	| "symphony"
 	| "multi_agent"
@@ -200,6 +200,22 @@ const OPENCODE_FORBIDDEN = new Set([
 	"opencode/gpt-5.3-codex-spark",
 	"opencode/claude-opus-4-7",
 ]);
+const CODEX_GPT55_HIGH_AGENTS_BY_PLAN: Record<
+	Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
+	ReadonlySet<string>
+> = {
+	plus: new Set(["athena"]),
+	"pro-5": new Set(["ares", "athena", "nemesis", "odysseus"]),
+	"pro-20": new Set(["ares", "athena", "morpheus", "nemesis", "odysseus"]),
+};
+const CODEX_GPT53_XHIGH_AGENTS_BY_PLAN: Record<
+	Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
+	ReadonlySet<string>
+> = {
+	plus: new Set(),
+	"pro-5": new Set(["hephaestus"]),
+	"pro-20": new Set(["apollo", "hephaestus"]),
+};
 
 export function resolveCodexModel(
 	agent: AgentRecord,
@@ -239,11 +255,15 @@ function codexReasoningEffort(
 	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
 ): ReasoningEffort {
 	if (model === "gpt-5.3-codex") {
+		if (CODEX_GPT53_XHIGH_AGENTS_BY_PLAN[plan].has(agent.id)) return "xhigh";
 		if (agent.tools.includes("write"))
 			return plan === "plus" ? "medium" : "high";
 		return plan === "plus" ? "low" : "medium";
 	}
-	if (model === "gpt-5.5") return "high";
+	if (model === "gpt-5.5")
+		return CODEX_GPT55_HIGH_AGENTS_BY_PLAN[plan].has(agent.id)
+			? "high"
+			: "medium";
 	return "low";
 }
 

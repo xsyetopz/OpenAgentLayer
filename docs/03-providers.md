@@ -1,7 +1,7 @@
 # Configure Providers
 
-OAL renders provider-native artifacts. The source intent is shared, but the
-files are different for Codex, Claude Code, and OpenCode.
+OAL renders provider-native files. The source intent is shared, but each
+provider gets files in its own format.
 
 ## Codex
 
@@ -10,12 +10,12 @@ OAL renders `.codex/config.toml`, `.codex/agents/*.toml`,
 Codex plugin marketplace payloads.
 
 OAL uses the normal shell for Codex and keeps RTK enforcement in visible hooks.
-It also renders `.codex/requirements.toml` as the managed-hook policy template
-for Codex. Codex itself loads `requirements.toml` from its system or managed
-configuration locations, so users who want hooks to run without approval review
-must install that rendered requirements file into the Codex requirements layer
-for their environment. OAL deploy prints a warning when this requirements
-artifact is present so the admin-enforced install step is not hidden.
+It also renders `.codex/requirements.toml` as the Codex managed-hook policy
+template. Codex loads `requirements.toml` from its system or managed config
+locations. If you want hooks to run without approval review, install the
+rendered requirements file into the Codex requirements layer for your
+environment. OAL deploy prints a warning when this file exists so the admin
+install step is visible.
 
 OAL renders `.codex/openagentlayer/codex-base-instructions.md` from upstream
 `openai/codex` base instructions plus the tracked OAL patch in
@@ -53,6 +53,7 @@ oal mcp install oal-inspect --provider opencode --scope global
 
 ## Provider Availability
 
-Setup treats provider binaries as optional for planning. When a provider binary
-is unavailable, OAL reports that state and continues with setup steps that can
-run through source rendering, deploy, plugin payloads, and shared validation.
+Setup treats provider binaries as optional during planning. If a provider binary
+is not available, OAL reports it and continues with steps that do not need that
+binary, such as source rendering, deploy planning, plugin payloads, and shared
+validation.

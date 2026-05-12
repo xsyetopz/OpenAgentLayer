@@ -67,7 +67,15 @@ test("Codex config schema requires cheap memory extraction model", () => {
 				'plan_mode_reasoning_effort = "xhigh"\nmodel_verbosity = "low"',
 			),
 		),
-	).toThrow("unsupported plan reasoning effort xhigh");
+	).not.toThrow();
+	expect(() =>
+		assertCodexTomlSchema(
+			config.replace(
+				'model_verbosity = "low"',
+				'plan_mode_reasoning_effort = "ultra"\nmodel_verbosity = "low"',
+			),
+		),
+	).toThrow("unsupported plan reasoning effort ultra");
 });
 
 test("RTK gain parser reads current-style percentage output", () => {

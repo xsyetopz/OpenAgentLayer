@@ -8,7 +8,11 @@ import {
 import type { AgentRecord, OalSource, Provider } from "@openagentlayer/source";
 import { agentPrompt, instructions, quoteToml } from "./common";
 import { renderHookArtifacts } from "./hooks";
-import type { CodexOrchestrationMode, RenderOptions } from "./model-routing";
+import type {
+	CodexOrchestrationMode,
+	ReasoningEffort,
+	RenderOptions,
+} from "./model-routing";
 import { resolveCodexModel } from "./model-routing";
 import { renderPrivilegedExecArtifacts } from "./runtime";
 import { renderSkillArtifacts } from "./skills";
@@ -224,8 +228,8 @@ interface CodexProfileConfig {
 	model: string;
 	approvalPolicy: "never" | "on-request";
 	sandboxMode: "read-only" | "workspace-write";
-	planReasoningEffort?: "low" | "medium" | "high";
-	modelReasoningEffort?: "low" | "medium" | "high";
+	planReasoningEffort?: ReasoningEffort;
+	modelReasoningEffort?: ReasoningEffort;
 	toolsViewImage?: boolean;
 }
 
@@ -269,7 +273,7 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "medium",
 				model: "medium",
-				implementPlan: "low",
+				implementPlan: "medium",
 				implementModel: "medium",
 				utilityPlan: "low",
 				utilityModel: "low",
@@ -293,8 +297,8 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
 				model: "medium",
-				implementPlan: "medium",
-				implementModel: "high",
+				implementPlan: "high",
+				implementModel: "xhigh",
 				utilityPlan: "low",
 				utilityModel: "medium",
 			};

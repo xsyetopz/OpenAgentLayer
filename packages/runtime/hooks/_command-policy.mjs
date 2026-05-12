@@ -66,6 +66,8 @@ const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
 const RAW_DIAGNOSTIC_ENV_PATTERN =
 	/(?:^|\s)(?:env\s+)?OAL_RTK_RAW_DIAGNOSTIC=1(?:\s|$)/;
 const WHITESPACE_PATTERN = /\s+/;
+const HEREDOC_WRITE_PATTERN =
+	/^\s*(?:cat|printf)\b[^\n]*(?:^|\s)(?:>|>>)\s*\S+[^\n]*<<[-~]?\s*['"]?[A-Za-z_][A-Za-z0-9_-]*['"]?/;
 const CODEX_EXEC_PATTERN = /(?:^|[\s"'`])codex\s+exec(?:\s|$)/;
 const DETACHED_CODEX_LAUNCHERS = new Set([
 	"docker",
@@ -171,6 +173,8 @@ function evaluateSingleCommand(command, options) {
 	const rewriteCandidate = shellInnerCommand(normalized) ?? normalized;
 	const delegatedCodex = evaluateCodexExecDelegation(rewriteCandidate);
 	if (delegatedCodex) return delegatedCodex;
+	const heredocWrite = evaluateHeredocWrite(rewriteCandidate);
+	if (heredocWrite) return heredocWrite;
 	const toolMismatch = evaluateToolMismatch(rewriteCandidate);
 	if (toolMismatch) return toolMismatch;
 	const bunReplacement = options.bunRewrite?.(rewriteCandidate);
@@ -230,6 +234,19 @@ function evaluateSingleCommand(command, options) {
 		decision: "warn",
 		reason: "RTK proxy handles this command when output may be noisy",
 		details: [`Use when useful: rtk proxy -- ${normalized}`],
+	};
+}
+
+function evaluateHeredocWrite(command) {
+	if (!HEREDOC_WRITE_PATTERN.test(command)) return undefined;
+	return {
+		decision: "block",
+		reason: "Shell heredoc file writes need an OAL-safe edit or commit path",
+		details: [
+			"Use apply_patch for repository files.",
+			'Use multiple -m paragraphs for commits: rtk git commit -m "type(scope): subject" -m "Summary:\\n- ..." --trailer "Co-authored-by: Codex <noreply@openai.com>"',
+			"Use for non-repo temp files when necessary: rtk proxy -- tee /tmp/file >/dev/null <<'EOF'",
+		],
 	};
 }
 

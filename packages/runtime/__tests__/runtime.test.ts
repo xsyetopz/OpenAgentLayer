@@ -521,6 +521,22 @@ test("Codex PreToolUse block feedback avoids note prefixes", async () => {
 	expect(reason).not.toContain("note:");
 });
 
+test("RTK hook gives actionable heredoc write guidance", async () => {
+	const result = await runHook({
+		command: "cat > /private/tmp/message <<'EOF'\nhello\nEOF",
+		rtkInstalled: true,
+		rtkPolicyPresent: true,
+	});
+	expect(result).toMatchObject({
+		decision: "block",
+		reason: "Shell heredoc file writes need an OAL-safe edit or commit path",
+	});
+	const details = result.details?.join("\n") ?? "";
+	expect(details).toContain("Use apply_patch for repository files.");
+	expect(details).toContain("multiple -m paragraphs");
+	expect(details).toContain("rtk proxy -- tee /tmp/file");
+});
+
 test("RTK hook ignores patch and edit payload text that is not a shell command", async () => {
 	await expect(
 		runHook({

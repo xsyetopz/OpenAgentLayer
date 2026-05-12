@@ -30,7 +30,12 @@ const ALLOWED_CODEX_MODELS = new Set([
 ]);
 const ALLOWED_APPROVAL_POLICIES = new Set(["on-request", "never"]);
 const ALLOWED_SANDBOX_MODES = new Set(["workspace-write", "read-only"]);
-const ALLOWED_CODEX_REASONING_EFFORTS = new Set(["low", "medium", "high"]);
+const ALLOWED_CODEX_REASONING_EFFORTS = new Set([
+	"low",
+	"medium",
+	"high",
+	"xhigh",
+]);
 const ALLOWED_CODEX_FEATURES = new Set([
 	"steer",
 	"apps",

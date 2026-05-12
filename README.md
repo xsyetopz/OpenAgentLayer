@@ -1,8 +1,11 @@
 # OpenAgentLayer
 
-OpenAgentLayer (OAL) generates, previews, deploys, updates, and uninstalls provider-native agent layers for Claude Code, Codex, and OpenCode.
+OpenAgentLayer (OAL) builds agent setup files for Claude Code, Codex, and
+OpenCode. It can preview, deploy, update, and uninstall those files.
 
-OAL keeps authored product input in `source/`, renders disposable provider artifacts, records manifest ownership, and removes only OAL-owned material during uninstall.
+OAL keeps the source of truth in `source/`. Generated provider files are
+disposable. Deploy records which files OAL owns, and uninstall removes only
+those OAL-owned files.
 
 ## Contents
 
@@ -29,7 +32,8 @@ OAL keeps authored product input in `source/`, renders disposable provider artif
 
 ## Quick start
 
-Clone, load upstream skill submodules, install dependencies, and verify the source graph:
+Clone the repo, load submodules, install dependencies, and check that OAL can
+render provider files:
 
 ```bash
 git clone https://github.com/xsyetopz/OpenAgentLayer.git
@@ -39,31 +43,36 @@ bun install --frozen-lockfile
 bun run check
 ```
 
-`bun` is a required OAL runtime dependency. The Homebrew cask depends on Bun, and `bun run toolchain` includes Bun in OS package-manager setup plans so generated Bun shims do not fail at use time. `setup --toolchain` can include the same toolchain plan before deploying provider artifacts.
+`bun` is required. The Homebrew cask depends on Bun. `bun run toolchain` and
+`setup --toolchain` include Bun in setup plans so generated shims work when you
+run them.
 
-RTK setup must use `rtk-ai/rtk`: install it, verify with `rtk gain`, then initialize provider policies with `rtk init -g --auto-patch`, `rtk init -g --codex`, and `rtk init -g --opencode`. OAL RTK hooks enforce RTK only when the binary works and `RTK.md` exists globally or in the project.
+RTK setup must use `rtk-ai/rtk`. Install it, verify it with `rtk gain`, then
+initialize provider policies with `rtk init -g --auto-patch`,
+`rtk init -g --codex`, and `rtk init -g --opencode`. OAL enforces RTK only
+when the binary works and an `RTK.md` policy exists globally or in the project.
 
-Preview exactly what OAL would generate before writing anything:
+Preview what OAL would generate before writing files:
 
 ```bash
 bun run preview -- --provider all
 bun run preview -- --provider codex --path .codex/config.toml --content
 ```
 
-Dry-run deployment into a project before applying changes:
+Dry-run deployment before applying changes:
 
 ```bash
 bun run setup -- --target /path/to/project --scope project --provider all --dry-run
 bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
 ```
 
-Apply only after the dry-run paths are correct:
+Apply only after the dry-run output points at the right paths:
 
 ```bash
 bun run deploy -- --target /path/to/project --scope project --provider all
 ```
 
-In a terminal, run the CLI without a command for guided prompts:
+Run the CLI without a command for guided prompts:
 
 ```bash
 bun packages/cli/src/main.ts
@@ -78,7 +87,9 @@ Convenience install scripts are available from the repository root:
 ./install-online.sh setup --scope global --provider all --toolchain --dry-run
 ```
 
-`install-online.sh` clones OAL into a temporary directory, copies it into `OAL_INSTALL_DIR` or `$HOME/.local/share/openagentlayer`, runs `install.sh`, and removes the temporary clone.
+`install-online.sh` clones OAL into a temporary directory, copies it into
+`OAL_INSTALL_DIR` or `$HOME/.local/share/openagentlayer`, runs `install.sh`,
+and removes the temporary clone.
 
 ## Install paths
 
@@ -93,7 +104,8 @@ Convenience install scripts are available from the repository root:
 
 ## Provider support
 
-Legend: ✅ supported, ⚠️ partial/provider-limited, 🚧 under construction, ❌ unsupported by provider surface, - not applicable.
+Legend: ✅ supported, ⚠️ warning or setup required, 🚧 partial or under
+construction, ❌ unsupported by the provider, `N/A` not applicable.
 
 | Capability                | Claude Code                            | Codex                                       | OpenCode                                   |
 | ------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------------ |
@@ -101,7 +113,7 @@ Legend: ✅ supported, ⚠️ partial/provider-limited, 🚧 under construction,
 | Per-agent model routing   | ✅ Claude allowlist.                    | ✅ Codex allowlist.                          | ✅ Auth model detection plus free fallback. |
 | Per-agent colors          | ✅ Quoted hex frontmatter.              | ✅ Quoted hex TOML values.                   | ✅ Quoted hex frontmatter.                  |
 | Skills                    | ✅ `skills/*/SKILL.md`.                 | ✅ `openagentlayer/skills/*/SKILL.md`.       | ✅ `skills/*/SKILL.md`.                     |
-| Commands/routes           | ✅ Slash-command Markdown.              | ⚠️ Rendered into `AGENTS.md`.                | ✅ Command Markdown plus config entries.    |
+| Commands/routes           | ✅ Slash-command Markdown.              | 🚧 Rendered into `AGENTS.md`.                | ✅ Command Markdown plus config entries.    |
 | Hooks                     | ✅ Hook entries plus executable `.mjs`. | ✅ Executable `.mjs` plus feature flags.     | ⚠️ Plugin-mediated executable `.mjs`.       |
 | Custom tools              | ❌ No matching provider surface.        | ❌ No matching provider surface.             | ✅ `@opencode-ai/plugin` TypeScript tools.  |
 | Provider instructions     | ✅ `CLAUDE.md`.                         | ✅ `AGENTS.md`.                              | ✅ instruction file plus config reference.  |
@@ -117,7 +129,8 @@ managed OAL hook entries. Codex only treats hooks as approval-free when that
 requirements file is installed into Codex's managed requirements layer for the
 environment; `deploy` prints a warning when this step is still external.
 
-Codex also has an OAL-managed delegation CLI for environments where the native subagent launcher is unavailable to the current session:
+Codex also has an OAL-managed delegation CLI. Use it when the native subagent
+launcher is not available in the current session:
 
 ```bash
 oal codex agent hermes --dry-run "map runtime hooks"
@@ -125,17 +138,19 @@ oal codex route review --dry-run "audit the current diff"
 oal codex peer batch --dry-run "investigate, implement, validate, and review"
 ```
 
-`oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/` run directory and coordinates orchestrator, validate, worker, and review passes.
+`oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/`
+directory. It coordinates orchestrator, validate, worker, and review passes.
 
 ## Model plans
 
-OAL applies subscription-specific model and reasoning choices instead of giving every generated agent the same model. Use `--plan` with `preview`, `render`, `deploy`, or `plugins`.
+OAL chooses models by plan and role. It does not give every generated agent the
+same model. Use `--plan` with `preview`, `render`, `deploy`, or `plugins`.
 
-| Provider    | Plans                                             | Notes                                                                                                                                                                                                              |
-| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses `gpt-5.5` for intelligence/orchestration, `gpt-5.3-codex` for worker/code-writing roles, and `gpt-5.4-mini` for utility/light subagent profiles; generated reasoning stays between low and high, never xhigh. |
-| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                                                                                                                            |
-| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.                                                                                                            |
+| Provider    | Plans                                             | Notes                                                                                                                                                                                                                               |
+| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses `gpt-5.5` for intelligence and orchestration, `gpt-5.3-codex` for code-writing roles, and `gpt-5.4-mini` for utility profiles. `plus` avoids xhigh; `pro-5` and `pro-20` use xhigh only for narrow GPT-5.3-Codex worker cases. |
+| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                                                                                                                                             |
+| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.                                                                                                                             |
 
 Examples:
 
@@ -154,7 +169,8 @@ bun run preview -- --provider opencode --plan opencode-auto --opencode-models-fi
 
 ## CLI commands
 
-Run through package scripts from a source checkout, or replace `bun run <script> --` with `oal` after installing the binary.
+Run package scripts from a source checkout. After installing the binary, replace
+`bun run <script> --` with `oal`.
 
 | Command            | Purpose                                                                              | Common flags                                                                                        | Safe first command                                                                      |
 | ------------------ | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -177,9 +193,13 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 | `roadmap-evidence` | Print the acceptance evidence ledger.                                                | None.                                                                                               | `bun run roadmap:evidence`.                                                             |
 | `accept`           | Run full product acceptance over source, rendering, deploy, uninstall, and fixtures. | None.                                                                                               | `bun run accept`.                                                                       |
 
-Providers accepted by provider-aware commands are `all`, `codex`, `claude`, `opencode`, or a comma-separated set such as `codex,opencode`. `uninstall` requires one provider, not `all`.
+Provider-aware commands accept `all`, `codex`, `claude`, `opencode`, or a
+comma-separated set such as `codex,opencode`. `uninstall` requires one provider,
+not `all`.
 
-Profiles live in `~/.openagentlayer/config.json` by default. They preserve provider order, scope, target/home paths, model plans, optional tools, and setup toggles:
+Profiles live in `~/.openagentlayer/config.json` by default. They store provider
+order, scope, target and home paths, model plans, optional tools, and setup
+toggles:
 
 ```bash
 bun run profiles -- save work --scope global --provider opencode,codex --optional ctx7,opencode-docs --activate
@@ -189,14 +209,20 @@ bun run setup -- --profile work --dry-run
 
 ## Interactive CLI
 
-OAL uses Commander for option parsing and Clack for simple terminal prompts. Run without a command in a TTY, or call `interactive` explicitly:
+OAL uses Commander for options and Clack for terminal prompts. Run without a
+command in a TTY, or call `interactive` directly:
 
 ```bash
 bun packages/cli/src/main.ts
 bun packages/cli/src/main.ts interactive
 ```
 
-Interactive mode supports setup, profile saving, state inspection, preview, deploy, plugin sync, uninstall, and check. Setup is a high-level wrapper over the same low-level `setup` command used by scripts. Provider prompts use multiselect where commands can act on multiple providers. Global deploy auto-detects the home directory and only asks when you override it. Non-interactive commands remain script-safe and print help instead of prompting when stdin is not a TTY.
+Interactive mode supports setup, profile saving, state inspection, preview,
+deploy, plugin sync, uninstall, and check. Setup wraps the same `setup` command
+used by scripts. Provider prompts use multiselect when a command can act on more
+than one provider. Global deploy detects the home directory and asks only when
+you override it. Non-interactive commands stay script-safe and print help
+instead of prompting when stdin is not a TTY.
 
 Optional features are explicit add/remove commands on top of OAL:
 
@@ -205,7 +231,9 @@ bun run features -- --install ctx7,playwright,anthropic-docs,opencode-docs
 bun run features -- --remove playwright,anthropic-docs,opencode-docs
 ```
 
-Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration. `anthropic-docs` and `opencode-docs` are normal OAL-owned MCP servers registered with provider MCP commands and served by `oal mcp serve`.
+Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP
+configuration. `anthropic-docs` and `opencode-docs` are OAL-owned MCP servers.
+Provider MCP commands register them, and `oal mcp serve` runs them.
 
 Copy commands from fenced `bash` blocks. Do not paste Markdown list bullets.
 
@@ -232,7 +260,8 @@ bun run deploy -- --scope global --provider all --dry-run
 bun run deploy -- --scope global --provider all
 ```
 
-Global deploy writes provider-native config under your provider homes and records global ownership under `.openagentlayer/manifest/global/`.
+Global deploy writes provider-native config under your provider homes. It records
+global ownership under `.openagentlayer/manifest/global/`.
 
 ### Sync provider plugins into your home directory
 
@@ -250,7 +279,8 @@ bun run uninstall -- --target /path/to/project --scope project --provider openco
 bun run uninstall -- --scope global --provider codex
 ```
 
-Uninstall removes OAL-owned artifacts from the manifest. It must preserve user-owned files and user-authored config blocks.
+Uninstall removes OAL-owned artifacts from the manifest. It must preserve
+user-owned files and user-authored config blocks.
 
 ## Homebrew
 
