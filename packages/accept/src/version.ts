@@ -66,9 +66,7 @@ async function assertVersionFilesAgree(
 		throw new Error("Cargo.toml version does not match root");
 	const cargoLock = await readFile(join(repoRoot, "Cargo.lock"), "utf8");
 	if (
-		!cargoLock.includes(
-			`[[package]]\nname = "opendex"\nversion = "${current}"`,
-		)
+		!cargoLock.includes(`[[package]]\nname = "opendex"\nversion = "${current}"`)
 	)
 		throw new Error("Cargo.lock opendex version does not match root");
 	const cask = await readFile(

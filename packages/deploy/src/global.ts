@@ -58,9 +58,8 @@ function globalContent(
 			() => `${join(home, ".codex/openagentlayer/hooks")}/`,
 		);
 	if (provider === "codex" && path === ".codex/requirements.toml")
-		return content.replaceAll(
-			"__OAL_CODEX_MANAGED_HOOK_DIR__",
-			() => join(home, ".codex/openagentlayer/hooks"),
+		return content.replaceAll("__OAL_CODEX_MANAGED_HOOK_DIR__", () =>
+			join(home, ".codex/openagentlayer/hooks"),
 		);
 	if (provider === "claude" && path === ".claude/settings.json")
 		return content

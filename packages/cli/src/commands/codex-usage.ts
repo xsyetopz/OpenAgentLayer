@@ -37,7 +37,9 @@ export async function runCodexUsageCommand(args: string[] = []): Promise<void> {
 	const db = new Database(dbPath, { readonly: true });
 	try {
 		const projectFilter = project ? "where cwd = $project" : "";
-		const params = project ? { $project: resolve(project), $limit: limit } : { $limit: limit };
+		const params = project
+			? { $project: resolve(project), $limit: limit }
+			: { $limit: limit };
 		const summary = db
 			.query(
 				`select
@@ -73,7 +75,9 @@ export async function runCodexUsageCommand(args: string[] = []): Promise<void> {
 			)
 			.all(params) as TopThreadRow[];
 		if (json) {
-			console.log(JSON.stringify({ dbPath, project, summary, topThreads }, null, 2));
+			console.log(
+				JSON.stringify({ dbPath, project, summary, topThreads }, null, 2),
+			);
 			return;
 		}
 		printUsageReport(dbPath, project, summary, topThreads);

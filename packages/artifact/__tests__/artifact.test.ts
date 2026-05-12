@@ -31,7 +31,7 @@ test("toml provenance preserves schema comment as the first line", () => {
 		provider: "codex",
 		path: ".codex/config.toml",
 		content:
-			"#:schema https://developers.openai.com/codex/config-schema.json\nprofile = \"openagentlayer\"\n",
+			'#:schema https://developers.openai.com/codex/config-schema.json\nprofile = "openagentlayer"\n',
 		sourceId: "config:codex",
 		mode: "config",
 	});
