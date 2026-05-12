@@ -10,7 +10,7 @@ export type ModelPlan =
 	| "opencode-auto"
 	| "opencode-auth"
 	| "opencode-free";
-export type ReasoningEffort = "none" | "low" | "medium" | "high" | "xhigh";
+export type ReasoningEffort = "low" | "medium" | "high";
 export type CodexOrchestrationMode =
 	| "symphony"
 	| "multi_agent"
@@ -207,11 +207,15 @@ export function resolveCodexModel(
 ): RoutedModel {
 	const plan =
 		options.codexPlan ?? (isCodexPlan(options.plan) ? options.plan : undefined);
-	const sourceModel = agent.models.codex ?? "gpt-5.4-mini";
-	const model = plan ? codexPlanModel(sourceModel, plan) : codexDefaultModel(sourceModel);
+	const sourceModel = agent.models.codex ?? "gpt-5.3-codex";
+	const model = plan
+		? codexPlanModel(sourceModel)
+		: codexDefaultModel(sourceModel);
 	return {
 		model,
-		...(plan ? { reasoningEffort: codexReasoningEffort(model, plan) } : {}),
+		...(plan
+			? { reasoningEffort: codexReasoningEffort(agent, model, plan) }
+			: {}),
 	};
 }
 
@@ -230,26 +234,24 @@ export function resolveClaudeModel(
 }
 
 function codexReasoningEffort(
+	agent: AgentRecord,
 	model: string,
 	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
 ): ReasoningEffort {
-	if (model === "gpt-5.3-codex") return plan === "plus" ? "medium" : "high";
+	if (model === "gpt-5.3-codex") {
+		if (agent.tools.includes("write"))
+			return plan === "plus" ? "medium" : "high";
+		return plan === "plus" ? "low" : "medium";
+	}
 	if (model === "gpt-5.5") return "high";
-	if (model === "gpt-5.4-mini") return plan === "pro-20" ? "medium" : "low";
 	return "low";
 }
 
-function codexPlanModel(
-	model: string,
-	plan: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">,
-): string {
-	if ((plan === "plus" || plan === "pro-5") && model === "gpt-5.5")
-		return "gpt-5.3-codex";
+function codexPlanModel(model: string): string {
 	return model;
 }
 
 function codexDefaultModel(model: string): string {
-	if (model === "gpt-5.5") return "gpt-5.3-codex";
 	return model;
 }
 

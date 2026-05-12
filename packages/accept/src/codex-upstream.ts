@@ -7,14 +7,19 @@ const CODEX_SUBMODULE = `[submodule "third_party/openai-codex"]
 \tbranch = main`;
 const CODEX_BASE_INSTRUCTIONS =
 	"third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md";
-const CODEX_PATCH = "patches/openai-codex-base-instructions-reddit.patch";
+const CODEX_PATCH = "patches/openai-codex-base-instructions-default-md.patch";
 const CODEX_REDDIT_RESEARCH = "docs/codex-reddit-research.md";
 
-export async function assertCodexUpstreamPatch(repoRoot: string): Promise<void> {
+export async function assertCodexUpstreamPatch(
+	repoRoot: string,
+): Promise<void> {
 	const gitmodules = await readFile(join(repoRoot, ".gitmodules"), "utf8");
 	if (!gitmodules.includes(CODEX_SUBMODULE))
 		throw new Error("OpenAI Codex submodule metadata is missing or incomplete");
-	const upstream = await readFile(join(repoRoot, CODEX_BASE_INSTRUCTIONS), "utf8");
+	const upstream = await readFile(
+		join(repoRoot, CODEX_BASE_INSTRUCTIONS),
+		"utf8",
+	);
 	if (!upstream.includes("## Validating your work"))
 		throw new Error("OpenAI Codex upstream base instructions are missing");
 	const patch = await readFile(join(repoRoot, CODEX_PATCH), "utf8");
@@ -29,7 +34,10 @@ export async function assertCodexUpstreamPatch(repoRoot: string): Promise<void> 
 	])
 		if (!patch.includes(required))
 			throw new Error(`Codex base-instruction patch missing \`${required}\``);
-	const research = await readFile(join(repoRoot, CODEX_REDDIT_RESEARCH), "utf8");
+	const research = await readFile(
+		join(repoRoot, CODEX_REDDIT_RESEARCH),
+		"utf8",
+	);
 	for (const required of [
 		"Managed hooks need requirements",
 		"Base instructions should be patched",
@@ -42,5 +50,7 @@ export async function assertCodexUpstreamPatch(repoRoot: string): Promise<void> 
 		"Deferred or already covered by existing OAL surfaces",
 	])
 		if (!research.includes(required))
-			throw new Error(`Codex reddit research disposition missing \`${required}\``);
+			throw new Error(
+				`Codex reddit research disposition missing \`${required}\``,
+			);
 }

@@ -138,10 +138,10 @@ async function assertCodexBaseInstructions(
 		"rtk proxy -- <command>",
 		"## OAL parent-session quota guard",
 		"oal codex-usage --project <path>",
-		"session-complete handoff",
+		"session-complete\nhandoff",
 		"COMPLETE-complete",
 		"report only conclusive, actionable findings grounded in current code",
-		"Keep review output findings-only and bounded",
+		"Keep review output findings-only\nand bounded",
 		"Unknown or potentially large command output must be bounded before it reaches context.",
 	])
 		if (!baseInstructions.includes(required))

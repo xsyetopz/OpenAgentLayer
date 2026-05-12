@@ -312,7 +312,7 @@ test("CLI Codex agent dry-run plans a custom-agent exec", async () => {
 	expect(run.command).toBe("codex");
 	expect(run.args).toContain("exec");
 	expect(run.args).toContain("-m");
-	expect(run.args).toContain("gpt-5.4-mini");
+	expect(run.args).toContain("gpt-5.5");
 	expect(run.args).toContain("read-only");
 	expect(run.args.join("\n")).toContain("Use OpenAgentLayer agent `hermes`");
 	expect(run.args.join("\n")).toContain("map hooks");
@@ -504,11 +504,11 @@ test("CLI preview applies configurable Caveman mode", async () => {
 			"packages/cli/src/main.ts",
 			"preview",
 			"--provider",
-			"codex",
+			"claude",
 			"--caveman-mode",
 			"off",
 			"--path",
-			"AGENTS.md",
+			".claude/commands/implement.md",
 			"--content",
 		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
@@ -562,10 +562,11 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 		pro5Stdout,
 		"profiles.openagentlayer-symphony-implement",
 	);
-	expect(pro5Lead).toContain('model = "gpt-5.3-codex"');
+	expect(pro5Lead).toContain('model = "gpt-5.5"');
 	expect(pro5Lead).toContain('plan_mode_reasoning_effort = "high"');
-	expect(pro5Lead).toContain('model_reasoning_effort = "high"');
+	expect(pro5Lead).toContain('model_reasoning_effort = "medium"');
 	expect(pro5Lead).toContain('model_verbosity = "low"');
+	expect(pro5Implement).toContain('model = "gpt-5.3-codex"');
 	expect(pro5Implement).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(pro5Implement).toContain('model_reasoning_effort = "high"');
 	expect(pro5Stdout).toContain("hide_rate_limit_model_nudge = true");
@@ -591,9 +592,11 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 		pro20Stdout,
 		"profiles.openagentlayer-symphony-implement",
 	);
+	expect(pro20Lead).toContain('model = "gpt-5.5"');
 	expect(pro20Lead).toContain('plan_mode_reasoning_effort = "high"');
-	expect(pro20Lead).toContain('model_reasoning_effort = "high"');
+	expect(pro20Lead).toContain('model_reasoning_effort = "medium"');
 	expect(pro20Lead).toContain('model_verbosity = "low"');
+	expect(pro20Implement).toContain('model = "gpt-5.3-codex"');
 	expect(pro20Implement).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(pro20Implement).toContain('model_reasoning_effort = "high"');
 	expect(pro20Stdout).toContain("hide_rate_limit_model_nudge = true");
@@ -851,7 +854,7 @@ test("CLI Codex agent artifacts omit unsupported color fields", async () => {
 	const stderr = await new Response(command.stderr).text();
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
-	expect(stdout).toContain('model = "gpt-5.3-codex"');
+	expect(stdout).toContain('model = "gpt-5.5"');
 	expect(stdout).not.toContain("color =");
 });
 

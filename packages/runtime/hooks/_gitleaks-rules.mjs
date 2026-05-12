@@ -1,6 +1,6 @@
 // biome-ignore-all lint: synced upstream Gitleaks rule payload
 // biome-ignore-all format: synced upstream Gitleaks rule payload
-// Synced from third_party/gitleaks/config/gitleaks.toml plus patches/gitleaks-oal-rules.patch
+// Synced from third_party/gitleaks/config/gitleaks.toml plus patches/gitleaks-toml.patch
 // Run: bun scripts/sync-gitleaks-rules.mjs
 
 export const GITLEAKS_RULES = [

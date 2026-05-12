@@ -11,7 +11,7 @@ const upstreamConfigPath = join(
 	root,
 	"third_party/gitleaks/config/gitleaks.toml",
 );
-const patchPath = join(root, "patches/gitleaks-oal-rules.patch");
+const patchPath = join(root, "patches/gitleaks-toml.patch");
 const outputPath = join(root, "packages/runtime/hooks/_gitleaks-rules.mjs");
 const check = process.argv.includes("--check");
 const RULE_SPLIT_PATTERN = /^\[\[rules\]\]\s*$/m;
@@ -121,5 +121,5 @@ function convertPattern(source) {
 }
 
 function renderRules(rules) {
-	return `// biome-ignore-all lint: synced upstream Gitleaks rule payload\n// biome-ignore-all format: synced upstream Gitleaks rule payload\n// Synced from third_party/gitleaks/config/gitleaks.toml plus patches/gitleaks-oal-rules.patch\n// Run: bun scripts/sync-gitleaks-rules.mjs\n\nexport const GITLEAKS_RULES = ${JSON.stringify(rules, undefined, "\t")};\n`;
+	return `// biome-ignore-all lint: synced upstream Gitleaks rule payload\n// biome-ignore-all format: synced upstream Gitleaks rule payload\n// Synced from third_party/gitleaks/config/gitleaks.toml plus patches/gitleaks-toml.patch\n// Run: bun scripts/sync-gitleaks-rules.mjs\n\nexport const GITLEAKS_RULES = ${JSON.stringify(rules, undefined, "\t")};\n`;
 }

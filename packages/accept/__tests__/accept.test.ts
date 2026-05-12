@@ -2,8 +2,8 @@ import { expect, test } from "bun:test";
 import { resolve } from "node:path";
 import { buildRoadmapEvidence } from "../src";
 import { assertCodebaseShape } from "../src/codebase-shape";
-import { assertCodexTomlSchema } from "../src/config-schema";
 import { assertCodexUpstreamPatch } from "../src/codex-upstream";
+import { assertCodexTomlSchema } from "../src/config-schema";
 import {
 	assertRtkGainPolicyFixtures,
 	assertRtkGainThreshold,
@@ -60,6 +60,14 @@ test("Codex config schema requires cheap memory extraction model", () => {
 	expect(() =>
 		assertCodexTomlSchema(config.replace("gpt-5.4-mini", "gpt-5.5")),
 	).toThrow("Codex memories.extract_model must use gpt-5.4-mini");
+	expect(() =>
+		assertCodexTomlSchema(
+			config.replace(
+				'model_verbosity = "low"',
+				'plan_mode_reasoning_effort = "xhigh"\nmodel_verbosity = "low"',
+			),
+		),
+	).toThrow("unsupported plan reasoning effort xhigh");
 });
 
 test("RTK gain parser reads current-style percentage output", () => {

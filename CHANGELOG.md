@@ -204,8 +204,7 @@ material only and is not part of the OAL release line.
 - Reworked generated agent prompts into role-based senior-peer prompts instead
   of generic product-branded agent prose.
 - Balanced Codex profile and agent reasoning effort across Plus, Pro 5x, and
-  Pro 20x plans, with `xhigh` reserved for rare high-risk review/security
-  roles.
+  Pro 20x plans, keeping generated reasoning between low and high.
 - Removed Codex feature inline reason comments from generated config output.
 - Removed stale prompt-skill language that blocked stronger prompt pressure.
 - Deep-merged provider JSON config during deploy so plugin/settings updates
@@ -273,9 +272,10 @@ material only and is not part of the OAL release line.
 
 ### Changed
 
-- Codex generated profiles now set `model_reasoning_effort` from the selected
-  Codex subscription plan: Pro 5x uses medium lead/high code, and Pro 20x uses
-  high lead/high code with medium utility.
+- Codex generated profiles now keep plan-mode and edit-mode reasoning separate:
+  orchestration profiles use `gpt-5.5`, implementation profiles use
+  `gpt-5.3-codex`, utility profiles use `gpt-5.4-mini`, and generated
+  reasoning never uses xhigh.
 - Kept low-level `--plan` as a compatibility option while making high-level
   setup use provider-specific plan flags.
 
@@ -407,8 +407,8 @@ material only and is not part of the OAL release line.
 
 ### Changed
 
-- Kept Codex model plans inside OAL's allowed `gpt-5.5`, `gpt-5.4-mini`, and
-  `gpt-5.3-codex` policy.
+- Kept Codex model plans inside OAL's allowed `gpt-5.5` intelligence,
+  `gpt-5.3-codex` worker, and `gpt-5.4-mini` utility policy.
 - Kept Claude model plans on `claude-opus-4-6`, `claude-opus-4-6[1m]`,
   `claude-sonnet-4-6`, and `claude-haiku-4-5`, with the 1M Opus route limited
   to the explicit long-context plan.
@@ -600,8 +600,8 @@ material only and is not part of the OAL release line.
   instead of guessing, scaffolding, or approximating behavior.
 - Switched Claude model routing to `claude-opus-4-6`,
   `claude-opus-4-6[1m]`, `claude-sonnet-4-6`, and `claude-haiku-4-5`.
-- Kept Codex routing limited to `gpt-5.5`, `gpt-5.4-mini`, and
-  `gpt-5.3-codex`.
+- Kept Codex routing limited to `gpt-5.5` intelligence roles,
+  `gpt-5.3-codex` worker roles, and `gpt-5.4-mini` utility profiles.
 - Updated CI/CD and Homebrew release checks so guarded release paths run only
   after quality gates and dry-run deployment checks.
 

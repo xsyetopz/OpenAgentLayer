@@ -19,7 +19,7 @@ artifact is present so the admin-enforced install step is not hidden.
 
 OAL renders `.codex/openagentlayer/codex-base-instructions.md` from upstream
 `openai/codex` base instructions plus the tracked OAL patch in
-`patches/openai-codex-base-instructions-reddit.patch`, then points
+`patches/openai-codex-base-instructions-default-md.patch`, then points
 `model_instructions_file` at that patched file.
 Generated Codex config also includes
 `#:schema https://developers.openai.com/codex/config-schema.json`.

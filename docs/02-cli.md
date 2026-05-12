@@ -60,7 +60,8 @@ bun run preview -- --provider claude --plan max-20-long
 bun run preview -- --provider opencode --plan opencode-auto
 ```
 
-Codex plan mode and edit mode are separate. OAL uses Codex values `none`,
-`low`, `medium`, `high`, and `xhigh`; `minimal` is not a Codex effort value.
-Default, Plus, and Pro-5 profiles avoid `gpt-5.5`; Pro-20 maps `gpt-5.5` to
-high and avoids xhigh by default to protect weekly quota.
+Codex plan mode and edit mode are separate. OAL renders Codex reasoning values
+from `low` through `high`; `minimal` is not a Codex effort value, and `xhigh`
+is not emitted. Generated Codex profiles use `gpt-5.5` for orchestration and
+semantic planning/observation, while implementation workers stay on
+`gpt-5.3-codex` and utility/light subagent profiles use `gpt-5.4-mini`.

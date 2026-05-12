@@ -33,7 +33,7 @@
     "document-plain"
   ],
   "models": {
-    "codex": "gpt-5.4-mini",
+    "codex": "gpt-5.5",
     "claude": "claude-haiku-4-5",
     "opencode": "anthropic/claude-haiku-4-5"
   },

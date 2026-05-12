@@ -131,11 +131,11 @@ oal codex peer batch --dry-run "investigate, implement, validate, and review"
 
 OAL applies subscription-specific model and reasoning choices instead of giving every generated agent the same model. Use `--plan` with `preview`, `render`, `deploy`, or `plugins`.
 
-| Provider    | Plans                                             | Notes                                                                                                                                                             |
-| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`; default, Plus, and Pro-5 avoid `gpt-5.5`, while Pro-20 uses `gpt-5.5` high without defaulting to xhigh. |
-| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                                                                           |
-| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.                                                           |
+| Provider    | Plans                                             | Notes                                                                                                                                                                                                              |
+| ----------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses `gpt-5.5` for intelligence/orchestration, `gpt-5.3-codex` for worker/code-writing roles, and `gpt-5.4-mini` for utility/light subagent profiles; generated reasoning stays between low and high, never xhigh. |
+| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                                                                                                                            |
+| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.                                                                                                            |
 
 Examples:
 

@@ -26,11 +26,11 @@ const TOML_INTEGER_PATTERN = /^\d+$/;
 const ALLOWED_CODEX_MODELS = new Set([
 	"gpt-5.5",
 	"gpt-5.4-mini",
-	"gpt-5.2",
 	"gpt-5.3-codex",
 ]);
 const ALLOWED_APPROVAL_POLICIES = new Set(["on-request", "never"]);
 const ALLOWED_SANDBOX_MODES = new Set(["workspace-write", "read-only"]);
+const ALLOWED_CODEX_REASONING_EFFORTS = new Set(["low", "medium", "high"]);
 const ALLOWED_CODEX_FEATURES = new Set([
 	"steer",
 	"apps",
@@ -107,6 +107,20 @@ export function assertCodexTomlSchema(toml: string): void {
 		if (profile.model_verbosity && profile.model_verbosity !== "low")
 			throw new Error(
 				`Codex profile ${profileName} has unsupported verbosity ${profile.model_verbosity}`,
+			);
+		if (
+			profile.plan_mode_reasoning_effort &&
+			!ALLOWED_CODEX_REASONING_EFFORTS.has(profile.plan_mode_reasoning_effort)
+		)
+			throw new Error(
+				`Codex profile ${profileName} has unsupported plan reasoning effort ${profile.plan_mode_reasoning_effort}`,
+			);
+		if (
+			profile.model_reasoning_effort &&
+			!ALLOWED_CODEX_REASONING_EFFORTS.has(profile.model_reasoning_effort)
+		)
+			throw new Error(
+				`Codex profile ${profileName} has unsupported model reasoning effort ${profile.model_reasoning_effort}`,
 			);
 	}
 	for (const [profileName, features] of Object.entries(parsed.features)) {

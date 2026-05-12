@@ -93,7 +93,10 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				["guardian", "subagent"].join("_"),
 			])
 				rejectIncludes(config, forbidden, "Codex config");
-			const requirements = artifact(".codex/requirements.toml", artifacts).content;
+			const requirements = artifact(
+				".codex/requirements.toml",
+				artifacts,
+			).content;
 			requireIncludes(requirements, "[features]", "Codex requirements");
 			requireIncludes(requirements, "hooks = true", "Codex requirements");
 			requireIncludes(requirements, "[hooks]", "Codex requirements");
@@ -149,7 +152,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			);
 			requireIncludes(
 				baseInstructions,
-				"session-complete handoff",
+				"session-complete\nhandoff",
 				"Codex base instructions",
 			);
 			requireIncludes(
@@ -164,7 +167,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			);
 			requireIncludes(
 				baseInstructions,
-				"Keep review output findings-only and bounded",
+				"Keep review output findings-only\nand bounded",
 				"Codex base instructions",
 			);
 			requireIncludes(

@@ -17,7 +17,14 @@ test("policy rejects forbidden Codex models", async () => {
 			report.issues.some((issue) => issue.code === "model-allowlist"),
 		).toBe(true);
 	}
-	firstAgent.models.codex = "gpt-5.2";
+	for (const model of ["gpt-5.2"]) {
+		firstAgent.models.codex = model;
+		const report = validateSourceGraph(candidate);
+		expect(
+			report.issues.some((issue) => issue.code === "model-allowlist"),
+		).toBe(true);
+	}
+	firstAgent.models.codex = "gpt-5.4-mini";
 	expect(validateSourceGraph(candidate).issues).toEqual([]);
 });
 

@@ -11,9 +11,9 @@ runtime; durable references live here as external links.
   `codex_hooks`. OAL now renders `.codex/requirements.toml` and acceptance
   checks reject `codex_hooks`.
 - **Base instructions should be patched, not replaced by local baseline text:**
-  OAL now reads upstream `openai/codex` base instructions from
-  `third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md`
-  and applies `patches/openai-codex-base-instructions-reddit.patch`.
+OAL now reads upstream `openai/codex` base instructions from
+`third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md`
+and applies `patches/openai-codex-base-instructions-default-md.patch`.
 - **Agents run tests too eagerly:** the Codex base patch tells agents not to run
   tests, type checks, builds, browser automation, simulator launches, or full
   validation suites after every implementation step by default.
@@ -30,13 +30,12 @@ runtime; durable references live here as external links.
 - **Audit false positives waste review time:** the Codex base patch adds review
   guidance requiring conclusive, actionable findings and allowing a no-findings
   result.
-- **Reasoning effort has a real quality/cost curve:** OAL avoids xhigh by
-  default because the research and local usage evidence show that heavy
-  reasoning can burn weekly quota quickly. Default, Plus, and Pro-5 generated
-  Codex agents avoid `gpt-5.5` and stay on `gpt-5.3-codex`/`gpt-5.4-mini`.
-  Pro-20 reserves `gpt-5.5` at high effort for quality work without making
-  xhigh the default. The unplanned primary Codex profile also avoids
-  `gpt-5.5`.
+- **Reasoning effort has a real quality/cost curve:** OAL does not emit xhigh
+  because the research and local usage evidence show that heavy reasoning can
+  burn weekly quota quickly. Generated Codex agents now use `gpt-5.5` for
+  intelligence-heavy orchestration, planning, review, and observation roles,
+  code-writing workers stay on `gpt-5.3-codex`, and utility/light subagent
+  profiles keep `gpt-5.4-mini`.
 - **Local weekly usage evidence:** the local Codex state database showed the
   fastest weekly drain came from `gpt-5.5` medium sessions, including 45
   threads and about 2.66B tokens in week `2026-18`, plus 12 threads and about

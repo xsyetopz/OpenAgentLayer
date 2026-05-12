@@ -48,7 +48,7 @@ export function instructions(
 	sourceRoutes: RouteRecord[],
 	provider: Provider,
 ): string {
-	return renderTemplate(source, "instructions", {
+	const rendered = renderTemplate(source, "instructions", {
 		provider,
 		routes: sourceRoutes
 			.filter((route) => route.providers.includes(provider))
@@ -58,6 +58,12 @@ export function instructions(
 			)
 			.join("\n"),
 	});
+	if (provider !== "codex") return rendered;
+	return `${rendered}
+
+## Codex Base Instructions
+
+- \`.codex/openagentlayer/codex-base-instructions.md\` is rendered from upstream \`openai/codex\` \`default.md\` plus the tracked OAL patch; treat it as the Codex base-instruction surface for this AGENTS.md block.`;
 }
 
 export function camelCase(text: string): string {

@@ -37,8 +37,7 @@ const CODEX_FEATURES = [
 const CODEX_MANAGED_HOOK_DIR_PLACEHOLDER = "__OAL_CODEX_MANAGED_HOOK_DIR__";
 const CODEX_BASE_INSTRUCTIONS_PATH =
 	"third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md";
-const CODEX_OAL_BASE_SECTION_PATH =
-	"source/prompts/codex-base-oal-section.md";
+const CODEX_OAL_BASE_SECTION_PATH = "source/prompts/codex-base-oal-section.md";
 
 export async function renderCodex(
 	source: OalSource,
@@ -225,8 +224,8 @@ interface CodexProfileConfig {
 	model: string;
 	approvalPolicy: "never" | "on-request";
 	sandboxMode: "read-only" | "workspace-write";
-	planReasoningEffort?: "none" | "low" | "medium" | "high" | "xhigh";
-	modelReasoningEffort?: "none" | "low" | "medium" | "high" | "xhigh";
+	planReasoningEffort?: "low" | "medium" | "high";
+	modelReasoningEffort?: "low" | "medium" | "high";
 	toolsViewImage?: boolean;
 }
 
@@ -265,27 +264,27 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 	switch (plan) {
 		case "plus":
 			return {
-				primaryModel: "gpt-5.3-codex",
+				primaryModel: "gpt-5.5",
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
-				plan: "low",
+				plan: "medium",
 				model: "medium",
-				implementPlan: "medium",
+				implementPlan: "low",
 				implementModel: "medium",
 				utilityPlan: "low",
 				utilityModel: "low",
 			};
 		case "pro-5":
 			return {
-				primaryModel: "gpt-5.3-codex",
+				primaryModel: "gpt-5.5",
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
-				model: "high",
+				model: "medium",
 				implementPlan: "medium",
 				implementModel: "high",
 				utilityPlan: "low",
-				utilityModel: "low",
+				utilityModel: "medium",
 			};
 		case "pro-20":
 			return {
@@ -293,15 +292,15 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
-				model: "high",
+				model: "medium",
 				implementPlan: "medium",
 				implementModel: "high",
-				utilityPlan: "medium",
+				utilityPlan: "low",
 				utilityModel: "medium",
 			};
 		default:
 			return {
-				primaryModel: "gpt-5.3-codex",
+				primaryModel: "gpt-5.5",
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 			};

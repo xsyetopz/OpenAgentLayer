@@ -143,6 +143,9 @@ function assertRouteArtifacts(artifacts: Artifact[]): void {
 		"Source of truth:",
 		"Change source:",
 		"Context budget:",
+		"Codex Base Instructions",
+		".codex/openagentlayer/codex-base-instructions.md",
+		"upstream `openai/codex` `default.md`",
 	])
 		if (!codexInstructions.content.includes(term))
 			throw new Error(`Codex AGENTS.md missing reload contract \`${term}\``);
@@ -232,13 +235,17 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
 		"# <<< oal codex <<<",
 	]);
-	assertArtifact(".codex/openagentlayer/codex-base-instructions.md", artifacts, [
-		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
-		"OAL and RTK project surfaces",
-		"rtk proxy -- <command>",
-		"Code review and audits",
-		"Unknown or potentially large command output must be bounded before it reaches context.",
-	]);
+	assertArtifact(
+		".codex/openagentlayer/codex-base-instructions.md",
+		artifacts,
+		[
+			"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+			"OAL and RTK project surfaces",
+			"rtk proxy -- <command>",
+			"Code review and audits",
+			"Unknown or potentially large command output must be bounded before it reaches context.",
+		],
+	);
 	assertArtifact("opencode.jsonc", artifacts, [
 		"// >>> oal opencode >>>",
 		"// Source: config:opencode",
