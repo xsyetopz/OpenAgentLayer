@@ -60,25 +60,25 @@ Pick commands that match touched areas.
 ```bash
 bunx tsc --noEmit
 bun run test
-bun run accept
+bun run oal:accept
 bun run biome:check
 ```
 
 ### Generated output and deploy behavior
 
 ```bash
-bun run check
-bun run preview -- --provider all
-bun run preview -- --provider codex --path .codex/config.toml --content
-bun run deploy -- --target /tmp/oal-check --scope project --provider all --dry-run
-bun run plugins -- --home /tmp/oal-home --provider all --dry-run
+bun run oal:check
+bun run oal:preview -- --provider all
+bun run oal:preview -- --provider codex --path .codex/config.toml --content
+bun run oal:deploy -- --target /tmp/oal-check --scope project --provider all --dry-run
+bun run oal:plugins -- --home /tmp/oal-home --provider all --dry-run
 ```
 
 ### Release surfaces
 
 ```bash
 ruby -c homebrew/Casks/openagentlayer.rb
-bun run roadmap:evidence
+bun run oal:roadmap:evidence
 ```
 
 ### Product naming audit
@@ -134,7 +134,7 @@ Without those values, CI skips submission after required checks pass.
 - [ ] Scope is focused.
 - [ ] `bunx tsc --noEmit` passes when TypeScript changed.
 - [ ] `bun run test` passes when behavior changed.
-- [ ] `bun run accept` passes for generator, deployer, provider, hook, or policy
+- [ ] `bun run oal:accept` passes for generator, deployer, provider, hook, or policy
       changes.
 - [ ] Generated previews or dry-runs were inspected for source/render changes.
 - [ ] Homebrew cask syntax passes for release-surface changes.

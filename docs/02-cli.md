@@ -6,9 +6,9 @@ Run commands from a source checkout with `bun run <script> -- ...`, or use
 ## Safe First Commands
 
 ```bash
-bun run check
-bun run preview -- --provider all
-bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
+bun run oal:check
+bun run oal:preview -- --provider all
+bun run oal:deploy -- --target /path/to/project --scope project --provider all --dry-run
 ```
 
 Apply deploy only after the dry-run paths match the target you expect.
@@ -55,9 +55,9 @@ The report groups weekly usage by Codex `thread_source`, model, and reasoning ef
 Use plan flags when rendering subscription-specific model routes:
 
 ```bash
-bun run preview -- --provider codex --plan pro-20
-bun run preview -- --provider claude --plan max-20-long
-bun run preview -- --provider opencode --plan opencode-auto
+bun run oal:preview -- --provider codex --plan pro-20
+bun run oal:preview -- --provider claude --plan max-20-long
+bun run oal:preview -- --provider opencode --plan opencode-auto
 ```
 
 Codex plan mode and edit mode are separate. OAL renders Codex reasoning values

@@ -12,10 +12,10 @@ git clone https://github.com/xsyetopz/OpenAgentLayer.git
 cd OpenAgentLayer
 git submodule update --init --recursive
 bun install --frozen-lockfile
-bun run check
+bun run oal:check
 ```
 
-`bun run check` loads authored source, validates product policy, and proves that
+`bun run oal:check` loads authored source, validates product policy, and proves that
 provider artifacts can render.
 
 ## Convenience Install
@@ -36,7 +36,7 @@ cleans up the temporary clone.
 Preview the toolchain plan before applying it:
 
 ```bash
-bun run toolchain -- --os macos --optional ctx7,anthropic-docs,opencode-docs
+bun run oal:toolchain -- --os macos --optional ctx7,anthropic-docs,opencode-docs
 bun run setup -- --scope global --provider all --toolchain --dry-run
 ```
 

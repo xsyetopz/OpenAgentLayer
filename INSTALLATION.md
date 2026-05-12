@@ -32,8 +32,8 @@ OAL expects:
 Recommended toolchain plan:
 
 ```bash
-bun run toolchain -- --os macos --optional ctx7,playwright,anthropic-docs,opencode-docs
-bun run toolchain -- --os linux --pkg apt --optional ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:toolchain -- --os macos --optional ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:toolchain -- --os linux --pkg apt --optional ctx7,playwright,anthropic-docs,opencode-docs
 ```
 
 The plan prints copy-safe `bash` blocks. Paste command lines without Markdown list bullets.
@@ -63,14 +63,14 @@ git clone https://github.com/xsyetopz/OpenAgentLayer.git
 cd OpenAgentLayer
 git submodule update --init --recursive
 bun install --frozen-lockfile
-bun run check
+bun run oal:check
 ```
 
 Preview generated provider artifacts:
 
 ```bash
-bun run preview -- --provider all
-bun run preview -- --provider codex --path .codex/config.toml --content
+bun run oal:preview -- --provider all
+bun run oal:preview -- --provider codex --path .codex/config.toml --content
 ```
 
 Plan the full setup flow without writing:
@@ -138,8 +138,8 @@ The interactive path uses Commander-parsed commands plus Clack prompts. It cover
 Optional feature commands can be printed separately:
 
 ```bash
-bun run features -- --install ctx7,playwright,anthropic-docs,opencode-docs
-bun run features -- --remove ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:features -- --install ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:features -- --remove ctx7,playwright,anthropic-docs,opencode-docs
 ```
 
 Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration. `anthropic-docs` and `opencode-docs` are normal OAL-owned MCP servers registered with provider MCP commands and served by `oal mcp serve`.
@@ -159,15 +159,15 @@ Profiles preserve reusable setup choices in `~/.openagentlayer/config.json` by d
 Save and activate a profile:
 
 ```bash
-bun run profiles -- save global --scope global --provider opencode,codex --optional ctx7,opencode-docs --codex-plan pro-20 --opencode-plan opencode-free --activate
+bun run oal:profiles -- save global --scope global --provider opencode,codex --optional ctx7,opencode-docs --codex-plan pro-20 --opencode-plan opencode-free --activate
 ```
 
 Inspect available profiles:
 
 ```bash
-bun run profiles -- list
-bun run profiles -- show global
-bun run profiles -- args global
+bun run oal:profiles -- list
+bun run oal:profiles -- show global
+bun run oal:profiles -- args global
 ```
 
 Use a profile with setup:
@@ -179,8 +179,8 @@ bun run setup -- --profile global --dry-run
 Inspect what OAL can apply or remove for the active profile:
 
 ```bash
-bun run state -- inspect
-bun run state -- inspect --profile global --json
+bun run oal:state -- inspect
+bun run oal:state -- inspect --profile global --json
 ```
 
 `state inspect` reports requested providers, provider binaries available in `PATH`, skipped provider reasons, deploy write/update/skip counts, owned-manifest removal eligibility, optional feature command counts, and the setup argument vector selected from the profile.
@@ -190,16 +190,16 @@ bun run state -- inspect --profile global --json
 User-level plugin sync writes provider-native plugin payloads into provider homes. Always inspect the dry-run first:
 
 ```bash
-bun run plugins -- --home "$HOME" --provider all --dry-run
-bun run plugins -- --home "$HOME" --provider all
+bun run oal:plugins -- --home "$HOME" --provider all --dry-run
+bun run oal:plugins -- --home "$HOME" --provider all
 ```
 
 Provider-specific dry-runs:
 
 ```bash
-bun run plugins -- --home "$HOME" --provider codex --dry-run
-bun run plugins -- --home "$HOME" --provider claude --dry-run
-bun run plugins -- --home "$HOME" --provider opencode --dry-run
+bun run oal:plugins -- --home "$HOME" --provider codex --dry-run
+bun run oal:plugins -- --home "$HOME" --provider claude --dry-run
+bun run oal:plugins -- --home "$HOME" --provider opencode --dry-run
 ```
 
 Claude Code plugin metadata lives under `.claude-plugin/` and the Claude plugin root. Codex plugin metadata lives under `.codex-plugin/` and the Codex marketplace entry. OpenCode plugin metadata lives under `plugins/opencode/openagentlayer/` and generated project plugin files.
@@ -209,21 +209,21 @@ Claude Code plugin metadata lives under `.claude-plugin/` and the Claude plugin 
 Project deploy renders provider-native artifacts and writes OAL ownership metadata into the target project. Dry-run first:
 
 ```bash
-bun run deploy -- --target /path/to/project --scope project --provider all --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider all --dry-run
 ```
 
 Apply all providers:
 
 ```bash
-bun run deploy -- --target /path/to/project --scope project --provider all
+bun run oal:deploy -- --target /path/to/project --scope project --provider all
 ```
 
 Apply one provider:
 
 ```bash
-bun run deploy -- --target /path/to/project --scope project --provider codex
-bun run deploy -- --target /path/to/project --scope project --provider claude
-bun run deploy -- --target /path/to/project --scope project --provider opencode
+bun run oal:deploy -- --target /path/to/project --scope project --provider codex
+bun run oal:deploy -- --target /path/to/project --scope project --provider claude
+bun run oal:deploy -- --target /path/to/project --scope project --provider opencode
 ```
 
 Generated files that support comments include OAL managed markers. Edit `source/` and rerender instead of editing generated files directly.
@@ -233,22 +233,22 @@ Generated files that support comments include OAL managed markers. Edit `source/
 Global deploy writes provider-native artifacts under the selected home directory. It also installs an owned source-checkout `oal` shim into `$HOME/.local/bin/oal` unless `--skip-bin` is passed. Dry-run first:
 
 ```bash
-bun run deploy -- --scope global --provider all --dry-run
-bun run deploy -- --scope global --provider all --dry-run --verbose
+bun run oal:deploy -- --scope global --provider all --dry-run
+bun run oal:deploy -- --scope global --provider all --dry-run --verbose
 ```
 
 Apply all providers:
 
 ```bash
-bun run deploy -- --scope global --provider all
+bun run oal:deploy -- --scope global --provider all
 ```
 
 Apply one provider:
 
 ```bash
-bun run deploy -- --scope global --provider codex
-bun run deploy -- --scope global --provider claude
-bun run deploy -- --scope global --provider opencode
+bun run oal:deploy -- --scope global --provider codex
+bun run oal:deploy -- --scope global --provider claude
+bun run oal:deploy -- --scope global --provider opencode
 ```
 
 Use `--home /path/to/home` for fixture installs or non-default provider homes. OAL records global ownership under `.openagentlayer/manifest/global/` in that home.
@@ -276,24 +276,24 @@ Model plans are optional. Without a plan, OAL uses cost-balanced Codex profile d
 Codex plans:
 
 ```bash
-bun run deploy -- --target /path/to/project --scope project --provider codex --plan plus --dry-run
-bun run deploy -- --target /path/to/project --scope project --provider codex --plan pro-5 --dry-run
-bun run deploy -- --target /path/to/project --scope project --provider codex --plan pro-20 --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider codex --plan plus --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider codex --plan pro-5 --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider codex --plan pro-20 --dry-run
 ```
 
 Claude Code plans:
 
 ```bash
-bun run deploy -- --target /path/to/project --scope project --provider claude --plan max-5 --dry-run
-bun run deploy -- --target /path/to/project --scope project --provider claude --plan max-20 --dry-run
-bun run deploy -- --target /path/to/project --scope project --provider claude --plan max-20-long --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider claude --plan max-5 --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider claude --plan max-20 --dry-run
+bun run oal:deploy -- --target /path/to/project --scope project --provider claude --plan max-20-long --dry-run
 ```
 
 OpenCode plans:
 
 ```bash
-bun run preview -- --provider opencode --plan opencode-auto --path opencode.jsonc --content
-bun run preview -- --provider opencode --plan opencode-free --path opencode.jsonc --content
+bun run oal:preview -- --provider opencode --plan opencode-auto --path opencode.jsonc --content
+bun run oal:preview -- --provider opencode --plan opencode-free --path opencode.jsonc --content
 ```
 
 `opencode-auto` runs `opencode models` and uses authenticated allowed models when available. If `opencode models` is unavailable, it falls back to OAL's free OpenCode set. Use `opencode-auth` when fallback should be an error.
@@ -302,7 +302,7 @@ For reproducible dry-runs:
 
 ```bash
 opencode models > /tmp/opencode-models.txt
-bun run preview -- --provider opencode --plan opencode-auto --opencode-models-file /tmp/opencode-models.txt --path opencode.jsonc --content
+bun run oal:preview -- --provider opencode --plan opencode-auto --opencode-models-file /tmp/opencode-models.txt --path opencode.jsonc --content
 ```
 
 ## Verify the install
@@ -311,8 +311,8 @@ Source checkout validation:
 
 ```bash
 rtk bun run test
-rtk bun run accept
-rtk proxy -- bun run accept
+rtk bun run oal:accept
+rtk proxy -- bun run oal:accept
 rtk bun run biome:check
 rtk bunx tsc --noEmit
 ```
@@ -328,7 +328,7 @@ oal toolchain --os macos --optional ctx7,anthropic-docs,opencode-docs
 RTK policy check:
 
 ```bash
-bun run rtk-gain -- --allow-empty-history
+bun run oal:rtk-gain -- --allow-empty-history
 ```
 
 ## Uninstall
@@ -336,23 +336,23 @@ bun run rtk-gain -- --allow-empty-history
 Uninstall removes OAL-owned artifacts for one provider. It does not accept `all` because each provider should be removed deliberately.
 
 ```bash
-bun run uninstall -- --target /path/to/project --scope project --provider codex
-bun run uninstall -- --target /path/to/project --scope project --provider claude
-bun run uninstall -- --target /path/to/project --scope project --provider opencode
-bun run uninstall -- --scope global --provider codex
-bun run uninstall -- --scope global --provider claude
-bun run uninstall -- --scope global --provider opencode
+bun run oal:uninstall -- --target /path/to/project --scope project --provider codex
+bun run oal:uninstall -- --target /path/to/project --scope project --provider claude
+bun run oal:uninstall -- --target /path/to/project --scope project --provider opencode
+bun run oal:uninstall -- --scope global --provider codex
+bun run oal:uninstall -- --scope global --provider claude
+bun run oal:uninstall -- --scope global --provider opencode
 ```
 
 After project uninstall, inspect the target project's git status. User-owned files and user-authored blocks should remain.
 
 ## Troubleshooting
 
-| Symptom                                           | Check                                                                                          |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `bun run check` fails on missing upstream skills. | Run `git submodule update --init --recursive`.                                                 |
-| Preview shows stale provider output.              | Edit `source/`, not generated artifacts, then rerun `bun run preview -- --provider all`.       |
-| Deploy wants to touch unexpected paths.           | Stop and inspect `--dry-run` output before applying.                                           |
-| Codex sessions do not show OAL instructions.      | Confirm `.codex/AGENTS.md` exists and the generated profile is active in `.codex/config.toml`. |
-| OpenCode tools fail to load.                      | Confirm dependencies include `@opencode-ai/plugin` and rerun `bun install --frozen-lockfile`.  |
-| RTK gain fails in local release checks.           | Run RTK-wrapped commands, then rerun `bun run rtk-gain -- --allow-empty-history`.              |
+| Symptom                                               | Check                                                                                          |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `bun run oal:check` fails on missing upstream skills. | Run `git submodule update --init --recursive`.                                                 |
+| Preview shows stale provider output.                  | Edit `source/`, not generated artifacts, then rerun `bun run oal:preview -- --provider all`.   |
+| Deploy wants to touch unexpected paths.               | Stop and inspect `--dry-run` output before applying.                                           |
+| Codex sessions do not show OAL instructions.          | Confirm `.codex/AGENTS.md` exists and the generated profile is active in `.codex/config.toml`. |
+| OpenCode tools fail to load.                          | Confirm dependencies include `@opencode-ai/plugin` and rerun `bun install --frozen-lockfile`.  |
+| RTK gain fails in local release checks.               | Run RTK-wrapped commands, then rerun `bun run oal:rtk-gain -- --allow-empty-history`.          |

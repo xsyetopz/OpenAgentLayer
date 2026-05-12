@@ -2,9 +2,9 @@ name: OAL CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   contents: read
@@ -58,11 +58,11 @@ jobs:
       - name: Test
         run: rtk proxy -- bun run test
       - name: Acceptance
-        run: rtk proxy -- bun run accept
+        run: rtk proxy -- bun run oal:accept
       - name: RTK gain policy
         run: |
           printf "%s\n" "$OAL_RTK_GAIN_FIXTURE" > "$RUNNER_TEMP/oal-rtk-gain.txt"
-          rtk proxy -- bun run rtk-gain -- --from-file "$RUNNER_TEMP/oal-rtk-gain.txt" --allow-empty-history
+          rtk proxy -- bun run oal:rtk-gain -- --from-file "$RUNNER_TEMP/oal-rtk-gain.txt" --allow-empty-history
         env:
           OAL_RTK_GAIN_FIXTURE: |
             Total commands:    1
@@ -70,7 +70,7 @@ jobs:
       - name: Lint
         run: rtk proxy -- bun run biome:check
       - name: Roadmap evidence
-        run: rtk proxy -- bun run roadmap:evidence
+        run: rtk proxy -- bun run oal:roadmap:evidence
       - name: Homebrew cask syntax
         run: ruby -c homebrew/Casks/openagentlayer.rb
   dry-run:
@@ -108,14 +108,15 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Source check
-        run: rtk proxy -- bun run check
+        run: rtk proxy -- bun run oal:check
       - name: Preview generated artifacts
-        run: rtk proxy -- bun run preview -- --provider all --path .codex/config.toml
+        run:
+          rtk proxy -- bun run oal:preview -- --provider all --path .codex/config.toml
           --content
       - name: Deploy dry-run
         run: |
           target="$(mktemp -d)"
-          rtk proxy -- bun run deploy -- --target "$target" --scope project --provider all --dry-run
+          rtk proxy -- bun run oal:deploy -- --target "$target" --scope project --provider all --dry-run
       - name: Installed CLI smoke
         run: |
           smoke="$(mktemp -d)"
@@ -135,7 +136,7 @@ jobs:
   homebrew-submission:
     name: Homebrew submission
     runs-on: macos-15
-    needs: [ quality, dry-run ]
+    needs: [quality, dry-run]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
       github.repository == 'xsyetopz/OpenAgentLayer'
     env:

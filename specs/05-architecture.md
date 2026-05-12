@@ -343,7 +343,7 @@ The following states define the supported architecture:
 
 | Change                            | Owning paths                                           | Required validation                              |
 | --------------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
-| Source schema or record semantics | `packages/source`, `source/`, `packages/policy`        | source tests, `bun run check`, acceptance        |
+| Source schema or record semantics | `packages/source`, `source/`, `packages/policy`        | source tests, `bun run oal:check`, acceptance    |
 | Provider file output              | `packages/adapter`                                     | adapter tests, config parse fixtures, acceptance |
 | Hook policy                       | `packages/runtime/hooks`, `source/hooks`               | runtime hook tests, acceptance hook fixtures     |
 | Deploy or uninstall               | `packages/deploy`, `packages/manifest`                 | deploy tests, uninstall fixture, acceptance      |

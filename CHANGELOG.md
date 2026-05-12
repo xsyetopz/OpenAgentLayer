@@ -120,7 +120,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bunx tsc --noEmit`
 - `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts`
 - `rtk proxy -- bun run biome:check`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- bun run test`
 - `rtk git -C . diff --check`
 - `rtk git -C . submodule status --recursive`
@@ -139,7 +139,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun test packages/adapter/__tests__/adapter.test.ts`
 - `rtk proxy -- bun test packages/accept/__tests__/accept.test.ts`
 - `rtk proxy -- bun test tests/e2e.test.ts`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- bun run test`
 - `rtk git -C . diff --check`
 
@@ -164,7 +164,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bunx tsc --noEmit`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bun run test`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk git -C . diff --check`
 - `rtk git -C . submodule status --recursive`
 
@@ -188,7 +188,7 @@ material only and is not part of the OAL release line.
 - `rtk bunx tsc --noEmit`
 - `rtk bun run test:unit`
 - `rtk bun run test:e2e`
-- `rtk bun run accept`
+- `rtk bun run oal:accept`
 
 ## [0.1.3-beta.3] - 2026-05-03
 
@@ -203,7 +203,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bunx tsc --noEmit`
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
 
 ## [0.1.3-beta.2] - 2026-05-03
@@ -234,7 +234,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bunx tsc --noEmit`
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
 
 ## [0.1.3-beta.1] - 2026-05-03
@@ -254,7 +254,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bunx tsc --noEmit`
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
 
 ## [0.1.2-beta.13] - 2026-05-03
@@ -276,7 +276,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 - `rtk proxy -- ruby -c homebrew/Casks/openagentlayer.rb`
 
 ## [0.1.2-beta.12] - 2026-05-03
@@ -303,7 +303,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 
 ## [0.1.2-beta.11] - 2026-05-03
 
@@ -332,7 +332,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 
 ## [0.1.2-beta.10] - 2026-05-03
 
@@ -359,7 +359,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 
 ## [0.1.2-beta.9] - 2026-05-03
 
@@ -383,7 +383,7 @@ material only and is not part of the OAL release line.
 - `rtk proxy -- bun run test`
 - `rtk proxy -- bun run biome:check`
 - `rtk proxy -- bunx tsc --noEmit`
-- `rtk proxy -- bun run accept`
+- `rtk proxy -- bun run oal:accept`
 
 ## [0.1.2-beta.6] - 2026-05-03
 
@@ -404,9 +404,9 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -438,9 +438,9 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -465,9 +465,9 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -483,9 +483,9 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -500,16 +500,16 @@ material only and is not part of the OAL release line.
 ### Changed
 
 - Made acceptance's internal RTK gain CLI check fixture-backed so fresh CI
-  runner history cannot fail `bun run accept`.
+  runner history cannot fail `bun run oal:accept`.
 - Kept live `rtk-gain --allow-empty-history` strict for non-empty histories
   below the 80% threshold.
 
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -539,9 +539,9 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
-- `rtk proxy -- bun run accept`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:accept`
+- `rtk proxy -- bun run oal:accept`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 - `rtk bun run biome:check`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -564,11 +564,11 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
+- `rtk bun run oal:accept`
 - `rtk bunx biome check . --error-on-warnings --max-diagnostics 16384`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
-- `rtk bun run rtk-gain -- --allow-empty-history`
+- `rtk bun run oal:rtk-gain -- --allow-empty-history`
 
 ## [0.1.1-beta.4] - 2026-05-03
 
@@ -589,7 +589,7 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
+- `rtk bun run oal:accept`
 - `rtk bunx biome check . --error-on-warnings --max-diagnostics 16384`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`
@@ -637,7 +637,7 @@ material only and is not part of the OAL release line.
 ### Verified
 
 - `rtk bun run test`
-- `rtk bun run accept`
+- `rtk bun run oal:accept`
 - `rtk bunx biome check . --error-on-warnings --max-diagnostics 16384`
 - `rtk bunx tsc --noEmit`
 - `rtk ruby -c homebrew/Casks/openagentlayer.rb`

@@ -29,7 +29,7 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		[
 			"package.json:scripts.accept",
 			"packages/cli/src/main.ts:accept",
-			"bun run accept",
+			"bun run oal:accept",
 		],
 	],
 	[

@@ -29,7 +29,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		input: {
 			status: "complete",
 			finalResponse: "STATUS PASS",
-			validationEvidence: ["bun run accept"],
+			validationEvidence: ["bun run oal:accept"],
 		},
 		decision: "pass",
 	},

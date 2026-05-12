@@ -7,8 +7,6 @@
 		"packages/*"
 	],
 	"scripts": {
-		"check": "bunx biome check . --error-on-warnings --max-diagnostics 16384",
-		"format": "bunx biome format . --write --max-diagnostics 16384",
 		"biome:check": "bunx biome check . --error-on-warnings --max-diagnostics 16384",
 		"biome:check:fix": "bun run biome:check --write",
 		"biome:lint": "bunx biome lint . --max-diagnostics 16384",

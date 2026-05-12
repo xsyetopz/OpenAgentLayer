@@ -6,7 +6,7 @@ green command output with direct evidence for the required behavior.
 ## Required Command
 
 ```bash
-bun run accept
+bun run oal:accept
 ```
 
 The command MUST pass in a clean fixture root without relying on the developer
@@ -16,7 +16,7 @@ home directory for mutable fixture state.
 
 ```mermaid
 flowchart TD
-    Start[bun run accept] --> Source[load source graph]
+    Start[bun run oal:accept] --> Source[load source graph]
     Source --> Policy[policy validation]
     Policy --> Inventory[source and repository inventory]
     Inventory --> MessageStyle[message style]
@@ -166,5 +166,5 @@ requirement to concrete evidence:
 - hook fixture
 - release witness
 
-Passing `bun run accept` is required for release-grade work, but it is not a
+Passing `bun run oal:accept` is required for release-grade work, but it is not a
 substitute for checking that the specific user requirements were covered.

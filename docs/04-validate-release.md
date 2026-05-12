@@ -6,14 +6,14 @@ release or handoff.
 ## Core Checks
 
 ```bash
-bun run check
+bun run oal:check
 bun run test
-bun run accept
+bun run oal:accept
 bun run biome:check
 bunx tsc --noEmit
 ```
 
-`bun run accept` is the product gate. It covers source loading, policy, provider
+`bun run oal:accept` is the product gate. It covers source loading, policy, provider
 rendering, deploy fixtures, uninstall fixtures, hooks, plugin payloads,
 manifests, installed-state checks, release metadata, upstream Codex submodule
 metadata, the tracked Codex base-instruction patch artifact, and the Codex
@@ -29,7 +29,7 @@ OAL hooks prefer native RTK filters for supported commands:
 
 ```bash
 rtk gain
-bun run rtk-gain -- --allow-empty-history
+bun run oal:rtk-gain -- --allow-empty-history
 bun packages/cli/src/main.ts rtk-report --project "$PWD"
 ```
 
@@ -41,7 +41,7 @@ lacks a native RTK filter or the filtered output is not useful.
 Before a release, run:
 
 ```bash
-bun run accept
+bun run oal:accept
 bun run test
 bun run biome:check
 bunx tsc --noEmit
