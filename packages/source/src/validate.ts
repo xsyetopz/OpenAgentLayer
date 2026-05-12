@@ -201,10 +201,6 @@ export function validateProductSource(record: ProductSource): void {
 			record.promptTemplates.instructions,
 			"product promptTemplates.instructions",
 		);
-		requireText(
-			record.promptTemplates.codexBaseline,
-			"product promptTemplates.codexBaseline",
-		);
 	}
 }
 

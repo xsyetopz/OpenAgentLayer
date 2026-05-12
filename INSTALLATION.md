@@ -253,6 +253,12 @@ bun run deploy -- --scope global --provider opencode
 
 Use `--home /path/to/home` for fixture installs or non-default provider homes. OAL records global ownership under `.openagentlayer/manifest/global/` in that home.
 
+For Codex, global deploy writes `.codex/requirements.toml` as the managed-hook
+policy template. Codex itself only grants approval-free hooks from its managed
+requirements layer, so install the rendered requirements file into the
+environment's Codex managed requirements location when hooks must run without
+review prompts.
+
 If the binary directory is not in `PATH`, OAL prints the exact `export PATH=...` command. The current shell cannot see a newly available command until `PATH` is updated and the shell command cache is refreshed.
 
 Manage the source-checkout shim directly:
@@ -265,7 +271,7 @@ bun packages/cli/src/main.ts bin --remove
 
 ## Select model plans
 
-Model plans are optional. Without a plan, OAL uses the source record defaults. With a plan, OAL applies subscription-specific provider model and reasoning choices for each Greek agent. Codex renders `plan_mode_reasoning_effort` for plan mode and `model_reasoning_effort` for edit/implementation mode separately.
+Model plans are optional. Without a plan, OAL uses cost-balanced Codex profile defaults and source record defaults for generated agents. With a plan, OAL applies subscription-specific provider model and reasoning choices for each Greek agent. Codex renders `plan_mode_reasoning_effort` for plan mode and `model_reasoning_effort` for edit/implementation mode separately. Default, Plus, and Pro-5 profiles avoid `gpt-5.5`; Pro-20 uses `gpt-5.5` high without defaulting to xhigh.
 
 Codex plans:
 

@@ -151,42 +151,13 @@ test("provider instructions render inspection and correction discipline contract
 		const instructions = rendered.artifacts.find(
 			(artifact) => artifact.path === path,
 		)?.content;
-		expect(instructions).toContain("Repository inspection:");
-		expect(instructions).toContain("git ls-files");
-		expect(instructions).toContain("Context discipline:");
-		expect(instructions).toContain("classify the task area");
-		expect(instructions).toContain("unrelated directories unusual");
-		expect(instructions).toContain("Correction discipline:");
-		expect(instructions).toContain("verify before accepting a correction");
-		expect(instructions).toContain(
-			"Examples, corrections, suggested names, and partial ideas are input evidence for the requested behavior only",
-		);
-		expect(instructions).toContain(
-			"Treat inferred compatibility, aliases, fallbacks, extra behavior, guardrails, docs, and cleanup as out of scope",
-		);
-		expect(instructions).toContain("Delegation discipline:");
-		expect(instructions).toContain(
-			"broad implementation work starts with a delegation check",
-		);
-		expect(instructions).toContain("Continuity discipline:");
-		expect(instructions).toContain("Continuation Record");
-		expect(instructions).toContain(
-			"current user messages and verified repo evidence",
-		);
-		expect(instructions).toContain("instruction reload semantics");
-		expect(instructions).toContain("skills reload semantics");
-		expect(instructions).toContain("Keep stable invariants");
-		if (provider === "codex") {
-			expect(instructions).toContain("Instruction reload surface:");
-			expect(instructions).toContain("session-loaded project guidance");
-			expect(instructions).toContain("reads invoked skill bodies from disk");
-			expect(instructions).toContain(
-				"OAL defaults Codex orchestration to OpenDex/Symphony",
-			);
-			expect(instructions).toContain(
-				"The parent thread owns task split, child launch, evidence merge, and final decision",
-			);
-		}
+		expect(instructions).toContain("Source of truth:");
+		expect(instructions).toContain("Change source:");
+		expect(instructions).toContain("Provider-native behavior:");
+		expect(instructions).toContain("Context budget:");
+		expect(instructions).toContain("- implement:");
+		expect(instructions).not.toContain("Codex baseline");
+		expect(instructions).not.toContain("Instruction reload surface:");
 	}
 });
 
@@ -201,36 +172,14 @@ test("provider agents render inspection and correction discipline contracts", as
 		const agent = rendered.artifacts.find(
 			(artifact) => artifact.path === path,
 		)?.content;
-		expect(agent).toContain("Repository inspection:");
-		expect(agent).toContain("git ls-files");
-		expect(agent).toContain("Context discipline:");
-		expect(agent).toContain(
-			"name the owning package/module/route/provider surface",
-		);
-		expect(agent).toContain("Navigation order:");
-		expect(agent).toContain("Correction discipline:");
-		expect(agent).toContain("verify before accepting a correction");
-		expect(agent).toContain(
-			"examples, corrections, suggested names, and partial ideas are input evidence for the requested behavior only",
-		);
-		expect(agent).toContain(
-			"use bounded python3 rewrites for broad mechanical changes",
-		);
-		expect(agent).toContain(
-			"inferred compatibility enters only through explicit user request or controlling source requirement",
-		);
-		expect(agent).toContain("Delegation check:");
-		expect(agent).toContain(
-			"broad implementation work uses subagents or the orchestrate route",
-		);
-		expect(agent).toContain(
-			"narrow single-owner edits begin with a recorded solo ownership reason",
-		);
-		expect(agent).toContain("Continuity check:");
-		expect(agent).toContain("short user-visible Continuation Record");
-		expect(agent).toContain("instruction reload semantics");
-		expect(agent).toContain("skills reload semantics");
-		expect(agent).toContain("Keep stable invariants");
+		expect(agent).toContain("OAL peer for Production implementation");
+		expect(agent).toContain("Own routes: implement.");
+		expect(agent).toContain("Inspect controlling source only");
+		expect(agent).toContain("prefer concise evidence over repeated policy text");
+		expect(agent).toContain("## Prompt contract");
+		expect(agent).toContain("Inspect only source needed");
+		expect(agent).toContain("smallest current-state change");
+		expect(agent).toContain("Validate only when");
 		if (provider === "codex") {
 			expect(agent).toContain('name = "hephaestus"');
 			expect(agent).toContain("description = ");
@@ -302,6 +251,14 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	const config = rendered.artifacts.find(
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
+	expect(
+		config?.startsWith(
+			"#:schema https://developers.openai.com/codex/config-schema.json",
+		),
+	).toBe(true);
+	expect(config).toContain(
+		"#:schema https://developers.openai.com/codex/config-schema.json",
+	);
 	expect(config).not.toContain("zsh_path");
 	expect(config).not.toContain("codex_hooks");
 	expect(config).toContain('profile = "openagentlayer-symphony"');
@@ -309,7 +266,9 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("[profiles.openagentlayer-symphony.features]");
 	expect(config).toContain("[profiles.openagentlayer-symphony-implement]");
 	expect(config).toContain("[profiles.openagentlayer-symphony-utility]");
-	expect(config).not.toContain("model_instructions_file");
+	expect(config).toContain(
+		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+	);
 	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain('model_verbosity = "low"');
@@ -321,6 +280,37 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("max_threads = 1");
 	expect(config).toContain("job_max_runtime_seconds = 1800");
 	expect(config).toContain("[tui]");
+	const requirements = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/requirements.toml",
+	)?.content;
+	expect(requirements).toContain("[features]\nhooks = true");
+	expect(requirements).not.toContain("codex_hooks");
+	expect(requirements).toContain(
+		'managed_dir = "__OAL_CODEX_MANAGED_HOOK_DIR__"',
+	);
+	expect(requirements).toContain(
+		"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
+	);
+	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");
+	expect(requirements).toContain("OAL_HOOK_EVENT=PreToolUse");
+	const baseInstructions = rendered.artifacts.find(
+		(artifact) =>
+			artifact.path === ".codex/openagentlayer/codex-base-instructions.md",
+	)?.content;
+	expect(baseInstructions).toContain(
+		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+	);
+	expect(baseInstructions).toContain("OAL and RTK project surfaces");
+	expect(baseInstructions).toContain("rtk proxy -- <command>");
+	expect(baseInstructions).toContain("OAL parent-session quota guard");
+	expect(baseInstructions).toContain("oal codex-usage --project <path>");
+	expect(baseInstructions).toContain("session-complete handoff");
+	expect(baseInstructions).toContain("COMPLETE-complete");
+	expect(baseInstructions).toContain("Code review and audits");
+	expect(baseInstructions).toContain("Keep review output findings-only and bounded");
+	expect(baseInstructions).toContain(
+		"Unknown or potentially large command output must be bounded before it reaches context.",
+	);
 	for (const item of [
 		"model-with-reasoning",
 		"run-state",
@@ -348,18 +338,9 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	const instructions = rendered.artifacts.find(
 		(artifact) => artifact.path === "AGENTS.md",
 	)?.content;
-	expect(instructions).toContain("Subagent surface:");
-	expect(instructions).toContain(
-		"OAL defaults Codex orchestration to OpenDex/Symphony",
-	);
-	expect(instructions).toContain(
-		"`multi_agent_v2` uses its own `max_concurrent_threads_per_session` throttle",
-	);
-	expect(instructions).toContain(
-		"Operators can opt into stable `multi_agent` or `multi_agent_v2` through OAL CLI setup options",
-	);
-	expect(instructions).toContain("use `oal codex peer batch <task>`");
-	expect(instructions).toContain("should not ask native Codex agents to spawn");
+	expect(instructions).toContain("Context budget:");
+	expect(instructions).toContain("- orchestrate:");
+	expect(instructions).not.toContain("Subagent surface:");
 	const hooks = JSON.parse(
 		rendered.artifacts.find((artifact) => artifact.path === ".codex/hooks.json")
 			?.content ?? "{}",

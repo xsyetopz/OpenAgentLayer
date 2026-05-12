@@ -196,6 +196,9 @@ async function runCodexLivePrompt(repoRoot: string): Promise<void> {
 		await writeCodexHookFixtureConfig(home);
 		await rm(join(home, ".codex/agents"), { recursive: true, force: true });
 		await runDeployedRuntimeChecks(home, "codex");
+		console.log(
+			"codex: STATUS INFO live prompt checks hook behavior; admin-enforced requirements.toml install is an external environment gate",
+		);
 		const prompt =
 			"Use shell exactly once to run this exact command: npx prettier foo.js\nDo not run bunx yourself. Then report the command result. Do not edit files.";
 		const result = await run(
@@ -234,6 +237,7 @@ async function writeCodexHookFixtureConfig(home: string): Promise<void> {
 	await writeFile(
 		join(home, ".codex/config.toml"),
 		`profile = "oal-hook-e2e"
+model_instructions_file = "./openagentlayer/codex-base-instructions.md"
 
 [features]
 hooks = true

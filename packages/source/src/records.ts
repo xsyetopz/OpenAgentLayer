@@ -108,5 +108,4 @@ export interface ProductPromptTemplates {
 	skillContract: string;
 	commandContract: string;
 	instructions: string;
-	codexBaseline: string;
 }

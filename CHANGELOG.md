@@ -5,6 +5,33 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.6.0-beta.3] - 2026-05-12
+
+### Added
+
+- Added Codex `requirements.toml` rendering for managed OAL hooks with canonical `hooks = true` feature pinning and managed hook command entries.
+- Added upstream `openai/codex` as the source for Codex base instructions and an OAL patch file applying reddit-sourced instruction changes.
+- Added a rendered patched Codex base-instructions artifact wired through `model_instructions_file`.
+- Added `docs/codex-reddit-research.md` to record the reddit research datasets applied or deferred for this release.
+- Added Codex config schema comments to generated `config.toml` and acceptance coverage.
+- Added deploy output guidance for Codex `requirements.toml` admin installation.
+- Added Rust workspace and lockfile version checks to release acceptance and `bump-version.sh`.
+- Added release acceptance coverage for the upstream Codex submodule and base-instruction patch artifact.
+- Added README and installation guidance for Codex managed `requirements.toml`.
+- Added validation docs coverage for upstream Codex and base-instruction patch release checks.
+- Added release acceptance coverage for the Codex reddit research disposition.
+- Added provider-e2e output and validation docs that distinguish Codex hook behavior checks from external admin requirements installation.
+
+### Changed
+
+- Changed Codex base-instruction behavior to avoid broad tests after every implementation step, require bounded large command output, and constrain audit findings to conclusive actionable evidence.
+- Changed global Codex deploy rewriting so generated requirements point managed hooks at the installed OAL hook directory.
+
+### Verified
+
+- Static implementation audit only; targeted validation has not yet been run in
+  this session.
+
 ## [0.6.0-beta.2] - 2026-05-08
 
 ### Added

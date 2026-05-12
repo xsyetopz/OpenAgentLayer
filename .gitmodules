@@ -26,3 +26,7 @@
 	path = third_party/openai-symphony
 	url = https://github.com/openai/symphony.git
 	branch = main
+[submodule "third_party/openai-codex"]
+	path = third_party/openai-codex
+	url = https://github.com/openai/codex.git
+	branch = main

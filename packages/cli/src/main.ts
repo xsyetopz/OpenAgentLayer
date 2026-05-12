@@ -5,6 +5,7 @@ import { runAcceptCommand } from "./commands/accept";
 import { runBinCommand } from "./commands/bin";
 import { runCheckCommand } from "./commands/check";
 import { runCodexCommand } from "./commands/codex";
+import { runCodexUsageCommand } from "./commands/codex-usage";
 import { runDeployCommand } from "./commands/deploy";
 import { runInspectCommand } from "./commands/inspect";
 import { runMcpCommand } from "./commands/mcp";
@@ -163,6 +164,16 @@ Examples:
 	.action((action: string, values: string[], options) =>
 		runCodexCommand(repoRoot, [action, ...values, ...argsFromOptions(options)]),
 	);
+
+program
+	.command("codex-usage")
+	.description("inspect local Codex state for weekly quota-drain patterns")
+	.option("--home <dir>", "home directory containing .codex/state_5.sqlite")
+	.option("--db <path>", "explicit Codex state SQLite database")
+	.option("--project <dir>", "only include threads for one project cwd")
+	.option("--limit <n>", "number of rows to print", "12")
+	.option("--json", "print structured JSON")
+	.action((options) => runCodexUsageCommand(argsFromOptions(options)));
 
 addRenderOptions(
 	program

@@ -112,6 +112,11 @@ Legend: ✅ supported, ⚠️ partial/provider-limited, 🚧 under construction,
 | Manifest deploy/uninstall | ✅ OAL-owned artifact tracking.         | ✅ OAL-owned artifact tracking.              | ✅ OAL-owned artifact tracking.             |
 | Drift checks              | ✅ Generated edit guards.               | ✅ Generated edit guards.                    | ✅ Generated edit guards.                   |
 
+For Codex, OAL renders `.codex/requirements.toml` with `hooks = true` and
+managed OAL hook entries. Codex only treats hooks as approval-free when that
+requirements file is installed into Codex's managed requirements layer for the
+environment; `deploy` prints a warning when this step is still external.
+
 Codex also has an OAL-managed delegation CLI for environments where the native subagent launcher is unavailable to the current session:
 
 ```bash
@@ -126,11 +131,11 @@ oal codex peer batch --dry-run "investigate, implement, validate, and review"
 
 OAL applies subscription-specific model and reasoning choices instead of giving every generated agent the same model. Use `--plan` with `preview`, `render`, `deploy`, or `plugins`.
 
-| Provider    | Plans                                             | Notes                                                                                                             |
-| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`; plan-mode and edit-mode effort are balanced separately. |
-| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                           |
-| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.           |
+| Provider    | Plans                                             | Notes                                                                                                                                                             |
+| ----------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `plus`, `pro-5`, `pro-20`                         | Uses only `gpt-5.5`, `gpt-5.4-mini`, and `gpt-5.3-codex`; default, Plus, and Pro-5 avoid `gpt-5.5`, while Pro-20 uses `gpt-5.5` high without defaulting to xhigh. |
+| Claude Code | `max-5`, `max-20`, `max-20-long`                  | `max-20-long` is the explicit `claude-opus-4-6[1m]` route for long-context Opus agents.                                                                           |
+| OpenCode    | `opencode-auto`, `opencode-auth`, `opencode-free` | `opencode-auto` reads `opencode models` when available and falls back to OAL's free OpenCode model set.                                                           |
 
 Examples:
 
@@ -168,6 +173,7 @@ Run through package scripts from a source checkout, or replace `bun run <script>
 | `features`         | Print optional feature install or removal commands.                                  | `--install`, `--remove`.                                                                            | `bun run features -- --install ctx7,anthropic-docs,opencode-docs`.                      |
 | `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve anthropic-docs`, `serve opencode-docs`, `serve oal-inspect`.                                 | `bun packages/cli/src/main.ts mcp serve oal-inspect`.                                   |
 | `rtk-gain`         | Check RTK token-savings policy.                                                      | `--from-file`, `--allow-empty-history`.                                                             | `bun run rtk-gain -- --allow-empty-history`.                                            |
+| `codex-usage`      | Inspect local Codex state for weekly quota-drain patterns.                           | `--home`, `--db`, `--project`, `--limit`, `--json`.                                                 | `bun packages/cli/src/main.ts codex-usage --project "$PWD"`.                            |
 | `roadmap-evidence` | Print the acceptance evidence ledger.                                                | None.                                                                                               | `bun run roadmap:evidence`.                                                             |
 | `accept`           | Run full product acceptance over source, rendering, deploy, uninstall, and fixtures. | None.                                                                                               | `bun run accept`.                                                                       |
 

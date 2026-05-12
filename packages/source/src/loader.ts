@@ -72,10 +72,6 @@ async function loadPromptTemplates(
 			"utf8",
 		),
 		instructions: await readFile(join(promptRoot, "instructions.md"), "utf8"),
-		codexBaseline: await readFile(
-			join(promptRoot, "codex-baseline.md"),
-			"utf8",
-		),
 	};
 }
 

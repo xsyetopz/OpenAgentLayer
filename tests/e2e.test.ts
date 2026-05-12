@@ -370,7 +370,7 @@ test("CLI preview shows generated artifact set without writing files", async () 
 	expect(stdout).toContain(".codex/config.toml");
 	expect(stdout).toContain("source: config:codex");
 	expect(stdout).toContain("## Artifact Contents");
-	expect(stdout).toContain('model = "gpt-5.5"');
+	expect(stdout).toContain('model = "gpt-5.3-codex"');
 	expect(stdout).toContain("interrupt_message = true");
 	expect(stdout).not.toContain('interrupt_message = "');
 	await expect(
@@ -562,8 +562,9 @@ test("CLI preview applies Codex subscription plan to profile reasoning", async (
 		pro5Stdout,
 		"profiles.openagentlayer-symphony-implement",
 	);
+	expect(pro5Lead).toContain('model = "gpt-5.3-codex"');
 	expect(pro5Lead).toContain('plan_mode_reasoning_effort = "high"');
-	expect(pro5Lead).toContain('model_reasoning_effort = "medium"');
+	expect(pro5Lead).toContain('model_reasoning_effort = "high"');
 	expect(pro5Lead).toContain('model_verbosity = "low"');
 	expect(pro5Implement).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(pro5Implement).toContain('model_reasoning_effort = "high"');
@@ -786,10 +787,28 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
 	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
+	const requirements = await readFile(
+		join(home, ".codex/requirements.toml"),
+		"utf8",
+	);
+	const baseInstructions = await readFile(
+		join(home, ".codex/openagentlayer/codex-base-instructions.md"),
+		"utf8",
+	);
 	expect(config).toContain('profile = "openagentlayer-symphony"');
+	expect(config.startsWith("#:schema ")).toBe(true);
+	expect(config).toContain(
+		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+	);
 	expect(config).toContain('plan_mode_reasoning_effort = "high"');
 	expect(config).toContain('model_reasoning_effort = "high"');
 	expect(config).toContain('[plugins."oal@openagentlayer-local"]');
+	expect(requirements).toContain("hooks = true");
+	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");
+	expect(requirements).toContain(join(home, ".codex/openagentlayer/hooks"));
+	expect(baseInstructions).toContain("OAL and RTK project surfaces");
+	expect(baseInstructions).toContain("rtk proxy -- <command>");
+	expect(baseInstructions).toContain("Code review and audits");
 	expect(
 		await readFile(
 			join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),
@@ -832,7 +851,7 @@ test("CLI Codex agent artifacts omit unsupported color fields", async () => {
 	const stderr = await new Response(command.stderr).text();
 	expect(await command.exited).toBe(0);
 	expect(stderr).toBe("");
-	expect(stdout).toContain('model = "gpt-5.5"');
+	expect(stdout).toContain('model = "gpt-5.3-codex"');
 	expect(stdout).not.toContain("color =");
 });
 

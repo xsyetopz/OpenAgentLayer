@@ -24,6 +24,7 @@ import {
 	UNINSTALL_PROVIDER_OPTIONS,
 } from "../src/interactive";
 import { renderOptions } from "../src/model-options";
+import { printDeployReport } from "../src/output";
 import { buildSetupArgs } from "../src/workflows";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
@@ -272,6 +273,53 @@ test("CLI scope parser accepts deploy scopes and rejects unknown scopes", () => 
 	expect(scopeOption("global")).toBe("global");
 	expect(() => scopeOption("workspace")).toThrow(
 		"Unsupported scope `workspace`",
+	);
+});
+
+test("deploy report warns that Codex requirements need managed install", () => {
+	const lines: string[] = [];
+	const originalLog = console.log;
+	console.log = (message?: unknown) => {
+		lines.push(String(message));
+	};
+	try {
+		printDeployReport(
+			{
+				sourceRoot: "/repo",
+				providers: ["codex"],
+				scope: "global",
+				targetRoot: "/home/user",
+				manifestRoot: "/home/user",
+				plan: {
+					targetRoot: "/home/user",
+					manifestRoot: "/home/user",
+					scope: "global",
+					artifacts: [
+						{
+							provider: "codex",
+							path: ".codex/requirements.toml",
+							content: "",
+							sourceId: "requirements:codex",
+							mode: "config",
+						},
+					],
+					changes: [],
+					manifest: {
+						product: "OpenAgentLayer",
+						version: 1,
+						oalVersion: "0.6.0-beta.3",
+						entries: [],
+					},
+					backups: [],
+				},
+			},
+			{},
+		);
+	} finally {
+		console.log = originalLog;
+	}
+	expect(lines.join("\n")).toContain(
+		"Codex requirements.toml rendered; install it into Codex managed requirements for approval-free hooks",
 	);
 });
 

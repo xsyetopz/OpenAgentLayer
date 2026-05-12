@@ -34,6 +34,8 @@ const CODEX_MARKERS = [
 	"# Regenerate: oal render",
 	"# <<< oal codex <<<",
 ] as const;
+const CODEX_SCHEMA_COMMENT =
+	"#:schema https://developers.openai.com/codex/config-schema.json";
 const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/nemotron-3-super-free",
 	"opencode/minimax-m2.5-free",
@@ -54,22 +56,44 @@ export async function assertProviderConfigContracts(
 
 async function assertCodexConfig(targetRoot: string): Promise<void> {
 	const config = await readFile(join(targetRoot, ".codex/config.toml"), "utf8");
+	const requirements = await readFile(
+		join(targetRoot, ".codex/requirements.toml"),
+		"utf8",
+	);
 	assertCodexTomlSchema(config);
+	if (!config.includes(CODEX_SCHEMA_COMMENT))
+		throw new Error("Codex config missing schema comment");
 	for (const marker of CODEX_MARKERS)
 		if (!config.includes(marker))
 			throw new Error(`Codex config missing managed marker \`${marker}\``);
-	await assertCodexInstructionBaseline(config, targetRoot);
+	await assertCodexBaseInstructions(config, targetRoot);
 	for (const flag of CODEX_REQUIRED_FLAGS)
 		if (!config.includes(flag))
 			throw new Error(`Codex config missing \`${flag}\``);
-	if (config.includes("model_instructions_file"))
-		throw new Error(
-			"Codex config should not replace bundled base instructions.",
-		);
+	if (
+		!config.includes(
+			'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+		)
+	)
+		throw new Error("Codex config missing patched base instructions file");
 	if (!config.includes('approvals_reviewer = "auto_review"'))
 		throw new Error("Codex config missing auto approval reviewer");
 	if (!config.includes("interrupt_message = true"))
 		throw new Error("Codex config has invalid agents.interrupt_message");
+	for (const required of [
+		"[features]",
+		"hooks = true",
+		"[hooks]",
+		"managed_dir",
+		"[[hooks.PreToolUse]]",
+		"OAL_HOOK_PROVIDER=codex",
+		"OAL_HOOK_EVENT=PreToolUse",
+		"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
+	])
+		if (!requirements.includes(required))
+			throw new Error(`Codex requirements missing \`${required}\``);
+	if (requirements.includes("codex_hooks"))
+		throw new Error("Codex requirements emitted legacy codex_hooks feature");
 	if (!config.includes("max_threads = 1"))
 		throw new Error("Codex config missing agents.max_threads");
 	if (!config.includes("job_max_runtime_seconds = 1800"))
@@ -86,7 +110,7 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 			);
 }
 
-async function assertCodexInstructionBaseline(
+async function assertCodexBaseInstructions(
 	config: string,
 	targetRoot: string,
 ): Promise<void> {
@@ -103,15 +127,27 @@ async function assertCodexInstructionBaseline(
 				`Codex profile \`${profile}\` should use the normal shell`,
 			);
 	}
-	const agents = await readFile(join(targetRoot, "AGENTS.md"), "utf8");
+	const baseInstructions = await readFile(
+		join(targetRoot, ".codex/openagentlayer/codex-base-instructions.md"),
+		"utf8",
+	);
 	for (const required of [
-		"Codex baseline",
-		"bundled base instructions",
-		"generated files are disposable outputs",
-		"Instruction reload surface:",
+		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+		"## OAL and RTK project surfaces",
+		"keep AGENTS.md-level context compact",
+		"rtk proxy -- <command>",
+		"## OAL parent-session quota guard",
+		"oal codex-usage --project <path>",
+		"session-complete handoff",
+		"COMPLETE-complete",
+		"report only conclusive, actionable findings grounded in current code",
+		"Keep review output findings-only and bounded",
+		"Unknown or potentially large command output must be bounded before it reaches context.",
 	])
-		if (!agents.includes(required))
-			throw new Error(`AGENTS.md missing Codex baseline text: \`${required}\``);
+		if (!baseInstructions.includes(required))
+			throw new Error(
+				`Patched Codex base instructions missing \`${required}\``,
+			);
 }
 
 async function assertClaudeSettings(targetRoot: string): Promise<void> {

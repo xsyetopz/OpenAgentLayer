@@ -42,6 +42,14 @@ bun packages/cli/src/main.ts codex peer batch --dry-run "investigate, implement,
 
 `agent` runs one generated Codex custom agent. `route` maps an OAL route to its owning generated agent. `peer batch` restores the v3-style coordinated run shape with orchestrator, validate, worker, and review passes, plus a `.openagentlayer/codex-peer/<run-id>/` handoff directory. Use `--dry-run` to inspect the plan before launching Codex.
 
+Use `codex-usage` to inspect local Codex state for root-session quota drains before continuing broad autonomous work:
+
+```bash
+bun packages/cli/src/main.ts codex-usage --project "$PWD"
+```
+
+The report groups weekly usage by Codex `thread_source`, model, and reasoning effort, then prints the top draining rollout paths. OAL uses this evidence with the generated parent-session quota guard: broad root sessions should stop at compaction, repeated command loops, or high used-token counts, write a Continuation Record, and move independent work to `oal codex peer batch`, OpenDex/Symphony, or a fresh bounded session. When Codex goals are enabled, this stop is session-complete handoff only; it pauses the loop and preserves usage accounting, but it is not COMPLETE-complete product completion unless the original objective has no remaining requirements.
+
 ## Model Plans
 
 Use plan flags when rendering subscription-specific model routes:
@@ -54,3 +62,5 @@ bun run preview -- --provider opencode --plan opencode-auto
 
 Codex plan mode and edit mode are separate. OAL uses Codex values `none`,
 `low`, `medium`, `high`, and `xhigh`; `minimal` is not a Codex effort value.
+Default, Plus, and Pro-5 profiles avoid `gpt-5.5`; Pro-20 maps `gpt-5.5` to
+high and avoids xhigh by default to protect weekly quota.

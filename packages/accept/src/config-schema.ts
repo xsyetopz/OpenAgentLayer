@@ -13,6 +13,7 @@ interface CodexProfile {
 interface CodexToml {
 	profile?: string;
 	approvals_reviewer?: string;
+	model_instructions_file?: string;
 	memories: Record<string, unknown>;
 	profiles: Record<string, CodexProfile>;
 	features: Record<string, Record<string, unknown>>;
@@ -69,6 +70,13 @@ export function assertCodexTomlSchema(toml: string): void {
 		throw new Error("Codex config active profile is not rendered");
 	if (parsed.approvals_reviewer !== "auto_review")
 		throw new Error("Codex config does not enable auto approval review");
+	if (
+		parsed.model_instructions_file !==
+		"./openagentlayer/codex-base-instructions.md"
+	)
+		throw new Error(
+			"Codex config does not load the patched OAL base instructions",
+		);
 	if (parsed.memories["extract_model"] !== "gpt-5.4-mini")
 		throw new Error("Codex memories.extract_model must use gpt-5.4-mini");
 	if (parsed.plugins["oal@openagentlayer-local"]?.enabled !== true)
@@ -216,6 +224,8 @@ function parseCodexToml(toml: string): CodexToml {
 			if (key === "profile") parsed.profile = value as string;
 			if (key === "approvals_reviewer")
 				parsed.approvals_reviewer = value as string;
+			if (key === "model_instructions_file")
+				parsed.model_instructions_file = value as string;
 		}
 	}
 	return parsed;

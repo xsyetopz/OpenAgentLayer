@@ -21,6 +21,7 @@ import { assertGeneratedArtifactContracts } from "./artifacts";
 import { assertCheckboxDiscipline } from "./checkboxes";
 import { assertCiCdWorkflow } from "./ci";
 import { assertCliContracts } from "./cli";
+import { assertCodexUpstreamPatch } from "./codex-upstream";
 import { assertCodebaseShape } from "./codebase-shape";
 import {
 	assertBackupsCreated,
@@ -72,6 +73,7 @@ export async function runAcceptance(
 	await assertMessageStyle(repoRoot);
 	await assertHomebrewCask(repoRoot);
 	await assertCiCdWorkflow(repoRoot);
+	await assertCodexUpstreamPatch(repoRoot);
 	await assertPluginMarketplace(repoRoot, graph.source);
 	await assertVersionBumpTool(repoRoot);
 	assertRtkGainPolicyFixtures();

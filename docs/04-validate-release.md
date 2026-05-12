@@ -15,7 +15,13 @@ bunx tsc --noEmit
 
 `bun run accept` is the product gate. It covers source loading, policy, provider
 rendering, deploy fixtures, uninstall fixtures, hooks, plugin payloads,
-manifests, and installed-state checks.
+manifests, installed-state checks, release metadata, upstream Codex submodule
+metadata, the tracked Codex base-instruction patch artifact, and the Codex
+reddit research disposition.
+
+Codex provider-e2e proves deployed hook behavior. It does not prove
+administrator installation of `requirements.toml` into Codex's managed
+requirements layer; treat that as a separate environment gate.
 
 ## RTK Efficiency
 

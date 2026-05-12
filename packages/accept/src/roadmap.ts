@@ -180,10 +180,11 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		],
 	],
 	[
-		/Generated Codex TOML parses|Supported schema keys|Deprecated|compatibility keys|Replacement fields|tools_view_image|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|undo|js_repl|false flag|true flag|Long-runtime/i,
+		/Generated Codex TOML parses|Supported schema keys|Deprecated|compatibility keys|Replacement fields|requirements\.toml|base instructions|upstream Codex|tools_view_image|steer|apps = false|tui_app_server|memories|sqlite|responses_websockets|unified_exec|shell_snapshot|collaboration_modes|codex_git_commit|fast_mode|undo|js_repl|false flag|true flag|Long-runtime/i,
 		[
 			"packages/adapter/src/codex.ts",
 			"packages/accept/src/provider.ts:assertCodexConfig",
+			"packages/accept/src/codex-upstream.ts:assertCodexUpstreamPatch",
 			"packages/accept/src/config-schema.ts:assertCodexTomlSchema",
 			"packages/accept/src/roadmap-strict.ts:codex-capability-profile",
 		],

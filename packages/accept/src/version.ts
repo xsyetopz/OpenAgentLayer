@@ -61,6 +61,16 @@ async function assertVersionFilesAgree(
 				`\`${path}\` version \`${parsed.version}\` does not match root`,
 			);
 	}
+	const cargoToml = await readFile(join(repoRoot, "Cargo.toml"), "utf8");
+	if (!cargoToml.includes(`version = "${current}"`))
+		throw new Error("Cargo.toml version does not match root");
+	const cargoLock = await readFile(join(repoRoot, "Cargo.lock"), "utf8");
+	if (
+		!cargoLock.includes(
+			`[[package]]\nname = "opendex"\nversion = "${current}"`,
+		)
+	)
+		throw new Error("Cargo.lock opendex version does not match root");
 	const cask = await readFile(
 		join(repoRoot, "homebrew/Casks/openagentlayer.rb"),
 		"utf8",

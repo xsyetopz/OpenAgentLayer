@@ -64,6 +64,11 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 		],
 		verify: ({ artifacts }) => {
 			const config = artifact(".codex/config.toml", artifacts).content;
+			requireIncludes(
+				config,
+				"#:schema https://developers.openai.com/codex/config-schema.json",
+				"Codex config",
+			);
 			for (const flag of REQUIRED_CODEX_FLAGS)
 				requireIncludes(config, flag, "Codex config");
 			for (const model of ["gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex"])
@@ -72,6 +77,11 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			requireIncludes(
 				config,
 				'approvals_reviewer = "auto_review"',
+				"Codex config",
+			);
+			requireIncludes(
+				config,
+				'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
 				"Codex config",
 			);
 			requireIncludes(config, "max_depth = 1", "Codex config");
@@ -83,6 +93,85 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 				["guardian", "subagent"].join("_"),
 			])
 				rejectIncludes(config, forbidden, "Codex config");
+			const requirements = artifact(".codex/requirements.toml", artifacts).content;
+			requireIncludes(requirements, "[features]", "Codex requirements");
+			requireIncludes(requirements, "hooks = true", "Codex requirements");
+			requireIncludes(requirements, "[hooks]", "Codex requirements");
+			requireIncludes(
+				requirements,
+				'managed_dir = "__OAL_CODEX_MANAGED_HOOK_DIR__"',
+				"Codex requirements",
+			);
+			requireIncludes(
+				requirements,
+				"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
+				"Codex requirements",
+			);
+			requireIncludes(
+				requirements,
+				"OAL_HOOK_PROVIDER=codex",
+				"Codex requirements",
+			);
+			requireIncludes(
+				requirements,
+				"OAL_HOOK_EVENT=PreToolUse",
+				"Codex requirements",
+			);
+			rejectIncludes(requirements, "codex_hooks", "Codex requirements");
+			const baseInstructions = artifact(
+				".codex/openagentlayer/codex-base-instructions.md",
+				artifacts,
+			).content;
+			requireIncludes(
+				baseInstructions,
+				"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"## OAL and RTK project surfaces",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"rtk proxy -- <command>",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"## OAL parent-session quota guard",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"oal codex-usage --project <path>",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"session-complete handoff",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"COMPLETE-complete",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"## Code review and audits",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"Keep review output findings-only and bounded",
+				"Codex base instructions",
+			);
+			requireIncludes(
+				baseInstructions,
+				"Unknown or potentially large command output must be bounded before it reaches context.",
+				"Codex base instructions",
+			);
 		},
 	},
 	{

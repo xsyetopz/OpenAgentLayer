@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { buildRoadmapEvidence } from "../src";
 import { assertCodebaseShape } from "../src/codebase-shape";
 import { assertCodexTomlSchema } from "../src/config-schema";
+import { assertCodexUpstreamPatch } from "../src/codex-upstream";
 import {
 	assertRtkGainPolicyFixtures,
 	assertRtkGainThreshold,
@@ -23,16 +24,24 @@ test("codebase shape gate accepts current source owners", async () => {
 	).resolves.toBeUndefined();
 });
 
+test("Codex upstream patch evidence is present", async () => {
+	await expect(
+		assertCodexUpstreamPatch(resolve(import.meta.dir, "../../..")),
+	).resolves.toBeUndefined();
+});
+
 test("Codex config schema requires cheap memory extraction model", () => {
 	const config = [
+		"#:schema https://developers.openai.com/codex/config-schema.json",
 		'profile = "openagentlayer"',
 		'approvals_reviewer = "auto_review"',
+		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
 		"",
 		"[memories]",
 		'extract_model = "gpt-5.4-mini"',
 		"",
 		"[profiles.openagentlayer]",
-		'model = "gpt-5.5"',
+		'model = "gpt-5.3-codex"',
 		'model_verbosity = "low"',
 		'approval_policy = "on-request"',
 		'sandbox_mode = "workspace-write"',

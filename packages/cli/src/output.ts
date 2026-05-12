@@ -73,6 +73,16 @@ export function printDeployReport(
 		"changes",
 		`write ${counts.write}, update ${counts.update}, skip ${counts.skip}, remove ${counts.remove}, backup ${counts.backup}`,
 	);
+	if (
+		report.plan.artifacts.some(
+			(artifact) =>
+				artifact.provider === "codex" &&
+				artifact.path === ".codex/requirements.toml",
+		)
+	)
+		printWarning(
+			"Codex requirements.toml rendered; install it into Codex managed requirements for approval-free hooks",
+		);
 	if (report.binary) {
 		printDetail(
 			"binary",

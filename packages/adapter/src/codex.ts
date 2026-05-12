@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import {
 	type Artifact,
 	type ArtifactSet,
@@ -32,6 +34,11 @@ const CODEX_FEATURES = [
 	["undo", false],
 	["js_repl", false],
 ] as const;
+const CODEX_MANAGED_HOOK_DIR_PLACEHOLDER = "__OAL_CODEX_MANAGED_HOOK_DIR__";
+const CODEX_BASE_INSTRUCTIONS_PATH =
+	"third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md";
+const CODEX_OAL_BASE_SECTION_PATH =
+	"source/prompts/codex-base-oal-section.md";
 
 export async function renderCodex(
 	source: OalSource,
@@ -52,6 +59,20 @@ export async function renderCodex(
 			content: renderCodexHooksJson(source),
 			sourceId: "hooks:codex",
 			mode: "config",
+		}),
+		withProvenance({
+			provider: PROVIDER,
+			path: ".codex/requirements.toml",
+			content: renderCodexRequirements(source),
+			sourceId: "requirements:codex",
+			mode: "config",
+		}),
+		withProvenance({
+			provider: PROVIDER,
+			path: ".codex/openagentlayer/codex-base-instructions.md",
+			content: await renderCodexBaseInstructions(repoRoot),
+			sourceId: "instructions-base:codex",
+			mode: "file",
 		}),
 	];
 	for (const agent of source.agents.filter((record) =>
@@ -116,8 +137,10 @@ function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
 	const orchestration = resolveCodexOrchestration(options);
 	const primaryProfile = codexPrimaryProfileName(orchestration.mode);
-	return `profile = ${quoteToml(primaryProfile)}
+	return `#:schema https://developers.openai.com/codex/config-schema.json
+profile = ${quoteToml(primaryProfile)}
 approvals_reviewer = "auto_review"
+model_instructions_file = "./openagentlayer/codex-base-instructions.md"
 
 [notice]
 hide_rate_limit_model_nudge = true
@@ -254,11 +277,11 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		case "pro-5":
 			return {
-				primaryModel: "gpt-5.5",
+				primaryModel: "gpt-5.3-codex",
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
-				model: "medium",
+				model: "high",
 				implementPlan: "medium",
 				implementModel: "high",
 				utilityPlan: "low",
@@ -278,7 +301,7 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		default:
 			return {
-				primaryModel: "gpt-5.5",
+				primaryModel: "gpt-5.3-codex",
 				implementProfileModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 			};
@@ -426,6 +449,78 @@ function renderCodexHooksJson(source: OalSource): string {
 		undefined,
 		2,
 	)}\n`;
+}
+
+function renderCodexRequirements(source: OalSource): string {
+	const groups = codexHookGroups(source);
+	const eventBlocks = [...groups.entries()]
+		.map(([event, commands]) =>
+			commands
+				.map(
+					(command) => `
+[[hooks.${event}]]
+
+[[hooks.${event}.hooks]]
+type = "command"
+command = ${quoteToml(command.replaceAll(".codex/openagentlayer/hooks", CODEX_MANAGED_HOOK_DIR_PLACEHOLDER))}
+statusMessage = ${quoteToml(`Running OAL ${event} hook`)}
+`,
+				)
+				.join(""),
+		)
+		.join("");
+	return `[features]
+hooks = true
+
+[hooks]
+managed_dir = ${quoteToml(CODEX_MANAGED_HOOK_DIR_PLACEHOLDER)}
+
+${eventBlocks}`;
+}
+
+async function renderCodexBaseInstructions(repoRoot: string): Promise<string> {
+	const [upstream, oalSection] = await Promise.all([
+		readFile(join(repoRoot, CODEX_BASE_INSTRUCTIONS_PATH), "utf8"),
+		readFile(join(repoRoot, CODEX_OAL_BASE_SECTION_PATH), "utf8"),
+	]);
+	return applyCodexBaseInstructionPatch(upstream, oalSection.trim());
+}
+
+function applyCodexBaseInstructionPatch(
+	upstream: string,
+	oalSection: string,
+): string {
+	let patched = upstream;
+	patched = replaceRequired(
+		patched,
+		"If the codebase has tests or the ability to build or run, consider using them to verify that your work is complete.",
+		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default. Run validation when the user requests it, the active route is explicitly a test/validate/release gate, or the completed change has a narrow check whose signal outweighs its cost. Prefer targeted checks over full suites, and prefer quiet or bounded output over raw logs.",
+	);
+	patched = replaceRequired(
+		patched,
+		`When testing, your philosophy should be to start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests as you build confidence. If there's no test for the code you changed, and if the adjacent patterns in the codebases show that there's a logical place for you to add a test, you may do so. However, do not add tests to codebases with no tests.`,
+		"When testing is justified, start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests only when the task requires broader confidence. If there is no test for the code you changed, and adjacent patterns show a logical place to add one, you may do so. However, do not add tests to codebases with no tests.",
+	);
+	patched = replaceRequired(
+		patched,
+		"- If the user makes a request that is unclear, ask for clarification.\n\n## Writing final answers",
+		`- If the user makes a request that is unclear, ask for clarification.\n\n${oalSection}\n\n## Writing final answers`,
+	);
+	return replaceRequired(
+		patched,
+		"- Do not use python scripts to attempt to output larger chunks of a file.",
+		"- Do not use python scripts to attempt to output larger chunks of a file.\n- Unknown or potentially large command output must be bounded before it reaches context. Prefer byte caps such as `head -c 4000` for raw commands whose output shape is unknown; line caps alone are not enough when files or logs contain very long lines.",
+	);
+}
+
+function replaceRequired(
+	text: string,
+	search: string,
+	replacement: string,
+): string {
+	if (!text.includes(search))
+		throw new Error("Codex upstream base instruction patch no longer applies");
+	return text.replace(search, replacement);
 }
 
 function codexHookGroups(source: OalSource): Map<string, string[]> {

@@ -10,6 +10,21 @@ OAL renders `.codex/config.toml`, `.codex/agents/*.toml`,
 Codex plugin marketplace payloads.
 
 OAL uses the normal shell for Codex and keeps RTK enforcement in visible hooks.
+It also renders `.codex/requirements.toml` as the managed-hook policy template
+for Codex. Codex itself loads `requirements.toml` from its system or managed
+configuration locations, so users who want hooks to run without approval review
+must install that rendered requirements file into the Codex requirements layer
+for their environment. OAL deploy prints a warning when this requirements
+artifact is present so the admin-enforced install step is not hidden.
+
+OAL renders `.codex/openagentlayer/codex-base-instructions.md` from upstream
+`openai/codex` base instructions plus the tracked OAL patch in
+`patches/openai-codex-base-instructions-reddit.patch`, then points
+`model_instructions_file` at that patched file.
+Generated Codex config also includes
+`#:schema https://developers.openai.com/codex/config-schema.json`.
+The research disposition for the reddit-derived changes lives in
+`docs/codex-reddit-research.md`.
 
 ## Claude Code
 

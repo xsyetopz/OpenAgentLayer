@@ -28,20 +28,10 @@ const REQUIRED_ROUTES = [
 ] as const;
 const AGENT_CONTRACT_TERMS = [
 	"## Prompt contract",
-	"Success criteria:",
-	"Ordered steps:",
-	"Ambiguity behavior:",
-	"Evidence contract:",
-	"Scope contract:",
-	"Structure contract:",
-	"Artifact target:",
-	"Edit envelope:",
-	"Naming source:",
-	"Removal transform:",
-	"Diff gate:",
-	"Source Evidence Map",
-	"Boundaries:",
-	"Blocker path:",
+	"Inspect only source needed",
+	"smallest current-state change",
+	"Validate only when",
+	"STATUS BLOCKED",
 	"Triggers:",
 	"Route handoff signals:",
 	"Tool contract:",
@@ -63,12 +53,11 @@ const COMMAND_CONTRACT_TERMS = [
 	"Structure contract:",
 	"Markdown contract:",
 	"Attribution contract:",
-	"Source-backed behaviour is mandatory",
+	"Behavior claims need current source",
 	"Source Evidence Map",
-	"The route path is inspect, prove, change, validate, report",
-	"Simplicity discipline",
-	"RTK efficiency:",
-	"Response boundaries:",
+	"Prefer direct source-backed code",
+	"RTK:",
+	"Answer the requested artifact",
 ] as const;
 const SKILL_PROMPT_CONTRACT_TERMS = [
 	"## Prompt contract",
@@ -151,20 +140,15 @@ function assertRouteArtifacts(artifacts: Artifact[]): void {
 	}
 	const codexInstructions = findArtifact("AGENTS.md", artifacts);
 	for (const term of [
-		"Instruction reload surface:",
-		"session-loaded project guidance",
-		"reads invoked skill bodies from disk",
+		"Source of truth:",
+		"Change source:",
+		"Context budget:",
 	])
 		if (!codexInstructions.content.includes(term))
 			throw new Error(`Codex AGENTS.md missing reload contract \`${term}\``);
 	for (const route of REQUIRED_ROUTES)
 		if (!codexInstructions.content.includes(`- ${route}:`))
 			throw new Error(`Codex AGENTS.md missing route \`${route}\``);
-	for (const agent of CORE_AGENTS) {
-		const codexAgent = findArtifact(`.codex/agents/${agent}.toml`, artifacts);
-		if (!codexAgent.content.includes("Owned route contracts:"))
-			throw new Error(`Codex agent \`${agent}\` missing owned route contracts`);
-	}
 }
 
 function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
@@ -223,10 +207,37 @@ function assertInstructionBlocks(artifacts: Artifact[]): void {
 
 function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	assertArtifact(".codex/config.toml", artifacts, [
+		"#:schema https://developers.openai.com/codex/config-schema.json",
 		"# >>> oal codex >>>",
 		"# Source: config:codex",
 		"# Regenerate: oal render",
 		"# <<< oal codex <<<",
+	]);
+	const codexConfig = findArtifact(".codex/config.toml", artifacts);
+	if (
+		!codexConfig.content.startsWith(
+			"#:schema https://developers.openai.com/codex/config-schema.json",
+		)
+	)
+		throw new Error("Codex config schema comment must be first line");
+	assertArtifact(".codex/requirements.toml", artifacts, [
+		"# >>> oal codex >>>",
+		"# Source: requirements:codex",
+		"hooks = true",
+		"[hooks]",
+		'managed_dir = "__OAL_CODEX_MANAGED_HOOK_DIR__"',
+		"[[hooks.PreToolUse]]",
+		"OAL_HOOK_PROVIDER=codex",
+		"OAL_HOOK_EVENT=PreToolUse",
+		"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
+		"# <<< oal codex <<<",
+	]);
+	assertArtifact(".codex/openagentlayer/codex-base-instructions.md", artifacts, [
+		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+		"OAL and RTK project surfaces",
+		"rtk proxy -- <command>",
+		"Code review and audits",
+		"Unknown or potentially large command output must be bounded before it reaches context.",
 	]);
 	assertArtifact("opencode.jsonc", artifacts, [
 		"// >>> oal opencode >>>",

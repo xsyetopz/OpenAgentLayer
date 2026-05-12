@@ -97,7 +97,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		!(
 			contentPreview.stdout.includes("## Artifact Contents") &&
 			contentPreview.stdout.includes("### codex .codex/config.toml") &&
-			contentPreview.stdout.includes('model = "gpt-5.5"')
+			contentPreview.stdout.includes('model = "gpt-5.3-codex"')
 		)
 	)
 		throw new Error("CLI preview did not show selected artifact content");

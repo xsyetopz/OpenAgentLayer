@@ -53,6 +53,14 @@ test("global deploy maps provider artifacts into provider homes", async () => {
 			sourceId: "instructions:codex",
 			mode: "block" as const,
 		},
+		{
+			provider: "codex" as const,
+			path: ".codex/requirements.toml",
+			content:
+				'managed_dir = "__OAL_CODEX_MANAGED_HOOK_DIR__"\ncommand = "OAL_HOOK_PROVIDER=codex OAL_HOOK_EVENT=PreToolUse __OAL_CODEX_MANAGED_HOOK_DIR__/hook.mjs"\n',
+			sourceId: "requirements:codex",
+			mode: "config" as const,
+		},
 	]);
 	const plan = await planDeploy(home, artifacts, {
 		scope: "global",
@@ -66,7 +74,14 @@ test("global deploy maps provider artifacts into provider homes", async () => {
 	);
 	await applyDeploy(plan);
 	const config = await readFile(join(home, ".codex/config.toml"), "utf8");
+	const requirements = await readFile(
+		join(home, ".codex/requirements.toml"),
+		"utf8",
+	);
 	expect(config).toContain(join(home, ".codex/agents/athena.toml"));
+	expect(requirements).toContain(join(home, ".codex/openagentlayer/hooks"));
+	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");
+	expect(requirements).toContain("OAL_HOOK_EVENT=PreToolUse");
 	expect(await readFile(join(home, ".codex/AGENTS.md"), "utf8")).toContain(
 		"Global Codex instructions",
 	);

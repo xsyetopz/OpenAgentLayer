@@ -21,6 +21,13 @@ export function artifactHash(content: string): string {
 export function withProvenance(artifact: Artifact): Artifact {
 	const provenance = renderProvenance(artifact);
 	if (!provenance) return { ...artifact, content: `${artifact.content}` };
+	if (artifact.content.startsWith("#:schema ")) {
+		const [schema, ...rest] = artifact.content.split("\n");
+		return {
+			...artifact,
+			content: `${schema}\n${provenance}\n${rest.join("\n")}`,
+		};
+	}
 	return {
 		...artifact,
 		content: `${provenance}\n${artifact.content}`,

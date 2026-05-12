@@ -13,17 +13,13 @@ export function quoteToml(text: string): string {
 export function agentPrompt(agent: AgentRecord, source: OalSource): string {
 	return `${agent.prompt}
 
-${renderTemplate(source, "agentContract", {
-	productPromptContracts: renderAgentPromptContracts(source),
-})}
+${renderTemplate(source, "agentContract", {})}
 
 Triggers: ${agent.triggers.join("; ")}
 Route handoff signals: ${agent.nonGoals.join("; ")}
 Tool contract: ${agent.tools.join(", ")}
 Skill access: ${agent.skills.join(", ")}
 Owned routes: ${agent.routes.join(", ")}
-Owned route contracts:
-${renderOwnedRouteContracts(agent, source)}
 Final output must include concrete evidence or a precise blocker.`;
 }
 
@@ -54,12 +50,12 @@ export function instructions(
 ): string {
 	return renderTemplate(source, "instructions", {
 		provider,
-		providerBaseline:
-			provider === "codex" ? renderTemplate(source, "codexBaseline", {}) : "",
-		productPromptContracts: renderProductPromptContracts(source),
 		routes: sourceRoutes
 			.filter((route) => route.providers.includes(provider))
-			.map((route) => `- ${route.id}: ${route.body}`)
+			.map(
+				(route) =>
+					`- ${route.id}: owner=${route.agent}; permissions=${route.permissions}; skills=${route.skills.join(", ")}`,
+			)
 			.join("\n"),
 	});
 }
@@ -85,49 +81,6 @@ function renderProductPromptContracts(source: OalSource): string {
 		`- ${contracts.simplicityDiscipline}`,
 		renderCavemanContract(source),
 	].join("\n");
-}
-
-function renderAgentPromptContracts(source: OalSource): string {
-	const contracts = source.promptContracts;
-	if (!contracts) return "";
-	return [
-		"- Artifact target: produce a current-state patch; repository artifacts describe behavior that exists now.",
-		"- Repository inspection: use rg/fd before broad reads; use git ls-files or git grep when tracked-file-only evidence is required.",
-		"- Context discipline: classify the task area and name the owning package/module/route/provider surface before broad exploration; unrelated directories need a one-line reason tied to the task.",
-		"- Navigation order: read package maps, local instructions, or source records before scanning implementation; use tracked inventories and bounded searches first.",
-		"- Edit tools: use apply_patch for focused manual edits; use bounded python3 rewrites for broad mechanical changes when many patch hunks would be fragile, then inspect the final diff.",
-		"- Edit envelope: derive ALLOWED_EDIT_SET from the user request and controlling source; docs, tests, comments, config, warnings, and guardrails enter the set through explicit request or current runtime/schema/security/validation need.",
-		"- Consent boundary: examples, corrections, suggested names, and partial ideas are input evidence for the requested behavior only; compatibility, aliases, fallbacks, extra behavior, guardrails, docs, cleanup, and adjacent changes need explicit user request or controlling source requirement.",
-		"- Naming source: create names from existing symbols, formal API/schema terms, user-supplied names, or current behavior; path labels are location metadata.",
-		"- Correction transform: apply corrected current behavior inside ALLOWED_EDIT_SET; inferred compatibility enters only through explicit user request or controlling source requirement.",
-		"- Removal transform: removed concepts become absence; current runtime behavior and explicitly requested history artifacts may carry needed text.",
-		"- Diff gate: inspect final diff and repair added residue before final response.",
-		"- Source evidence: inspect controlling source before claims; behavior changes need Source Evidence Map, Changed Behavior, and Validation Evidence.",
-		"- Provider reload evidence: instruction reload semantics, skills reload semantics, and model/window semantics need current provider docs, provider source code, or validated runtime evidence before claims.",
-		"- Stable vs evolving guidance: Keep stable invariants in provider instruction files; keep fast-changing workflows in skills, hooks, commands, or provider-native agents when the provider reload path supports them.",
-		"- Correction discipline: verify before accepting a correction; separate checked facts from inference, and return STATUS BLOCKED with Attempted, Evidence, and Need when source truth is missing or contradictory.",
-		"- Delegation check: broad implementation work uses subagents or the orchestrate route when ownership, providers, packages, test tiers, or investigation paths can split; narrow single-owner edits begin with a recorded solo ownership reason.",
-		"- Continuity check: for multi-step work, keep a short user-visible Continuation Record with objective, done, next, and blockers; prefer current user messages and verified repo evidence over hidden memory files.",
-		"- Boundaries: answer the requested task; extra guidance, alternatives, cleanup, and guardrails enter the answer through user request or validation need.",
-		"- Blocker path: missing, ambiguous, or contradictory source truth returns STATUS BLOCKED with Attempted, Evidence, and Need.",
-		renderCavemanContract(source),
-	].join("\n");
-}
-
-function renderOwnedRouteContracts(
-	agent: AgentRecord,
-	source: OalSource,
-): string {
-	const routes = source.routes.filter((route) =>
-		agent.routes.includes(route.id),
-	);
-	if (routes.length === 0) return "- none";
-	return routes
-		.map(
-			(route) =>
-				`- ${route.id}: permissions=${route.permissions}; arguments=${route.arguments}; skills=${route.skills.join(", ")}; ${route.body}`,
-		)
-		.join("\n");
 }
 
 function renderCavemanContract(source: OalSource): string {
