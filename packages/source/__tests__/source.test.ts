@@ -49,6 +49,10 @@ test("loadSource loads authored prompt skills", async () => {
 	const git = graph.source.skills.find((skill) => skill.id === "git");
 	expect(git?.body).toContain("not alone in the codebase");
 	expect(git?.body).toContain("must not be reverted");
+	const oal = graph.source.skills.find((skill) => skill.id === "oal");
+	expect(oal?.body).toContain("OAL's index skill for AI/LLM use");
+	expect(oal?.body).toContain("Codex does not infer them automatically");
+	expect(oal?.body).toContain("CSV/batch subagents");
 	for (const skillId of ["push", "pull", "land"])
 		expect(
 			graph.source.skills.find((skill) => skill.id === skillId)?.upstream?.path,

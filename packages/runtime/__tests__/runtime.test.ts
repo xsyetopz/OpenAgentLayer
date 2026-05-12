@@ -728,6 +728,8 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 		details: expect.arrayContaining([
 			expect.stringContaining("Native multi_agent_v2 is OAL's default"),
 			expect.stringContaining("rendered OAL agent names"),
+			expect.stringContaining(".codex/config.toml [agents] and AGENTS.md"),
+			expect.stringContaining("does not infer them from intent alone"),
 			expect.stringContaining("Parent thread owns task split"),
 			expect.stringContaining("do not spawn extra pooled threads"),
 			expect.stringContaining("oal opendex"),

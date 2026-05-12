@@ -200,8 +200,10 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 			expect(artifact?.content).toContain("## Prompt contract");
 			if (provider === "codex" && skill === "oal") {
 				expect(artifact?.content).toContain(
-					"spawn custom agents by their rendered OAL agent name",
+					"explicitly spawn rendered OAL agent names or aliases",
 				);
+				expect(artifact?.content).toContain("OAL's index skill for AI/LLM use");
+				expect(artifact?.content).toContain("CSV/batch subagents");
 				expect(artifact?.content).not.toContain("oal codex agent <agent>");
 			}
 		}
@@ -288,12 +290,19 @@ test("provider agents render inspection and correction discipline contracts", as
 		expect(agent).toContain(
 			"prefer concise evidence over repeated policy text",
 		);
-		expect(agent).toContain("## Prompt contract");
-		expect(agent).toContain("Inspect only source needed");
-		expect(agent).toContain("not alone in the codebase");
-		expect(agent).toContain("existing unexplained change is user-owned");
-		expect(agent).toContain("smallest current-state change");
-		expect(agent).toContain("Validate only when");
+		expect(agent).toContain("## Narrow Agent Contract");
+		expect(agent).toContain(
+			"Job: Production implementation, refactoring, and bug fixing.",
+		);
+		expect(agent).toContain(
+			"Use only these tools: read, search, shell, write, patch.",
+		);
+		expect(agent).toContain(
+			"Stay narrow: do not drift into adjacent route ownership",
+		);
+		expect(agent).toContain("unexplained existing changes are user-owned");
+		expect(agent).toContain("behavior claims require source evidence");
+		expect(agent).toContain("STATUS BLOCKED");
 		if (provider === "codex") {
 			expect(agent).toContain('name = "hephaestus"');
 			expect(agent).toContain("description = ");
@@ -400,6 +409,10 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).not.toContain("max_threads = 1");
 	expect(config).toContain("root_agent_usage_hint_text");
 	expect(config).toContain("subagent_usage_hint_text");
+	expect(config).toContain('nickname_candidates = ["hephaestus", "implement"]');
+	expect(config).toContain(
+		'nickname_candidates = ["atalanta", "test", "validate", "accept"]',
+	);
 	expect(config).toContain("job_max_runtime_seconds = 1800");
 	expect(config).toContain("[tui]");
 	const requirements = rendered.artifacts.find(
@@ -502,6 +515,31 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 			),
 		),
 	).toBe(true);
+});
+
+test("Codex instructions render subagent invocation roster", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	const rendered = await renderProvider("codex", graph.source, repoRoot);
+	const instructions = rendered.artifacts.find(
+		(artifact) => artifact.path === "AGENTS.md",
+	)?.content;
+	expect(instructions).toContain("## Codex Subagents");
+	expect(instructions).toContain(
+		"Codex does not automatically infer OAL's custom subagent roster",
+	);
+	expect(instructions).toContain(
+		"explicitly invoke native subagents with the rendered OAL agent names or aliases",
+	);
+	expect(instructions).toContain(
+		"- hephaestus: aliases=hephaestus, implement; routes=implement",
+	);
+	expect(instructions).toContain(
+		"- atalanta: aliases=atalanta, test, validate, accept; routes=test, validate, accept",
+	);
+	expect(instructions).toContain("For many similar rows, create a CSV");
+	expect(instructions).toContain(
+		".codex/openagentlayer/codex-base-instructions.md",
+	);
 });
 
 test("Codex Plus plan routes intelligence to GPT-5.5 and workers to GPT-5.3", async () => {

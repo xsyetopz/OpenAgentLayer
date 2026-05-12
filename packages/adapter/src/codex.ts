@@ -202,7 +202,7 @@ ${source.agents
 		(agent) => `
 [agents.${agent.id}]
 description = ${quoteToml(agent.role)}
-nickname_candidates = [${quoteToml(agent.id)}]
+nickname_candidates = [${codexAgentNicknames(agent).map(quoteToml).join(", ")}]
 config_file = "./agents/${agent.id}.toml"`,
 	)
 	.join("\n")}
@@ -221,6 +221,10 @@ function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
 		default:
 			return "openagentlayer-symphony";
 	}
+}
+
+function codexAgentNicknames(agent: AgentRecord): string[] {
+	return [...new Set([agent.id, agent.name.toLowerCase(), ...agent.routes])];
 }
 
 interface CodexProfileConfig {

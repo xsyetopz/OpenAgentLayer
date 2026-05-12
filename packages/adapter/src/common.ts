@@ -10,17 +10,22 @@ export function quoteToml(text: string): string {
 	return JSON.stringify(text);
 }
 
-export function agentPrompt(agent: AgentRecord, source: OalSource): string {
-	return `${agent.prompt}
-
-${renderTemplate(source, "agentContract", {})}
-
-Triggers: ${agent.triggers.join("; ")}
-Route handoff signals: ${agent.nonGoals.join("; ")}
-Tool contract: ${agent.tools.join(", ")}
-Skill access: ${agent.skills.join(", ")}
-Owned routes: ${agent.routes.join(", ")}
-Final output must include concrete evidence or a precise blocker.`;
+export function agentPrompt(agent: AgentRecord, _source: OalSource): string {
+	return [
+		agent.prompt,
+		"",
+		"## Narrow Agent Contract",
+		`Job: ${agent.role}.`,
+		`Own routes: ${agent.routes.join(", ") || "none"}.`,
+		`Use only these tools: ${agent.tools.join(", ")}.`,
+		`Use these skills when relevant: ${agent.skills.join(", ")}.`,
+		`Accept work when: ${agent.triggers.join("; ")}.`,
+		`Refuse or hand back when: ${agent.nonGoals.join("; ")}.`,
+		"Stay narrow: do not drift into adjacent route ownership, broad cleanup, generated-output edits, or orchestration unless explicitly assigned.",
+		"Workspace consequence: unexplained existing changes are user-owned; do not revert, reformat, overwrite, move, stage, or commit them.",
+		"Evidence consequence: behavior claims require source evidence and targeted validation when validation is justified.",
+		"Output consequence: return changed behavior plus evidence, or `STATUS BLOCKED` with Attempted/Evidence/Need.",
+	].join("\n");
 }
 
 export function skillMarkdown(skill: SkillRecord, source: OalSource): string {
@@ -61,6 +66,8 @@ export function instructions(
 	if (provider !== "codex") return rendered;
 	return `${rendered}
 
+${renderCodexAgentInvocation(source)}
+
 ## Codex Base Instructions
 
 - \`.codex/openagentlayer/codex-base-instructions.md\` is rendered from upstream \`openai/codex\` \`default.md\` plus the tracked OAL patch; treat it as the Codex base-instruction surface for this AGENTS.md block.`;
@@ -94,6 +101,32 @@ function renderCavemanContract(source: OalSource): string {
 	if (mode === "off")
 		return "- Caveman mode: off. Answer normally; user-invoked Caveman output activates compression.";
 	return `- Caveman mode: ${mode}. Compress assistant prose according to this mode while preserving code, commands, paths, URLs, exact errors, versions, commit messages, review findings, and file contents.`;
+}
+
+function renderCodexAgentInvocation(source: OalSource): string {
+	const agents = source.agents.filter((agent) =>
+		agent.providers.includes("codex"),
+	);
+	if (agents.length === 0) return "";
+	const roster = agents
+		.map(
+			(agent) =>
+				`- ${agent.id}: aliases=${agentAliases(agent).join(", ")}; routes=${agent.routes.join(", ") || "none"}; role=${agent.role}`,
+		)
+		.join("\n");
+	return `## Codex Subagents
+
+- Codex does not automatically infer OAL's custom subagent roster; explicitly invoke native subagents with the rendered OAL agent names or aliases when work can be split.
+- Use subagents for broad work that can split by ownership, provider, package, test tier, review perspective, documentation lookup, or repeated batch item. Keep a narrow single-owner fix local and record why.
+- Parent sessions own task split, agent launch, wait/merge, and final decision. Ask subagents for final evidence, changed paths, validation output, or a precise blocker; merge only their final summaries into the parent context.
+- For many similar rows, create a CSV and use Codex batch subagents when available; each worker should return structured results to the parent.
+
+Rendered OAL agent roster:
+${roster}`;
+}
+
+function agentAliases(agent: AgentRecord): string[] {
+	return [...new Set([agent.id, agent.name.toLowerCase(), ...agent.routes])];
 }
 
 function renderSkillSupportFiles(skill: SkillRecord): string {
