@@ -118,6 +118,8 @@ export const PROFILE_ACTION_OPTIONS = [
 	{ value: "list", label: "List profiles" },
 	{ value: "show", label: "Show active profile" },
 	{ value: "use", label: "Activate profile" },
+	{ value: "edit", label: "Edit profile" },
+	{ value: "rename", label: "Rename profile" },
 	{ value: "remove", label: "Remove profile" },
 ] as const;
 
@@ -143,19 +145,39 @@ export const OPTIONAL_FEATURE_OPTIONS = [
 		hint: "browser automation",
 	},
 	{
+		value: "skill-frontend-design",
+		label: "Anthropic frontend-design [skill]",
+		hint: "intentional frontend aesthetics",
+	},
+	{
+		value: "skill-webapp-testing",
+		label: "Anthropic webapp-testing [skill]",
+		hint: "local browser app testing",
+	},
+	{
+		value: "skill-security-best-practices",
+		label: "OpenAI security-best-practices [skill]",
+		hint: "code security review",
+	},
+	{
+		value: "skill-react-best-practices",
+		label: "Vercel react-best-practices [skill]",
+		hint: "React and Next.js performance",
+	},
+	{
+		value: "skill-stripe-best-practices",
+		label: "Stripe stripe-best-practices [skill]",
+		hint: "Stripe integration choices",
+	},
+	{
+		value: "skill-workers-best-practices",
+		label: "Cloudflare workers-best-practices [skill]",
+		hint: "Cloudflare Workers patterns",
+	},
+	{
 		value: "deepwiki",
 		label: "DeepWiki [MCP]",
 		hint: "repository knowledge MCP",
-	},
-	{
-		value: "anthropic-docs",
-		label: "Anthropic Docs [MCP]",
-		hint: "Claude Code and Anthropic docs",
-	},
-	{
-		value: "opencode-docs",
-		label: "OpenCode Docs [MCP]",
-		hint: "OpenCode config, tools, plugin docs",
 	},
 ] as const;
 
@@ -498,18 +520,80 @@ async function interactiveAdvanced(repoRoot: string): Promise<void> {
 }
 
 async function interactiveProfiles(): Promise<void> {
-	const action = await ask<"list" | "show" | "use" | "remove">(
+	const action = await ask<
+		"list" | "show" | "use" | "edit" | "rename" | "remove"
+	>(
 		select({
 			message: "Profiles",
 			options: [...PROFILE_ACTION_OPTIONS],
 		}),
 	);
+	if (action === "edit") {
+		const name = await profileNameSelectionPrompt(action);
+		const profile = await profileEditPrompt();
+		const configPath = configPathFromArgs([]);
+		const config = await loadConfig(configPath);
+		config.profiles[name] = profile;
+		await saveConfig(configPath, config);
+		log.success(`Edited profile ${name}`);
+		return;
+	}
+	if (action === "rename") {
+		const name = await profileNameSelectionPrompt(action);
+		const newName = await profileNamePrompt("New profile name");
+		await runProfilesCommand([action, name, newName]);
+		return;
+	}
 	if (action === "use" || action === "remove") {
 		const name = await profileNameSelectionPrompt(action);
 		await runProfilesCommand([action, name]);
 		return;
 	}
 	await runProfilesCommand([action]);
+}
+
+async function profileEditPrompt(): Promise<OalProfile> {
+	const providers = await availableProviderPrompt();
+	const scope = await scopePrompt();
+	const home = scope === "global" ? await globalHomePrompt() : undefined;
+	const target = scope === "project" ? await targetPrompt() : undefined;
+	const codexPlan = providers.includes("codex")
+		? await codexPlanPrompt()
+		: undefined;
+	const codexOrchestration = providers.includes("codex")
+		? await codexOrchestrationPrompt()
+		: undefined;
+	const claudePlan = providers.includes("claude")
+		? await claudePlanPrompt()
+		: undefined;
+	const opencodePlan = providers.includes("opencode")
+		? await opencodePlanPrompt()
+		: undefined;
+	const cavemanMode = await cavemanModePrompt();
+	const rtk = await ask<boolean>(
+		confirm({ message: "Set up RTK enforcement?", initialValue: true }),
+	);
+	const toolchain = await ask<boolean>(
+		confirm({
+			message: "Install OAL command-line tools?",
+			initialValue: true,
+		}),
+	);
+	const optionalTools = await optionalToolPrompt();
+	return {
+		providers,
+		scope,
+		...(home ? { home } : {}),
+		...(target ? { target } : {}),
+		...(codexPlan ? { codexPlan } : {}),
+		...(codexOrchestration ?? {}),
+		...(claudePlan ? { claudePlan } : {}),
+		...(opencodePlan ? { opencodePlan } : {}),
+		cavemanMode,
+		rtk,
+		toolchain,
+		optionalTools,
+	};
 }
 
 async function interactivePreview(repoRoot: string): Promise<void> {
@@ -769,7 +853,7 @@ function profileNamePrompt(message: string): Promise<string> {
 }
 
 async function profileNameSelectionPrompt(
-	action: "use" | "remove",
+	action: "use" | "edit" | "rename" | "remove",
 ): Promise<string> {
 	const config = await loadConfig(configPathFromArgs([]));
 	const names = Object.keys(config.profiles).sort();
@@ -780,7 +864,14 @@ async function profileNameSelectionPrompt(
 			: undefined;
 	return ask<string>(
 		select({
-			message: action === "use" ? "Profile to activate" : "Profile to remove",
+			message:
+				action === "use"
+					? "Profile to activate"
+					: action === "edit"
+						? "Profile to edit"
+						: action === "rename"
+							? "Profile to rename"
+							: "Profile to remove",
 			options: names.map((name) => ({
 				value: name,
 				label: activeProfile === name ? `${name} [active]` : name,

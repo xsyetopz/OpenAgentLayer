@@ -22,14 +22,20 @@ export async function runProfilesCommand(args: string[]): Promise<void> {
 		printProfile(config, rest[0] ?? config.activeProfile, configPath);
 		return;
 	}
-	if (action === "save") {
+	if (action === "save" || action === "edit") {
 		const name = rest[0];
 		if (!name) throw new Error("Profile name is required");
 		assertProfileName(name);
+		if (action === "edit" && !config.profiles[name])
+			throw new Error(`Profile \`${name}\` is available to save first`);
 		config.profiles[name] = buildProfileFromArgs(rest.slice(1));
 		if (rest.includes("--activate")) config.activeProfile = name;
 		await saveConfig(configPath, config);
-		console.log(`Saved profile \`${name}\``);
+		console.log(
+			action === "edit"
+				? `Edited profile \`${name}\``
+				: `Saved profile \`${name}\``,
+		);
 		return;
 	}
 	if (action === "use") {
@@ -41,6 +47,25 @@ export async function runProfilesCommand(args: string[]): Promise<void> {
 		config.activeProfile = name;
 		await saveConfig(configPath, config);
 		console.log(`Active profile \`${name}\``);
+		return;
+	}
+	if (action === "rename") {
+		const name = rest[0];
+		const newName = rest[1];
+		if (!name) throw new Error("Profile name is required");
+		if (!newName) throw new Error("New profile name is required");
+		assertProfileName(name);
+		assertProfileName(newName);
+		const profile = config.profiles[name];
+		if (!profile)
+			throw new Error(`Profile \`${name}\` is available to save first`);
+		if (config.profiles[newName])
+			throw new Error(`Profile \`${newName}\` already exists`);
+		config.profiles[newName] = profile;
+		delete config.profiles[name];
+		if (config.activeProfile === name) config.activeProfile = newName;
+		await saveConfig(configPath, config);
+		console.log(`Renamed profile \`${name}\` to \`${newName}\``);
 		return;
 	}
 	if (action === "remove") {
@@ -64,7 +89,7 @@ export async function runProfilesCommand(args: string[]): Promise<void> {
 		return;
 	}
 	throw new Error(
-		`Profile action \`${action}\` uses list, show, save, use, remove, or args`,
+		`Profile action \`${action}\` uses list, show, save, edit, use, rename, remove, or args`,
 	);
 }
 

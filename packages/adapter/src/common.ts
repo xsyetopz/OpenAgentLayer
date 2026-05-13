@@ -10,7 +10,9 @@ export function quoteToml(text: string): string {
 	return JSON.stringify(text);
 }
 
-export function agentPrompt(agent: AgentRecord, _source: OalSource): string {
+export function agentPrompt(agent: AgentRecord, source: OalSource): string {
+	if (!agent.prompt)
+		throw new Error(`Agent \`${agent.id}\` prompt was not hydrated`);
 	return [
 		agent.prompt,
 		"",
@@ -24,6 +26,9 @@ export function agentPrompt(agent: AgentRecord, _source: OalSource): string {
 		"Stay narrow: do not drift into adjacent route ownership, broad cleanup, generated-output edits, or orchestration unless explicitly assigned.",
 		"Workspace consequence: unexplained existing changes are user-owned; do not revert, reformat, overwrite, move, stage, or commit them.",
 		"Evidence consequence: behavior claims require source evidence and targeted validation when validation is justified.",
+		...(source.promptContracts?.zenDiscipline
+			? [`Implementation consequence: ${source.promptContracts.zenDiscipline}`]
+			: []),
 		"Output consequence: return changed behavior plus evidence, or `STATUS BLOCKED` with Attempted/Evidence/Need.",
 	].join("\n");
 }
@@ -33,6 +38,7 @@ export function skillMarkdown(skill: SkillRecord, source: OalSource): string {
 		source,
 		"skillContract",
 		{
+			productPromptContracts: renderProductPromptContracts(source),
 			supportFiles: renderSkillSupportFiles(skill),
 		},
 	)}\n`;
@@ -55,6 +61,9 @@ export function instructions(
 ): string {
 	const rendered = renderTemplate(source, "instructions", {
 		provider,
+		zenDiscipline: source.promptContracts?.zenDiscipline
+			? `- **General Zen:** ${source.promptContracts.zenDiscipline}`
+			: "",
 		routes: sourceRoutes
 			.filter((route) => route.providers.includes(provider))
 			.map(
@@ -92,6 +101,7 @@ function renderProductPromptContracts(source: OalSource): string {
 		`- ${contracts.continuityDiscipline}`,
 		`- ${contracts.accountabilityPressure}`,
 		`- ${contracts.simplicityDiscipline}`,
+		`- ${contracts.zenDiscipline}`,
 		renderCavemanContract(source),
 	].join("\n");
 }

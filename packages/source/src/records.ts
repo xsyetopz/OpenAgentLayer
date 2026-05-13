@@ -11,7 +11,7 @@ export interface AgentRecord {
 	skills: string[];
 	routes: string[];
 	models: ModelMap;
-	prompt: string;
+	prompt?: string;
 }
 
 export interface SkillSupportFile {
@@ -101,9 +101,11 @@ export interface ProductPromptContracts {
 	continuityDiscipline: string;
 	accountabilityPressure: string;
 	simplicityDiscipline: string;
+	zenDiscipline: string;
 }
 
 export interface ProductPromptTemplates {
+	agentPrompt: string;
 	agentContract: string;
 	skillContract: string;
 	commandContract: string;

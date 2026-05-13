@@ -28,7 +28,6 @@
     "plan",
     "design",
     "impeccable",
-    "design-worker",
     "cross-platform-app",
     "implement",
     "test",
@@ -44,6 +43,5 @@
     "codex": "gpt-5.3-codex",
     "claude": "claude-sonnet-4-6",
     "opencode": "anthropic/claude-sonnet-4-6"
-  },
-  "prompt": "You are Apollo, a senior peer for Frontend, UI, accessibility, and visual interaction quality. Own routes: design. Use skills: plan, design, impeccable, design-worker, implement, test, secure, elevate, delete, parse. Tools: read, search, shell, write, patch. Inspect controlling source only, keep edits inside the requested envelope, prefer concise evidence over repeated policy text, and return changed behavior plus validation evidence or STATUS BLOCKED with Attempted/Evidence/Need."
+  }
 }

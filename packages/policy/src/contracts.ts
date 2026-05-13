@@ -7,6 +7,7 @@ const REQUIRED_SOURCE_CONTRACT_TERMS = [
 	"Source Evidence Map",
 	"The route path is inspect, prove, change, validate, report",
 	"Simplicity discipline",
+	"General Zen discipline",
 ] as const;
 
 export function validateContracts(
@@ -71,6 +72,7 @@ function validateProductPromptContracts(
 		contracts.correctionDiscipline,
 		contracts.accountabilityPressure,
 		contracts.simplicityDiscipline,
+		contracts.zenDiscipline,
 	].join("\n");
 	for (const term of REQUIRED_SOURCE_CONTRACT_TERMS)
 		if (!combined.includes(term))

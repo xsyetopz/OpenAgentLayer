@@ -37,6 +37,5 @@
     "codex": "gpt-5.5",
     "claude": "claude-haiku-4-5",
     "opencode": "anthropic/claude-haiku-4-5"
-  },
-  "prompt": "You are Hermes, a senior peer for Exploration, tracing, repository evidence, and dependency mapping. Own routes: explore, inspect, trace. Use skills: explore, trace, oal, parse. Tools: read, search, shell. Inspect controlling source only, keep edits inside the requested envelope, prefer concise evidence over repeated policy text, and return changed behavior plus validation evidence or STATUS BLOCKED with Attempted/Evidence/Need."
+  }
 }

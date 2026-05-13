@@ -178,16 +178,16 @@ Run package scripts from a source checkout. After installing the binary, replace
 | `preview`          | Show generated artifact paths and optional file contents without writing.            | `--scope`, `--home`, `--provider`, `--path`, `--content`, `--plan`.                                 | `bun run oal:preview -- --provider all`.                                                    |
 | `render`           | Write generated artifacts into an output directory.                                  | `--scope`, `--home`, `--provider`, `--out`, `--plan`.                                               | `bun run oal:render -- --provider codex --out generated`.                                   |
 | `setup`            | Plan or apply toolchain, deploy, plugin sync, binary shim, and installed checks.     | `--target`, `--scope`, `--provider`, `--toolchain`, `--optional`, `--dry-run`, `--verbose`.         | `bun run setup -- --scope global --provider all --toolchain --dry-run`.                     |
-| `profiles`         | Save, show, activate, or remove reusable setup profiles.                             | `list`, `show`, `save`, `use`, `remove`, `--config`, setup flags.                                   | `bun run oal:profiles -- save global --scope global --provider codex,opencode --activate`.  |
+| `profiles`         | Save, edit, show, activate, rename, or remove reusable setup profiles.               | `list`, `show`, `save`, `edit`, `use`, `rename`, `remove`, `--config`, setup flags.                 | `bun run oal:profiles -- save global --scope global --provider codex,opencode --activate`.  |
 | `state`            | Inspect active profile, provider availability, deploy changes, and removal state.    | `inspect`, `--profile`, `--config`, `--provider`, `--json`.                                         | `bun run oal:state -- inspect --json`.                                                      |
 | `deploy`           | Merge OAL artifacts into a target project or global provider home.                   | `--target`, `--scope project\|global`, `--home`, `--provider`, `--dry-run`, `--verbose`, `--quiet`. | `bun run oal:deploy -- --target /path/to/project --scope project --provider all --dry-run`. |
 | `bin`              | Install, inspect, or remove the source-checkout `oal` executable shim.               | `--home`, `--bin-dir`, `--remove`, `--dry-run`.                                                     | `bun packages/cli/src/main.ts bin --dry-run`.                                               |
 | `uninstall`        | Remove one provider's OAL-owned artifacts from a target project or provider home.    | `--target`, `--scope project\|global`, `--home`, `--provider`.                                      | `bun run oal:uninstall -- --target /path/to/project --scope project --provider codex`.      |
 | `plugins`          | Sync provider plugin payloads into user-level provider homes.                        | `--home`, `--provider`, `--dry-run`, `--plan`, `--opencode-models-file`.                            | `bun run oal:plugins -- --home "$HOME" --provider all --dry-run`.                           |
 | `inspect`          | Print shared OAL capability, manifest, generated-input, policy, or release evidence. | `capabilities`, `manifest`, `generated-diff`, `rtk-report`, `command-policy`, `release-witness`.    | `bun packages/cli/src/main.ts inspect capabilities`.                                        |
-| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run oal:toolchain -- --os macos --optional ctx7,anthropic-docs,opencode-docs`.         |
-| `features`         | Print optional feature install or removal commands.                                  | `--install`, `--remove`.                                                                            | `bun run oal:features -- --install ctx7,anthropic-docs,opencode-docs`.                      |
-| `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve anthropic-docs`, `serve opencode-docs`, `serve oal-inspect`.                                 | `bun packages/cli/src/main.ts mcp serve oal-inspect`.                                       |
+| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run oal:toolchain -- --os macos --optional ctx7,skill-frontend-design`.                |
+| `features`         | Print optional feature install, removal, or officialskills.sh catalog commands.      | `--install`, `--remove`, `--catalog`, `--catalog-url`, `--json`.                                    | `bun run oal:features -- --install ctx7,skill-frontend-design`.                             |
+| `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve oal-inspect`.                                                                                | `bun packages/cli/src/main.ts mcp serve oal-inspect`.                                       |
 | `rtk-gain`         | Check RTK token-savings policy.                                                      | `--from-file`, `--allow-empty-history`.                                                             | `bun run oal:rtk-gain -- --allow-empty-history`.                                            |
 | `codex-usage`      | Inspect local Codex state for weekly quota-drain patterns.                           | `--home`, `--db`, `--project`, `--limit`, `--json`.                                                 | `bun packages/cli/src/main.ts codex-usage --project "$PWD"`.                                |
 | `roadmap-evidence` | Print the acceptance evidence ledger.                                                | None.                                                                                               | `bun run oal:roadmap:evidence`.                                                             |
@@ -202,7 +202,7 @@ order, scope, target and home paths, model plans, optional tools, and setup
 toggles:
 
 ```bash
-bun run oal:profiles -- save work --scope global --provider opencode,codex --optional ctx7,opencode-docs --activate
+bun run oal:profiles -- save work --scope global --provider opencode,codex --optional ctx7,skill-frontend-design --activate
 bun run oal:state -- inspect --profile work
 bun run setup -- --profile work --dry-run
 ```
@@ -227,13 +227,12 @@ instead of prompting when stdin is not a TTY.
 Optional features are explicit add/remove commands on top of OAL:
 
 ```bash
-bun run oal:features -- --install ctx7,playwright,anthropic-docs,opencode-docs
-bun run oal:features -- --remove playwright,anthropic-docs,opencode-docs
+bun run oal:features -- --install ctx7,playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:features -- --remove playwright,skill-frontend-design,skill-react-best-practices
 ```
 
-Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP
-configuration. `anthropic-docs` and `opencode-docs` are OAL-owned MCP servers.
-Provider MCP commands register them, and `oal mcp serve` runs them.
+Feature labels use `[CLI]` for command-line setup, `[MCP]` for provider MCP
+configuration, and `[skill]` for curated external skills from officialskills.sh.
 
 Copy commands from fenced `bash` blocks. Do not paste Markdown list bullets.
 

@@ -199,6 +199,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 			);
 			expect(artifact?.content).toContain(expected);
 			expect(artifact?.content).toContain("## Prompt contract");
+			expect(artifact?.content).toContain("General Zen discipline");
 			if (provider === "codex" && skill === "oal") {
 				expect(artifact?.content).toContain(
 					"explicitly spawn rendered OAL agent names or aliases",
@@ -211,11 +212,6 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	}
 	for (const provider of ["codex", "claude", "opencode"] as const) {
 		const rendered = await renderProvider(provider, graph.source, repoRoot);
-		const artifact = rendered.artifacts.find((candidate) =>
-			candidate.path.endsWith("/css-modern-features/SKILL.md"),
-		);
-		expect(artifact?.content).toContain("Modern CSS Skill");
-		expect(artifact?.content).toContain("container queries");
 		const impeccable = rendered.artifacts.find((candidate) =>
 			candidate.path.endsWith("/impeccable/SKILL.md"),
 		);
@@ -225,19 +221,11 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 		const loadContextScript = rendered.artifacts.find((candidate) =>
 			candidate.path.endsWith("/impeccable/scripts/load-context.mjs"),
 		);
-		const designWorker = rendered.artifacts.find((candidate) =>
-			candidate.path.endsWith("/design-worker/SKILL.md"),
-		);
-		const designWorkerReference = rendered.artifacts.find((candidate) =>
-			candidate.path.endsWith("/design-worker/references/worker.md"),
-		);
 		expect(impeccable?.content).toContain(
 			"Designs and iterates production-grade frontend interfaces",
 		);
 		expect(brandReference?.content).toContain("Brand");
 		expect(loadContextScript?.content).toContain("PRODUCT.md");
-		expect(designWorker?.content).toContain("Design Worker");
-		expect(designWorkerReference?.content).toContain("Worker");
 	}
 });
 
@@ -305,12 +293,33 @@ test("provider agents render inspection and correction discipline contracts", as
 		);
 		expect(agent).toContain("unexplained existing changes are user-owned");
 		expect(agent).toContain("behavior claims require source evidence");
+		expect(agent).toContain("General Zen discipline");
+		expect(agent).toContain("Errors should never pass silently.");
 		expect(agent).toContain("STATUS BLOCKED");
 		if (provider === "codex") {
 			expect(agent).toContain('name = "hephaestus"');
 			expect(agent).toContain("description = ");
 			expect(agent).toContain('nickname_candidates = ["hephaestus"]');
 		}
+	}
+});
+
+test("provider instructions render general Zen discipline", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	for (const [provider, path] of [
+		["codex", "AGENTS.md"],
+		["claude", "CLAUDE.md"],
+		["opencode", ".opencode/instructions/openagentlayer.md"],
+	] as const) {
+		const rendered = await renderProvider(provider, graph.source, repoRoot);
+		const instructions = rendered.artifacts.find(
+			(artifact) => artifact.path === path,
+		)?.content;
+		expect(instructions).toContain("General Zen discipline");
+		expect(instructions).toContain("Beautiful is better than ugly.");
+		expect(instructions).toContain(
+			"Namespaces are one honking great idea -- let's do more of those!",
+		);
 	}
 });
 

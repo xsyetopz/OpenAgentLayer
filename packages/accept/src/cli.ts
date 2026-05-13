@@ -15,7 +15,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		"macos",
 		"--homebrew-missing",
 		"--optional",
-		"ctx7,playwright,anthropic-docs,opencode-docs",
+		"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
 	]);
 	if (
 		!(
@@ -37,9 +37,13 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			toolchain.stdout.includes(
 				"bunx -p playwright playwright install --with-deps",
 			) &&
-			toolchain.stdout.includes("claude mcp add oal-anthropic-docs") &&
-			toolchain.stdout.includes("oal mcp install opencode-docs") &&
-			!toolchain.stdout.includes("\n- bunx")
+			toolchain.stdout.includes(
+				"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+			) &&
+			toolchain.stdout.includes(
+				"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+			) &&
+			!toolchain.stdout.includes("\n- npx")
 		)
 	)
 		throw new Error(
@@ -58,7 +62,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			"--provider",
 			"all",
 			"--optional",
-			"ctx7,playwright,deepwiki,anthropic-docs,opencode-docs",
+			"ctx7,playwright,deepwiki,skill-frontend-design",
 			"--rtk",
 			"--dry-run",
 		],

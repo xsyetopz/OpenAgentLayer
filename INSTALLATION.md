@@ -32,8 +32,8 @@ OAL expects:
 Recommended toolchain plan:
 
 ```bash
-bun run oal:toolchain -- --os macos --optional ctx7,playwright,anthropic-docs,opencode-docs
-bun run oal:toolchain -- --os linux --pkg apt --optional ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:toolchain -- --os macos --optional ctx7,playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:toolchain -- --os linux --pkg apt --optional ctx7,playwright,skill-frontend-design,skill-react-best-practices
 ```
 
 The plan prints copy-safe `bash` blocks. Paste command lines without Markdown list bullets.
@@ -76,16 +76,16 @@ bun run oal:preview -- --provider codex --path .codex/config.toml --content
 Plan the full setup flow without writing:
 
 ```bash
-bun run setup -- --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+bun run setup -- --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
 ```
 
 Use the source checkout convenience script to run dependency setup and the OAL CLI:
 
 ```bash
-./install.sh setup --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+./install.sh setup --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
 ```
 
-Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7,anthropic-docs,opencode-docs`.
+Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7,skill-frontend-design,skill-react-best-practices`.
 
 ## Install online
 
@@ -94,7 +94,7 @@ Use `install-online.sh` when you want the script to handle the git checkout. It 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/master/install-online.sh -o install-online.sh
 chmod +x install-online.sh
-./install-online.sh setup --scope global --provider all --toolchain --optional ctx7,anthropic-docs,opencode-docs --dry-run
+./install-online.sh setup --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
 ```
 
 Environment overrides:
@@ -138,17 +138,23 @@ The interactive path uses Commander-parsed commands plus Clack prompts. It cover
 Optional feature commands can be printed separately:
 
 ```bash
-bun run oal:features -- --install ctx7,playwright,anthropic-docs,opencode-docs
-bun run oal:features -- --remove ctx7,playwright,anthropic-docs,opencode-docs
+bun run oal:features -- --install ctx7,playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:features -- --remove ctx7,playwright,skill-frontend-design,skill-react-best-practices
 ```
 
-Feature labels use `[CLI]` for command-line setup and `[MCP]` for provider MCP configuration. `anthropic-docs` and `opencode-docs` are normal OAL-owned MCP servers registered with provider MCP commands and served by `oal mcp serve`.
+Feature labels use `[CLI]` for command-line setup, `[MCP]` for provider MCP configuration, and `[skill]` for curated external skills from officialskills.sh. Curated skill options install their source repo and named skill with `bunx skills add <repo> --skill <name>`.
+
+Print the current curated skill catalog:
+
+```bash
+bun run oal:features -- --catalog
+bun run oal:features -- --catalog --json
+bun run oal:features -- --catalog-url https://officialskills.sh/openai/skills/security-best-practices --json
+```
 
 Run an OAL-owned MCP server directly when a provider launches it:
 
 ```bash
-bun packages/cli/src/main.ts mcp serve anthropic-docs
-bun packages/cli/src/main.ts mcp serve opencode-docs
 bun packages/cli/src/main.ts mcp serve oal-inspect
 ```
 
@@ -159,7 +165,7 @@ Profiles preserve reusable setup choices in `~/.openagentlayer/config.json` by d
 Save and activate a profile:
 
 ```bash
-bun run oal:profiles -- save global --scope global --provider opencode,codex --optional ctx7,opencode-docs --codex-plan pro-20 --opencode-plan opencode-free --activate
+bun run oal:profiles -- save global --scope global --provider opencode,codex --optional ctx7,skill-frontend-design --codex-plan pro-20 --opencode-plan opencode-free --activate
 ```
 
 Inspect available profiles:
@@ -168,6 +174,9 @@ Inspect available profiles:
 bun run oal:profiles -- list
 bun run oal:profiles -- show global
 bun run oal:profiles -- args global
+bun run oal:profiles -- edit global --scope global --provider codex,opencode --optional ctx7,skill-frontend-design
+bun run oal:profiles -- rename global daily
+bun run oal:profiles -- remove daily
 ```
 
 Use a profile with setup:
@@ -322,7 +331,7 @@ Installed binary smoke test:
 ```bash
 oal check
 oal preview --provider all
-oal toolchain --os macos --optional ctx7,anthropic-docs,opencode-docs
+oal toolchain --os macos --optional ctx7,skill-frontend-design,skill-react-best-practices
 ```
 
 RTK policy check:

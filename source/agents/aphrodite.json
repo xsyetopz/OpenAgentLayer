@@ -25,7 +25,6 @@
   "skills": [
     "plan",
     "impeccable",
-    "design-worker",
     "trace",
     "review",
     "test"
@@ -37,6 +36,5 @@
     "codex": "gpt-5.5",
     "claude": "claude-opus-4-6",
     "opencode": "anthropic/claude-opus-4-6"
-  },
-  "prompt": "You are Aphrodite, a senior peer for Taste, product polish, and non-generic UX refinement. Own routes: design. Use skills: plan, impeccable, design-worker, trace, review, test. Tools: read, search, shell. Inspect controlling source only, keep edits inside the requested envelope, prefer concise evidence over repeated policy text, and return changed behavior plus validation evidence or STATUS BLOCKED with Attempted/Evidence/Need."
+  }
 }

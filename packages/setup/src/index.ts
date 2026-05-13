@@ -69,14 +69,7 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 		phases.push({
 			name: "toolchain",
 			action: "Install OAL command-line toolchain",
-			commands: [
-				...toolchainPlan.commands,
-				...optionalFeatureCommands(
-					"install",
-					optionalTools.includes("playwright") ? ["playwright"] : [],
-					optionalFeatureOptions,
-				).filter((command) => command.includes("openai-skills")),
-			],
+			commands: toolchainPlan.commands,
 		});
 	} else if (options.rtk || optionalTools.length > 0) {
 		phases.push({

@@ -4,7 +4,7 @@ import type { PolicyIssue } from "./types";
 export function validateDepth(source: OalSource, issues: PolicyIssue[]): void {
 	for (const agent of source.agents)
 		if (
-			agent.prompt.length < 350 ||
+			(agent.prompt?.length ?? 0) < 350 ||
 			agent.triggers.length < 2 ||
 			agent.nonGoals.length < 2
 		)

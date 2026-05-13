@@ -1,7 +1,9 @@
 import { expect, test } from "bun:test";
 import {
 	context7ApiKeyStatus,
+	officialSkillLinks,
 	optionalFeatureCommands,
+	parseOfficialSkillPage,
 	planToolchainInstall,
 	renderToolchainPlan,
 } from "../src";
@@ -81,48 +83,39 @@ test("optional feature commands support install and removal", () => {
 		}),
 	).toEqual(["ctx7 setup --cli --yes --codex --opencode --project"]);
 	expect(
-		optionalFeatureCommands("install", ["anthropic-docs", "opencode-docs"]),
+		optionalFeatureCommands("install", [
+			"skill-frontend-design",
+			"skill-react-best-practices",
+		]),
 	).toEqual([
-		"claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs",
-		"oal mcp install opencode-docs --provider opencode --scope global",
+		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
 	]);
 	expect(
-		optionalFeatureCommands("remove", ["anthropic-docs", "opencode-docs"]),
+		optionalFeatureCommands("remove", [
+			"skill-frontend-design",
+			"skill-react-best-practices",
+		]),
 	).toEqual([
-		"claude mcp remove oal-anthropic-docs --scope user",
-		"oal mcp remove opencode-docs --provider opencode --scope global",
-	]);
-	expect(
-		optionalFeatureCommands("install", ["anthropic-docs", "opencode-docs"], {
-			providers: ["codex", "opencode"],
-		}),
-	).toEqual([
-		"oal mcp install opencode-docs --provider opencode --scope global",
+		"# Review installed skill target before removing frontend-design with bunx skills remove frontend-design",
+		"# Review installed skill target before removing react-best-practices with bunx skills remove react-best-practices",
 	]);
 });
 
-test("Playwright optional setup installs OpenAI Playwright skill when roots are known", () => {
+test("Playwright optional setup only installs browser dependencies", () => {
 	expect(
 		optionalFeatureCommands("install", ["playwright"], {
 			providers: ["codex", "opencode"],
 			repoRoot: "/repo",
 			targetRoot: "/target",
 		}),
-	).toEqual([
-		"bunx -p playwright playwright install --with-deps",
-		"git -C '/repo' submodule update --init --recursive third_party/openai-skills",
-		"mkdir -p '/target/.codex/openagentlayer/skills/playwright' && cp -R '/repo/third_party/openai-skills/skills/.curated/playwright/.' '/target/.codex/openagentlayer/skills/playwright'",
-		"mkdir -p '/target/.opencode/skills/playwright' && cp -R '/repo/third_party/openai-skills/skills/.curated/playwright/.' '/target/.opencode/skills/playwright'",
-	]);
+	).toEqual(["bunx -p playwright playwright install --with-deps"]);
 	expect(optionalFeatureCommands("install", ["playwright"])).toEqual([
 		"bunx -p playwright playwright install --with-deps",
 	]);
 	expect(
-		optionalFeatureCommands("install", ["ctx7"], {
-			repoRoot: "/repo",
-			targetRoot: "/target",
-		}),
-	).not.toContainEqual(expect.stringContaining("openai-skills"));
+		optionalFeatureCommands("install", ["playwright"]).join("\n"),
+	).not.toContain("submodule");
 });
 
 test("Context7 API key status detects expected key format", () => {
@@ -136,6 +129,33 @@ test("Context7 API key status detects expected key format", () => {
 		present: true,
 		valid: false,
 		source: "CONTEXT7_API_KEY",
+	});
+});
+
+test("officialskills frontend pages can generate catalog entries", () => {
+	const html = `
+		<h1>security-best-practices</h1>
+		community security
+		<p>Reviews Python and TypeScript codebases.</p>
+		<p>npx skills add https://github.com/openai/skills --skill security-best-practices</p>
+		<a href="/openai/skills/security-best-practices">OpenAI</a>
+	`;
+	expect(officialSkillLinks(html)).toEqual([
+		"https://officialskills.sh/openai/skills/security-best-practices",
+	]);
+	expect(
+		parseOfficialSkillPage(
+			html,
+			"https://officialskills.sh/openai/skills/security-best-practices",
+		),
+	).toMatchObject({
+		id: "skill-security-best-practices",
+		publisher: "OpenAI",
+		name: "security-best-practices",
+		category: "security",
+		sourceStatus: "community",
+		repo: "https://github.com/openai/skills",
+		skill: "security-best-practices",
 	});
 });
 

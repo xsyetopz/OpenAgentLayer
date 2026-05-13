@@ -6,12 +6,6 @@
       "path": "third_party/caveman",
       "remote": "https://github.com/juliusbrussee/caveman.git"
     },
-    "css-modern-features": {
-      "branch": "main",
-      "commit": "d4816de6f4978da2b21b039154d657fb373fd7df",
-      "path": "third_party/css-modern-features",
-      "remote": "https://github.com/rushenn/css-modern-features.git"
-    },
     "taste-skill": {
       "branch": "main",
       "commit": "60c2de19766019297287bd26a260275e499789a9",

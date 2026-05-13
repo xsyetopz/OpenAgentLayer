@@ -26,14 +26,11 @@ export async function loadSource(sourceRoot: string): Promise<SourceGraph> {
 		join(sourceRoot, "product.json"),
 	);
 	validateProductSource(product);
+	const promptTemplates = await loadPromptTemplates(sourceRoot);
 	const source: OalSource = {
 		...product,
-		promptTemplates: await loadPromptTemplates(sourceRoot),
-		agents: await readRecords<AgentRecord>(
-			sourceRoot,
-			"agents",
-			validateAgentRecord,
-		),
+		promptTemplates,
+		agents: [],
 		skills: await loadSkillRecords(sourceRoot),
 		routes: await readRecords<RouteRecord>(
 			sourceRoot,
@@ -51,6 +48,7 @@ export async function loadSource(sourceRoot: string): Promise<SourceGraph> {
 			validateToolRecord,
 		),
 	};
+	source.agents = await loadAgentRecords(sourceRoot, promptTemplates);
 	return createSourceGraph(sourceRoot, source);
 }
 
@@ -59,6 +57,7 @@ async function loadPromptTemplates(
 ): Promise<NonNullable<ProductSource["promptTemplates"]>> {
 	const promptRoot = join(sourceRoot, "prompts");
 	return {
+		agentPrompt: await readFile(join(promptRoot, "agent-prompt.md"), "utf8"),
 		agentContract: await readFile(
 			join(promptRoot, "agent-contract.md"),
 			"utf8",
@@ -73,6 +72,45 @@ async function loadPromptTemplates(
 		),
 		instructions: await readFile(join(promptRoot, "instructions.md"), "utf8"),
 	};
+}
+
+async function loadAgentRecords(
+	sourceRoot: string,
+	promptTemplates: NonNullable<ProductSource["promptTemplates"]>,
+): Promise<AgentRecord[]> {
+	const records = await readRecords<AgentRecord>(
+		sourceRoot,
+		"agents",
+		validateAgentRecord,
+	);
+	const hydrated = records.map((record) =>
+		record.prompt
+			? record
+			: {
+					...record,
+					prompt: renderSourceTemplate(promptTemplates.agentPrompt, {
+						name: record.name,
+						role: record.role,
+						routes: record.routes.join(", ") || "none",
+						skills: record.skills.join(", ") || "none",
+						tools: record.tools.join(", ") || "none",
+					}),
+				},
+	);
+	for (const record of hydrated) validateAgentRecord(record);
+	return hydrated;
+}
+
+function renderSourceTemplate(
+	template: string,
+	values: Record<string, string>,
+): string {
+	return Object.entries(values)
+		.reduce(
+			(content, [key, value]) => content.replaceAll(`{{ ${key} }}`, value),
+			template,
+		)
+		.trim();
 }
 
 async function loadSkillRecords(sourceRoot: string): Promise<SkillRecord[]> {

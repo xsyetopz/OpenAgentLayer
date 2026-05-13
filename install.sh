@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root"
 
-default_optional="${OAL_OPTIONAL_TOOLS:-ctx7,anthropic-docs,opencode-docs}"
+default_optional="${OAL_OPTIONAL_TOOLS:-ctx7,skill-frontend-design,skill-react-best-practices}"
 
 if ! command -v bun >/dev/null 2>&1; then
   echo "error: Bun is required before running OAL install." >&2

@@ -1,10 +1,15 @@
 import {
 	isExpectedContext7ApiKey,
+	OFFICIAL_SKILL_CATALOG,
+	type OfficialSkillCatalogEntry,
 	type OperatingSystem,
 	type OptionalTool,
+	officialSkillIds,
+	officialSkillLinks,
 	optionalFeatureCommands,
 	optionalToolLabel,
 	type PackageManager,
+	parseOfficialSkillPage,
 	planToolchainInstall,
 	renderToolchainPlan,
 } from "@openagentlayer/toolchain";
@@ -30,7 +35,22 @@ export function runToolchainCommand(args: string[]): void {
 	else console.log(renderToolchainPlan(plan));
 }
 
-export function runFeaturesCommand(args: string[]): void {
+export async function runFeaturesCommand(args: string[]): Promise<void> {
+	const catalogUrl = option(args, "--catalog-url");
+	if (catalogUrl) {
+		assertOfficialSkillsUrl(catalogUrl);
+		const catalog = await fetchOfficialSkillCatalog(catalogUrl);
+		if (args.includes("--json"))
+			console.log(JSON.stringify(catalog, undefined, 2));
+		else console.log(renderOfficialSkillCatalog(catalog));
+		return;
+	}
+	if (args.includes("--catalog")) {
+		if (args.includes("--json"))
+			console.log(JSON.stringify(OFFICIAL_SKILL_CATALOG, undefined, 2));
+		else console.log(renderOfficialSkillCatalog(OFFICIAL_SKILL_CATALOG));
+		return;
+	}
 	const install = optionalTools(option(args, "--install"));
 	const remove = optionalTools(option(args, "--remove"));
 	const context7ApiKey = option(args, "--context7-api-key");
@@ -38,7 +58,7 @@ export function runFeaturesCommand(args: string[]): void {
 		throw new Error("Context7 API key must start with ctx7sk-");
 	if (install.length === 0 && remove.length === 0)
 		throw new Error(
-			"Expected `--install` or `--remove` with `ctx7,deepwiki,playwright,anthropic-docs,opencode-docs`",
+			"Expected `--install` or `--remove` with `ctx7,deepwiki,playwright,skill-frontend-design,skill-webapp-testing,skill-security-best-practices,skill-react-best-practices,skill-stripe-best-practices,skill-workers-best-practices`",
 		);
 	const commands = [
 		...optionalFeatureCommands("install", install, {
@@ -59,6 +79,52 @@ export function runFeaturesCommand(args: string[]): void {
 	);
 }
 
+function assertOfficialSkillsUrl(url: string): void {
+	const parsed = new URL(url);
+	if (parsed.protocol !== "https:" || parsed.hostname !== "officialskills.sh")
+		throw new Error("`--catalog-url` must use https://officialskills.sh/");
+}
+
+async function fetchOfficialSkillCatalog(url: string) {
+	const response = await fetch(url);
+	if (!response.ok)
+		throw new Error(
+			`Failed to fetch officialskills catalog: ${response.status}`,
+		);
+	const html = await response.text();
+	const direct = parseOfficialSkillPage(html, url);
+	if (direct) return [direct];
+	const entries: OfficialSkillCatalogEntry[] = [];
+	for (const link of officialSkillLinks(html).slice(0, 25)) {
+		const page = await fetch(link);
+		if (!page.ok) continue;
+		const entry = parseOfficialSkillPage(await page.text(), link);
+		if (entry) entries.push(entry);
+	}
+	return entries;
+}
+
+function renderOfficialSkillCatalog(
+	catalog: readonly OfficialSkillCatalogEntry[],
+): string {
+	return [
+		"# OpenAgentLayer Official Skills Catalog",
+		"",
+		...catalog.map((entry) =>
+			[
+				`## ${entry.publisher}/${entry.name}`,
+				`id: ${entry.id}`,
+				`category: ${entry.category}`,
+				`source status: ${entry.sourceStatus}`,
+				`install: bunx skills add ${entry.repo} --skill ${entry.skill}`,
+				`source: ${entry.sourceUrl}`,
+				entry.description,
+				"",
+			].join("\n"),
+		),
+	].join("\n");
+}
+
 function osOption(rawOs: string | undefined): OperatingSystem {
 	if (rawOs === "macos" || rawOs === "linux") return rawOs;
 	if (!rawOs) return process.platform === "darwin" ? "macos" : "linux";
@@ -73,12 +139,6 @@ function optionalTools(rawTools: string | undefined): OptionalTool[] {
 		.split(",")
 		.map((tool) => tool.trim())
 		.filter((tool): tool is OptionalTool =>
-			[
-				"ctx7",
-				"deepwiki",
-				"playwright",
-				"anthropic-docs",
-				"opencode-docs",
-			].includes(tool),
+			["ctx7", "deepwiki", "playwright", ...officialSkillIds()].includes(tool),
 		);
 }

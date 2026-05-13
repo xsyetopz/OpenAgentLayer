@@ -30,7 +30,8 @@ export function validateAgentRecord(record: AgentRecord): void {
 	requireStringList(record.tools, `agent ${record.id} tools`);
 	requireStringList(record.skills, `agent ${record.id} skills`);
 	requireStringList(record.routes, `agent ${record.id} routes`);
-	requireText(record.prompt, `agent ${record.id} prompt`);
+	if (record.prompt !== undefined)
+		requireText(record.prompt, `agent ${record.id} prompt`);
 }
 
 export function validateSkillRecord(record: SkillRecord): void {
@@ -176,6 +177,10 @@ export function validateProductSource(record: ProductSource): void {
 			"product promptContracts.delegationDiscipline",
 		);
 		requireText(
+			record.promptContracts.continuityDiscipline,
+			"product promptContracts.continuityDiscipline",
+		);
+		requireText(
 			record.promptContracts.accountabilityPressure,
 			"product promptContracts.accountabilityPressure",
 		);
@@ -183,8 +188,16 @@ export function validateProductSource(record: ProductSource): void {
 			record.promptContracts.simplicityDiscipline,
 			"product promptContracts.simplicityDiscipline",
 		);
+		requireText(
+			record.promptContracts.zenDiscipline,
+			"product promptContracts.zenDiscipline",
+		);
 	}
 	if (record.promptTemplates) {
+		requireText(
+			record.promptTemplates.agentPrompt,
+			"product promptTemplates.agentPrompt",
+		);
 		requireText(
 			record.promptTemplates.agentContract,
 			"product promptTemplates.agentContract",

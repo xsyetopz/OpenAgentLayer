@@ -8,6 +8,8 @@ This project is managed by OAL for **{{ provider }}**.
 - **Shared workspace:** you are not alone in the codebase. Treat any pre-existing, non-AI-authored, or unexplained change as user-owned work that must not be reverted, reformatted, overwritten, or moved without explicit user permission.
 - **Context budget:** keep repo guidance short; move detailed workflows into skills, commands, hooks, or route files.
 
+{{ zenDiscipline }}
+
 ## Routes
 
 {{ routes }}

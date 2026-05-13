@@ -1,5 +1,5 @@
 {
-  "version": "0.7.0-beta.1",
+  "version": "0.8.0-beta.1",
   "product": {
     "name": "OpenAgentLayer",
     "shortName": "OAL"
@@ -18,6 +18,7 @@
     "delegationDiscipline": "Split broad work only when ownership or evidence paths are independent; parent owns merge decisions.",
     "continuityDiscipline": "For long work, keep a short continuation record with objective, done, next, and blockers.",
     "accountabilityPressure": "The route path is inspect, prove, change, validate, report. A precise STATUS BLOCKED with Attempted/Evidence/Need is valid when evidence or permission is missing.",
-    "simplicityDiscipline": "Simplicity discipline: Prefer direct source-backed code over abstractions; move evolving workflows into skills, hooks, or commands."
+    "simplicityDiscipline": "Simplicity discipline: Prefer direct source-backed code over abstractions; move evolving workflows into skills, hooks, or commands.",
+    "zenDiscipline": "General Zen discipline: Apply the following philosophy as general-purpose engineering guidance for every language and task:\nBeautiful is better than ugly.\nExplicit is better than implicit.\nSimple is better than complex.\nComplex is better than complicated.\nFlat is better than nested.\nSparse is better than dense.\nReadability counts.\nSpecial cases aren't special enough to break the rules.\nAlthough practicality beats purity.\nErrors should never pass silently.\nUnless explicitly silenced.\nIn the face of ambiguity, refuse the temptation to guess.\nThere should be one-- and preferably only one --obvious way to do it.\nAlthough that way may not be obvious at first unless you're Dutch.\nNow is better than never.\nAlthough never is often better than *right* now.\nIf the implementation is hard to explain, it's a bad idea.\nIf the implementation is easy to explain, it may be a good idea.\nNamespaces are one honking great idea -- let's do more of those!"
   }
 }

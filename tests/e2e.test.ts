@@ -637,8 +637,6 @@ test("CLI setup dry-run plans deploy plugins tools and checks", async () => {
 	expect(stdout).toContain("rtk init -g --codex");
 	expect(stdout).toContain("ctx7 setup --cli --yes --codex --opencode");
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
-	expect(stdout).toContain("third_party/openai-skills");
-	expect(stdout).toContain(".codex/openagentlayer/skills/playwright");
 	expect(stdout).not.toContain("claude mcp add oal-deepwiki-docs");
 	expect(stdout).toContain("OpenAgentLayer deploy · dry-run");
 	expect(stdout).toContain("OpenAgentLayer plugins · dry-run");
@@ -670,7 +668,7 @@ test("CLI profiles save ordered setup state and drive setup dry-run", async () =
 			"--opencode-plan",
 			"opencode-free",
 			"--optional",
-			"ctx7,opencode-docs",
+			"ctx7,skill-frontend-design",
 			"--rtk",
 			"--activate",
 		],
@@ -707,7 +705,7 @@ test("CLI profiles save ordered setup state and drive setup dry-run", async () =
 	expect(await setup.exited).toBe(0);
 	expect(setupStderr).toBe("");
 	expect(setupStdout).toContain("providers: opencode, codex");
-	expect(setupStdout).toContain("selected: ctx7, opencode-docs");
+	expect(setupStdout).toContain("selected: ctx7, skill-frontend-design");
 	await rm(root, { recursive: true, force: true });
 });
 
@@ -898,7 +896,7 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 			"--pkg",
 			"apt",
 			"--optional",
-			"ctx7,playwright,anthropic-docs,opencode-docs",
+			"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
 		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
 	);
@@ -921,8 +919,12 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 		"ctx7 setup --cli --yes --codex --claude --opencode",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
-	expect(stdout).toContain("claude mcp add oal-anthropic-docs");
-	expect(stdout).toContain("oal mcp install opencode-docs");
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+	);
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+	);
 	expect(stdout).not.toContain("\n- bunx");
 });
 
@@ -933,7 +935,7 @@ test("CLI features shows optional install and removal commands", async () => {
 			"packages/cli/src/main.ts",
 			"features",
 			"--install",
-			"ctx7,playwright,anthropic-docs,opencode-docs",
+			"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
 			"--remove",
 			"playwright",
 		],
@@ -947,8 +949,12 @@ test("CLI features shows optional install and removal commands", async () => {
 		"ctx7 setup --cli --yes --codex --claude --opencode",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
-	expect(stdout).toContain("claude mcp add oal-anthropic-docs");
-	expect(stdout).toContain("oal mcp install opencode-docs");
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+	);
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+	);
 	expect(stdout).toContain("bunx -p playwright playwright uninstall --all");
 });
 

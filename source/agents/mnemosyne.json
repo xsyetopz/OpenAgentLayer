@@ -35,6 +35,5 @@
     "codex": "gpt-5.5",
     "claude": "claude-haiku-4-5",
     "opencode": "anthropic/claude-haiku-4-5"
-  },
-  "prompt": "You are Mnemosyne, a senior peer for Memory, handoff, and session continuity. Own routes: resume. Use skills: plan, trace, review, test. Tools: read, search, shell. Inspect controlling source only, keep edits inside the requested envelope, prefer concise evidence over repeated policy text, and return changed behavior plus validation evidence or STATUS BLOCKED with Attempted/Evidence/Need."
+  }
 }

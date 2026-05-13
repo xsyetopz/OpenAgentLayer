@@ -65,43 +65,37 @@ addRenderOptions(
 	.option("--dry-run", "print planned setup without writing")
 	.option("--verbose", "print detailed setup output")
 	.option("--quiet", "suppress normal setup output")
-	.option(
-		"--optional <tools>",
-		"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
-	)
+	.option("--optional <tools>", "comma-separated optional tool or skill ids")
 	.option("--toolchain", "install OAL command-line toolchain when missing")
 	.option("--rtk", "install/init RTK policy surfaces")
 	.option("--ctx7-cli", "install/configure Context7 CLI")
 	.option("--context7-api-key <key>", "Context7 API key for higher rate limits")
 	.option("--playwright-cli", "install/configure Playwright CLI")
 	.option("--deepwiki-mcp", "configure DeepWiki MCP where supported")
-	.option("--anthropic-docs-mcp", "configure Anthropic/Claude docs MCP")
-	.option("--opencode-docs-mcp", "configure OpenCode docs MCP")
 	.action((options) => runSetupCommand(repoRoot, argsFromOptions(options)));
 
 addRenderOptions(
 	program
 		.command("profiles")
-		.description("list, show, save, activate, or remove setup profiles")
-		.argument("[action]", "list, show, save, use, remove, or args", "list")
-		.argument("[name]", "profile name")
+		.description(
+			"list, show, save, edit, activate, rename, or remove setup profiles",
+		)
+		.argument(
+			"[action]",
+			"list, show, save, edit, use, rename, remove, or args",
+			"list",
+		)
+		.argument("[values...]", "profile names or action values")
 		.option("--config <path>", "OAL config file")
 		.option("--target <dir>", "project target directory")
 		.option("--bin-dir <dir>", "global executable directory")
-		.option(
-			"--optional <tools>",
-			"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
-		)
+		.option("--optional <tools>", "comma-separated optional tool or skill ids")
 		.option("--toolchain", "install OAL command-line toolchain when missing")
 		.option("--rtk", "install/init RTK policy surfaces")
 		.option("--verbose", "print detailed setup output")
 		.option("--activate", "activate the saved profile")
-		.action((action: string, name: string | undefined, options) =>
-			runProfilesCommand([
-				action,
-				...(name ? [name] : []),
-				...argsFromOptions(options),
-			]),
+		.action((action: string, values: string[], options) =>
+			runProfilesCommand([action, ...values, ...argsFromOptions(options)]),
 		),
 );
 
@@ -116,10 +110,7 @@ addRenderOptions(
 		.option("--config <path>", "OAL config file")
 		.option("--target <dir>", "project target directory")
 		.option("--bin-dir <dir>", "global executable directory")
-		.option(
-			"--optional <tools>",
-			"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
-		)
+		.option("--optional <tools>", "comma-separated optional tool or skill ids")
 		.option("--json", "print structured JSON")
 		.action((action: string, options) =>
 			runStateCommand(repoRoot, [action, ...argsFromOptions(options)]),
@@ -252,10 +243,7 @@ program
 	.description("print OS package-manager setup commands")
 	.option("--os <os>", "macos or linux")
 	.option("--pkg <manager>", "brew, apt, dnf, pacman, zypper, or apk")
-	.option(
-		"--optional <tools>",
-		"comma-separated ctx7,deepwiki,playwright,anthropic-docs,opencode-docs",
-	)
+	.option("--optional <tools>", "comma-separated optional tool or skill ids")
 	.option("--json", "print JSON")
 	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.option("--homebrew-missing", "pretend Homebrew is missing on macOS")
@@ -266,6 +254,9 @@ program
 	.description("print optional feature install or removal commands")
 	.option("--install <tools>", "comma-separated optional tools")
 	.option("--remove <tools>", "comma-separated optional tools")
+	.option("--catalog", "print curated officialskills.sh catalog")
+	.option("--catalog-url <url>", "fetch and parse an officialskills.sh page")
+	.option("--json", "print catalog as JSON")
 	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.action((options) => runFeaturesCommand(argsFromOptions(options)));
 
@@ -330,7 +321,7 @@ program
 	.command("mcp")
 	.description("run or configure OAL-owned MCP servers")
 	.argument("<action>", "serve, install, or remove")
-	.argument("<server>", "anthropic-docs, opencode-docs, or oal-inspect")
+	.argument("<server>", "oal-inspect")
 	.option("--provider <provider>", "opencode for config install/remove")
 	.option("--scope <scope>", "project or global", "global")
 	.option("--home <dir>", "home directory for global scope")
@@ -500,15 +491,15 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--from-file", options["fromFile"]);
 	pushValue(args, "--project", options["project"]);
 	pushValue(args, "--db", options["db"]);
+	pushValue(args, "--catalog-url", options["catalogUrl"]);
 	pushFlag(args, "--content", options["content"]);
 	pushFlag(args, "--installed", options["installed"]);
+	pushFlag(args, "--catalog", options["catalog"]);
 	pushFlag(args, "--toolchain", options["toolchain"]);
 	pushFlag(args, "--rtk", options["rtk"]);
 	pushFlag(args, "--ctx7-cli", options["ctx7Cli"]);
 	pushFlag(args, "--playwright-cli", options["playwrightCli"]);
 	pushFlag(args, "--deepwiki-mcp", options["deepwikiMcp"]);
-	pushFlag(args, "--anthropic-docs-mcp", options["anthropicDocsMcp"]);
-	pushFlag(args, "--opencode-docs-mcp", options["opencodeDocsMcp"]);
 	pushFlag(args, "--dry-run", options["dryRun"]);
 	pushFlag(args, "--diff", options["diff"]);
 	pushFlag(args, "--skip-bin", options["skipBin"]);

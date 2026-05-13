@@ -9,6 +9,7 @@ import {
 import {
 	isExpectedContext7ApiKey,
 	type OptionalTool,
+	officialSkillIds,
 } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
 import {
@@ -146,16 +147,15 @@ function setupOptionalTools(args: string[]): OptionalTool[] {
 			tool === "ctx7" ||
 			tool === "deepwiki" ||
 			tool === "playwright" ||
-			tool === "anthropic-docs" ||
-			tool === "opencode-docs"
+			officialSkillIds().includes(
+				tool as ReturnType<typeof officialSkillIds>[number],
+			)
 		)
-			tools.add(tool);
+			tools.add(tool as OptionalTool);
 	}
 	if (flag(args, "--ctx7-cli")) tools.add("ctx7");
 	if (flag(args, "--playwright-cli")) tools.add("playwright");
 	if (flag(args, "--deepwiki-mcp")) tools.add("deepwiki");
-	if (flag(args, "--anthropic-docs-mcp")) tools.add("anthropic-docs");
-	if (flag(args, "--opencode-docs-mcp")) tools.add("opencode-docs");
 	return [...tools];
 }
 

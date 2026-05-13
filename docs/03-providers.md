@@ -32,22 +32,15 @@ OAL renders `.claude/settings.json`, `.claude/agents/*.md`,
 `.claude/skills/*/SKILL.md`, `.claude/hooks/scripts/*.mjs`,
 `.claude/commands/*.md`, and `CLAUDE.md`.
 
-Anthropic Docs MCP is OAL-owned and can be registered with Claude Code:
-
-```bash
-claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs
-```
-
 ## OpenCode
 
 OAL renders `opencode.jsonc`, `.opencode/agents/*.md`,
 `.opencode/commands/*.md`, `.opencode/tools/*.ts`,
 `.opencode/plugins/openagentlayer.ts`, instructions, and executable hooks.
 
-OpenCode Docs and OAL Inspect MCP servers can be installed through OAL:
+OAL Inspect MCP can be installed through OAL:
 
 ```bash
-oal mcp install opencode-docs --provider opencode --scope global
 oal mcp install oal-inspect --provider opencode --scope global
 ```
 

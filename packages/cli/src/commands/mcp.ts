@@ -7,7 +7,7 @@ import { type InspectTopic, inspectTopic } from "@openagentlayer/inspect";
 import { loadSource } from "@openagentlayer/source";
 import { option } from "../arguments";
 
-type McpServer = "anthropic-docs" | "opencode-docs" | "oal-inspect";
+type McpServer = "oal-inspect";
 type McpAction = "serve" | "install" | "remove";
 
 interface JsonRpcRequest {
@@ -17,40 +17,6 @@ interface JsonRpcRequest {
 }
 
 const MCP_SERVERS = {
-	"anthropic-docs": {
-		name: "oal-anthropic-docs",
-		title: "Anthropic Docs",
-		skill: "anthropic-docs",
-		description:
-			"Use OAL Anthropic Docs skill guidance for Anthropic API and Claude Code docs",
-		references: [
-			["Anthropic platform docs", "https://platform.claude.com/docs/en/home"],
-			["Claude Code docs", "https://code.claude.com/docs/"],
-			["Claude Code settings", "https://code.claude.com/docs/en/settings"],
-			["Claude Code hooks", "https://code.claude.com/docs/en/hooks"],
-			["Claude Code skills", "https://code.claude.com/docs/en/skills"],
-			[
-				"Claude Code plugins",
-				"https://code.claude.com/docs/en/plugins-reference",
-			],
-		],
-	},
-	"opencode-docs": {
-		name: "oal-opencode-docs",
-		title: "OpenCode Docs",
-		skill: "opencode-docs",
-		description:
-			"Use OAL OpenCode Docs skill guidance for OpenCode config, tools, plugins, agents, permissions, and MCP",
-		references: [
-			["OpenCode docs", "https://opencode.ai/docs/"],
-			["OpenCode config schema", "https://opencode.ai/config.json"],
-			["OpenCode config", "https://opencode.ai/docs/config/"],
-			["OpenCode plugins", "https://opencode.ai/docs/plugins/"],
-			["OpenCode tools", "https://opencode.ai/docs/tools/"],
-			["OpenCode custom tools", "https://opencode.ai/docs/custom-tools/"],
-			["OpenCode agents", "https://opencode.ai/docs/agents/"],
-		],
-	},
 	"oal-inspect": {
 		name: "oal-inspect",
 		title: "OAL Inspect",
@@ -73,10 +39,7 @@ export async function runMcpCommand(
 	if (!action)
 		throw new Error("Expected MCP action: serve, install, or remove");
 	const server = mcpServer(args[1]);
-	if (!server)
-		throw new Error(
-			"Expected MCP server: anthropic-docs, opencode-docs, or oal-inspect.",
-		);
+	if (!server) throw new Error("Expected MCP server: oal-inspect");
 	if (action === "serve") await runMcpServer(repoRoot, server);
 	else await configureMcpServer(action, server, args.slice(2));
 }
@@ -122,7 +85,7 @@ async function handleRequest(
 			jsonrpc: "2.0",
 			id: request.id,
 			result: {
-				tools: server === "oal-inspect" ? inspectTools() : docsTools(docs),
+				tools: inspectTools(),
 			},
 		};
 	if (request.method === "tools/call")
@@ -156,48 +119,11 @@ async function toolCall(
 			},
 		};
 	}
-	if (toolName !== "search_docs" && toolName !== "list_docs")
-		return {
-			jsonrpc: "2.0",
-			id: request.id,
-			error: { code: -32602, message: "Unknown docs tool" },
-		};
-	const query = String(
-		(request.params?.["arguments"] as Record<string, unknown> | undefined)?.[
-			"query"
-		] ?? "",
-	);
 	return {
 		jsonrpc: "2.0",
 		id: request.id,
-		result: {
-			content: [{ type: "text", text: docsText(server, query) }],
-		},
+		error: { code: -32602, message: "Unknown OAL inspect tool" },
 	};
-}
-
-function docsTools(docs: (typeof MCP_SERVERS)[McpServer]): unknown[] {
-	return [
-		{
-			name: "search_docs",
-			description: docs.description,
-			inputSchema: {
-				type: "object",
-				properties: {
-					query: {
-						type: "string",
-						description:
-							"Question or topic to match against OAL docs references",
-					},
-				},
-			},
-		},
-		{
-			name: "list_docs",
-			description: `List \`${docs.title}\` URLs and OAL skill instructions`,
-			inputSchema: { type: "object", properties: {} },
-		},
-	];
 }
 
 function inspectTools(): unknown[] {
@@ -238,27 +164,8 @@ function inspectTopicName(name: string): InspectTopic | undefined {
 	return undefined;
 }
 
-function docsText(server: McpServer, query: string): string {
-	const docs = MCP_SERVERS[server];
-	return [
-		`${docs.title} via OAL skill ${docs.skill}`,
-		docs.description,
-		query ? `Query: ${query}` : "",
-		"References:",
-		...docs.references.map(([label, url]) => `- ${label}: ${url}`),
-		"Use these references as source truth before provider behavior changes.",
-	]
-		.filter(Boolean)
-		.join("\n");
-}
-
 function mcpServer(value: string | undefined): McpServer | undefined {
-	if (
-		value === "anthropic-docs" ||
-		value === "opencode-docs" ||
-		value === "oal-inspect"
-	)
-		return value;
+	if (value === "oal-inspect") return value;
 	return undefined;
 }
 
@@ -273,10 +180,6 @@ async function configureMcpServer(
 	server: McpServer,
 	args: string[],
 ): Promise<void> {
-	if (server !== "opencode-docs" && server !== "oal-inspect")
-		throw new Error(
-			"Only `opencode-docs` and `oal-inspect` have OAL-managed MCP config install.",
-		);
 	const provider = option(args, "--provider") ?? "opencode";
 	if (provider !== "opencode")
 		throw new Error("Only `--provider opencode` is supported for MCP config");

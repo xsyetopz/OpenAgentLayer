@@ -1,3 +1,19 @@
+export {
+	OFFICIAL_SKILL_CATALOG,
+	type OfficialSkillCatalogEntry,
+	type OfficialSkillId,
+	officialSkillById,
+	officialSkillIds,
+	officialSkillLinks,
+	parseOfficialSkillPage,
+} from "./official-skills";
+
+import {
+	OFFICIAL_SKILL_CATALOG,
+	type OfficialSkillId,
+	officialSkillById,
+} from "./official-skills";
+
 export type OperatingSystem = "macos" | "linux";
 export type PackageManager =
 	| "brew"
@@ -6,12 +22,7 @@ export type PackageManager =
 	| "pacman"
 	| "zypper"
 	| "apk";
-export type OptionalTool =
-	| "ctx7"
-	| "deepwiki"
-	| "playwright"
-	| "anthropic-docs"
-	| "opencode-docs";
+export type OptionalTool = "ctx7" | "deepwiki" | "playwright" | OfficialSkillId;
 export type OptionalToolAction = "install" | "remove";
 export type OptionalToolProvider = "codex" | "claude" | "opencode";
 export type OptionalToolScope = "global" | "project";
@@ -55,9 +66,13 @@ const OPTIONAL_TOOL_LABELS: Record<OptionalTool, string> = {
 	ctx7: "ctx7 [CLI]",
 	deepwiki: "deepwiki [MCP]",
 	playwright: "playwright [CLI]",
-	"anthropic-docs": "Anthropic Docs [MCP]",
-	"opencode-docs": "OpenCode Docs [MCP]",
-};
+	...Object.fromEntries(
+		OFFICIAL_SKILL_CATALOG.map((entry) => [
+			entry.id,
+			`${entry.publisher} ${entry.name} [skill]`,
+		]),
+	),
+} as Record<OptionalTool, string>;
 
 const CORE_TOOLS = [
 	"bun",
@@ -275,63 +290,28 @@ export function optionalFeatureCommands(
 				? "claude mcp add oal-deepwiki-docs --scope user -- bunx ctx7@latest mcp deepwiki"
 				: "claude mcp remove oal-deepwiki-docs --scope user",
 		);
-	if (optionalTools.includes("anthropic-docs") && providers.includes("claude"))
-		commands.push(
-			action === "install"
-				? "claude mcp add oal-anthropic-docs --scope user -- oal mcp serve anthropic-docs"
-				: "claude mcp remove oal-anthropic-docs --scope user",
-		);
-	if (optionalTools.includes("opencode-docs") && providers.includes("opencode"))
-		commands.push(
-			action === "install"
-				? `oal mcp install opencode-docs --provider opencode --scope ${options.scope ?? "global"}`
-				: `oal mcp remove opencode-docs --provider opencode --scope ${options.scope ?? "global"}`,
-		);
 	if (optionalTools.includes("playwright")) {
 		commands.push(
 			action === "install"
 				? "bunx -p playwright playwright install --with-deps"
 				: "bunx -p playwright playwright uninstall --all",
 		);
-		commands.push(...playwrightSkillCommands(action, options));
+	}
+	for (const tool of optionalTools) {
+		const command = officialSkillById(tool);
+		if (!command) continue;
+		commands.push(officialSkillCommand(action, command));
 	}
 	return commands;
 }
 
-function playwrightSkillCommands(
+function officialSkillCommand(
 	action: OptionalToolAction,
-	options: OptionalFeatureCommandOptions,
-): string[] {
-	if (!(options.repoRoot && options.targetRoot)) return [];
-	const providers = options.providers ?? ["codex", "claude", "opencode"];
-	const sourcePath = `${options.repoRoot}/third_party/openai-skills/skills/.curated/playwright`;
-	if (action !== "install") return [];
-	return [
-		`git -C ${shellQuote(options.repoRoot)} submodule update --init --recursive third_party/openai-skills`,
-		...playwrightSkillDestinationRoots(options.targetRoot, providers).map(
-			(destinationRoot) =>
-				[
-					`mkdir -p ${shellQuote(`${destinationRoot}/playwright`)}`,
-					`cp -R ${shellQuote(`${sourcePath}/.`)} ${shellQuote(`${destinationRoot}/playwright`)}`,
-				].join(" && "),
-		),
-	];
-}
-
-function playwrightSkillDestinationRoots(
-	targetRoot: string,
-	providers: OptionalToolProvider[],
-): string[] {
-	return providers.map((provider) => {
-		switch (provider) {
-			case "codex":
-				return `${targetRoot}/.codex/openagentlayer/skills`;
-			case "claude":
-				return `${targetRoot}/.claude/skills`;
-			default:
-				return `${targetRoot}/.opencode/skills`;
-		}
-	});
+	command: { repo: string; skill: string },
+): string {
+	if (action === "remove")
+		return `# Review installed skill target before removing ${command.skill} with bunx skills remove ${command.skill}`;
+	return `bunx skills add ${command.repo} --skill ${command.skill}`;
 }
 
 function ctx7Command(

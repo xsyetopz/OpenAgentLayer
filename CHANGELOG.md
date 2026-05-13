@@ -5,7 +5,7 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.7.0-beta.1] - 2026-05-13
+## [0.8.0-beta.1] - 2026-05-13
 
 ### Added
 
@@ -13,18 +13,24 @@ material only and is not part of the OAL release line.
 - Added a cross-platform app skill with Flutter/Dart defaults, C# + Avalonia desktop guidance, and C# + MonoGame game guidance.
 - Added rscheck-backed OpenDex linting alongside workspace and test clippy gates.
 - Added compact skill-intake guidance for using external catalogs as discovery input while keeping OAL skills local and reusable.
+- Added curated officialskills.sh entries as optional setup/features checkboxes for installing individual external skills.
+- Added `oal features --catalog` and `--catalog-url` surfaces that render officialskills.sh catalogs and single-skill pages.
+- Added source-owned agent prompt hydration through `source/prompts/agent-prompt.md`.
 
 ### Changed
 
 - Replaced the legacy Symphony package, CLI command, submodule, and generated guidance with OpenDex surfaces.
 - Consolidated overlapping command-safety hooks into `block-command-safety`.
 - Strengthened session and subagent prompt guidance for exact hook-command obedience while keeping the injected prompt compact.
-- Updated release metadata from `0.6.0-beta.12` to `0.7.0-beta.1`.
+- Changed optional skill install/remove commands to use `bunx skills`.
+- Changed provider prompt contracts to include the verbatim Zen of Python as general-purpose engineering guidance.
+- Updated release metadata from `0.7.0-beta.1` to `0.8.0-beta.1`.
 
 ### Removed
 
 - Removed legacy Symphony package sources, workspace dependency links, CLI wiring, and submodule registration.
 - Removed stale and duplicate hook records for command advice, protected-branch checks, unsafe git checks, destructive commands, weak blocked status, and validation-evidence completion.
+- Removed stale third-party skill and MCP surfaces for openai-skills, robertmsale, css-modern-features, anthropic-docs, and opencode-docs.
 
 ### Verified
 

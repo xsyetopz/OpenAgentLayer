@@ -11,6 +11,8 @@
 - **Markdown contract:** use headings for hierarchy, lists for steps, fenced code blocks with language identifiers for examples, inline code for literals, and emphasis where wording needs it.
 - **Attribution contract:** when external standards or guides influence the result, include a concise `## References` section with descriptive links.
 
+{{ productPromptContracts }}
+
 ## Bundled support files
 
 {{ supportFiles }}
