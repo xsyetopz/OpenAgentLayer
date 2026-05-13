@@ -1,6 +1,6 @@
 {
-  "id": "trace",
-  "title": "Trace",
+  "id": "tracing",
+  "title": "Tracing",
   "providers": [
     "codex",
     "claude",
@@ -11,11 +11,11 @@
   "supportFiles": [
     {
       "path": "references/trace.md",
-      "source": "skill-resources/trace/references/trace.md"
+      "source": "skill-resources/tracing/references/trace.md"
     },
     {
       "path": "assets/trace.md",
-      "source": "skill-resources/trace/assets/trace.md"
+      "source": "skill-resources/tracing/assets/trace.md"
     }
   ]
 }

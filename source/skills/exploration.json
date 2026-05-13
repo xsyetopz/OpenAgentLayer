@@ -1,6 +1,6 @@
 {
-  "id": "explore",
-  "title": "Explore",
+  "id": "exploration",
+  "title": "Exploration",
   "providers": [
     "codex",
     "claude",
@@ -11,11 +11,11 @@
   "supportFiles": [
     {
       "path": "references/map.md",
-      "source": "skill-resources/explore/references/map.md"
+      "source": "skill-resources/exploration/references/map.md"
     },
     {
       "path": "assets/map-template.md",
-      "source": "skill-resources/explore/assets/map-template.md"
+      "source": "skill-resources/exploration/assets/map-template.md"
     }
   ]
 }

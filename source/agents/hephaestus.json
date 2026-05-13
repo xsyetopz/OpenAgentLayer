@@ -25,18 +25,18 @@
     "patch"
   ],
   "skills": [
-    "plan",
-    "implement",
+    "planning",
+    "implementation",
     "cross-platform-app",
-    "test",
-    "secure",
-    "git",
-    "elevate",
-    "delete",
-    "parse"
+    "testing",
+    "safety",
+    "git-workflow",
+    "privileged-execution",
+    "safe-deletion",
+    "command-analysis"
   ],
   "routes": [
-    "implement"
+    "implementation"
   ],
   "models": {
     "codex": "gpt-5.3-codex",

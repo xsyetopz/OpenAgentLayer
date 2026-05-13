@@ -171,13 +171,14 @@ function claudeToolNames(tool: string): string[] {
 function delegationCapable(agent: AgentRecord): boolean {
 	return (
 		agent.routes.includes("orchestrate") ||
-		agent.routes.includes("implement") ||
-		agent.routes.includes("plan") ||
-		agent.routes.includes("explore") ||
-		agent.routes.includes("trace") ||
+		agent.routes.includes("implementation") ||
+		agent.routes.includes("planning") ||
+		agent.routes.includes("exploration") ||
+		agent.routes.includes("tracing") ||
 		agent.routes.includes("validate") ||
-		agent.routes.includes("test") ||
+		agent.routes.includes("testing") ||
 		agent.routes.includes("review") ||
-		agent.routes.includes("document")
+		agent.routes.includes("documentation") ||
+		agent.routes.includes("plain-language-writing")
 	);
 }

@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "test",
-    "debug",
-    "trace",
-    "elevate",
-    "parse"
+    "testing",
+    "debugging",
+    "tracing",
+    "privileged-execution",
+    "command-analysis"
   ],
   "routes": [
-    "test",
+    "testing",
     "validate",
     "accept"
   ],

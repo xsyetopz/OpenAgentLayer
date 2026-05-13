@@ -23,12 +23,12 @@
     "shell"
   ],
   "skills": [
-    "prompt",
-    "plan",
+    "prompt-engineering",
+    "planning",
     "review"
   ],
   "routes": [
-    "document"
+    "documentation"
   ],
   "models": {
     "codex": "gpt-5.5",

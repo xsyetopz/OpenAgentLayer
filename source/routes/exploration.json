@@ -1,5 +1,5 @@
 {
-  "id": "explore",
+  "id": "exploration",
   "providers": [
     "codex",
     "claude",
@@ -7,8 +7,8 @@
   ],
   "agent": "hermes",
   "skills": [
-    "explore",
-    "parse"
+    "exploration",
+    "command-analysis"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

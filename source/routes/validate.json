@@ -7,9 +7,9 @@
   ],
   "agent": "atalanta",
   "skills": [
-    "test",
-    "parse",
-    "elevate"
+    "testing",
+    "command-analysis",
+    "privileged-execution"
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",

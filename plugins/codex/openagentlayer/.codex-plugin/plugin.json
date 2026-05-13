@@ -1,6 +1,6 @@
 {
   "name": "oal",
-  "version": "0.8.0-beta.1",
+  "version": "0.8.0-beta.2",
   "description": "OpenAgentLayer Codex plugin payload with generated skills and runtime hooks.",
   "publisher": "xsyetopz",
   "homepage": "https://github.com/xsyetopz/OpenAgentLayer"

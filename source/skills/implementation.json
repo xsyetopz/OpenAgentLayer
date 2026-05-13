@@ -1,6 +1,6 @@
 {
-  "id": "implement",
-  "title": "Implement",
+  "id": "implementation",
+  "title": "Code Implementation",
   "providers": [
     "codex",
     "claude",
@@ -11,7 +11,7 @@
   "supportFiles": [
     {
       "path": "references/contract.md",
-      "source": "skill-resources/implement/references/contract.md"
+      "source": "skill-resources/implementation/references/contract.md"
     },
     {
       "path": "references/simplicity.md",
@@ -19,7 +19,7 @@
     },
     {
       "path": "scripts/source-evidence-check.mjs",
-      "source": "skill-resources/implement/scripts/source-evidence-check.mjs",
+      "source": "skill-resources/implementation/scripts/source-evidence-check.mjs",
       "executable": true
     }
   ]

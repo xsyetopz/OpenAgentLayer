@@ -1,6 +1,6 @@
 {
-  "id": "document",
-  "title": "Document",
+  "id": "documentation",
+  "title": "Documentation",
   "providers": [
     "codex",
     "claude",
@@ -11,15 +11,15 @@
   "supportFiles": [
     {
       "path": "references/doc-standard.md",
-      "source": "skill-resources/document/references/doc-standard.md"
+      "source": "skill-resources/documentation/references/doc-standard.md"
     },
     {
       "path": "assets/change-note.md",
-      "source": "skill-resources/document/assets/change-note.md"
+      "source": "skill-resources/documentation/assets/change-note.md"
     },
     {
       "path": "references/markdown.md",
-      "source": "skill-resources/document/references/markdown.md"
+      "source": "skill-resources/documentation/references/markdown.md"
     }
   ]
 }

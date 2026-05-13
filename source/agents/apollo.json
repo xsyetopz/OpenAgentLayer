@@ -25,16 +25,16 @@
     "patch"
   ],
   "skills": [
-    "plan",
+    "planning",
     "design",
     "impeccable",
     "cross-platform-app",
-    "implement",
-    "test",
-    "secure",
-    "elevate",
-    "delete",
-    "parse"
+    "implementation",
+    "testing",
+    "safety",
+    "privileged-execution",
+    "safe-deletion",
+    "command-analysis"
   ],
   "routes": [
     "design"

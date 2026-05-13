@@ -1,6 +1,6 @@
 {
-  "id": "test",
-  "title": "Test",
+  "id": "testing",
+  "title": "Testing",
   "providers": [
     "codex",
     "claude",
@@ -11,20 +11,20 @@
   "supportFiles": [
     {
       "path": "references/tdd.md",
-      "source": "skill-resources/test/references/tdd.md"
+      "source": "skill-resources/testing/references/tdd.md"
     },
     {
       "path": "scripts/hook-fixture.mjs",
-      "source": "skill-resources/test/scripts/hook-fixture.mjs",
+      "source": "skill-resources/testing/scripts/hook-fixture.mjs",
       "executable": true
     },
     {
       "path": "references/language-suites.md",
-      "source": "skill-resources/test/references/language-suites.md"
+      "source": "skill-resources/testing/references/language-suites.md"
     },
     {
       "path": "scripts/detect-rust-inline-tests.mjs",
-      "source": "skill-resources/test/scripts/detect-rust-inline-tests.mjs",
+      "source": "skill-resources/testing/scripts/detect-rust-inline-tests.mjs",
       "executable": true
     }
   ]

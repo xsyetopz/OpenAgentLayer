@@ -5,6 +5,26 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.8.0-beta.2] - 2026-05-14
+
+### Added
+
+- Added officialskills.sh category parsing and tabbed install browsing for the interactive OAL CLI.
+- Added full fetched official skill catalog support, including `--category` filtering and `--install all` for fetched catalogs.
+
+### Changed
+
+- Reworked the interactive CLI command hub around task-oriented Start, Inspect, Artifacts, Extend, and Manage sections.
+- Renamed OAL-owned skill and route identifiers to self-documenting action/domain names for slash-command surfaces.
+- Updated agent, route, acceptance, and provider contracts to use the renamed OAL skill surfaces.
+- Updated release metadata from `0.8.0-beta.1` to `0.8.0-beta.2`.
+
+### Verified
+
+- `bunx biome check source/skills source/routes source/agents packages/adapter/src/claude.ts packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/accept/src packages/cli/src/interactive.ts packages/cli/src/commands/toolchain.ts packages/cli/src/main.ts packages/cli/__tests__/cli.test.ts packages/toolchain/src packages/toolchain/__tests__/toolchain.test.ts --max-diagnostics 400`
+- `bun test packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/toolchain/__tests__/toolchain.test.ts packages/cli/__tests__/cli.test.ts`
+- `bun run oal:accept`
+
 ## [0.8.0-beta.1] - 2026-05-13
 
 ### Added

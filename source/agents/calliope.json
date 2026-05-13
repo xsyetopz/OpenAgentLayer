@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "document",
+    "documentation",
     "handoff",
-    "plan",
-    "document-plain"
+    "planning",
+    "plain-language-writing"
   ],
   "routes": [
-    "document",
-    "document-plain"
+    "documentation",
+    "plain-language-writing"
   ],
   "models": {
     "codex": "gpt-5.5",

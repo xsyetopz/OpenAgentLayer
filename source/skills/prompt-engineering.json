@@ -1,6 +1,6 @@
 {
-  "id": "prompt",
-  "title": "Prompt",
+  "id": "prompt-engineering",
+  "title": "Prompt Engineering",
   "providers": [
     "codex",
     "claude",
@@ -11,15 +11,15 @@
   "supportFiles": [
     {
       "path": "references/prompt.md",
-      "source": "skill-resources/prompt/references/prompt.md"
+      "source": "skill-resources/prompt-engineering/references/prompt.md"
     },
     {
       "path": "assets/contract.md",
-      "source": "skill-resources/prompt/assets/contract.md"
+      "source": "skill-resources/prompt-engineering/assets/contract.md"
     },
     {
       "path": "references/markdown-prompts.md",
-      "source": "skill-resources/prompt/references/markdown-prompts.md"
+      "source": "skill-resources/prompt-engineering/references/markdown-prompts.md"
     }
   ]
 }

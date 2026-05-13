@@ -10,7 +10,7 @@
     "design",
     "impeccable",
     "cross-platform-app",
-    "parse"
+    "command-analysis"
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",

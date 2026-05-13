@@ -23,6 +23,7 @@ import {
 	PROFILE_ACTION_OPTIONS,
 	setupProfileChoices,
 	UNINSTALL_PROVIDER_OPTIONS,
+	WORKFLOW_OPTIONS,
 } from "../src/interactive";
 import { renderOptions } from "../src/model-options";
 import { printDeployReport } from "../src/output";
@@ -353,6 +354,27 @@ test("interactive profile menu exposes removal", () => {
 	]);
 });
 
+test("interactive command hub is recategorized by job", () => {
+	expect(WORKFLOW_OPTIONS.map((option) => option.value)).toEqual([
+		"setup",
+		"repair",
+		"status",
+		"validate",
+		"artifacts",
+		"deploy",
+		"skills",
+		"plugins",
+		"profiles",
+		"uninstall",
+	]);
+	expect(WORKFLOW_OPTIONS.map((option) => option.label).join("\n")).toContain(
+		"Extend · Official skills",
+	);
+	expect(WORKFLOW_OPTIONS.map((option) => option.label).join("\n")).toContain(
+		"Artifacts · Deploy provider files",
+	);
+});
+
 test("profiles command renames saved profiles and preserves active profile", async () => {
 	const root = await mkdtemp(`${tmpdir()}/oal-profiles-`);
 	const config = `${root}/config.json`;
@@ -459,13 +481,13 @@ test("interactive cleanup menus expose multi-selectable choices", () => {
 	expect(OPTIONAL_FEATURE_OPTIONS.map((option) => option.value)).toEqual([
 		"ctx7",
 		"playwright",
+		"deepwiki",
 		"skill-frontend-design",
 		"skill-webapp-testing",
 		"skill-security-best-practices",
 		"skill-react-best-practices",
 		"skill-stripe-best-practices",
 		"skill-workers-best-practices",
-		"deepwiki",
 	]);
 });
 
@@ -516,6 +538,67 @@ test("features command restricts fetched catalogs to officialskills", async () =
 	await expect(
 		runFeaturesCommand(["--catalog-url", "https://example.com/skills/demo"]),
 	).rejects.toThrow("`--catalog-url` must use https://officialskills.sh/");
+});
+
+test("features command installs all fetched skills in a website tab", async () => {
+	const originalFetch = globalThis.fetch;
+	globalThis.fetch = ((url: string) => {
+		const htmlByUrl: Record<string, string> = {
+			"https://officialskills.sh/": `
+				<script src="/assets/main.js"></script>
+				<a href="/openai/skills/security-best-practices">Security</a>
+				<a href="/cloudflare/skills/workers-best-practices">Workers</a>
+				<a href="/anthropics/skills/frontend-design">Design</a>
+			`,
+			"https://officialskills.sh/assets/main.js": `
+				{slug:"openai/security-best-practices",name:"security-best-practices",description:"Security checks",owner:"openai",category:"security"}
+				{slug:"cloudflare/workers-best-practices",name:"workers-best-practices",description:"Workers",owner:"cloudflare",category:"infrastructure"}
+				{slug:"anthropics/frontend-design",name:"frontend-design",description:"Design",owner:"anthropics",category:"design"}
+			`,
+			"https://officialskills.sh/openai/skills/security-best-practices": `
+				security community
+				<p>npx skills add https://github.com/openai/skills --skill security-best-practices</p>
+			`,
+			"https://officialskills.sh/cloudflare/skills/workers-best-practices": `
+				infrastructure official
+				<p>npx skills add https://github.com/cloudflare/skills --skill workers-best-practices</p>
+			`,
+			"https://officialskills.sh/anthropics/skills/frontend-design": `
+				design official
+				<p>npx skills add https://github.com/anthropics/skills --skill frontend-design</p>
+			`,
+		};
+		return Promise.resolve(
+			new Response(htmlByUrl[url] ?? "", {
+				status: htmlByUrl[url] ? 200 : 404,
+			}),
+		);
+	}) as typeof fetch;
+	const lines: string[] = [];
+	const originalLog = console.log;
+	console.log = (message?: unknown) => {
+		lines.push(String(message));
+	};
+	try {
+		await runFeaturesCommand([
+			"--catalog-url",
+			"https://officialskills.sh/",
+			"--category",
+			"security",
+			"--install",
+			"all",
+		]);
+	} finally {
+		console.log = originalLog;
+		globalThis.fetch = originalFetch;
+	}
+	const output = lines.join("\n");
+	expect(output).toContain("OpenAI security-best-practices [skill]");
+	expect(output).toContain(
+		"bunx skills add https://github.com/openai/skills --skill security-best-practices",
+	);
+	expect(output).not.toContain("workers-best-practices");
+	expect(output).not.toContain("frontend-design");
 });
 
 test("setup optional commands stream readable progress and time out", async () => {

@@ -1,6 +1,6 @@
 {
-  "id": "plan",
-  "title": "Plan",
+  "id": "planning",
+  "title": "Planning",
   "providers": [
     "codex",
     "claude",
@@ -11,11 +11,11 @@
   "supportFiles": [
     {
       "path": "references/plan.md",
-      "source": "skill-resources/plan/references/plan.md"
+      "source": "skill-resources/planning/references/plan.md"
     },
     {
       "path": "assets/prd.md",
-      "source": "skill-resources/plan/assets/prd.md"
+      "source": "skill-resources/planning/assets/prd.md"
     }
   ]
 }

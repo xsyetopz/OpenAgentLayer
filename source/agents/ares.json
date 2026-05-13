@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "debug",
-    "test",
-    "trace",
+    "debugging",
+    "testing",
+    "tracing",
     "review",
-    "parse"
+    "command-analysis"
   ],
   "routes": [
-    "debug"
+    "debugging"
   ],
   "models": {
     "codex": "gpt-5.5",

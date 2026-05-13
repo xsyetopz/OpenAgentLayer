@@ -146,7 +146,7 @@ test("provider commit attribution renders for Claude and OpenCode", async () => 
 	);
 	expect(settings.attribution?.pr).toBe("");
 	const commitSkill = claude.artifacts.find(
-		(artifact) => artifact.path === ".claude/skills/commit/SKILL.md",
+		(artifact) => artifact.path === ".claude/skills/git-commit/SKILL.md",
 	)?.content;
 	expect(commitSkill).toContain("Claude <noreply@anthropic.com>");
 	expect(commitSkill).toContain("OpenCode: use the current agent model");
@@ -188,8 +188,10 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	for (const [skill, expected] of [
 		["caveman", "Use compact output"],
+		["command-analysis", "Treat command text as structured input"],
+		["plain-language-writing", "Rewrite prose"],
 		["taste", "Improve product UI"],
-		["oal", "oal codex peer batch <task>"],
+		["oal-maintenance", "oal codex peer batch <task>"],
 		["cross-platform-app", "rigid product stack"],
 	] as const) {
 		for (const provider of ["codex", "claude", "opencode"] as const) {
@@ -200,7 +202,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 			expect(artifact?.content).toContain(expected);
 			expect(artifact?.content).toContain("## Prompt contract");
 			expect(artifact?.content).toContain("General Zen discipline");
-			if (provider === "codex" && skill === "oal") {
+			if (provider === "codex" && skill === "oal-maintenance") {
 				expect(artifact?.content).toContain(
 					"explicitly spawn rendered OAL agent names or aliases",
 				);
@@ -246,7 +248,7 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain("Shared workspace:");
 		expect(instructions).toContain("not alone in the codebase");
 		expect(instructions).toContain("Context budget:");
-		expect(instructions).toContain("- implement:");
+		expect(instructions).toContain("- implementation:");
 		if (provider === "codex") {
 			expect(instructions).toContain("Codex Base Instructions");
 			expect(instructions).toContain(
@@ -276,7 +278,7 @@ test("provider agents render inspection and correction discipline contracts", as
 		expect(agent).toContain(
 			"senior peer for Production implementation, refactoring, and bug fixing",
 		);
-		expect(agent).toContain("Own routes: implement.");
+		expect(agent).toContain("Own routes: implementation.");
 		expect(agent).toContain("Inspect controlling source only");
 		expect(agent).toContain(
 			"prefer concise evidence over repeated policy text",
@@ -434,9 +436,11 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("fit the runtime cap");
 	expect(config).toContain("subagent_usage_hint_text");
 	expect(config).toContain("bounded assigned task within the runtime cap");
-	expect(config).toContain('nickname_candidates = ["hephaestus", "implement"]');
 	expect(config).toContain(
-		'nickname_candidates = ["atalanta", "test", "validate", "accept"]',
+		'nickname_candidates = ["hephaestus", "implementation"]',
+	);
+	expect(config).toContain(
+		'nickname_candidates = ["atalanta", "testing", "validate", "accept"]',
 	);
 	expect(config).toContain("job_max_runtime_seconds = 600");
 	expect(config).toContain("[tui]");
@@ -591,10 +595,10 @@ test("Codex instructions render subagent invocation roster", async () => {
 	);
 	expect(instructions).toContain("fit the configured job runtime cap");
 	expect(instructions).toContain(
-		"- hephaestus: aliases=hephaestus, implement; routes=implement",
+		"- hephaestus: aliases=hephaestus, implementation; routes=implementation",
 	);
 	expect(instructions).toContain(
-		"- atalanta: aliases=atalanta, test, validate, accept; routes=test, validate, accept",
+		"- atalanta: aliases=atalanta, testing, validate, accept; routes=testing, validate, accept",
 	);
 	expect(instructions).toContain("For many similar rows, create a CSV");
 	expect(instructions).toContain(

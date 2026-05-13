@@ -1,5 +1,5 @@
 {
-  "id": "document",
+  "id": "documentation",
   "providers": [
     "codex",
     "claude",
@@ -7,7 +7,7 @@
   ],
   "agent": "calliope",
   "skills": [
-    "document"
+    "documentation"
   ],
   "permissions": "docs-only write",
   "arguments": "task objective, target paths, and required evidence",

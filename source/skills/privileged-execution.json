@@ -1,17 +1,17 @@
 {
-  "id": "elevate",
-  "title": "Elevate",
+  "id": "privileged-execution",
+  "title": "Privileged Execution",
   "providers": [
     "codex",
     "claude",
     "opencode"
   ],
-  "description": "Use OAL privileged execution for bounded commands that need host privileges, such as Xcode or signing commands. Use when sandboxed shell execution blocks a required validation or deploy command.",
+  "description": "Use OAL privileged execution for bounded commands that need host privileges, such as Xcode or signing commands. Use when sandboxed execution blocks a required validation or deploy command.",
   "body": "Try normal guarded shell first. Privileged execution requires allowlisted command, explicit argv, cwd inside repo or approved target root, and dry-run evidence for request shape. Escalation uses argv form and bounded command classes.",
   "supportFiles": [
     {
       "path": "references/runtime.md",
-      "source": "skill-resources/elevate/references/runtime.md"
+      "source": "skill-resources/privileged-execution/references/runtime.md"
     }
   ]
 }

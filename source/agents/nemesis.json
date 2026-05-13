@@ -24,10 +24,10 @@
   ],
   "skills": [
     "review",
-    "secure",
-    "architect",
-    "delete",
-    "parse"
+    "safety",
+    "architecture",
+    "safe-deletion",
+    "command-analysis"
   ],
   "routes": [
     "review",

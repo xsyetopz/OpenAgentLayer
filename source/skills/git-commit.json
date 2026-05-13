@@ -1,6 +1,6 @@
 {
-  "id": "commit",
-  "title": "Commit",
+  "id": "git-commit",
+  "title": "Git Snapshot",
   "providers": [
     "codex",
     "claude",
@@ -11,7 +11,7 @@
   "supportFiles": [
     {
       "path": "references/commit.md",
-      "source": "skill-resources/commit/references/commit.md"
+      "source": "skill-resources/git-commit/references/commit.md"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "id": "plan",
+  "id": "planning",
   "providers": [
     "codex",
     "claude",
@@ -7,9 +7,9 @@
   ],
   "agent": "athena",
   "skills": [
-    "plan",
-    "prompt",
-    "parse"
+    "planning",
+    "prompt-engineering",
+    "command-analysis"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

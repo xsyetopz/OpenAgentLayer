@@ -1,6 +1,6 @@
 {
   "id": "design",
-  "title": "Design",
+  "title": "Interface Design",
   "providers": [
     "codex",
     "claude",

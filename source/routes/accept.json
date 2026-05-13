@@ -7,10 +7,10 @@
   ],
   "agent": "atalanta",
   "skills": [
-    "test",
-    "oal",
-    "parse",
-    "elevate"
+    "testing",
+    "oal-maintenance",
+    "command-analysis",
+    "privileged-execution"
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",

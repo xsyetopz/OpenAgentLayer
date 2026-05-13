@@ -1,6 +1,6 @@
 {
-  "id": "architect",
-  "title": "Architect",
+  "id": "architecture",
+  "title": "Architecture",
   "providers": [
     "codex",
     "claude",
@@ -11,7 +11,7 @@
   "supportFiles": [
     {
       "path": "references/deep-modules.md",
-      "source": "skill-resources/architect/references/deep-modules.md"
+      "source": "skill-resources/architecture/references/deep-modules.md"
     },
     {
       "path": "references/simplicity.md",

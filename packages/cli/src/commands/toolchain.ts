@@ -1,9 +1,13 @@
 import {
 	isExpectedContext7ApiKey,
 	OFFICIAL_SKILL_CATALOG,
+	OFFICIAL_SKILL_CATEGORIES,
 	type OfficialSkillCatalogEntry,
+	type OfficialSkillCategory,
 	type OperatingSystem,
 	type OptionalTool,
+	officialSkillBundleLinks,
+	officialSkillCategoryMap,
 	officialSkillIds,
 	officialSkillLinks,
 	optionalFeatureCommands,
@@ -39,7 +43,26 @@ export async function runFeaturesCommand(args: string[]): Promise<void> {
 	const catalogUrl = option(args, "--catalog-url");
 	if (catalogUrl) {
 		assertOfficialSkillsUrl(catalogUrl);
-		const catalog = await fetchOfficialSkillCatalog(catalogUrl);
+		const catalog = filterOfficialSkillCatalog(
+			await fetchOfficialSkillCatalog(catalogUrl),
+			option(args, "--category"),
+		);
+		const install = catalogOptionalTools(option(args, "--install"), catalog);
+		const remove = catalogOptionalTools(option(args, "--remove"), catalog);
+		if (install.length > 0 || remove.length > 0) {
+			const commands = [
+				...optionalFeatureCommands("install", install, {
+					officialSkills: catalog,
+				}),
+				...optionalFeatureCommands("remove", remove, {
+					officialSkills: catalog,
+				}),
+			];
+			console.log(
+				renderFeatureCommands([...install, ...remove], commands, catalog),
+			);
+			return;
+		}
 		if (args.includes("--json"))
 			console.log(JSON.stringify(catalog, undefined, 2));
 		else console.log(renderOfficialSkillCatalog(catalog));
@@ -66,17 +89,7 @@ export async function runFeaturesCommand(args: string[]): Promise<void> {
 		}),
 		...optionalFeatureCommands("remove", remove),
 	];
-	console.log(
-		[
-			"# OpenAgentLayer Optional Feature Commands",
-			`Features: ${[...install, ...remove].map(optionalToolLabel).join(", ")}`,
-			"",
-			"```bash",
-			...commands,
-			"```",
-			"",
-		].join("\n"),
-	);
+	console.log(renderFeatureCommands([...install, ...remove], commands));
 }
 
 function assertOfficialSkillsUrl(url: string): void {
@@ -85,7 +98,7 @@ function assertOfficialSkillsUrl(url: string): void {
 		throw new Error("`--catalog-url` must use https://officialskills.sh/");
 }
 
-async function fetchOfficialSkillCatalog(url: string) {
+export async function fetchOfficialSkillCatalog(url: string) {
 	const response = await fetch(url);
 	if (!response.ok)
 		throw new Error(
@@ -94,14 +107,77 @@ async function fetchOfficialSkillCatalog(url: string) {
 	const html = await response.text();
 	const direct = parseOfficialSkillPage(html, url);
 	if (direct) return [direct];
+	const categoryMap = await fetchOfficialSkillCategories(html, url);
 	const entries: OfficialSkillCatalogEntry[] = [];
-	for (const link of officialSkillLinks(html).slice(0, 25)) {
+	for (const link of officialSkillLinks(html)) {
 		const page = await fetch(link);
 		if (!page.ok) continue;
 		const entry = parseOfficialSkillPage(await page.text(), link);
-		if (entry) entries.push(entry);
+		if (entry) {
+			const [owner, , skill] = new URL(link).pathname
+				.split("/")
+				.filter(Boolean);
+			const slug = [owner, skill].filter(Boolean).join("/");
+			entries.push({
+				...entry,
+				category: categoryMap.get(slug) ?? entry.category,
+			});
+		}
 	}
 	return entries;
+}
+
+async function fetchOfficialSkillCategories(
+	html: string,
+	sourceUrl: string,
+): Promise<Map<string, OfficialSkillCategory>> {
+	const categories = new Map<string, OfficialSkillCategory>();
+	for (const link of officialSkillBundleLinks(html, sourceUrl)) {
+		const response = await fetch(link);
+		if (!response.ok) continue;
+		for (const [slug, category] of officialSkillCategoryMap(
+			await response.text(),
+		))
+			categories.set(slug, category);
+	}
+	return categories;
+}
+
+function filterOfficialSkillCatalog(
+	catalog: OfficialSkillCatalogEntry[],
+	category: string | undefined,
+): OfficialSkillCatalogEntry[] {
+	if (!category || category === "all") return catalog;
+	if (!OFFICIAL_SKILL_CATEGORIES.includes(category as OfficialSkillCategory))
+		throw new Error(
+			"`--category` must be one of all,infrastructure,development,ai-tools,workflows,security,data,design,docs,testing",
+		);
+	return catalog.filter((entry) => entry.category === category);
+}
+
+function renderFeatureCommands(
+	features: readonly OptionalTool[],
+	commands: readonly string[],
+	catalog: readonly OfficialSkillCatalogEntry[] = [],
+): string {
+	return [
+		"# OpenAgentLayer Optional Feature Commands",
+		`Features: ${features.map((feature) => featureLabel(feature, catalog)).join(", ")}`,
+		"",
+		"```bash",
+		...commands,
+		"```",
+		"",
+	].join("\n");
+}
+
+function featureLabel(
+	feature: OptionalTool,
+	catalog: readonly OfficialSkillCatalogEntry[],
+): string {
+	const entry = catalog.find((candidate) => candidate.id === feature);
+	if (entry) return `${entry.publisher} ${entry.name} [skill]`;
+	return optionalToolLabel(feature);
 }
 
 function renderOfficialSkillCatalog(
@@ -141,4 +217,19 @@ function optionalTools(rawTools: string | undefined): OptionalTool[] {
 		.filter((tool): tool is OptionalTool =>
 			["ctx7", "deepwiki", "playwright", ...officialSkillIds()].includes(tool),
 		);
+}
+
+function catalogOptionalTools(
+	rawTools: string | undefined,
+	catalog: readonly OfficialSkillCatalogEntry[],
+): OptionalTool[] {
+	if (!rawTools) return [];
+	const catalogIds = new Set(catalog.map((entry) => entry.id));
+	return rawTools
+		.split(",")
+		.map((tool) => tool.trim())
+		.flatMap((tool) =>
+			tool === "all" ? catalog.map((entry) => entry.id) : tool,
+		)
+		.filter((tool): tool is OptionalTool => catalogIds.has(tool));
 }

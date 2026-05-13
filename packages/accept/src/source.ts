@@ -84,22 +84,26 @@ export function assertRoadmapSource(source: OalSource): void {
 		if (!source.agents.some((agent) => agent.id === id))
 			throw new Error(`Missing core agent \`${id}\``);
 	for (const id of [
-		"plan",
-		"implement",
+		"planning",
+		"implementation",
 		"review",
-		"test",
+		"testing",
 		"validate",
-		"explore",
-		"trace",
-		"debug",
+		"exploration",
+		"tracing",
+		"debugging",
 		"design",
-		"document",
+		"documentation",
 		"orchestrate",
 		"audit",
 	])
 		if (!source.routes.some((route) => route.id === id))
 			throw new Error(`Missing route \`${id}\``);
-	for (const id of ["elevate", "delete", "parse"])
+	for (const id of [
+		"privileged-execution",
+		"safe-deletion",
+		"command-analysis",
+	])
 		if (!source.skills.some((skill) => skill.id === id))
 			throw new Error(`Missing runtime safety skill \`${id}\``);
 }

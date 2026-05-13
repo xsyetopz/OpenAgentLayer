@@ -23,10 +23,10 @@
     "shell"
   ],
   "skills": [
-    "plan",
-    "trace",
+    "planning",
+    "tracing",
     "review",
-    "test"
+    "testing"
   ],
   "routes": [
     "resume"

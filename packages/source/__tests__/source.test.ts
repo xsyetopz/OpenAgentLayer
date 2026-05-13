@@ -21,6 +21,12 @@ test("loadSource loads authored prompt skills", async () => {
 	);
 	const caveman = graph.source.skills.find((skill) => skill.id === "caveman");
 	const taste = graph.source.skills.find((skill) => skill.id === "taste");
+	const commandParse = graph.source.skills.find(
+		(skill) => skill.id === "command-analysis",
+	);
+	const plainLanguage = graph.source.skills.find(
+		(skill) => skill.id === "plain-language-writing",
+	);
 	const impeccable = graph.source.skills.find(
 		(skill) => skill.id === "impeccable",
 	);
@@ -29,6 +35,12 @@ test("loadSource loads authored prompt skills", async () => {
 	);
 	expect(caveman?.body).toContain("Use compact output");
 	expect(taste?.body).toContain("Improve product UI");
+	expect(commandParse?.title).toBe("Command Analysis");
+	expect(commandParse?.body).toContain(
+		"Treat command text as structured input",
+	);
+	expect(plainLanguage?.title).toBe("Plain Language Writing");
+	expect(plainLanguage?.body).toContain("Rewrite prose");
 	expect(impeccable?.body).toContain(
 		"Designs and iterates production-grade frontend interfaces",
 	);
@@ -47,16 +59,18 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(impeccable?.upstream?.path).toBe(
 		"third_party/impeccable/skill/SKILL.md",
 	);
-	const commit = graph.source.skills.find((skill) => skill.id === "commit");
+	const commit = graph.source.skills.find((skill) => skill.id === "git-commit");
 	expect(commit?.upstream).toBeUndefined();
 	expect(commit?.body).toContain("Conventional Commits 1.0.0");
 	expect(commit?.body).toContain("Codex <noreply@openai.com>");
 	expect(commit?.body).toContain("Claude <noreply@anthropic.com>");
 	expect(commit?.body).toContain("OpenCode: use the current agent model");
-	const git = graph.source.skills.find((skill) => skill.id === "git");
+	const git = graph.source.skills.find((skill) => skill.id === "git-workflow");
 	expect(git?.body).toContain("not alone in the codebase");
 	expect(git?.body).toContain("must not be reverted");
-	const oal = graph.source.skills.find((skill) => skill.id === "oal");
+	const oal = graph.source.skills.find(
+		(skill) => skill.id === "oal-maintenance",
+	);
 	expect(oal?.body).toContain("OAL's index skill for AI/LLM use");
 	expect(oal?.body).toContain("Codex does not infer them automatically");
 	expect(oal?.body).toContain("CSV/batch subagents");
@@ -87,5 +101,5 @@ test("loadSource hydrates agent prompts from the shared template", async () => {
 		resolve(repoRoot, "source/agents/hephaestus.json"),
 		"utf8",
 	);
-	expect(rawHephaestus).not.toContain('"prompt"');
+	expect(rawHephaestus).not.toContain('"prompt-engineering"');
 });

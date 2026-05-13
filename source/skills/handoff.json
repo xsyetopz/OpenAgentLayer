@@ -1,6 +1,6 @@
 {
   "id": "handoff",
-  "title": "Handoff",
+  "title": "Continuation Handoff",
   "providers": [
     "codex",
     "claude",

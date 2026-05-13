@@ -8,8 +8,8 @@
   "agent": "nemesis",
   "skills": [
     "review",
-    "delete",
-    "parse"
+    "safe-deletion",
+    "command-analysis"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

@@ -202,15 +202,15 @@ async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
 		throw new Error("OpenCode small model fallback is not second free model");
 	assertOpenCodeAgentColors(config.agent);
 	for (const command of [
-		"plan",
-		"implement",
+		"planning",
+		"implementation",
 		"review",
-		"test",
+		"testing",
 		"validate",
-		"explore",
-		"trace",
-		"debug",
-		"document",
+		"exploration",
+		"tracing",
+		"debugging",
+		"documentation",
 		"orchestrate",
 		"audit",
 	])

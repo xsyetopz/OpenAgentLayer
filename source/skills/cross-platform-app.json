@@ -1,6 +1,6 @@
 {
   "id": "cross-platform-app",
-  "title": "Opinionated Cross-Platform App Builder",
+  "title": "Cross-Platform App",
   "providers": [
     "codex",
     "claude",

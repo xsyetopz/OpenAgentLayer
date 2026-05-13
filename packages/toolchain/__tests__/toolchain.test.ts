@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
 import {
 	context7ApiKeyStatus,
+	officialSkillBundleLinks,
+	officialSkillCategoryMap,
 	officialSkillLinks,
 	optionalFeatureCommands,
 	parseOfficialSkillPage,
@@ -157,6 +159,17 @@ test("officialskills frontend pages can generate catalog entries", () => {
 		repo: "https://github.com/openai/skills",
 		skill: "security-best-practices",
 	});
+});
+
+test("officialskills frontend bundles expose website tab categories", () => {
+	const html = '<script src="/assets/main.js"></script>';
+	expect(officialSkillBundleLinks(html, "https://officialskills.sh/")).toEqual([
+		"https://officialskills.sh/assets/main.js",
+	]);
+	const categories = officialSkillCategoryMap(
+		'{slug:"openai/security-best-practices",name:"security-best-practices",description:"Review code",owner:"openai",category:"security",localMarkdownPath:"/skills-markdown/openai/security-best-practices.md"}',
+	);
+	expect(categories.get("openai/security-best-practices")).toBe("security");
 });
 
 test("official skill catalog preserves descriptive sentences", () => {

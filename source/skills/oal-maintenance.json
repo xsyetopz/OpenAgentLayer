@@ -1,6 +1,6 @@
 {
-  "id": "oal",
-  "title": "OAL",
+  "id": "oal-maintenance",
+  "title": "OAL Maintenance",
   "providers": [
     "codex",
     "claude",
@@ -11,7 +11,7 @@
   "supportFiles": [
     {
       "path": "references/surfaces.md",
-      "source": "skill-resources/oal/references/surfaces.md"
+      "source": "skill-resources/oal-maintenance/references/surfaces.md"
     }
   ]
 }

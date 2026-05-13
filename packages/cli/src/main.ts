@@ -256,6 +256,7 @@ program
 	.option("--remove <tools>", "comma-separated optional tools")
 	.option("--catalog", "print curated officialskills.sh catalog")
 	.option("--catalog-url <url>", "fetch and parse an officialskills.sh page")
+	.option("--category <category>", "filter fetched officialskills.sh catalog")
 	.option("--json", "print catalog as JSON")
 	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.action((options) => runFeaturesCommand(argsFromOptions(options)));
@@ -492,6 +493,7 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--project", options["project"]);
 	pushValue(args, "--db", options["db"]);
 	pushValue(args, "--catalog-url", options["catalogUrl"]);
+	pushValue(args, "--category", options["category"]);
 	pushFlag(args, "--content", options["content"]);
 	pushFlag(args, "--installed", options["installed"]);
 	pushFlag(args, "--catalog", options["catalog"]);

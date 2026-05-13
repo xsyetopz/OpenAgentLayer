@@ -164,7 +164,7 @@ function assertDesignSkillStandards(source: OalSource): void {
 }
 
 function assertTestSkillStandards(source: OalSource): void {
-	const test = source.skills.find((skill) => skill.id === "test");
+	const test = source.skills.find((skill) => skill.id === "testing");
 	if (!test) throw new Error("Missing test skill");
 	const suites = supportFileContent(test, "references/language-suites.md");
 	for (const term of [
@@ -225,7 +225,7 @@ function assertTestSkillStandards(source: OalSource): void {
 }
 
 function assertMarkdownPromptStandards(source: OalSource): void {
-	const document = source.skills.find((skill) => skill.id === "document");
+	const document = source.skills.find((skill) => skill.id === "documentation");
 	if (!document) throw new Error("Missing document skill");
 	const markdown = supportFileContent(document, "references/markdown.md");
 	for (const term of [
@@ -243,7 +243,9 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 	])
 		if (!markdown.includes(term))
 			throw new Error(`document markdown standards missing \`${term}\``);
-	const prompt = source.skills.find((skill) => skill.id === "prompt");
+	const prompt = source.skills.find(
+		(skill) => skill.id === "prompt-engineering",
+	);
 	if (!prompt) throw new Error("Missing prompt skill");
 	const promptMarkdown = supportFileContent(
 		prompt,
@@ -264,7 +266,7 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 }
 
 function assertSimplicityDiscipline(source: OalSource): void {
-	for (const skillId of ["architect", "implement", "review"]) {
+	for (const skillId of ["architecture", "implementation", "review"]) {
 		const skill = source.skills.find((candidate) => candidate.id === skillId);
 		if (!skill) throw new Error(`Missing \`${skillId}\` skill`);
 		const content = supportFileContent(skill, "references/simplicity.md");
@@ -283,17 +285,27 @@ function assertSimplicityDiscipline(source: OalSource): void {
 
 function assertRuntimeSafetySkills(source: OalSource): void {
 	const required = {
-		elevate: ["privileged execution", "argv", "dry-run", "allowlist"],
-		delete: ["git status", "manifest ownership", "dirty", "ambiguous"],
-		parse: ["shell operators", "argv", "exit code", "substring-only"],
+		"privileged-execution": [
+			"privileged execution",
+			"argv",
+			"dry-run",
+			"allowlist",
+		],
+		"safe-deletion": ["git status", "manifest ownership", "dirty", "ambiguous"],
+		"command-analysis": [
+			"shell operators",
+			"argv",
+			"exit code",
+			"substring-only",
+		],
 	} as const;
 	for (const [skillId, terms] of Object.entries(required)) {
 		const skill = source.skills.find((candidate) => candidate.id === skillId);
 		if (!skill) throw new Error(`Missing \`${skillId}\` skill`);
 		const supportPath =
-			skillId === "elevate"
+			skillId === "privileged-execution"
 				? "references/runtime.md"
-				: skillId === "delete"
+				: skillId === "safe-deletion"
 					? "references/checklist.md"
 					: "references/commands.md";
 		const content = supportFileContent(skill, supportPath);

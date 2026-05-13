@@ -15,6 +15,10 @@ import type { Provider } from "@openagentlayer/source";
 import {
 	context7ApiKeyStatus,
 	isExpectedContext7ApiKey,
+	OFFICIAL_SKILL_CATALOG,
+	OFFICIAL_SKILL_CATEGORIES,
+	type OfficialSkillCatalogEntry,
+	type OfficialSkillCategory,
 	type OptionalTool,
 } from "@openagentlayer/toolchain";
 import { runCheckCommand } from "./commands/check";
@@ -24,7 +28,10 @@ import { runPreviewCommand } from "./commands/preview";
 import { runProfilesCommand } from "./commands/profiles";
 import { runSetupCommand } from "./commands/setup";
 import { runStateCommand } from "./commands/state";
-import { runFeaturesCommand } from "./commands/toolchain";
+import {
+	fetchOfficialSkillCatalog,
+	runFeaturesCommand,
+} from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
 import {
 	configPathFromArgs,
@@ -44,16 +51,17 @@ import {
 	type WorkflowScope,
 } from "./workflows";
 
-type InteractiveAction = "setup" | "inspect" | "repair" | "remove" | "advanced";
-type AdvancedAction =
-	| "preview"
+type InteractiveAction =
+	| "setup"
+	| "repair"
+	| "status"
+	| "validate"
+	| "artifacts"
 	| "deploy"
+	| "skills"
 	| "plugins"
-	| "features"
 	| "profiles"
-	| "state"
-	| "uninstall"
-	| "check";
+	| "uninstall";
 type ProviderMulti = WorkflowProvider[];
 type SetupIntent = "setup" | "repair";
 type SetupProfileChoice =
@@ -137,49 +145,63 @@ export const UNINSTALL_PROVIDER_OPTIONS = [
 	},
 ] as const;
 
-export const OPTIONAL_FEATURE_OPTIONS = [
-	{ value: "ctx7", label: "Context7 [CLI]", hint: "current docs lookup" },
+export const OPTIONAL_FEATURE_OPTIONS = optionalFeatureOptions();
+
+export const WORKFLOW_OPTIONS = [
 	{
-		value: "playwright",
-		label: "Playwright [CLI]",
-		hint: "browser automation",
+		value: "setup",
+		label: "Start · Review and apply setup",
+		hint: "profile, providers, toolchain, optional tools",
 	},
 	{
-		value: "skill-frontend-design",
-		label: "Anthropic frontend-design [skill]",
-		hint: "intentional frontend aesthetics",
+		value: "repair",
+		label: "Start · Repair existing install",
+		hint: "inspect state, then reapply selected providers",
 	},
 	{
-		value: "skill-webapp-testing",
-		label: "Anthropic webapp-testing [skill]",
-		hint: "local browser app testing",
+		value: "status",
+		label: "Inspect · Status and installed state",
+		hint: "profile, availability, manifest drift",
 	},
 	{
-		value: "skill-security-best-practices",
-		label: "OpenAI security-best-practices [skill]",
-		hint: "code security review",
+		value: "validate",
+		label: "Inspect · Validate source",
+		hint: "renderability and source checks",
 	},
 	{
-		value: "skill-react-best-practices",
-		label: "Vercel react-best-practices [skill]",
-		hint: "React and Next.js performance",
+		value: "artifacts",
+		label: "Artifacts · Preview generated files",
+		hint: "tree or selected file content",
 	},
 	{
-		value: "skill-stripe-best-practices",
-		label: "Stripe stripe-best-practices [skill]",
-		hint: "Stripe integration choices",
+		value: "deploy",
+		label: "Artifacts · Deploy provider files",
+		hint: "write Codex, Claude, or OpenCode artifacts",
 	},
 	{
-		value: "skill-workers-best-practices",
-		label: "Cloudflare workers-best-practices [skill]",
-		hint: "Cloudflare Workers patterns",
+		value: "skills",
+		label: "Extend · Official skills",
+		hint: "install from officialskills.sh tabs",
 	},
 	{
-		value: "deepwiki",
-		label: "DeepWiki [MCP]",
-		hint: "repository knowledge MCP",
+		value: "plugins",
+		label: "Extend · Plugin payloads",
+		hint: "sync provider plugin payloads",
+	},
+	{
+		value: "profiles",
+		label: "Manage · Profiles",
+		hint: "list, edit, rename, activate, remove",
+	},
+	{
+		value: "uninstall",
+		label: "Manage · Uninstall OAL",
+		hint: "remove owned provider artifacts",
 	},
 ] as const;
+
+const OFFICIAL_SKILLS_URL = "https://officialskills.sh/#find-skills";
+const OFFICIAL_SKILLS_CATALOG_URL = "https://officialskills.sh/";
 
 export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	if (!process.stdin.isTTY)
@@ -189,9 +211,14 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 		const action = await workflowPrompt();
 		if (action === "setup") await interactiveSetup(repoRoot, "setup");
 		else if (action === "repair") await interactiveSetup(repoRoot, "repair");
-		else if (action === "inspect") await interactiveInspect(repoRoot);
-		else if (action === "remove") await interactiveUninstall();
-		else await interactiveAdvanced(repoRoot);
+		else if (action === "status") await interactiveStatus(repoRoot);
+		else if (action === "validate") await runCheckCommand(repoRoot);
+		else if (action === "artifacts") await interactiveArtifacts(repoRoot);
+		else if (action === "deploy") await interactiveDeploy(repoRoot);
+		else if (action === "skills") await interactiveFeatures();
+		else if (action === "plugins") await interactivePlugins(repoRoot);
+		else if (action === "profiles") await interactiveProfiles();
+		else await interactiveUninstall();
 		const again = await ask<boolean>(
 			confirm({
 				message: "Run another OAL workflow?",
@@ -206,34 +233,8 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 function workflowPrompt(): Promise<InteractiveAction> {
 	return ask<InteractiveAction>(
 		select({
-			message: "Choose workflow",
-			options: [
-				{
-					value: "setup",
-					label: "Review / apply setup",
-					hint: "profile, current state, optional tools, deploy",
-				},
-				{
-					value: "inspect",
-					label: "Inspect OAL",
-					hint: "check source or preview generated artifacts",
-				},
-				{
-					value: "repair",
-					label: "Repair existing OAL",
-					hint: "preview state, then reapply selected providers",
-				},
-				{
-					value: "remove",
-					label: "Remove OAL",
-					hint: "uninstall owned provider artifacts",
-				},
-				{
-					value: "advanced",
-					label: "Advanced commands",
-					hint: "direct low-level CLI surfaces",
-				},
-			],
+			message: "OpenAgentLayer command hub",
+			options: [...WORKFLOW_OPTIONS],
 		}),
 	);
 }
@@ -430,29 +431,20 @@ async function printSetupStatePreview(
 	await runStateCommand(repoRoot, ["inspect", ...args]);
 }
 
-async function interactiveInspect(repoRoot: string): Promise<void> {
-	const action = await ask<
-		"state" | "check" | "installed" | "preview" | "content"
-	>(
+async function interactiveStatus(repoRoot: string): Promise<void> {
+	const action = await ask<"state" | "installed">(
 		select({
-			message: "Inspect target",
+			message: "Status target",
 			options: [
 				{
 					value: "state",
 					label: "State summary",
 					hint: "profile, provider availability, deploy plan",
 				},
-				{ value: "check", label: "Check source", hint: "renderability only" },
 				{
 					value: "installed",
-					label: "Check installed state",
+					label: "Installed state",
 					hint: "manifest and drift checks",
-				},
-				{ value: "preview", label: "Preview artifact tree", hint: "no writes" },
-				{
-					value: "content",
-					label: "Preview artifact content",
-					hint: "select one path",
 				},
 			],
 		}),
@@ -461,21 +453,34 @@ async function interactiveInspect(repoRoot: string): Promise<void> {
 		await runStateCommand(repoRoot, ["inspect"]);
 		return;
 	}
-	if (action === "check") {
-		await runCheckCommand(repoRoot);
-		return;
-	}
-	if (action === "installed") {
-		const providers = await availableProviderPrompt();
-		await runCheckCommand(repoRoot, [
-			"--installed",
-			"--provider",
-			providerSetArg(providers),
-			"--home",
-			await globalHomePrompt(),
-		]);
-		return;
-	}
+	const providers = await availableProviderPrompt();
+	await runCheckCommand(repoRoot, [
+		"--installed",
+		"--provider",
+		providerSetArg(providers),
+		"--home",
+		await globalHomePrompt(),
+	]);
+}
+
+async function interactiveArtifacts(repoRoot: string): Promise<void> {
+	const action = await ask<"tree" | "content">(
+		select({
+			message: "Artifact preview",
+			options: [
+				{
+					value: "tree",
+					label: "Generated artifact tree",
+					hint: "provider files without contents",
+				},
+				{
+					value: "content",
+					label: "Generated artifact content",
+					hint: "select one path",
+				},
+			],
+		}),
+	);
 	const providers = await providerPrompt();
 	const args = ["--provider", providerSetArg(providers)];
 	if (action === "content") {
@@ -483,40 +488,6 @@ async function interactiveInspect(repoRoot: string): Promise<void> {
 		args.push("--path", await artifactPathPrompt());
 	}
 	await runPreviewCommand(repoRoot, args);
-}
-
-async function interactiveAdvanced(repoRoot: string): Promise<void> {
-	const action = await ask<AdvancedAction>(
-		select({
-			message: "Advanced command",
-			options: [
-				{
-					value: "preview",
-					label: "preview",
-					hint: "show generated artifacts",
-				},
-				{ value: "deploy", label: "deploy", hint: "write provider artifacts" },
-				{ value: "plugins", label: "plugins", hint: "sync plugin payloads" },
-				{
-					value: "features",
-					label: "features",
-					hint: "optional feature commands",
-				},
-				{ value: "state", label: "state", hint: "profile and install state" },
-				{ value: "profiles", label: "profiles", hint: "saved setup profiles" },
-				{ value: "uninstall", label: "uninstall", hint: "remove owned files" },
-				{ value: "check", label: "check", hint: "validate source" },
-			],
-		}),
-	);
-	if (action === "check") await runCheckCommand(repoRoot);
-	else if (action === "preview") await interactivePreview(repoRoot);
-	else if (action === "deploy") await interactiveDeploy(repoRoot);
-	else if (action === "plugins") await interactivePlugins(repoRoot);
-	else if (action === "features") await interactiveFeatures();
-	else if (action === "state") await runStateCommand(repoRoot, ["inspect"]);
-	else if (action === "profiles") await interactiveProfiles();
-	else await interactiveUninstall();
 }
 
 async function interactiveProfiles(): Promise<void> {
@@ -596,18 +567,6 @@ async function profileEditPrompt(): Promise<OalProfile> {
 	};
 }
 
-async function interactivePreview(repoRoot: string): Promise<void> {
-	const providers = await providerPrompt();
-	const args = ["--provider", providerSetArg(providers)];
-	if (
-		await ask<boolean>(
-			confirm({ message: "Include artifact contents?", initialValue: false }),
-		)
-	)
-		args.push("--content");
-	await runPreviewCommand(repoRoot, args);
-}
-
 async function interactiveDeploy(repoRoot: string): Promise<void> {
 	const providers = await availableProviderPrompt();
 	const scope = await scopePrompt();
@@ -660,23 +619,125 @@ async function interactiveUninstall(): Promise<void> {
 }
 
 async function interactiveFeatures(): Promise<void> {
-	const action = await ask<"install" | "remove">(
+	const action = await ask<"install" | "remove" | "catalog">(
 		select({
-			message: "Feature action",
+			message: "Official skills",
 			options: [
-				{ value: "install", label: "Install optional features" },
-				{ value: "remove", label: "Remove optional features" },
+				{ value: "install", label: "Install skills by tab" },
+				{ value: "remove", label: "Remove selected skills" },
+				{ value: "catalog", label: "Print website skill catalog" },
 			],
 		}),
 	);
-	const features = await ask<OptionalTool[]>(
-		multiselect({
-			message: "Features",
-			required: true,
-			options: [...OPTIONAL_FEATURE_OPTIONS],
+	if (action === "catalog") {
+		await runFeaturesCommand(["--catalog-url", OFFICIAL_SKILLS_CATALOG_URL]);
+		return;
+	}
+	const catalog = await officialSkillsCatalog();
+	const category = await officialSkillCategoryPrompt(catalog);
+	const categoryCatalog =
+		category === "all"
+			? catalog
+			: catalog.filter((entry) => entry.category === category);
+	const selection = await ask<"all" | "choose">(
+		select({
+			message: "Skill selection",
+			options: [
+				{ value: "all", label: `All in ${category} tab` },
+				{ value: "choose", label: "Choose skills" },
+			],
 		}),
 	);
-	runFeaturesCommand([`--${action}`, features.join(",")]);
+	const features =
+		selection === "all"
+			? ["all"]
+			: await ask<OptionalTool[]>(
+					multiselect({
+						message: "Skills",
+						required: true,
+						options: officialSkillOptions(categoryCatalog),
+					}),
+				);
+	await runFeaturesCommand([
+		"--catalog-url",
+		OFFICIAL_SKILLS_CATALOG_URL,
+		"--category",
+		category,
+		`--${action}`,
+		features.join(","),
+	]);
+}
+
+function officialSkillOptions(catalog: readonly OfficialSkillCatalogEntry[]) {
+	return catalog.map((entry) => ({
+		value: entry.id as OptionalTool,
+		label: `${entry.publisher} ${entry.name}`,
+		hint: `${entry.category} · ${entry.sourceStatus}`,
+	}));
+}
+
+async function officialSkillsCatalog(): Promise<OfficialSkillCatalogEntry[]> {
+	try {
+		return await fetchOfficialSkillCatalog(OFFICIAL_SKILLS_CATALOG_URL);
+	} catch (error) {
+		printWarning(
+			`Could not load ${OFFICIAL_SKILLS_URL}; using bundled skill catalog. ${error instanceof Error ? error.message : String(error)}`,
+		);
+		return [...OFFICIAL_SKILL_CATALOG];
+	}
+}
+
+function officialSkillCategoryPrompt(
+	catalog: readonly OfficialSkillCatalogEntry[],
+): Promise<OfficialSkillCategory | "all"> {
+	const counts = new Map<OfficialSkillCategory | "all", number>([
+		["all", catalog.length],
+	]);
+	for (const category of OFFICIAL_SKILL_CATEGORIES)
+		counts.set(
+			category,
+			catalog.filter((entry) => entry.category === category).length,
+		);
+	return ask<OfficialSkillCategory | "all">(
+		select({
+			message: "Skill tab",
+			options: [
+				{ value: "all", label: "All", hint: `${counts.get("all") ?? 0}` },
+				...OFFICIAL_SKILL_CATEGORIES.map((category) => ({
+					value: category,
+					label: category,
+					hint: `${counts.get(category) ?? 0}`,
+				})),
+			],
+		}),
+	);
+}
+
+function optionalFeatureOptions() {
+	return [
+		{ value: "ctx7", label: "Context7 [CLI]", hint: "current docs lookup" },
+		{
+			value: "playwright",
+			label: "Playwright [CLI]",
+			hint: "browser automation",
+		},
+		{
+			value: "deepwiki",
+			label: "DeepWiki [MCP]",
+			hint: "repository knowledge MCP",
+		},
+		...officialSkillOptions(OFFICIAL_SKILL_CATALOG),
+	];
+}
+
+function optionalToolPrompt(): Promise<OptionalTool[]> {
+	return ask<OptionalTool[]>(
+		multiselect({
+			message: "Optional tools and bundled skills",
+			required: false,
+			options: optionalFeatureOptions(),
+		}),
+	);
 }
 
 async function confirmApplyPrompt(
@@ -1026,16 +1087,6 @@ function opencodePlanPrompt(): Promise<string> {
 		select({
 			message: "OpenCode model mode",
 			options: OPENCODE_PLAN_OPTIONS,
-		}),
-	);
-}
-
-function optionalToolPrompt(): Promise<OptionalTool[]> {
-	return ask<OptionalTool[]>(
-		multiselect({
-			message: "Optional tool phases",
-			required: false,
-			options: [...OPTIONAL_FEATURE_OPTIONS],
 		}),
 	);
 }

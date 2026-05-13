@@ -1,5 +1,5 @@
 {
-  "id": "debug",
+  "id": "debugging",
   "providers": [
     "codex",
     "claude",
@@ -7,9 +7,9 @@
   ],
   "agent": "ares",
   "skills": [
-    "debug",
-    "parse",
-    "elevate"
+    "debugging",
+    "command-analysis",
+    "privileged-execution"
   ],
   "permissions": "fixture shell",
   "arguments": "task objective, target paths, and required evidence",

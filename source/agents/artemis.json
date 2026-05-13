@@ -23,13 +23,13 @@
     "shell"
   ],
   "skills": [
-    "plan",
-    "trace",
+    "planning",
+    "tracing",
     "review",
-    "test"
+    "testing"
   ],
   "routes": [
-    "trace"
+    "tracing"
   ],
   "models": {
     "codex": "gpt-5.5",

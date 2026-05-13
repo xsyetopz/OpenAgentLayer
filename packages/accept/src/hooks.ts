@@ -22,7 +22,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_changed_files: {
-		input: { provider: "codex", route: "implement" },
+		input: { provider: "codex", route: "implementation" },
 		decision: "pass",
 	},
 	require_completion_evidence: {
@@ -73,7 +73,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_git_context: {
-		input: { provider: "codex", route: "plan" },
+		input: { provider: "codex", route: "planning" },
 		decision: "pass",
 	},
 	warn_large_diff: {
@@ -89,7 +89,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_package_scripts: {
-		input: { provider: "claude", route: "test" },
+		input: { provider: "claude", route: "testing" },
 		decision: "pass",
 	},
 	inject_project_memory: {
@@ -105,7 +105,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_route_context: {
-		input: { provider: "codex", route: "implement" },
+		input: { provider: "codex", route: "implementation" },
 		decision: "pass",
 	},
 	enforce_route_contract: {

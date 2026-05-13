@@ -1,6 +1,6 @@
 {
-  "id": "debug",
-  "title": "Debug",
+  "id": "debugging",
+  "title": "Debugging",
   "providers": [
     "codex",
     "claude",
@@ -11,11 +11,11 @@
   "supportFiles": [
     {
       "path": "references/loop.md",
-      "source": "skill-resources/debug/references/loop.md"
+      "source": "skill-resources/debugging/references/loop.md"
     },
     {
       "path": "assets/symptom-report.md",
-      "source": "skill-resources/debug/assets/symptom-report.md"
+      "source": "skill-resources/debugging/assets/symptom-report.md"
     }
   ]
 }

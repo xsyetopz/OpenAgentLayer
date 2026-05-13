@@ -23,16 +23,16 @@
     "shell"
   ],
   "skills": [
-    "secure",
+    "safety",
     "review",
-    "trace",
-    "delete",
-    "parse"
+    "tracing",
+    "safe-deletion",
+    "command-analysis"
   ],
   "routes": [
     "audit",
     "review",
-    "trace"
+    "tracing"
   ],
   "models": {
     "codex": "gpt-5.5",

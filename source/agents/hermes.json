@@ -23,15 +23,15 @@
     "shell"
   ],
   "skills": [
-    "explore",
-    "trace",
-    "oal",
-    "parse"
+    "exploration",
+    "tracing",
+    "oal-maintenance",
+    "command-analysis"
   ],
   "routes": [
-    "explore",
+    "exploration",
     "inspect",
-    "trace"
+    "tracing"
   ],
   "models": {
     "codex": "gpt-5.5",

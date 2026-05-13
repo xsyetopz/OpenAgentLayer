@@ -23,13 +23,13 @@
     "shell"
   ],
   "skills": [
-    "plan",
+    "planning",
     "handoff",
-    "oal",
-    "trace",
-    "elevate",
-    "delete",
-    "parse"
+    "oal-maintenance",
+    "tracing",
+    "privileged-execution",
+    "safe-deletion",
+    "command-analysis"
   ],
   "routes": [
     "orchestrate"

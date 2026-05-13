@@ -1,8 +1,12 @@
 export {
 	OFFICIAL_SKILL_CATALOG,
+	OFFICIAL_SKILL_CATEGORIES,
 	type OfficialSkillCatalogEntry,
+	type OfficialSkillCategory,
 	type OfficialSkillId,
+	officialSkillBundleLinks,
 	officialSkillById,
+	officialSkillCategoryMap,
 	officialSkillIds,
 	officialSkillLinks,
 	parseOfficialSkillPage,
@@ -10,6 +14,7 @@ export {
 
 import {
 	OFFICIAL_SKILL_CATALOG,
+	type OfficialSkillCatalogEntry,
 	type OfficialSkillId,
 	officialSkillById,
 } from "./official-skills";
@@ -51,6 +56,7 @@ export interface OptionalFeatureCommandOptions {
 	context7ApiKey?: string;
 	repoRoot?: string;
 	targetRoot?: string;
+	officialSkills?: readonly OfficialSkillCatalogEntry[];
 }
 
 export interface Context7ApiKeyStatus {
@@ -298,7 +304,9 @@ export function optionalFeatureCommands(
 		);
 	}
 	for (const tool of optionalTools) {
-		const command = officialSkillById(tool);
+		const command =
+			options.officialSkills?.find((entry) => entry.id === tool) ??
+			officialSkillById(tool);
 		if (!command) continue;
 		commands.push(officialSkillCommand(action, command));
 	}

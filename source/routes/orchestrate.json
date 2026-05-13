@@ -7,11 +7,11 @@
   ],
   "agent": "odysseus",
   "skills": [
-    "plan",
+    "planning",
     "handoff",
-    "elevate",
-    "delete",
-    "parse"
+    "privileged-execution",
+    "safe-deletion",
+    "command-analysis"
   ],
   "permissions": "coordination",
   "arguments": "task objective, target paths, and required evidence",

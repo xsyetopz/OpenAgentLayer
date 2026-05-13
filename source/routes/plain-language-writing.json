@@ -1,5 +1,5 @@
 {
-  "id": "document-plain",
+  "id": "plain-language-writing",
   "providers": [
     "codex",
     "claude",
@@ -7,7 +7,7 @@
   ],
   "agent": "calliope",
   "skills": [
-    "document-plain"
+    "plain-language-writing"
   ],
   "permissions": "docs/prose-only write",
   "arguments": "target prose, audience, tone constraints, files, and required evidence",

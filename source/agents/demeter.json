@@ -25,13 +25,13 @@
     "patch"
   ],
   "skills": [
-    "plan",
-    "trace",
+    "planning",
+    "tracing",
     "review",
-    "test"
+    "testing"
   ],
   "routes": [
-    "implement"
+    "implementation"
   ],
   "models": {
     "codex": "gpt-5.3-codex",

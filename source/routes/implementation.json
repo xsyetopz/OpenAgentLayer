@@ -1,5 +1,5 @@
 {
-  "id": "implement",
+  "id": "implementation",
   "providers": [
     "codex",
     "claude",
@@ -7,11 +7,11 @@
   ],
   "agent": "hephaestus",
   "skills": [
-    "implement",
+    "implementation",
     "cross-platform-app",
-    "elevate",
-    "delete",
-    "parse"
+    "privileged-execution",
+    "safe-deletion",
+    "command-analysis"
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",

@@ -2,18 +2,27 @@ export interface OfficialSkillCatalogEntry {
 	id: string;
 	publisher: string;
 	name: string;
-	category:
-		| "design"
-		| "development"
-		| "security"
-		| "testing"
-		| "infrastructure";
+	category: OfficialSkillCategory;
 	sourceStatus: "official" | "community";
 	repo: string;
 	skill: string;
 	sourceUrl: string;
 	description: string;
 }
+
+export const OFFICIAL_SKILL_CATEGORIES = [
+	"infrastructure",
+	"development",
+	"ai-tools",
+	"workflows",
+	"security",
+	"data",
+	"design",
+	"docs",
+	"testing",
+] as const;
+
+export type OfficialSkillCategory = (typeof OFFICIAL_SKILL_CATEGORIES)[number];
 
 export type OfficialSkillId =
 	| "skill-frontend-design"
@@ -146,14 +155,38 @@ export function officialSkillLinks(html: string): string[] {
 	return [...links].sort();
 }
 
+export function officialSkillBundleLinks(
+	html: string,
+	sourceUrl: string,
+): string[] {
+	const links = new Set<string>();
+	for (const match of html.matchAll(/(?:href|src)="([^"]+\.js)"/g)) {
+		const url = new URL(match[1], sourceUrl);
+		if (
+			url.hostname === "officialskills.sh" &&
+			url.pathname.startsWith("/assets/")
+		)
+			links.add(url.toString());
+	}
+	return [...links].sort();
+}
+
+export function officialSkillCategoryMap(
+	javascript: string,
+): Map<string, OfficialSkillCategory> {
+	const categories = new Map<string, OfficialSkillCategory>();
+	const recordPattern =
+		/\{slug:"([^"]+)",name:"[^"]+",description:"(?:\\.|[^"\\])*",owner:"[^"]+",category:"([^"]+)"/g;
+	for (const match of javascript.matchAll(recordPattern)) {
+		const category = match[2] as OfficialSkillCategory;
+		if (OFFICIAL_SKILL_CATEGORIES.includes(category))
+			categories.set(match[1], category);
+	}
+	return categories;
+}
+
 function categoryFromHtml(html: string): OfficialSkillCatalogEntry["category"] {
-	for (const category of [
-		"design",
-		"security",
-		"testing",
-		"infrastructure",
-		"development",
-	] as const) {
+	for (const category of OFFICIAL_SKILL_CATEGORIES) {
 		if (html.includes(category)) return category;
 	}
 	return "development";
