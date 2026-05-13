@@ -61,6 +61,7 @@ const PREFERRED_REPLACEMENTS = new Map([
 	["du", "dust"],
 	["time", "hyperfine"],
 ]);
+const AUTO_SHIM_ALTERNATE_COMMANDS = new Set(["ack", "ag", "exa", "du"]);
 const SUDO_PREFIX_PATTERN = /^sudo\s+/;
 const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
 const RAW_DIAGNOSTIC_ENV_PATTERN =
@@ -122,12 +123,15 @@ export function evaluateCommandPolicy(command, options = {}) {
 			reason: "Command inspection complete: executable command absent",
 		};
 	let firstWarning;
+	let firstPass;
 	for (const commandLine of commands) {
 		const result = evaluateSingleCommand(commandLine, options);
 		if (result.decision === "block") return result;
 		if (result.decision === "warn") firstWarning ??= result;
+		if (result.decision === "pass") firstPass ??= result;
 	}
 	if (firstWarning) return firstWarning;
+	if (firstPass) return firstPass;
 	return { decision: "pass", reason: "Command already uses RTK" };
 }
 
@@ -193,15 +197,29 @@ function evaluateSingleCommand(command, options) {
 		};
 
 	const preferredReplacement = PREFERRED_REPLACEMENTS.get(executable);
-	if (preferredReplacement)
+	if (preferredReplacement) {
+		if (
+			options.autoShimAlternateTools &&
+			AUTO_SHIM_ALTERNATE_COMMANDS.has(executable)
+		)
+			return {
+				decision: "pass",
+				reason: "Command is handled by the Codex alternate-tool shim",
+			};
 		return {
 			decision: "block",
 			reason: "OpenAgentLayer has a preferred QoL tool for this command",
 			details: [`Use: ${rewriteExecutable(normalized, preferredReplacement)}`],
 		};
+	}
 
 	const rtkExecutable = SUPPORTED_COMMANDS.get(executable);
 	if (rtkExecutable) {
+		if (options.autoShimSupportedCommands)
+			return {
+				decision: "pass",
+				reason: "Command is handled by the Codex RTK shim",
+			};
 		if (options.rtkInstalled === false)
 			return {
 				decision: "block",

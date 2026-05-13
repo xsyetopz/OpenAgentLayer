@@ -42,6 +42,64 @@ const CODEX_MANAGED_HOOK_DIR_PLACEHOLDER = "__OAL_CODEX_MANAGED_HOOK_DIR__";
 const CODEX_BASE_INSTRUCTIONS_PATH =
 	"third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md";
 const CODEX_OAL_BASE_SECTION_PATH = "source/prompts/codex-base-oal-section.md";
+const CODEX_RTK_SHIMS = [
+	["aws", "aws"],
+	["cargo", "cargo"],
+	["cat", "read"],
+	["config", "config"],
+	["curl", "curl"],
+	["deps", "deps"],
+	["diff", "diff"],
+	["discover", "discover"],
+	["docker", "docker"],
+	["dotnet", "dotnet"],
+	["env", "env"],
+	["err", "err"],
+	["find", "find"],
+	["format", "format"],
+	["gh", "gh"],
+	["git", "git"],
+	["glab", "glab"],
+	["go", "go"],
+	["golangci-lint", "golangci-lint"],
+	["grep", "grep"],
+	["gt", "gt"],
+	["jest", "jest"],
+	["json", "json"],
+	["kubectl", "kubectl"],
+	["lint", "lint"],
+	["log", "log"],
+	["ls", "ls"],
+	["mypy", "mypy"],
+	["next", "next"],
+	["pip", "pip"],
+	["playwright", "playwright"],
+	["prettier", "prettier"],
+	["prisma", "prisma"],
+	["psql", "psql"],
+	["pytest", "pytest"],
+	["rake", "rake"],
+	["rg", "grep"],
+	["read", "read"],
+	["rspec", "rspec"],
+	["rubocop", "rubocop"],
+	["ruff", "ruff"],
+	["session", "session"],
+	["smart", "smart"],
+	["summary", "summary"],
+	["test", "test"],
+	["tree", "tree"],
+	["tsc", "tsc"],
+	["vitest", "vitest"],
+	["wc", "wc"],
+	["wget", "wget"],
+] as const;
+const CODEX_ALTERNATE_TOOL_SHIMS = [
+	["ack", "rg"],
+	["ag", "rg"],
+	["exa", "eza"],
+	["du", "dust"],
+] as const;
 
 export async function renderCodex(
 	source: OalSource,
@@ -77,7 +135,16 @@ export async function renderCodex(
 			sourceId: "instructions-base:codex",
 			mode: "file",
 		}),
+		withProvenance({
+			provider: PROVIDER,
+			path: ".codex/scripts/common.sh",
+			content: renderCodexCommonShellScript(),
+			sourceId: "rtk-shim:codex",
+			mode: "file",
+		}),
 	];
+	artifacts.push(...renderCodexRtkShimArtifacts());
+	artifacts.push(...renderCodexAlternateToolShimArtifacts());
 	for (const agent of source.agents.filter((record) =>
 		record.providers.includes(PROVIDER),
 	))
@@ -134,6 +201,83 @@ export async function renderCodex(
 			},
 		],
 	};
+}
+
+function renderCodexCommonShellScript(): string {
+	return `strip_shim_path() {
+	local path_value="\${1:-}"
+	local shim_dir_codex="$HOME/.codex/shim"
+	local rebuilt=""
+	local entry=""
+	local -a entries=("\${(@s/:/)path_value}")
+	for entry in "\${entries[@]}"; do
+		[[ -z "$entry" || "$entry" == "$shim_dir_codex" ]] && continue
+		if [[ -n "$rebuilt" ]]; then
+			rebuilt="\${rebuilt}:$entry"
+		else
+			rebuilt="$entry"
+		fi
+	done
+	printf '%s\\n' "$rebuilt"
+}
+
+unshim_current_path() {
+	strip_shim_path "\${PATH:-}"
+}
+`;
+}
+
+function renderCodexRtkShimArtifacts(): Artifact[] {
+	return CODEX_RTK_SHIMS.map(([command, rtkCommand]) =>
+		withProvenance({
+			provider: PROVIDER,
+			path: `.codex/shim/${command}`,
+			content: renderCodexRtkShim(rtkCommand),
+			sourceId: "rtk-shim:codex",
+			executable: true,
+			mode: "file",
+		}),
+	);
+}
+
+function renderCodexRtkShim(rtkCommand: string): string {
+	return `#!/bin/zsh
+set -euo pipefail
+
+source "$HOME/.codex/scripts/common.sh"
+
+PATH="$(unshim_current_path)" exec rtk ${rtkCommand} "$@"
+`;
+}
+
+function renderCodexAlternateToolShimArtifacts(): Artifact[] {
+	return CODEX_ALTERNATE_TOOL_SHIMS.map(([command, replacement]) =>
+		withProvenance({
+			provider: PROVIDER,
+			path: `.codex/shim/${command}`,
+			content: renderCodexAlternateToolShim(command, replacement),
+			sourceId: "tool-shim:codex",
+			executable: true,
+			mode: "file",
+		}),
+	);
+}
+
+function renderCodexAlternateToolShim(
+	command: string,
+	replacement: string,
+): string {
+	return `#!/bin/zsh
+set -euo pipefail
+
+source "$HOME/.codex/scripts/common.sh"
+
+PATH="$(unshim_current_path)"
+if command -v ${replacement} >/dev/null 2>&1; then
+	exec ${replacement} "$@"
+fi
+exec ${command} "$@"
+`;
 }
 
 function renderCodexConfig(source: OalSource, options: RenderOptions): string {

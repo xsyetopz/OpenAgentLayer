@@ -262,10 +262,34 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	);
 	if (!hook.content.startsWith("#!/usr/bin/env node"))
 		throw new Error("Codex hook shebang was not preserved");
-	if (artifacts.some((artifact) => artifact.path.includes("/shim/")))
-		throw new Error(
-			"Codex default render should not emit PATH shim artifacts.",
-		);
+	assertArtifact(".codex/scripts/common.sh", artifacts, [
+		"strip_shim_path()",
+		'shim_dir_codex="$HOME/.codex/shim"',
+		"unshim_current_path()",
+	]);
+	assertArtifact(".codex/shim/cargo", artifacts, [
+		"#!/bin/zsh",
+		'source "$HOME/.codex/scripts/common.sh"',
+		'PATH="$(unshim_current_path)" exec rtk cargo "$@"',
+	]);
+	assertArtifact(".codex/shim/rg", artifacts, [
+		'PATH="$(unshim_current_path)" exec rtk grep "$@"',
+	]);
+	assertArtifact(".codex/shim/ack", artifacts, [
+		"command -v rg",
+		'exec rg "$@"',
+		'exec ack "$@"',
+	]);
+	assertArtifact(".codex/shim/exa", artifacts, [
+		"command -v eza",
+		'exec eza "$@"',
+		'exec exa "$@"',
+	]);
+	if (artifacts.some((artifact) => artifact.path === ".codex/shim/time"))
+		throw new Error("Codex should not emit a non-transparent `time` shim");
+	for (const artifact of artifacts)
+		if (artifact.path.startsWith(".codex/shim/") && !artifact.executable)
+			throw new Error(`Codex RTK shim \`${artifact.path}\` is not executable`);
 	const privileged = findArtifact(
 		".codex/openagentlayer/runtime/privileged-exec.mjs",
 		artifacts,

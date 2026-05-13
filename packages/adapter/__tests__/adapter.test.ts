@@ -492,9 +492,34 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).not.toContain('"weekly-limit"');
 	expect(config).not.toContain('"session-id"');
 	expect(config).not.toContain('"total-input-tokens"');
+	const cargoShim = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/shim/cargo",
+	);
+	expect(cargoShim?.executable).toBe(true);
+	expect(cargoShim?.content).toContain("exec rtk cargo");
+	const rgShim = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/shim/rg",
+	);
+	expect(rgShim?.content).toContain("exec rtk grep");
+	const ackShim = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/shim/ack",
+	);
+	expect(ackShim?.executable).toBe(true);
+	expect(ackShim?.content).toContain("command -v rg");
+	expect(ackShim?.content).toContain('exec rg "$@"');
+	expect(ackShim?.content).toContain('exec ack "$@"');
+	const exaShim = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/shim/exa",
+	);
+	expect(exaShim?.content).toContain("command -v eza");
 	expect(
-		rendered.artifacts.some((artifact) => artifact.path.includes("/shim/")),
+		rendered.artifacts.some((artifact) => artifact.path === ".codex/shim/time"),
 	).toBe(false);
+	const commonShell = rendered.artifacts.find(
+		(artifact) => artifact.path === ".codex/scripts/common.sh",
+	)?.content;
+	expect(commonShell).toContain('shim_dir_codex="$HOME/.codex/shim"');
+	expect(commonShell).not.toContain("/opt/homebrew/shim");
 	expect(
 		rendered.artifacts.some(
 			(artifact) =>

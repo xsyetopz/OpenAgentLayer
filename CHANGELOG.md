@@ -5,18 +5,26 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.9] - 2026-05-13
+## [0.6.0-beta.10] - 2026-05-13
+
+### Added
+
+- Added Codex RTK command shims so compatible shell commands route through `rtk` without requiring agents to write explicit `rtk` prefixes.
+- Added Codex alternate-tool shims for transparent replacements such as `ack`/`ag` to `rg`, `exa` to `eza`, and `du` to `dust` when the replacement exists on the user's unshimmed `PATH`.
+- Added Codex shim support helpers under `.codex/scripts/common.sh` that strip only the OAL Codex shim directory and avoid legacy shim paths.
 
 ### Changed
 
-- Encouraged Codex native subagents by default for broad or parallelizable OAL work while keeping narrow single-owner edits local.
-- Added plan-aware Codex subagent thread caps and shorter job runtime caps so spawned workers receive bounded tasks that fit their budget.
-- Updated SessionStart and SubagentStart guidance to require bounded child ownership, runtime-fit checks, prompt `$oal:oal` use for OAL work, and prompt closure of idle or completed agents.
-- Updated release metadata from `0.6.0-beta.8` to `0.6.0-beta.9`.
+- Repurposed Codex RTK hook behavior so shim-covered commands pass through while hooks continue to handle proxy rewrites, non-shim providers, and commands the shim cannot fulfill.
+- Kept non-transparent alternate-tool rewrites such as `time` to `hyperfine` in hook guidance instead of generating unsafe shell shims.
+- Updated release metadata from `0.6.0-beta.9` to `0.6.0-beta.10`.
 
 ### Verified
 
-- `rtk test bun test packages/adapter/__tests__/adapter.test.ts packages/runtime/__tests__/runtime.test.ts`
+- `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/accept/__tests__/accept.test.ts packages/adapter/__tests__/adapter.test.ts`
+- `rtk proxy -- bun run biome:check`
+- `rtk proxy -- bunx tsc --noEmit --pretty false`
+- `rtk proxy -- bun run oal:accept`
 
 ## [0.6.0-beta.8] - 2026-05-13
 

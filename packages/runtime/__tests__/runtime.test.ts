@@ -159,6 +159,17 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "block",
 		details: ["Use: rtk git status"],
 	});
+	await expect(
+		runHook({
+			provider: "codex",
+			command: "git status",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "pass",
+		reason: "Command is handled by the Codex RTK shim",
+	});
 	await expect(runHook({ command: "rtk git status" })).resolves.toMatchObject({
 		decision: "pass",
 	});
@@ -299,6 +310,17 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "block",
 		details: ["Use: rtk read package.json"],
 	});
+	await expect(
+		runHook({
+			provider: "codex",
+			command: "cat package.json",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "pass",
+		reason: "Command is handled by the Codex RTK shim",
+	});
 	await expect(runHook({ command: "make check" })).resolves.toMatchObject({
 		decision: "warn",
 		details: ["Use when useful: rtk proxy -- make check"],
@@ -364,6 +386,26 @@ test("command policy enforces preferred QoL tool replacements", async () => {
 			details: [`Use: ${replacement}`],
 		});
 	}
+	for (const command of ["ack Token", "ag Token", "exa -la", "du -sh ."]) {
+		await expect(
+			runHook({
+				provider: "codex",
+				command,
+			}),
+		).resolves.toMatchObject({
+			decision: "pass",
+			reason: "Command is handled by the Codex alternate-tool shim",
+		});
+	}
+	await expect(
+		runHook({
+			provider: "codex",
+			command: "time bun test",
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "OpenAgentLayer has a preferred QoL tool for this command",
+	});
 });
 
 test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", async () => {
@@ -429,6 +471,16 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 	});
 	expect(codexPass.code).toBe(0);
 	expect(codexPass.stdout).toBe("");
+	const codexShimPass = await runHookRaw(
+		"enforce-rtk-commands.mjs",
+		{
+			hook_event_name: "PreToolUse",
+			command: "git status",
+		},
+		{ OAL_HOOK_PROVIDER: "codex" },
+	);
+	expect(codexShimPass.code).toBe(0);
+	expect(codexShimPass.stdout).toBe("");
 	const claudeDeny = await runHookRaw(
 		"enforce-rtk-commands.mjs",
 		{
@@ -501,13 +553,13 @@ test("RTK hook allows Codex exec help probes", async () => {
 	});
 });
 
-test("Codex PreToolUse block feedback avoids note prefixes", async () => {
+test("Codex PreToolUse Bun rewrite feedback avoids note prefixes", async () => {
 	const result = await runHookRaw(
 		"enforce-rtk-commands.mjs",
 		{
 			hook_event_name: "PreToolUse",
 			provider: "codex",
-			command: "cat package.json",
+			command: "npx prettier foo.js",
 			rtkInstalled: true,
 			rtkPolicyPresent: true,
 		},
@@ -518,8 +570,10 @@ test("Codex PreToolUse block feedback avoids note prefixes", async () => {
 	expect(result.code).toBe(0);
 	const parsed = JSON.parse(result.stdout);
 	const reason = parsed.hookSpecificOutput.permissionDecisionReason as string;
-	expect(reason).toContain("RTK command form is available");
-	expect(reason).toContain("use `rtk read package.json`");
+	expect(reason).toContain(
+		"Bun command form is available for this package-manager command",
+	);
+	expect(reason).toContain("use `rtk proxy -- bunx prettier foo.js`");
 	expect(reason).not.toContain("note:");
 });
 

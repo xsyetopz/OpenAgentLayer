@@ -117,8 +117,8 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	enforce_rtk_commands: {
-		input: { command: "git status" },
-		decision: "block",
+		input: { provider: "codex", command: "git status" },
+		decision: "pass",
 	},
 	block_secret_files: {
 		input: { paths: [".env"] },
@@ -256,11 +256,10 @@ async function assertProviderNativeHookOutput(
 		{ hook_event_name: "PreToolUse", command: "git status" },
 		{ OAL_HOOK_PROVIDER: "codex", OAL_HOOK_EVENT: "PreToolUse" },
 	);
-	if (
-		JSON.parse(codexDeny.stdout).hookSpecificOutput?.permissionDecision !==
-		"deny"
-	)
-		throw new Error("Codex PreToolUse hook did not emit native deny output");
+	if (codexDeny.stdout !== "")
+		throw new Error(
+			"Codex shimmed RTK command hook emitted stdout instead of passing through.",
+		);
 	const claudeDeny = await runNativeHook(
 		join(targetRoot, ".claude/hooks/scripts/enforce-rtk-commands.mjs"),
 		{ hook_event_name: "PreToolUse", command: "git status" },
@@ -371,10 +370,19 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 		targetRoot,
 		".codex/openagentlayer/hooks/enforce-rtk-commands.mjs",
 	);
+	await assertHook(
+		scriptPath,
+		{ provider: "codex", command: "git status" },
+		"pass",
+	);
 	await assertHook(scriptPath, { command: "git status" }, "block");
 	await assertHook(scriptPath, { command: "rtk git status" }, "pass");
 	await assertHook(scriptPath, { command: "make check" }, "warn");
-	await assertHook(scriptPath, { command: "cat package.json" }, "block");
+	await assertHook(
+		scriptPath,
+		{ provider: "codex", command: "cat package.json" },
+		"pass",
+	);
 	const script = `${await readFile(scriptPath, "utf8")}\n${await readFile(
 		join(targetRoot, ".codex/openagentlayer/hooks/_command-policy.mjs"),
 		"utf8",

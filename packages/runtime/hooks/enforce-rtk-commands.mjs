@@ -17,6 +17,12 @@ function evaluate(payload) {
 	const rtkState = inspectRtkState(payload);
 	return evaluateCommandPolicy(command, {
 		bunRewrite,
+		autoShimSupportedCommands:
+			(asString(payload.provider) || process.env["OAL_HOOK_PROVIDER"]) ===
+			"codex",
+		autoShimAlternateTools:
+			(asString(payload.provider) || process.env["OAL_HOOK_PROVIDER"]) ===
+			"codex",
 		rtkInstalled: rtkState.installed,
 		rtkPolicyPresent: rtkState.policyPresent,
 	});
