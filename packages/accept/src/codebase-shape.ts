@@ -33,10 +33,7 @@ async function assertPackageLineBudgets(
 		if (!owner) continue;
 		const content = await readTrackedWorktreeFile(repoRoot, file);
 		if (content === undefined) continue;
-		totals.set(
-			owner,
-			(totals.get(owner) ?? 0) + lineCount(content),
-		);
+		totals.set(owner, (totals.get(owner) ?? 0) + lineCount(content));
 	}
 	const oversized = [...totals.entries()]
 		.filter(([, lines]) => lines > MAX_PACKAGE_SOURCE_LINES)

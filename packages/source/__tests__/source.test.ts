@@ -19,7 +19,9 @@ test("loadSource loads authored prompt skills", async () => {
 	);
 	expect(caveman?.body).toContain("Use compact output");
 	expect(taste?.body).toContain("Improve product UI");
-	expect(impeccable?.body).toContain("Designs and iterates production-grade frontend interfaces");
+	expect(impeccable?.body).toContain(
+		"Designs and iterates production-grade frontend interfaces",
+	);
 	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
 		"reference/brand.md",
 	);

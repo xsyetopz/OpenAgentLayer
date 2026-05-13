@@ -107,7 +107,9 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		"instead of doing all edits in the GPT-5.5 parent",
 	])
 		if (!config.includes(required))
-			throw new Error(`Codex config missing multi-agent cost hint \`${required}\``);
+			throw new Error(
+				`Codex config missing multi-agent cost hint \`${required}\``,
+			);
 	if (config.includes('interrupt_message = "'))
 		throw new Error("Codex config emitted string agents.interrupt_message");
 	for (const forbidden of [

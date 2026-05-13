@@ -82,13 +82,13 @@ export async function renderOpenCode(
 			sourceId: `tool:${tool.id}`,
 			mode: "file",
 		});
-		artifacts.push({
-			provider: PROVIDER,
-			path: ".opencode/plugins/openagentlayer.ts",
-			content: renderOpenCodePlugin(source),
-			sourceId: "plugin:opencode",
-			mode: "file",
-		});
+	artifacts.push({
+		provider: PROVIDER,
+		path: ".opencode/plugins/openagentlayer.ts",
+		content: renderOpenCodePlugin(source),
+		sourceId: "plugin:opencode",
+		mode: "file",
+	});
 	artifacts.push({
 		provider: PROVIDER,
 		path: ".opencode/instructions/openagentlayer.md",
