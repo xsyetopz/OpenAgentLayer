@@ -80,9 +80,9 @@ export const CODEX_ORCHESTRATION_OPTIONS = [
 		hint: "native shallow agents, bounded by agents table",
 	},
 	{
-		value: "symphony",
-		label: "OpenDex / Symphony",
-		hint: "external control-plane mode, native multi-agent disabled",
+		value: "opendex",
+		label: "OpenDex",
+		hint: "external Rust control-plane mode, native multi-agent disabled",
 	},
 ] as const;
 

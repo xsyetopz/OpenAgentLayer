@@ -8,8 +8,8 @@ interface HookFixture {
 }
 
 const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
-	block_protected_branch: {
-		input: { branch: "main", command: "git push origin main" },
+	block_command_safety: {
+		input: { branch: "main", command: "git commit -m change" },
 		decision: "block",
 	},
 	block_caveman_filler: {
@@ -35,10 +35,6 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 	},
 	block_secret_output: {
 		input: { output: "token ghp_123456789012345678901234567890123456" },
-		decision: "block",
-	},
-	block_destructive_commands: {
-		input: { command: "rm -rf /tmp/example" },
 		decision: "block",
 	},
 	block_generated_drift: {
@@ -127,22 +123,6 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 	inject_subagent_context: {
 		input: { provider: "claude", route: "review" },
 		decision: "pass",
-	},
-	block_unsafe_git: {
-		input: { command: "git push --force origin main" },
-		decision: "block",
-	},
-	require_validation_evidence: {
-		input: { status: "complete", finalResponse: "STATUS PASS" },
-		decision: "block",
-	},
-	block_weak_blocked: {
-		input: { status: "blocked", finalResponse: "blocked" },
-		decision: "block",
-	},
-	advise_command_tools: {
-		input: { command: "grep -R SentinelTag ." },
-		decision: "warn",
 	},
 };
 
@@ -334,9 +314,13 @@ async function assertProviderNativeHookOutput(
 		"output.args.command = replacement",
 		"throw new Error",
 		"evaluateFailureLoop",
+		"evaluateCommandSafety",
 		"styleHookMessage",
 		"styleHookLines",
-		"blockIfNeeded(evaluateFailureLoop(output ?? {}))",
+		"beforeHookIds",
+		"afterHookIds",
+		"runBeforeHook",
+		"runAfterHook",
 	])
 		if (!plugin.includes(term))
 			throw new Error(

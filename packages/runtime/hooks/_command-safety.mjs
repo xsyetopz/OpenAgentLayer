@@ -1,4 +1,5 @@
 import { extractCommand, extractCommands } from "./_payload.mjs";
+import { asArray, asString, uniqueValues } from "./_runtime.mjs";
 
 const DESTRUCTIVE_COMMAND_PATTERNS = [
 	/\brm\s+-[a-z]*[rf][a-z]*\s+(?:--\s+)?(?:\/|~|\.\.?)(?:\s|$)/i,
@@ -45,6 +46,23 @@ const PROTECTED_BRANCH_MUTATION_PATTERNS = [
 	/\bgit\s+tag\b/i,
 ];
 
+const DEFAULT_PROTECTED_BRANCHES = ["main", "master", "release", "production"];
+
+export function evaluateCommandSafety(payload) {
+	for (const evaluate of [
+		evaluateProtectedBranchMutation,
+		evaluateUnsafeGit,
+		evaluateDestructiveCommand,
+	]) {
+		const result = evaluate(payload);
+		if (result.decision !== "pass") return result;
+	}
+	return {
+		decision: "pass",
+		reason: "Command passed safety checks",
+	};
+}
+
 export function evaluateDestructiveCommand(payload) {
 	if (payload.allowDestructive === true) {
 		return {
@@ -83,6 +101,53 @@ export function isProtectedBranchMutation(payload) {
 	return PROTECTED_BRANCH_MUTATION_PATTERNS.some((pattern) =>
 		pattern.test(command),
 	);
+}
+
+export function evaluateProtectedBranchMutation(payload) {
+	if (payload.allowProtectedBranchMutation === true) {
+		return {
+			decision: "warn",
+			reason: "Protected branch mutation allowed by explicit override",
+		};
+	}
+
+	const currentBranch =
+		asString(payload.branch) || asString(payload.currentBranch);
+	if (!currentBranch) {
+		return {
+			decision: "pass",
+			reason: "Branch context absent",
+		};
+	}
+
+	const protectedBranches = uniqueValues([
+		...DEFAULT_PROTECTED_BRANCHES,
+		...asArray(payload.protectedBranches).map((branch) => asString(branch)),
+	]).filter(Boolean);
+
+	if (!protectedBranches.includes(currentBranch)) {
+		return {
+			decision: "pass",
+			reason: "Current branch outside protected set",
+		};
+	}
+
+	if (!isProtectedBranchMutation(payload)) {
+		return {
+			decision: "pass",
+			reason: `Protected branch (\`${currentBranch}\`) operation is non-mutating`,
+		};
+	}
+
+	return {
+		decision: "block",
+		reason: `Protected branch mutation blocked on \`${currentBranch}\``,
+		details: [
+			asString(payload.command) ||
+				asString(payload.toolCommand) ||
+				asString(payload.operation),
+		].filter(Boolean),
+	};
 }
 
 function evaluateCommandPatterns(

@@ -145,9 +145,9 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 			"Keep `rtk gain` at or above 80%; drops below 80% require command/output efficiency work before release.",
 			"Use `rtk gain` to confirm token savings; prefer capped `rtk grep`, bounded `rtk read`, and bounded `rtk find` for high-volume repository inspection.",
 			"RTK flags are not raw tool flags: do not pass `--max` or `--file-type` to plain `rg`/`grep`, and do not pass `--max-lines` or `--level` to shell `read`.",
-			"When RTK is unavailable or a command fails from flag mismatch, use plain Linux fallbacks: `rg -n <pattern> <path> -g '<glob>' | head -n <n>` and `sed -n '1,<n>p' <file>`.",
-			"Use `rg` and `fd` for provider-shared source discovery; both respect `.gitignore` by default.",
-			"Use `git ls-files` when a task explicitly requires tracked files only.",
+			"Use raw tool fallbacks only after RTK options are exhausted; prefer `rtk grep`, `rtk read`, `rtk find`, and `rtk git ls-files`.",
+			"Use `rtk proxy -- rg` and `rtk proxy -- fd` for provider-shared source discovery only as a last resort; both respect `.gitignore` by default.",
+			"Use `rtk git ls-files` when a task explicitly requires tracked files only.",
 			"Use `jq`/`yq` for structured config, `shellcheck`/`shfmt` for shell, `hyperfine` for speed claims, `ast-grep`/`sd` for careful mechanical rewrites, and `gitleaks` for secret checks.",
 		],
 	};

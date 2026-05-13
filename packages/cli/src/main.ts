@@ -20,7 +20,6 @@ import { runRtkGainCommand } from "./commands/rtk-gain";
 import { runRtkReportCommand } from "./commands/rtk-report";
 import { runSetupCommand } from "./commands/setup";
 import { runStateCommand } from "./commands/state";
-import { runSymphonyCommand } from "./commands/symphony";
 import { runFeaturesCommand, runToolchainCommand } from "./commands/toolchain";
 import { runUninstallCommand } from "./commands/uninstall";
 import { runInteractiveCommand } from "./interactive";
@@ -313,12 +312,6 @@ program
 	);
 
 program
-	.command("symphony")
-	.description("run the Symphony issue-workflow service")
-	.argument("[workflow]", "WORKFLOW.md path", "WORKFLOW.md")
-	.action((workflow: string) => runSymphonyCommand([workflow]));
-
-program
 	.command("provider-e2e")
 	.description(
 		"check real provider binaries and optionally run headless live prompts",
@@ -395,7 +388,7 @@ function addRenderOptions(command: Command): Command {
 		.option("--opencode-models-file <path>", "saved `opencode models` output")
 		.option(
 			"--codex-orchestration <mode>",
-			"Codex orchestration: symphony, multi_agent, or multi_agent_v2",
+			"Codex orchestration: opendex, multi_agent, or multi_agent_v2",
 		)
 		.option("--codex-agent-max-depth <n>", "Codex agents.max_depth")
 		.option("--codex-agent-max-threads <n>", "Codex agents.max_threads")

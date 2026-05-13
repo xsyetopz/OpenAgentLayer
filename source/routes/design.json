@@ -10,6 +10,7 @@
     "design",
     "impeccable",
     "design-worker",
+    "cross-platform-app",
     "parse"
   ],
   "permissions": "write with guarded shell",

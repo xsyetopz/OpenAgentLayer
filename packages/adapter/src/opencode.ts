@@ -82,13 +82,13 @@ export async function renderOpenCode(
 			sourceId: `tool:${tool.id}`,
 			mode: "file",
 		});
-	artifacts.push({
-		provider: PROVIDER,
-		path: ".opencode/plugins/openagentlayer.ts",
-		content: renderOpenCodePlugin(source),
-		sourceId: "plugin:opencode",
-		mode: "file",
-	});
+		artifacts.push({
+			provider: PROVIDER,
+			path: ".opencode/plugins/openagentlayer.ts",
+			content: renderOpenCodePlugin(source),
+			sourceId: "plugin:opencode",
+			mode: "file",
+		});
 	artifacts.push({
 		provider: PROVIDER,
 		path: ".opencode/instructions/openagentlayer.md",
@@ -304,14 +304,26 @@ export const ${camelCase(tool.id)} = tool({
 }
 
 function renderOpenCodePlugin(source: OalSource): string {
-	const hookScripts = JSON.stringify(source.hooks.map((hook) => hook.script));
+	const beforeHookIds = JSON.stringify(
+		source.hooks
+			.filter((hook) => hook.events?.opencode?.includes("tool.execute.before"))
+			.map((hook) => hook.id),
+	);
+	const afterHookIds = JSON.stringify(
+		source.hooks
+			.filter((hook) => hook.events?.opencode?.includes("tool.execute.after"))
+			.map((hook) => hook.id),
+	);
 	return `import type { Plugin } from "@opencode-ai/plugin";
 import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";
 import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";
-import { evaluateDestructiveCommand, evaluateUnsafeGit } from "../openagentlayer/hooks/_command-safety.mjs";
+import { evaluateCommandSafety } from "../openagentlayer/hooks/_command-safety.mjs";
 import { evaluateFailureLoop } from "../openagentlayer/hooks/_failure-loop.mjs";
 import { styleHookLines, styleHookMessage } from "../openagentlayer/hooks/_hook-style.mjs";
 import { evaluateSecretGuard } from "../openagentlayer/hooks/_secret-guard.mjs";
+
+const beforeHookIds = ${beforeHookIds};
+const afterHookIds = ${afterHookIds};
 
 function commandArg(output: { args?: Record<string, unknown> }) {
 	const command = output.args?.command;
@@ -332,23 +344,40 @@ function replacementFrom(details: unknown) {
 	return typeof line === "string" ? line.slice("Use: ".length) : "";
 }
 
+function runBeforeHook(hookId: string, payload: Record<string, unknown>, command: string) {
+	if (hookId === "block_secret_files" || hookId === "block_env_file_access")
+		return evaluateSecretGuard(payload);
+	if (hookId === "block_command_safety")
+		return command ? evaluateCommandSafety({ ...payload, command }) : { decision: "pass", reason: "Command input absent" };
+	if (hookId === "enforce_rtk_commands") {
+		if (!command) return { decision: "pass", reason: "Command text absent" };
+		return evaluateCommandPolicy(command, {
+			bunRewrite,
+			rtkInstalled: true,
+			rtkPolicyPresent: true
+		});
+	}
+	return { decision: "pass", reason: "OpenCode hook has no dispatcher" };
+}
+
+function runAfterHook(hookId: string, output: unknown) {
+	const text = String((output as { output?: unknown; stdout?: unknown; stderr?: unknown })?.output ?? (output as { stdout?: unknown })?.stdout ?? (output as { stderr?: unknown })?.stderr ?? "");
+	if (hookId === "block_secret_output")
+		return evaluateSecretGuard({ output: text });
+	if (hookId === "block_repeated_failures")
+		return evaluateFailureLoop(output ?? {});
+	return { decision: "pass", reason: "OpenCode hook has no dispatcher" };
+}
+
 export const OpenAgentLayerPlugin: Plugin = async () => ({
 	"tool.execute.before": async (input, output) => {
 		const payload = { tool_input: output.args, args: output.args };
-		blockIfNeeded(evaluateSecretGuard(payload));
-		if (input.tool === "bash") {
-			const command = commandArg(output);
-			blockIfNeeded(evaluateSecretGuard({ ...payload, command }));
-			blockIfNeeded(evaluateDestructiveCommand({ ...payload, command }));
-			blockIfNeeded(evaluateUnsafeGit({ ...payload, command }));
-			const result = evaluateCommandPolicy(command, {
-				bunRewrite,
-				rtkInstalled: true,
-				rtkPolicyPresent: true
-			});
+		const command = input.tool === "bash" ? commandArg(output) : "";
+		for (const hookId of beforeHookIds) {
+			const result = runBeforeHook(hookId, command ? { ...payload, command } : payload, command);
 			if (result.decision === "block") {
 				const replacement = replacementFrom(result.details);
-				if (replacement) {
+				if (replacement && input.tool === "bash") {
 					output.args.command = replacement;
 					return;
 				}
@@ -360,15 +389,12 @@ export const OpenAgentLayerPlugin: Plugin = async () => ({
 		}
 	},
 	"tool.execute.after": async (_input, output) => {
-		const text = String(output.output ?? output.stdout ?? output.stderr ?? "");
-		blockIfNeeded(evaluateSecretGuard({ output: text }));
-		blockIfNeeded(evaluateFailureLoop(output ?? {}));
+		for (const hookId of afterHookIds)
+			blockIfNeeded(runAfterHook(hookId, output));
 	},
 	event: async ({ event }) => {
 		if (event.type === "session.idle") return;
 	},
 });
-
-export const hookScripts = ${hookScripts};
 `;
 }

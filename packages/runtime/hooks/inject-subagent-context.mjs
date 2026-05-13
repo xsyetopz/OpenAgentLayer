@@ -12,7 +12,7 @@ const SUBAGENT_GUIDANCE = [
 	"Parent thread owns task split, child launch, evidence merge, continuation, and final decision",
 	"Workers return final evidence and artifacts to the parent; do not spawn extra pooled threads or keep idle workers open",
 	"Close or hand back promptly when the assigned output is complete, blocked, or no longer needed; stalled background work wastes token budget.",
-	"Use `opendex`, `oal opendex`, or `oal symphony <WORKFLOW.md>` only when the task explicitly needs those external control planes",
+	"Use `opendex` or `oal opendex` only when the task explicitly needs the external control plane",
 ];
 
 function hookEvent(payload) {

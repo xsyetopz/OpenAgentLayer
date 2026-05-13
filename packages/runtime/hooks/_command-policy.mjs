@@ -69,6 +69,7 @@ const RAW_DIAGNOSTIC_ENV_PATTERN =
 const WHITESPACE_PATTERN = /\s+/;
 const HEREDOC_WRITE_PATTERN =
 	/^\s*(?:cat|printf)\b[^\n]*(?:^|\s)(?:>|>>)\s*\S+[^\n]*<<[-~]?\s*['"]?[A-Za-z_][A-Za-z0-9_-]*['"]?/;
+const REGEX_CONFIG_EDIT_PATTERN = /\b(sed|perl)\b[\s\S]*\.(json|ya?ml)\b/i;
 const CODEX_EXEC_PATTERN = /(?:^|[\s"'`])codex\s+exec(?:\s|$)/;
 const DETACHED_CODEX_LAUNCHERS = new Set([
 	"docker",
@@ -78,7 +79,7 @@ const DETACHED_CODEX_LAUNCHERS = new Set([
 	"tmux",
 ]);
 const RTK_GREP_LEGACY_FLAGS = new Set(["-R", "-r", "--include", "--exclude"]);
-const RTK_GREP_MAX_FLAGS = new Set(["-m", "--max"]);
+const RTK_GREP_MAX_FLAGS = new Set(["-m"]);
 const RTK_READ_BOUND_FLAGS = new Set([
 	"-m",
 	"--max-lines",
@@ -179,6 +180,8 @@ function evaluateSingleCommand(command, options) {
 	if (delegatedCodex) return delegatedCodex;
 	const heredocWrite = evaluateHeredocWrite(rewriteCandidate);
 	if (heredocWrite) return heredocWrite;
+	const structuredConfigEdit = evaluateStructuredConfigEdit(rewriteCandidate);
+	if (structuredConfigEdit) return structuredConfigEdit;
 	const toolMismatch = evaluateToolMismatch(rewriteCandidate);
 	if (toolMismatch) return toolMismatch;
 	const bunReplacement = options.bunRewrite?.(rewriteCandidate);
@@ -268,6 +271,19 @@ function evaluateHeredocWrite(command) {
 	};
 }
 
+function evaluateStructuredConfigEdit(command) {
+	if (!REGEX_CONFIG_EDIT_PATTERN.test(command)) return undefined;
+	return {
+		decision: "warn",
+		reason: "JSON/YAML edits need a structured editor",
+		details: [
+			"Use: rtk proxy -- jq <filter> <file>",
+			"Use: rtk proxy -- yq <filter> <file>",
+			"Use: apply_patch for focused repository edits.",
+		],
+	};
+}
+
 function evaluateToolMismatch(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
 	const executable = shellWrapperName(tokens[0] ?? "");
@@ -279,9 +295,9 @@ function evaluateToolMismatch(command) {
 			decision: "block",
 			reason: "RTK-only search flags were used with a raw search command",
 			details: [
-				`Use: rtk ${rewriteExecutable(command, executable === "rg" ? "grep" : executable)}`,
-				"Fallback: rg -n <pattern> <path> -g '<glob>' | head -n <n>",
-				"Note: raw rg uses --max-count/-m per file, not RTK's global --max result cap.",
+				`Use: ${rewriteSearchAsRtk(command, executable)}`,
+				"Use: rtk grep <pattern> <path> -m <n> --file-type <type>",
+				"Last resort after RTK options are exhausted: rtk proxy -- rg -n <pattern> <path> -g '<glob>' | head -n <n>",
 			],
 		};
 	}
@@ -291,8 +307,8 @@ function evaluateToolMismatch(command) {
 			reason: "RTK-only read flags were used with the shell read command",
 			details: [
 				`Use: rtk ${rewriteExecutable(command, "read")}`,
-				"Fallback: sed -n '1,<n>p' <file>",
-				"Fallback with line numbers: nl -ba <file> | sed -n '1,<n>p'",
+				"Use: rtk read --line-numbers --max-lines <n> <file>",
+				"Use: rtk read --line-numbers --tail-lines <n> <file>",
 			],
 		};
 	}
@@ -431,13 +447,13 @@ function evaluateRtkGrepBounds(tokens) {
 		return {
 			decision: "block",
 			reason: "RTK grep works best with native compact options",
-			details: ["Use: rtk grep <pattern> <path> --max <n> --file-type <type>"],
+			details: ["Use: rtk grep <pattern> <path> -m <n> --file-type <type>"],
 		};
 	if (!hasOption(tokens, RTK_GREP_MAX_FLAGS))
 		return {
 			decision: "block",
 			reason: "RTK grep needs an explicit result cap",
-			details: ["Use: rtk grep <pattern> <path> --max <n>"],
+			details: ["Use: rtk grep <pattern> <path> -m <n>"],
 		};
 	return undefined;
 }
@@ -471,7 +487,7 @@ function evaluateRtkFindBounds(tokens) {
 			reason: "RTK find needs a narrowing predicate for large codebases",
 			details: [
 				"Use: rtk find <path> -maxdepth <n> -type f -name '<glob>'",
-				"Use: git ls-files <pathspec> for tracked-file inventory",
+				"Use: rtk git ls-files <pathspec>",
 			],
 		};
 	return undefined;
@@ -522,4 +538,24 @@ function rewriteExecutable(command, replacement) {
 		.filter(Boolean);
 	if (!executable) return replacement;
 	return [replacement, ...rest].join(" ");
+}
+
+function rewriteSearchAsRtk(command, executable) {
+	const replacement = executable === "rg" ? "grep" : executable;
+	const tokens = rewriteExecutable(command, replacement)
+		.split(WHITESPACE_PATTERN)
+		.filter(Boolean);
+	const rewritten = [];
+	for (const token of tokens) {
+		if (token === "--max") {
+			rewritten.push("-m");
+			continue;
+		}
+		if (token.startsWith("--max=")) {
+			rewritten.push("-m", token.slice("--max=".length));
+			continue;
+		}
+		rewritten.push(token);
+	}
+	return `rtk ${rewritten.join(" ")}`;
 }

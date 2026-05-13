@@ -11,8 +11,6 @@ export interface BinPlan {
 	content: string;
 	opendexPath: string;
 	opendexContent: string;
-	symphonyPath: string;
-	symphonyContent: string;
 }
 
 export interface BinManifest {
@@ -23,14 +21,11 @@ export interface BinManifest {
 	source: string;
 	opendexPath?: string;
 	opendexHash?: string;
-	symphonyPath?: string;
-	symphonyHash?: string;
 }
 
 export function planBinInstall(binDir: string, entrypoint: string): BinPlan {
 	const path = join(binDir, "oal");
 	const opendexPath = join(binDir, "opendex");
-	const symphonyPath = join(binDir, "symphony");
 	return {
 		action: "write",
 		path,
@@ -38,24 +33,19 @@ export function planBinInstall(binDir: string, entrypoint: string): BinPlan {
 		content: renderShim(entrypoint),
 		opendexPath,
 		opendexContent: renderShim(entrypoint, ["opendex"]),
-		symphonyPath,
-		symphonyContent: renderShim(entrypoint, ["symphony"]),
 	};
 }
 
 export async function refineBinPlan(plan: BinPlan): Promise<BinPlan> {
 	try {
-		const [current, opendexCurrent, symphonyCurrent] = await Promise.all([
+		const [current, opendexCurrent] = await Promise.all([
 			readFile(plan.path, "utf8"),
 			readFile(plan.opendexPath, "utf8"),
-			readFile(plan.symphonyPath, "utf8"),
 		]);
 		return {
 			...plan,
 			action:
-				current === plan.content &&
-				opendexCurrent === plan.opendexContent &&
-				symphonyCurrent === plan.symphonyContent
+				current === plan.content && opendexCurrent === plan.opendexContent
 					? "skip"
 					: "update",
 		};
@@ -74,8 +64,6 @@ export async function applyBinInstall(
 	await chmod(plan.path, 0o755);
 	await writeFile(plan.opendexPath, plan.opendexContent, { mode: 0o755 });
 	await chmod(plan.opendexPath, 0o755);
-	await writeFile(plan.symphonyPath, plan.symphonyContent, { mode: 0o755 });
-	await chmod(plan.symphonyPath, 0o755);
 	await writeManifest(home, {
 		product: "OpenAgentLayer",
 		version: 1,
@@ -84,8 +72,6 @@ export async function applyBinInstall(
 		source: entrypoint,
 		opendexPath: plan.opendexPath,
 		opendexHash: hash(plan.opendexContent),
-		symphonyPath: plan.symphonyPath,
-		symphonyHash: hash(plan.symphonyContent),
 	});
 }
 
@@ -99,7 +85,6 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 		if (hash(current) === manifest.hash) {
 			await rm(manifest.path);
 			await removeOwnedOpenDexShim(manifest);
-			await removeOwnedSymphonyShim(manifest);
 			await rm(manifestPath);
 			return {
 				action: "remove",
@@ -108,8 +93,6 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 				content: current,
 				opendexPath: manifest.opendexPath ?? "",
 				opendexContent: "",
-				symphonyPath: manifest.symphonyPath ?? "",
-				symphonyContent: "",
 			};
 		}
 		return {
@@ -119,12 +102,9 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 			content: current,
 			opendexPath: manifest.opendexPath ?? "",
 			opendexContent: "",
-			symphonyPath: manifest.symphonyPath ?? "",
-			symphonyContent: "",
 		};
 	} catch {
 		await removeOwnedOpenDexShim(manifest);
-		await removeOwnedSymphonyShim(manifest);
 		await rm(manifestPath);
 		return {
 			action: "skip",
@@ -133,8 +113,6 @@ export async function removeBinInstall(home: string): Promise<BinPlan> {
 			content: "",
 			opendexPath: manifest.opendexPath ?? "",
 			opendexContent: "",
-			symphonyPath: manifest.symphonyPath ?? "",
-			symphonyContent: "",
 		};
 	}
 }
@@ -165,17 +143,6 @@ async function removeOwnedOpenDexShim(manifest: BinManifest): Promise<void> {
 	try {
 		const current = await readFile(manifest.opendexPath, "utf8");
 		if (hash(current) === manifest.opendexHash) await rm(manifest.opendexPath);
-	} catch {
-		// Missing secondary shim is already the desired removal state.
-	}
-}
-
-async function removeOwnedSymphonyShim(manifest: BinManifest): Promise<void> {
-	if (!(manifest.symphonyPath && manifest.symphonyHash)) return;
-	try {
-		const current = await readFile(manifest.symphonyPath, "utf8");
-		if (hash(current) === manifest.symphonyHash)
-			await rm(manifest.symphonyPath);
 	} catch {
 		// Missing secondary shim is already the desired removal state.
 	}

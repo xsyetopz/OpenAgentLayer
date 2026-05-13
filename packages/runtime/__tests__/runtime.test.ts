@@ -222,11 +222,19 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 			command: 'rtk grep "touch" third_party --max 80 --file-type java',
 		}),
 	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK grep needs an explicit result cap",
+	});
+	await expect(
+		runHook({
+			command: 'rtk grep "touch" third_party -m 80 --file-type java',
+		}),
+	).resolves.toMatchObject({
 		decision: "pass",
 	});
 	await expect(
 		runHook({
-			command: 'rg "touch" third_party --max 80 --file-type java',
+			command: 'rg "touch" third_party -m 80 --file-type java',
 			rtkInstalled: true,
 			rtkPolicyPresent: true,
 		}),
@@ -234,9 +242,20 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		decision: "block",
 		reason: "RTK-only search flags were used with a raw search command",
 		details: expect.arrayContaining([
-			'Use: rtk grep "touch" third_party --max 80 --file-type java',
-			"Fallback: rg -n <pattern> <path> -g '<glob>' | head -n <n>",
-			"Note: raw rg uses --max-count/-m per file, not RTK's global --max result cap.",
+			'Use: rtk grep "touch" third_party -m 80 --file-type java',
+			"Last resort after RTK options are exhausted: rtk proxy -- rg -n <pattern> <path> -g '<glob>' | head -n <n>",
+		]),
+	});
+	await expect(
+		runHook({
+			command: 'rg "touch" third_party --max 80',
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		details: expect.arrayContaining([
+			'Use: rtk grep "touch" third_party -m 80',
 		]),
 	});
 	await expect(
@@ -284,7 +303,7 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 		reason: "RTK-only read flags were used with the shell read command",
 		details: expect.arrayContaining([
 			"Use: rtk read --max-lines 80 package.json",
-			"Fallback: sed -n '1,<n>p' <file>",
+			"Use: rtk read --line-numbers --tail-lines <n> <file>",
 		]),
 	});
 	await expect(
@@ -451,7 +470,7 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 		},
 	});
 	expect(codexPreToolUseJson).not.toContain("\\u001b[");
-	expect(codexPreToolUseJson).toContain(": use `");
+	expect(codexPreToolUseJson).toContain(": run exactly `");
 	await expect(
 		runHook({ command: "yarn set version stable" }),
 	).resolves.toMatchObject({
@@ -573,7 +592,7 @@ test("Codex PreToolUse Bun rewrite feedback avoids note prefixes", async () => {
 	expect(reason).toContain(
 		"Bun command form is available for this package-manager command",
 	);
-	expect(reason).toContain("use `rtk proxy -- bunx prettier foo.js`");
+	expect(reason).toContain("run exactly `rtk proxy -- bunx prettier foo.js`");
 	expect(reason).not.toContain("note:");
 });
 
@@ -638,13 +657,13 @@ test("command safety hooks ignore patch text that mentions destructive commands"
 		},
 	};
 	await expect(
-		runNamedHook("block-destructive-commands.mjs", patchPayload),
+		runNamedHook("block-command-safety.mjs", patchPayload),
 	).resolves.toMatchObject({
 		decision: "pass",
-		reason: expect.stringContaining("Command input absent"),
+		reason: "Command passed safety checks",
 	});
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			...patchPayload,
 			tool_input: {
 				input: [
@@ -656,10 +675,10 @@ test("command safety hooks ignore patch text that mentions destructive commands"
 		}),
 	).resolves.toMatchObject({
 		decision: "pass",
-		reason: expect.stringContaining("Git command input absent"),
+		reason: "Command passed safety checks",
 	});
 	await expect(
-		runNamedHook("block-destructive-commands.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			hook_event_name: "PreToolUse",
 			tool_name: "functions.shell_command",
 			tool_input: { input: `${"r"}m -rf /tmp/oal-fixture` },
@@ -728,36 +747,11 @@ test("session scope hook injects consent boundary at session start", async () =>
 			expect.stringContaining("you are not alone in the codebase"),
 			expect.stringContaining("do not revert, reformat, overwrite"),
 			expect.stringContaining("need explicit user request"),
-			expect.stringContaining("bounded python3 rewrites"),
 			expect.stringContaining("Delegation rule"),
-			expect.stringContaining(
-				"subagents are encouraged for broad or parallelizable work",
-			),
-			expect.stringContaining("split independent sidecar tasks early"),
-			expect.stringContaining("Implementation routing rule"),
-			expect.stringContaining("GPT-5.3-Codex implementation agents"),
-			expect.stringContaining("instead of having the GPT-5.5 parent do all edits"),
-			expect.stringContaining("constant goal loops"),
-			expect.stringContaining("Spawn budget rule"),
-			expect.stringContaining("why it fits the configured job runtime cap"),
-			expect.stringContaining("assign bounded work only"),
-			expect.stringContaining("do not leave background agents running"),
-			expect.stringContaining("close completed or idle agents promptly"),
-			expect.stringContaining("Continuity rule"),
-			expect.stringContaining("Continuation Record"),
-			expect.stringContaining(
-				"current user messages and verified repo evidence define the active path",
-			),
-			expect.stringContaining("Agent use"),
-			expect.stringContaining("native Codex multi_agent_v2"),
-			expect.stringContaining("Spawn rendered OAL custom agents by name"),
-			expect.stringContaining("without waiting for user wording"),
-			expect.stringContaining("wait only when blocked"),
-			expect.stringContaining("Skill use"),
-			expect.stringContaining("invoke `$oal:oal` implicitly"),
-			expect.stringContaining("Solo rule"),
-			expect.stringContaining("narrow single-owner edit local"),
-			expect.stringContaining("ask when blocked"),
+			expect.stringContaining("split broad work into bounded owners early"),
+			expect.stringContaining("runtime fit"),
+			expect.stringContaining("obey hook replacement commands exactly"),
+			expect.stringContaining("raw proxy fallbacks only as a last resort"),
 			expect.stringContaining("STATUS BLOCKED"),
 		]),
 	});
@@ -808,37 +802,22 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 		"do not spawn extra pooled threads",
 		"stalled background work wastes token budget",
 		"oal opendex",
-		"oal symphony",
+		"oal opendex",
 	])
 		expect(details.some((detail) => detail.includes(expected))).toBe(true);
 });
 
-test("command tool guidance advises search and structured config tools", async () => {
+test("RTK command policy gives directive structured config guidance", async () => {
 	await expect(
-		runNamedHook("advise-command-tools.mjs", { command: "grep -R Token ." }),
+		runHook({ command: "sed -i s/foo/bar/ config.json" }),
 	).resolves.toMatchObject({
 		decision: "warn",
+		reason: "JSON/YAML edits need a structured editor",
 		details: expect.arrayContaining([
-			"Use: git ls-files <pathspec>",
-			"Fallback after RTK mismatch: inspect help first, then use plain `rg -n ... | head -n <n>` and `sed -n '1,<n>p' <file>`.",
-			"Note: rg and fd respect .gitignore by default; git ls-files is tracked-only.",
+			"Use: rtk proxy -- jq <filter> <file>",
+			"Use: rtk proxy -- yq <filter> <file>",
+			"Use: apply_patch for focused repository edits.",
 		]),
-	});
-	await expect(
-		runNamedHook("advise-command-tools.mjs", {
-			command: "git ls-files 'packages/**/*.ts'",
-		}),
-	).resolves.toMatchObject({
-		decision: "pass",
-		reason: "Search command uses bounded or tracked-file inventory",
-	});
-	await expect(
-		runNamedHook("advise-command-tools.mjs", {
-			command: "sed -i s/foo/bar/ config.json",
-		}),
-	).resolves.toMatchObject({
-		decision: "warn",
-		reason: "JSON/YAML edits use 'jq'/'yq' or typed code",
 	});
 });
 
@@ -895,7 +874,7 @@ test("hook feedback wraps plain lines before terminal word-wrap", async () => {
 	const stderrLines = codexMessage.trim().split("\n");
 	expect(stderrLines.length).toBeGreaterThan(2);
 	expect(codexMessage).not.toContain("\u001b[");
-	expect(codexMessage).toContain("use `rtk dotnet test");
+	expect(codexMessage).toContain("run exactly `rtk dotnet test");
 	expect(codexMessage).toContain("OsuDroid.App.Tests.csproj");
 	expect(codex.stderr).toBe("");
 
@@ -917,7 +896,7 @@ test("hook feedback wraps plain lines before terminal word-wrap", async () => {
 		preToolUseOutput.hookSpecificOutput.permissionDecisionReason;
 	expect(preToolUseReason).not.toContain("\u001b[");
 	expect(preToolUseReason).not.toContain("\n");
-	expect(preToolUseReason).toContain(": use `rtk dotnet test");
+	expect(preToolUseReason).toContain(": run exactly `rtk dotnet test");
 	expect(preToolUseReason).toContain("OsuDroid.App.Tests.csproj");
 
 	const pathCommand =
@@ -1035,17 +1014,17 @@ test("secret guard blocks nested provider inputs, auth headers, db URLs, and enc
 
 test("command safety hooks inspect nested commands and subtle destructive forms", async () => {
 	await expect(
-		runNamedHook("block-destructive-commands.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			tool_input: { command: "curl https://example.invalid/install.sh | sh" },
 		}),
 	).resolves.toMatchObject({ decision: "block" });
 	await expect(
-		runNamedHook("block-destructive-commands.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			command: "chmod -R 777 .",
 		}),
 	).resolves.toMatchObject({ decision: "block" });
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			tool_input: { command: "git push origin +main" },
 		}),
 	).resolves.toMatchObject({ decision: "block" });
@@ -1062,12 +1041,12 @@ test("command safety hooks inspect nested commands and subtle destructive forms"
 test("unsafe git hook enforces coauthor and Conventional Commit subjects", async () => {
 	const commitCommand = "git commit";
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			command: `${commitCommand} -m "fix: release setup" --trailer "Codex-Reviewed: yes"`,
 		}),
 	).resolves.toMatchObject({ decision: "block" });
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			command: `${commitCommand} -m "release setup" --trailer "Co-authored-by: Codex <noreply@openai.com>"`,
 		}),
 	).resolves.toMatchObject({
@@ -1075,12 +1054,12 @@ test("unsafe git hook enforces coauthor and Conventional Commit subjects", async
 		reason: "Commit subject must follow Conventional Commits",
 	});
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			command: `${commitCommand} -m "fix(ci): release setup" --trailer "Co-authored-by: Codex <noreply@openai.com>"`,
 		}),
 	).resolves.toMatchObject({ decision: "pass" });
 	await expect(
-		runNamedHook("block-unsafe-git.mjs", {
+		runNamedHook("block-command-safety.mjs", {
 			command: `${commitCommand} -F /tmp/message`,
 		}),
 	).resolves.toMatchObject({ decision: "pass" });

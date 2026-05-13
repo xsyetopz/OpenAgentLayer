@@ -125,22 +125,14 @@ flowchart TD
 - block legacy recursive `rtk grep` flags and uncapped `rtk grep`
 - block `rtk read` without `--max-lines`, `--tail-lines`, or `--level`
 - block raw file dumps that should use `rtk read`
-- return actionable `Use:` guidance when a replacement is known
-
-`advise-command-tools` MUST:
-
-- warn on recursive `grep -R`
-- warn on unbounded `find .`
 - warn on regex editing of JSON, YAML, or YML through `sed` or `perl`
-- pass bounded or tracked-file inventory commands such as `git ls-files` and
-  `rg --files`
+- return actionable `Use:` guidance when a replacement is known
 
 ## Hook Inventory
 
 Hook categories are:
 
 - RTK command enforcement
-- command-tool advice
 - destructive command safety
 - unsafe git operation safety
 - protected branch safety
@@ -174,8 +166,8 @@ MUST follow a compiler-like style:
 - quote concrete values with backticks
 - in template literals, wrap substituted values as `` `${value}` ``
 - start with the contract, supported path, or observed diagnostic category
-- render known replacements as `` use `<command>` ``
-- render optional suggestions as `` use `<command>` when useful ``
+- render known replacements as `` run exactly `<command>` ``
+- render optional suggestions as `` run `<command>` when useful ``
 - render explanatory support as `note: <detail>`
 - join compact provider feedback as `<message>: <suggestion>`
 - use separate lines for styled stderr/system feedback
@@ -187,9 +179,9 @@ MUST follow a compiler-like style:
 Examples:
 
 ```text
-RTK command form is available: use `rtk grep "pattern" source packages --max 80 --file-type ts`
-use `rtk grep "pattern" source packages --max 80 --file-type ts`
-use `rtk proxy -- make check` when useful
+RTK command form is available: run exactly `rtk grep "pattern" source packages -m 80 --file-type ts`
+run exactly `rtk grep "pattern" source packages -m 80 --file-type ts`
+run `rtk proxy -- make check` when useful
 Provider value `other` needs `codex`, `claude`, `opencode`, or `all`
 ```
 

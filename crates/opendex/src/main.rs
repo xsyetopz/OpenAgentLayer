@@ -1,19 +1,20 @@
 use std::env;
 use std::path::PathBuf;
-use std::process::exit;
+use std::process::ExitCode;
 
 use opendex::{ControlPlane, DaemonConfig, OpenDexDaemon};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> ExitCode {
     let mut args = env::args().skip(1);
     let Some(command) = args.next() else {
         println!("opendex {}", env!("CARGO_PKG_VERSION"));
-        return;
+        return ExitCode::SUCCESS;
     };
     match command.as_str() {
         "--version" | "-V" | "version" => {
             println!("opendex {}", env!("CARGO_PKG_VERSION"));
+            ExitCode::SUCCESS
         }
         "serve" => {
             let mut address = "127.0.0.1:8765".to_string();
@@ -42,12 +43,13 @@ async fn main() {
             );
             if let Err(error) = daemon.serve_async(&address).await {
                 eprintln!("opendex serve failed: {error}");
-                exit(1);
+                return ExitCode::FAILURE;
             }
+            ExitCode::SUCCESS
         }
         _ => {
             eprintln!("unknown opendex command: {command}");
-            exit(2);
+            ExitCode::from(2)
         }
     }
 }

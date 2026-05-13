@@ -27,7 +27,7 @@ Agent use:
 - For significant or separable Codex coding implementation, prefer rendered GPT-5.3-Codex implementation workers such as `hephaestus`, `daedalus`, `demeter`, `hecate`, or `prometheus` instead of having the GPT-5.5 parent perform all edits.
 - Parent sessions own task split, agent launch, wait/merge, and final decision. Merge only final summaries, changed paths, validation output, and precise blockers into the parent context.
 - Use CSV/batch subagents for many similar row-shaped tasks when the provider exposes that surface.
-- If native Codex subagents are unavailable or an external control plane is explicitly needed, use `oal codex peer batch <task>`, `oal opendex`, `opendex`, or Symphony workflow commands for bounded OpenDex/Symphony orchestration.
+- If native Codex subagents are unavailable or an external control plane is explicitly needed, use `oal codex peer batch <task>`, `oal opendex`, or `opendex` for bounded OpenDex orchestration.
 - `oal codex peer batch` creates a `.openagentlayer/codex-peer/<run-id>/` handoff directory with orchestrator, validate, worker, and review passes.
 
 Source-to-artifact chain must be complete for new behavior: source record, renderer, deploy ownership, acceptance check.

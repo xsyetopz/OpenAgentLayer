@@ -3,8 +3,7 @@
   "script": "inject-changed-files.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -12,9 +11,6 @@
     ],
     "claude": [
       "PostToolUse"
-    ],
-    "opencode": [
-      "file.edited"
     ]
   }
 }

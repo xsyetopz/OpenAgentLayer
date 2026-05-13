@@ -18,8 +18,6 @@ rscheck:
 	"$$RSCHECK_BIN" check; code=$$?; test $$code -le 1
 
 lint:
-	$(CARGO) run -p musi_diaggen -- write
-	$(CARGO) run -p musi_diaggen -- check
 	$(MAKE) rscheck
 	$(CARGO) clippy --locked --workspace -- -D warnings
 	$(CARGO) clippy --locked --workspace --tests -- -D warnings

@@ -3,8 +3,7 @@
   "script": "block-explanation-only.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -12,9 +11,6 @@
     ],
     "claude": [
       "Stop"
-    ],
-    "opencode": [
-      "session.idle"
     ]
   }
 }

@@ -117,13 +117,13 @@ function codexOrchestrationOptions(
 
 function codexOrchestrationMode(value: string): CodexOrchestrationMode {
 	if (
-		value === "symphony" ||
+		value === "opendex" ||
 		value === "multi_agent" ||
 		value === "multi_agent_v2"
 	)
 		return value;
 	throw new Error(
-		`Unsupported Codex orchestration \`${value}\`. Expected symphony, multi_agent, or multi_agent_v2`,
+		`Unsupported Codex orchestration \`${value}\`. Expected opendex, multi_agent, or multi_agent_v2`,
 	);
 }
 

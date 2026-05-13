@@ -3,8 +3,7 @@
   "script": "inject-project-memory.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -12,9 +11,6 @@
     ],
     "claude": [
       "SessionStart"
-    ],
-    "opencode": [
-      "session.created"
     ]
   }
 }

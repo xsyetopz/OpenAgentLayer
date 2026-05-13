@@ -1,6 +1,6 @@
 {
-  "id": "require_validation_evidence",
-  "script": "require-validation-evidence.mjs",
+  "id": "block_command_safety",
+  "script": "block-command-safety.mjs",
   "providers": [
     "codex",
     "claude",
@@ -8,13 +8,13 @@
   ],
   "events": {
     "codex": [
-      "Stop"
+      "PreToolUse"
     ],
     "claude": [
-      "Stop"
+      "PreToolUse"
     ],
     "opencode": [
-      "session.idle"
+      "tool.execute.before"
     ]
   }
 }

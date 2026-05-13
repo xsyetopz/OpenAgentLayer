@@ -3,8 +3,7 @@
   "script": "inject-route-context.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -12,9 +11,6 @@
     ],
     "claude": [
       "UserPromptSubmit"
-    ],
-    "opencode": [
-      "tui.prompt.append"
     ]
   }
 }

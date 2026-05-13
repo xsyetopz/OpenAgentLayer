@@ -16,12 +16,31 @@ const TERMINAL_PERIOD_PATTERNS = [
 export async function assertMessageStyle(repoRoot: string): Promise<void> {
 	for (const path of await trackedFiles(repoRoot)) {
 		if (!MESSAGE_FILE_PATTERN.test(path)) continue;
-		const content = await readFile(join(repoRoot, path), "utf8");
+		const content = await readTrackedWorktreeFile(repoRoot, path);
+		if (content === undefined) continue;
 		for (const pattern of TERMINAL_PERIOD_PATTERNS)
 			if (pattern.test(content))
 				throw new Error(
 					`Message style uses terminal period in \`${path}\` for \`${pattern.source}\``,
 				);
+	}
+}
+
+async function readTrackedWorktreeFile(
+	repoRoot: string,
+	path: string,
+): Promise<string | undefined> {
+	try {
+		return await readFile(join(repoRoot, path), "utf8");
+	} catch (error) {
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			error.code === "ENOENT"
+		)
+			return undefined;
+		throw error;
 	}
 }
 

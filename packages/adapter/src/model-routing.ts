@@ -12,7 +12,7 @@ export type ModelPlan =
 	| "opencode-free";
 export type ReasoningEffort = "low" | "medium" | "high" | "xhigh";
 export type CodexOrchestrationMode =
-	| "symphony"
+	| "opendex"
 	| "multi_agent"
 	| "multi_agent_v2";
 

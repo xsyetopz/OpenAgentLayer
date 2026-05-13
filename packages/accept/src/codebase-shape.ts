@@ -31,10 +31,11 @@ async function assertPackageLineBudgets(
 	for (const file of files) {
 		const owner = ownerFor(file);
 		if (!owner) continue;
+		const content = await readTrackedWorktreeFile(repoRoot, file);
+		if (content === undefined) continue;
 		totals.set(
 			owner,
-			(totals.get(owner) ?? 0) +
-				lineCount(await readFile(join(repoRoot, file), "utf8")),
+			(totals.get(owner) ?? 0) + lineCount(content),
 		);
 	}
 	const oversized = [...totals.entries()]
@@ -44,6 +45,24 @@ async function assertPackageLineBudgets(
 		throw new Error(
 			`Codebase shape has oversized source owners over ${MAX_PACKAGE_SOURCE_LINES} lines: ${oversized.join(", ")}`,
 		);
+}
+
+async function readTrackedWorktreeFile(
+	repoRoot: string,
+	file: string,
+): Promise<string | undefined> {
+	try {
+		return await readFile(join(repoRoot, file), "utf8");
+	} catch (error) {
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			error.code === "ENOENT"
+		)
+			return undefined;
+		throw error;
+	}
 }
 
 function assertDirectChildren(files: string[]): void {

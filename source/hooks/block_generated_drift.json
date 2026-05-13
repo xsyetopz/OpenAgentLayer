@@ -3,8 +3,7 @@
   "script": "block-generated-drift.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -12,9 +11,6 @@
     ],
     "claude": [
       "PostToolUse"
-    ],
-    "opencode": [
-      "tool.execute.after"
     ]
   }
 }

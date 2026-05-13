@@ -3,8 +3,7 @@
   "script": "enforce-route-contract.mjs",
   "providers": [
     "codex",
-    "claude",
-    "opencode"
+    "claude"
   ],
   "events": {
     "codex": [
@@ -13,9 +12,6 @@
     "claude": [
       "Stop",
       "SubagentStop"
-    ],
-    "opencode": [
-      "session.idle"
     ]
   }
 }

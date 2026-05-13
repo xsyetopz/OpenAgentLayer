@@ -360,7 +360,7 @@ test("interactive subscription prompts are ordered from lowest to highest", () =
 	expect(CODEX_ORCHESTRATION_OPTIONS.map((option) => option.value)).toEqual([
 		"multi_agent_v2",
 		"multi_agent",
-		"symphony",
+		"opendex",
 	]);
 	expect(CLAUDE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
 		"max-5",

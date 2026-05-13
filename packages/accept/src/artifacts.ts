@@ -261,7 +261,7 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"export const OpenAgentLayerPlugin",
 	]);
 	const hook = findArtifact(
-		".codex/openagentlayer/hooks/block-destructive-commands.mjs",
+		".codex/openagentlayer/hooks/block-command-safety.mjs",
 		artifacts,
 	);
 	if (!hook.content.startsWith("#!/usr/bin/env node"))

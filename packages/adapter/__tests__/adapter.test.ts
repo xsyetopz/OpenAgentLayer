@@ -190,6 +190,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 		["caveman", "Use compact output"],
 		["taste", "Improve product UI"],
 		["oal", "oal codex peer batch <task>"],
+		["cross-platform-app", "rigid product stack"],
 	] as const) {
 		for (const provider of ["codex", "claude", "opencode"] as const) {
 			const rendered = await renderProvider(provider, graph.source, repoRoot);
@@ -230,7 +231,9 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 		const designWorkerReference = rendered.artifacts.find((candidate) =>
 			candidate.path.endsWith("/design-worker/references/worker.md"),
 		);
-		expect(impeccable?.content).toContain("IMPECCABLE_PREFLIGHT");
+		expect(impeccable?.content).toContain(
+			"Designs and iterates production-grade frontend interfaces",
+		);
 		expect(brandReference?.content).toContain("Brand");
 		expect(loadContextScript?.content).toContain("PRODUCT.md");
 		expect(designWorker?.content).toContain("Design Worker");
@@ -809,11 +812,13 @@ test("OpenCode renders real OAL command policy and RTK tools", async () => {
 	expect(plugin).toContain("styleHookLines");
 	expect(plugin).toContain("evaluateCommandPolicy");
 	expect(plugin).toContain("evaluateSecretGuard");
-	expect(plugin).toContain("evaluateDestructiveCommand");
-	expect(plugin).toContain("evaluateUnsafeGit");
+	expect(plugin).toContain("evaluateCommandSafety");
 	expect(plugin).toContain("evaluateFailureLoop");
+	expect(plugin).toContain("beforeHookIds");
+	expect(plugin).toContain("afterHookIds");
+	expect(plugin).toContain("runBeforeHook");
+	expect(plugin).toContain("runAfterHook");
 	expect(plugin).toContain("output.args.command = replacement");
-	expect(plugin).toContain("blockIfNeeded(evaluateFailureLoop(output ?? {}))");
 	expect(plugin).not.toContain("output.metadata");
 });
 

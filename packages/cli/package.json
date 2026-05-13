@@ -17,7 +17,6 @@
 		"@openagentlayer/plugins": "workspace:*",
 		"@openagentlayer/policy": "workspace:*",
 		"@openagentlayer/source": "workspace:*",
-		"@openagentlayer/symphony": "workspace:*",
 		"@openagentlayer/toolchain": "workspace:*",
 		"commander": "^14.0.3",
 		"@openagentlayer/setup": "workspace:*"

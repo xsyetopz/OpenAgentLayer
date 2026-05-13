@@ -5,21 +5,35 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.12] - 2026-05-13
+## [0.7.0-beta.1] - 2026-05-13
 
 ### Added
 
-- Added generated Codex `config.toml` `developer_instructions` gates for defensive contrast checks, avoiding unsupported contrast, and preventing implementation-context leakage in public-facing text.
-- Added adapter and acceptance coverage for the rendered Codex `developer_instructions` gates.
+- Added a source-driven OpenCode hook dispatcher that maps authored OAL hook records into before/after tool execution handling.
+- Added a cross-platform app skill with Flutter/Dart defaults, C# + Avalonia desktop guidance, and C# + MonoGame game guidance.
+- Added rscheck-backed OpenDex linting alongside workspace and test clippy gates.
+- Added compact skill-intake guidance for using external catalogs as discovery input while keeping OAL skills local and reusable.
 
 ### Changed
 
-- Updated release metadata from `0.6.0-beta.11` to `0.6.0-beta.12`.
+- Replaced the legacy Symphony package, CLI command, submodule, and generated guidance with OpenDex surfaces.
+- Consolidated overlapping command-safety hooks into `block-command-safety`.
+- Strengthened session and subagent prompt guidance for exact hook-command obedience while keeping the injected prompt compact.
+- Updated release metadata from `0.6.0-beta.12` to `0.7.0-beta.1`.
+
+### Removed
+
+- Removed legacy Symphony package sources, workspace dependency links, CLI wiring, and submodule registration.
+- Removed stale and duplicate hook records for command advice, protected-branch checks, unsafe git checks, destructive commands, weak blocked status, and validation-evidence completion.
 
 ### Verified
 
-- `bun test packages/adapter/__tests__/adapter.test.ts -t "Codex default render uses normal shell and hook-based RTK enforcement"`
-- `bun packages/cli/src/main.ts preview --provider codex --path .codex/config.toml --content`
+- `rtk proxy -- bun test packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts packages/deploy/__tests__/deploy.test.ts packages/toolchain/__tests__/toolchain.test.ts`
+- `rtk proxy -- bun run oal:render`
+- `rtk proxy -- bun run oal:accept`
+- `rtk cargo test -p opendex`
+- `rtk proxy -- make lint`
+- `rtk cargo fmt --check`
 
 ## [0.6.0-beta.8] - 2026-05-13
 

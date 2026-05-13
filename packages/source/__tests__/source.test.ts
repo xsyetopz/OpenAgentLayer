@@ -14,9 +14,12 @@ test("loadSource loads authored prompt skills", async () => {
 	const designWorker = graph.source.skills.find(
 		(skill) => skill.id === "design-worker",
 	);
+	const crossPlatformApp = graph.source.skills.find(
+		(skill) => skill.id === "cross-platform-app",
+	);
 	expect(caveman?.body).toContain("Use compact output");
 	expect(taste?.body).toContain("Improve product UI");
-	expect(impeccable?.body).toContain("IMPECCABLE_PREFLIGHT");
+	expect(impeccable?.body).toContain("Designs and iterates production-grade frontend interfaces");
 	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
 		"reference/brand.md",
 	);
@@ -27,6 +30,10 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(designWorker?.supportFiles?.map((file) => file.path)).toContain(
 		"references/worker.md",
 	);
+	expect(crossPlatformApp?.supportFiles?.map((file) => file.path)).toContain(
+		"references/stack.md",
+	);
+	expect(crossPlatformApp?.body).toContain("rigid product stack");
 	expect(caveman?.upstream).toBeUndefined();
 	expect(taste?.upstream).toBeUndefined();
 	expect(impeccable?.upstream?.path).toBe(
@@ -34,11 +41,6 @@ test("loadSource loads authored prompt skills", async () => {
 	);
 	expect(designWorker?.upstream?.path).toBe(
 		"third_party/robertmsale-codex/skills/design-worker/SKILL.md",
-	);
-	const linear = graph.source.skills.find((skill) => skill.id === "linear");
-	expect(linear?.body).toContain("linear_graphql");
-	expect(linear?.upstream?.path).toBe(
-		"third_party/openai-symphony/.codex/skills/linear/SKILL.md",
 	);
 	const commit = graph.source.skills.find((skill) => skill.id === "commit");
 	expect(commit?.upstream).toBeUndefined();
@@ -53,10 +55,10 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(oal?.body).toContain("OAL's index skill for AI/LLM use");
 	expect(oal?.body).toContain("Codex does not infer them automatically");
 	expect(oal?.body).toContain("CSV/batch subagents");
-	for (const skillId of ["push", "pull", "land"])
-		expect(
-			graph.source.skills.find((skill) => skill.id === skillId)?.upstream?.path,
-		).toBe(`third_party/openai-symphony/.codex/skills/${skillId}/SKILL.md`);
+	for (const skillId of ["push", "pull", "land", "linear"])
+		expect(graph.source.skills.some((skill) => skill.id === skillId)).toBe(
+			false,
+		);
 });
 
 test("loadSource reports provenance for authored records", async () => {

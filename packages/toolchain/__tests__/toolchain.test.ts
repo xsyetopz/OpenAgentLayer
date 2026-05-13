@@ -39,7 +39,7 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	expect(renderToolchainPlan(plan)).toContain(
 		"RTK flags are not raw tool flags",
 	);
-	expect(renderToolchainPlan(plan)).toContain("plain Linux fallbacks");
+	expect(renderToolchainPlan(plan)).toContain("RTK options are exhausted");
 	expect(renderToolchainPlan(plan)).toContain("respect `.gitignore`");
 	expect(renderToolchainPlan(plan)).toContain("tracked files only");
 	expect(renderToolchainPlan(plan)).toContain("shellcheck");

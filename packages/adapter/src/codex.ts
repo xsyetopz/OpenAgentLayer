@@ -379,7 +379,7 @@ function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
 		case "multi_agent_v2":
 			return "openagentlayer-multi-agent-v2";
 		default:
-			return "openagentlayer-symphony";
+			return "openagentlayer-opendex";
 	}
 }
 
@@ -555,7 +555,7 @@ function renderCodexFeatures(
 ): string {
 	const baseFeatures = CODEX_FEATURES.map(([name, defaultEnabled]) => {
 		const enabled =
-			name === "apps" ? orchestration.mode === "symphony" : defaultEnabled;
+			name === "apps" ? orchestration.mode === "opendex" : defaultEnabled;
 		return `${name} = ${enabled ? "true" : "false"}`;
 	});
 	return [
