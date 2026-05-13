@@ -679,9 +679,7 @@ test("session scope hook injects consent boundary at session start", async () =>
 			expect.stringContaining(
 				"subagents are encouraged for broad or parallelizable work",
 			),
-			expect.stringContaining(
-				"split independent sidecar tasks early",
-			),
+			expect.stringContaining("split independent sidecar tasks early"),
 			expect.stringContaining("Spawn budget rule"),
 			expect.stringContaining("why it fits the configured job runtime cap"),
 			expect.stringContaining("assign bounded work only"),
