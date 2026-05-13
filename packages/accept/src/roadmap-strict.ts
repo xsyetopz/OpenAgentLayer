@@ -87,10 +87,10 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			requireIncludes(config, "max_depth = 1", "Codex config");
 			requireIncludes(
 				config,
-				"max_concurrent_threads_per_session = 1",
+				"max_concurrent_threads_per_session = 4",
 				"Codex config",
 			);
-			requireIncludes(config, "job_max_runtime_seconds = 1800", "Codex config");
+			requireIncludes(config, "job_max_runtime_seconds = 600", "Codex config");
 			for (const forbidden of [
 				`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 				'approval_policy = "on-failure"',
