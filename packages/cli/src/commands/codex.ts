@@ -407,7 +407,7 @@ function rolePrompt(role: PeerRole, paths: PeerPaths): string {
 		case "validate":
 			return `${common}\n\nRead ${join(paths.resultsDir, "orchestrator.md")} when present. Reproduce broadly, list exact variants, and record evidence. Do not implement fixes.`;
 		case "worker":
-			return `${common}\n\nRead orchestrator and validation results. Implement the smallest cohesive fix that satisfies acceptance criteria and validation evidence.`;
+			return `${common}\n\nRead orchestrator and validation results. Implement the complete cohesive fix that satisfies acceptance criteria and validation evidence.`;
 		case "review":
 			return `${common}\n\nRead orchestrator, validation, and worker results. Audit correctness, regressions, missing tests, and residual risk.`;
 		default:

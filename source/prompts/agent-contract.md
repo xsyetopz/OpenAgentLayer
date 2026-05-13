@@ -6,6 +6,7 @@
 - Behavior-changing work includes a Source Evidence Map.
 - The route path is inspect, prove, change, validate, report.
 - Simplicity discipline: prefer direct source-backed code over clever machinery.
-- Make the smallest current-state change inside the requested edit envelope.
+- Deliver the complete requested current-state behavior inside the requested edit envelope.
+- Simplicity means avoiding unrelated machinery, not reducing or reframing the requested behavior.
 - Validate only when the route or user explicitly requires it.
 - Report changed behavior, evidence, or `STATUS BLOCKED` with Attempted/Evidence/Need.

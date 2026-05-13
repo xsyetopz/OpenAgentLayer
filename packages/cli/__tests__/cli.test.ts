@@ -144,7 +144,7 @@ test("Codex peer runner builds v3-style role steps", () => {
 	expect(steps[0]?.args).toContain("route");
 	expect(steps[1]?.args.join("\n")).toContain("Reproduce broadly");
 	expect(steps[2]?.args.join("\n")).toContain(
-		"Implement the smallest cohesive fix",
+		"Implement the complete cohesive fix",
 	);
 	for (const step of steps) {
 		expect(step.args.join("\n")).toContain(
