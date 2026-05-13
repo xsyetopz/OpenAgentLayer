@@ -1031,8 +1031,8 @@ test("CLI RTK report groups project history by routing kind", async () => {
 	expect(stdout).toContain("filtered: commands=1");
 	expect(stdout).toContain("fallback: commands=1");
 	expect(stdout).toContain("nl -ba <file>");
-	expect(stdout).toContain("rg -n ... | head -n <n>");
-	expect(stdout).toContain("sed -n '1,<n>p' <file>");
+	expect(stdout).toContain("rtk grep <pattern> <path> -m <n>");
+	expect(stdout).toContain("rtk read --max-lines <n> <file>");
 	await rm(root, { recursive: true, force: true });
 });
 
