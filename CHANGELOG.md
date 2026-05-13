@@ -5,6 +5,19 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.6.0-beta.9] - 2026-05-13
+
+### Changed
+
+- Encouraged Codex native subagents by default for broad or parallelizable OAL work while keeping narrow single-owner edits local.
+- Added plan-aware Codex subagent thread caps and shorter job runtime caps so spawned workers receive bounded tasks that fit their budget.
+- Updated SessionStart and SubagentStart guidance to require bounded child ownership, runtime-fit checks, prompt `$oal:oal` use for OAL work, and prompt closure of idle or completed agents.
+- Updated release metadata from `0.6.0-beta.8` to `0.6.0-beta.9`.
+
+### Verified
+
+- `rtk test bun test packages/adapter/__tests__/adapter.test.ts packages/runtime/__tests__/runtime.test.ts`
+
 ## [0.6.0-beta.8] - 2026-05-13
 
 ### Added

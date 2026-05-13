@@ -116,8 +116,9 @@ function renderCodexAgentInvocation(source: OalSource): string {
 		.join("\n");
 	return `## Codex Subagents
 
-- Codex does not automatically infer OAL's custom subagent roster; explicitly invoke native subagents with the rendered OAL agent names or aliases when work can be split.
-- Use subagents for broad work that can split by ownership, provider, package, test tier, review perspective, documentation lookup, or repeated batch item. Keep a narrow single-owner fix local and record why.
+- OAL treats native Codex subagents as the default path for broad or parallelizable work when multi_agent or multi_agent_v2 is enabled; users should not need to request them manually.
+- Before starting broad work, split independent sidecar tasks and spawn rendered OAL agent names or aliases; each assignment must fit the configured job runtime cap. Keep a narrow single-owner fix local and record why.
+- Use subagents for work that can split by ownership, provider, package, test tier, review perspective, documentation lookup, or repeated batch item.
 - Parent sessions own task split, agent launch, wait/merge, and final decision. Ask subagents for final evidence, changed paths, validation output, or a precise blocker; merge only their final summaries into the parent context.
 - For many similar rows, create a CSV and use Codex batch subagents when available; each worker should return structured results to the parent.
 

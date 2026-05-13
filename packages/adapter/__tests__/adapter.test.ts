@@ -404,16 +404,20 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("enable_fanout = false");
 	expect(config).toContain("multi_agent = false");
 	expect(config).toContain(
-		"multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 1",
+		"multi_agent_v2 = { enabled = true, max_concurrent_threads_per_session = 4",
 	);
 	expect(config).not.toContain("max_threads = 1");
 	expect(config).toContain("root_agent_usage_hint_text");
+	expect(config).toContain("Assume native subagents are encouraged");
+	expect(config).toContain("when work can split");
+	expect(config).toContain("fit the runtime cap");
 	expect(config).toContain("subagent_usage_hint_text");
+	expect(config).toContain("bounded assigned task within the runtime cap");
 	expect(config).toContain('nickname_candidates = ["hephaestus", "implement"]');
 	expect(config).toContain(
 		'nickname_candidates = ["atalanta", "test", "validate", "accept"]',
 	);
-	expect(config).toContain("job_max_runtime_seconds = 1800");
+	expect(config).toContain("job_max_runtime_seconds = 600");
 	expect(config).toContain("[tui]");
 	const requirements = rendered.artifacts.find(
 		(artifact) => artifact.path === ".codex/requirements.toml",
@@ -525,11 +529,15 @@ test("Codex instructions render subagent invocation roster", async () => {
 	)?.content;
 	expect(instructions).toContain("## Codex Subagents");
 	expect(instructions).toContain(
-		"Codex does not automatically infer OAL's custom subagent roster",
+		"OAL treats native Codex subagents as the default path",
 	);
 	expect(instructions).toContain(
-		"explicitly invoke native subagents with the rendered OAL agent names or aliases",
+		"users should not need to request them manually",
 	);
+	expect(instructions).toContain(
+		"Before starting broad work, split independent sidecar tasks",
+	);
+	expect(instructions).toContain("fit the configured job runtime cap");
 	expect(instructions).toContain(
 		"- hephaestus: aliases=hephaestus, implement; routes=implement",
 	);
@@ -633,6 +641,56 @@ test("Codex native orchestration modes render bounded settings", async () => {
 	);
 	expect(v2Config).toContain("min_wait_timeout_ms = 250");
 	expect(v2Config).toContain('usage_hint_text = "Use sparingly."');
+});
+
+test("Codex orchestration thread caps follow subscription plan", async () => {
+	const graph = await loadSource(resolve(repoRoot, "source"));
+	const plusV1 = await renderProvider("codex", graph.source, repoRoot, {
+		codexPlan: "plus",
+		codexOrchestration: { mode: "multi_agent", maxThreads: 99 },
+	});
+	const plusV1Config = plusV1.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(plusV1Config).toContain("max_threads = 2");
+	expect(plusV1Config).toContain("job_max_runtime_seconds = 300");
+
+	const pro5V2 = await renderProvider("codex", graph.source, repoRoot, {
+		codexPlan: "pro-5",
+		codexOrchestration: {
+			mode: "multi_agent_v2",
+			maxThreads: 99,
+			multiAgentV2: { maxConcurrentThreadsPerSession: 99 },
+		},
+	});
+	const pro5V2Config = pro5V2.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(pro5V2Config).toContain("max_concurrent_threads_per_session = 4");
+	expect(pro5V2Config).toContain("job_max_runtime_seconds = 600");
+
+	const pro20V1 = await renderProvider("codex", graph.source, repoRoot, {
+		codexPlan: "pro-20",
+		codexOrchestration: { mode: "multi_agent" },
+	});
+	const pro20V1Config = pro20V1.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(pro20V1Config).toContain("max_threads = 6");
+	expect(pro20V1Config).toContain("job_max_runtime_seconds = 900");
+
+	const minClamp = await renderProvider("codex", graph.source, repoRoot, {
+		codexPlan: "pro-20",
+		codexOrchestration: {
+			mode: "multi_agent_v2",
+			maxThreads: 0,
+			multiAgentV2: { maxConcurrentThreadsPerSession: 0 },
+		},
+	});
+	const minClampConfig = minClamp.artifacts.find(
+		(artifact) => artifact.path === ".codex/config.toml",
+	)?.content;
+	expect(minClampConfig).toContain("max_concurrent_threads_per_session = 1");
 });
 
 test("Codex renders hooks only in hooks.json with provider event env", async () => {

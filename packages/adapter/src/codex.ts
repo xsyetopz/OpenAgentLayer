@@ -317,17 +317,18 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 
 function resolveCodexAgentPlan(options: RenderOptions): {
 	jobMaxRuntimeSeconds: number;
+	maxThreads: number;
 } {
 	const plan = options.codexPlan ?? options.plan;
 	switch (plan) {
 		case "plus":
-			return { jobMaxRuntimeSeconds: 600 };
+			return { jobMaxRuntimeSeconds: 300, maxThreads: 2 };
 		case "pro-5":
-			return { jobMaxRuntimeSeconds: 900 };
+			return { jobMaxRuntimeSeconds: 600, maxThreads: 4 };
 		case "pro-20":
-			return { jobMaxRuntimeSeconds: 1800 };
+			return { jobMaxRuntimeSeconds: 900, maxThreads: 6 };
 		default:
-			return { jobMaxRuntimeSeconds: 1800 };
+			return { jobMaxRuntimeSeconds: 600, maxThreads: 4 };
 	}
 }
 
@@ -353,10 +354,12 @@ function resolveCodexOrchestration(
 	const plan = resolveCodexAgentPlan(options);
 	const input = options.codexOrchestration ?? {};
 	const mode = input.mode ?? "multi_agent_v2";
-	const maxThreads = input.maxThreads ?? 1;
+	const maxThreads = clampCodexThreads(input.maxThreads, plan.maxThreads);
 	const maxDepth = input.maxDepth ?? 1;
-	const v2Threads =
-		input.multiAgentV2?.maxConcurrentThreadsPerSession ?? maxThreads;
+	const v2Threads = clampCodexThreads(
+		input.multiAgentV2?.maxConcurrentThreadsPerSession ?? maxThreads,
+		plan.maxThreads,
+	);
 	return {
 		mode,
 		maxDepth,
@@ -368,15 +371,23 @@ function resolveCodexOrchestration(
 				? {
 						usageHintEnabled: true,
 						rootAgentUsageHintText:
-							"Use native spawn_agent for broad or parallel OAL work. Prefer rendered OAL agent_type names from [agents], such as hermes, hephaestus, atalanta, nemesis, or athena, and merge only final evidence.",
+							"Assume native subagents are encouraged for broad or parallel OAL work. Spawn rendered OAL agent_type names from [agents] when work can split, assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
 						subagentUsageHintText:
-							"You are an OAL native subagent. Complete the assigned task, return concise evidence and changed paths, and do not create nested peer orchestrators.",
+							"You are an OAL native subagent. Complete only the bounded assigned task within the runtime cap, return concise evidence and changed paths, and do not create nested peer orchestrators.",
 					}
 				: {}),
 			...input.multiAgentV2,
 			maxConcurrentThreadsPerSession: v2Threads,
 		},
 	};
+}
+
+function clampCodexThreads(
+	value: number | undefined,
+	planMaxThreads: number,
+): number {
+	const requested = value ?? planMaxThreads;
+	return Math.max(1, Math.min(requested, planMaxThreads));
 }
 
 function renderCodexFeatures(

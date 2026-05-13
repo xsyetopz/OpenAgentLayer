@@ -677,8 +677,16 @@ test("session scope hook injects consent boundary at session start", async () =>
 			expect.stringContaining("bounded python3 rewrites"),
 			expect.stringContaining("Delegation rule"),
 			expect.stringContaining(
-				"narrow single-owner edits begin with a recorded solo ownership reason",
+				"subagents are encouraged for broad or parallelizable work",
 			),
+			expect.stringContaining(
+				"split independent sidecar tasks early",
+			),
+			expect.stringContaining("Spawn budget rule"),
+			expect.stringContaining("why it fits the configured job runtime cap"),
+			expect.stringContaining("assign bounded work only"),
+			expect.stringContaining("do not leave background agents running"),
+			expect.stringContaining("close completed or idle agents promptly"),
 			expect.stringContaining("Continuity rule"),
 			expect.stringContaining("Continuation Record"),
 			expect.stringContaining(
@@ -687,8 +695,12 @@ test("session scope hook injects consent boundary at session start", async () =>
 			expect.stringContaining("Agent use"),
 			expect.stringContaining("native Codex multi_agent_v2"),
 			expect.stringContaining("Spawn rendered OAL custom agents by name"),
-			expect.stringContaining("oal symphony"),
-			expect.stringContaining("oal opendex"),
+			expect.stringContaining("without waiting for user wording"),
+			expect.stringContaining("wait only when blocked"),
+			expect.stringContaining("Skill use"),
+			expect.stringContaining("invoke `$oal:oal` implicitly"),
+			expect.stringContaining("Solo rule"),
+			expect.stringContaining("narrow single-owner edit local"),
 			expect.stringContaining("ask when blocked"),
 			expect.stringContaining("STATUS BLOCKED"),
 		]),
@@ -718,24 +730,27 @@ test("session scope hook injects consent boundary at session start", async () =>
 });
 
 test("subagent context hook guides Codex agents toward native OAL agents", async () => {
-	await expect(
-		runNamedHook("inject-subagent-context.mjs", {
-			hook_event_name: "SubagentStart",
-		}),
-	).resolves.toMatchObject({
-		decision: "warn",
-		reason: "OAL native multi-agent subagent context",
-		details: expect.arrayContaining([
-			expect.stringContaining("Native multi_agent_v2 is OAL's default"),
-			expect.stringContaining("rendered OAL agent names"),
-			expect.stringContaining(".codex/config.toml [agents] and AGENTS.md"),
-			expect.stringContaining("does not infer them from intent alone"),
-			expect.stringContaining("Parent thread owns task split"),
-			expect.stringContaining("do not spawn extra pooled threads"),
-			expect.stringContaining("oal opendex"),
-			expect.stringContaining("oal symphony"),
-		]),
+	const result = await runNamedHook("inject-subagent-context.mjs", {
+		hook_event_name: "SubagentStart",
 	});
+	expect(result.decision).toBe("warn");
+	expect(result.reason).toBe("OAL native multi-agent subagent context");
+	const details = (result as { details?: string[] }).details ?? [];
+	for (const expected of [
+		"Native multi_agent_v2 is OAL's default",
+		"subagents are encouraged for split work",
+		"OAL agent names and aliases",
+		".codex/config.toml [agents] and AGENTS.md",
+		"spawn those names directly",
+		"fit inside the configured job runtime cap",
+		"smallest useful evidence slice",
+		"Parent thread owns task split",
+		"do not spawn extra pooled threads",
+		"stalled background work wastes token budget",
+		"oal opendex",
+		"oal symphony",
+	])
+		expect(details.some((detail) => detail.includes(expected))).toBe(true);
 });
 
 test("command tool guidance advises search and structured config tools", async () => {
