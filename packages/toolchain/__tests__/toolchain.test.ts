@@ -159,6 +159,29 @@ test("officialskills frontend pages can generate catalog entries", () => {
 	});
 });
 
+test("official skill catalog preserves descriptive sentences", () => {
+	const catalog = planToolchainInstall({
+		os: "linux",
+		includeOptional: ["skill-security-best-practices"],
+	});
+	expect(catalog.optionalTools).toContain(
+		"OpenAI security-best-practices [skill]",
+	);
+	expect(
+		parseOfficialSkillPage(
+			`
+				<h1>security-best-practices</h1>
+				<p>Community security checks.</p>
+				<p>bunx skills add https://github.com/openai/skills --skill security-best-practices</p>
+			`,
+			"https://officialskills.sh/openai/skills/security-best-practices",
+		),
+	).toMatchObject({
+		description: expect.stringContaining("."),
+		sourceStatus: "community",
+	});
+});
+
 test("Context7 install command can include API key", () => {
 	expect(
 		optionalFeatureCommands("install", ["ctx7"], {

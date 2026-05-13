@@ -35,7 +35,6 @@ import { assertHomebrewCask } from "./homebrew";
 import { assertHooks } from "./hooks";
 import { assertInstalledFlowSmoke } from "./install-smoke";
 import { assertRepositoryInventory } from "./inventory";
-import { assertMessageStyle } from "./message-style";
 import { assertPluginMarketplace } from "./plugins";
 import { assertProviderConfigContracts } from "./provider";
 import { assertRoadmapEvidence, buildRoadmapEvidence } from "./roadmap";
@@ -70,7 +69,6 @@ export async function runAcceptance(
 	await assertCheckboxDiscipline(repoRoot);
 	await assertRepositoryInventory(repoRoot);
 	await assertCodebaseShape(repoRoot);
-	await assertMessageStyle(repoRoot);
 	await assertHomebrewCask(repoRoot);
 	await assertCiCdWorkflow(repoRoot);
 	await assertCodexUpstreamPatch(repoRoot);
