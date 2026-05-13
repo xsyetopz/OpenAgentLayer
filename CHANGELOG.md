@@ -5,22 +5,21 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.6.0-beta.11] - 2026-05-13
+## [0.6.0-beta.12] - 2026-05-13
 
 ### Added
 
-- Added Codex root-agent and hook guidance that routes significant or separable coding implementation to rendered GPT-5.3-Codex implementation subagents instead of leaving all edits in the GPT-5.5 parent.
-- Added acceptance coverage for the rendered multi-agent cost hint in Codex config.
+- Added generated Codex `config.toml` `developer_instructions` gates for defensive contrast checks, avoiding unsupported contrast, and preventing implementation-context leakage in public-facing text.
+- Added adapter and acceptance coverage for the rendered Codex `developer_instructions` gates.
 
 ### Changed
 
-- Updated OAL prompt, skill, and surface guidance to treat lower GPT-5.5 reasoning effort as insufficient cost control for constantly running goal loops when cheaper worker models can own implementation.
-- Corrected Codex plan documentation to reflect current `xhigh` reasoning support for selected implementation workers.
-- Updated release metadata from `0.6.0-beta.10` to `0.6.0-beta.11`.
+- Updated release metadata from `0.6.0-beta.11` to `0.6.0-beta.12`.
 
 ### Verified
 
-- `bun test packages/adapter/__tests__/adapter.test.ts packages/runtime/__tests__/runtime.test.ts packages/source/__tests__/source.test.ts packages/accept/__tests__/accept.test.ts`
+- `bun test packages/adapter/__tests__/adapter.test.ts -t "Codex default render uses normal shell and hook-based RTK enforcement"`
+- `bun packages/cli/src/main.ts preview --provider codex --path .codex/config.toml --content`
 
 ## [0.6.0-beta.8] - 2026-05-13
 

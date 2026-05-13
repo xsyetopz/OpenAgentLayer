@@ -396,6 +396,13 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain(
 		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
 	);
+	expect(config).toContain("developer_instructions =");
+	expect(config).toContain(
+		"## Mandatory Output Gate: Defensive Contrast Check",
+	);
+	expect(config).toContain(
+		"## Mandatory Output Gate: Prevent Implementation-Context Leakage",
+	);
 	expect(config).toContain('[memories]\nextract_model = "gpt-5.4-mini"');
 	expect(config).toContain("[features]\nsteer = true");
 	expect(config).toContain('model_verbosity = "low"');

@@ -211,6 +211,10 @@ function assertInstructionBlocks(artifacts: Artifact[]): void {
 function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	assertArtifact(".codex/config.toml", artifacts, [
 		"#:schema https://developers.openai.com/codex/config-schema.json",
+		"developer_instructions =",
+		"## Mandatory Output Gate: Defensive Contrast Check",
+		"## Mandatory Output Gate: Avoid Defensive Contrast",
+		"## Mandatory Output Gate: Prevent Implementation-Context Leakage",
 		"# >>> oal codex >>>",
 		"# Source: config:codex",
 		"# Regenerate: oal render",

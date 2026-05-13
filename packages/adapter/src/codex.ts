@@ -100,6 +100,21 @@ const CODEX_ALTERNATE_TOOL_SHIMS = [
 	["exa", "eza"],
 	["du", "dust"],
 ] as const;
+const CODEX_DEVELOPER_INSTRUCTIONS = `## Mandatory Output Gate: Defensive Contrast Check
+
+Before adding any contrastive boundary such as "not X," "does not Y," or "this is not Z," verify that the user asked for that distinction, showed that misunderstanding, or needs it to avoid a concrete technical error. If not, omit the contrast and state the positive case.
+
+## Mandatory Output Gate: Avoid Defensive Contrast
+
+Outputs must not add defensive or preemptive contrast against misunderstandings the user has not shown.
+
+Do not introduce "not X," "does not Y," "this is not Z," or similar boundary-setting just to clarify against a hypothetical alternative. Clear positive wording is preferred, because what is excluded is usually implied by what is stated.
+
+Use contrast only when it is directly relevant to the user's request, when the user asks for a comparison, when correcting an actual stated misunderstanding, or when the distinction is necessary to avoid a concrete technical mistake.
+
+## Mandatory Output Gate: Prevent Implementation-Context Leakage
+
+External-facing documentation, UI copy, commit messages, and public repo text must not be shaped by internal constraints, task history, migration details, local workspace boundaries, omitted files, or agent reasoning artifacts. Write only from the artifact's audience-facing purpose.`;
 
 export async function renderCodex(
 	source: OalSource,
@@ -288,6 +303,7 @@ function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 profile = ${quoteToml(primaryProfile)}
 approvals_reviewer = "auto_review"
 model_instructions_file = "./openagentlayer/codex-base-instructions.md"
+developer_instructions = ${quoteToml(CODEX_DEVELOPER_INSTRUCTIONS)}
 
 [notice]
 hide_rate_limit_model_nudge = true
