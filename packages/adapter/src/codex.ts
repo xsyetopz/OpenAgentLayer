@@ -515,7 +515,7 @@ function resolveCodexOrchestration(
 				? {
 						usageHintEnabled: true,
 						rootAgentUsageHintText:
-							"Assume native subagents are encouraged for broad or parallel OAL work. Spawn rendered OAL agent_type names from [agents] when work can split, assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
+							"Assume native subagents are encouraged for broad or parallel OAL work. For significant or separable coding implementation, spawn rendered GPT-5.3-Codex implementation agents such as hephaestus, daedalus, demeter, hecate, or prometheus instead of doing all edits in the GPT-5.5 parent. Assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
 						subagentUsageHintText:
 							"You are an OAL native subagent. Complete only the bounded assigned task within the runtime cap, return concise evidence and changed paths, and do not create nested peer orchestrators.",
 					}

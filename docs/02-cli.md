@@ -61,7 +61,7 @@ bun run oal:preview -- --provider opencode --plan opencode-auto
 ```
 
 Codex plan mode and edit mode are separate. OAL renders Codex reasoning values
-from `low` through `high`; `minimal` is not a Codex effort value, and `xhigh`
-is not emitted. Generated Codex profiles use `gpt-5.5` for orchestration and
-semantic planning/observation, while implementation workers stay on
-`gpt-5.3-codex` and utility/light subagent profiles use `gpt-5.4-mini`.
+from `low` through `xhigh`; `minimal` is not a Codex effort value. Generated
+Codex profiles use `gpt-5.5` for orchestration and semantic planning/observation,
+while implementation workers stay on `gpt-5.3-codex` and utility/light subagent
+profiles use `gpt-5.4-mini`.

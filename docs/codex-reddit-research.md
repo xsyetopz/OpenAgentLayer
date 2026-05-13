@@ -30,12 +30,13 @@ and applies `patches/openai-codex-base-instructions-default-md.patch`.
 - **Audit false positives waste review time:** the Codex base patch adds review
   guidance requiring conclusive, actionable findings and allowing a no-findings
   result.
-- **Reasoning effort has a real quality/cost curve:** OAL does not emit xhigh
-  because the research and local usage evidence show that heavy reasoning can
-  burn weekly quota quickly. Generated Codex agents now use `gpt-5.5` for
-  intelligence-heavy orchestration, planning, review, and observation roles,
-  code-writing workers stay on `gpt-5.3-codex`, and utility/light subagent
-  profiles keep `gpt-5.4-mini`.
+- **Reasoning effort has a real quality/cost curve:** heavy GPT-5.5 reasoning
+  can burn weekly quota quickly, so OAL does not use lower GPT-5.5 effort as
+  the primary cost control for constant goal loops. Generated Codex agents use
+  `gpt-5.5` for intelligence-heavy orchestration, planning, review, and
+  observation roles; significant code-writing work routes to rendered
+  GPT-5.3-Codex implementation workers; utility/light subagent profiles keep
+  `gpt-5.4-mini`.
 - **Local weekly usage evidence:** the local Codex state database showed the
   fastest weekly drain came from `gpt-5.5` medium sessions, including 45
   threads and about 2.66B tokens in week `2026-18`, plus 12 threads and about

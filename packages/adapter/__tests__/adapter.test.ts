@@ -409,7 +409,9 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).not.toContain("max_threads = 1");
 	expect(config).toContain("root_agent_usage_hint_text");
 	expect(config).toContain("Assume native subagents are encouraged");
-	expect(config).toContain("when work can split");
+	expect(config).toContain("significant or separable coding implementation");
+	expect(config).toContain("GPT-5.3-Codex implementation agents");
+	expect(config).toContain("instead of doing all edits in the GPT-5.5 parent");
 	expect(config).toContain("fit the runtime cap");
 	expect(config).toContain("subagent_usage_hint_text");
 	expect(config).toContain("bounded assigned task within the runtime cap");
@@ -561,6 +563,12 @@ test("Codex instructions render subagent invocation roster", async () => {
 	);
 	expect(instructions).toContain(
 		"Before starting broad work, split independent sidecar tasks",
+	);
+	expect(instructions).toContain(
+		"For coding implementation, prefer spawning the rendered GPT-5.3-Codex implementation agents",
+	);
+	expect(instructions).toContain(
+		"do not rely on lower GPT-5.5 reasoning effort as a cost control for constantly running goal loops",
 	);
 	expect(instructions).toContain("fit the configured job runtime cap");
 	expect(instructions).toContain(

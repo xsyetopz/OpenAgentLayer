@@ -100,6 +100,14 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		);
 	if (!config.includes("job_max_runtime_seconds = 600"))
 		throw new Error("Codex config missing bounded agents job runtime");
+	for (const required of [
+		"root_agent_usage_hint_text",
+		"subagent_usage_hint_text",
+		"GPT-5.3-Codex implementation agents",
+		"instead of doing all edits in the GPT-5.5 parent",
+	])
+		if (!config.includes(required))
+			throw new Error(`Codex config missing multi-agent cost hint \`${required}\``);
 	if (config.includes('interrupt_message = "'))
 		throw new Error("Codex config emitted string agents.interrupt_message");
 	for (const forbidden of [
