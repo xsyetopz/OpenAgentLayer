@@ -86,21 +86,21 @@ test("optional feature commands support install and removal", () => {
 	).toEqual(["ctx7 setup --cli --yes --codex --opencode --project"]);
 	expect(
 		optionalFeatureCommands("install", [
-			"skill-frontend-design",
-			"skill-react-best-practices",
+			"skill-openai-gh-fix-ci",
+			"skill-trailofbits-static-analysis",
 		]),
 	).toEqual([
-		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
-		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
 	]);
 	expect(
 		optionalFeatureCommands("remove", [
-			"skill-frontend-design",
-			"skill-react-best-practices",
+			"skill-openai-gh-fix-ci",
+			"skill-trailofbits-static-analysis",
 		]),
 	).toEqual([
-		"bunx skills remove frontend-design",
-		"bunx skills remove react-best-practices",
+		"bunx skills remove gh-fix-ci",
+		"bunx skills remove static-analysis",
 	]);
 });
 
@@ -139,7 +139,7 @@ test("officialskills frontend pages can generate catalog entries", () => {
 		<h1>security-best-practices</h1>
 		community security
 		<p>Reviews Python and TypeScript codebases.</p>
-		<p>npx skills add https://github.com/openai/skills --skill security-best-practices</p>
+		<p>bunx skills add https://github.com/openai/skills --skill security-best-practices</p>
 		<a href="/openai/skills/security-best-practices">OpenAI</a>
 	`;
 	expect(officialSkillLinks(html)).toEqual([
@@ -188,10 +188,10 @@ test("officialskills frontend bundles expose website tab categories", () => {
 test("official skill catalog preserves descriptive sentences", () => {
 	const catalog = planToolchainInstall({
 		os: "linux",
-		includeOptional: ["skill-security-best-practices"],
+		includeOptional: ["skill-trailofbits-static-analysis"],
 	});
 	expect(catalog.optionalTools).toContain(
-		"OpenAI security-best-practices [skill]",
+		"Trail of Bits static-analysis [skill]",
 	);
 	expect(
 		parseOfficialSkillPage(

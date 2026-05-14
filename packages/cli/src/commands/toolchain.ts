@@ -81,7 +81,7 @@ export async function runFeaturesCommand(args: string[]): Promise<void> {
 		throw new Error("Context7 API key must start with ctx7sk-");
 	if (install.length === 0 && remove.length === 0)
 		throw new Error(
-			"Expected `--install` or `--remove` with `ctx7,deepwiki,playwright,skill-frontend-design,skill-webapp-testing,skill-security-best-practices,skill-react-best-practices,skill-stripe-best-practices,skill-workers-best-practices`",
+			`Expected \`--install\` or \`--remove\` with \`ctx7,deepwiki,playwright,${officialSkillIds().join(",")}\``,
 		);
 	const commands = [
 		...optionalFeatureCommands("install", install, {
@@ -102,9 +102,12 @@ export async function fetchOfficialSkillCatalog(
 	url: string,
 	options: { signal?: AbortSignal; timeoutMs?: number } = {},
 ) {
-	const controller = options.signal ? undefined : new AbortController();
+	const controller =
+		options.signal || options.timeoutMs === undefined
+			? undefined
+			: new AbortController();
 	const timeout = controller
-		? setTimeout(() => controller.abort(), options.timeoutMs ?? 15_000)
+		? setTimeout(() => controller.abort(), options.timeoutMs)
 		: undefined;
 	const signal = options.signal ?? controller?.signal;
 	try {
@@ -170,7 +173,7 @@ function filterOfficialSkillCatalog(
 	if (!category || category === "all") return catalog;
 	if (!OFFICIAL_SKILL_CATEGORIES.includes(category as OfficialSkillCategory))
 		throw new Error(
-			"`--category` must be one of all,infrastructure,development,ai-tools,workflows,security,data,design,docs,testing",
+			"`--category` must be one of all,infrastructure,development,ai-tools,ai-agents,workflows,security,data,design,docs,testing",
 		);
 	return catalog.filter((entry) => entry.category === category);
 }

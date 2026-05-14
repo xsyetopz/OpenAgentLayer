@@ -283,19 +283,24 @@ async function assertProviderNativeHookOutput(
 			additionalContext?: string;
 		};
 	};
-	if (codexPromptOutput.hookSpecificOutput?.hookEventName !== "UserPromptSubmit")
-		throw new Error("Codex UserPromptSubmit subagent reminder used wrong event");
+	if (
+		codexPromptOutput.hookSpecificOutput?.hookEventName !== "UserPromptSubmit"
+	)
+		throw new Error(
+			"Codex UserPromptSubmit subagent reminder used wrong event",
+		);
+	const codexPromptContext =
+		codexPromptOutput.hookSpecificOutput?.additionalContext ?? "";
+	if (codexPromptContext.length > 360)
+		throw new Error("Codex UserPromptSubmit subagent reminder is too long");
 	for (const required of [
-		"Autonomous OAL reminder",
-		"Do not switch to doing the whole task manually",
-		"same `$oal` cycle again",
-		"resume the `$oal` subagent cycle",
+		"OAL subagent reminder",
+		"spawn bounded native OAL subagents/sidecars",
+		"do not continue manually",
+		"tighten scope and spawn the next relevant OAL agent",
+		"parent merges evidence",
 	])
-		if (
-			!codexPromptOutput.hookSpecificOutput?.additionalContext?.includes(
-				required,
-			)
-		)
+		if (!codexPromptContext.includes(required))
 			throw new Error(
 				`Codex UserPromptSubmit subagent reminder missing \`${required}\``,
 			);

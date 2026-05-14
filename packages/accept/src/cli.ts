@@ -15,7 +15,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 		"macos",
 		"--homebrew-missing",
 		"--optional",
-		"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
+		"ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis",
 	]);
 	if (
 		!(
@@ -38,10 +38,10 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 				"bunx -p playwright playwright install --with-deps",
 			) &&
 			toolchain.stdout.includes(
-				"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+				"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
 			) &&
 			toolchain.stdout.includes(
-				"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+				"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
 			) &&
 			!toolchain.stdout.includes("\n- npx")
 		)
@@ -62,7 +62,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			"--provider",
 			"all",
 			"--optional",
-			"ctx7,playwright,deepwiki,skill-frontend-design",
+			"ctx7,playwright,deepwiki,skill-openai-gh-fix-ci",
 			"--rtk",
 			"--dry-run",
 		],

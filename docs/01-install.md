@@ -36,7 +36,7 @@ cleans up the temporary clone.
 Preview the toolchain plan before applying it:
 
 ```bash
-bun run oal:toolchain -- --os macos --optional ctx7,skill-frontend-design,skill-react-best-practices
+bun run oal:toolchain -- --os macos --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
 bun run setup -- --scope global --provider all --toolchain --dry-run
 ```
 

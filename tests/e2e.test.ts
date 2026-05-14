@@ -668,7 +668,7 @@ test("CLI profiles save ordered setup state and drive setup dry-run", async () =
 			"--opencode-plan",
 			"opencode-free",
 			"--optional",
-			"ctx7,skill-frontend-design",
+			"ctx7,skill-openai-gh-fix-ci",
 			"--rtk",
 			"--activate",
 		],
@@ -705,7 +705,7 @@ test("CLI profiles save ordered setup state and drive setup dry-run", async () =
 	expect(await setup.exited).toBe(0);
 	expect(setupStderr).toBe("");
 	expect(setupStdout).toContain("providers: opencode, codex");
-	expect(setupStdout).toContain("selected: ctx7, skill-frontend-design");
+	expect(setupStdout).toContain("selected: ctx7, skill-openai-gh-fix-ci");
 	await rm(root, { recursive: true, force: true });
 });
 
@@ -896,7 +896,7 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 			"--pkg",
 			"apt",
 			"--optional",
-			"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
+			"ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis",
 		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
 	);
@@ -920,10 +920,10 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
 	);
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
 	);
 	expect(stdout).not.toContain("\n- bunx");
 });
@@ -935,7 +935,7 @@ test("CLI features shows optional install and removal commands", async () => {
 			"packages/cli/src/main.ts",
 			"features",
 			"--install",
-			"ctx7,playwright,skill-frontend-design,skill-react-best-practices",
+			"ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis",
 			"--remove",
 			"playwright",
 		],
@@ -950,10 +950,10 @@ test("CLI features shows optional install and removal commands", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
 	);
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright uninstall --all");
 });

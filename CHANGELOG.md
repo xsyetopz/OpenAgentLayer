@@ -5,23 +5,29 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.8.0-beta.3] - 2026-05-14
+## [0.8.0-beta.4] - 2026-05-14
 
 ### Added
 
-- Added prompt-time Codex subagent reminders for autonomous OAL sessions.
-- Added acceptance coverage for Codex `UserPromptSubmit` subagent context output.
+- Added default setup installation for the curated top-10 officialskills.sh essentials.
+- Added officialskills.sh essentials for GitHub CI fixes, PR comments, automation, web testing, security review, Sentry workflows, and MCP building.
+- Added tree-style interactive CLI menu categories for Start, Inspect, Artifacts, Extend, and Manage.
+- Added prompt-time Codex subagent reminders that explicitly trigger bounded native subagents and sidecars.
 
 ### Changed
 
-- Registered the subagent context hook on `UserPromptSubmit` for Codex and Claude.
-- Updated Codex hook output so user-prompt warnings inject additional context.
-- Updated release metadata from `0.8.0-beta.2` to `0.8.0-beta.3`.
+- Changed officialskills.sh catalog loading to wait for completion by default instead of aborting after five seconds.
+- Changed the curated officialskills.sh install commands and docs to prefer `bunx`.
+- Changed the Codex `UserPromptSubmit` reminder to stay compact while naming `spawn`, `subagents`, and `sidecars`.
+- Changed interactive CLI menu data into a small tree model shared by source and tests.
+- Updated release metadata from `0.8.0-beta.3` to `0.8.0-beta.4`.
 
 ### Verified
 
-- `bun test packages/runtime/__tests__/runtime.test.ts`
-- `bun test packages/adapter/__tests__/adapter.test.ts`
+- `bun test packages/cli/__tests__/cli.test.ts`
+- `bun test packages/cli/__tests__/cli.test.ts packages/toolchain/__tests__/toolchain.test.ts`
+- `bun test packages/runtime/__tests__/runtime.test.ts packages/adapter/__tests__/adapter.test.ts`
+- `bunx biome check packages/cli/src/interactive.ts packages/cli/src/interactive-menu.ts packages/cli/__tests__/cli.test.ts`
 - `bun run oal:accept`
 
 ## [0.8.0-beta.2] - 2026-05-14

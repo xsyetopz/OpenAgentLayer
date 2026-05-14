@@ -9,6 +9,7 @@ import {
 import {
 	isExpectedContext7ApiKey,
 	type OptionalTool,
+	OFFICIAL_SKILL_CATALOG,
 	officialSkillIds,
 } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
@@ -24,6 +25,9 @@ import { runPluginsCommand } from "./plugins";
 
 const INTEGER_PATTERN = /^\d+$/;
 const noop = () => undefined;
+const DEFAULT_SETUP_OPTIONAL_TOOLS = OFFICIAL_SKILL_CATALOG.map(
+	(entry) => entry.id,
+) as OptionalTool[];
 
 export async function runSetupCommand(
 	repoRoot: string,
@@ -142,7 +146,9 @@ function commandExists(command: string): boolean {
 
 function setupOptionalTools(args: string[]): OptionalTool[] {
 	const tools = new Set<OptionalTool>();
-	for (const tool of (option(args, "--optional") ?? "").split(",")) {
+	const rawOptional = option(args, "--optional");
+	if (!rawOptional) return [...DEFAULT_SETUP_OPTIONAL_TOOLS];
+	for (const tool of rawOptional.split(",")) {
 		if (
 			tool === "ctx7" ||
 			tool === "deepwiki" ||

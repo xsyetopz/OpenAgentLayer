@@ -32,8 +32,8 @@ OAL expects:
 Recommended toolchain plan:
 
 ```bash
-bun run oal:toolchain -- --os macos --optional ctx7,playwright,skill-frontend-design,skill-react-best-practices
-bun run oal:toolchain -- --os linux --pkg apt --optional ctx7,playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:toolchain -- --os macos --optional ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
+bun run oal:toolchain -- --os linux --pkg apt --optional ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
 ```
 
 The plan prints copy-safe `bash` blocks. Paste command lines without Markdown list bullets.
@@ -76,16 +76,16 @@ bun run oal:preview -- --provider codex --path .codex/config.toml --content
 Plan the full setup flow without writing:
 
 ```bash
-bun run setup -- --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
+bun run setup -- --scope global --provider all --toolchain --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis --dry-run
 ```
 
 Use the source checkout convenience script to run dependency setup and the OAL CLI:
 
 ```bash
-./install.sh setup --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
+./install.sh setup --scope global --provider all --toolchain --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis --dry-run
 ```
 
-Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7,skill-frontend-design,skill-react-best-practices`.
+Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7` plus the curated top 10 officialskills essentials.
 
 ## Install online
 
@@ -94,7 +94,7 @@ Use `install-online.sh` when you want the script to handle the git checkout. It 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/xsyetopz/OpenAgentLayer/master/install-online.sh -o install-online.sh
 chmod +x install-online.sh
-./install-online.sh setup --scope global --provider all --toolchain --optional ctx7,skill-frontend-design,skill-react-best-practices --dry-run
+./install-online.sh setup --scope global --provider all --toolchain --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis --dry-run
 ```
 
 Environment overrides:
@@ -133,13 +133,13 @@ Run without a command in a TTY for guided prompts:
 bun packages/cli/src/main.ts
 ```
 
-The interactive path uses Commander-parsed commands plus Clack prompts. It covers setup, profile saving, state inspection, preview, deploy, plugin sync, uninstall, and check. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
+The interactive path uses Commander-parsed commands plus Clack prompts. It is a tiny TUI with category prompts first, then workflow prompts inside Start, Inspect, Artifacts, Extend, and Manage. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
 
 Optional feature commands can be printed separately:
 
 ```bash
-bun run oal:features -- --install ctx7,playwright,skill-frontend-design,skill-react-best-practices
-bun run oal:features -- --remove ctx7,playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:features -- --install ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
+bun run oal:features -- --remove ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
 ```
 
 Feature labels use `[CLI]` for command-line setup, `[MCP]` for provider MCP configuration, and `[skill]` for curated external skills from officialskills.sh. Curated skill options install their source repo and named skill with `bunx skills add <repo> --skill <name>`.
@@ -165,7 +165,7 @@ Profiles preserve reusable setup choices in `~/.openagentlayer/config.json` by d
 Save and activate a profile:
 
 ```bash
-bun run oal:profiles -- save global --scope global --provider opencode,codex --optional ctx7,skill-frontend-design --codex-plan pro-20 --opencode-plan opencode-free --activate
+bun run oal:profiles -- save global --scope global --provider opencode,codex --optional ctx7,skill-openai-gh-fix-ci --codex-plan pro-20 --opencode-plan opencode-free --activate
 ```
 
 Inspect available profiles:
@@ -174,7 +174,7 @@ Inspect available profiles:
 bun run oal:profiles -- list
 bun run oal:profiles -- show global
 bun run oal:profiles -- args global
-bun run oal:profiles -- edit global --scope global --provider codex,opencode --optional ctx7,skill-frontend-design
+bun run oal:profiles -- edit global --scope global --provider codex,opencode --optional ctx7,skill-openai-gh-fix-ci
 bun run oal:profiles -- rename global daily
 bun run oal:profiles -- remove daily
 ```
@@ -331,7 +331,7 @@ Installed binary smoke test:
 ```bash
 oal check
 oal preview --provider all
-oal toolchain --os macos --optional ctx7,skill-frontend-design,skill-react-best-practices
+oal toolchain --os macos --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
 ```
 
 RTK policy check:

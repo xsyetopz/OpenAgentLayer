@@ -794,9 +794,9 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 	expect(codexPromptOutput.hookSpecificOutput?.hookEventName).toBe(
 		"UserPromptSubmit",
 	);
-	expect(
-		codexPromptOutput.hookSpecificOutput?.additionalContext,
-	).toContain("Autonomous OAL reminder");
+	expect(codexPromptOutput.hookSpecificOutput?.additionalContext).toContain(
+		"OAL subagent reminder",
+	);
 
 	const promptResult = await runNamedHook("inject-subagent-context.mjs", {
 		hook_event_name: "UserPromptSubmit",
@@ -804,16 +804,18 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 	expect(promptResult.decision).toBe("warn");
 	expect(promptResult.reason).toBe("OAL subagent reminder");
 	const promptDetails = (promptResult as { details?: string[] }).details ?? [];
+	expect(promptDetails).toHaveLength(2);
+	expect(promptDetails.join(" ").length).toBeLessThan(320);
 	for (const expected of [
-		"Autonomous OAL reminder",
+		"OAL subagent reminder",
 		"`$oal` guidance",
-		"bounded native OAL subagents",
-		"Before manual parent work",
-		"relevant rendered agent",
-		"Do not switch to doing the whole task manually",
-		"same `$oal` cycle again",
-		"Use manual parent work only to recover",
-		"resume the `$oal` subagent cycle",
+		"before manual work",
+		"spawn bounded native OAL subagents/sidecars",
+		"splittable implementation, review, tests, docs, tracing",
+		"sidecar stalls/fails",
+		"do not continue manually",
+		"tighten scope and spawn the next relevant OAL agent",
+		"parent merges evidence",
 	])
 		expect(promptDetails.some((detail) => detail.includes(expected))).toBe(
 			true,

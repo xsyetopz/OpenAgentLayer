@@ -185,8 +185,8 @@ Run package scripts from a source checkout. After installing the binary, replace
 | `uninstall`        | Remove one provider's OAL-owned artifacts from a target project or provider home.    | `--target`, `--scope project\|global`, `--home`, `--provider`.                                      | `bun run oal:uninstall -- --target /path/to/project --scope project --provider codex`.      |
 | `plugins`          | Sync provider plugin payloads into user-level provider homes.                        | `--home`, `--provider`, `--dry-run`, `--plan`, `--opencode-models-file`.                            | `bun run oal:plugins -- --home "$HOME" --provider all --dry-run`.                           |
 | `inspect`          | Print shared OAL capability, manifest, generated-input, policy, or release evidence. | `capabilities`, `manifest`, `generated-diff`, `rtk-report`, `command-policy`, `release-witness`.    | `bun packages/cli/src/main.ts inspect capabilities`.                                        |
-| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run oal:toolchain -- --os macos --optional ctx7,skill-frontend-design`.                |
-| `features`         | Print optional feature install, removal, or officialskills.sh catalog commands.      | `--install`, `--remove`, `--catalog`, `--catalog-url`, `--json`.                                    | `bun run oal:features -- --install ctx7,skill-frontend-design`.                             |
+| `toolchain`        | Print OS package-manager setup commands for OAL-friendly tools.                      | `--os`, `--pkg`, `--optional`, `--json`.                                                            | `bun run oal:toolchain -- --os macos --optional ctx7,skill-openai-gh-fix-ci`.               |
+| `features`         | Print optional feature install, removal, or officialskills.sh catalog commands.      | `--install`, `--remove`, `--catalog`, `--catalog-url`, `--json`.                                    | `bun run oal:features -- --install ctx7,skill-openai-gh-fix-ci`.                            |
 | `mcp`              | Run OAL-owned MCP servers over stdio.                                                | `serve oal-inspect`.                                                                                | `bun packages/cli/src/main.ts mcp serve oal-inspect`.                                       |
 | `rtk-gain`         | Check RTK token-savings policy.                                                      | `--from-file`, `--allow-empty-history`.                                                             | `bun run oal:rtk-gain -- --allow-empty-history`.                                            |
 | `codex-usage`      | Inspect local Codex state for weekly quota-drain patterns.                           | `--home`, `--db`, `--project`, `--limit`, `--json`.                                                 | `bun packages/cli/src/main.ts codex-usage --project "$PWD"`.                                |
@@ -202,7 +202,7 @@ order, scope, target and home paths, model plans, optional tools, and setup
 toggles:
 
 ```bash
-bun run oal:profiles -- save work --scope global --provider opencode,codex --optional ctx7,skill-frontend-design --activate
+bun run oal:profiles -- save work --scope global --provider opencode,codex --optional ctx7,skill-openai-gh-fix-ci --activate
 bun run oal:state -- inspect --profile work
 bun run setup -- --profile work --dry-run
 ```
@@ -217,18 +217,19 @@ bun packages/cli/src/main.ts
 bun packages/cli/src/main.ts interactive
 ```
 
-Interactive mode supports setup, profile saving, state inspection, preview,
-deploy, plugin sync, uninstall, and check. Setup wraps the same `setup` command
-used by scripts. Provider prompts use multiselect when a command can act on more
-than one provider. Global deploy detects the home directory and asks only when
-you override it. Non-interactive commands stay script-safe and print help
-instead of prompting when stdin is not a TTY.
+Interactive mode is a tiny TUI: choose a category, then choose the workflow
+inside it. The main categories are Start, Inspect, Artifacts, Extend, and
+Manage. Setup wraps the same `setup` command used by scripts. Provider prompts
+use multiselect when a command can act on more than one provider. Global deploy
+detects the home directory and asks only when you override it. Non-interactive
+commands stay script-safe and print help instead of prompting when stdin is not a
+TTY.
 
 Optional features are explicit add/remove commands on top of OAL:
 
 ```bash
-bun run oal:features -- --install ctx7,playwright,skill-frontend-design,skill-react-best-practices
-bun run oal:features -- --remove playwright,skill-frontend-design,skill-react-best-practices
+bun run oal:features -- --install ctx7,playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
+bun run oal:features -- --remove playwright,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis
 ```
 
 Feature labels use `[CLI]` for command-line setup, `[MCP]` for provider MCP

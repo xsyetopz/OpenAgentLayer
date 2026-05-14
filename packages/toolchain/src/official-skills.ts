@@ -14,6 +14,7 @@ export const OFFICIAL_SKILL_CATEGORIES = [
 	"infrastructure",
 	"development",
 	"ai-tools",
+	"ai-agents",
 	"workflows",
 	"security",
 	"data",
@@ -24,34 +25,52 @@ export const OFFICIAL_SKILL_CATEGORIES = [
 
 export type OfficialSkillCategory = (typeof OFFICIAL_SKILL_CATEGORIES)[number];
 
-export type OfficialSkillId =
-	| "skill-frontend-design"
-	| "skill-webapp-testing"
-	| "skill-security-best-practices"
-	| "skill-react-best-practices"
-	| "skill-stripe-best-practices"
-	| "skill-workers-best-practices";
+export type OfficialSkillId = (typeof OFFICIAL_SKILL_CATALOG)[number]["id"];
 
 const INSTALL_COMMAND_PATTERN =
 	/(?:npx|bunx)\s+skills\s+add\s+(https:\/\/github\.com\/[^\s"'`<]+)\s+--skill\s+([A-Za-z0-9._-]+)/;
 const COMMUNITY_STATUS_PATTERN = /\bcommunity\b/i;
 const TITLE_CASE_SPLIT_PATTERN = /[-_]/;
 
-export const OFFICIAL_SKILL_CATALOG: OfficialSkillCatalogEntry[] = [
+export const OFFICIAL_SKILL_CATALOG = [
 	{
-		id: "skill-frontend-design",
-		publisher: "Anthropic",
-		name: "frontend-design",
-		category: "design",
+		id: "skill-openai-gh-fix-ci",
+		publisher: "OpenAI",
+		name: "gh-fix-ci",
+		category: "workflows",
 		sourceStatus: "official",
-		repo: "https://github.com/anthropics/skills",
-		skill: "frontend-design",
-		sourceUrl: "https://officialskills.sh/anthropics/skills/frontend-design",
+		repo: "https://github.com/openai/skills",
+		skill: "gh-fix-ci",
+		sourceUrl: "https://officialskills.sh/openai/skills/gh-fix-ci",
 		description:
-			"Intentional frontend aesthetics and interface implementation.",
+			"Debug failing GitHub Actions checks on a PR with the GitHub CLI.",
 	},
 	{
-		id: "skill-webapp-testing",
+		id: "skill-openai-gh-address-comments",
+		publisher: "OpenAI",
+		name: "gh-address-comments",
+		category: "workflows",
+		sourceStatus: "official",
+		repo: "https://github.com/openai/skills",
+		skill: "gh-address-comments",
+		sourceUrl: "https://officialskills.sh/openai/skills/gh-address-comments",
+		description:
+			"Read PR comments and review threads with the GitHub CLI, then address selected feedback.",
+	},
+	{
+		id: "skill-openai-yeet",
+		publisher: "OpenAI",
+		name: "yeet",
+		category: "workflows",
+		sourceStatus: "official",
+		repo: "https://github.com/openai/skills",
+		skill: "yeet",
+		sourceUrl: "https://officialskills.sh/openai/skills/yeet",
+		description:
+			"Automate the GitHub branch, commit, push, and pull request workflow.",
+	},
+	{
+		id: "skill-anthropics-webapp-testing",
 		publisher: "Anthropic",
 		name: "webapp-testing",
 		category: "testing",
@@ -59,56 +78,84 @@ export const OFFICIAL_SKILL_CATALOG: OfficialSkillCatalogEntry[] = [
 		repo: "https://github.com/anthropics/skills",
 		skill: "webapp-testing",
 		sourceUrl: "https://officialskills.sh/anthropics/skills/webapp-testing",
-		description: "Local web application testing with browser automation.",
+		description: "Test local web applications with browser automation.",
 	},
 	{
-		id: "skill-security-best-practices",
-		publisher: "OpenAI",
-		name: "security-best-practices",
+		id: "skill-trailofbits-audit-context-building",
+		publisher: "Trail of Bits",
+		name: "audit-context-building",
 		category: "security",
-		sourceStatus: "community",
-		repo: "https://github.com/openai/skills",
-		skill: "security-best-practices",
+		sourceStatus: "official",
+		repo: "https://github.com/trailofbits/skills",
+		skill: "audit-context-building",
 		sourceUrl:
-			"https://officialskills.sh/openai/skills/security-best-practices",
-		description: "Security review for Python, JavaScript, TypeScript, and Go.",
+			"https://officialskills.sh/trailofbits/skills/audit-context-building",
+		description:
+			"Build a structured pre-audit model of functions, invariants, and trust boundaries.",
 	},
 	{
-		id: "skill-react-best-practices",
-		publisher: "Vercel",
-		name: "react-best-practices",
-		category: "development",
+		id: "skill-trailofbits-differential-review",
+		publisher: "Trail of Bits",
+		name: "differential-review",
+		category: "security",
 		sourceStatus: "official",
-		repo: "https://github.com/vercel-labs/next-skills",
-		skill: "react-best-practices",
+		repo: "https://github.com/trailofbits/skills",
+		skill: "differential-review",
 		sourceUrl:
-			"https://officialskills.sh/vercel-labs/skills/react-best-practices",
-		description: "React and Next.js performance practices.",
+			"https://officialskills.sh/trailofbits/skills/differential-review",
+		description:
+			"Run security-focused differential reviews on PRs, commits, and diffs.",
 	},
 	{
-		id: "skill-stripe-best-practices",
-		publisher: "Stripe",
-		name: "stripe-best-practices",
-		category: "development",
+		id: "skill-trailofbits-static-analysis",
+		publisher: "Trail of Bits",
+		name: "static-analysis",
+		category: "security",
 		sourceStatus: "official",
-		repo: "https://github.com/stripe/ai",
-		skill: "stripe-best-practices",
-		sourceUrl: "https://officialskills.sh/stripe/skills/stripe-best-practices",
-		description: "Stripe integration and API decision guidance.",
+		repo: "https://github.com/trailofbits/skills",
+		skill: "static-analysis",
+		sourceUrl: "https://officialskills.sh/trailofbits/skills/static-analysis",
+		description:
+			"Use CodeQL, Semgrep, and SARIF parsing for security vulnerability detection.",
 	},
 	{
-		id: "skill-workers-best-practices",
-		publisher: "Cloudflare",
-		name: "workers-best-practices",
-		category: "infrastructure",
+		id: "skill-trailofbits-testing-handbook-skills",
+		publisher: "Trail of Bits",
+		name: "testing-handbook-skills",
+		category: "security",
 		sourceStatus: "official",
-		repo: "https://github.com/cloudflare/skills",
-		skill: "workers-best-practices",
+		repo: "https://github.com/trailofbits/skills",
+		skill: "testing-handbook-skills",
 		sourceUrl:
-			"https://officialskills.sh/cloudflare/skills/workers-best-practices",
-		description: "Cloudflare Workers production patterns.",
+			"https://officialskills.sh/trailofbits/skills/testing-handbook-skills",
+		description:
+			"Generate application security testing skills from the Trail of Bits handbook.",
 	},
-];
+	{
+		id: "skill-getsentry-sentry-workflow",
+		publisher: "Sentry",
+		name: "sentry-workflow",
+		category: "workflows",
+		sourceStatus: "official",
+		repo: "https://github.com/getsentry/sentry-for-ai",
+		skill: "sentry-workflow",
+		sourceUrl: "https://officialskills.sh/getsentry/skills/sentry-workflow",
+		description:
+			"Fix production issues and review code with Sentry context in one workflow.",
+	},
+	{
+		id: "skill-anthropics-mcp-builder",
+		publisher: "Anthropic",
+		name: "mcp-builder",
+		category: "ai-tools",
+		sourceStatus: "official",
+		repo: "https://github.com/anthropics/skills",
+		skill: "mcp-builder",
+		sourceUrl: "https://officialskills.sh/anthropics/skills/mcp-builder",
+		description:
+			"Build MCP servers that connect LLMs to external APIs and services.",
+	},
+] as const satisfies OfficialSkillCatalogEntry[];
 
 export function officialSkillById(
 	id: string,
@@ -117,7 +164,7 @@ export function officialSkillById(
 }
 
 export function officialSkillIds(): OfficialSkillId[] {
-	return OFFICIAL_SKILL_CATALOG.map((entry) => entry.id as OfficialSkillId);
+	return OFFICIAL_SKILL_CATALOG.map((entry) => entry.id);
 }
 
 export function parseOfficialSkillPage(

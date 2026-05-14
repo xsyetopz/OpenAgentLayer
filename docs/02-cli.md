@@ -13,6 +13,24 @@ bun run oal:deploy -- --target /path/to/project --scope project --provider all -
 
 Apply deploy only after the dry-run paths match the target you expect.
 
+## Interactive Mode
+
+Run without a command in a TTY, or call `interactive` directly:
+
+```bash
+bun packages/cli/src/main.ts
+bun packages/cli/src/main.ts interactive
+```
+
+Interactive mode is a tiny TUI. It first asks for a category, then asks for the
+workflow inside that category:
+
+- Start: setup, repair
+- Inspect: status, validate
+- Artifacts: preview, deploy
+- Extend: official skills, plugin payloads
+- Manage: profiles, uninstall
+
 ## Inspect OAL
 
 Use `inspect` for read-only product evidence:

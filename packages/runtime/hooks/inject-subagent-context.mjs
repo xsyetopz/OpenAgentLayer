@@ -6,10 +6,8 @@ import { asString, createHookRunner } from "./_runtime.mjs";
 const SUBAGENT_EVENTS = new Set(["SubagentStart", "subagent.started"]);
 const USER_PROMPT_EVENTS = new Set(["UserPromptSubmit", "user.prompt.submit"]);
 const USER_PROMPT_GUIDANCE = [
-	"Autonomous OAL reminder: invoke `$oal` guidance and default to bounded native OAL subagents for code implementation, review, tests, docs, tracing, provider checks, and other splittable work.",
-	"Before manual parent work, split any independent ownership, provider, package, test tier, review perspective, documentation lookup, or repeated batch item into the relevant rendered agent and keep useful local progress moving.",
-	"Do not switch to doing the whole task manually after one subagent attempt; run the same `$oal` cycle again with tighter scope, clearer ownership, or a different relevant OAL agent.",
-	"Use manual parent work only to recover from subagent failure, stalls, or regressions; capture the failure evidence, repair the blocker, then resume the `$oal` subagent cycle.",
+	"OAL subagent reminder: invoke `$oal` guidance; before manual work, spawn bounded native OAL subagents/sidecars for splittable implementation, review, tests, docs, tracing.",
+	"If sidecar stalls/fails, do not continue manually; tighten scope and spawn the next relevant OAL agent; parent merges evidence and fixes blockers.",
 ];
 const SUBAGENT_GUIDANCE = [
 	"Native multi_agent_v2 is OAL's default Codex orchestration path: subagents are encouraged for split work, and each child stays inside the assigned ownership scope",

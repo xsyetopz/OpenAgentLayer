@@ -43,6 +43,13 @@ import {
 	saveConfig,
 	setupArgsForProfile,
 } from "./config-state";
+
+import {
+	type InteractiveAction,
+	type InteractiveCategory,
+	WORKFLOW_CATEGORY_OPTIONS,
+	WORKFLOW_OPTIONS_BY_CATEGORY,
+} from "./interactive-menu";
 import { printDetail, printHeader, printStep, printWarning } from "./output";
 import { installableProviders } from "./provider-binaries";
 import { cavemanModes } from "./source";
@@ -53,17 +60,6 @@ import {
 	type WorkflowScope,
 } from "./workflows";
 
-type InteractiveAction =
-	| "setup"
-	| "repair"
-	| "status"
-	| "validate"
-	| "artifacts"
-	| "deploy"
-	| "skills"
-	| "plugins"
-	| "profiles"
-	| "uninstall";
 type ProviderMulti = WorkflowProvider[];
 type SetupIntent = "setup" | "repair";
 type SetupProfileChoice =
@@ -149,62 +145,8 @@ export const UNINSTALL_PROVIDER_OPTIONS = [
 
 export const OPTIONAL_FEATURE_OPTIONS = optionalFeatureOptions();
 
-export const WORKFLOW_OPTIONS = [
-	{
-		value: "setup",
-		label: "Review and apply setup",
-		hint: "Start · profile, providers, toolchain, optional tools",
-	},
-	{
-		value: "repair",
-		label: "Repair existing install",
-		hint: "Start · inspect state, then reapply selected providers",
-	},
-	{
-		value: "status",
-		label: "Status and installed state",
-		hint: "Inspect · profile, availability, manifest drift",
-	},
-	{
-		value: "validate",
-		label: "Validate source",
-		hint: "Inspect · renderability and source checks",
-	},
-	{
-		value: "artifacts",
-		label: "Preview generated files",
-		hint: "Artifacts · tree or selected file content",
-	},
-	{
-		value: "deploy",
-		label: "Deploy provider files",
-		hint: "Artifacts · write Codex, Claude, or OpenCode artifacts",
-	},
-	{
-		value: "skills",
-		label: "Official skills",
-		hint: "Extend · install from officialskills.sh tabs",
-	},
-	{
-		value: "plugins",
-		label: "Plugin payloads",
-		hint: "Extend · sync provider plugin payloads",
-	},
-	{
-		value: "profiles",
-		label: "Profiles",
-		hint: "Manage · list, edit, rename, activate, remove",
-	},
-	{
-		value: "uninstall",
-		label: "Uninstall OAL",
-		hint: "Manage · remove owned provider artifacts",
-	},
-] as const;
-
 const OFFICIAL_SKILLS_URL = "https://officialskills.sh/#find-skills";
 const OFFICIAL_SKILLS_CATALOG_URL = "https://officialskills.sh/";
-const OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS = 5000;
 const OFFICIAL_SKILLS_CACHE_VERSION = 1;
 
 export interface OfficialSkillsCache {
@@ -241,11 +183,20 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	outro("✓ Done");
 }
 
-function workflowPrompt(): Promise<InteractiveAction> {
-	return ask<InteractiveAction>(
+async function workflowPrompt(): Promise<InteractiveAction> {
+	const category = await ask<InteractiveCategory>(
 		select({
 			message: "OpenAgentLayer command hub",
-			options: [...WORKFLOW_OPTIONS],
+			options: [...WORKFLOW_CATEGORY_OPTIONS],
+		}),
+	);
+	const categoryOption = WORKFLOW_CATEGORY_OPTIONS.find(
+		(option) => option.value === category,
+	);
+	return ask<InteractiveAction>(
+		select({
+			message: categoryOption?.label ?? "Workflow",
+			options: [...WORKFLOW_OPTIONS_BY_CATEGORY[category]],
 		}),
 	);
 }
@@ -736,14 +687,13 @@ async function officialSkillsCatalog(): Promise<OfficialSkillCatalogEntry[]> {
 	try {
 		const catalog = await fetchOfficialSkillCatalogWithTimeout(
 			OFFICIAL_SKILLS_CATALOG_URL,
-			OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS,
 		);
 		await writeOfficialSkillsCache(cachePath, catalog);
 		log.success(`Loaded ${catalog.length} skills from officialskills.sh.`);
 		return catalog;
 	} catch (error) {
 		printWarning(
-			`Could not load ${OFFICIAL_SKILLS_URL} within ${OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS / 1000}s; using bundled skill catalog. ${error instanceof Error ? error.message : String(error)}`,
+			`Could not load ${OFFICIAL_SKILLS_URL}; using bundled skill catalog. ${error instanceof Error ? error.message : String(error)}`,
 		);
 		return [...OFFICIAL_SKILL_CATALOG];
 	}
@@ -770,7 +720,6 @@ async function refreshOfficialSkillsCache(
 ): Promise<void> {
 	const catalog = await fetchOfficialSkillCatalogWithTimeout(
 		OFFICIAL_SKILLS_CATALOG_URL,
-		OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS,
 	);
 	if (sameOfficialSkillsCatalog(catalog, cached.entries)) return;
 	await writeOfficialSkillsCache(cachePath, catalog);
@@ -849,8 +798,9 @@ function isMissingFile(error: unknown): boolean {
 
 export async function fetchOfficialSkillCatalogWithTimeout(
 	url: string,
-	timeoutMs: number,
+	timeoutMs?: number,
 ): Promise<OfficialSkillCatalogEntry[]> {
+	if (timeoutMs === undefined) return fetchOfficialSkillCatalog(url);
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), timeoutMs);
 	try {

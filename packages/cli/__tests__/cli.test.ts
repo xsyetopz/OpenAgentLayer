@@ -1,5 +1,12 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	mkdtemp,
+	readFile,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { providerOption, providerOptions, scopeOption } from "../src/arguments";
@@ -28,14 +35,32 @@ import {
 	sameOfficialSkillsCatalog,
 	setupProfileChoices,
 	UNINSTALL_PROVIDER_OPTIONS,
-	WORKFLOW_OPTIONS,
 	writeOfficialSkillsCache,
 } from "../src/interactive";
+import {
+	WORKFLOW_CATEGORY_OPTIONS,
+	WORKFLOW_OPTIONS,
+	WORKFLOW_OPTIONS_BY_CATEGORY,
+} from "../src/interactive-menu";
 import { renderOptions } from "../src/model-options";
 import { printDeployReport } from "../src/output";
 import { buildSetupArgs } from "../src/workflows";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
+
+async function fakeProviderPath(
+	root: string,
+	providers: string[],
+): Promise<NodeJS.ProcessEnv> {
+	const bin = join(root, "provider-bin");
+	await mkdir(bin, { recursive: true });
+	for (const provider of providers) {
+		const path = join(bin, provider);
+		await writeFile(path, "#!/usr/bin/env sh\nexit 0\n");
+		await chmod(path, 0o755);
+	}
+	return { ...process.env, PATH: `${bin}:${process.env["PATH"] ?? ""}` };
+}
 
 test("CLI provider parser accepts OAL providers and rejects unknown providers", () => {
 	expect(providerOption("codex")).toBe("codex");
@@ -248,8 +273,8 @@ test("interactive setup workflow builds low-level setup args", () => {
 			optionalTools: [
 				"ctx7",
 				"deepwiki",
-				"skill-frontend-design",
-				"skill-react-best-practices",
+				"skill-openai-gh-fix-ci",
+				"skill-trailofbits-static-analysis",
 			],
 			context7ApiKey: ["ctx7sk", "abcdefghijklmnop"].join("-"),
 			toolchain: true,
@@ -273,7 +298,7 @@ test("interactive setup workflow builds low-level setup args", () => {
 		"--rtk",
 		"--toolchain",
 		"--optional",
-		"ctx7,deepwiki,skill-frontend-design,skill-react-best-practices",
+		"ctx7,deepwiki,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis",
 		"--context7-api-key",
 		["ctx7sk", "abcdefghijklmnop"].join("-"),
 		"--dry-run",
@@ -360,7 +385,30 @@ test("interactive profile menu exposes removal", () => {
 	]);
 });
 
-test("interactive command hub is recategorized by job", () => {
+test("interactive command hub uses a tree menu", () => {
+	expect(WORKFLOW_CATEGORY_OPTIONS.map((option) => option.value)).toEqual([
+		"start",
+		"inspect",
+		"artifacts",
+		"extend",
+		"manage",
+	]);
+	expect(
+		Object.fromEntries(
+			Object.entries(WORKFLOW_OPTIONS_BY_CATEGORY).map(
+				([category, options]) => [
+					category,
+					options.map((option) => option.value),
+				],
+			),
+		),
+	).toEqual({
+		start: ["setup", "repair"],
+		inspect: ["status", "validate"],
+		artifacts: ["artifacts", "deploy"],
+		extend: ["skills", "plugins"],
+		manage: ["profiles", "uninstall"],
+	});
 	expect(WORKFLOW_OPTIONS.map((option) => option.value)).toEqual([
 		"setup",
 		"repair",
@@ -386,7 +434,7 @@ test("interactive command hub is recategorized by job", () => {
 		WORKFLOW_OPTIONS.filter((option) => option.label.includes(" · ")),
 	).toEqual([]);
 	expect(WORKFLOW_OPTIONS.map((option) => option.hint).join("\n")).toContain(
-		"Extend · install from officialskills.sh tabs",
+		"install from officialskills.sh tabs",
 	);
 });
 
@@ -464,7 +512,7 @@ test("profiles command edits existing profiles", async () => {
 			"--target",
 			"/tmp/project",
 			"--optional",
-			"skill-frontend-design",
+			"skill-openai-gh-fix-ci",
 			"--config",
 			config,
 		],
@@ -483,7 +531,7 @@ test("profiles command edits existing profiles", async () => {
 		providers: ["opencode"],
 		scope: "project",
 		target: "/tmp/project",
-		optionalTools: ["skill-frontend-design"],
+		optionalTools: ["skill-openai-gh-fix-ci"],
 	});
 });
 
@@ -497,13 +545,54 @@ test("interactive cleanup menus expose multi-selectable choices", () => {
 		"ctx7",
 		"playwright",
 		"deepwiki",
-		"skill-frontend-design",
-		"skill-webapp-testing",
-		"skill-security-best-practices",
-		"skill-react-best-practices",
-		"skill-stripe-best-practices",
-		"skill-workers-best-practices",
+		"skill-openai-gh-fix-ci",
+		"skill-openai-gh-address-comments",
+		"skill-openai-yeet",
+		"skill-anthropics-webapp-testing",
+		"skill-trailofbits-audit-context-building",
+		"skill-trailofbits-differential-review",
+		"skill-trailofbits-static-analysis",
+		"skill-trailofbits-testing-handbook-skills",
+		"skill-getsentry-sentry-workflow",
+		"skill-anthropics-mcp-builder",
 	]);
+});
+
+test("setup defaults include curated official skills", async () => {
+	const root = await mkdtemp(`${tmpdir()}/oal-setup-default-skills-`);
+	const env = await fakeProviderPath(root, ["codex"]);
+	const proc = Bun.spawn(
+		[
+			"bun",
+			"packages/cli/src/main.ts",
+			"setup",
+			"--scope",
+			"global",
+			"--home",
+			root,
+			"--provider",
+			"codex",
+			"--dry-run",
+			"--quiet",
+		],
+		{ cwd: repoRoot, env, stdout: "pipe", stderr: "pipe" },
+	);
+	const [stdout, stderr, code] = await Promise.all([
+		new Response(proc.stdout).text(),
+		new Response(proc.stderr).text(),
+		proc.exited,
+	]);
+	await rm(root, { recursive: true, force: true });
+	expect(stderr).toBe("");
+	expect(code).toBe(0);
+	expect(stdout).toContain("selected: skill-openai-gh-fix-ci");
+	expect(stdout).toContain("skill-anthropics-mcp-builder");
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+	);
+	expect(stdout).toContain(
+		"bunx skills add https://github.com/anthropics/skills --skill mcp-builder",
+	);
 });
 
 test("official skill prompt choices use unique values", () => {
@@ -575,7 +664,28 @@ test("official skill interactive actions build executable commands", () => {
 	).toEqual(["bunx skills remove bug-debug"]);
 });
 
-test("official skill catalog loading aborts instead of hanging", async () => {
+test("official skill catalog loading can take its time by default", async () => {
+	const originalFetch = globalThis.fetch;
+	let receivedSignal = false;
+	globalThis.fetch = ((_url: string, init?: RequestInit) => {
+		receivedSignal = init?.signal !== undefined;
+		return Promise.resolve(
+			new Response(
+				"<p>bunx skills add https://github.com/openai/skills --skill gh-fix-ci</p>",
+			),
+		);
+	}) as typeof fetch;
+	try {
+		await expect(
+			fetchOfficialSkillCatalogWithTimeout("https://officialskills.sh/"),
+		).resolves.toHaveLength(1);
+		expect(receivedSignal).toBe(false);
+	} finally {
+		globalThis.fetch = originalFetch;
+	}
+});
+
+test("official skill catalog loading supports explicit timeouts", async () => {
 	const originalFetch = globalThis.fetch;
 	let aborted = false;
 	globalThis.fetch = ((_url: string, init?: RequestInit) => {
@@ -633,19 +743,19 @@ test("optional features can install curated external skills", () => {
 	try {
 		runFeaturesCommand([
 			"--install",
-			"skill-frontend-design,skill-react-best-practices",
+			"skill-openai-gh-fix-ci,skill-trailofbits-static-analysis",
 		]);
 	} finally {
 		console.log = originalLog;
 	}
 	const output = lines.join("\n");
-	expect(output).toContain("Anthropic frontend-design [skill]");
-	expect(output).toContain("Vercel react-best-practices [skill]");
+	expect(output).toContain("OpenAI gh-fix-ci [skill]");
+	expect(output).toContain("Trail of Bits static-analysis [skill]");
 	expect(output).toContain(
-		"bunx skills add https://github.com/anthropics/skills --skill frontend-design",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
 	);
 	expect(output).toContain(
-		"bunx skills add https://github.com/vercel-labs/next-skills --skill react-best-practices",
+		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
 	);
 });
 
@@ -681,24 +791,24 @@ test("features command installs all fetched skills in a website tab", async () =
 				<script src="/assets/main.js"></script>
 				<a href="/openai/skills/security-best-practices">Security</a>
 				<a href="/cloudflare/skills/workers-best-practices">Workers</a>
-				<a href="/anthropics/skills/frontend-design">Design</a>
+				<a href="/openai/skills/gh-fix-ci">GitHub CI</a>
 			`,
 			"https://officialskills.sh/assets/main.js": `
 				{slug:"openai/security-best-practices",name:"security-best-practices",description:"Security checks",owner:"openai",category:"security"}
 				{slug:"cloudflare/workers-best-practices",name:"workers-best-practices",description:"Workers",owner:"cloudflare",category:"infrastructure"}
-				{slug:"anthropics/frontend-design",name:"frontend-design",description:"Design",owner:"anthropics",category:"design"}
+				{slug:"openai/gh-fix-ci",name:"gh-fix-ci",description:"GitHub CI",owner:"openai",category:"workflows"}
 			`,
 			"https://officialskills.sh/openai/skills/security-best-practices": `
 				security community
-				<p>npx skills add https://github.com/openai/skills --skill security-best-practices</p>
+				<p>bunx skills add https://github.com/openai/skills --skill security-best-practices</p>
 			`,
 			"https://officialskills.sh/cloudflare/skills/workers-best-practices": `
 				infrastructure official
-				<p>npx skills add https://github.com/cloudflare/skills --skill workers-best-practices</p>
+				<p>bunx skills add https://github.com/cloudflare/skills --skill workers-best-practices</p>
 			`,
-			"https://officialskills.sh/anthropics/skills/frontend-design": `
-				design official
-				<p>npx skills add https://github.com/anthropics/skills --skill frontend-design</p>
+			"https://officialskills.sh/openai/skills/gh-fix-ci": `
+				workflows official
+				<p>bunx skills add https://github.com/openai/skills --skill gh-fix-ci</p>
 			`,
 		};
 		return Promise.resolve(
@@ -731,7 +841,7 @@ test("features command installs all fetched skills in a website tab", async () =
 		"bunx skills add https://github.com/openai/skills --skill security-best-practices",
 	);
 	expect(output).not.toContain("workers-best-practices");
-	expect(output).not.toContain("frontend-design");
+	expect(output).not.toContain("gh-fix-ci");
 });
 
 test("setup optional commands stream readable progress and time out", async () => {
