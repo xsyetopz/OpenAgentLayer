@@ -136,6 +136,10 @@ function isStopEvent(event) {
 	return event === "Stop" || event === "SubagentStop";
 }
 
+function isContextInjectionEvent(event) {
+	return event === "SessionStart" || event === "UserPromptSubmit";
+}
+
 function preToolUseDeny(reason) {
 	return {
 		hookSpecificOutput: {
@@ -152,11 +156,11 @@ function codexOutcome(event, outcome) {
 		case "pass":
 			return undefined;
 		case "warn":
-			return event === "SessionStart"
+			return isContextInjectionEvent(event)
 				? {
 						continue: true,
 						hookSpecificOutput: {
-							hookEventName: "SessionStart",
+							hookEventName: event,
 							additionalContext: plainContextText(outcome),
 						},
 					}

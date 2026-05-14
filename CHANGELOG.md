@@ -5,6 +5,25 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
+## [0.8.0-beta.3] - 2026-05-14
+
+### Added
+
+- Added prompt-time Codex subagent reminders for autonomous OAL sessions.
+- Added acceptance coverage for Codex `UserPromptSubmit` subagent context output.
+
+### Changed
+
+- Registered the subagent context hook on `UserPromptSubmit` for Codex and Claude.
+- Updated Codex hook output so user-prompt warnings inject additional context.
+- Updated release metadata from `0.8.0-beta.2` to `0.8.0-beta.3`.
+
+### Verified
+
+- `bun test packages/runtime/__tests__/runtime.test.ts`
+- `bun test packages/adapter/__tests__/adapter.test.ts`
+- `bun run oal:accept`
+
 ## [0.8.0-beta.2] - 2026-05-14
 
 ### Added

@@ -121,8 +121,11 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_subagent_context: {
-		input: { provider: "claude", route: "review" },
-		decision: "pass",
+		input: {
+			provider: "codex",
+			hook_event_name: "UserPromptSubmit",
+		},
+		decision: "warn",
 	},
 };
 
@@ -269,6 +272,33 @@ async function assertProviderNativeHookOutput(
 		throw new Error("Codex PostToolUse block did not emit native feedback");
 	if (codexPostToolBlock.stderr !== "")
 		throw new Error("Codex PostToolUse block emitted stderr feedback");
+	const codexPromptReminder = await runNativeHook(
+		join(targetRoot, ".codex/openagentlayer/hooks/inject-subagent-context.mjs"),
+		{ hook_event_name: "UserPromptSubmit", provider: "codex" },
+		{ OAL_HOOK_PROVIDER: "codex", OAL_HOOK_EVENT: "UserPromptSubmit" },
+	);
+	const codexPromptOutput = JSON.parse(codexPromptReminder.stdout) as {
+		hookSpecificOutput?: {
+			hookEventName?: string;
+			additionalContext?: string;
+		};
+	};
+	if (codexPromptOutput.hookSpecificOutput?.hookEventName !== "UserPromptSubmit")
+		throw new Error("Codex UserPromptSubmit subagent reminder used wrong event");
+	for (const required of [
+		"Autonomous OAL reminder",
+		"Do not switch to doing the whole task manually",
+		"same `$oal` cycle again",
+		"resume the `$oal` subagent cycle",
+	])
+		if (
+			!codexPromptOutput.hookSpecificOutput?.additionalContext?.includes(
+				required,
+			)
+		)
+			throw new Error(
+				`Codex UserPromptSubmit subagent reminder missing \`${required}\``,
+			);
 	const claudePostToolFailureBlock = await runNativeHook(
 		join(targetRoot, ".claude/hooks/scripts/block-repeated-failures.mjs"),
 		{

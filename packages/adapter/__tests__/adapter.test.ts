@@ -569,6 +569,13 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 			),
 		),
 	).toBe(true);
+	expect(
+		hooks.hooks["UserPromptSubmit"]?.some((group) =>
+			group.hooks.some((hook) =>
+				hook.command.includes("inject-subagent-context.mjs"),
+			),
+		),
+	).toBe(true);
 });
 
 test("Codex instructions render subagent invocation roster", async () => {

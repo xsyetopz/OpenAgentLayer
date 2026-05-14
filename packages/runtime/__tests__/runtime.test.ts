@@ -780,6 +780,45 @@ test("session scope hook injects consent boundary at session start", async () =>
 });
 
 test("subagent context hook guides Codex agents toward native OAL agents", async () => {
+	const codexPrompt = await runHookRaw("inject-subagent-context.mjs", {
+		hook_event_name: "UserPromptSubmit",
+		provider: "codex",
+	});
+	expect(codexPrompt.code).toBe(0);
+	const codexPromptOutput = JSON.parse(codexPrompt.stdout) as {
+		hookSpecificOutput?: {
+			hookEventName?: string;
+			additionalContext?: string;
+		};
+	};
+	expect(codexPromptOutput.hookSpecificOutput?.hookEventName).toBe(
+		"UserPromptSubmit",
+	);
+	expect(
+		codexPromptOutput.hookSpecificOutput?.additionalContext,
+	).toContain("Autonomous OAL reminder");
+
+	const promptResult = await runNamedHook("inject-subagent-context.mjs", {
+		hook_event_name: "UserPromptSubmit",
+	});
+	expect(promptResult.decision).toBe("warn");
+	expect(promptResult.reason).toBe("OAL subagent reminder");
+	const promptDetails = (promptResult as { details?: string[] }).details ?? [];
+	for (const expected of [
+		"Autonomous OAL reminder",
+		"`$oal` guidance",
+		"bounded native OAL subagents",
+		"Before manual parent work",
+		"relevant rendered agent",
+		"Do not switch to doing the whole task manually",
+		"same `$oal` cycle again",
+		"Use manual parent work only to recover",
+		"resume the `$oal` subagent cycle",
+	])
+		expect(promptDetails.some((detail) => detail.includes(expected))).toBe(
+			true,
+		);
+
 	const result = await runNamedHook("inject-subagent-context.mjs", {
 		hook_event_name: "SubagentStart",
 	});
