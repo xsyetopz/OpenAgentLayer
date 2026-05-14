@@ -1,3 +1,8 @@
+---
+name: language-design-skill
+description: "Design language/compiler/runtime systems with explicit semantic contracts, DAG architecture boundaries, and practical implementation trade-offs."
+---
+
 # Language Design, Compiler Architecture, Runtime Architecture, and Semantic Discipline Skill
 
 Use this skill when designing, reviewing, implementing, or refactoring a programming language, compiler, interpreter, VM, runtime, standard library, package/module system, language server, formatter, transpiler, or execution backend.
