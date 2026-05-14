@@ -11,10 +11,12 @@ material only and is not part of the OAL release line.
 
 - Added officialskills.sh category parsing and tabbed install browsing for the interactive OAL CLI.
 - Added full fetched official skill catalog support, including `--category` filtering and `--install all` for fetched catalogs.
+- Added cached officialskills.sh catalogue loading for the interactive skills hub.
 
 ### Changed
 
 - Reworked the interactive CLI command hub around task-oriented Start, Inspect, Artifacts, Extend, and Manage sections.
+- Changed the skills hub to show live loading status, fall back cleanly, and execute selected install/remove commands after confirmation.
 - Renamed OAL-owned skill and route identifiers to self-documenting action/domain names for slash-command surfaces.
 - Updated agent, route, acceptance, and provider contracts to use the renamed OAL skill surfaces.
 - Updated release metadata from `0.8.0-beta.1` to `0.8.0-beta.2`.
@@ -24,6 +26,8 @@ material only and is not part of the OAL release line.
 - `bunx biome check source/skills source/routes source/agents packages/adapter/src/claude.ts packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/accept/src packages/cli/src/interactive.ts packages/cli/src/commands/toolchain.ts packages/cli/src/main.ts packages/cli/__tests__/cli.test.ts packages/toolchain/src packages/toolchain/__tests__/toolchain.test.ts --max-diagnostics 400`
 - `bun test packages/source/__tests__/source.test.ts packages/adapter/__tests__/adapter.test.ts packages/toolchain/__tests__/toolchain.test.ts packages/cli/__tests__/cli.test.ts`
 - `bun run oal:accept`
+- `bun test packages/cli/__tests__/cli.test.ts packages/toolchain/__tests__/toolchain.test.ts`
+- `bunx biome check packages/cli/src/interactive.ts packages/cli/src/commands/toolchain.ts packages/cli/__tests__/cli.test.ts packages/toolchain/src/index.ts packages/toolchain/__tests__/toolchain.test.ts --max-diagnostics 240`
 
 ## [0.8.0-beta.1] - 2026-05-13
 

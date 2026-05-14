@@ -1,5 +1,6 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import {
 	cancel,
 	confirm,
@@ -20,13 +21,14 @@ import {
 	type OfficialSkillCatalogEntry,
 	type OfficialSkillCategory,
 	type OptionalTool,
+	optionalFeatureCommands,
 } from "@openagentlayer/toolchain";
 import { runCheckCommand } from "./commands/check";
 import { runDeployCommand } from "./commands/deploy";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
 import { runProfilesCommand } from "./commands/profiles";
-import { runSetupCommand } from "./commands/setup";
+import { runOptionalSetupCommand, runSetupCommand } from "./commands/setup";
 import { runStateCommand } from "./commands/state";
 import {
 	fetchOfficialSkillCatalog,
@@ -202,6 +204,15 @@ export const WORKFLOW_OPTIONS = [
 
 const OFFICIAL_SKILLS_URL = "https://officialskills.sh/#find-skills";
 const OFFICIAL_SKILLS_CATALOG_URL = "https://officialskills.sh/";
+const OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS = 5000;
+const OFFICIAL_SKILLS_CACHE_VERSION = 1;
+
+export interface OfficialSkillsCache {
+	version: typeof OFFICIAL_SKILLS_CACHE_VERSION;
+	sourceUrl: string;
+	updatedAt: string;
+	entries: OfficialSkillCatalogEntry[];
+}
 
 export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	if (!process.stdin.isTTY)
@@ -650,7 +661,7 @@ async function interactiveFeatures(): Promise<void> {
 	);
 	const features =
 		selection === "all"
-			? ["all"]
+			? (categoryCatalog.map((entry) => entry.id) as OptionalTool[])
 			: await ask<OptionalTool[]>(
 					multiselect({
 						message: "Skills",
@@ -658,6 +669,11 @@ async function interactiveFeatures(): Promise<void> {
 						options: officialSkillOptions(categoryCatalog),
 					}),
 				);
+	const commands = officialSkillActionCommands(
+		action,
+		features,
+		categoryCatalog,
+	);
 	await runFeaturesCommand([
 		"--catalog-url",
 		OFFICIAL_SKILLS_CATALOG_URL,
@@ -666,6 +682,29 @@ async function interactiveFeatures(): Promise<void> {
 		`--${action}`,
 		features.join(","),
 	]);
+	const execute = await ask<boolean>(
+		confirm({
+			message: `${action === "install" ? "Install" : "Remove"} selected skills now?`,
+			initialValue: action === "install",
+		}),
+	);
+	if (!execute) return;
+	for (const [index, command] of commands.entries())
+		await runOptionalSetupCommand(command, {
+			quiet: false,
+			index: index + 1,
+			total: commands.length,
+		});
+}
+
+export function officialSkillActionCommands(
+	action: "install" | "remove",
+	features: readonly string[],
+	catalog: readonly OfficialSkillCatalogEntry[],
+) {
+	return optionalFeatureCommands(action, [...features] as OptionalTool[], {
+		officialSkills: catalog,
+	});
 }
 
 export function officialSkillOptions(
@@ -686,13 +725,138 @@ export function officialSkillOptions(
 }
 
 async function officialSkillsCatalog(): Promise<OfficialSkillCatalogEntry[]> {
+	const cachePath = officialSkillsCachePath();
+	const cached = await readOfficialSkillsCache(cachePath);
+	if (cached) {
+		log.success(`Loaded ${cached.entries.length} cached officialskills.`);
+		scheduleOfficialSkillsCacheRefresh(cachePath, cached);
+		return cached.entries;
+	}
+	log.info("Loading officialskills.sh catalog…");
 	try {
-		return await fetchOfficialSkillCatalog(OFFICIAL_SKILLS_CATALOG_URL);
+		const catalog = await fetchOfficialSkillCatalogWithTimeout(
+			OFFICIAL_SKILLS_CATALOG_URL,
+			OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS,
+		);
+		await writeOfficialSkillsCache(cachePath, catalog);
+		log.success(`Loaded ${catalog.length} skills from officialskills.sh.`);
+		return catalog;
 	} catch (error) {
 		printWarning(
-			`Could not load ${OFFICIAL_SKILLS_URL}; using bundled skill catalog. ${error instanceof Error ? error.message : String(error)}`,
+			`Could not load ${OFFICIAL_SKILLS_URL} within ${OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS / 1000}s; using bundled skill catalog. ${error instanceof Error ? error.message : String(error)}`,
 		);
 		return [...OFFICIAL_SKILL_CATALOG];
+	}
+}
+
+function officialSkillsCachePath(home = homedir()): string {
+	return join(home, ".openagentlayer", "officialskills-catalog.json");
+}
+
+function scheduleOfficialSkillsCacheRefresh(
+	cachePath: string,
+	cached: OfficialSkillsCache,
+): void {
+	refreshOfficialSkillsCache(cachePath, cached).catch((error) => {
+		printWarning(
+			`Could not refresh officialskills cache. ${error instanceof Error ? error.message : String(error)}`,
+		);
+	});
+}
+
+async function refreshOfficialSkillsCache(
+	cachePath: string,
+	cached: OfficialSkillsCache,
+): Promise<void> {
+	const catalog = await fetchOfficialSkillCatalogWithTimeout(
+		OFFICIAL_SKILLS_CATALOG_URL,
+		OFFICIAL_SKILLS_INTERACTIVE_TIMEOUT_MS,
+	);
+	if (sameOfficialSkillsCatalog(catalog, cached.entries)) return;
+	await writeOfficialSkillsCache(cachePath, catalog);
+	log.success(`Updated officialskills cache with ${catalog.length} skills.`);
+}
+
+export async function readOfficialSkillsCache(
+	cachePath: string,
+): Promise<OfficialSkillsCache | undefined> {
+	try {
+		const parsed = JSON.parse(
+			await readFile(cachePath, "utf8"),
+		) as Partial<OfficialSkillsCache>;
+		if (
+			parsed.version !== OFFICIAL_SKILLS_CACHE_VERSION ||
+			parsed.sourceUrl !== OFFICIAL_SKILLS_CATALOG_URL ||
+			!Array.isArray(parsed.entries)
+		)
+			return undefined;
+		return {
+			version: OFFICIAL_SKILLS_CACHE_VERSION,
+			sourceUrl: OFFICIAL_SKILLS_CATALOG_URL,
+			updatedAt:
+				typeof parsed.updatedAt === "string"
+					? parsed.updatedAt
+					: new Date(0).toISOString(),
+			entries: parsed.entries as OfficialSkillCatalogEntry[],
+		};
+	} catch (error) {
+		if (isMissingFile(error)) return undefined;
+		printWarning(
+			`Could not read officialskills cache. ${error instanceof Error ? error.message : String(error)}`,
+		);
+		return undefined;
+	}
+}
+
+export async function writeOfficialSkillsCache(
+	cachePath: string,
+	entries: readonly OfficialSkillCatalogEntry[],
+): Promise<void> {
+	await mkdir(dirname(cachePath), { recursive: true });
+	const cache: OfficialSkillsCache = {
+		version: OFFICIAL_SKILLS_CACHE_VERSION,
+		sourceUrl: OFFICIAL_SKILLS_CATALOG_URL,
+		updatedAt: new Date().toISOString(),
+		entries: [...entries],
+	};
+	await writeFile(cachePath, `${JSON.stringify(cache, undefined, 2)}\n`);
+}
+
+export function sameOfficialSkillsCatalog(
+	next: readonly OfficialSkillCatalogEntry[],
+	current: readonly OfficialSkillCatalogEntry[],
+): boolean {
+	return (
+		JSON.stringify(canonicalOfficialSkills(next)) ===
+		JSON.stringify(canonicalOfficialSkills(current))
+	);
+}
+
+function canonicalOfficialSkills(
+	entries: readonly OfficialSkillCatalogEntry[],
+): OfficialSkillCatalogEntry[] {
+	return [...entries].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function isMissingFile(error: unknown): boolean {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"code" in error &&
+		(error as { code?: unknown }).code === "ENOENT"
+	);
+}
+
+export async function fetchOfficialSkillCatalogWithTimeout(
+	url: string,
+	timeoutMs: number,
+): Promise<OfficialSkillCatalogEntry[]> {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		return await fetchOfficialSkillCatalog(url, { signal: controller.signal });
+	} finally {
+		clearTimeout(timeout);
 	}
 }
 

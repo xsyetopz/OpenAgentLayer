@@ -98,8 +98,27 @@ function assertOfficialSkillsUrl(url: string): void {
 		throw new Error("`--catalog-url` must use https://officialskills.sh/");
 }
 
-export async function fetchOfficialSkillCatalog(url: string) {
-	const response = await fetch(url);
+export async function fetchOfficialSkillCatalog(
+	url: string,
+	options: { signal?: AbortSignal; timeoutMs?: number } = {},
+) {
+	const controller = options.signal ? undefined : new AbortController();
+	const timeout = controller
+		? setTimeout(() => controller.abort(), options.timeoutMs ?? 15_000)
+		: undefined;
+	const signal = options.signal ?? controller?.signal;
+	try {
+		return await fetchOfficialSkillCatalogInner(url, signal);
+	} finally {
+		if (timeout) clearTimeout(timeout);
+	}
+}
+
+async function fetchOfficialSkillCatalogInner(
+	url: string,
+	signal: AbortSignal | undefined,
+) {
+	const response = await fetch(url, { signal });
 	if (!response.ok)
 		throw new Error(
 			`Failed to fetch officialskills catalog: ${response.status}`,
@@ -107,10 +126,10 @@ export async function fetchOfficialSkillCatalog(url: string) {
 	const html = await response.text();
 	const direct = parseOfficialSkillPage(html, url);
 	if (direct) return [direct];
-	const categoryMap = await fetchOfficialSkillCategories(html, url);
+	const categoryMap = await fetchOfficialSkillCategories(html, url, signal);
 	const entries: OfficialSkillCatalogEntry[] = [];
 	for (const link of officialSkillLinks(html)) {
-		const page = await fetch(link);
+		const page = await fetch(link, { signal });
 		if (!page.ok) continue;
 		const entry = parseOfficialSkillPage(await page.text(), link);
 		if (entry) {
@@ -130,10 +149,11 @@ export async function fetchOfficialSkillCatalog(url: string) {
 async function fetchOfficialSkillCategories(
 	html: string,
 	sourceUrl: string,
+	signal: AbortSignal | undefined,
 ): Promise<Map<string, OfficialSkillCategory>> {
 	const categories = new Map<string, OfficialSkillCategory>();
 	for (const link of officialSkillBundleLinks(html, sourceUrl)) {
-		const response = await fetch(link);
+		const response = await fetch(link, { signal });
 		if (!response.ok) continue;
 		for (const [slug, category] of officialSkillCategoryMap(
 			await response.text(),

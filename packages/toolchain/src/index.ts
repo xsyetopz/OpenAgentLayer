@@ -317,8 +317,7 @@ function officialSkillCommand(
 	action: OptionalToolAction,
 	command: { repo: string; skill: string },
 ): string {
-	if (action === "remove")
-		return `# Review installed skill target before removing ${command.skill} with bunx skills remove ${command.skill}`;
+	if (action === "remove") return `bunx skills remove ${command.skill}`;
 	return `bunx skills add ${command.repo} --skill ${command.skill}`;
 }
 

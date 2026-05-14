@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { providerOption, providerOptions, scopeOption } from "../src/arguments";
 import {
 	buildPeerSteps,
@@ -18,13 +18,18 @@ import {
 	CLAUDE_PLAN_OPTIONS,
 	CODEX_ORCHESTRATION_OPTIONS,
 	CODEX_PLAN_OPTIONS,
+	fetchOfficialSkillCatalogWithTimeout,
 	OPENCODE_PLAN_OPTIONS,
 	OPTIONAL_FEATURE_OPTIONS,
+	officialSkillActionCommands,
 	officialSkillOptions,
 	PROFILE_ACTION_OPTIONS,
+	readOfficialSkillsCache,
+	sameOfficialSkillsCatalog,
 	setupProfileChoices,
 	UNINSTALL_PROVIDER_OPTIONS,
 	WORKFLOW_OPTIONS,
+	writeOfficialSkillsCache,
 } from "../src/interactive";
 import { renderOptions } from "../src/model-options";
 import { printDeployReport } from "../src/output";
@@ -544,6 +549,79 @@ test("official skill prompt choices use unique values", () => {
 	expect(new Set(options.map((option) => option.value)).size).toBe(
 		options.length,
 	);
+});
+
+test("official skill interactive actions build executable commands", () => {
+	const catalog = [
+		{
+			id: "skill-acme-bug-debug",
+			publisher: "Acme",
+			name: "bug-debug",
+			category: "development",
+			sourceStatus: "community",
+			repo: "https://github.com/acme/skills",
+			skill: "bug-debug",
+			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			description: "Debug bugs.",
+		},
+	] as const;
+	expect(
+		officialSkillActionCommands("install", ["skill-acme-bug-debug"], catalog),
+	).toEqual([
+		"bunx skills add https://github.com/acme/skills --skill bug-debug",
+	]);
+	expect(
+		officialSkillActionCommands("remove", ["skill-acme-bug-debug"], catalog),
+	).toEqual(["bunx skills remove bug-debug"]);
+});
+
+test("official skill catalog loading aborts instead of hanging", async () => {
+	const originalFetch = globalThis.fetch;
+	let aborted = false;
+	globalThis.fetch = ((_url: string, init?: RequestInit) => {
+		return new Promise<Response>((_resolve, reject) => {
+			init?.signal?.addEventListener("abort", () => {
+				aborted = true;
+				reject(new Error("aborted"));
+			});
+		});
+	}) as typeof fetch;
+	try {
+		await expect(
+			fetchOfficialSkillCatalogWithTimeout("https://officialskills.sh/", 10),
+		).rejects.toThrow();
+		expect(aborted).toBe(true);
+	} finally {
+		globalThis.fetch = originalFetch;
+	}
+});
+
+test("official skill catalog cache stores entries and detects unchanged content", async () => {
+	const root = await mkdtemp(`${tmpdir()}/oal-officialskills-cache-`);
+	const cachePath = join(root, "officialskills-catalog.json");
+	const catalog = [
+		{
+			id: "skill-acme-bug-debug",
+			publisher: "Acme",
+			name: "bug-debug",
+			category: "development",
+			sourceStatus: "community",
+			repo: "https://github.com/acme/skills",
+			skill: "bug-debug",
+			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			description: "Debug bugs.",
+		},
+	] as const;
+	await writeOfficialSkillsCache(cachePath, catalog);
+	const cached = await readOfficialSkillsCache(cachePath);
+	expect(cached?.entries).toEqual(catalog);
+	expect(sameOfficialSkillsCatalog([...catalog].reverse(), catalog)).toBe(true);
+	expect(
+		sameOfficialSkillsCatalog(
+			[{ ...catalog[0], description: "Updated debug bugs." }],
+			catalog,
+		),
+	).toBe(false);
 });
 
 test("optional features can install curated external skills", () => {

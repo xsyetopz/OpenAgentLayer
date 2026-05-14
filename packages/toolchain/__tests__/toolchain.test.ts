@@ -99,8 +99,8 @@ test("optional feature commands support install and removal", () => {
 			"skill-react-best-practices",
 		]),
 	).toEqual([
-		"# Review installed skill target before removing frontend-design with bunx skills remove frontend-design",
-		"# Review installed skill target before removing react-best-practices with bunx skills remove react-best-practices",
+		"bunx skills remove frontend-design",
+		"bunx skills remove react-best-practices",
 	]);
 });
 
