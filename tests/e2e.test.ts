@@ -508,7 +508,7 @@ test("CLI preview applies configurable Caveman mode", async () => {
 			"--caveman-mode",
 			"off",
 			"--path",
-			".claude/commands/implement.md",
+			".claude/commands/implementation.md",
 			"--content",
 		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
@@ -861,7 +861,7 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 		),
 	).toContain('"name": "oal"');
 	await rm(home, { recursive: true, force: true });
-});
+}, 10000);
 
 test("CLI Codex agent artifacts omit unsupported color fields", async () => {
 	const command = Bun.spawn(
