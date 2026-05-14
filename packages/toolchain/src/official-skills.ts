@@ -6,6 +6,7 @@ export interface OfficialSkillCatalogEntry {
 	sourceStatus: "official" | "community";
 	repo: string;
 	skill: string;
+	pathOnly?: boolean;
 	sourceUrl: string;
 	description: string;
 }
@@ -70,15 +71,16 @@ export const OFFICIAL_SKILL_CATALOG = [
 			"Automate the GitHub branch, commit, push, and pull request workflow.",
 	},
 	{
-		id: "skill-anthropics-webapp-testing",
-		publisher: "Anthropic",
-		name: "webapp-testing",
+		id: "skill-openai-playwright",
+		publisher: "OpenAI",
+		name: "playwright",
 		category: "testing",
-		sourceStatus: "official",
-		repo: "https://github.com/anthropics/skills",
-		skill: "webapp-testing",
-		sourceUrl: "https://officialskills.sh/anthropics/skills/webapp-testing",
-		description: "Test local web applications with browser automation.",
+		sourceStatus: "community",
+		repo: "https://github.com/openai/skills",
+		skill: "playwright",
+		sourceUrl: "https://officialskills.sh/openai/skills/playwright",
+		description:
+			"Automate a real browser from the terminal using playwright-cli.",
 	},
 	{
 		id: "skill-trailofbits-audit-context-building",
@@ -112,8 +114,9 @@ export const OFFICIAL_SKILL_CATALOG = [
 		name: "static-analysis",
 		category: "security",
 		sourceStatus: "official",
-		repo: "https://github.com/trailofbits/skills",
+		repo: "https://github.com/trailofbits/skills/tree/main/plugins/static-analysis",
 		skill: "static-analysis",
+		pathOnly: true,
 		sourceUrl: "https://officialskills.sh/trailofbits/skills/static-analysis",
 		description:
 			"Use CodeQL, Semgrep, and SARIF parsing for security vulnerability detection.",

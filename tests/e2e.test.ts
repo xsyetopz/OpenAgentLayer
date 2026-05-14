@@ -920,10 +920,10 @@ test("CLI toolchain shows OS package-manager install plan", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
 	);
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
+		"bunx skills add https://github.com/trailofbits/skills/tree/main/plugins/static-analysis --yes --global",
 	);
 	expect(stdout).not.toContain("\n- bunx");
 });
@@ -950,10 +950,10 @@ test("CLI features shows optional install and removal commands", async () => {
 	);
 	expect(stdout).toContain("bunx -p playwright playwright install --with-deps");
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
 	);
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
+		"bunx skills add https://github.com/trailofbits/skills/tree/main/plugins/static-analysis --yes --global",
 	);
 	expect(stdout).toContain("bunx -p playwright playwright uninstall --all");
 });

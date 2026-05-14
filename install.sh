@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$repo_root"
 
-default_officialskills="skill-openai-gh-fix-ci,skill-openai-gh-address-comments,skill-openai-yeet,skill-anthropics-webapp-testing,skill-trailofbits-audit-context-building,skill-trailofbits-differential-review,skill-trailofbits-static-analysis,skill-trailofbits-testing-handbook-skills,skill-getsentry-sentry-workflow,skill-anthropics-mcp-builder"
+default_officialskills="skill-openai-gh-fix-ci,skill-openai-gh-address-comments,skill-openai-yeet,skill-openai-playwright,skill-trailofbits-audit-context-building,skill-trailofbits-differential-review,skill-trailofbits-static-analysis,skill-trailofbits-testing-handbook-skills,skill-getsentry-sentry-workflow,skill-anthropics-mcp-builder"
 default_optional="${OAL_OPTIONAL_TOOLS:-ctx7,${default_officialskills}}"
 
 if ! command -v bun >/dev/null 2>&1; then

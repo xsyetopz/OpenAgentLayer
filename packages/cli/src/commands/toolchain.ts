@@ -219,7 +219,9 @@ function renderOfficialSkillCatalog(
 				`id: ${entry.id}`,
 				`category: ${entry.category}`,
 				`source status: ${entry.sourceStatus}`,
-				`install: bunx skills add ${entry.repo} --skill ${entry.skill}`,
+				entry.pathOnly
+					? `install: bunx skills add ${entry.repo} --yes --global`
+					: `install: bunx skills add ${entry.repo} --skill ${entry.skill} --yes --global`,
 				`source: ${entry.sourceUrl}`,
 				entry.description,
 				"",

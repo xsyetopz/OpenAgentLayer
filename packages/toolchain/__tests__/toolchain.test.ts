@@ -90,8 +90,8 @@ test("optional feature commands support install and removal", () => {
 			"skill-trailofbits-static-analysis",
 		]),
 	).toEqual([
-		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
-		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
+		"bunx skills add https://github.com/trailofbits/skills/tree/main/plugins/static-analysis --yes --global",
 	]);
 	expect(
 		optionalFeatureCommands("remove", [
@@ -99,8 +99,8 @@ test("optional feature commands support install and removal", () => {
 			"skill-trailofbits-static-analysis",
 		]),
 	).toEqual([
-		"bunx skills remove gh-fix-ci",
-		"bunx skills remove static-analysis",
+		"bunx skills remove gh-fix-ci --yes --global",
+		"bunx skills remove static-analysis --yes --global",
 	]);
 });
 

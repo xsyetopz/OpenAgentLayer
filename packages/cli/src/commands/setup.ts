@@ -26,7 +26,9 @@ import { runPluginsCommand } from "./plugins";
 
 const INTEGER_PATTERN = /^\d+$/;
 const OFFICIAL_SKILL_ADD_COMMAND_PATTERN =
-	/\bbunx\s+skills\s+add\b.*\s+--skill\s+([^\s]+)/;
+	/\bbunx\s+skills\s+add\b.*\s+--skill\s+(.+?)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
+const OFFICIAL_SKILL_PATH_COMMAND_PATTERN =
+	/\bbunx\s+skills\s+add\b.*\/(?:skills|plugins)\/([A-Za-z0-9._-]+)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
 const noop = () => undefined;
 const DEFAULT_SETUP_OPTIONAL_TOOLS = OFFICIAL_SKILL_CATALOG.map(
 	(entry) => entry.id,
@@ -235,10 +237,19 @@ function installedOfficialSkillPath(
 	command: string,
 	codexHome: string,
 ): string | undefined {
-	const skill = command.match(OFFICIAL_SKILL_ADD_COMMAND_PATTERN)?.[1];
-	if (!skill) return undefined;
-	const skillPath = join(codexHome, "skills", skill);
-	return existsSync(join(skillPath, "SKILL.md")) ? skillPath : undefined;
+	const skillNames = command
+		.match(OFFICIAL_SKILL_ADD_COMMAND_PATTERN)?.[1]
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean);
+	const pathSkill = command.match(OFFICIAL_SKILL_PATH_COMMAND_PATTERN)?.[1];
+	const skills = skillNames ?? (pathSkill ? [pathSkill] : undefined);
+	if (!skills || skills.length === 0) return undefined;
+	const missing = skills.find(
+		(skill) => !existsSync(join(codexHome, "skills", skill, "SKILL.md")),
+	);
+	if (missing) return undefined;
+	return skills.map((skill) => join(codexHome, "skills", skill)).join(", ");
 }
 
 interface OptionalSetupRunOptions {

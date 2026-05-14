@@ -38,10 +38,10 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 				"bunx -p playwright playwright install --with-deps",
 			) &&
 			toolchain.stdout.includes(
-				"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+				"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
 			) &&
 			toolchain.stdout.includes(
-				"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
+				"bunx skills add https://github.com/trailofbits/skills/tree/main/plugins/static-analysis --yes --global",
 			) &&
 			!toolchain.stdout.includes("\n- npx")
 		)

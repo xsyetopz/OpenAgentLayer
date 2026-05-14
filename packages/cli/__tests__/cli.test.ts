@@ -562,7 +562,7 @@ test("interactive cleanup menus expose multi-selectable choices", () => {
 		"skill-openai-gh-fix-ci",
 		"skill-openai-gh-address-comments",
 		"skill-openai-yeet",
-		"skill-anthropics-webapp-testing",
+		"skill-openai-playwright",
 		"skill-trailofbits-audit-context-building",
 		"skill-trailofbits-differential-review",
 		"skill-trailofbits-static-analysis",
@@ -602,10 +602,10 @@ test("setup defaults include curated official skills", async () => {
 	expect(stdout).toContain("selected: skill-openai-gh-fix-ci");
 	expect(stdout).toContain("skill-anthropics-mcp-builder");
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
 	);
 	expect(stdout).toContain(
-		"bunx skills add https://github.com/anthropics/skills --skill mcp-builder",
+		"bunx skills add https://github.com/anthropics/skills --skill mcp-builder --yes --global",
 	);
 });
 
@@ -624,15 +624,30 @@ if [ -z "$CODEX_HOME" ]; then
 fi
 printf '%s\\n' "$CODEX_HOME" >> "$OAL_CODEX_HOME_LOG"
 if [ "$1" = "skills" ] && [ "$2" = "add" ]; then
+  case "$3" in
+    */plugins/static-analysis)
+      mkdir -p "$CODEX_HOME/skills/static-analysis"
+      printf 'name: static-analysis\\n' > "$CODEX_HOME/skills/static-analysis/SKILL.md"
+      ;;
+  esac
+  in_skills=0
   while [ "$#" -gt 0 ]; do
     if [ "$1" = "--skill" ]; then
-      skill="$2"
-      break
+      in_skills=1
+      shift
+      continue
+    fi
+    if [ "$in_skills" = "1" ]; then
+      case "$1" in
+        --*) break ;;
+        *)
+          mkdir -p "$CODEX_HOME/skills/$1"
+          printf 'name: %s\\n' "$1" > "$CODEX_HOME/skills/$1/SKILL.md"
+          ;;
+      esac
     fi
     shift
   done
-  mkdir -p "$CODEX_HOME/skills/$skill"
-  printf 'name: %s\\n' "$skill" > "$CODEX_HOME/skills/$skill/SKILL.md"
 fi
 exit 0
 `,
@@ -742,11 +757,11 @@ test("official skill interactive actions build executable commands", () => {
 	expect(
 		officialSkillActionCommands("install", ["skill-acme-bug-debug"], catalog),
 	).toEqual([
-		"bunx skills add https://github.com/acme/skills --skill bug-debug",
+		"bunx skills add https://github.com/acme/skills --skill bug-debug --yes --global",
 	]);
 	expect(
 		officialSkillActionCommands("remove", ["skill-acme-bug-debug"], catalog),
-	).toEqual(["bunx skills remove bug-debug"]);
+	).toEqual(["bunx skills remove bug-debug --yes --global"]);
 });
 
 test("official skill catalog loading can take its time by default", async () => {
@@ -837,10 +852,10 @@ test("optional features can install curated external skills", () => {
 	expect(output).toContain("OpenAI gh-fix-ci [skill]");
 	expect(output).toContain("Trail of Bits static-analysis [skill]");
 	expect(output).toContain(
-		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci",
+		"bunx skills add https://github.com/openai/skills --skill gh-fix-ci --yes --global",
 	);
 	expect(output).toContain(
-		"bunx skills add https://github.com/trailofbits/skills --skill static-analysis",
+		"bunx skills add https://github.com/trailofbits/skills/tree/main/plugins/static-analysis --yes --global",
 	);
 });
 
@@ -923,7 +938,7 @@ test("features command installs all fetched skills in a website tab", async () =
 	const output = lines.join("\n");
 	expect(output).toContain("OpenAI security-best-practices [skill]");
 	expect(output).toContain(
-		"bunx skills add https://github.com/openai/skills --skill security-best-practices",
+		"bunx skills add https://github.com/openai/skills --skill security-best-practices --yes --global",
 	);
 	expect(output).not.toContain("workers-best-practices");
 	expect(output).not.toContain("gh-fix-ci");

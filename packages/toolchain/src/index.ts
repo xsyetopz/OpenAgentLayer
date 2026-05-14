@@ -308,17 +308,24 @@ export function optionalFeatureCommands(
 			options.officialSkills?.find((entry) => entry.id === tool) ??
 			officialSkillById(tool);
 		if (!command) continue;
-		commands.push(officialSkillCommand(action, command));
+		commands.push(...officialSkillCommand(action, command, options.scope));
 	}
 	return commands;
 }
 
 function officialSkillCommand(
 	action: OptionalToolAction,
-	command: { repo: string; skill: string },
-): string {
-	if (action === "remove") return `bunx skills remove ${command.skill}`;
-	return `bunx skills add ${command.repo} --skill ${command.skill}`;
+	command: { repo: string; skill: string; pathOnly?: boolean },
+	scope: OptionalToolScope = "global",
+): string[] {
+	const scopeFlag = scope === "global" ? " --global" : "";
+	if (action === "remove")
+		return [`bunx skills remove ${command.skill} --yes${scopeFlag}`];
+	if (command.pathOnly)
+		return [`bunx skills add ${command.repo} --yes${scopeFlag}`];
+	return [
+		`bunx skills add ${command.repo} --skill ${command.skill} --yes${scopeFlag}`,
+	];
 }
 
 function ctx7Command(
