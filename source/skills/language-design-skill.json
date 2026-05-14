@@ -1,0 +1,29 @@
+{
+  "id": "language-design-skill",
+  "title": "Language Design Skill",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Design or review programming language, compiler, runtime, VM, and semantic architecture with explicit DAG boundaries, implementation-family fit, and practical evolution constraints.",
+  "body": "Use this skill when designing or reviewing language/compiler/runtime architecture where semantics, contracts, and execution strategy must stay explicit and testable. Apply the skill’s design laws to enforce acyclic package boundaries, choose an implementation family that matches real product goals, and keep syntax, semantics, runtime ABI, diagnostics, tooling, and evolution contracts separated by stable ownership boundaries.",
+  "upstream": {
+    "path": "source/skill-resources/language-design/references/language-design-skill.md",
+    "verbatim": true
+  },
+  "supportFiles": [
+    {
+      "path": "references/reference-map.md",
+      "source": "skill-resources/language-design/references/reference-map.md"
+    },
+    {
+      "path": "assets/design-review-checklist.md",
+      "source": "skill-resources/language-design/assets/design-review-checklist.md"
+    },
+    {
+      "path": "assets/prompt-template.md",
+      "source": "skill-resources/language-design/assets/prompt-template.md"
+    }
+  ]
+}
