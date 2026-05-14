@@ -2,17 +2,17 @@ import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { LINE_BREAK_PATTERN } from "./patterns";
 
 const execFileAsync = promisify(execFile);
 
 const SOURCE_FILE_PATTERN = /\.(ts|tsx|mts|mjs|js|json|jsonc|md)$/;
 const GENERATED_PATH_PATTERN =
 	/(^|\/)(dist|generated|node_modules|\.oal)(\/|$)/;
-const LINE_PATTERN = /\r?\n/;
 const MAX_PACKAGE_SOURCE_LINES = 10_000;
 const MAX_DIRECT_SOURCE_CHILDREN = 32;
 const DIRECT_SOURCE_CHILDREN_LIMITS = new Map<string, number>([
-	["source/skills", 48],
+	["source/skills", 49],
 ]);
 const MAX_SOURCE_PATH_DEPTH = 6;
 
@@ -121,7 +121,7 @@ function isSourceFile(file: string): boolean {
 }
 
 function lineCount(content: string): number {
-	return content.split(LINE_PATTERN).length;
+	return content.split(LINE_BREAK_PATTERN).length;
 }
 
 async function trackedFiles(repoRoot: string): Promise<string[]> {

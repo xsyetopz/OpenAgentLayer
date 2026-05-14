@@ -857,17 +857,16 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 	expect(promptResult.reason).toBe("OAL subagent reminder");
 	const promptDetails = (promptResult as { details?: string[] }).details ?? [];
 	expect(promptDetails).toHaveLength(2);
-	expect(promptDetails.join(" ").length).toBeLessThan(320);
+	expect(promptDetails.join(" ").length).toBeLessThan(380);
 	for (const expected of [
-		"OAL subagent reminder",
 		"`$oal` guidance",
-		"before manual work",
-		"spawn bounded native OAL subagents/sidecars",
-		"splittable implementation, review, tests, docs, tracing",
-		"sidecar stalls/fails",
-		"do not continue manually",
-		"tighten scope and spawn the next relevant OAL agent",
-		"parent merges evidence",
+		"bounded native OAL subagents or sidecars",
+		"broad or splittable implementation",
+		"quick single-owner fixes",
+		"work directly in the parent thread",
+		"sidecar stalls or fails",
+		"tighten scope",
+		"merge evidence before continuing",
 	])
 		expect(promptDetails.some((detail) => detail.includes(expected))).toBe(
 			true,
@@ -881,7 +880,7 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 	const details = (result as { details?: string[] }).details ?? [];
 	for (const expected of [
 		"Native multi_agent_v2 is OAL's default",
-		"subagents are encouraged for split work",
+		"Use subagents when work can split",
 		"OAL agent names and aliases",
 		".codex/config.toml [agents] and AGENTS.md",
 		"spawn those names directly",
@@ -894,7 +893,6 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 		"Parent thread owns task split",
 		"do not spawn extra pooled threads",
 		"stalled background work wastes token budget",
-		"oal opendex",
 		"oal opendex",
 	])
 		expect(details.some((detail) => detail.includes(expected))).toBe(true);

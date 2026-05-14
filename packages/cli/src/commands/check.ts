@@ -1,11 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { CODEX_COLOR_FIELD_PATTERN } from "@openagentlayer/accept";
 import { flag, option, providerOptions } from "../arguments";
 import { expandProviders } from "../provider-binaries";
 import { renderableSourceReport } from "../source";
 
-const CODEX_COLOR_FIELD = /^color\s*=/m;
 const CODEX_OAL_PROFILE = /profile = "openagentlayer(?:-[^"]+)?"/;
 
 export async function runCheckCommand(
@@ -125,7 +125,7 @@ async function assertCodexInstalled(
 		[join(home, ".codex/config.toml"), join(target, ".codex/config.toml")],
 		"Codex config",
 	);
-	if (CODEX_COLOR_FIELD.test(config.content))
+	if (CODEX_COLOR_FIELD_PATTERN.test(config.content))
 		throw new Error(
 			`\`${config.path}\` needs Codex schema fields without \`color\``,
 		);
@@ -133,7 +133,7 @@ async function assertCodexInstalled(
 		? join(home, ".codex/agents")
 		: join(target, ".codex/agents");
 	const agent = await readFile(join(agentDir, "athena.toml"), "utf8");
-	if (CODEX_COLOR_FIELD.test(agent))
+	if (CODEX_COLOR_FIELD_PATTERN.test(agent))
 		throw new Error(
 			"Installed Codex agent TOML needs Codex schema fields without `color`",
 		);

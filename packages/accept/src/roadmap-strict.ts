@@ -1,5 +1,12 @@
 import type { Artifact } from "@openagentlayer/artifact";
 import type { OalSource } from "@openagentlayer/source";
+import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_HOOKS_DIR,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+	OAL_OPENCODE_HOOKS_DIR,
+} from "./patterns";
 
 export interface StrictRoadmapCheck {
 	id: string;
@@ -64,11 +71,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 		],
 		verify: ({ artifacts }) => {
 			const config = artifact(".codex/config.toml", artifacts).content;
-			requireIncludes(
-				config,
-				"#:schema https://developers.openai.com/codex/config-schema.json",
-				"Codex config",
-			);
+			requireIncludes(config, CODEX_CONFIG_SCHEMA_COMMENT, "Codex config");
 			for (const flag of REQUIRED_CODEX_FLAGS)
 				requireIncludes(config, flag, "Codex config");
 			for (const model of [
@@ -86,7 +89,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			);
 			requireIncludes(
 				config,
-				'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+				`model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"`,
 				"Codex config",
 			);
 			requireIncludes(config, "max_depth = 1", "Codex config");
@@ -131,7 +134,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			);
 			rejectIncludes(requirements, "codex_hooks", "Codex requirements");
 			const baseInstructions = artifact(
-				".codex/openagentlayer/codex-base-instructions.md",
+				OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 				artifacts,
 			).content;
 			requireIncludes(
@@ -315,9 +318,9 @@ function requireArtifact(path: string, artifacts: Artifact[]): void {
 }
 
 function hookPath(provider: string, script: string): string {
-	if (provider === "codex") return `.codex/openagentlayer/hooks/${script}`;
+	if (provider === "codex") return `${OAL_CODEX_HOOKS_DIR}/${script}`;
 	if (provider === "claude") return `.claude/hooks/scripts/${script}`;
-	return `.opencode/openagentlayer/hooks/${script}`;
+	return `${OAL_OPENCODE_HOOKS_DIR}/${script}`;
 }
 
 function requireIncludes(content: string, term: string, label: string): void {

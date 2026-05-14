@@ -17,10 +17,9 @@ rendered requirements file into the Codex requirements layer for your
 environment. OAL deploy prints a warning when this file exists so the admin
 install step is visible.
 
-OAL renders `.codex/openagentlayer/codex-base-instructions.md` from upstream
-`openai/codex` base instructions plus the tracked OAL patch in
-`patches/openai-codex-base-instructions-default-md.patch`, then points
-`model_instructions_file` at that patched file.
+OAL renders `.codex/openagentlayer/codex-base-instructions.md` from the
+repository prompt surface in `prompts/codex_base_instruction.custom.md`, then
+points `model_instructions_file` at that rendered file.
 Generated Codex config also includes a `#:schema` comment that points to the
 [Codex config schema](https://developers.openai.com/codex/config-schema.json).
 The research disposition for the reddit-derived changes lives in

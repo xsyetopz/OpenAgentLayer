@@ -1,6 +1,11 @@
 export {
+	OFFICIAL_SKILL_ADD_COMMAND_PATTERN,
 	OFFICIAL_SKILL_CATALOG,
 	OFFICIAL_SKILL_CATEGORIES,
+	OFFICIAL_SKILL_INSTALL_COMMAND_PATTERN,
+	OFFICIAL_SKILL_PATH_COMMAND_PATTERN,
+	OFFICIAL_SKILLS_BASE_URL,
+	OFFICIAL_SKILLS_HOSTNAME,
 	type OfficialSkillCatalogEntry,
 	type OfficialSkillCategory,
 	type OfficialSkillId,
@@ -12,6 +17,11 @@ export {
 	parseOfficialSkillPage,
 } from "./official-skills";
 
+import {
+	CONTEXT7_DASHBOARD_URL,
+	RTK_INSTALL_COMMAND,
+	RTK_INSTALL_SCRIPT_URL,
+} from "@openagentlayer/source";
 import {
 	OFFICIAL_SKILL_CATALOG,
 	type OfficialSkillCatalogEntry,
@@ -65,7 +75,8 @@ export interface Context7ApiKeyStatus {
 	source?: string;
 }
 
-const CONTEXT7_DASHBOARD_URL = "https://context7.com/dashboard";
+export { CONTEXT7_DASHBOARD_URL, RTK_INSTALL_COMMAND, RTK_INSTALL_SCRIPT_URL };
+
 const CONTEXT7_API_KEY_PATTERN = /^ctx7sk-[A-Za-z0-9_-]{16,}$/;
 
 const OPTIONAL_TOOL_LABELS: Record<OptionalTool, string> = {
@@ -81,40 +92,136 @@ const OPTIONAL_TOOL_LABELS: Record<OptionalTool, string> = {
 } as Record<OptionalTool, string>;
 
 const CORE_TOOLS = [
-	"bun",
-	"ripgrep",
-	"fd",
-	"fzf",
-	"bat",
-	"eza",
-	"git-delta",
-	"jq",
-	"yq",
-	"just",
-	"direnv",
-	"mise",
-	"zoxide",
-	"dust",
-	"hyperfine",
-	"entr",
-	"gh",
-	"lazygit",
-	"tmux",
-	"btop",
-	"shellcheck",
-	"shfmt",
-	"ast-grep",
-	"sd",
-	"tokei",
-	"gitleaks",
-	"pre-commit",
-	"watchexec",
+	"bun", // JS runtime and package manager for CLI and scripts.
+	"ripgrep", // Fast recursive search for code/data inspection.
+	"fd", // Fast file discovery with ignore support.
+	"fzf", // Interactive fuzzy finder for local workflows.
+	"bat", // Syntax-highlighted file preview in terminal.
+	"eza", // Improved directory listing with metadata.
+	"git-delta", // Readable syntax-aware Git diff pager.
+	"jq", // JSON query and transformation primitive.
+	"yq", // YAML/JSON query and editing primitive.
+	"just", // Task runner for repeatable project commands.
+	"direnv", // Repo-local environment loading automation.
+	"gum", // Scriptable prompts/menus/spinners for shell UX.
+	"mise", // Runtime/tool version manager for reproducibility.
+	"zoxide", // Faster directory jumping utility.
+	"dust", // Disk usage analyzer for quick storage checks.
+	"hyperfine", // Command benchmarking for performance comparisons.
+	"entr", // Lightweight file change trigger runner.
+	"gh", // GitHub CLI for PR/issues/actions/releases.
+	"lazygit", // Interactive Git TUI for local workflows.
+	"tmux", // Terminal multiplexing for multi-session runs.
+	"btop", // Interactive process/system monitor.
+	"shellcheck", // Static analysis for shell script correctness.
+	"shfmt", // Shell formatter for consistent script style.
+	"ast-grep", // AST-aware search/rewrite for safer edits.
+	"sd", // Safer regex replacement tool for text rewrites.
+	"tokei", // Code statistics by language and file type.
+	"gitleaks", // Secret scanning in source and history.
+	"pre-commit", // Git hook runner for local quality gates.
+	"watchexec", // File watcher for command reruns on changes.
+	"bats-core", // Bash test framework for shell/CLI tests.
+	"comby", // Structural multi-language search and rewrite.
+	"dasel", // Structured data query/edit across JSON/YAML/TOML/XML.
+	"jc", // Convert command output into JSON.
+	"jo", // Build JSON in shell scripts without quoting issues.
+	"xan", // Fast CSV slicing/stats/inspection utility.
+	"miller", // CSV/TSV/JSONL data wrangling from shell.
+	"difftastic", // Syntax-aware diff for review signal quality.
+	"git-absorb", // Auto-create fixup commits from local changes.
+	"actionlint", // Lint GitHub Actions workflow files.
+	"hadolint", // Lint Dockerfiles and container best practices.
+	"trivy", // Vulnerability scanning for filesystems/images/deps.
+	"syft", // SBOM generation for dependencies and artifacts.
+	"grype", // Vulnerability scanning against SBOM/images.
+	"process-compose", // Local multi-process service orchestration.
+	"overmind", // Procfile-based process supervision.
+	"poppler", // PDF tools: pdftotext/pdfinfo/pdfimages.
+	"exiftool", // Metadata inspection and editing for media/docs.
+	"pandoc", // Document format conversion toolkit.
+	"graphviz", // Graph rendering (dot) for diagrams/dependencies.
+	"duckdb", // Local SQL over CSV/JSON/Parquet/log datasets.
+	"lsof", // Inspect open files/sockets/ports/process handles.
+	"strace", // Linux syscall tracing for process debugging.
+	"dtruss", // macOS syscall tracing via DTrace tooling.
+	"sqlite3", // Local database CLI for structured inspection.
+	"file", // Byte-level file type detection via libmagic.
+	"imagemagick", // Image inspect/convert/resize workflows.
+	"ffmpeg", // Audio/video/media stream inspection and conversion.
+	"python3", // Python runtime for automation and package tooling.
 ] as const;
+const PYTHON_PACKAGES = [
+	"pillow", // Image loading, conversion, resizing, metadata.
+	"pymupdf", // PDF rendering and text/image extraction.
+	"pypdf", // Lightweight PDF split/merge/metadata handling.
+	"pdfplumber", // PDF table and structured text extraction.
+	"python-magic", // MIME/file-type detection from bytes.
+	"charset-normalizer", // Robust text encoding detection.
+	"chardet", // Legacy/fallback character encoding detection.
+	"beautifulsoup4", // Forgiving HTML/XML parsing.
+	"lxml", // Fast XML/HTML parser with XPath support.
+	"markdown-it-py", // CommonMark-compatible Markdown parsing.
+	"mistune", // Alternate Markdown parsing/rendering.
+	"python-frontmatter", // Markdown frontmatter parsing support.
+	"ruamel.yaml", // YAML round-trip editing preserving comments.
+	"tomlkit", // TOML round-trip editing preserving formatting.
+	"jsonschema", // JSON/config/schema validation engine.
+	"pydantic", // Structured data validation and typing models.
+	"httpx", // Modern sync/async HTTP client.
+	"aiofiles", // Async file I/O for Python workflows.
+	"tenacity", // Retry/backoff control for flaky operations.
+	"orjson", // High-performance JSON parser/serializer.
+	"jsonlines", // JSONL stream and dataset utilities.
+	"packaging", // Correct version/specifier parsing.
+	"pathspec", // Gitignore-style path matching support.
+	"GitPython", // Git automation from Python.
+	"dulwich", // Pure-Python Git plumbing fallback.
+	"tree-sitter", // Structural parsing foundation.
+	"tree-sitter-language-pack", // Bundled grammars for many languages.
+	"libcst", // Concrete Python rewriting preserving formatting.
+	"pygments", // Syntax tokenization/highlighting helpers.
+	"rapidfuzz", // Fast fuzzy matching for names/text.
+	"regex", // Enhanced regex engine beyond stdlib re.
+	"watchdog", // File watch events for automation loops.
+	"rich", // Rich terminal formatting and tracebacks.
+	"typer", // Rapid CLI scaffolding for Python tooling.
+	"tqdm", // Progress bars for long-running operations.
+	"pandas", // Dataframe tooling for CSV/XLSX/table data.
+	"polars", // Fast dataframe processing for large datasets.
+	"pyarrow", // Arrow/Parquet data interchange support.
+	"duckdb", // SQL over local structured datasets in Python.
+	"openpyxl", // XLSX read/write support.
+	"python-docx", // DOCX read/write support.
+	"python-pptx", // PPTX read/write support.
+	"odfpy", // ODT/ODS document support.
+	"networkx", // Graph modeling for dependencies/flows.
+	"graphviz", // Python graph rendering bindings.
+	"matplotlib", // Quick plotting/visualization utilities.
+	"numpy", // Numeric and ndarray foundation.
+	"scipy", // Scientific computing and algorithm fallback.
+	"opencv-python", // Advanced image/video processing.
+	"pytesseract", // OCR wrapper (expects native tesseract).
+	"imagehash", // Perceptual image hashing and dedupe.
+	"mutagen", // Audio metadata reading/writing.
+	"jinja2", // Template rendering for generated artifacts.
+	"hypothesis", // Property-based test case generation.
+	"deepdiff", // Structured object diffing.
+	"dictdiffer", // Lightweight dict/list diffing.
+	"xxhash", // Fast non-cryptographic content hashing.
+	"blake3", // Fast strong hashing utility.
+	"psutil", // Process/system inspection utilities.
+	"humanize", // Human-readable sizes/durations/counts.
+	"tabulate", // Table rendering in terminal output.
+	"send2trash", // Safer delete-to-trash operations.
+	"filelock", // Cross-process file lock coordination.
+	"portalocker", // Portable file locking fallback.
+] as const;
+const MERMAID_CLI_INSTALL = "bun install -g @mermaid-js/mermaid-cli";
 const BREW_INSTALL =
 	'/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"';
 const BUN_INSTALL = ["curl -fsSL https://bun.sh/install", "bash"].join(" | ");
-const RTK_INSTALL =
-	"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh";
+const RTK_INSTALL = RTK_INSTALL_COMMAND;
 
 export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 	const packageManager =
@@ -125,6 +232,7 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		...bootstrapCommands(options.os, packageManager, options.hasHomebrew),
 		BUN_INSTALL,
 		installCommand(packageManager, packageManagerTools(packageManager)),
+		...pythonBootstrapCommands(packageManager),
 		RTK_INSTALL,
 		"rtk --version",
 		"rtk gain",
@@ -137,6 +245,8 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 		"rtk find --help",
 		"rg --help",
 		"fd --help",
+		MERMAID_CLI_INSTALL,
+		...pythonPackageInstallCommands(),
 		...(optionalTools.includes("ctx7")
 			? [
 					"bun install -g ctx7",
@@ -170,6 +280,7 @@ export function planToolchainInstall(options: ToolchainOptions): ToolchainPlan {
 			"Use `rtk proxy -- rg` and `rtk proxy -- fd` for provider-shared source discovery only as a last resort; both respect `.gitignore` by default.",
 			"Use `rtk git ls-files` when a task explicitly requires tracked files only.",
 			"Use `jq`/`yq` for structured config, `shellcheck`/`shfmt` for shell, `hyperfine` for speed claims, `ast-grep`/`sd` for careful mechanical rewrites, and `gitleaks` for secret checks.",
+			"Python tooling support installs Python 3, pip bootstrap, and a broad automation/data/media package set for agent workflows.",
 		],
 	};
 }
@@ -258,9 +369,33 @@ function installCommand(
 function packageManagerTools(
 	packageManager: PackageManager,
 ): readonly string[] {
-	if (packageManager === "brew")
-		return CORE_TOOLS.filter((tool) => tool !== "bun");
-	return CORE_TOOLS;
+	const mapped = CORE_TOOLS.map((tool) =>
+		packageManagerToolName(packageManager, tool),
+	).filter(Boolean) as string[];
+	if (packageManager === "brew") return mapped.filter((tool) => tool !== "bun");
+	return mapped;
+}
+
+function packageManagerToolName(
+	packageManager: PackageManager,
+	tool: (typeof CORE_TOOLS)[number],
+): string | undefined {
+	if (packageManager === "brew") {
+		const brewAliases: Partial<Record<(typeof CORE_TOOLS)[number], string>> = {
+			miller: "miller",
+			python3: "python",
+		};
+		return brewAliases[tool] ?? tool;
+	}
+	if (tool === "python3") return "python3";
+	if (tool === "dtruss") return undefined;
+	if (tool === "strace" && packageManager === "brew") return undefined;
+	if (tool === "difftastic") return packageManager === "apt" ? undefined : tool;
+	if (tool === "process-compose")
+		return packageManager === "apt" ? undefined : tool;
+	if (tool === "overmind") return packageManager === "apt" ? undefined : tool;
+	if (tool === "git-absorb") return packageManager === "apt" ? undefined : tool;
+	return tool;
 }
 
 function linuxRefreshCommand(packageManager: PackageManager): string {
@@ -278,6 +413,29 @@ function linuxRefreshCommand(packageManager: PackageManager): string {
 		default:
 			return "brew update";
 	}
+}
+
+function pythonBootstrapCommands(packageManager: PackageManager): string[] {
+	if (packageManager === "brew")
+		return [
+			"python3 --version || python --version",
+			"python3 -m pip --version || python3 -m ensurepip --upgrade",
+			"python3 -m pip install --upgrade pip",
+		];
+	return [
+		"python3 --version",
+		"python3 -m pip --version || python3 -m ensurepip --upgrade",
+		"python3 -m pip install --upgrade pip",
+	];
+}
+
+function pythonPackageInstallCommands(chunkSize = 20): string[] {
+	const commands: string[] = [];
+	for (let index = 0; index < PYTHON_PACKAGES.length; index += chunkSize) {
+		const chunk = PYTHON_PACKAGES.slice(index, index + chunkSize);
+		commands.push(`python3 -m pip install --upgrade ${chunk.join(" ")}`);
+	}
+	return commands;
 }
 
 export function optionalFeatureCommands(

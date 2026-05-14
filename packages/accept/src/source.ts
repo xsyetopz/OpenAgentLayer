@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { validateSourceGraph } from "@openagentlayer/policy";
 import { runtimeHooks } from "@openagentlayer/runtime";
 import type { OalSource } from "@openagentlayer/source";
+import { LINE_BREAK_PATTERN } from "./patterns";
 
 const LIVE_TEXT_PATH_PATTERN =
 	/\.(cjs|js|json|jsonc|md|mjs|ts|tsx|toml|yaml|yml)$/;
-const LINE_PATTERN = /\r?\n/;
 const MARKDOWN_SEMICOLON_BULLET_PATTERN = /^\s*-\s.+;$/;
 const BARE_MARKDOWN_URL_PATTERN = /(^|[\s(])https?:\/\/[^\s)<>]+/;
 
@@ -165,7 +165,7 @@ async function liveTextPaths(repoRoot: string): Promise<string[]> {
 
 function assertMarkdownHasHeading(path: string, content: string): void {
 	const first = content
-		.split(LINE_PATTERN)
+		.split(LINE_BREAK_PATTERN)
 		.find((line) => line.trim().length > 0)
 		?.trim();
 	if (!first?.startsWith("#"))
@@ -173,7 +173,7 @@ function assertMarkdownHasHeading(path: string, content: string): void {
 }
 
 function assertMarkdownBulletPunctuation(path: string, content: string): void {
-	const lines = content.split(LINE_PATTERN);
+	const lines = content.split(LINE_BREAK_PATTERN);
 	for (const [index, line] of lines.entries())
 		if (MARKDOWN_SEMICOLON_BULLET_PATTERN.test(line.trim()))
 			throw new Error(
@@ -183,7 +183,7 @@ function assertMarkdownBulletPunctuation(path: string, content: string): void {
 
 function assertMarkdownLinks(path: string, content: string): void {
 	let inFence = false;
-	for (const [index, line] of content.split(LINE_PATTERN).entries()) {
+	for (const [index, line] of content.split(LINE_BREAK_PATTERN).entries()) {
 		if (line.trim().startsWith("```")) {
 			inFence = !inFence;
 			continue;

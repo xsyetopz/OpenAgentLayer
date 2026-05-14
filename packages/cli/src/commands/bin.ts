@@ -1,5 +1,6 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	applyBinInstall,
 	binManifestPath,
@@ -16,7 +17,7 @@ export async function runBinCommand(
 ): Promise<void> {
 	const home = resolve(option(args, "--home") ?? homedir());
 	const binDir = resolve(option(args, "--bin-dir") ?? join(home, ".local/bin"));
-	const entrypoint = join(repoRoot, "packages/cli/src/main.ts");
+	const entrypoint = join(repoRoot, OAL_CLI_ENTRY_RELATIVE);
 	const dryRun = flag(args, "--dry-run");
 	if (flag(args, "--remove")) {
 		if (dryRun) console.log(`DRY RUN remove ${binManifestPath(home)}`);

@@ -1,6 +1,10 @@
 import { chmod, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import type { OalSource, Provider } from "@openagentlayer/source";
+import {
+	OAL_CLI_ENTRY_RELATIVE,
+	type OalSource,
+	type Provider,
+} from "@openagentlayer/source";
 
 export async function assertOpenCodeTools(targetRoot: string): Promise<void> {
 	await linkToolDependencies(targetRoot);
@@ -71,7 +75,7 @@ async function installAcceptanceOalShim(targetRoot: string): Promise<string> {
 	const shimPath = join(binRoot, "oal");
 	await writeFile(
 		shimPath,
-		`#!/usr/bin/env bash\nexec bun "${join(repoRoot, "packages/cli/src/main.ts")}" "$@"\n`,
+		`#!/usr/bin/env bash\nexec bun "${join(repoRoot, OAL_CLI_ENTRY_RELATIVE)}" "$@"\n`,
 		"utf8",
 	);
 	await chmod(shimPath, 0o755);
@@ -145,22 +149,18 @@ function providerSkillRoot(provider: Provider): string {
 }
 
 function assertDesignSkillStandards(source: OalSource): void {
-	const design = source.skills.find((skill) => skill.id === "design");
-	if (!design) throw new Error("Missing design skill");
-	const content = supportFileContent(design, "references/api-standards.md");
-	for (const term of [
-		"OpenAPI",
-		"JSON Schema",
-		"AsyncAPI",
-		"GraphQL",
-		"CloudEvents",
-		"Problem Details",
-		"OAuth 2.0",
-		"OpenID Connect",
-		"RFC 9110",
-	])
-		if (!content.includes(term))
-			throw new Error(`design skill standards missing \`${term}\``);
+	const designRoute = source.routes.find((route) => route.id === "design");
+	if (!designRoute) throw new Error("Missing design route");
+	for (const requiredSkillId of ["impeccable", "taste"])
+		if (!designRoute.skills.includes(requiredSkillId))
+			throw new Error(
+				`Design route missing required skill \`${requiredSkillId}\`.`,
+			);
+	for (const requiredSkillId of ["impeccable", "taste"])
+		if (!source.skills.some((skill) => skill.id === requiredSkillId))
+			throw new Error(
+				`Missing design capability skill \`${requiredSkillId}\`.`,
+			);
 }
 
 function assertTestSkillStandards(source: OalSource): void {

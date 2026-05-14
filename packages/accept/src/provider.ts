@@ -5,6 +5,12 @@ import {
 	assertCodexTomlSchema,
 	assertOpenCodeConfigSchema,
 } from "./config-schema";
+import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	HEX_COLOR_VALUE_PATTERN,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+} from "./patterns";
 
 const CODEX_REQUIRED_FLAGS = [
 	"steer = true",
@@ -34,8 +40,6 @@ const CODEX_MARKERS = [
 	"# Regenerate: oal render",
 	"# <<< oal codex <<<",
 ] as const;
-const CODEX_SCHEMA_COMMENT =
-	"#:schema https://developers.openai.com/codex/config-schema.json";
 const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/nemotron-3-super-free",
 	"opencode/minimax-m2.5-free",
@@ -43,7 +47,6 @@ const OPENCODE_MODEL_FALLBACKS = [
 	"opencode/big-pickle",
 	"opencode/gpt-5-nano",
 ] as const;
-const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/;
 
 export async function assertProviderConfigContracts(
 	targetRoot: string,
@@ -61,7 +64,7 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		"utf8",
 	);
 	assertCodexTomlSchema(config);
-	if (!config.includes(CODEX_SCHEMA_COMMENT))
+	if (!config.includes(CODEX_CONFIG_SCHEMA_COMMENT))
 		throw new Error("Codex config missing schema comment");
 	for (const marker of CODEX_MARKERS)
 		if (!config.includes(marker))
@@ -72,7 +75,7 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 			throw new Error(`Codex config missing \`${flag}\``);
 	if (
 		!config.includes(
-			'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+			`model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"`,
 		)
 	)
 		throw new Error("Codex config missing patched base instructions file");
@@ -140,7 +143,7 @@ async function assertCodexBaseInstructions(
 			);
 	}
 	const baseInstructions = await readFile(
-		join(targetRoot, ".codex/openagentlayer/codex-base-instructions.md"),
+		join(targetRoot, OAL_CODEX_BASE_INSTRUCTIONS_FILE),
 		"utf8",
 	);
 	for (const required of [
@@ -223,7 +226,7 @@ function assertOpenCodeAgentColors(agentConfig: Record<string, unknown>): void {
 		if (!(config && typeof config === "object" && "color" in config))
 			throw new Error(`OpenCode agent \`${agentId}\` missing color`);
 		const color = (config as { color?: unknown }).color;
-		if (!(typeof color === "string" && HEX_COLOR_PATTERN.test(color)))
+		if (!(typeof color === "string" && HEX_COLOR_VALUE_PATTERN.test(color)))
 			throw new Error(`OpenCode agent \`${agentId}\` has invalid color`);
 	}
 }

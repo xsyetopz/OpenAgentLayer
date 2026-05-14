@@ -1,6 +1,11 @@
 import { expect, test } from "bun:test";
 import { resolve } from "node:path";
-import { loadSource } from "@openagentlayer/source";
+import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	loadSource,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+} from "@openagentlayer/source";
 import { parseOpenCodeModels, renderProvider } from "../src";
 import {
 	OPENCODE_MODEL_FALLBACKS,
@@ -264,9 +269,7 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain("- implementation:");
 		if (provider === "codex") {
 			expect(instructions).toContain("Codex Base Instructions");
-			expect(instructions).toContain(
-				".codex/openagentlayer/codex-base-instructions.md",
-			);
+			expect(instructions).toContain(OAL_CODEX_BASE_INSTRUCTIONS_FILE);
 			expect(instructions).toContain("upstream `openai/codex` `default.md`");
 			expect(instructions).not.toContain("model_instructions_file");
 		} else {
@@ -403,14 +406,8 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	const config = rendered.artifacts.find(
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
-	expect(
-		config?.startsWith(
-			"#:schema https://developers.openai.com/codex/config-schema.json",
-		),
-	).toBe(true);
-	expect(config).toContain(
-		"#:schema https://developers.openai.com/codex/config-schema.json",
-	);
+	expect(config?.startsWith(CODEX_CONFIG_SCHEMA_COMMENT)).toBe(true);
+	expect(config).toContain(CODEX_CONFIG_SCHEMA_COMMENT);
 	expect(config).not.toContain("zsh_path");
 	expect(config).not.toContain("codex_hooks");
 	expect(config).toContain('profile = "openagentlayer-multi-agent-v2"');
@@ -421,7 +418,7 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	);
 	expect(config).toContain("[profiles.openagentlayer-multi-agent-v2-utility]");
 	expect(config).toContain(
-		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+		`model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"`,
 	);
 	expect(config).toContain("developer_instructions =");
 	expect(config).toContain(
@@ -473,51 +470,16 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(requirements).toContain("OAL_HOOK_PROVIDER=codex");
 	expect(requirements).toContain("OAL_HOOK_EVENT=PreToolUse");
 	const baseInstructions = rendered.artifacts.find(
-		(artifact) =>
-			artifact.path === ".codex/openagentlayer/codex-base-instructions.md",
+		(artifact) => artifact.path === OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 	)?.content;
-	expect(baseInstructions).toContain("Be respectful but not deferential");
-	expect(baseInstructions).toContain(
-		"do not add emotional validation, people-pleasing agreement, or apology-centered phrasing",
-	);
-	expect(baseInstructions).toContain(
-		"Push back on requests, names, designs, or assumptions",
-	);
-	expect(baseInstructions).toContain(
-		"Do not paper over symptoms with compatibility shims, aliases, parser fallbacks",
-	);
-	expect(baseInstructions).toContain(
-		"Do not add adjacent behavior, hidden fallback paths, defensive layers",
-	);
-	expect(baseInstructions).toContain(
-		"Do not widen scope to make a partial solution look complete",
-	);
-	expect(baseInstructions).toContain(
-		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
-	);
-	expect(baseInstructions).toContain("OAL and RTK project surfaces");
-	expect(baseInstructions).toContain("rtk proxy -- <command>");
-	expect(baseInstructions).not.toContain("OAL scope fidelity");
-	expect(baseInstructions).toContain(
-		"documentation-only work unless the user explicitly asks",
-	);
-	expect(baseInstructions).toContain(
-		"implementation request into future-work documentation",
-	);
-	expect(baseInstructions).toContain(
-		"add concise end-user copy where the behavior is selected or explained",
-	);
-	expect(baseInstructions).toContain("OAL parent-session quota guard");
-	expect(baseInstructions).toContain("oal codex-usage --project <path>");
-	expect(baseInstructions).toContain("session-complete\nhandoff");
-	expect(baseInstructions).toContain("COMPLETE-complete");
-	expect(baseInstructions).toContain("Code review and audits");
-	expect(baseInstructions).toContain(
-		"Keep review output findings-only\nand bounded",
-	);
-	expect(baseInstructions).toContain(
-		"Unknown or potentially large command output must be bounded before it reaches context.",
-	);
+	expect(baseInstructions).toContain("# Codex Base Instruction (Custom)");
+	expect(baseInstructions).toContain("## Codex loop model");
+	expect(baseInstructions).toContain("1. user request");
+	expect(baseInstructions).toContain("7. verify");
+	expect(baseInstructions).toContain("9. final report");
+	expect(baseInstructions).toContain("Repo evidence beats memory.");
+	expect(baseInstructions).toContain("## Design-pattern policy");
+	expect(baseInstructions).toContain("## Final report format");
 	for (const item of [
 		"model-with-reasoning",
 		"run-state",
@@ -623,9 +585,7 @@ test("Codex instructions render subagent invocation roster", async () => {
 		"- atalanta: aliases=atalanta, testing, validate, accept; routes=testing, validate, accept",
 	);
 	expect(instructions).toContain("For many similar rows, create a CSV");
-	expect(instructions).toContain(
-		".codex/openagentlayer/codex-base-instructions.md",
-	);
+	expect(instructions).toContain(OAL_CODEX_BASE_INSTRUCTIONS_FILE);
 });
 
 test("Codex Plus plan routes profile work to GPT-5.4 and workers to GPT-5.3", async () => {

@@ -8,8 +8,14 @@ import {
 	type SetupScope,
 } from "@openagentlayer/setup";
 import {
+	POSITIVE_INTEGER_PATTERN,
+	WHITESPACE_SPLIT_PATTERN,
+} from "@openagentlayer/source";
+import {
 	isExpectedContext7ApiKey,
+	OFFICIAL_SKILL_ADD_COMMAND_PATTERN,
 	OFFICIAL_SKILL_CATALOG,
+	OFFICIAL_SKILL_PATH_COMMAND_PATTERN,
 	type OptionalTool,
 	officialSkillIds,
 } from "@openagentlayer/toolchain";
@@ -24,11 +30,6 @@ import { runCheckCommand } from "./check";
 import { runDeployCommand } from "./deploy";
 import { runPluginsCommand } from "./plugins";
 
-const INTEGER_PATTERN = /^\d+$/;
-const OFFICIAL_SKILL_ADD_COMMAND_PATTERN =
-	/\bbunx\s+skills\s+add\b.*\s+--skill\s+(.+?)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
-const OFFICIAL_SKILL_PATH_COMMAND_PATTERN =
-	/\bbunx\s+skills\s+add\b.*\/(?:skills|plugins)\/([A-Za-z0-9._-]+)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
 const noop = () => undefined;
 const DEFAULT_SETUP_OPTIONAL_TOOLS = OFFICIAL_SKILL_CATALOG.map(
 	(entry) => entry.id,
@@ -240,7 +241,7 @@ function installedOfficialSkillPath(
 	const skillNames = command
 		.match(OFFICIAL_SKILL_ADD_COMMAND_PATTERN)?.[1]
 		.trim()
-		.split(/\s+/)
+		.split(WHITESPACE_SPLIT_PATTERN)
 		.filter(Boolean);
 	const pathSkill = command.match(OFFICIAL_SKILL_PATH_COMMAND_PATTERN)?.[1];
 	const skills = skillNames ?? (pathSkill ? [pathSkill] : undefined);
@@ -406,13 +407,13 @@ function tail(text: string, limit = 4000): string {
 
 function optionalSetupTimeoutMs(): number {
 	const raw = process.env["OAL_SETUP_COMMAND_TIMEOUT_MS"];
-	if (raw && INTEGER_PATTERN.test(raw)) return Number(raw);
+	if (raw && POSITIVE_INTEGER_PATTERN.test(raw)) return Number(raw);
 	return 15 * 60 * 1000;
 }
 
 function optionalSetupIdleTimeoutMs(): number {
 	const raw = process.env["OAL_SETUP_IDLE_TIMEOUT_MS"];
-	if (raw && INTEGER_PATTERN.test(raw)) return Number(raw);
+	if (raw && POSITIVE_INTEGER_PATTERN.test(raw)) return Number(raw);
 	return 2 * 60 * 1000;
 }
 

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { HookRecord, OalSource } from "@openagentlayer/source";
+import { OAL_CODEX_HOOKS_DIR, OAL_OPENCODE_HOOKS_DIR } from "./patterns";
 
 interface HookFixture {
 	input: unknown;
@@ -137,7 +138,7 @@ export async function assertHooks(
 	await assertRtkHookBehavior(targetRoot);
 	await assertProviderNativeHookOutput(targetRoot);
 	await assertMalformedInput(
-		join(targetRoot, ".codex/openagentlayer/hooks/inject-route-context.mjs"),
+		join(targetRoot, `${OAL_CODEX_HOOKS_DIR}/inject-route-context.mjs`),
 	);
 }
 
@@ -157,9 +158,8 @@ async function assertSourceHook(
 
 function hookPath(provider: string, script: string): string {
 	if (provider === "claude") return `.claude/hooks/scripts/${script}`;
-	if (provider === "opencode")
-		return `.opencode/openagentlayer/hooks/${script}`;
-	return `.codex/openagentlayer/hooks/${script}`;
+	if (provider === "opencode") return `${OAL_OPENCODE_HOOKS_DIR}/${script}`;
+	return `${OAL_CODEX_HOOKS_DIR}/${script}`;
 }
 
 async function assertHook(
@@ -223,7 +223,7 @@ async function assertProviderNativeHookOutput(
 ): Promise<void> {
 	const scriptPath = join(
 		targetRoot,
-		".codex/openagentlayer/hooks/enforce-rtk-commands.mjs",
+		`${OAL_CODEX_HOOKS_DIR}/enforce-rtk-commands.mjs`,
 	);
 	const pass = await runNativeHook(
 		scriptPath,
@@ -254,7 +254,7 @@ async function assertProviderNativeHookOutput(
 	)
 		throw new Error("Claude PreToolUse hook did not emit native deny output");
 	const codexPostToolBlock = await runNativeHook(
-		join(targetRoot, ".codex/openagentlayer/hooks/block-repeated-failures.mjs"),
+		join(targetRoot, `${OAL_CODEX_HOOKS_DIR}/block-repeated-failures.mjs`),
 		{
 			hook_event_name: "PostToolUse",
 			failures: ["one", "two", "three"],
@@ -273,7 +273,7 @@ async function assertProviderNativeHookOutput(
 	if (codexPostToolBlock.stderr !== "")
 		throw new Error("Codex PostToolUse block emitted stderr feedback");
 	const codexPromptReminder = await runNativeHook(
-		join(targetRoot, ".codex/openagentlayer/hooks/inject-subagent-context.mjs"),
+		join(targetRoot, `${OAL_CODEX_HOOKS_DIR}/inject-subagent-context.mjs`),
 		{ hook_event_name: "UserPromptSubmit", provider: "codex" },
 		{ OAL_HOOK_PROVIDER: "codex", OAL_HOOK_EVENT: "UserPromptSubmit" },
 	);
@@ -387,7 +387,7 @@ async function runNativeHook(
 async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 	const scriptPath = join(
 		targetRoot,
-		".codex/openagentlayer/hooks/enforce-rtk-commands.mjs",
+		`${OAL_CODEX_HOOKS_DIR}/enforce-rtk-commands.mjs`,
 	);
 	await assertHook(
 		scriptPath,
@@ -403,7 +403,7 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 		"pass",
 	);
 	const script = `${await readFile(scriptPath, "utf8")}\n${await readFile(
-		join(targetRoot, ".codex/openagentlayer/hooks/_command-policy.mjs"),
+		join(targetRoot, `${OAL_CODEX_HOOKS_DIR}/_command-policy.mjs`),
 		"utf8",
 	)}`;
 	for (const command of [
@@ -425,7 +425,7 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 		if (!script.includes(`"${command}"`))
 			throw new Error(`RTK enforcement hook missing command \`${command}\``);
 	const rewriteSupport = await readFile(
-		join(targetRoot, ".codex/openagentlayer/hooks/_bun-rewrite.mjs"),
+		join(targetRoot, `${OAL_CODEX_HOOKS_DIR}/_bun-rewrite.mjs`),
 		"utf8",
 	);
 	for (const replacement of ["bunx", '"run"', '"add"', "bun install", '"pm"'])

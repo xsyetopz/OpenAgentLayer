@@ -8,6 +8,8 @@
   "agent": "hephaestus",
   "skills": [
     "implementation",
+    "dedupe",
+    "zen-of-python",
     "cross-platform-app",
     "privileged-execution",
     "safe-deletion",

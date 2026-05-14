@@ -1,5 +1,12 @@
 import type { Artifact } from "@openagentlayer/artifact";
 import type { OalSource, Provider } from "@openagentlayer/source";
+import {
+	CODEX_COLOR_FIELD_PATTERN,
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	HEX_COLOR_FRAGMENT_PATTERN,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_HOOKS_DIR,
+} from "./patterns";
 
 const PROVIDERS: Provider[] = ["codex", "claude", "opencode"];
 const CORE_AGENTS = [
@@ -70,8 +77,6 @@ const SKILL_PROMPT_CONTRACT_TERMS = [
 	"Markdown contract:",
 	"Attribution contract:",
 ] as const;
-const HEX_COLOR_PATTERN = /#[0-9a-f]{6}/;
-const CODEX_COLOR_PATTERN = /^color\s*=/m;
 const FORBIDDEN_MODEL_TERMS = [
 	"gpt-5.3-codex-spark",
 	"claude-opus-4-7",
@@ -143,7 +148,7 @@ function assertRouteArtifacts(artifacts: Artifact[]): void {
 		"Change source:",
 		"Context budget:",
 		"Codex Base Instructions",
-		".codex/openagentlayer/codex-base-instructions.md",
+		OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 		"upstream `openai/codex` `default.md`",
 	])
 		if (!codexInstructions.content.includes(term))
@@ -209,7 +214,7 @@ function assertInstructionBlocks(artifacts: Artifact[]): void {
 
 function assertProvenanceMarkers(artifacts: Artifact[]): void {
 	assertArtifact(".codex/config.toml", artifacts, [
-		"#:schema https://developers.openai.com/codex/config-schema.json",
+		CODEX_CONFIG_SCHEMA_COMMENT,
 		"developer_instructions =",
 		"## Mandatory Output Gate: Defensive Contrast Check",
 		"## Mandatory Output Gate: Avoid Defensive Contrast",
@@ -220,11 +225,7 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"# <<< oal codex <<<",
 	]);
 	const codexConfig = findArtifact(".codex/config.toml", artifacts);
-	if (
-		!codexConfig.content.startsWith(
-			"#:schema https://developers.openai.com/codex/config-schema.json",
-		)
-	)
+	if (!codexConfig.content.startsWith(CODEX_CONFIG_SCHEMA_COMMENT))
 		throw new Error("Codex config schema comment must be first line");
 	assertArtifact(".codex/requirements.toml", artifacts, [
 		"# >>> oal codex >>>",
@@ -238,17 +239,13 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"__OAL_CODEX_MANAGED_HOOK_DIR__/enforce-rtk-commands.mjs",
 		"# <<< oal codex <<<",
 	]);
-	assertArtifact(
-		".codex/openagentlayer/codex-base-instructions.md",
-		artifacts,
-		[
-			"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
-			"OAL and RTK project surfaces",
-			"rtk proxy -- <command>",
-			"Code review and audits",
-			"Unknown or potentially large command output must be bounded before it reaches context.",
-		],
-	);
+	assertArtifact(OAL_CODEX_BASE_INSTRUCTIONS_FILE, artifacts, [
+		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+		"OAL and RTK project surfaces",
+		"rtk proxy -- <command>",
+		"Code review and audits",
+		"Unknown or potentially large command output must be bounded before it reaches context.",
+	]);
 	assertArtifact("opencode.jsonc", artifacts, [
 		"// >>> oal opencode >>>",
 		"// Source: config:opencode",
@@ -260,7 +257,7 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"export const OpenAgentLayerPlugin",
 	]);
 	const hook = findArtifact(
-		".codex/openagentlayer/hooks/block-command-safety.mjs",
+		`${OAL_CODEX_HOOKS_DIR}/block-command-safety.mjs`,
 		artifacts,
 	);
 	if (!hook.content.startsWith("#!/usr/bin/env node"))
@@ -324,7 +321,7 @@ function assertDistinctAgentColors(artifacts: Artifact[]): void {
 	const colors = new Map<string, string>();
 	for (const agent of CORE_AGENTS) {
 		const artifact = findArtifact(`.claude/agents/${agent}.md`, artifacts);
-		const color = artifact.content.match(HEX_COLOR_PATTERN)?.[0];
+		const color = artifact.content.match(HEX_COLOR_FRAGMENT_PATTERN)?.[0];
 		if (!color) throw new Error(`Agent \`${agent}\` missing hex color`);
 		const owner = colors.get(color);
 		if (owner)
@@ -340,7 +337,7 @@ function assertNoUnsupportedCodexAgentFields(
 	artifacts: Artifact[],
 ): void {
 	const artifact = findArtifact(path, artifacts);
-	if (CODEX_COLOR_PATTERN.test(artifact.content))
+	if (CODEX_COLOR_FIELD_PATTERN.test(artifact.content))
 		throw new Error(`\`${path}\` emitted unsupported Codex color field`);
 }
 

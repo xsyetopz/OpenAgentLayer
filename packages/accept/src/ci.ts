@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { RTK_INSTALL_SCRIPT_URL } from "./patterns";
 
 const CI_WORKFLOW = ".github/workflows/ci.yml";
 const REQUIRED_WORKFLOW_TERMS = [
@@ -13,7 +14,7 @@ const REQUIRED_WORKFLOW_TERMS = [
 	"git submodule update --init --recursive --jobs 1",
 	"git submodule status --recursive",
 	"permissions:\n  contents: read",
-	"https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh",
+	RTK_INSTALL_SCRIPT_URL,
 	'echo "$HOME/.rtk/bin" >> "$GITHUB_PATH"',
 	"rtk proxy -- bunx tsc --noEmit",
 	"rtk proxy -- bun run gitleaks:check",

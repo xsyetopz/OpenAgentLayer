@@ -5,6 +5,7 @@ import type {
 	RouteRecord,
 	SkillRecord,
 } from "@openagentlayer/source";
+import { OAL_CODEX_BASE_INSTRUCTIONS_FILE } from "@openagentlayer/source";
 
 export function quoteToml(text: string): string {
 	return JSON.stringify(text);
@@ -79,7 +80,7 @@ ${renderCodexAgentInvocation(source)}
 
 ## Codex Base Instructions
 
-- \`.codex/openagentlayer/codex-base-instructions.md\` is rendered from upstream \`openai/codex\` \`default.md\` plus the tracked OAL patch; treat it as the Codex base-instruction surface for this AGENTS.md block.`;
+ - \`${OAL_CODEX_BASE_INSTRUCTIONS_FILE}\` is rendered from upstream \`openai/codex\` \`default.md\` plus the tracked OAL patch; treat it as the Codex base-instruction surface for this AGENTS.md block.`;
 }
 
 export function camelCase(text: string): string {

@@ -6,18 +6,18 @@ import { asString, createHookRunner } from "./_runtime.mjs";
 const SUBAGENT_EVENTS = new Set(["SubagentStart", "subagent.started"]);
 const USER_PROMPT_EVENTS = new Set(["UserPromptSubmit", "user.prompt.submit"]);
 const USER_PROMPT_GUIDANCE = [
-	"OAL subagent reminder: invoke `$oal` guidance; before manual work, spawn bounded native OAL subagents/sidecars for splittable implementation, review, tests, docs, tracing.",
-	"If sidecar stalls/fails, do not continue manually; tighten scope and spawn the next relevant OAL agent; parent merges evidence and fixes blockers.",
+	"Invoke `$oal` guidance; use bounded native OAL subagents or sidecars for broad or splittable implementation, review, tests, docs, and tracing.",
+	"For quick single-owner fixes, work directly in the parent thread. If a sidecar stalls or fails, tighten scope, spawn the next relevant OAL agent, and merge evidence before continuing.",
 ];
 const SUBAGENT_GUIDANCE = [
-	"Native multi_agent_v2 is OAL's default Codex orchestration path: subagents are encouraged for split work, and each child stays inside the assigned ownership scope",
-	"Custom OAL agent names and aliases are rendered in .codex/config.toml [agents] and AGENTS.md; parent agents should spawn those names directly when work can split",
+	"Native multi_agent_v2 is OAL's default Codex orchestration path. Use subagents when work can split, and keep each child inside its assigned ownership scope.",
+	"Custom OAL agent names and aliases are rendered in .codex/config.toml [agents] and AGENTS.md. Parent agents should spawn those names directly when work can split.",
 	"Implementation workers such as hephaestus, daedalus, demeter, hecate, and prometheus use GPT-5.3-Codex in Codex model plans; significant or separable coding tasks should be routed to them instead of keeping all edits in the parent reasoning session.",
 	"Each assignment must fit inside the configured job runtime cap; if the requested scope is too broad, return the smallest useful evidence slice or a precise blocker instead of expanding work.",
-	"Parent thread owns task split, child launch, evidence merge, continuation, and final decision",
-	"Workers return final evidence and artifacts to the parent; do not spawn extra pooled threads or keep idle workers open",
+	"Parent thread owns task split, child launch, evidence merge, continuation, and final decision.",
+	"Workers return final evidence and artifacts to the parent; do not spawn extra pooled threads or keep idle workers open.",
 	"Close or hand back promptly when the assigned output is complete, blocked, or no longer needed; stalled background work wastes token budget.",
-	"Use `opendex` or `oal opendex` only when the task explicitly needs the external control plane",
+	"Use `opendex` or `oal opendex` only when the task explicitly needs the external control plane.",
 ];
 
 function hookEvent(payload) {

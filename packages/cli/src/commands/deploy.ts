@@ -1,6 +1,7 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { renderProvider } from "@openagentlayer/adapter";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	applyBinInstall,
 	applyDeploy,
@@ -57,7 +58,7 @@ export async function runDeployCommand(
 		context.scope === "global" && !flag(args, "--skip-bin");
 	const binPlan = shouldInstallBin
 		? await refineBinPlan(
-				planBinInstall(binDir, join(repoRoot, "packages/cli/src/main.ts")),
+				planBinInstall(binDir, join(repoRoot, OAL_CLI_ENTRY_RELATIVE)),
 			)
 		: undefined;
 	printDeployReport(
@@ -92,7 +93,7 @@ export async function runDeployCommand(
 			await applyBinInstall(
 				context.manifestRoot,
 				binPlan,
-				join(repoRoot, "packages/cli/src/main.ts"),
+				join(repoRoot, OAL_CLI_ENTRY_RELATIVE),
 			);
 	}
 }

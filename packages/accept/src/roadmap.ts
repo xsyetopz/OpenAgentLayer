@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
+import { ROADMAP_CHECKBOX_PATTERN } from "./patterns";
 import { strictRoadmapEvidenceLines } from "./roadmap-strict";
 
 export interface RoadmapEvidence {
@@ -8,12 +10,10 @@ export interface RoadmapEvidence {
 	evidence: string[];
 }
 
-const ROADMAP_CHECKBOX_PATTERN = /^- \[[ x]\] /;
-
 const EVIDENCE_RULES: [RegExp, string[]][] = [
 	[
 		/OAL CLI|CLI exposes|provider-scoped render|CLI rejects|CLI errors|CLI smoke/i,
-		["packages/cli/src/main.ts", "packages/accept/src/cli.ts"],
+		[OAL_CLI_ENTRY_RELATIVE, "packages/accept/src/cli.ts"],
 	],
 	[
 		/repository tree|current repository tree|active authored source paths|generated output paths|validation\/test paths|obsolete\/disconnected|failed-attempt|old naming|checkbox|PLAN\.md|ROADMAP\.md/i,
@@ -28,7 +28,7 @@ const EVIDENCE_RULES: [RegExp, string[]][] = [
 		/acceptance command exists|single acceptance command|validation\/test paths/i,
 		[
 			"package.json:scripts.accept",
-			"packages/cli/src/main.ts:accept",
+			`${OAL_CLI_ENTRY_RELATIVE}:accept`,
 			"bun run oal:accept",
 		],
 	],

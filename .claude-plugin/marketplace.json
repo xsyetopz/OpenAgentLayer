@@ -10,7 +10,7 @@
         "ref": "master"
       },
       "description": "OpenAgentLayer provider-native agents, skills, commands, and hooks for Claude Code.",
-      "version": "0.8.0-beta.5",
+      "version": "0.8.1",
       "author": {
         "name": "xsyetopz"
       },

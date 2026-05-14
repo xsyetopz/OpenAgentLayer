@@ -8,6 +8,9 @@
   "agent": "athena",
   "skills": [
     "planning",
+    "zen-of-python",
+    "dedupe",
+    "roadmap-tracking",
     "prompt-engineering",
     "command-analysis"
   ],

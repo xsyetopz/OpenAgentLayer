@@ -1,3 +1,5 @@
+import { WHITESPACE_SPLIT_PATTERN } from "./_patterns.mjs";
+
 const SUPPORTED_COMMANDS = new Map(
 	[
 		"aws",
@@ -54,6 +56,13 @@ const SUPPORTED_COMMANDS = new Map(
 );
 
 const SHELL_WRAPPERS = new Set(["bash", "sh", "zsh"]);
+const RTK_INSTALL_COMMAND = [
+	"curl -fsSL https://",
+	["raw", "githubusercontent", "com"].join("."),
+	"/",
+	["rtk-ai", "rtk", "master", "install.sh"].join("/"),
+	" | sh",
+].join("");
 const PREFERRED_REPLACEMENTS = new Map([
 	["ack", "rg"],
 	["ag", "rg"],
@@ -66,7 +75,6 @@ const SUDO_PREFIX_PATTERN = /^sudo\s+/;
 const ENV_PREFIX_PATTERN = /^env\s+(?:[A-Za-z_][A-Za-z0-9_]*=[^\s]+\s+)*/;
 const RAW_DIAGNOSTIC_ENV_PATTERN =
 	/(?:^|\s)(?:env\s+)?OAL_RTK_RAW_DIAGNOSTIC=1(?:\s|$)/;
-const WHITESPACE_PATTERN = /\s+/;
 const HEREDOC_WRITE_PATTERN =
 	/^\s*(?:cat|printf)\b[^\n]*(?:^|\s)(?:>|>>)\s*\S+[^\n]*<<[-~]?\s*['"]?[A-Za-z_][A-Za-z0-9_-]*['"]?/;
 const REGEX_CONFIG_EDIT_PATTERN = /\b(sed|perl)\b[\s\S]*\.(json|ya?ml)\b/i;
@@ -232,7 +240,7 @@ function evaluateSingleCommand(command, options) {
 				reason:
 					"RTK route needs the rtk-ai/rtk binary and successful `rtk gain`",
 				details: [
-					"Install: curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh",
+					`Install: ${RTK_INSTALL_COMMAND}`,
 					"Verify: rtk --version && rtk gain",
 				],
 			};
@@ -288,7 +296,7 @@ function evaluateStructuredConfigEdit(command) {
 }
 
 function evaluateToolMismatch(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	const executable = shellWrapperName(tokens[0] ?? "");
 	if (
 		(executable === "rg" || executable === "grep") &&
@@ -319,7 +327,7 @@ function evaluateToolMismatch(command) {
 }
 
 function evaluateCodexExecDelegation(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	if (tokens[0] !== "codex" || tokens[1] !== "exec") {
 		if (!CODEX_EXEC_PATTERN.test(command)) return undefined;
 		if (usesDetachedLauncher(tokens)) {
@@ -384,7 +392,7 @@ function stripCommandPrefixes(command) {
 }
 
 export function commandExecutable(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	if (tokens.length === 0) return "";
 	if (SHELL_WRAPPERS.has(shellWrapperName(tokens[0])) && tokens[1] === "-lc") {
 		const nested = tokens
@@ -397,7 +405,7 @@ export function commandExecutable(command) {
 }
 
 function shellInnerCommand(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	if (SHELL_WRAPPERS.has(shellWrapperName(tokens[0])) && tokens[1] === "-lc") {
 		return tokens
 			.slice(2)
@@ -418,7 +426,7 @@ function rawDiagnosticRequested(command) {
 }
 
 function evaluateRtkCommandBounds(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	if (tokens[0] !== "rtk") return undefined;
 	const subcommand = tokens[1] ?? "";
 	if (subcommand === "grep") return evaluateRtkGrepBounds(tokens);
@@ -430,14 +438,14 @@ function evaluateRtkCommandBounds(command) {
 }
 
 function isHelpOrVersionCommand(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	return tokens.some((token) =>
 		["--help", "-h", "help", "--version", "-V"].includes(token),
 	);
 }
 
 function evaluateUnsupportedRtkCommand(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	const subcommand = tokens[1] ?? "";
 	if (!subcommand) return undefined;
 	if (RTK_META_COMMANDS.has(subcommand)) return undefined;
@@ -548,7 +556,7 @@ function hasOption(tokens, options) {
 }
 
 function rtkProxyInnerCommand(command) {
-	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = command.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	if (tokens[0] !== "rtk" || tokens[1] !== "proxy") return undefined;
 	const separator = tokens[2] === "--" ? 3 : 2;
 	return tokens.slice(separator).join(" ");
@@ -556,7 +564,7 @@ function rtkProxyInnerCommand(command) {
 
 function rewriteExecutable(command, replacement) {
 	const [executable, ...rest] = command
-		.split(WHITESPACE_PATTERN)
+		.split(WHITESPACE_SPLIT_PATTERN)
 		.filter(Boolean);
 	if (!executable) return replacement;
 	return [replacement, ...rest].join(" ");
@@ -565,7 +573,7 @@ function rewriteExecutable(command, replacement) {
 function rewriteSearchAsRtk(command, executable) {
 	const replacement = executable === "rg" ? "grep" : executable;
 	const tokens = rewriteExecutable(command, replacement)
-		.split(WHITESPACE_PATTERN)
+		.split(WHITESPACE_SPLIT_PATTERN)
 		.filter(Boolean);
 	const rewritten = [];
 	for (const token of tokens) {

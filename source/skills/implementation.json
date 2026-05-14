@@ -1,6 +1,6 @@
 {
   "id": "implementation",
-  "title": "Code Implementation",
+  "title": "Implementation",
   "providers": [
     "codex",
     "claude",

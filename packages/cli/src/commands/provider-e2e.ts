@@ -1,6 +1,11 @@
 import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+	OAL_CODEX_HOOKS_DIR,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+	OAL_OPENCODE_HOOKS_DIR,
+} from "@openagentlayer/source";
 import { flag, option, providerOptions } from "../arguments";
 import { expandProviders } from "../provider-binaries";
 import { runDeployCommand } from "./deploy";
@@ -237,7 +242,7 @@ async function writeCodexHookFixtureConfig(home: string): Promise<void> {
 	await writeFile(
 		join(home, ".codex/config.toml"),
 		`profile = "oal-hook-e2e"
-model_instructions_file = "./openagentlayer/codex-base-instructions.md"
+model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"
 
 [features]
 hooks = true
@@ -269,10 +274,10 @@ async function runDeployedRuntimeChecks(
 ): Promise<void> {
 	const hookRoot =
 		provider === "codex"
-			? ".codex/openagentlayer/hooks"
+			? OAL_CODEX_HOOKS_DIR
 			: provider === "claude"
 				? ".claude/hooks/scripts"
-				: ".opencode/openagentlayer/hooks";
+				: OAL_OPENCODE_HOOKS_DIR;
 	const hook = join(fixture, hookRoot, "enforce-rtk-commands.mjs");
 	const hookResult = await runWithStdin(
 		"bun",

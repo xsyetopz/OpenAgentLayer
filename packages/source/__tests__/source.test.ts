@@ -33,6 +33,9 @@ test("loadSource loads authored prompt skills", async () => {
 	const crossPlatformApp = graph.source.skills.find(
 		(skill) => skill.id === "cross-platform-app",
 	);
+	const roadmapTracking = graph.source.skills.find(
+		(skill) => skill.id === "roadmap-tracking",
+	);
 	expect(caveman?.body).toContain("Use compact output");
 	expect(taste?.body).toContain("Improve product UI");
 	expect(commandParse?.title).toBe("Command Analysis");
@@ -54,6 +57,14 @@ test("loadSource loads authored prompt skills", async () => {
 		"references/stack.md",
 	);
 	expect(crossPlatformApp?.body).toContain("rigid product stack");
+	expect(roadmapTracking?.title).toBe("Roadmap Tracking");
+	expect(roadmapTracking?.description).toContain("PLAN.md");
+	expect(roadmapTracking?.body).toContain("[ ]` for not started");
+	expect(roadmapTracking?.body).toContain("[~]` for in progress");
+	expect(roadmapTracking?.body).toContain("[x]` for done");
+	expect(roadmapTracking?.supportFiles?.map((file) => file.path)).toContain(
+		"references/checkbox-status.md",
+	);
 	expect(caveman?.upstream).toBeUndefined();
 	expect(taste?.upstream).toBeUndefined();
 	expect(impeccable?.upstream?.path).toBe(

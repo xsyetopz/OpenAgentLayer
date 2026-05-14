@@ -1,4 +1,4 @@
-import type { AgentRecord } from "@openagentlayer/source";
+import { LINE_BREAK_PATTERN, type AgentRecord } from "@openagentlayer/source";
 
 export type ModelPlan =
 	| "plus"
@@ -65,7 +65,6 @@ export const OPENCODE_FREE_MODELS = [
 	"opencode/gpt-5-nano",
 ] as const;
 
-const LINE_BREAK = /\r?\n/;
 
 const CLAUDE_PLANS: Record<
 	Extract<ModelPlan, "max-5" | "max-20" | "max-20-long">,
@@ -313,7 +312,7 @@ export function resolveOpenCodeModel(
 
 export function parseOpenCodeModels(output: string): string[] {
 	return output
-		.split(LINE_BREAK)
+		.split(LINE_BREAK_PATTERN)
 		.map((line) => line.trim())
 		.filter((line) => line.startsWith("opencode/"));
 }

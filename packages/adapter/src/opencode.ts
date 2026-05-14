@@ -9,6 +9,7 @@ import type {
 	Provider,
 	ToolRecord,
 } from "@openagentlayer/source";
+import { OAL_OPENCODE_HOOKS_DIR } from "@openagentlayer/source";
 import { agentHexColor } from "./agent-colors";
 import {
 	agentPrompt,
@@ -27,6 +28,17 @@ const PROVIDER: Provider = "opencode";
 export const OPENCODE_MODEL_FALLBACKS = [...OPENCODE_FREE_MODELS] as const;
 const MODEL_SUFFIX_PATTERN = /\[[^\]]+\]$/;
 const MODEL_VERSION_PATTERN = /^\d+(?:\.\d+)*$/;
+const OPENCODE_COMMAND_POLICY_IMPORTS = [
+	'import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";',
+	'import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";',
+].join("\n");
+const OPENCODE_PLUGIN_HOOK_IMPORTS = [
+	OPENCODE_COMMAND_POLICY_IMPORTS,
+	'import { evaluateCommandSafety } from "../openagentlayer/hooks/_command-safety.mjs";',
+	'import { evaluateFailureLoop } from "../openagentlayer/hooks/_failure-loop.mjs";',
+	'import { styleHookLines, styleHookMessage } from "../openagentlayer/hooks/_hook-style.mjs";',
+	'import { evaluateSecretGuard } from "../openagentlayer/hooks/_secret-guard.mjs";',
+].join("\n");
 
 export async function renderOpenCode(
 	source: OalSource,
@@ -100,7 +112,7 @@ export async function renderOpenCode(
 		...(await renderHookArtifacts(
 			PROVIDER,
 			source.hooks,
-			".opencode/openagentlayer/hooks",
+			OAL_OPENCODE_HOOKS_DIR,
 			repoRoot,
 		)),
 	);
@@ -263,8 +275,7 @@ export const ${camelCase(tool.id)} = tool({
 
 function renderCommandPolicyTool(tool: ToolRecord): string {
 	return `import { tool } from "@opencode-ai/plugin";
-import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";
-import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";
+${OPENCODE_COMMAND_POLICY_IMPORTS}
 
 export const ${camelCase(tool.id)} = tool({
 	description: ${quoteToml(tool.description)},
@@ -315,12 +326,7 @@ function renderOpenCodePlugin(source: OalSource): string {
 			.map((hook) => hook.id),
 	);
 	return `import type { Plugin } from "@opencode-ai/plugin";
-import { evaluateCommandPolicy } from "../openagentlayer/hooks/_command-policy.mjs";
-import { bunRewrite } from "../openagentlayer/hooks/_bun-rewrite.mjs";
-import { evaluateCommandSafety } from "../openagentlayer/hooks/_command-safety.mjs";
-import { evaluateFailureLoop } from "../openagentlayer/hooks/_failure-loop.mjs";
-import { styleHookLines, styleHookMessage } from "../openagentlayer/hooks/_hook-style.mjs";
-import { evaluateSecretGuard } from "../openagentlayer/hooks/_secret-guard.mjs";
+${OPENCODE_PLUGIN_HOOK_IMPORTS}
 
 const beforeHookIds = ${beforeHookIds};
 const afterHookIds = ${afterHookIds};

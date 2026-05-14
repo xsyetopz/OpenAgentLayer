@@ -23,15 +23,26 @@ export const OFFICIAL_SKILL_CATEGORIES = [
 	"docs",
 	"testing",
 ] as const;
+export const OFFICIAL_SKILLS_BASE_URL = "https://officialskills.sh";
+export const OFFICIAL_SKILLS_HOSTNAME = new URL(OFFICIAL_SKILLS_BASE_URL)
+	.hostname;
 
 export type OfficialSkillCategory = (typeof OFFICIAL_SKILL_CATEGORIES)[number];
 
 export type OfficialSkillId = (typeof OFFICIAL_SKILL_CATALOG)[number]["id"];
 
-const INSTALL_COMMAND_PATTERN =
+export const OFFICIAL_SKILL_INSTALL_COMMAND_PATTERN =
 	/(?:npx|bunx)\s+skills\s+add\s+(https:\/\/github\.com\/[^\s"'`<]+)\s+--skill\s+([A-Za-z0-9._-]+)/;
+export const OFFICIAL_SKILL_ADD_COMMAND_PATTERN =
+	/\bbunx\s+skills\s+add\b.*\s+--skill\s+(.+?)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
+export const OFFICIAL_SKILL_PATH_COMMAND_PATTERN =
+	/\bbunx\s+skills\s+add\b.*\/(?:skills|plugins)\/([A-Za-z0-9._-]+)(?:\s+--(?:global|yes)\b|\s+-[gy]\b|$)/;
 const COMMUNITY_STATUS_PATTERN = /\bcommunity\b/i;
 const TITLE_CASE_SPLIT_PATTERN = /[-_]/;
+
+function officialSkillsUrl(path: string): string {
+	return `${OFFICIAL_SKILLS_BASE_URL}${path}`;
+}
 
 export const OFFICIAL_SKILL_CATALOG = [
 	{
@@ -42,7 +53,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/openai/skills",
 		skill: "gh-fix-ci",
-		sourceUrl: "https://officialskills.sh/openai/skills/gh-fix-ci",
+		sourceUrl: officialSkillsUrl("/openai/skills/gh-fix-ci"),
 		description:
 			"Debug failing GitHub Actions checks on a PR with the GitHub CLI.",
 	},
@@ -54,7 +65,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/openai/skills",
 		skill: "gh-address-comments",
-		sourceUrl: "https://officialskills.sh/openai/skills/gh-address-comments",
+		sourceUrl: officialSkillsUrl("/openai/skills/gh-address-comments"),
 		description:
 			"Read PR comments and review threads with the GitHub CLI, then address selected feedback.",
 	},
@@ -66,7 +77,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/openai/skills",
 		skill: "yeet",
-		sourceUrl: "https://officialskills.sh/openai/skills/yeet",
+		sourceUrl: officialSkillsUrl("/openai/skills/yeet"),
 		description:
 			"Automate the GitHub branch, commit, push, and pull request workflow.",
 	},
@@ -78,7 +89,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "community",
 		repo: "https://github.com/openai/skills",
 		skill: "playwright",
-		sourceUrl: "https://officialskills.sh/openai/skills/playwright",
+		sourceUrl: officialSkillsUrl("/openai/skills/playwright"),
 		description:
 			"Automate a real browser from the terminal using playwright-cli.",
 	},
@@ -90,8 +101,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/trailofbits/skills",
 		skill: "audit-context-building",
-		sourceUrl:
-			"https://officialskills.sh/trailofbits/skills/audit-context-building",
+		sourceUrl: officialSkillsUrl("/trailofbits/skills/audit-context-building"),
 		description:
 			"Build a structured pre-audit model of functions, invariants, and trust boundaries.",
 	},
@@ -103,8 +113,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/trailofbits/skills",
 		skill: "differential-review",
-		sourceUrl:
-			"https://officialskills.sh/trailofbits/skills/differential-review",
+		sourceUrl: officialSkillsUrl("/trailofbits/skills/differential-review"),
 		description:
 			"Run security-focused differential reviews on PRs, commits, and diffs.",
 	},
@@ -117,7 +126,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		repo: "https://github.com/trailofbits/skills/tree/main/plugins/static-analysis",
 		skill: "static-analysis",
 		pathOnly: true,
-		sourceUrl: "https://officialskills.sh/trailofbits/skills/static-analysis",
+		sourceUrl: officialSkillsUrl("/trailofbits/skills/static-analysis"),
 		description:
 			"Use CodeQL, Semgrep, and SARIF parsing for security vulnerability detection.",
 	},
@@ -129,8 +138,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/trailofbits/skills",
 		skill: "testing-handbook-skills",
-		sourceUrl:
-			"https://officialskills.sh/trailofbits/skills/testing-handbook-skills",
+		sourceUrl: officialSkillsUrl("/trailofbits/skills/testing-handbook-skills"),
 		description:
 			"Generate application security testing skills from the Trail of Bits handbook.",
 	},
@@ -142,7 +150,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/getsentry/sentry-for-ai",
 		skill: "sentry-workflow",
-		sourceUrl: "https://officialskills.sh/getsentry/skills/sentry-workflow",
+		sourceUrl: officialSkillsUrl("/getsentry/skills/sentry-workflow"),
 		description:
 			"Fix production issues and review code with Sentry context in one workflow.",
 	},
@@ -154,7 +162,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		sourceStatus: "official",
 		repo: "https://github.com/anthropics/skills",
 		skill: "mcp-builder",
-		sourceUrl: "https://officialskills.sh/anthropics/skills/mcp-builder",
+		sourceUrl: officialSkillsUrl("/anthropics/skills/mcp-builder"),
 		description:
 			"Build MCP servers that connect LLMs to external APIs and services.",
 	},
@@ -174,7 +182,7 @@ export function parseOfficialSkillPage(
 	html: string,
 	sourceUrl: string,
 ): OfficialSkillCatalogEntry | undefined {
-	const install = html.match(INSTALL_COMMAND_PATTERN);
+	const install = html.match(OFFICIAL_SKILL_INSTALL_COMMAND_PATTERN);
 	if (!install) return undefined;
 	const path = new URL(sourceUrl).pathname.split("/").filter(Boolean);
 	const owner = path[0] ?? "external";
@@ -213,7 +221,7 @@ function sourceStatusFromHtml(
 export function officialSkillLinks(html: string): string[] {
 	const links = new Set<string>();
 	for (const match of html.matchAll(/href="(\/[^"]+\/skills\/[^"#?]+)"/g))
-		links.add(`https://officialskills.sh${match[1]}`);
+		links.add(officialSkillsUrl(match[1]));
 	return [...links].sort();
 }
 
@@ -225,7 +233,7 @@ export function officialSkillBundleLinks(
 	for (const match of html.matchAll(/(?:href|src)="([^"]+\.js)"/g)) {
 		const url = new URL(match[1], sourceUrl);
 		if (
-			url.hostname === "officialskills.sh" &&
+			url.hostname === OFFICIAL_SKILLS_HOSTNAME &&
 			url.pathname.startsWith("/assets/")
 		)
 			links.add(url.toString());

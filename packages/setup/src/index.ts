@@ -1,4 +1,5 @@
 import type { Provider } from "@openagentlayer/source";
+import { RTK_INSTALL_COMMAND } from "@openagentlayer/source";
 import {
 	type OptionalTool,
 	optionalFeatureCommands,
@@ -78,7 +79,7 @@ export function planSetup(options: SetupPlanOptions): SetupPlan {
 			commands: [
 				...(options.rtk
 					? [
-							"curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh",
+							RTK_INSTALL_COMMAND,
 							"rtk init -g --auto-patch",
 							"rtk init -g --codex",
 							"rtk init -g --opencode",

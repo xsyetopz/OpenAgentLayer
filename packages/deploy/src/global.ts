@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import type { Artifact } from "@openagentlayer/artifact";
-import type { Provider } from "@openagentlayer/source";
+import { OAL_CODEX_HOOKS_DIR, type Provider } from "@openagentlayer/source";
 
 const CODEX_AGENT_CONFIG_FILE = /config_file = "\.\/agents\/([^"]+)"/g;
 
@@ -54,12 +54,12 @@ function globalContent(
 		);
 	if (provider === "codex" && path === ".codex/hooks.json")
 		return content.replaceAll(
-			".codex/openagentlayer/hooks/",
-			() => `${join(home, ".codex/openagentlayer/hooks")}/`,
+			`${OAL_CODEX_HOOKS_DIR}/`,
+			() => `${join(home, OAL_CODEX_HOOKS_DIR)}/`,
 		);
 	if (provider === "codex" && path === ".codex/requirements.toml")
 		return content.replaceAll("__OAL_CODEX_MANAGED_HOOK_DIR__", () =>
-			join(home, ".codex/openagentlayer/hooks"),
+			join(home, OAL_CODEX_HOOKS_DIR),
 		);
 	if (provider === "claude" && path === ".claude/settings.json")
 		return content

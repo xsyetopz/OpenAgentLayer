@@ -9,6 +9,11 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
+import {
+	OFFICIAL_SKILLS_BASE_URL,
+	OFFICIAL_SKILLS_HOSTNAME,
+} from "@openagentlayer/toolchain";
 import { providerOption, providerOptions, scopeOption } from "../src/arguments";
 import {
 	buildPeerSteps,
@@ -52,6 +57,11 @@ import { printDeployReport } from "../src/output";
 import { buildSetupArgs } from "../src/workflows";
 
 const repoRoot = resolve(import.meta.dir, "../../..");
+const OFFICIAL_SKILLS_CATALOG_URL = `${OFFICIAL_SKILLS_BASE_URL}/`;
+
+function officialSkillSourceUrl(owner: string, skill: string): string {
+	return `${OFFICIAL_SKILLS_BASE_URL}/${owner}/skills/${skill}`;
+}
 
 async function fakeProviderPath(
 	root: string,
@@ -173,7 +183,7 @@ async function runMcp(
 	requests: unknown[],
 ): Promise<JsonRpcResponse[]> {
 	const proc = Bun.spawn(
-		["bun", "packages/cli/src/main.ts", "mcp", "serve", server],
+		["bun", OAL_CLI_ENTRY_RELATIVE, "mcp", "serve", server],
 		{ cwd: repoRoot, stdin: "pipe", stdout: "pipe", stderr: "pipe" },
 	);
 	for (const request of requests)
@@ -465,7 +475,7 @@ test("interactive command hub uses a tree menu", () => {
 		WORKFLOW_OPTIONS.filter((option) => option.label.includes(" · ")),
 	).toEqual([]);
 	expect(WORKFLOW_OPTIONS.map((option) => option.hint).join("\n")).toContain(
-		"install from officialskills.sh tabs",
+		`install from ${OFFICIAL_SKILLS_HOSTNAME} tabs`,
 	);
 	expect(searchWorkflowOptions("deploy").map((option) => option.value)).toEqual(
 		["deploy"],
@@ -495,7 +505,7 @@ test("profiles command renames saved profiles and preserves active profile", asy
 	const proc = Bun.spawn(
 		[
 			"bun",
-			"packages/cli/src/main.ts",
+			OAL_CLI_ENTRY_RELATIVE,
 			"profiles",
 			"rename",
 			"daily",
@@ -538,7 +548,7 @@ test("profiles command edits existing profiles", async () => {
 	const proc = Bun.spawn(
 		[
 			"bun",
-			"packages/cli/src/main.ts",
+			OAL_CLI_ENTRY_RELATIVE,
 			"profiles",
 			"edit",
 			"daily",
@@ -601,7 +611,7 @@ test("setup defaults include curated official skills", async () => {
 	const proc = Bun.spawn(
 		[
 			"bun",
-			"packages/cli/src/main.ts",
+			OAL_CLI_ENTRY_RELATIVE,
 			"setup",
 			"--scope",
 			"global",
@@ -728,7 +738,7 @@ test("official skill prompt choices use unique values", () => {
 			sourceStatus: "community",
 			repo: "https://github.com/acme/skills",
 			skill: "bug-debug",
-			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			sourceUrl: officialSkillSourceUrl("acme", "bug-debug"),
 			description: "Debug bugs.",
 		},
 		{
@@ -739,7 +749,7 @@ test("official skill prompt choices use unique values", () => {
 			sourceStatus: "community",
 			repo: "https://github.com/example/skills",
 			skill: "bug-debug",
-			sourceUrl: "https://officialskills.sh/example/skills/bug-debug",
+			sourceUrl: officialSkillSourceUrl("example", "bug-debug"),
 			description: "Debug bugs.",
 		},
 		{
@@ -750,7 +760,7 @@ test("official skill prompt choices use unique values", () => {
 			sourceStatus: "community",
 			repo: "https://github.com/example/skills",
 			skill: "bug-debug",
-			sourceUrl: "https://officialskills.sh/example/skills/bug-debug",
+			sourceUrl: officialSkillSourceUrl("example", "bug-debug"),
 			description: "Debug bugs.",
 		},
 	]);
@@ -773,7 +783,7 @@ test("official skill interactive actions build executable commands", () => {
 			sourceStatus: "community",
 			repo: "https://github.com/acme/skills",
 			skill: "bug-debug",
-			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			sourceUrl: officialSkillSourceUrl("acme", "bug-debug"),
 			description: "Debug bugs.",
 		},
 	] as const;
@@ -800,7 +810,7 @@ test("official skill catalog loading can take its time by default", async () => 
 	}) as typeof fetch;
 	try {
 		await expect(
-			fetchOfficialSkillCatalogWithTimeout("https://officialskills.sh/"),
+			fetchOfficialSkillCatalogWithTimeout(OFFICIAL_SKILLS_CATALOG_URL),
 		).resolves.toHaveLength(1);
 		expect(receivedSignal).toBe(false);
 	} finally {
@@ -821,7 +831,7 @@ test("official skill catalog loading supports explicit timeouts", async () => {
 	}) as typeof fetch;
 	try {
 		await expect(
-			fetchOfficialSkillCatalogWithTimeout("https://officialskills.sh/", 10),
+			fetchOfficialSkillCatalogWithTimeout(OFFICIAL_SKILLS_CATALOG_URL, 10),
 		).rejects.toThrow();
 		expect(aborted).toBe(true);
 	} finally {
@@ -841,7 +851,7 @@ test("official skill catalog cache stores entries and detects unchanged content"
 			sourceStatus: "community",
 			repo: "https://github.com/acme/skills",
 			skill: "bug-debug",
-			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			sourceUrl: officialSkillSourceUrl("acme", "bug-debug"),
 			description: "Debug bugs.",
 		},
 	] as const;
@@ -895,41 +905,69 @@ test("features command exposes curated officialskills catalog", () => {
 	}
 	const output = lines.join("\n");
 	expect(output).toContain("# OpenAgentLayer Official Skills Catalog");
-	expect(output).toContain("source: https://officialskills.sh/");
+	expect(output).toContain(`source: ${OFFICIAL_SKILLS_CATALOG_URL}`);
 	expect(output).toContain("source status:");
 	expect(output).toContain("install: bunx skills add");
+});
+
+test("features command can print compact officialskills catalog", () => {
+	const lines: string[] = [];
+	const originalLog = console.log;
+	console.log = (message?: unknown) => {
+		lines.push(String(message));
+	};
+	try {
+		runFeaturesCommand(["--catalog", "--compact"]);
+	} finally {
+		console.log = originalLog;
+	}
+	const output = lines.join("\n");
+	const parsed = JSON.parse(output) as Record<string, unknown>[];
+	expect(Array.isArray(parsed)).toBe(true);
+	expect(parsed.length).toBeGreaterThan(0);
+	expect(parsed[0]).toHaveProperty("id");
+	expect(parsed[0]).toHaveProperty("name");
+	expect(parsed[0]).toHaveProperty("publisher");
+	expect(parsed[0]).toHaveProperty("description");
+	expect(parsed[0]).toHaveProperty("category");
+	expect(parsed[0]).toHaveProperty("sourceStatus");
+	expect(parsed[0]).toHaveProperty("sourceUrl");
+	expect(parsed[0]).not.toHaveProperty("repo");
+	expect(parsed[0]).not.toHaveProperty("skill");
 });
 
 test("features command restricts fetched catalogs to officialskills", async () => {
 	await expect(
 		runFeaturesCommand(["--catalog-url", "https://example.com/skills/demo"]),
-	).rejects.toThrow("`--catalog-url` must use https://officialskills.sh/");
+	).rejects.toThrow(
+		`\`--catalog-url\` must use ${OFFICIAL_SKILLS_CATALOG_URL}`,
+	);
 });
 
 test("features command installs all fetched skills in a website tab", async () => {
 	const originalFetch = globalThis.fetch;
 	globalThis.fetch = ((url: string) => {
 		const htmlByUrl: Record<string, string> = {
-			"https://officialskills.sh/": `
+			[OFFICIAL_SKILLS_CATALOG_URL]: `
 				<script src="/assets/main.js"></script>
 				<a href="/openai/skills/security-best-practices">Security</a>
 				<a href="/cloudflare/skills/workers-best-practices">Workers</a>
 				<a href="/openai/skills/gh-fix-ci">GitHub CI</a>
 			`,
-			"https://officialskills.sh/assets/main.js": `
+			[`${OFFICIAL_SKILLS_BASE_URL}/assets/main.js`]: `
 				{slug:"openai/security-best-practices",name:"security-best-practices",description:"Security checks",owner:"openai",category:"security"}
 				{slug:"cloudflare/workers-best-practices",name:"workers-best-practices",description:"Workers",owner:"cloudflare",category:"infrastructure"}
 				{slug:"openai/gh-fix-ci",name:"gh-fix-ci",description:"GitHub CI",owner:"openai",category:"workflows"}
 			`,
-			"https://officialskills.sh/openai/skills/security-best-practices": `
+			[officialSkillSourceUrl("openai", "security-best-practices")]: `
 				security community
 				<p>bunx skills add https://github.com/openai/skills --skill security-best-practices</p>
 			`,
-			"https://officialskills.sh/cloudflare/skills/workers-best-practices": `
+			[officialSkillSourceUrl("cloudflare", "workers-best-practices")]: `
 				infrastructure official
 				<p>bunx skills add https://github.com/cloudflare/skills --skill workers-best-practices</p>
 			`,
-			"https://officialskills.sh/openai/skills/gh-fix-ci": `
+			[officialSkillSourceUrl("openai", "gh-fix-ci")]: `
 				workflows official
 				<p>bunx skills add https://github.com/openai/skills --skill gh-fix-ci</p>
 			`,
@@ -948,7 +986,7 @@ test("features command installs all fetched skills in a website tab", async () =
 	try {
 		await runFeaturesCommand([
 			"--catalog-url",
-			"https://officialskills.sh/",
+			OFFICIAL_SKILLS_CATALOG_URL,
 			"--category",
 			"security",
 			"--install",
@@ -1046,7 +1084,7 @@ test("state inspect explicit setup args override active profile", async () => {
 	const proc = Bun.spawn(
 		[
 			"bun",
-			"packages/cli/src/main.ts",
+			OAL_CLI_ENTRY_RELATIVE,
 			"state",
 			"inspect",
 			"--config",

@@ -1,6 +1,6 @@
 {
   "id": "caveman",
-  "title": "Caveman Output Mode",
+  "title": "Caveman",
   "providers": [
     "codex",
     "claude",

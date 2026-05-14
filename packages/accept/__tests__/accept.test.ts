@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
 import { resolve } from "node:path";
+import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+} from "@openagentlayer/source";
 import { buildRoadmapEvidence } from "../src";
 import { assertCodebaseShape } from "../src/codebase-shape";
 import { assertCodexUpstreamPatch } from "../src/codex-upstream";
@@ -31,7 +35,7 @@ test("repository inventory accepts root community policy docs", async () => {
 	).resolves.toBeUndefined();
 });
 
-test("Codex upstream patch evidence is present", async () => {
+test("Codex system prompt evidence is present", async () => {
 	await expect(
 		assertCodexUpstreamPatch(resolve(import.meta.dir, "../../..")),
 	).resolves.toBeUndefined();
@@ -39,10 +43,10 @@ test("Codex upstream patch evidence is present", async () => {
 
 test("Codex config schema requires cheap memory extraction model", () => {
 	const config = [
-		"#:schema https://developers.openai.com/codex/config-schema.json",
+		CODEX_CONFIG_SCHEMA_COMMENT,
 		'profile = "openagentlayer"',
 		'approvals_reviewer = "auto_review"',
-		'model_instructions_file = "./openagentlayer/codex-base-instructions.md"',
+		`model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"`,
 		"",
 		"[memories]",
 		'extract_model = "gpt-5.4-mini"',

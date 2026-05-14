@@ -12,12 +12,18 @@ import {
 	select,
 	text,
 } from "@clack/prompts";
-import type { Provider } from "@openagentlayer/source";
 import {
+	POSITIVE_INTEGER_PATTERN,
+	type Provider,
+} from "@openagentlayer/source";
+import {
+	CONTEXT7_DASHBOARD_URL,
 	context7ApiKeyStatus,
 	isExpectedContext7ApiKey,
 	OFFICIAL_SKILL_CATALOG,
 	OFFICIAL_SKILL_CATEGORIES,
+	OFFICIAL_SKILLS_BASE_URL,
+	OFFICIAL_SKILLS_HOSTNAME,
 	type OfficialSkillCatalogEntry,
 	type OfficialSkillCategory,
 	type OptionalTool,
@@ -68,8 +74,6 @@ type SetupIntent = "setup" | "repair";
 type SetupProfileChoice =
 	| { value: "manual"; label: string; hint: string }
 	| { value: string; label: string; hint: string; name: string };
-
-const POSITIVE_INTEGER_PATTERN = /^\d+$/;
 
 export const CODEX_PLAN_OPTIONS = [
 	{ value: "plus", label: "Plus", hint: "low lead, medium code" },
@@ -148,8 +152,8 @@ export const UNINSTALL_PROVIDER_OPTIONS = [
 
 export const OPTIONAL_FEATURE_OPTIONS = optionalFeatureOptions();
 
-const OFFICIAL_SKILLS_URL = "https://officialskills.sh/#find-skills";
-const OFFICIAL_SKILLS_CATALOG_URL = "https://officialskills.sh/";
+const OFFICIAL_SKILLS_URL = `${OFFICIAL_SKILLS_BASE_URL}/#find-skills`;
+const OFFICIAL_SKILLS_CATALOG_URL = `${OFFICIAL_SKILLS_BASE_URL}/`;
 const OFFICIAL_SKILLS_CACHE_VERSION = 1;
 
 export interface OfficialSkillsCache {
@@ -722,13 +726,15 @@ async function officialSkillsCatalog(): Promise<OfficialSkillCatalogEntry[]> {
 		scheduleOfficialSkillsCacheRefresh(cachePath, cached);
 		return cached.entries;
 	}
-	log.info("Loading officialskills.sh catalog…");
+	log.info(`Loading ${OFFICIAL_SKILLS_HOSTNAME} catalog…`);
 	try {
 		const catalog = await fetchOfficialSkillCatalogWithTimeout(
 			OFFICIAL_SKILLS_CATALOG_URL,
 		);
 		await writeOfficialSkillsCache(cachePath, catalog);
-		log.success(`Loaded ${catalog.length} skills from officialskills.sh.`);
+		log.success(
+			`Loaded ${catalog.length} skills from ${OFFICIAL_SKILLS_HOSTNAME}.`,
+		);
 		return catalog;
 	} catch (error) {
 		printWarning(
@@ -1264,7 +1270,7 @@ async function context7ApiKeyPrompt(): Promise<string | undefined> {
 		: "Provide a Context7 API key for higher rate limits?";
 	const provide = await ask<boolean>(confirm({ message, initialValue: false }));
 	if (!provide) {
-		log.info("Get a Context7 API key at https://context7.com/dashboard.");
+		log.info(`Get a Context7 API key at ${CONTEXT7_DASHBOARD_URL}.`);
 		return undefined;
 	}
 	return ask<string>(

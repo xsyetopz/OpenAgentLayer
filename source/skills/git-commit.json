@@ -1,6 +1,6 @@
 {
   "id": "git-commit",
-  "title": "Git Snapshot",
+  "title": "Git Commit",
   "providers": [
     "codex",
     "claude",

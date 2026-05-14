@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
+import { WHITESPACE_SPLIT_PATTERN } from "@openagentlayer/source";
 import {
 	context7ApiKeyStatus,
+	OFFICIAL_SKILLS_BASE_URL,
 	officialSkillBundleLinks,
 	officialSkillCategoryMap,
 	officialSkillLinks,
@@ -10,8 +12,12 @@ import {
 	renderToolchainPlan,
 } from "../src";
 
-const WHITESPACE_PATTERN = /\s+/;
 const VALID_CONTEXT7_API_KEY = ["ctx7sk", "abcdefghijklmnop"].join("-");
+const OFFICIAL_SKILLS_CATALOG_URL = `${OFFICIAL_SKILLS_BASE_URL}/`;
+
+function officialSkillSourceUrl(owner: string, skill: string): string {
+	return `${OFFICIAL_SKILLS_BASE_URL}/${owner}/skills/${skill}`;
+}
 
 test("macOS plan installs Homebrew before core tools when missing", () => {
 	const plan = planToolchainInstall({ os: "macos", hasHomebrew: false });
@@ -21,8 +27,8 @@ test("macOS plan installs Homebrew before core tools when missing", () => {
 	const brewCommand = plan.commands.find((command) =>
 		command.startsWith("brew install "),
 	);
-	expect(brewCommand?.split(WHITESPACE_PATTERN)).toContain("ripgrep");
-	expect(brewCommand?.split(WHITESPACE_PATTERN)).not.toContain("bun");
+	expect(brewCommand?.split(WHITESPACE_SPLIT_PATTERN)).toContain("ripgrep");
+	expect(brewCommand?.split(WHITESPACE_SPLIT_PATTERN)).not.toContain("bun");
 	expect(plan.requiredTools).toContain("bun");
 	expect(plan.requiredTools).toContain("shellcheck");
 	expect(plan.requiredTools).toContain("shfmt");
@@ -143,12 +149,12 @@ test("officialskills frontend pages can generate catalog entries", () => {
 		<a href="/openai/skills/security-best-practices">OpenAI</a>
 	`;
 	expect(officialSkillLinks(html)).toEqual([
-		"https://officialskills.sh/openai/skills/security-best-practices",
+		officialSkillSourceUrl("openai", "security-best-practices"),
 	]);
 	expect(
 		parseOfficialSkillPage(
 			html,
-			"https://officialskills.sh/openai/skills/security-best-practices",
+			officialSkillSourceUrl("openai", "security-best-practices"),
 		),
 	).toMatchObject({
 		id: "skill-openai-security-best-practices",
@@ -164,11 +170,11 @@ test("officialskills frontend pages can generate catalog entries", () => {
 test("officialskills parsed ids include owner to avoid duplicate prompt values", () => {
 	const first = parseOfficialSkillPage(
 		"<p>bunx skills add https://github.com/acme/skills --skill bug-debug</p>",
-		"https://officialskills.sh/acme/skills/bug-debug",
+		officialSkillSourceUrl("acme", "bug-debug"),
 	);
 	const second = parseOfficialSkillPage(
 		"<p>bunx skills add https://github.com/example/skills --skill bug-debug</p>",
-		"https://officialskills.sh/example/skills/bug-debug",
+		officialSkillSourceUrl("example", "bug-debug"),
 	);
 	expect(first?.id).toBe("skill-acme-bug-debug");
 	expect(second?.id).toBe("skill-example-bug-debug");
@@ -176,8 +182,8 @@ test("officialskills parsed ids include owner to avoid duplicate prompt values",
 
 test("officialskills frontend bundles expose website tab categories", () => {
 	const html = '<script src="/assets/main.js"></script>';
-	expect(officialSkillBundleLinks(html, "https://officialskills.sh/")).toEqual([
-		"https://officialskills.sh/assets/main.js",
+	expect(officialSkillBundleLinks(html, OFFICIAL_SKILLS_CATALOG_URL)).toEqual([
+		`${OFFICIAL_SKILLS_BASE_URL}/assets/main.js`,
 	]);
 	const categories = officialSkillCategoryMap(
 		'{slug:"openai/security-best-practices",name:"security-best-practices",description:"Review code",owner:"openai",category:"security",localMarkdownPath:"/skills-markdown/openai/security-best-practices.md"}',
@@ -200,7 +206,7 @@ test("official skill catalog preserves descriptive sentences", () => {
 				<p>Community security checks.</p>
 				<p>bunx skills add https://github.com/openai/skills --skill security-best-practices</p>
 			`,
-			"https://officialskills.sh/openai/skills/security-best-practices",
+			officialSkillSourceUrl("openai", "security-best-practices"),
 		),
 	).toMatchObject({
 		description: expect.stringContaining("."),

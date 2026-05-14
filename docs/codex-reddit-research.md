@@ -10,24 +10,24 @@ runtime; durable references live here as external links.
   `requirements.toml` with canonical `hooks = true`, not deprecated
   `codex_hooks`. OAL now renders `.codex/requirements.toml` and acceptance
   checks reject `codex_hooks`.
-- **Base instructions should be patched, not replaced by local baseline text:**
-OAL now reads upstream `openai/codex` base instructions from
-`third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md`
-and applies `patches/openai-codex-base-instructions-default-md.patch`.
-- **Agents run tests too eagerly:** the Codex base patch tells agents not to run
+- **Base instructions should be replaced by a repo prompt surface:**
+OAL now uses `prompts/codex_base_instruction.custom.md` as the Codex
+`model_instructions_file` source instead of patching
+`third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md`.
+- **Agents run tests too eagerly:** the custom prompt tells agents not to run
   tests, type checks, builds, browser automation, simulator launches, or full
   validation suites after every implementation step by default.
-- **Validation should be targeted:** the Codex base patch keeps targeted checks
+- **Validation should be targeted:** the custom prompt keeps targeted checks
   as the first validation tier and broadens only when the task requires broader
   confidence.
 - **OAL/RTK belongs in base instructions, not AGENTS bloat:** detailed
-  OAL-specific CLI and `rtk-ai/rtk` behavior now lives in the patched Codex base
+  OAL-specific CLI and `rtk-ai/rtk` behavior now lives in the custom base
   instructions. Generated `AGENTS.md` stays compact and points to source,
   provider-native behavior, context budget, and route ownership.
-- **Command output can destroy context:** the Codex base patch requires unknown
+- **Command output can destroy context:** the custom prompt requires unknown
   or potentially large command output to be byte bounded before it reaches
   context.
-- **Audit false positives waste review time:** the Codex base patch adds review
+- **Audit false positives waste review time:** the custom prompt adds review
   guidance requiring conclusive, actionable findings and allowing a no-findings
   result.
 - **Reasoning effort has a real quality/cost curve:** heavy GPT-5.5 reasoning

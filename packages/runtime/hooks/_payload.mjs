@@ -1,4 +1,5 @@
 import { asArray, asObject, asString } from "./_runtime.mjs";
+import { WHITESPACE_SPLIT_PATTERN } from "./_patterns.mjs";
 
 const COMMAND_FIELDS = ["command", "toolCommand", "rawCommand", "script"];
 const GENERIC_COMMAND_FIELDS = ["input"];
@@ -20,7 +21,6 @@ const TEXT_FIELDS = [
 	"content",
 	"finalResponse",
 ];
-const TOKEN_SPLIT_PATTERN = /\s+/;
 const QUOTE_EDGE_PATTERN = /^["']|["']$/g;
 
 function nestedObjects(payload) {
@@ -83,7 +83,7 @@ export function extractPaths(payload) {
 		for (const field of PATH_FIELDS) paths.push(asString(object[field]));
 	}
 	for (const command of extractCommands(payload)) {
-		for (const token of command.split(TOKEN_SPLIT_PATTERN)) {
+		for (const token of command.split(WHITESPACE_SPLIT_PATTERN)) {
 			const cleaned = token.replace(QUOTE_EDGE_PATTERN, "");
 			if (cleaned.includes("/") || cleaned.includes(".")) paths.push(cleaned);
 		}

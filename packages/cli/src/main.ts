@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { resolve } from "node:path";
+import { OFFICIAL_SKILLS_HOSTNAME } from "@openagentlayer/toolchain";
 import { Command } from "commander";
 import { runAcceptCommand } from "./commands/accept";
 import { runBinCommand } from "./commands/bin";
@@ -263,9 +264,19 @@ program
 	.description("print optional feature install or removal commands")
 	.option("--install <tools>", "comma-separated optional tools")
 	.option("--remove <tools>", "comma-separated optional tools")
-	.option("--catalog", "print curated officialskills.sh catalog")
-	.option("--catalog-url <url>", "fetch and parse an officialskills.sh page")
-	.option("--category <category>", "filter fetched officialskills.sh catalog")
+	.option("--catalog", `print curated ${OFFICIAL_SKILLS_HOSTNAME} catalog`)
+	.option(
+		"--catalog-url <url>",
+		`fetch and parse an ${OFFICIAL_SKILLS_HOSTNAME} page`,
+	)
+	.option(
+		"--category <category>",
+		`filter fetched ${OFFICIAL_SKILLS_HOSTNAME} catalog`,
+	)
+	.option(
+		"--compact",
+		"print compact catalog entries (id, name, publisher, description, category, status, source)",
+	)
 	.option("--json", "print catalog as JSON")
 	.option("--context7-api-key <key>", "Context7 API key for ctx7 setup")
 	.action((options) => runFeaturesCommand(argsFromOptions(options)));

@@ -1,6 +1,6 @@
 {
   "id": "taste",
-  "title": "Taste and Product Polish",
+  "title": "Taste",
   "providers": [
     "codex",
     "claude",

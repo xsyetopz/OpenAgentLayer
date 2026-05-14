@@ -1,3 +1,8 @@
+import {
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+	POSITIVE_INTEGER_PATTERN,
+} from "./patterns";
+
 interface CodexProfile {
 	model?: string;
 	approval_policy?: string;
@@ -20,8 +25,6 @@ interface CodexToml {
 	agents: Record<string, unknown>;
 	plugins: Record<string, { enabled?: boolean }>;
 }
-
-const TOML_INTEGER_PATTERN = /^\d+$/;
 
 const ALLOWED_CODEX_MODELS = new Set([
 	"gpt-5.5",
@@ -78,7 +81,7 @@ export function assertCodexTomlSchema(toml: string): void {
 		throw new Error("Codex config does not enable auto approval review");
 	if (
 		parsed.model_instructions_file !==
-		"./openagentlayer/codex-base-instructions.md"
+		OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE
 	)
 		throw new Error(
 			"Codex config does not load the patched OAL base instructions",
@@ -277,7 +280,7 @@ function parseTomlValue(
 	const value = stripTomlComment(rawValue);
 	if (value === "true") return true;
 	if (value === "false") return false;
-	if (TOML_INTEGER_PATTERN.test(value)) return Number(value);
+	if (POSITIVE_INTEGER_PATTERN.test(value)) return Number(value);
 	if (value.startsWith('"') && value.endsWith('"'))
 		return JSON.parse(value) as string;
 	if (value.startsWith("{") && value.endsWith("}"))

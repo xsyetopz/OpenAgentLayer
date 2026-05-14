@@ -7,8 +7,10 @@
   ],
   "agent": "apollo",
   "skills": [
-    "design",
+    "zen-of-python",
     "impeccable",
+    "taste",
+    "dedupe",
     "cross-platform-app",
     "command-analysis"
   ],

@@ -6,6 +6,12 @@ import {
 	withProvenance,
 } from "@openagentlayer/artifact";
 import type { AgentRecord, OalSource, Provider } from "@openagentlayer/source";
+import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_HOOKS_DIR,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+} from "@openagentlayer/source";
 import { agentPrompt, instructions, quoteToml } from "./common";
 import { renderHookArtifacts } from "./hooks";
 import type {
@@ -39,9 +45,7 @@ const CODEX_FEATURES = [
 	["js_repl", false],
 ] as const;
 const CODEX_MANAGED_HOOK_DIR_PLACEHOLDER = "__OAL_CODEX_MANAGED_HOOK_DIR__";
-const CODEX_BASE_INSTRUCTIONS_PATH =
-	"third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md";
-const CODEX_OAL_BASE_SECTION_PATH = "source/prompts/codex-base-oal-section.md";
+const CODEX_BASE_INSTRUCTIONS_PATH = "prompts/codex_base_instruction.custom.md";
 const CODEX_RTK_SHIMS = [
 	["aws", "aws"],
 	["cargo", "cargo"],
@@ -145,7 +149,7 @@ export async function renderCodex(
 		}),
 		withProvenance({
 			provider: PROVIDER,
-			path: ".codex/openagentlayer/codex-base-instructions.md",
+			path: OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 			content: await renderCodexBaseInstructions(repoRoot),
 			sourceId: "instructions-base:codex",
 			mode: "file",
@@ -194,7 +198,7 @@ export async function renderCodex(
 		...(await renderHookArtifacts(
 			PROVIDER,
 			source.hooks,
-			".codex/openagentlayer/hooks",
+			OAL_CODEX_HOOKS_DIR,
 			repoRoot,
 		)),
 	);
@@ -299,10 +303,10 @@ function renderCodexConfig(source: OalSource, options: RenderOptions): string {
 	const profile = resolveCodexProfilePlan(options);
 	const orchestration = resolveCodexOrchestration(options);
 	const primaryProfile = codexPrimaryProfileName(orchestration.mode);
-	return `#:schema https://developers.openai.com/codex/config-schema.json
+	return `${CODEX_CONFIG_SCHEMA_COMMENT}
 profile = ${quoteToml(primaryProfile)}
 approvals_reviewer = "auto_review"
-model_instructions_file = "./openagentlayer/codex-base-instructions.md"
+model_instructions_file = "${OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE}"
 developer_instructions = ${quoteToml(CODEX_DEVELOPER_INSTRUCTIONS)}
 
 [notice]
@@ -649,7 +653,7 @@ function renderCodexRequirements(source: OalSource): string {
 
 [[hooks.${event}.hooks]]
 type = "command"
-command = ${quoteToml(command.replaceAll(".codex/openagentlayer/hooks", CODEX_MANAGED_HOOK_DIR_PLACEHOLDER))}
+command = ${quoteToml(command.replaceAll(OAL_CODEX_HOOKS_DIR, CODEX_MANAGED_HOOK_DIR_PLACEHOLDER))}
 statusMessage = ${quoteToml(`Running OAL ${event} hook`)}
 `,
 				)
@@ -665,84 +669,8 @@ managed_dir = ${quoteToml(CODEX_MANAGED_HOOK_DIR_PLACEHOLDER)}
 ${eventBlocks}`;
 }
 
-async function renderCodexBaseInstructions(repoRoot: string): Promise<string> {
-	const [upstream, oalSection] = await Promise.all([
-		readFile(join(repoRoot, CODEX_BASE_INSTRUCTIONS_PATH), "utf8"),
-		readFile(join(repoRoot, CODEX_OAL_BASE_SECTION_PATH), "utf8"),
-	]);
-	return applyCodexBaseInstructionPatch(upstream, oalSection.trim());
-}
-
-function applyCodexBaseInstructionPatch(
-	upstream: string,
-	oalSection: string,
-): string {
-	let patched = upstream;
-	patched = replaceRequired(
-		patched,
-		"Your default personality and tone is concise, direct, and friendly. You communicate efficiently, always keeping the user clearly informed about ongoing actions without unnecessary detail. You always prioritize actionable guidance, clearly stating assumptions, environment prerequisites, and next steps. Unless explicitly asked, you avoid excessively verbose explanations about your work.",
-		"Your default personality and tone is concise, direct, and friendly. You communicate efficiently, always keeping the user clearly informed about ongoing actions without unnecessary detail. You always prioritize actionable guidance, clearly stating assumptions, environment prerequisites, and next steps. Be respectful but not deferential: do not add emotional validation, people-pleasing agreement, or apology-centered phrasing when a technical correction or disagreement is more useful. Push back on requests, names, designs, or assumptions that conflict with repository evidence, correctness, maintainability, safety, or the user's stated outcome; explain the technical reason and offer a concrete alternative. Unless explicitly asked, you avoid excessively verbose explanations about your work.",
-	);
-	patched = replaceRequired(
-		patched,
-		"If the codebase has tests or the ability to build or run, consider using them to verify that your work is complete.",
-		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default. Run validation when the user requests it, the active route is explicitly a test/validate/release gate, or the completed change has a narrow check whose signal outweighs its cost. Prefer targeted checks over full suites, and prefer quiet or bounded output over raw logs.",
-	);
-	patched = replaceRequired(
-		patched,
-		`When testing, your philosophy should be to start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests as you build confidence. If there's no test for the code you changed, and if the adjacent patterns in the codebases show that there's a logical place for you to add a test, you may do so. However, do not add tests to codebases with no tests.`,
-		"When testing is justified, start as specific as possible to the code you changed so that you can catch issues efficiently, then make your way to broader tests only when the task requires broader confidence. If there is no test for the code you changed, and adjacent patterns show a logical place to add one, you may do so. However, do not add tests to codebases with no tests.",
-	);
-	patched = replaceRequired(
-		patched,
-		"- Fix the problem at the root cause rather than applying surface-level patches, when possible.",
-		"- Fix the problem at the root cause rather than applying surface-level patches, when possible. Do not paper over symptoms with compatibility shims, aliases, parser fallbacks, broad guardrails, retries, sleeps, mocks, skipped tests, or documentation-only explanations unless the user explicitly requests that tradeoff or the repository design requires it.",
-	);
-	patched = replaceRequired(
-		patched,
-		"- Avoid unneeded complexity in your solution.",
-		"- Avoid unneeded complexity in your solution. Do not add adjacent behavior, hidden fallback paths, defensive layers, new configuration switches, or cleanup beyond the requested scope unless a controlling source requirement makes them necessary.",
-	);
-	patched = replaceRequired(
-		patched,
-		"- Do not attempt to fix unrelated bugs or broken tests. It is not your responsibility to fix them. (You may mention them to the user in your final message though.)",
-		"- Do not attempt to fix unrelated bugs or broken tests. It is not your responsibility to fix them. Do not widen scope to make a partial solution look complete. (You may mention them to the user in your final message though.)",
-	);
-	patched = replaceRequired(
-		patched,
-		"- Update documentation as necessary.",
-		"- Update documentation as necessary, but do not turn a requested code or product behavior change into documentation-only work unless the user explicitly asks.",
-	);
-	patched = replaceRequired(
-		patched,
-		"If you're operating in an existing codebase, you should make sure you do exactly what the user asks with surgical precision. Treat the surrounding codebase with respect, and don't overstep (i.e. changing filenames or variables unnecessarily). You should balance being sufficiently ambitious and proactive when completing tasks of this nature.",
-		"If you're operating in an existing codebase, you should make sure you do exactly what the user asks with surgical precision. Treat examples, corrections, suggested names, and partial ideas as evidence for the requested behavior, not as permission to reduce scope. Do not turn a current implementation request into future-work documentation, a placeholder, a probe-only surface, or the \"smallest real\" variant unless the user explicitly asks for that tradeoff. When a user corrects scope, restate the concrete deliverable, inspect the owning code or provider API, and either implement the complete requested behavior or return `STATUS BLOCKED` with attempted steps, evidence, and the specific missing input or platform constraint. Treat the surrounding codebase with respect, and don't overstep (i.e. changing filenames or variables unnecessarily). You should balance being sufficiently ambitious and proactive when completing tasks of this nature.",
-	);
-	patched = replaceRequired(
-		patched,
-		"You should use judicious initiative to decide on the right level of detail and complexity to deliver based on the user's needs. This means showing good judgment that you're capable of doing the right extras without gold-plating. This might be demonstrated by high-value, creative touches when scope of the task is vague; while being surgical and targeted when scope is tightly specified.",
-		"You should use judicious initiative to decide on the right level of detail and complexity to deliver based on the user's needs. This means showing good judgment that you're capable of doing the right extras without gold-plating. When the user says a product surface is too technical or asks for brief descriptions, info affordances, labels, or mode guidance, treat that as a user-facing UX deliverable and add concise end-user copy where the behavior is selected or explained. This might be demonstrated by high-value, creative touches when scope of the task is vague; while being surgical and targeted when scope is tightly specified.",
-	);
-	patched = replaceRequired(
-		patched,
-		"# Tool Guidelines",
-		`${oalSection}\n\n# Tool Guidelines`,
-	);
-	return replaceRequired(
-		patched,
-		"- Do not use python scripts to attempt to output larger chunks of a file.",
-		"- Do not use python scripts to attempt to output larger chunks of a file.\n- Unknown or potentially large command output must be bounded before it reaches context. Prefer byte caps such as `head -c 4000` for raw commands whose output shape is unknown; line caps alone are not enough when files or logs contain very long lines.",
-	);
-}
-
-function replaceRequired(
-	text: string,
-	search: string,
-	replacement: string,
-): string {
-	if (!text.includes(search))
-		throw new Error("Codex upstream base instruction patch no longer applies");
-	return text.replace(search, replacement);
+function renderCodexBaseInstructions(repoRoot: string): Promise<string> {
+	return readFile(join(repoRoot, CODEX_BASE_INSTRUCTIONS_PATH), "utf8");
 }
 
 function codexHookGroups(source: OalSource): Map<string, string[]> {
@@ -750,7 +678,7 @@ function codexHookGroups(source: OalSource): Map<string, string[]> {
 		.flatMap((hook) =>
 			(hook.events.codex ?? []).map((event) => ({
 				event,
-				command: `OAL_HOOK_PROVIDER=codex OAL_HOOK_EVENT=${event} .codex/openagentlayer/hooks/${hook.script}`,
+				command: `OAL_HOOK_PROVIDER=codex OAL_HOOK_EVENT=${event} ${OAL_CODEX_HOOKS_DIR}/${hook.script}`,
 			})),
 		)
 		.reduce((byEvent, hook) => {

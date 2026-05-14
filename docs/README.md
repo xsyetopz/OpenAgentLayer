@@ -10,6 +10,7 @@ Read in this order:
 2. [Use the CLI](02-cli.md)
 3. [Configure providers](03-providers.md)
 4. [Validate and release](04-validate-release.md)
+5. [Codex custom base instruction prompt](codex-base-instruction-custom.md)
 
 Keep documentation here factual and user-facing:
 

@@ -1,0 +1,29 @@
+{
+  "id": "zen-of-python",
+  "title": "Zen of Python",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Apply The Zen of Python (PEP 20) as a design and naming axiom for architecture, APIs, modules, and implementation choices with explicit simplicity, readability, and consistency pressure.",
+  "body": "Use PEP 20 principles as operational design constraints: prefer explicit over implicit, simple over complex, flat over nested, readable over clever, and one obvious way where possible. Apply this to naming (stable domain terms, clear verbs, non-ambiguous nouns), module boundaries (high cohesion, low coupling), API shape (predictable contracts, explicit states/errors), and implementation structure (small focused functions, minimal branching, no hidden behavior). When conflicting options exist, choose the variant with the clearest mental model and lowest surprise cost. Document decisions when tradeoffs are non-obvious, and verify that naming and structure remain consistent across source, tests, and generated artifacts.",
+  "supportFiles": [
+    {
+      "path": "references/pep20-principles.md",
+      "source": "skill-resources/zen-of-python/references/pep20-principles.md"
+    },
+    {
+      "path": "references/naming-guidelines.md",
+      "source": "skill-resources/zen-of-python/references/naming-guidelines.md"
+    },
+    {
+      "path": "assets/design-review-template.md",
+      "source": "skill-resources/zen-of-python/assets/design-review-template.md"
+    },
+    {
+      "path": "assets/zen-application.md",
+      "source": "skill-resources/zen-of-python/assets/zen-application.md"
+    }
+  ]
+}

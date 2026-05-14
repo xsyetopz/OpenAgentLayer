@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { CODEX_CONFIG_SCHEMA_COMMENT } from "@openagentlayer/source";
 import {
 	artifactHash,
 	compareArtifacts,
@@ -30,8 +31,7 @@ test("toml provenance preserves schema comment as the first line", () => {
 	const artifact = withProvenance({
 		provider: "codex",
 		path: ".codex/config.toml",
-		content:
-			'#:schema https://developers.openai.com/codex/config-schema.json\nprofile = "openagentlayer"\n',
+		content: `${CODEX_CONFIG_SCHEMA_COMMENT}\nprofile = "openagentlayer"\n`,
 		sourceId: "config:codex",
 		mode: "config",
 	});

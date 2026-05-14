@@ -1,8 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import type { AgentRecord } from "@openagentlayer/source";
-import { loadSource } from "@openagentlayer/source";
+import {
+	OAL_CLI_ENTRY_RELATIVE,
+	loadSource,
+	type AgentRecord,
+} from "@openagentlayer/source";
 import { flag, option } from "../arguments";
 
 const PEER_ROLES = [
@@ -92,7 +95,7 @@ export function buildPeerSteps(
 		mode,
 		command: process.execPath,
 		args: [
-			join(repoRoot, "packages/cli/src/main.ts"),
+			join(repoRoot, OAL_CLI_ENTRY_RELATIVE),
 			"codex",
 			"route",
 			mode,

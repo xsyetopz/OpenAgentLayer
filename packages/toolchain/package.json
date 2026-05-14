@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
-  "exports": "./src/index.ts"
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@openagentlayer/source": "workspace:*"
+  }
 }

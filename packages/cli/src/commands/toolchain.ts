@@ -2,6 +2,8 @@ import {
 	isExpectedContext7ApiKey,
 	OFFICIAL_SKILL_CATALOG,
 	OFFICIAL_SKILL_CATEGORIES,
+	OFFICIAL_SKILLS_BASE_URL,
+	OFFICIAL_SKILLS_HOSTNAME,
 	type OfficialSkillCatalogEntry,
 	type OfficialSkillCategory,
 	type OperatingSystem,
@@ -40,6 +42,7 @@ export function runToolchainCommand(args: string[]): void {
 }
 
 export async function runFeaturesCommand(args: string[]): Promise<void> {
+	const compact = args.includes("--compact");
 	const catalogUrl = option(args, "--catalog-url");
 	if (catalogUrl) {
 		assertOfficialSkillsUrl(catalogUrl);
@@ -63,13 +66,19 @@ export async function runFeaturesCommand(args: string[]): Promise<void> {
 			);
 			return;
 		}
-		if (args.includes("--json"))
+		if (compact)
+			console.log(JSON.stringify(compactCatalog(catalog), undefined, 2));
+		else if (args.includes("--json"))
 			console.log(JSON.stringify(catalog, undefined, 2));
 		else console.log(renderOfficialSkillCatalog(catalog));
 		return;
 	}
 	if (args.includes("--catalog")) {
-		if (args.includes("--json"))
+		if (compact)
+			console.log(
+				JSON.stringify(compactCatalog(OFFICIAL_SKILL_CATALOG), undefined, 2),
+			);
+		else if (args.includes("--json"))
 			console.log(JSON.stringify(OFFICIAL_SKILL_CATALOG, undefined, 2));
 		else console.log(renderOfficialSkillCatalog(OFFICIAL_SKILL_CATALOG));
 		return;
@@ -92,10 +101,35 @@ export async function runFeaturesCommand(args: string[]): Promise<void> {
 	console.log(renderFeatureCommands([...install, ...remove], commands));
 }
 
+function compactCatalog(catalog: readonly OfficialSkillCatalogEntry[]) {
+	return catalog.map(
+		({
+			id,
+			name,
+			publisher,
+			description,
+			category,
+			sourceStatus,
+			sourceUrl,
+		}) => ({
+			id,
+			name,
+			publisher,
+			description,
+			category,
+			sourceStatus,
+			sourceUrl,
+		}),
+	);
+}
+
 function assertOfficialSkillsUrl(url: string): void {
 	const parsed = new URL(url);
-	if (parsed.protocol !== "https:" || parsed.hostname !== "officialskills.sh")
-		throw new Error("`--catalog-url` must use https://officialskills.sh/");
+	if (
+		parsed.protocol !== "https:" ||
+		parsed.hostname !== OFFICIAL_SKILLS_HOSTNAME
+	)
+		throw new Error(`\`--catalog-url\` must use ${OFFICIAL_SKILLS_BASE_URL}/`);
 }
 
 export async function fetchOfficialSkillCatalog(

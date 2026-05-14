@@ -1,6 +1,6 @@
 {
   "id": "git-workflow",
-  "title": "Git State",
+  "title": "Git Workflow",
   "providers": [
     "codex",
     "claude",

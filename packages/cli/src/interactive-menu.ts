@@ -1,3 +1,5 @@
+import { OFFICIAL_SKILLS_HOSTNAME } from "@openagentlayer/toolchain";
+
 export type InteractiveAction =
 	| "setup"
 	| "repair"
@@ -94,7 +96,7 @@ export const WORKFLOW_OPTIONS_BY_CATEGORY = {
 		{
 			value: "skills",
 			label: "Official skills",
-			hint: "install from officialskills.sh tabs",
+			hint: `install from ${OFFICIAL_SKILLS_HOSTNAME} tabs`,
 		},
 		{
 			value: "plugins",

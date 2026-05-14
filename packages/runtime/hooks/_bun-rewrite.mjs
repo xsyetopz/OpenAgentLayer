@@ -1,4 +1,4 @@
-const WHITESPACE_PATTERN = /\s+/;
+import { WHITESPACE_SPLIT_PATTERN } from "./_patterns.mjs";
 const YARN_BUILTINS_WITHOUT_BUN_EQUIVALENT = new Set([
 	"config",
 	"constraints",
@@ -25,7 +25,7 @@ export function bunRewrite(command) {
 	)
 		return undefined;
 
-	const tokens = normalized.split(WHITESPACE_PATTERN).filter(Boolean);
+	const tokens = normalized.split(WHITESPACE_SPLIT_PATTERN).filter(Boolean);
 	const executable = tokens[0];
 	const commandArguments = tokens.slice(1);
 	if (!executable) return undefined;

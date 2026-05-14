@@ -2,6 +2,7 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { renderProvider } from "@openagentlayer/adapter";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	pathContains,
 	planBinInstall,
@@ -98,7 +99,7 @@ export async function runStateCommand(
 	const binary =
 		context.scope === "global"
 			? await refineBinPlan(
-					planBinInstall(binDir, join(repoRoot, "packages/cli/src/main.ts")),
+					planBinInstall(binDir, join(repoRoot, OAL_CLI_ENTRY_RELATIVE)),
 				)
 			: undefined;
 	const report: StateReport = {

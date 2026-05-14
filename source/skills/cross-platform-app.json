@@ -1,6 +1,6 @@
 {
   "id": "cross-platform-app",
-  "title": "Cross-Platform App",
+  "title": "Cross Platform App",
   "providers": [
     "codex",
     "claude",

@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	applyBinInstall,
 	applyDeploy,
@@ -160,7 +161,7 @@ test("dry-run diffs render merged generated artifact changes without writing", a
 test("bin install owns oal and opendex shims", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-bin-install-"));
 	const binDir = join(home, "bin");
-	const entrypoint = "/repo/packages/cli/src/main.ts";
+	const entrypoint = `/repo/${OAL_CLI_ENTRY_RELATIVE}`;
 	const plan = planBinInstall(binDir, entrypoint);
 	await applyBinInstall(home, plan, entrypoint);
 	expect(await readFile(join(binDir, "oal"), "utf8")).toContain(

@@ -8,8 +8,9 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 
-const CLI_ENTRY = "packages/cli/src/main.ts";
+const CLI_ENTRY = OAL_CLI_ENTRY_RELATIVE;
 
 export async function assertInstalledFlowSmoke(
 	repoRoot: string,

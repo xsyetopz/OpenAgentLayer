@@ -27,6 +27,8 @@
   "skills": [
     "planning",
     "implementation",
+    "dedupe",
+    "zen-of-python",
     "cross-platform-app",
     "testing",
     "safety",

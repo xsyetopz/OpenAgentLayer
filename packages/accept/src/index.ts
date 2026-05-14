@@ -147,3 +147,8 @@ function assertManifestDepth(artifactCount: number, entryCount: number): void {
 
 export { buildRoadmapEvidence, renderRoadmapEvidenceMarkdown } from "./roadmap";
 export { assertRtkGainThreshold, evaluateRtkGainOutput } from "./rtk";
+export {
+	CODEX_COLOR_FIELD_PATTERN,
+	LINE_BREAK_PATTERN,
+	POSITIVE_INTEGER_PATTERN,
+} from "./patterns";

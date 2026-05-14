@@ -1,8 +1,10 @@
 import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
+import { CONTEXT7_DASHBOARD_URL } from "./patterns";
 
-const CLI_ENTRY = "packages/cli/src/main.ts";
+const CLI_ENTRY = OAL_CLI_ENTRY_RELATIVE;
 
 export async function assertCliContracts(repoRoot: string): Promise<void> {
 	await runCli(repoRoot, ["check"]);
@@ -32,7 +34,7 @@ export async function assertCliContracts(repoRoot: string): Promise<void> {
 			toolchain.stdout.includes("fd --help") &&
 			toolchain.stdout.includes("bun install -g ctx7") &&
 			toolchain.stdout.includes("ctx7 --version") &&
-			toolchain.stdout.includes("https://context7.com/dashboard") &&
+			toolchain.stdout.includes(CONTEXT7_DASHBOARD_URL) &&
 			toolchain.stdout.includes("ctx7 setup") &&
 			toolchain.stdout.includes(
 				"bunx -p playwright playwright install --with-deps",

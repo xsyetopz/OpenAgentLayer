@@ -15,8 +15,8 @@ export type {
 export {
 	assertKnownModelPlan,
 	isClaudePlan,
-	isCodexProfileModel,
 	isCodexPlan,
+	isCodexProfileModel,
 	isOpenCodePlan,
 	parseOpenCodeModels,
 } from "./model-routing";
