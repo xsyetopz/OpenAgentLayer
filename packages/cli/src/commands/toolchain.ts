@@ -121,7 +121,7 @@ async function fetchOfficialSkillCatalogInner(
 	url: string,
 	signal: AbortSignal | undefined,
 ) {
-	const response = await fetch(url, { signal });
+	const response = await fetchWithSignal(url, signal);
 	if (!response.ok)
 		throw new Error(
 			`Failed to fetch officialskills catalog: ${response.status}`,
@@ -132,7 +132,7 @@ async function fetchOfficialSkillCatalogInner(
 	const categoryMap = await fetchOfficialSkillCategories(html, url, signal);
 	const entries: OfficialSkillCatalogEntry[] = [];
 	for (const link of officialSkillLinks(html)) {
-		const page = await fetch(link, { signal });
+		const page = await fetchWithSignal(link, signal);
 		if (!page.ok) continue;
 		const entry = parseOfficialSkillPage(await page.text(), link);
 		if (entry) {
@@ -156,7 +156,7 @@ async function fetchOfficialSkillCategories(
 ): Promise<Map<string, OfficialSkillCategory>> {
 	const categories = new Map<string, OfficialSkillCategory>();
 	for (const link of officialSkillBundleLinks(html, sourceUrl)) {
-		const response = await fetch(link, { signal });
+		const response = await fetchWithSignal(link, signal);
 		if (!response.ok) continue;
 		for (const [slug, category] of officialSkillCategoryMap(
 			await response.text(),
@@ -164,6 +164,10 @@ async function fetchOfficialSkillCategories(
 			categories.set(slug, category);
 	}
 	return categories;
+}
+
+function fetchWithSignal(url: string, signal: AbortSignal | undefined) {
+	return signal ? fetch(url, { signal }) : fetch(url);
 }
 
 function filterOfficialSkillCatalog(

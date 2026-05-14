@@ -17,6 +17,8 @@ export type InteractiveCategory =
 	| "extend"
 	| "manage";
 
+export type InteractiveControl = "back" | "quit" | "search";
+
 export interface InteractiveMenuOption<T extends string> {
 	value: T;
 	label: string;
@@ -117,6 +119,39 @@ export const WORKFLOW_OPTIONS_BY_CATEGORY = {
 	readonly InteractiveMenuOption<InteractiveAction>[]
 >;
 
-export const WORKFLOW_OPTIONS = WORKFLOW_CATEGORY_OPTIONS.flatMap(
-	(category) => WORKFLOW_OPTIONS_BY_CATEGORY[category.value],
-);
+export const WORKFLOW_CATEGORY_CONTROL_OPTIONS = [
+	{
+		value: "search",
+		label: "Search workflows",
+		hint: "filter by label, action, or hint",
+	},
+	{
+		value: "quit",
+		label: "Quit",
+		hint: "close interactive mode",
+	},
+] as const satisfies readonly InteractiveMenuOption<"search" | "quit">[];
+
+export const WORKFLOW_BACK_OPTION = {
+	value: "back",
+	label: "Back to categories",
+	hint: "choose another workflow group",
+} as const satisfies InteractiveMenuOption<"back">;
+
+export const WORKFLOW_OPTIONS: readonly InteractiveMenuOption<InteractiveAction>[] =
+	WORKFLOW_CATEGORY_OPTIONS.flatMap(
+		(category): readonly InteractiveMenuOption<InteractiveAction>[] =>
+			WORKFLOW_OPTIONS_BY_CATEGORY[category.value],
+	);
+
+export function searchWorkflowOptions(
+	query: string,
+): readonly InteractiveMenuOption<InteractiveAction>[] {
+	const needle = query.trim().toLowerCase();
+	if (!needle) return WORKFLOW_OPTIONS;
+	return WORKFLOW_OPTIONS.filter((option) =>
+		[option.value, option.label, option.hint].some((field) =>
+			field.toLowerCase().includes(needle),
+		),
+	);
+}

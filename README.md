@@ -219,11 +219,12 @@ bun packages/cli/src/main.ts interactive
 
 Interactive mode is a tiny TUI: choose a category, then choose the workflow
 inside it. The main categories are Start, Inspect, Artifacts, Extend, and
-Manage. Setup wraps the same `setup` command used by scripts. Provider prompts
-use multiselect when a command can act on more than one provider. Global deploy
-detects the home directory and asks only when you override it. Non-interactive
-commands stay script-safe and print help instead of prompting when stdin is not a
-TTY.
+Manage. Search workflows filters by label, action, or hint. Nested workflow
+prompts include Back to categories, and the hub includes Quit. Setup wraps the
+same `setup` command used by scripts. Provider prompts use multiselect when a
+command can act on more than one provider. Global deploy detects the home
+directory and asks only when you override it. Non-interactive commands stay
+script-safe and print help instead of prompting when stdin is not a TTY.
 
 Optional features are explicit add/remove commands on top of OAL:
 
@@ -234,6 +235,8 @@ bun run oal:features -- --remove playwright,skill-openai-gh-fix-ci,skill-trailof
 
 Feature labels use `[CLI]` for command-line setup, `[MCP]` for provider MCP
 configuration, and `[skill]` for curated external skills from officialskills.sh.
+Default setup installs the curated top 10 officialskills into the selected Codex
+home and skips skills that already have `SKILL.md`.
 
 Copy commands from fenced `bash` blocks. Do not paste Markdown list bullets.
 

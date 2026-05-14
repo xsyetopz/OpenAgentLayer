@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -8,8 +9,8 @@ import {
 } from "@openagentlayer/setup";
 import {
 	isExpectedContext7ApiKey,
-	type OptionalTool,
 	OFFICIAL_SKILL_CATALOG,
+	type OptionalTool,
 	officialSkillIds,
 } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
@@ -24,6 +25,8 @@ import { runDeployCommand } from "./deploy";
 import { runPluginsCommand } from "./plugins";
 
 const INTEGER_PATTERN = /^\d+$/;
+const OFFICIAL_SKILL_ADD_COMMAND_PATTERN =
+	/\bbunx\s+skills\s+add\b.*\s+--skill\s+([^\s]+)/;
 const noop = () => undefined;
 const DEFAULT_SETUP_OPTIONAL_TOOLS = OFFICIAL_SKILL_CATALOG.map(
 	(entry) => entry.id,
@@ -92,7 +95,7 @@ async function runSetupWithArgs(
 	}
 	await runOptionalSetup(
 		plan.phases[0]?.name === "toolchain" ? plan.phases[0].commands : [],
-		{ dryRun, quiet },
+		{ dryRun, home, quiet },
 	);
 	const providerArg = providers.join(",");
 	const common = [
@@ -194,13 +197,32 @@ function passthroughRenderArgs(args: string[]): string[] {
 
 async function runOptionalSetup(
 	commands: string[],
-	options: { dryRun: boolean; quiet: boolean },
+	options: { dryRun: boolean; home: string; quiet: boolean },
 ): Promise<void> {
 	if (commands.length === 0) return;
 	if (options.dryRun) return;
+	const codexHome = join(options.home, ".codex");
+	const agentsHome = join(options.home, ".agents");
 	for (const [index, command] of commands.entries()) {
+		const installedSkill = installedOfficialSkillPath(command, codexHome);
+		if (installedSkill) {
+			if (!options.quiet)
+				console.log(
+					color(
+						"dim",
+						`◇ Optional setup ${index + 1}/${commands.length} already installed: ${installedSkill}`,
+					),
+				);
+			continue;
+		}
 		const result = await runOptionalSetupCommand(command, {
 			...options,
+			cwd: options.home,
+			env: {
+				AGENTS_HOME: agentsHome,
+				CODEX_HOME: codexHome,
+				HOME: options.home,
+			},
 			index: index + 1,
 			total: commands.length,
 		});
@@ -209,7 +231,19 @@ async function runOptionalSetup(
 	}
 }
 
+function installedOfficialSkillPath(
+	command: string,
+	codexHome: string,
+): string | undefined {
+	const skill = command.match(OFFICIAL_SKILL_ADD_COMMAND_PATTERN)?.[1];
+	if (!skill) return undefined;
+	const skillPath = join(codexHome, "skills", skill);
+	return existsSync(join(skillPath, "SKILL.md")) ? skillPath : undefined;
+}
+
 interface OptionalSetupRunOptions {
+	cwd?: string;
+	env?: NodeJS.ProcessEnv;
 	quiet: boolean;
 	index: number;
 	total: number;
@@ -237,7 +271,9 @@ export async function runOptionalSetupCommand(
 			color("cyan", `◇ Optional setup ${options.index}/${options.total}`),
 		);
 	if (!options.quiet) console.log(color("dim", `  $ ${command}`));
-	const child = Bun.spawn(["sh", "-lc", command], {
+	const child = Bun.spawn(["sh", "-c", command], {
+		...(options.cwd ? { cwd: options.cwd } : {}),
+		env: options.env ? { ...process.env, ...options.env } : process.env,
 		stdout: "pipe",
 		stderr: "pipe",
 	});

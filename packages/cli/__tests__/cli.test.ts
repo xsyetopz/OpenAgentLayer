@@ -19,7 +19,10 @@ import {
 	renderPeerSummary,
 } from "../src/commands/codex";
 import { opendexRun } from "../src/commands/opendex";
-import { runOptionalSetupCommand } from "../src/commands/setup";
+import {
+	runOptionalSetupCommand,
+	runSetupCommand,
+} from "../src/commands/setup";
 import { runFeaturesCommand } from "../src/commands/toolchain";
 import {
 	CLAUDE_PLAN_OPTIONS,
@@ -38,6 +41,8 @@ import {
 	writeOfficialSkillsCache,
 } from "../src/interactive";
 import {
+	searchWorkflowOptions,
+	WORKFLOW_CATEGORY_CONTROL_OPTIONS,
 	WORKFLOW_CATEGORY_OPTIONS,
 	WORKFLOW_OPTIONS,
 	WORKFLOW_OPTIONS_BY_CATEGORY,
@@ -394,6 +399,9 @@ test("interactive command hub uses a tree menu", () => {
 		"manage",
 	]);
 	expect(
+		WORKFLOW_CATEGORY_CONTROL_OPTIONS.map((option) => option.value),
+	).toEqual(["search", "quit"]);
+	expect(
 		Object.fromEntries(
 			Object.entries(WORKFLOW_OPTIONS_BY_CATEGORY).map(
 				([category, options]) => [
@@ -436,6 +444,12 @@ test("interactive command hub uses a tree menu", () => {
 	expect(WORKFLOW_OPTIONS.map((option) => option.hint).join("\n")).toContain(
 		"install from officialskills.sh tabs",
 	);
+	expect(searchWorkflowOptions("deploy").map((option) => option.value)).toEqual(
+		["deploy"],
+	);
+	expect(
+		searchWorkflowOptions("officialskills").map((option) => option.value),
+	).toEqual(["skills"]);
 });
 
 test("profiles command renames saved profiles and preserves active profile", async () => {
@@ -595,6 +609,77 @@ test("setup defaults include curated official skills", async () => {
 	);
 });
 
+test("setup installs default official skills into selected Codex home", async () => {
+	const root = await mkdtemp(`${tmpdir()}/oal-setup-home-skills-`);
+	const bin = join(root, "provider-bin");
+	const logPath = join(root, "codex-home.log");
+	await mkdir(bin, { recursive: true });
+	await writeFile(join(bin, "codex"), "#!/usr/bin/env sh\nexit 0\n");
+	await writeFile(
+		join(bin, "bunx"),
+		`#!/usr/bin/env sh
+if [ -z "$CODEX_HOME" ]; then
+  echo "missing CODEX_HOME" >&2
+  exit 2
+fi
+printf '%s\\n' "$CODEX_HOME" >> "$OAL_CODEX_HOME_LOG"
+if [ "$1" = "skills" ] && [ "$2" = "add" ]; then
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = "--skill" ]; then
+      skill="$2"
+      break
+    fi
+    shift
+  done
+  mkdir -p "$CODEX_HOME/skills/$skill"
+  printf 'name: %s\\n' "$skill" > "$CODEX_HOME/skills/$skill/SKILL.md"
+fi
+exit 0
+`,
+	);
+	await chmod(join(bin, "codex"), 0o755);
+	await chmod(join(bin, "bunx"), 0o755);
+	const originalPath = process.env["PATH"];
+	const originalLog = process.env["OAL_CODEX_HOME_LOG"];
+	process.env["PATH"] = `${bin}:${originalPath ?? ""}`;
+	process.env["OAL_CODEX_HOME_LOG"] = logPath;
+	try {
+		await runSetupCommand(repoRoot, [
+			"setup",
+			"--scope",
+			"global",
+			"--home",
+			root,
+			"--provider",
+			"codex",
+			"--quiet",
+		]);
+		await runSetupCommand(repoRoot, [
+			"setup",
+			"--scope",
+			"global",
+			"--home",
+			root,
+			"--provider",
+			"codex",
+			"--quiet",
+		]);
+	} finally {
+		if (originalPath === undefined) delete process.env["PATH"];
+		else process.env["PATH"] = originalPath;
+		if (originalLog === undefined) delete process.env["OAL_CODEX_HOME_LOG"];
+		else process.env["OAL_CODEX_HOME_LOG"] = originalLog;
+	}
+	const codexHome = join(root, ".codex");
+	const installs = (await readFile(logPath, "utf8")).trim().split("\n");
+	expect(new Set(installs)).toEqual(new Set([codexHome]));
+	expect(installs).toHaveLength(10);
+	expect(
+		await readFile(join(codexHome, "skills", "gh-fix-ci", "SKILL.md"), "utf8"),
+	).toContain("gh-fix-ci");
+	await rm(root, { recursive: true, force: true });
+});
+
 test("official skill prompt choices use unique values", () => {
 	const options = officialSkillOptions([
 		{
@@ -631,7 +716,7 @@ test("official skill prompt choices use unique values", () => {
 			description: "Debug bugs.",
 		},
 	]);
-	expect(options.map((option) => option.value)).toEqual([
+	expect(options.map((option) => String(option.value))).toEqual([
 		"skill-acme-bug-debug",
 		"skill-example-bug-debug",
 	]);
@@ -724,7 +809,7 @@ test("official skill catalog cache stores entries and detects unchanged content"
 	] as const;
 	await writeOfficialSkillsCache(cachePath, catalog);
 	const cached = await readOfficialSkillsCache(cachePath);
-	expect(cached?.entries).toEqual(catalog);
+	expect(cached?.entries).toEqual([...catalog]);
 	expect(sameOfficialSkillsCatalog([...catalog].reverse(), catalog)).toBe(true);
 	expect(
 		sameOfficialSkillsCatalog(

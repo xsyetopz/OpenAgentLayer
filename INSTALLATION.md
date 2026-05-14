@@ -85,7 +85,7 @@ Use the source checkout convenience script to run dependency setup and the OAL C
 ./install.sh setup --scope global --provider all --toolchain --optional ctx7,skill-openai-gh-fix-ci,skill-trailofbits-static-analysis --dry-run
 ```
 
-Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7` plus the curated top 10 officialskills essentials.
+Without arguments, `install.sh` runs global setup with the default optional tools from `OAL_OPTIONAL_TOOLS` or `ctx7` plus the curated top 10 officialskills essentials. Setup installs those skills into the selected Codex home and skips skills that already have `SKILL.md`.
 
 ## Install online
 
@@ -133,7 +133,7 @@ Run without a command in a TTY for guided prompts:
 bun packages/cli/src/main.ts
 ```
 
-The interactive path uses Commander-parsed commands plus Clack prompts. It is a tiny TUI with category prompts first, then workflow prompts inside Start, Inspect, Artifacts, Extend, and Manage. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
+The interactive path uses Commander-parsed commands plus Clack prompts. It is a tiny TUI with category prompts first, then workflow prompts inside Start, Inspect, Artifacts, Extend, and Manage. Use Search workflows to filter by label, action, or hint. Nested workflow prompts include Back to categories, and the hub includes Quit. Interactive setup is a high-level wrapper over the low-level `setup` command. Provider prompts use multiselect where the command can act on multiple providers. Global flows detect the home directory automatically and only ask when you override it. Non-TTY usage prints help instead of blocking for input.
 
 Optional feature commands can be printed separately:
 

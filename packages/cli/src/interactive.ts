@@ -47,6 +47,9 @@ import {
 import {
 	type InteractiveAction,
 	type InteractiveCategory,
+	searchWorkflowOptions,
+	WORKFLOW_BACK_OPTION,
+	WORKFLOW_CATEGORY_CONTROL_OPTIONS,
 	WORKFLOW_CATEGORY_OPTIONS,
 	WORKFLOW_OPTIONS_BY_CATEGORY,
 } from "./interactive-menu";
@@ -162,6 +165,7 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	intro("OpenAgentLayer");
 	for (;;) {
 		const action = await workflowPrompt();
+		if (!action) break;
 		if (action === "setup") await interactiveSetup(repoRoot, "setup");
 		else if (action === "repair") await interactiveSetup(repoRoot, "repair");
 		else if (action === "status") await interactiveStatus(repoRoot);
@@ -183,20 +187,55 @@ export async function runInteractiveCommand(repoRoot: string): Promise<void> {
 	outro("✓ Done");
 }
 
-async function workflowPrompt(): Promise<InteractiveAction> {
-	const category = await ask<InteractiveCategory>(
-		select({
-			message: "OpenAgentLayer command hub",
-			options: [...WORKFLOW_CATEGORY_OPTIONS],
+async function workflowPrompt(): Promise<InteractiveAction | undefined> {
+	for (;;) {
+		const category = await ask<InteractiveCategory | "search" | "quit">(
+			select({
+				message: "OpenAgentLayer command hub",
+				options: [
+					...WORKFLOW_CATEGORY_OPTIONS,
+					...WORKFLOW_CATEGORY_CONTROL_OPTIONS,
+				],
+			}),
+		);
+		if (category === "quit") return undefined;
+		if (category === "search") {
+			const action = await workflowSearchPrompt();
+			if (action === "back") continue;
+			return action;
+		}
+		const categoryOption = WORKFLOW_CATEGORY_OPTIONS.find(
+			(option) => option.value === category,
+		);
+		const action = await ask<InteractiveAction | "back">(
+			select({
+				message: categoryOption?.label ?? "Workflow",
+				options: [
+					...WORKFLOW_OPTIONS_BY_CATEGORY[category],
+					WORKFLOW_BACK_OPTION,
+				],
+			}),
+		);
+		if (action !== "back") return action;
+	}
+}
+
+async function workflowSearchPrompt(): Promise<InteractiveAction | "back"> {
+	const query = await ask<string>(
+		text({
+			message: "Search workflows",
+			placeholder: "deploy, skills, status…",
 		}),
 	);
-	const categoryOption = WORKFLOW_CATEGORY_OPTIONS.find(
-		(option) => option.value === category,
-	);
-	return ask<InteractiveAction>(
+	const matches = searchWorkflowOptions(query);
+	if (matches.length === 0) {
+		printWarning("No matching workflows found.");
+		return "back";
+	}
+	return ask<InteractiveAction | "back">(
 		select({
-			message: categoryOption?.label ?? "Workflow",
-			options: [...WORKFLOW_OPTIONS_BY_CATEGORY[category]],
+			message: "Search results",
+			options: [...matches, WORKFLOW_BACK_OPTION],
 		}),
 	);
 }

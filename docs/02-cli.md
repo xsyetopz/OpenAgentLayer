@@ -31,6 +31,9 @@ workflow inside that category:
 - Extend: official skills, plugin payloads
 - Manage: profiles, uninstall
 
+Use Search workflows from the hub to filter by label, action, or hint. Nested
+workflow prompts include Back to categories, and the hub includes Quit.
+
 ## Inspect OAL
 
 Use `inspect` for read-only product evidence:
