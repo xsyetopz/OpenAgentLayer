@@ -25,6 +25,7 @@ const TOML_INTEGER_PATTERN = /^\d+$/;
 
 const ALLOWED_CODEX_MODELS = new Set([
 	"gpt-5.5",
+	"gpt-5.4",
 	"gpt-5.4-mini",
 	"gpt-5.3-codex",
 ]);

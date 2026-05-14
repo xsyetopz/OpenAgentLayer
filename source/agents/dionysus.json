@@ -32,7 +32,7 @@
     "planning"
   ],
   "models": {
-    "codex": "gpt-5.5",
+    "codex": "gpt-5.4",
     "claude": "claude-opus-4-6",
     "opencode": "anthropic/claude-opus-4-6"
   }

@@ -319,7 +319,7 @@ ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: primaryProfile,
-	model: profile.primaryModel,
+	model: profile.profileModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.plan, profile.model),
@@ -330,7 +330,7 @@ ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: "openagentlayer",
-	model: profile.primaryModel,
+	model: profile.profileModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.plan, profile.model),
@@ -341,7 +341,7 @@ ${renderCodexFeatures(orchestration)}
 
 ${renderCodexProfile({
 	name: `${primaryProfile}-implement`,
-	model: profile.implementProfileModel,
+	model: profile.implementationModel,
 	approvalPolicy: "on-request",
 	sandboxMode: "workspace-write",
 	...optionalReasoningEfforts(profile.implementPlan, profile.implementModel),
@@ -418,8 +418,8 @@ ${profile.toolsViewImage ? "tools_view_image = true\n" : ""}
 }
 
 function resolveCodexProfilePlan(options: RenderOptions): {
-	primaryModel: string;
-	implementProfileModel: string;
+	profileModel: string;
+	implementationModel: string;
 	utilityProfileModel: string;
 	plan?: CodexProfileConfig["planReasoningEffort"];
 	model?: CodexProfileConfig["modelReasoningEffort"];
@@ -432,8 +432,8 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 	switch (plan) {
 		case "plus":
 			return {
-				primaryModel: "gpt-5.5",
-				implementProfileModel: "gpt-5.3-codex",
+				profileModel: options.codexProfileModel ?? "gpt-5.4",
+				implementationModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "medium",
 				model: "medium",
@@ -444,8 +444,8 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		case "pro-5":
 			return {
-				primaryModel: "gpt-5.5",
-				implementProfileModel: "gpt-5.3-codex",
+				profileModel: options.codexProfileModel ?? "gpt-5.4",
+				implementationModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
 				model: "medium",
@@ -456,8 +456,8 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		case "pro-20":
 			return {
-				primaryModel: "gpt-5.5",
-				implementProfileModel: "gpt-5.3-codex",
+				profileModel: options.codexProfileModel ?? "gpt-5.5",
+				implementationModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 				plan: "high",
 				model: "medium",
@@ -468,8 +468,8 @@ function resolveCodexProfilePlan(options: RenderOptions): {
 			};
 		default:
 			return {
-				primaryModel: "gpt-5.5",
-				implementProfileModel: "gpt-5.3-codex",
+				profileModel: options.codexProfileModel ?? "gpt-5.4",
+				implementationModel: "gpt-5.3-codex",
 				utilityProfileModel: "gpt-5.4-mini",
 			};
 	}
@@ -531,7 +531,7 @@ function resolveCodexOrchestration(
 				? {
 						usageHintEnabled: true,
 						rootAgentUsageHintText:
-							"Assume native subagents are encouraged for broad or parallel OAL work. For significant or separable coding implementation, spawn rendered GPT-5.3-Codex implementation agents such as hephaestus, daedalus, demeter, hecate, or prometheus instead of doing all edits in the GPT-5.5 parent. Assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
+							"Assume native subagents are encouraged for broad or parallel OAL work. For significant or separable coding implementation, spawn rendered GPT-5.3-Codex implementation agents such as hephaestus, daedalus, demeter, hecate, or prometheus instead of doing all edits in the parent reasoning session. Assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
 						subagentUsageHintText:
 							"You are an OAL native subagent. Complete only the bounded assigned task within the runtime cap, return concise evidence and changed paths, and do not create nested peer orchestrators.",
 					}

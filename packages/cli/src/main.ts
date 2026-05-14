@@ -164,6 +164,15 @@ program
 	.option("--db <path>", "explicit Codex state SQLite database")
 	.option("--project <dir>", "only include threads for one project cwd")
 	.option("--limit <n>", "number of rows to print", "12")
+	.option("--reset <time>", "weekly reset start timestamp")
+	.option("--next-reset <time>", "next weekly reset timestamp")
+	.option("--plan <plan>", "Codex plan label for pacing output")
+	.option("--weekly-limit-tokens <n>", "known weekly token budget")
+	.option("--weekly-used-percent <n>", "known weekly percent from provider UI")
+	.option(
+		"--fail-at-deficit-percent <n>",
+		"set exit code 1 when deficit reaches this percent",
+	)
 	.option("--json", "print structured JSON")
 	.action((options) => runCodexUsageCommand(argsFromOptions(options)));
 
@@ -370,6 +379,10 @@ function addRenderOptions(command: Command): Command {
 		.option("--plan <plan>", "legacy shared model plan")
 		.option("--codex-plan <plan>", "Codex plan: plus, pro-5, or pro-20")
 		.option(
+			"--codex-profile-model <model>",
+			"Codex active profile model: gpt-5.5 or gpt-5.4",
+		)
+		.option(
 			"--claude-plan <plan>",
 			"Claude plan: max-5, max-20, or max-20-long",
 		)
@@ -429,6 +442,7 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--home", options["home"]);
 	pushValue(args, "--plan", options["plan"]);
 	pushValue(args, "--codex-plan", options["codexPlan"]);
+	pushValue(args, "--codex-profile-model", options["codexProfileModel"]);
 	pushValue(args, "--claude-plan", options["claudePlan"]);
 	pushValue(args, "--opencode-plan", options["opencodePlan"]);
 	pushValue(args, "--opencode-models-file", options["opencodeModelsFile"]);
@@ -492,6 +506,12 @@ function argsFromOptions(options: Record<string, unknown>): string[] {
 	pushValue(args, "--from-file", options["fromFile"]);
 	pushValue(args, "--project", options["project"]);
 	pushValue(args, "--db", options["db"]);
+	pushValue(args, "--limit", options["limit"]);
+	pushValue(args, "--reset", options["reset"]);
+	pushValue(args, "--next-reset", options["nextReset"]);
+	pushValue(args, "--weekly-limit-tokens", options["weeklyLimitTokens"]);
+	pushValue(args, "--weekly-used-percent", options["weeklyUsedPercent"]);
+	pushValue(args, "--fail-at-deficit-percent", options["failAtDeficitPercent"]);
 	pushValue(args, "--catalog-url", options["catalogUrl"]);
 	pushValue(args, "--category", options["category"]);
 	pushFlag(args, "--content", options["content"]);

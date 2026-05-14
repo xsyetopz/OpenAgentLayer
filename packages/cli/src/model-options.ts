@@ -3,6 +3,7 @@ import {
 	assertKnownModelPlan,
 	type CodexOrchestrationMode,
 	isClaudePlan,
+	isCodexProfileModel,
 	isCodexPlan,
 	isOpenCodePlan,
 	parseOpenCodeModels,
@@ -13,6 +14,7 @@ import { option } from "./arguments";
 export async function renderOptions(args: string[]): Promise<RenderOptions> {
 	const plan = option(args, "--plan");
 	const codexPlan = option(args, "--codex-plan");
+	const codexProfileModel = option(args, "--codex-profile-model");
 	const claudePlan = option(args, "--claude-plan");
 	const opencodePlan = option(args, "--opencode-plan");
 	const modelsFile = option(args, "--opencode-models-file");
@@ -26,6 +28,13 @@ export async function renderOptions(args: string[]): Promise<RenderOptions> {
 		if (!isCodexPlan(codexPlan))
 			throw new Error(`Unsupported Codex plan \`${codexPlan}\``);
 		options.codexPlan = codexPlan;
+	}
+	if (codexProfileModel) {
+		if (!isCodexProfileModel(codexProfileModel))
+			throw new Error(
+				`Unsupported Codex profile model \`${codexProfileModel}\`. Expected gpt-5.5 or gpt-5.4`,
+			);
+		options.codexProfileModel = codexProfileModel;
 	}
 	if (claudePlan) {
 		assertKnownModelPlan(claudePlan);

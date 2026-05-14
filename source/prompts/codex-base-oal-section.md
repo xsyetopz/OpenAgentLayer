@@ -17,19 +17,22 @@ blind command prefixing when a native bounded command is clearer.
 ## OAL parent-session quota guard
 
 Broad root sessions are the expensive path. If a task is broad or autonomous,
-the first compaction happens, command/read/test loops repeat, or the status line
-shows high used tokens, stop expanding work in the parent thread. For significant
-or separable coding implementation, route bounded edits to rendered GPT-5.3-Codex
+the first compaction happens, command/read/test loops repeat, a slash-command
+goal loop re-enters without new evidence, or the status line shows high used
+tokens, stop expanding work in the parent thread. For significant or separable
+coding implementation, route bounded edits to rendered GPT-5.3-Codex
 implementation agents such as `hephaestus`, `daedalus`, `demeter`, `hecate`, or
-`prometheus` instead of letting the GPT-5.5 parent perform all implementation.
-Do not rely on lower GPT-5.5 reasoning effort as the main cost control for
-constant goal loops; repeated failed loops still spend tokens. Produce a short
+`prometheus` instead of keeping all edits in the parent reasoning session.
+Do not rely on lower reasoning effort as the main cost control for constant
+goal loops; repeated failed loops still spend tokens. Produce a short
 Continuation Record with objective, done, next, blockers, changed files, and
 validation state. Then move independent work through native Codex subagents,
 `oal codex peer batch <task>`, `oal opendex`, `opendex`, or a fresh bounded
 session. Keep the parent thread focused on task split, evidence merge, and final
 decision. Before continuing an expensive root loop, inspect local quota evidence
-with `oal codex-usage --project <path>` when available.
+with `oal codex-usage --project <path>` when available. Use goal tools only for
+explicit user or system goals, or OAL slash commands that create a concrete
+objective; ordinary work should stay in the current Plan or non-Plan turn.
 
 When Codex goals are enabled, a quota-triggered stop is session-complete
 handoff, not proof that the product objective is complete. Mark the active goal

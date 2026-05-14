@@ -165,10 +165,23 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 			command: "git status",
 			rtkInstalled: true,
 			rtkPolicyPresent: true,
+			codexShimActive: true,
 		}),
 	).resolves.toMatchObject({
 		decision: "pass",
 		reason: "Command is handled by the Codex RTK shim",
+	});
+	await expect(
+		runHook({
+			provider: "codex",
+			command: "git status",
+			rtkInstalled: true,
+			rtkPolicyPresent: true,
+			codexShimActive: false,
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		details: ["Use: rtk git status"],
 	});
 	await expect(runHook({ command: "rtk git status" })).resolves.toMatchObject({
 		decision: "pass",
@@ -269,6 +282,27 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 	).resolves.toMatchObject({
 		decision: "pass",
 	});
+	await expect(runHook({ command: "rtk read --help" })).resolves.toMatchObject({
+		decision: "pass",
+		reason: "RTK help/version probe is allowed",
+	});
+	await expect(runHook({ command: "rtk grep --help" })).resolves.toMatchObject({
+		decision: "pass",
+		reason: "RTK help/version probe is allowed",
+	});
+	await expect(
+		runHook({
+			command:
+				"rtk read --line-numbers --max-lines 140 crates/music_ir_lower/src/expr.rs --start-line 390",
+		}),
+	).resolves.toMatchObject({
+		decision: "block",
+		reason: "RTK read does not support arbitrary start-line ranges",
+		details: [
+			"Use: rtk read --line-numbers --max-lines <n> <file>",
+			"For a line range, use: rtk proxy -- sed -n '<start>,<end>p' <file>",
+		],
+	});
 	await expect(runHook({ command: "rtk find ." })).resolves.toMatchObject({
 		decision: "block",
 		reason: "RTK find needs an explicit traversal bound",
@@ -335,6 +369,7 @@ test("RTK hook enforces supported commands and proxies unsupported commands", as
 			command: "cat package.json",
 			rtkInstalled: true,
 			rtkPolicyPresent: true,
+			codexShimActive: true,
 		}),
 	).resolves.toMatchObject({
 		decision: "pass",
@@ -410,6 +445,7 @@ test("command policy enforces preferred QoL tool replacements", async () => {
 			runHook({
 				provider: "codex",
 				command,
+				codexShimActive: true,
 			}),
 		).resolves.toMatchObject({
 			decision: "pass",
@@ -495,11 +531,27 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 		{
 			hook_event_name: "PreToolUse",
 			command: "git status",
+			codexShimActive: true,
 		},
 		{ OAL_HOOK_PROVIDER: "codex" },
 	);
 	expect(codexShimPass.code).toBe(0);
 	expect(codexShimPass.stdout).toBe("");
+	const codexShimDeny = await runHookRaw(
+		"enforce-rtk-commands.mjs",
+		{
+			hook_event_name: "PreToolUse",
+			command: "git status",
+			codexShimActive: false,
+		},
+		{ OAL_HOOK_PROVIDER: "codex" },
+	);
+	expect(JSON.parse(codexShimDeny.stdout)).toMatchObject({
+		hookSpecificOutput: {
+			hookEventName: "PreToolUse",
+			permissionDecision: "deny",
+		},
+	});
 	const claudeDeny = await runHookRaw(
 		"enforce-rtk-commands.mjs",
 		{
@@ -836,7 +888,7 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 		"Implementation workers such as hephaestus",
 		"use GPT-5.3-Codex",
 		"significant or separable coding tasks",
-		"GPT-5.5 parent",
+		"parent reasoning session",
 		"fit inside the configured job runtime cap",
 		"smallest useful evidence slice",
 		"Parent thread owns task split",

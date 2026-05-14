@@ -46,6 +46,7 @@ export async function assertRenderedConfigs(targetRoot: string): Promise<void> {
 		throw new Error("TOML config merge did not preserve user-owned keys");
 	for (const required of [
 		"gpt-5.5",
+		"gpt-5.4",
 		"gpt-5.4-mini",
 		"gpt-5.3-codex",
 		"shell_snapshot = false",

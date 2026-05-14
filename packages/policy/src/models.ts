@@ -3,6 +3,7 @@ import type { PolicyIssue } from "./types";
 
 export const CODEX_MODELS = [
 	"gpt-5.5",
+	"gpt-5.4",
 	"gpt-5.4-mini",
 	"gpt-5.3-codex",
 ] as const;
@@ -13,7 +14,6 @@ export const CLAUDE_MODELS = [
 	"claude-haiku-4-5",
 ] as const;
 export const FORBIDDEN_CODEX = [
-	["gpt", "5", "4"].join("-"),
 	`${["gpt", "5", "3", "codex"].join("-")}-spark`,
 ] as const;
 export const FORBIDDEN_CLAUDE = [

@@ -6,6 +6,7 @@ import type { RenderOptions } from "./model-routing";
 import { renderOpenCode } from "./opencode";
 
 export type {
+	CodexModel,
 	CodexOrchestrationMode,
 	CodexOrchestrationOptions,
 	ModelPlan,
@@ -14,6 +15,7 @@ export type {
 export {
 	assertKnownModelPlan,
 	isClaudePlan,
+	isCodexProfileModel,
 	isCodexPlan,
 	isOpenCodePlan,
 	parseOpenCodeModels,

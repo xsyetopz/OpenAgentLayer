@@ -67,11 +67,12 @@ Use `codex-usage` to inspect local Codex state for root-session quota drains bef
 
 ```bash
 bun packages/cli/src/main.ts codex-usage --project "$PWD"
+bun packages/cli/src/main.ts codex-usage --project "$PWD" --reset 2026-05-12T00:27:00Z --next-reset 2026-05-19T00:27:00Z --weekly-used-percent 45
 ```
 
-The report groups weekly usage by Codex `thread_source`, model, and reasoning effort, then prints the top draining rollout paths. OAL uses this evidence with the generated parent-session quota guard: broad root sessions should stop at compaction, repeated command loops, or high used-token counts, write a Continuation Record, and move independent work to `oal codex peer batch`, OpenDex/Symphony, or a fresh bounded session. When Codex goals are enabled, this stop is session-complete handoff only; it pauses the loop and preserves usage accounting, but it is not COMPLETE-complete product completion unless the original objective has no remaining requirements.
+The report groups weekly usage by Codex `thread_source`, model, and reasoning effort, then prints the top draining rollout paths. With reset-window flags, it also prints reserve/deficit pacing and can set a failing exit code through `--fail-at-deficit-percent`. OAL uses this evidence with the generated parent-session quota guard: broad root sessions should stop at compaction, repeated command loops, slash-command goal loops without new evidence, or high used-token counts, write a Continuation Record, and move independent work to `oal codex peer batch`, OpenDex/Symphony, or a fresh bounded session. When Codex goals are enabled, this stop is session-complete handoff only; it pauses the loop and preserves usage accounting, but it is not COMPLETE-complete product completion unless the original objective has no remaining requirements.
 
-## Model Plans
+## Model Plans vs Codex Plan Mode
 
 Use plan flags when rendering subscription-specific model routes:
 
@@ -81,8 +82,10 @@ bun run oal:preview -- --provider claude --plan max-20-long
 bun run oal:preview -- --provider opencode --plan opencode-auto
 ```
 
-Codex plan mode and edit mode are separate. OAL renders Codex reasoning values
-from `low` through `xhigh`; `minimal` is not a Codex effort value. Generated
-Codex profiles use `gpt-5.5` for orchestration and semantic planning/observation,
-while implementation workers stay on `gpt-5.3-codex` and utility/light subagent
-profiles use `gpt-5.4-mini`.
+Codex Plan mode and non-Plan mode are runtime UI states. OAL `--plan` and
+`--codex-plan` are rendered subscription/model-routing presets that control
+profile models, reasoning efforts, agent caps, and runtime caps. Default,
+`plus`, and `pro-5` parent profiles use `gpt-5.4` for quota-sensitive sustained
+work; `pro-20` keeps `gpt-5.5` unless `--codex-profile-model gpt-5.4` is set.
+Implementation workers stay on `gpt-5.3-codex`; utility/light profiles use
+`gpt-5.4-mini`.

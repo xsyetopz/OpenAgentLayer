@@ -71,7 +71,12 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			);
 			for (const flag of REQUIRED_CODEX_FLAGS)
 				requireIncludes(config, flag, "Codex config");
-			for (const model of ["gpt-5.5", "gpt-5.4-mini", "gpt-5.3-codex"])
+			for (const model of [
+				"gpt-5.5",
+				"gpt-5.4",
+				"gpt-5.4-mini",
+				"gpt-5.3-codex",
+			])
 				requireIncludes(config, model, "Codex config");
 			rejectIncludes(config, "zsh_path", "Codex config");
 			requireIncludes(

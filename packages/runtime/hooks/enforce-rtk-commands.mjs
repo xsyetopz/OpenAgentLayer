@@ -3,7 +3,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { delimiter, join, resolve } from "node:path";
 import { bunRewrite } from "./_bun-rewrite.mjs";
 import { evaluateCommandPolicy } from "./_command-policy.mjs";
 import { asString, createHookRunner } from "./_runtime.mjs";
@@ -15,14 +15,13 @@ function evaluate(payload) {
 	}
 
 	const rtkState = inspectRtkState(payload);
+	const provider =
+		(asString(payload.provider) || process.env["OAL_HOOK_PROVIDER"]) ===
+		"codex";
 	return evaluateCommandPolicy(command, {
 		bunRewrite,
-		autoShimSupportedCommands:
-			(asString(payload.provider) || process.env["OAL_HOOK_PROVIDER"]) ===
-			"codex",
-		autoShimAlternateTools:
-			(asString(payload.provider) || process.env["OAL_HOOK_PROVIDER"]) ===
-			"codex",
+		autoShimSupportedCommands: provider && rtkState.codexShimActive,
+		autoShimAlternateTools: provider && rtkState.codexShimActive,
 		rtkInstalled: rtkState.installed,
 		rtkPolicyPresent: rtkState.policyPresent,
 	});
@@ -36,11 +35,19 @@ function inspectRtkState(payload) {
 				typeof payload.rtkPolicyPresent === "boolean"
 					? payload.rtkPolicyPresent
 					: true,
+			codexShimActive:
+				typeof payload.codexShimActive === "boolean"
+					? payload.codexShimActive
+					: codexRtkShimActive(),
 		};
 	}
 	return {
 		installed: rtkGainWorks(),
 		policyPresent: rtkPolicyPresent(asString(payload.cwd) || process.cwd()),
+		codexShimActive:
+			typeof payload.codexShimActive === "boolean"
+				? payload.codexShimActive
+				: codexRtkShimActive(),
 	};
 }
 
@@ -68,6 +75,19 @@ function rtkPolicyPaths(cwd) {
 		join(projectRoot, ".claude/RTK.md"),
 		join(projectRoot, ".config/opencode/RTK.md"),
 	];
+}
+
+function codexRtkShimActive() {
+	const shimDir = join(homedir(), ".codex/shim");
+	const pathEntries = (process.env.PATH || "")
+		.split(delimiter)
+		.filter(Boolean)
+		.map((entry) => resolve(entry));
+	return (
+		pathEntries.includes(resolve(shimDir)) &&
+		existsSync(join(shimDir, "git")) &&
+		existsSync(join(shimDir, "cat"))
+	);
 }
 
 function firstCommandText(payload) {

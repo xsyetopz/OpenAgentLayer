@@ -113,7 +113,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	enforce_rtk_commands: {
-		input: { provider: "codex", command: "git status" },
+		input: { provider: "codex", command: "git status", codexShimActive: true },
 		decision: "pass",
 	},
 	block_secret_files: {
@@ -391,7 +391,7 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 	);
 	await assertHook(
 		scriptPath,
-		{ provider: "codex", command: "git status" },
+		{ provider: "codex", command: "git status", codexShimActive: true },
 		"pass",
 	);
 	await assertHook(scriptPath, { command: "git status" }, "block");

@@ -363,6 +363,29 @@ test("Codex orchestration setup args and render options preserve v2 bounds", asy
 	});
 });
 
+test("Codex profile model setup args and render options are explicit", async () => {
+	const args = buildSetupArgs({
+		providers: ["codex"],
+		scope: "global",
+		codexPlan: "pro-5",
+		codexProfileModel: "gpt-5.4",
+	});
+	expect(args).toContain("--codex-profile-model");
+	expect(args).toContain("gpt-5.4");
+	await expect(renderOptions(args)).resolves.toMatchObject({
+		codexPlan: "pro-5",
+		codexProfileModel: "gpt-5.4",
+	});
+	await expect(
+		renderOptions([
+			"--provider",
+			"codex",
+			"--codex-profile-model",
+			"gpt-5.3-codex",
+		]),
+	).rejects.toThrow("Unsupported Codex profile model");
+});
+
 test("interactive setup asks to use active and saved profiles", () => {
 	expect(
 		setupProfileChoices({

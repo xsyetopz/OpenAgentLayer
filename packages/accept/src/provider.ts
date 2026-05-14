@@ -104,7 +104,7 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		"root_agent_usage_hint_text",
 		"subagent_usage_hint_text",
 		"GPT-5.3-Codex implementation agents",
-		"instead of doing all edits in the GPT-5.5 parent",
+		"instead of doing all edits in the parent reasoning session",
 	])
 		if (!config.includes(required))
 			throw new Error(

@@ -40,6 +40,7 @@ const VALUE_FLAGS = new Set([
 	"--bin-dir",
 	"--plan",
 	"--codex-plan",
+	"--codex-profile-model",
 	"--codex-orchestration",
 	"--codex-agent-max-depth",
 	"--codex-agent-max-threads",
@@ -116,6 +117,11 @@ export function buildProfileFromArgs(args: string[]): OalProfile {
 	assignValue(profile, "target", option(args, "--target"));
 	assignValue(profile, "binDir", option(args, "--bin-dir"));
 	assignValue(profile, "codexPlan", option(args, "--codex-plan"));
+	assignValue(
+		profile,
+		"codexProfileModel",
+		option(args, "--codex-profile-model"),
+	);
 	assignValue(
 		profile,
 		"codexOrchestration",
@@ -229,6 +235,7 @@ function normalizeProfile(
 	assignValue(normalized, "target", profile?.target);
 	assignValue(normalized, "binDir", profile?.binDir);
 	assignValue(normalized, "codexPlan", profile?.codexPlan);
+	assignValue(normalized, "codexProfileModel", profile?.codexProfileModel);
 	assignValue(normalized, "codexOrchestration", profile?.codexOrchestration);
 	assignValue(normalized, "codexAgentMaxDepth", profile?.codexAgentMaxDepth);
 	assignValue(

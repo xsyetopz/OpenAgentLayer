@@ -87,6 +87,7 @@ const RTK_READ_BOUND_FLAGS = new Set([
 	"-l",
 	"--level",
 ]);
+const RTK_READ_UNSUPPORTED_RANGE_FLAGS = new Set(["--start-line"]);
 const RTK_FIND_BOUND_FLAGS = new Set(["-maxdepth", "--max-depth"]);
 const RTK_FIND_NARROWING_FLAGS = new Set([
 	"-name",
@@ -168,6 +169,8 @@ function evaluateSingleCommand(command, options) {
 			};
 	}
 	if (normalized.startsWith("rtk ") || normalized === "rtk") {
+		if (isHelpOrVersionCommand(normalized))
+			return { decision: "pass", reason: "RTK help/version probe is allowed" };
 		const rtkBounds = evaluateRtkCommandBounds(normalized);
 		if (rtkBounds) return rtkBounds;
 		const unsupportedRtkCommand = evaluateUnsupportedRtkCommand(normalized);
@@ -426,6 +429,13 @@ function evaluateRtkCommandBounds(command) {
 	return undefined;
 }
 
+function isHelpOrVersionCommand(command) {
+	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
+	return tokens.some((token) =>
+		["--help", "-h", "help", "--version", "-V"].includes(token),
+	);
+}
+
 function evaluateUnsupportedRtkCommand(command) {
 	const tokens = command.split(WHITESPACE_PATTERN).filter(Boolean);
 	const subcommand = tokens[1] ?? "";
@@ -459,6 +469,18 @@ function evaluateRtkGrepBounds(tokens) {
 }
 
 function evaluateRtkReadBounds(tokens) {
+	const unsupportedRangeFlag = tokens.find((token) =>
+		RTK_READ_UNSUPPORTED_RANGE_FLAGS.has(token),
+	);
+	if (unsupportedRangeFlag)
+		return {
+			decision: "block",
+			reason: "RTK read does not support arbitrary start-line ranges",
+			details: [
+				"Use: rtk read --line-numbers --max-lines <n> <file>",
+				"For a line range, use: rtk proxy -- sed -n '<start>,<end>p' <file>",
+			],
+		};
 	if (!hasOption(tokens, RTK_READ_BOUND_FLAGS))
 		return {
 			decision: "block",

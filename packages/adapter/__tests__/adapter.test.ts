@@ -46,8 +46,8 @@ test("model plans route Greek agents by subscription", async () => {
 	const hermes = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hermes.toml",
 	)?.content;
-	expect(hermes).toContain('model = "gpt-5.5"');
-	expect(hermes).toContain('model_reasoning_effort = "medium"');
+	expect(hermes).toContain('model = "gpt-5.4"');
+	expect(hermes).toContain('model_reasoning_effort = "high"');
 	const hephaestus = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hephaestus.toml",
 	)?.content;
@@ -174,12 +174,25 @@ test("provider commit attribution renders for Claude and OpenCode", async () => 
 
 test("Codex source models split intelligence from worker agents", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
+	const quotaSensitiveAgents = new Set([
+		"artemis",
+		"asclepius",
+		"atalanta",
+		"calliope",
+		"chronos",
+		"dionysus",
+		"hermes",
+		"hestia",
+		"mnemosyne",
+	]);
 	for (const agent of graph.source.agents.filter((record) =>
 		record.providers.includes("codex"),
 	)) {
 		const expected = agent.tools.includes("write")
 			? "gpt-5.3-codex"
-			: "gpt-5.5";
+			: quotaSensitiveAgents.has(agent.id)
+				? "gpt-5.4"
+				: "gpt-5.5";
 		expect(agent.models.codex).toBe(expected);
 	}
 });
@@ -432,7 +445,9 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).toContain("Assume native subagents are encouraged");
 	expect(config).toContain("significant or separable coding implementation");
 	expect(config).toContain("GPT-5.3-Codex implementation agents");
-	expect(config).toContain("instead of doing all edits in the GPT-5.5 parent");
+	expect(config).toContain(
+		"instead of doing all edits in the parent reasoning session",
+	);
 	expect(config).toContain("fit the runtime cap");
 	expect(config).toContain("subagent_usage_hint_text");
 	expect(config).toContain("bounded assigned task within the runtime cap");
@@ -598,7 +613,7 @@ test("Codex instructions render subagent invocation roster", async () => {
 		"For coding implementation, prefer spawning the rendered GPT-5.3-Codex implementation agents",
 	);
 	expect(instructions).toContain(
-		"do not rely on lower GPT-5.5 reasoning effort as a cost control for constantly running goal loops",
+		"do not rely on lower reasoning effort as a cost control for constantly running goal loops",
 	);
 	expect(instructions).toContain("fit the configured job runtime cap");
 	expect(instructions).toContain(
@@ -613,7 +628,7 @@ test("Codex instructions render subagent invocation roster", async () => {
 	);
 });
 
-test("Codex Plus plan routes intelligence to GPT-5.5 and workers to GPT-5.3", async () => {
+test("Codex Plus plan routes profile work to GPT-5.4 and workers to GPT-5.3", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	const rendered = await renderProvider("codex", graph.source, repoRoot, {
 		plan: "plus",
@@ -622,7 +637,7 @@ test("Codex Plus plan routes intelligence to GPT-5.5 and workers to GPT-5.3", as
 		(artifact) => artifact.path === ".codex/config.toml",
 	)?.content;
 	expect(config).toContain(
-		'[profiles.openagentlayer-multi-agent-v2]\nmodel = "gpt-5.5"',
+		'[profiles.openagentlayer-multi-agent-v2]\nmodel = "gpt-5.4"',
 	);
 	expect(config).toContain('plan_mode_reasoning_effort = "medium"');
 	expect(config).toContain('model_reasoning_effort = "medium"');

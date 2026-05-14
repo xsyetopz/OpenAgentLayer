@@ -11,6 +11,11 @@ export type ModelPlan =
 	| "opencode-auth"
 	| "opencode-free";
 export type ReasoningEffort = "low" | "medium" | "high" | "xhigh";
+export type CodexModel =
+	| "gpt-5.5"
+	| "gpt-5.4"
+	| "gpt-5.4-mini"
+	| "gpt-5.3-codex";
 export type CodexOrchestrationMode =
 	| "opendex"
 	| "multi_agent"
@@ -37,6 +42,7 @@ export interface CodexOrchestrationOptions {
 export interface RenderOptions {
 	plan?: ModelPlan;
 	codexPlan?: Extract<ModelPlan, "plus" | "pro-5" | "pro-20">;
+	codexProfileModel?: Extract<CodexModel, "gpt-5.5" | "gpt-5.4">;
 	claudePlan?: Extract<ModelPlan, "max-5" | "max-20" | "max-20-long">;
 	opencodePlan?: Extract<
 		ModelPlan,
@@ -264,6 +270,7 @@ function codexReasoningEffort(
 		return CODEX_GPT55_HIGH_AGENTS_BY_PLAN[plan].has(agent.id)
 			? "high"
 			: "medium";
+	if (model === "gpt-5.4") return plan === "plus" ? "medium" : "high";
 	return "low";
 }
 
@@ -329,6 +336,12 @@ export function isCodexPlan(
 	plan: string | undefined,
 ): plan is Extract<ModelPlan, "plus" | "pro-5" | "pro-20"> {
 	return plan === "plus" || plan === "pro-5" || plan === "pro-20";
+}
+
+export function isCodexProfileModel(
+	model: string | undefined,
+): model is Extract<CodexModel, "gpt-5.5" | "gpt-5.4"> {
+	return model === "gpt-5.5" || model === "gpt-5.4";
 }
 
 export function isClaudePlan(

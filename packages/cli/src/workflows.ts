@@ -11,6 +11,7 @@ export interface SetupWorkflowSelection {
 	target?: string;
 	binDir?: string;
 	codexPlan?: string;
+	codexProfileModel?: string;
 	codexOrchestration?: string;
 	codexAgentMaxDepth?: string;
 	codexAgentMaxThreads?: string;
@@ -46,6 +47,8 @@ export function buildSetupArgs(selection: SetupWorkflowSelection): string[] {
 		args.push("--target", selection.target);
 	if (selection.binDir) args.push("--bin-dir", selection.binDir);
 	appendProviderPlan(args, "codex", selection.codexPlan, selection.providers);
+	if (selection.providers.includes("codex"))
+		appendValue(args, "--codex-profile-model", selection.codexProfileModel);
 	appendCodexOrchestrationArgs(args, selection);
 	appendProviderPlan(args, "claude", selection.claudePlan, selection.providers);
 	appendProviderPlan(

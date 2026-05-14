@@ -5,7 +5,7 @@ All notable changes to OpenAgentLayer (OAL) are documented here.
 This changelog starts at OAL v1. Earlier repository history is reference
 material only and is not part of the OAL release line.
 
-## [0.8.0-beta.4] - 2026-05-14
+## [0.8.0-beta.5] - 2026-05-14
 
 ### Added
 
@@ -13,6 +13,8 @@ material only and is not part of the OAL release line.
 - Added officialskills.sh essentials for GitHub CI fixes, PR comments, automation, web testing, security review, Sentry workflows, and MCP building.
 - Added tree-style interactive CLI menu categories for Start, Inspect, Artifacts, Extend, and Manage.
 - Added prompt-time Codex subagent reminders that explicitly trigger bounded native subagents and sidecars.
+- Added Codex usage reset-window pacing, reserve, deficit, and run-out risk reporting.
+- Added Codex profile model routing for GPT-5.4, GPT-5.5, GPT-5.4 Mini, and GPT-5.3 Codex surfaces.
 
 ### Changed
 
@@ -20,15 +22,20 @@ material only and is not part of the OAL release line.
 - Changed the curated officialskills.sh install commands and docs to prefer `bunx`.
 - Changed the Codex `UserPromptSubmit` reminder to stay compact while naming `spawn`, `subagents`, and `sidecars`.
 - Changed interactive CLI menu data into a small tree model shared by source and tests.
-- Updated release metadata from `0.8.0-beta.3` to `0.8.0-beta.4`.
+- Changed Codex goal-loop guidance to keep GPT-5.5 parent sessions focused on orchestration and merge decisions.
+- Changed RTK command enforcement to verify active Codex shims and guide unsupported `rtk read --start-line` usage to bounded `rtk proxy -- sed` ranges.
+- Updated release metadata from `0.8.0-beta.4` to `0.8.0-beta.5`.
 
 ### Verified
 
 - `bun test packages/cli/__tests__/cli.test.ts`
 - `bun test packages/cli/__tests__/cli.test.ts packages/toolchain/__tests__/toolchain.test.ts`
 - `bun test packages/runtime/__tests__/runtime.test.ts packages/adapter/__tests__/adapter.test.ts`
+- `bun test packages/adapter/__tests__/adapter.test.ts packages/cli/__tests__/cli.test.ts packages/runtime/__tests__/runtime.test.ts packages/accept/__tests__/accept.test.ts`
+- `bun test packages/runtime/__tests__/runtime.test.ts`
+- `bun test packages/accept/__tests__/accept.test.ts`
 - `bunx biome check packages/cli/src/interactive.ts packages/cli/src/interactive-menu.ts packages/cli/__tests__/cli.test.ts`
-- `bun run oal:accept`
+- `git diff --check && bun run oal:check`
 
 ## [0.8.0-beta.2] - 2026-05-14
 

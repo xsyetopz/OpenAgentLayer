@@ -31,17 +31,19 @@ and applies `patches/openai-codex-base-instructions-default-md.patch`.
   guidance requiring conclusive, actionable findings and allowing a no-findings
   result.
 - **Reasoning effort has a real quality/cost curve:** heavy GPT-5.5 reasoning
-  can burn weekly quota quickly, so OAL does not use lower GPT-5.5 effort as
-  the primary cost control for constant goal loops. Generated Codex agents use
-  `gpt-5.5` for intelligence-heavy orchestration, planning, review, and
-  observation roles; significant code-writing work routes to rendered
-  GPT-5.3-Codex implementation workers; utility/light subagent profiles keep
+  can burn weekly quota quickly, so OAL treats model routing, subagent
+  ownership, runtime caps, and handoff discipline as the primary cost controls
+  for constant goal loops. Default, Plus, and Pro-5 parent profiles use
+  `gpt-5.4` for quota-sensitive sustained work; Pro-20 keeps `gpt-5.5` for
+  high-stakes orchestration unless the user selects the quota-sensitive
+  profile model. Significant code-writing work routes to rendered
+  GPT-5.3-Codex implementation workers; utility/light profiles keep
   `gpt-5.4-mini`.
 - **Local weekly usage evidence:** the local Codex state database showed the
   fastest weekly drain came from `gpt-5.5` medium sessions, including 45
   threads and about 2.66B tokens in week `2026-18`, plus 12 threads and about
   2.06B tokens in week `2026-17`. OAL therefore avoids escalating 5.5 effort
-  further by default.
+  further by default and uses `gpt-5.4` where its compressed behavior fits.
 - **Root-session drain beats native subagent drain:** the largest local
   rollouts were blank/root Codex sessions with thousands of shell calls and
   many compactions. Native `thread_source = subagent` usage was tiny by
