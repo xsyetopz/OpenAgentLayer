@@ -1,5 +1,5 @@
 ---
-name: language-design-skill
+name: language-design
 description: "Design language/compiler/runtime systems with explicit semantic contracts, DAG architecture boundaries, and practical implementation trade-offs."
 ---
 
