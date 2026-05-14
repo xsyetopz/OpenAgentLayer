@@ -1,4 +1,5 @@
 [v]3_[l]egacy/
+.openagentlayer/
 
 # Build output
 dist/
