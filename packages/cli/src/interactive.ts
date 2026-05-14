@@ -150,53 +150,53 @@ export const OPTIONAL_FEATURE_OPTIONS = optionalFeatureOptions();
 export const WORKFLOW_OPTIONS = [
 	{
 		value: "setup",
-		label: "Start · Review and apply setup",
-		hint: "profile, providers, toolchain, optional tools",
+		label: "Review and apply setup",
+		hint: "Start · profile, providers, toolchain, optional tools",
 	},
 	{
 		value: "repair",
-		label: "Start · Repair existing install",
-		hint: "inspect state, then reapply selected providers",
+		label: "Repair existing install",
+		hint: "Start · inspect state, then reapply selected providers",
 	},
 	{
 		value: "status",
-		label: "Inspect · Status and installed state",
-		hint: "profile, availability, manifest drift",
+		label: "Status and installed state",
+		hint: "Inspect · profile, availability, manifest drift",
 	},
 	{
 		value: "validate",
-		label: "Inspect · Validate source",
-		hint: "renderability and source checks",
+		label: "Validate source",
+		hint: "Inspect · renderability and source checks",
 	},
 	{
 		value: "artifacts",
-		label: "Artifacts · Preview generated files",
-		hint: "tree or selected file content",
+		label: "Preview generated files",
+		hint: "Artifacts · tree or selected file content",
 	},
 	{
 		value: "deploy",
-		label: "Artifacts · Deploy provider files",
-		hint: "write Codex, Claude, or OpenCode artifacts",
+		label: "Deploy provider files",
+		hint: "Artifacts · write Codex, Claude, or OpenCode artifacts",
 	},
 	{
 		value: "skills",
-		label: "Extend · Official skills",
-		hint: "install from officialskills.sh tabs",
+		label: "Official skills",
+		hint: "Extend · install from officialskills.sh tabs",
 	},
 	{
 		value: "plugins",
-		label: "Extend · Plugin payloads",
-		hint: "sync provider plugin payloads",
+		label: "Plugin payloads",
+		hint: "Extend · sync provider plugin payloads",
 	},
 	{
 		value: "profiles",
-		label: "Manage · Profiles",
-		hint: "list, edit, rename, activate, remove",
+		label: "Profiles",
+		hint: "Manage · list, edit, rename, activate, remove",
 	},
 	{
 		value: "uninstall",
-		label: "Manage · Uninstall OAL",
-		hint: "remove owned provider artifacts",
+		label: "Uninstall OAL",
+		hint: "Manage · remove owned provider artifacts",
 	},
 ] as const;
 

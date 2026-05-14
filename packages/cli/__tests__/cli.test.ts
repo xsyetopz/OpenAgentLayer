@@ -369,10 +369,19 @@ test("interactive command hub is recategorized by job", () => {
 		"uninstall",
 	]);
 	expect(WORKFLOW_OPTIONS.map((option) => option.label).join("\n")).toContain(
-		"Extend · Official skills",
+		"Official skills",
 	);
 	expect(WORKFLOW_OPTIONS.map((option) => option.label).join("\n")).toContain(
-		"Artifacts · Deploy provider files",
+		"Deploy provider files",
+	);
+	expect(new Set(WORKFLOW_OPTIONS.map((option) => option.label)).size).toBe(
+		WORKFLOW_OPTIONS.length,
+	);
+	expect(
+		WORKFLOW_OPTIONS.filter((option) => option.label.includes(" · ")),
+	).toEqual([]);
+	expect(WORKFLOW_OPTIONS.map((option) => option.hint).join("\n")).toContain(
+		"Extend · install from officialskills.sh tabs",
 	);
 });
 
