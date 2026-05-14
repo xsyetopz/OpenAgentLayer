@@ -127,10 +127,11 @@ export function parseOfficialSkillPage(
 	const install = html.match(INSTALL_COMMAND_PATTERN);
 	if (!install) return undefined;
 	const path = new URL(sourceUrl).pathname.split("/").filter(Boolean);
-	const publisher = titleCase(path[0] ?? "External");
+	const owner = path[0] ?? "external";
+	const publisher = titleCase(owner);
 	const name = path[2] ?? install[2];
 	return {
-		id: `skill-${install[2]}`,
+		id: officialSkillId(owner, install[2]),
 		publisher,
 		name,
 		category: categoryFromHtml(html),
@@ -140,6 +141,17 @@ export function parseOfficialSkillPage(
 		sourceUrl,
 		description: firstParagraph(html) ?? `${publisher} ${name} skill.`,
 	};
+}
+
+function officialSkillId(owner: string, skill: string): string {
+	return `skill-${slugPart(owner)}-${slugPart(skill)}`;
+}
+
+function slugPart(value: string): string {
+	return value
+		.toLowerCase()
+		.replace(/[^a-z0-9._-]+/g, "-")
+		.replace(/^-+|-+$/g, "");
 }
 
 function sourceStatusFromHtml(

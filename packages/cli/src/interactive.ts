@@ -668,12 +668,21 @@ async function interactiveFeatures(): Promise<void> {
 	]);
 }
 
-function officialSkillOptions(catalog: readonly OfficialSkillCatalogEntry[]) {
-	return catalog.map((entry) => ({
-		value: entry.id as OptionalTool,
-		label: `${entry.publisher} ${entry.name}`,
-		hint: `${entry.category} · ${entry.sourceStatus}`,
-	}));
+export function officialSkillOptions(
+	catalog: readonly OfficialSkillCatalogEntry[],
+) {
+	const seen = new Set<string>();
+	return catalog.flatMap((entry) => {
+		if (seen.has(entry.id)) return [];
+		seen.add(entry.id);
+		return [
+			{
+				value: entry.id as OptionalTool,
+				label: `${entry.publisher} ${entry.name}`,
+				hint: `${entry.category} · ${entry.sourceStatus}`,
+			},
+		];
+	});
 }
 
 async function officialSkillsCatalog(): Promise<OfficialSkillCatalogEntry[]> {

@@ -151,7 +151,7 @@ test("officialskills frontend pages can generate catalog entries", () => {
 			"https://officialskills.sh/openai/skills/security-best-practices",
 		),
 	).toMatchObject({
-		id: "skill-security-best-practices",
+		id: "skill-openai-security-best-practices",
 		publisher: "OpenAI",
 		name: "security-best-practices",
 		category: "security",
@@ -159,6 +159,19 @@ test("officialskills frontend pages can generate catalog entries", () => {
 		repo: "https://github.com/openai/skills",
 		skill: "security-best-practices",
 	});
+});
+
+test("officialskills parsed ids include owner to avoid duplicate prompt values", () => {
+	const first = parseOfficialSkillPage(
+		"<p>bunx skills add https://github.com/acme/skills --skill bug-debug</p>",
+		"https://officialskills.sh/acme/skills/bug-debug",
+	);
+	const second = parseOfficialSkillPage(
+		"<p>bunx skills add https://github.com/example/skills --skill bug-debug</p>",
+		"https://officialskills.sh/example/skills/bug-debug",
+	);
+	expect(first?.id).toBe("skill-acme-bug-debug");
+	expect(second?.id).toBe("skill-example-bug-debug");
 });
 
 test("officialskills frontend bundles expose website tab categories", () => {

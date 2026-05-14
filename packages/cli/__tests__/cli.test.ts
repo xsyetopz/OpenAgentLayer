@@ -20,6 +20,7 @@ import {
 	CODEX_PLAN_OPTIONS,
 	OPENCODE_PLAN_OPTIONS,
 	OPTIONAL_FEATURE_OPTIONS,
+	officialSkillOptions,
 	PROFILE_ACTION_OPTIONS,
 	setupProfileChoices,
 	UNINSTALL_PROVIDER_OPTIONS,
@@ -489,6 +490,51 @@ test("interactive cleanup menus expose multi-selectable choices", () => {
 		"skill-stripe-best-practices",
 		"skill-workers-best-practices",
 	]);
+});
+
+test("official skill prompt choices use unique values", () => {
+	const options = officialSkillOptions([
+		{
+			id: "skill-acme-bug-debug",
+			publisher: "Acme",
+			name: "bug-debug",
+			category: "development",
+			sourceStatus: "community",
+			repo: "https://github.com/acme/skills",
+			skill: "bug-debug",
+			sourceUrl: "https://officialskills.sh/acme/skills/bug-debug",
+			description: "Debug bugs.",
+		},
+		{
+			id: "skill-example-bug-debug",
+			publisher: "Example",
+			name: "bug-debug",
+			category: "development",
+			sourceStatus: "community",
+			repo: "https://github.com/example/skills",
+			skill: "bug-debug",
+			sourceUrl: "https://officialskills.sh/example/skills/bug-debug",
+			description: "Debug bugs.",
+		},
+		{
+			id: "skill-example-bug-debug",
+			publisher: "Example",
+			name: "bug-debug",
+			category: "development",
+			sourceStatus: "community",
+			repo: "https://github.com/example/skills",
+			skill: "bug-debug",
+			sourceUrl: "https://officialskills.sh/example/skills/bug-debug",
+			description: "Debug bugs.",
+		},
+	]);
+	expect(options.map((option) => option.value)).toEqual([
+		"skill-acme-bug-debug",
+		"skill-example-bug-debug",
+	]);
+	expect(new Set(options.map((option) => option.value)).size).toBe(
+		options.length,
+	);
 });
 
 test("optional features can install curated external skills", () => {
