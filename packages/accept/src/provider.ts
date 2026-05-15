@@ -105,11 +105,13 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 		throw new Error("Codex config missing bounded agents job runtime");
 	for (const required of [
 		"[agents.default]",
-		"./agents/odysseus.toml",
+		"./agents/default.toml",
 		"[agents.worker]",
-		"./agents/hephaestus.toml",
+		"./agents/worker.toml",
 		"[agents.explorer]",
-		"./agents/hermes.toml",
+		"./agents/explorer.toml",
+		"[agents.monitor]",
+		"./agents/monitor.toml",
 	])
 		if (!config.includes(required))
 			throw new Error(

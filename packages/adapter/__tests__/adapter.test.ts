@@ -55,12 +55,25 @@ test("model plans route Greek agents by subscription", async () => {
 	expect(codexConfig).toContain(
 		'[profiles.openagentlayer-multi-agent-v2-implement]\nmodel = "gpt-5.3-codex"',
 	);
+	expect(codexConfig).toContain("[agents.default]\n");
+	expect(codexConfig).toContain('config_file = "./agents/default.toml"');
+	expect(codexConfig).toContain("[agents.worker]\n");
+	expect(codexConfig).toContain('config_file = "./agents/worker.toml"');
+	expect(codexConfig).toContain("[agents.explorer]\n");
+	expect(codexConfig).toContain('config_file = "./agents/explorer.toml"');
+	expect(codexConfig).toContain("[agents.monitor]\n");
+	expect(codexConfig).toContain('config_file = "./agents/monitor.toml"');
 	expect(codexConfig).toContain('model_reasoning_effort = "xhigh"');
 	const athena = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/athena.toml",
 	)?.content;
 	expect(athena).toContain('model = "gpt-5.5"');
 	expect(athena).toContain('model_reasoning_effort = "high"');
+	const explorer = codex.artifacts.find(
+		(artifact) => artifact.path === ".codex/agents/explorer.toml",
+	)?.content;
+	expect(explorer).toContain('name = "explorer"');
+	expect(explorer).toContain('model = "gpt-5.4"');
 	const hermes = codex.artifacts.find(
 		(artifact) => artifact.path === ".codex/agents/hermes.toml",
 	)?.content;

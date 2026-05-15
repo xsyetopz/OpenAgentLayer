@@ -104,6 +104,28 @@ const CODEX_ALTERNATE_TOOL_SHIMS = [
 	["exa", "eza"],
 	["du", "dust"],
 ] as const;
+const CODEX_BUILTIN_AGENT_OVERRIDES = [
+	[
+		"default",
+		"odysseus",
+		"OAL orchestration agent; replaces the Codex built-in default role when OAL is active.",
+	],
+	[
+		"worker",
+		"hephaestus",
+		"OAL implementation agent; replaces the Codex built-in worker role when OAL is active.",
+	],
+	[
+		"explorer",
+		"hermes",
+		"OAL repository mapping agent; replaces the Codex built-in explorer role when OAL is active.",
+	],
+	[
+		"monitor",
+		"asclepius",
+		"OAL validation and reliability agent; replaces the Codex built-in monitor role when OAL is active.",
+	],
+] as const;
 const CODEX_DEVELOPER_INSTRUCTIONS = `## Mandatory Output Gate: Defensive Contrast Check
 
 Before adding any contrastive boundary such as "not X," "does not Y," or "this is not Z," verify that the user asked for that distinction, showed that misunderstanding, or needs it to avoid a concrete technical error. If not, omit the contrast and state the positive case.
@@ -176,6 +198,7 @@ export async function renderCodex(
 				mode: "file",
 			}),
 		);
+	artifacts.push(...renderCodexBuiltinAgentArtifacts(source, options));
 	for (const skill of source.skills.filter((record) =>
 		record.providers.includes(PROVIDER),
 	))
@@ -378,37 +401,13 @@ enabled = true
 }
 
 function renderCodexBuiltinAgentOverrides(): string {
-	const overrides = [
-		[
-			"default",
-			"odysseus",
-			"OAL orchestration agent; replaces the Codex built-in default role when OAL is active.",
-		],
-		[
-			"worker",
-			"hephaestus",
-			"OAL implementation agent; replaces the Codex built-in worker role when OAL is active.",
-		],
-		[
-			"explorer",
-			"hermes",
-			"OAL repository mapping agent; replaces the Codex built-in explorer role when OAL is active.",
-		],
-		[
-			"monitor",
-			"asclepius",
-			"OAL validation and reliability agent; replaces the Codex built-in monitor role when OAL is active.",
-		],
-	] as const;
-	return overrides
-		.map(
-			([role, target, description]) => `
+	return CODEX_BUILTIN_AGENT_OVERRIDES.map(
+		([role, _target, description]) => `
 [agents.${role}]
 description = ${quoteToml(description)}
 nickname_candidates = [${quoteToml(role)}]
-config_file = "./agents/${target}.toml"`,
-		)
-		.join("\n");
+config_file = "./agents/${role}.toml"`,
+	).join("\n");
 }
 
 function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
@@ -727,12 +726,13 @@ function renderCodexAgent(
 	agent: AgentRecord,
 	source: OalSource,
 	options: RenderOptions,
+	overrides: { description?: string; name?: string } = {},
 ): string {
 	const model = resolveCodexModel(agent, options);
 	return [
-		`name = ${quoteToml(agent.id)}`,
-		`description = ${quoteToml(agent.role)}`,
-		`nickname_candidates = [${quoteToml(agent.id)}]`,
+		`name = ${quoteToml(overrides.name ?? agent.id)}`,
+		`description = ${quoteToml(overrides.description ?? agent.role)}`,
+		`nickname_candidates = [${quoteToml(overrides.name ?? agent.id)}]`,
 		`model = ${quoteToml(model.model)}`,
 		`sandbox_mode = ${quoteToml(agent.tools.includes("write") ? "workspace-write" : "read-only")}`,
 		...(model.reasoningEffort
@@ -741,4 +741,28 @@ function renderCodexAgent(
 		`developer_instructions = ${quoteToml(agentPrompt(agent, source))}`,
 		"",
 	].join("\n");
+}
+
+function renderCodexBuiltinAgentArtifacts(
+	source: OalSource,
+	options: RenderOptions,
+): Artifact[] {
+	return CODEX_BUILTIN_AGENT_OVERRIDES.map(([role, target, description]) => {
+		const agent = source.agents.find((record) => record.id === target);
+		if (!agent) {
+			throw new Error(
+				`Codex built-in agent override target ${target} not found`,
+			);
+		}
+		return withProvenance({
+			provider: PROVIDER,
+			path: `.codex/agents/${role}.toml`,
+			content: renderCodexAgent(agent, source, options, {
+				description,
+				name: role,
+			}),
+			sourceId: `agent:${target}`,
+			mode: "file",
+		});
+	});
 }
