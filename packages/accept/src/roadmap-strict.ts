@@ -1,12 +1,12 @@
 import type { Artifact } from "@openagentlayer/artifact";
-import type { OalSource } from "@openagentlayer/source";
 import {
 	CODEX_CONFIG_SCHEMA_COMMENT,
 	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 	OAL_CODEX_HOOKS_DIR,
 	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
 	OAL_OPENCODE_HOOKS_DIR,
-} from "./patterns";
+	type OalSource,
+} from "@openagentlayer/source";
 
 export interface StrictRoadmapCheck {
 	id: string;
@@ -74,12 +74,7 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			requireIncludes(config, CODEX_CONFIG_SCHEMA_COMMENT, "Codex config");
 			for (const flag of REQUIRED_CODEX_FLAGS)
 				requireIncludes(config, flag, "Codex config");
-			for (const model of [
-				"gpt-5.5",
-				"gpt-5.4",
-				"gpt-5.4-mini",
-				"gpt-5.3-codex",
-			])
+			for (const model of ["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex"])
 				requireIncludes(config, model, "Codex config");
 			rejectIncludes(config, "zsh_path", "Codex config");
 			requireIncludes(
@@ -139,52 +134,52 @@ export const STRICT_ROADMAP_CHECKS: StrictRoadmapCheck[] = [
 			).content;
 			requireIncludes(
 				baseInstructions,
-				"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
+				"# Validation Budget",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"## OAL and RTK project surfaces",
+				"# Command Budget",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"rtk proxy -- <command>",
+				"existing project scripts over invented commands",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"## OAL parent-session quota guard",
+				"# Agent Loop",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"oal codex-usage --project <path>",
+				"# Context Budget",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"session-complete\nhandoff",
+				"# Scope Budget",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"COMPLETE-complete",
+				"# Communication",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"## Code review and audits",
+				"# Final Response",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"Keep review output findings-only\nand bounded",
+				"Do not narrate every command.",
 				"Codex base instructions",
 			);
 			requireIncludes(
 				baseInstructions,
-				"Unknown or potentially large command output must be bounded before it reaches context.",
+				"Every command must answer a specific question or perform a necessary action.",
 				"Codex base instructions",
 			);
 		},

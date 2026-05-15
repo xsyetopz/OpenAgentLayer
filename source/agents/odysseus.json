@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,13 +23,13 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "handoff",
-    "oal-maintenance",
-    "tracing",
-    "privileged-execution",
-    "safe-deletion",
-    "command-analysis"
+    "plan-work",
+    "write-handoff",
+    "maintain-oal",
+    "trace-data-flow",
+    "run-privileged-command",
+    "delete-safely",
+    "analyze-commands"
   ],
   "routes": [
     "orchestrate"

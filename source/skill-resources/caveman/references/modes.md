@@ -7,4 +7,4 @@ Use the requested compression level while preserving exact technical tokens.
 - ultra: labels, arrows, and abbreviations where meaning stays exact.
 - wenyan modes: same compression with classical Chinese flavor when requested.
 
-Preserve code, commands, paths, URLs, exact errors, versions, commit messages, review findings, and file contents.
+Preserve code, commands, paths, URLs, exact errors, versions, commit messages, review-changes findings, and file contents.

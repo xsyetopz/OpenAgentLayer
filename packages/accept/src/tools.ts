@@ -164,7 +164,7 @@ function assertDesignSkillStandards(source: OalSource): void {
 }
 
 function assertTestSkillStandards(source: OalSource): void {
-	const test = source.skills.find((skill) => skill.id === "testing");
+	const test = source.skills.find((skill) => skill.id === "test-behavior");
 	if (!test) throw new Error("Missing test skill");
 	const suites = supportFileContent(test, "references/language-suites.md");
 	for (const term of [
@@ -225,7 +225,7 @@ function assertTestSkillStandards(source: OalSource): void {
 }
 
 function assertMarkdownPromptStandards(source: OalSource): void {
-	const document = source.skills.find((skill) => skill.id === "documentation");
+	const document = source.skills.find((skill) => skill.id === "write-docs");
 	if (!document) throw new Error("Missing document skill");
 	const markdown = supportFileContent(document, "references/markdown.md");
 	for (const term of [
@@ -233,7 +233,7 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 		"GitHub Flavored Markdown",
 		"GitHub Markdown alerts",
 		"Markdown Guide",
-		"Google developer documentation",
+		"Google developer write-docs",
 		"Microsoft style guide",
 		"Diataxis",
 		"**bold**",
@@ -243,9 +243,7 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 	])
 		if (!markdown.includes(term))
 			throw new Error(`document markdown standards missing \`${term}\``);
-	const prompt = source.skills.find(
-		(skill) => skill.id === "prompt-engineering",
-	);
+	const prompt = source.skills.find((skill) => skill.id === "design-prompts");
 	if (!prompt) throw new Error("Missing prompt skill");
 	const promptMarkdown = supportFileContent(
 		prompt,
@@ -266,7 +264,11 @@ function assertMarkdownPromptStandards(source: OalSource): void {
 }
 
 function assertSimplicityDiscipline(source: OalSource): void {
-	for (const skillId of ["architecture", "implementation", "review"]) {
+	for (const skillId of [
+		"design-architecture",
+		"implement",
+		"review-changes",
+	]) {
 		const skill = source.skills.find((candidate) => candidate.id === skillId);
 		if (!skill) throw new Error(`Missing \`${skillId}\` skill`);
 		const content = supportFileContent(skill, "references/simplicity.md");
@@ -285,14 +287,14 @@ function assertSimplicityDiscipline(source: OalSource): void {
 
 function assertRuntimeSafetySkills(source: OalSource): void {
 	const required = {
-		"privileged-execution": [
+		"run-privileged-command": [
 			"privileged execution",
 			"argv",
 			"dry-run",
 			"allowlist",
 		],
-		"safe-deletion": ["git status", "manifest ownership", "dirty", "ambiguous"],
-		"command-analysis": [
+		"delete-safely": ["git status", "manifest ownership", "dirty", "ambiguous"],
+		"analyze-commands": [
 			"shell operators",
 			"argv",
 			"exit code",
@@ -303,15 +305,17 @@ function assertRuntimeSafetySkills(source: OalSource): void {
 		const skill = source.skills.find((candidate) => candidate.id === skillId);
 		if (!skill) throw new Error(`Missing \`${skillId}\` skill`);
 		const supportPath =
-			skillId === "privileged-execution"
+			skillId === "run-privileged-command"
 				? "references/runtime.md"
-				: skillId === "safe-deletion"
+				: skillId === "delete-safely"
 					? "references/checklist.md"
 					: "references/commands.md";
 		const content = supportFileContent(skill, supportPath);
 		for (const term of terms)
 			if (!content.includes(term))
-				throw new Error(`\`${skillId}\` safety skill missing \`${term}\``);
+				throw new Error(
+					`\`${skillId}\` audit-safety skill missing \`${term}\``,
+				);
 	}
 }
 

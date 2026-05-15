@@ -1,0 +1,21 @@
+{
+  "id": "map-repository",
+  "title": "Map Repository",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Map code, docs, provider artifacts, and data flow before changing behavior. Use when the user asks where something lives, how it works, or why a generated artifact appears.",
+  "body": "Read the narrowest source set that can answer the question. Produce a map with exact paths and evidence. Rewrite plan-work appears when the user asks for it.",
+  "supportFiles": [
+    {
+      "path": "references/map.md",
+      "source": "skill-resources/map-repository/references/map.md"
+    },
+    {
+      "path": "assets/map-template.md",
+      "source": "skill-resources/map-repository/assets/map-template.md"
+    }
+  ]
+}

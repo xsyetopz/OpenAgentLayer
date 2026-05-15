@@ -1,0 +1,21 @@
+{
+  "id": "design-architecture",
+  "title": "Design Architecture",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Find simpler module seams, naming fixes, god-object splits, and deep-module opportunities. Use when design-architecture, package boundaries, cohesion, or codebase shape is the problem.",
+  "body": "Prefer boring depth over elaborate diagrams. A useful design-architecture change reduces reasons to change, shrinks public interfaces, or concentrates product behavior behind a stable seam. New abstractions need at least two real callers or a source-backed provider/runtime boundary.",
+  "supportFiles": [
+    {
+      "path": "references/deep-modules.md",
+      "source": "skill-resources/design-architecture/references/deep-modules.md"
+    },
+    {
+      "path": "references/simplicity.md",
+      "source": "skill-resources/shared/references/simplicity.md"
+    }
+  ]
+}

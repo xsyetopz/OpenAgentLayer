@@ -570,8 +570,8 @@ test("RTK hook rewrites replaceable Node.js package-manager commands to Bun", as
 
 test("RTK hook routes Codex delegation to OAL-managed Codex commands", async () => {
 	for (const command of [
-		'codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review this"',
-		'rtk proxy -- codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review this"',
+		'codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review-changes this"',
+		'rtk proxy -- codex exec -c agent="nemesis" -s read-only -C /repo -o /tmp/nemesis.md "review-changes this"',
 		'true && codex exec --ephemeral "hidden work"',
 	]) {
 		await expect(runHook({ command })).resolves.toMatchObject({
@@ -861,7 +861,7 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 	for (const expected of [
 		"`$oal` guidance",
 		"bounded native OAL subagents or sidecars",
-		"broad or splittable implementation",
+		"broad or splittable implement",
 		"quick single-owner fixes",
 		"work directly in the parent thread",
 		"sidecar stalls or fails",
@@ -893,7 +893,6 @@ test("subagent context hook guides Codex agents toward native OAL agents", async
 		"Parent thread owns task split",
 		"do not spawn extra pooled threads",
 		"stalled background work wastes token budget",
-		"oal opendex",
 	])
 		expect(details.some((detail) => detail.includes(expected))).toBe(true);
 });

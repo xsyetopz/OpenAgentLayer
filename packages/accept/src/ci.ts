@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { RTK_INSTALL_SCRIPT_URL } from "./patterns";
+import { RTK_INSTALL_SCRIPT_URL } from "@openagentlayer/source";
 
 const CI_WORKFLOW = ".github/workflows/ci.yml";
 const REQUIRED_WORKFLOW_TERMS = [

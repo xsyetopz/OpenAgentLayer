@@ -4,9 +4,9 @@ When OAL artifacts are present, keep AGENTS.md-level context compact. Put stable
 project invariants in generated provider instructions, and put detailed or
 fast-changing workflows in OAL skills, hooks, commands, or route files. Use OAL
 CLI surfaces such as `oal inspect <topic>`, `oal codex peer batch <task>`,
-`oal opendex`, `opendex`, `oal rtk-report --project <path>`,
-`oal codex-usage --project <path>`, and provider deploy/preview commands when
-they are the shortest source-backed path to evidence.
+`oal rtk-report --project <path>`, `oal codex-usage --project <path>`, and
+provider deploy/preview commands when they are the shortest source-backed path
+to evidence.
 
 When RTK is available and policy allows it, prefer bounded `rtk` forms for
 high-volume inspection: `rtk grep`, `rtk read`, `rtk find`, `rtk git -C`, and
@@ -20,33 +20,33 @@ Broad root sessions are the expensive path. If a task is broad or autonomous,
 the first compaction happens, command/read/test loops repeat, a slash-command
 goal loop re-enters without new evidence, or the status line shows high used
 tokens, stop expanding work in the parent thread. For significant or separable
-coding implementation, route bounded edits to rendered GPT-5.3-Codex
-implementation agents such as `hephaestus`, `daedalus`, `demeter`, `hecate`, or
+coding implement, route bounded edits to rendered GPT-5.3-Codex
+implement agents such as `hephaestus`, `daedalus`, `demeter`, `hecate`, or
 `prometheus` instead of keeping all edits in the parent reasoning session.
 Do not rely on lower reasoning effort as the main cost control for constant
 goal loops; repeated failed loops still spend tokens. Produce a short
 Continuation Record with objective, done, next, blockers, changed files, and
 validation state. Then move independent work through native Codex subagents,
-`oal codex peer batch <task>`, `oal opendex`, `opendex`, or a fresh bounded
-session. Keep the parent thread focused on task split, evidence merge, and final
-decision. Before continuing an expensive root loop, inspect local quota evidence
-with `oal codex-usage --project <path>` when available. Use goal tools only for
+`oal codex peer batch <task>`, or a fresh bounded session. Keep the parent
+thread focused on task split, evidence merge, and final decision. Before
+continuing an expensive root loop, inspect local quota evidence with
+`oal codex-usage --project <path>` when available. Use goal tools only for
 explicit user or system goals, or OAL slash commands that create a concrete
 objective; ordinary work should stay in the current Plan or non-Plan turn.
 
 When Codex goals are enabled, a quota-triggered stop is session-complete
-handoff, not proof that the product objective is complete. Mark the active goal
+write-handoff, not proof that the product objective is complete. Mark the active goal
 complete only to pause the loop and preserve usage accounting after the
 Continuation Record is written. State that completion means "complete for this
 session" and list the remaining product work explicitly. Do not claim
 COMPLETE-complete unless a completion audit proves the original objective has no
 remaining requirements.
 
-## Code review and audits
+## Code review-changes and audits
 
 When reviewing or auditing code, report only conclusive, actionable findings grounded in current code,
 command output, provider docs, fixtures, or tests. It is valid to report no
 findings. Do not inflate severity to make the audit look useful; distinguish
 confirmed defects from speculative risks and require a realistic impact path for
-high-severity claims. Keep review output findings-only
+high-severity claims. Keep review-changes output findings-only
 and bounded; do not spend tokens on repeated summaries when there are no findings.

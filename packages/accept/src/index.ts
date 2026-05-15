@@ -145,10 +145,10 @@ function assertManifestDepth(artifactCount: number, entryCount: number): void {
 		throw new Error("Manifest does not track every artifact");
 }
 
-export { buildRoadmapEvidence, renderRoadmapEvidenceMarkdown } from "./roadmap";
-export { assertRtkGainThreshold, evaluateRtkGainOutput } from "./rtk";
 export {
-	CODEX_COLOR_FIELD_PATTERN,
 	LINE_BREAK_PATTERN,
 	POSITIVE_INTEGER_PATTERN,
-} from "./patterns";
+} from "@openagentlayer/source";
+export { CODEX_COLOR_FIELD_PATTERN } from "./patterns";
+export { buildRoadmapEvidence, renderRoadmapEvidenceMarkdown } from "./roadmap";
+export { assertRtkGainThreshold, evaluateRtkGainOutput } from "./rtk";

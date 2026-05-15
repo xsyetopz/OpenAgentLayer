@@ -1,4 +1,5 @@
 import { WHITESPACE_SPLIT_PATTERN } from "./_patterns.mjs";
+
 const YARN_BUILTINS_WITHOUT_BUN_EQUIVALENT = new Set([
 	"config",
 	"constraints",

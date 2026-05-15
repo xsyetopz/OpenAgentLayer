@@ -283,7 +283,7 @@ export async function runOptionalSetupCommand(
 			color("cyan", `◇ Optional setup ${options.index}/${options.total}`),
 		);
 	if (!options.quiet) console.log(color("dim", `  $ ${command}`));
-	const child = Bun.spawn(["sh", "-c", command], {
+	const child = Bun.spawn(["/bin/sh", "-c", command], {
 		...(options.cwd ? { cwd: options.cwd } : {}),
 		env: options.env ? { ...process.env, ...options.env } : process.env,
 		stdout: "pipe",

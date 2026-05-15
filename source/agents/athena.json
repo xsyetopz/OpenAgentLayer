@@ -6,15 +6,15 @@
     "claude",
     "opencode"
   ],
-  "role": "Architecture, planning, sequencing, and public API ownership",
+  "role": "Architecture, plan-work, sequencing, and public API ownership",
   "triggers": [
-    "work requires planning, package boundaries, API design",
+    "work requires plan-work, package boundaries, API design",
     "Athena owns the requested route or risk area",
     "provider-specific generated behavior needs evidence"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,16 +23,16 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "zen-of-python",
-    "dedupe",
-    "roadmap-tracking",
-    "architecture",
-    "prompt-engineering",
-    "review"
+    "plan-work",
+    "simplify-design",
+    "deduplicate-code",
+    "track-roadmap",
+    "design-architecture",
+    "design-prompts",
+    "review-changes"
   ],
   "routes": [
-    "planning"
+    "plan-work"
   ],
   "models": {
     "codex": "gpt-5.5",

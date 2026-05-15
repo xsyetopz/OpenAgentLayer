@@ -2,7 +2,7 @@
 
 This directory is for people and AI coding agents who need to install, run, or
 operate OAL. It describes current commands and workflows. Product requirements
-and implementation contracts live in [specs/](../specs/).
+and implement contracts live in [specs/](../specs/).
 
 Read in this order:
 
@@ -12,7 +12,7 @@ Read in this order:
 4. [Validate and release](04-validate-release.md)
 5. [Codex custom base instruction prompt](codex-base-instruction-custom.md)
 
-Keep documentation here factual and user-facing:
+Keep write-docs here factual and user-facing:
 
 - explain commands that exist now
 - use copyable shell examples

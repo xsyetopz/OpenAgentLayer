@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import {
-	OAL_CLI_ENTRY_RELATIVE,
-	loadSource,
 	type AgentRecord,
+	loadSource,
+	OAL_CLI_ENTRY_RELATIVE,
 } from "@openagentlayer/source";
 import { flag, option } from "../arguments";
 
@@ -12,7 +12,7 @@ const PEER_ROLES = [
 	["orchestrator", "orchestrate"],
 	["validate", "validate"],
 	["worker", "implement"],
-	["review", "review"],
+	["review-changes", "review-changes"],
 ] as const;
 const ISO_MILLISECONDS_PATTERN = /\..+$/;
 
@@ -131,8 +131,8 @@ export function renderPeerBrief(
 		"",
 		"- orchestrator -- split work, define acceptance criteria, and decide ownership",
 		"- validate -- reproduce broadly, gather evidence, and enumerate variants",
-		"- worker -- implement against the orchestrator and validation handoff",
-		"- review -- audit the resulting diff, validation, and residual risk",
+		"- worker -- implement against the orchestrator and validation write-handoff",
+		"- review-changes -- audit the resulting diff, validation, and residual risk",
 		"",
 		"## Spawn Boundary",
 		"",
@@ -400,18 +400,18 @@ function rolePrompt(role: PeerRole, paths: PeerPaths): string {
 	const common = [
 		`Shared run directory: ${paths.root}`,
 		`Read ${paths.brief} first`,
-		`Use ${paths.handoffsDir} and ${paths.resultsDir} as the durable handoff trail`,
+		`Use ${paths.handoffsDir} and ${paths.resultsDir} as the durable write-handoff trail`,
 		"Do not assume hidden context from other runs",
 		"Do not launch `oal codex peer`, `oal codex route orchestrate`, native Codex subagents, or another orchestrator",
 	].join("\n");
 	switch (role) {
 		case "orchestrator":
-			return `${common}\n\nProduce a concrete ownership split, acceptance criteria, and the next validation handoff. Write no code.`;
+			return `${common}\n\nProduce a concrete ownership split, acceptance criteria, and the next validation write-handoff. Write no code.`;
 		case "validate":
 			return `${common}\n\nRead ${join(paths.resultsDir, "orchestrator.md")} when present. Reproduce broadly, list exact variants, and record evidence. Do not implement fixes.`;
 		case "worker":
 			return `${common}\n\nRead orchestrator and validation results. Implement the complete cohesive fix that satisfies acceptance criteria and validation evidence.`;
-		case "review":
+		case "review-changes":
 			return `${common}\n\nRead orchestrator, validation, and worker results. Audit correctness, regressions, missing tests, and residual risk.`;
 		default:
 			throw new Error(`Unknown Codex peer role \`${role}\``);

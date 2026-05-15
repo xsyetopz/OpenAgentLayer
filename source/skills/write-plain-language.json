@@ -1,0 +1,25 @@
+{
+  "id": "write-plain-language",
+  "title": "Write Plain Language",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Rewrite public prose into plain, translation-ready language while preserving exact technical meaning. Use for docs wording, UI copy, status text, onboarding text, changelog prose, and generated artifact explanations.",
+  "body": "Rewrite prose so readers understand it quickly while technical meaning stays intact. Edit authored public prose. Generated output is edited through authored source or as the requested artifact. Preserve commands, code, paths, IDs, API names, product names, legal terms, security terms, and validation evidence. Translation happens on explicit request.",
+  "supportFiles": [
+    {
+      "path": "references/a2-b1.md",
+      "source": "skill-resources/write-plain-language/references/a2-b1.md"
+    },
+    {
+      "path": "references/localization.md",
+      "source": "skill-resources/write-plain-language/references/localization.md"
+    },
+    {
+      "path": "assets/rewrite-checklist.md",
+      "source": "skill-resources/write-plain-language/assets/rewrite-checklist.md"
+    }
+  ]
+}

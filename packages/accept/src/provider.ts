@@ -1,16 +1,16 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
+	CODEX_CONFIG_SCHEMA_COMMENT,
+	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
+	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
+} from "@openagentlayer/source";
+import {
 	assertClaudeSettingsSchema,
 	assertCodexTomlSchema,
 	assertOpenCodeConfigSchema,
 } from "./config-schema";
-import {
-	CODEX_CONFIG_SCHEMA_COMMENT,
-	HEX_COLOR_VALUE_PATTERN,
-	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
-	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
-} from "./patterns";
+import { HEX_COLOR_VALUE_PATTERN } from "./patterns";
 
 const CODEX_REQUIRED_FLAGS = [
 	"steer = true",
@@ -104,9 +104,21 @@ async function assertCodexConfig(targetRoot: string): Promise<void> {
 	if (!config.includes("job_max_runtime_seconds = 600"))
 		throw new Error("Codex config missing bounded agents job runtime");
 	for (const required of [
+		"[agents.default]",
+		"./agents/odysseus.toml",
+		"[agents.worker]",
+		"./agents/hephaestus.toml",
+		"[agents.explorer]",
+		"./agents/hermes.toml",
+	])
+		if (!config.includes(required))
+			throw new Error(
+				`Codex config missing built-in agent override: ${required}`,
+			);
+	for (const required of [
 		"root_agent_usage_hint_text",
 		"subagent_usage_hint_text",
-		"GPT-5.3-Codex implementation agents",
+		"GPT-5.3-Codex implement agents",
 		"instead of doing all edits in the parent reasoning session",
 	])
 		if (!config.includes(required))
@@ -147,17 +159,14 @@ async function assertCodexBaseInstructions(
 		"utf8",
 	);
 	for (const required of [
-		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
-		"## OAL and RTK project surfaces",
-		"keep AGENTS.md-level context compact",
-		"rtk proxy -- <command>",
-		"## OAL parent-session quota guard",
-		"oal codex-usage --project <path>",
-		"session-complete\nhandoff",
-		"COMPLETE-complete",
-		"report only conclusive, actionable findings grounded in current code",
-		"Keep review output findings-only\nand bounded",
-		"Unknown or potentially large command output must be bounded before it reaches context.",
+		"# Outcome Contract",
+		"# Literal Execution Rule",
+		"# Agent Loop",
+		"# Command Budget",
+		"# Validation Budget",
+		"# Final Response",
+		"Every command must answer a specific question or perform a necessary action.",
+		"Do not narrate every command.",
 	])
 		if (!baseInstructions.includes(required))
 			throw new Error(
@@ -168,7 +177,7 @@ async function assertCodexBaseInstructions(
 async function assertClaudeSettings(targetRoot: string): Promise<void> {
 	const settings = JSON.parse(
 		await readFile(join(targetRoot, ".claude/settings.json"), "utf8"),
-	) as { permissions?: unknown; hooks?: unknown; model?: string };
+	) as { permissions?: { deny?: string[] }; hooks?: unknown; model?: string };
 	assertClaudeSettingsSchema(settings);
 	if (settings.model !== "claude-sonnet-4-6")
 		throw new Error(
@@ -176,6 +185,15 @@ async function assertClaudeSettings(targetRoot: string): Promise<void> {
 		);
 	if (!(settings.permissions && settings.hooks))
 		throw new Error("Claude settings missing permissions or hooks");
+	for (const agent of [
+		"Agent(Explore)",
+		"Agent(Plan)",
+		"Agent(general-purpose)",
+	])
+		if (!settings.permissions.deny?.includes(agent))
+			throw new Error(
+				`Claude settings missing built-in subagent deny: ${agent}`,
+			);
 }
 
 async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
@@ -203,17 +221,18 @@ async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
 		throw new Error("OpenCode model fallback default is not first free model");
 	if (config.small_model !== OPENCODE_MODEL_FALLBACKS[1])
 		throw new Error("OpenCode small model fallback is not second free model");
+	assertOpenCodeBuiltinAgentDisables(config.agent);
 	assertOpenCodeAgentColors(config.agent);
 	for (const command of [
-		"planning",
-		"implementation",
-		"review",
-		"testing",
+		"plan-work",
+		"implement",
+		"review-changes",
+		"test-behavior",
 		"validate",
-		"exploration",
-		"tracing",
-		"debugging",
-		"documentation",
+		"map-repository",
+		"trace-data-flow",
+		"debug-failures",
+		"write-docs",
 		"orchestrate",
 		"audit",
 	])
@@ -221,8 +240,30 @@ async function assertOpenCodeConfig(targetRoot: string): Promise<void> {
 			throw new Error(`OpenCode config missing command \`${command}\``);
 }
 
+function assertOpenCodeBuiltinAgentDisables(
+	agentConfig: Record<string, unknown>,
+): void {
+	for (const agentId of ["build", "plan", "general", "explore", "scout"]) {
+		const config = agentConfig[agentId];
+		if (
+			!(
+				config &&
+				typeof config === "object" &&
+				(config as { disable?: unknown }).disable === true
+			)
+		)
+			throw new Error(`OpenCode built-in agent is not disabled: ${agentId}`);
+	}
+}
+
 function assertOpenCodeAgentColors(agentConfig: Record<string, unknown>): void {
 	for (const [agentId, config] of Object.entries(agentConfig)) {
+		if (
+			config &&
+			typeof config === "object" &&
+			(config as { disable?: unknown }).disable === true
+		)
+			continue;
 		if (!(config && typeof config === "object" && "color" in config))
 			throw new Error(`OpenCode agent \`${agentId}\` missing color`);
 		const color = (config as { color?: unknown }).color;

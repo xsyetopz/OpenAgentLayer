@@ -8,13 +8,13 @@
   ],
   "role": "Review, audit, regression, and security risk finding",
   "triggers": [
-    "work requires hard review, security, and correctness checks",
+    "work requires hard review-changes, security, and correctness checks",
     "Nemesis owns the requested route or risk area",
     "provider-specific generated behavior needs evidence"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "review",
-    "safety",
-    "architecture",
-    "safe-deletion",
-    "command-analysis"
+    "review-changes",
+    "audit-safety",
+    "design-architecture",
+    "delete-safely",
+    "analyze-commands"
   ],
   "routes": [
-    "review",
+    "review-changes",
     "audit"
   ],
   "models": {

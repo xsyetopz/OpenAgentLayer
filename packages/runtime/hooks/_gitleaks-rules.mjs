@@ -2104,7 +2104,7 @@ export const GITLEAKS_RULES = [
 	},
 	{
 		"id": "postman-api-token",
-		"description": "Uncovered a Postman API token, potentially compromising API testing and development workflows.",
+		"description": "Uncovered a Postman API token, potentially compromising API test-behavior and development workflows.",
 		"regex": {
 			"source": "\\b(PMAK-[a-f0-9]{24}\\-[a-f0-9]{34})(?:[\\x60'\"\\s;]|\\\\[nr]|$)",
 			"flags": "gi"
@@ -2190,7 +2190,7 @@ export const GITLEAKS_RULES = [
 	},
 	{
 		"id": "readme-api-token",
-		"description": "Detected a Readme API token, risking unauthorized documentation management and content exposure.",
+		"description": "Detected a Readme API token, risking unauthorized write-docs management and content exposure.",
 		"regex": {
 			"source": "\\b(rdme_[a-z0-9]{70})(?:[\\x60'\"\\s;]|\\\\[nr]|$)",
 			"flags": "g"

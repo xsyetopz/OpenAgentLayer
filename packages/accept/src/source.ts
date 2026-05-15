@@ -2,8 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSourceGraph } from "@openagentlayer/policy";
 import { runtimeHooks } from "@openagentlayer/runtime";
-import type { OalSource } from "@openagentlayer/source";
-import { LINE_BREAK_PATTERN } from "./patterns";
+import { LINE_BREAK_PATTERN, type OalSource } from "@openagentlayer/source";
 
 const LIVE_TEXT_PATH_PATTERN =
 	/\.(cjs|js|json|jsonc|md|mjs|ts|tsx|toml|yaml|yml)$/;
@@ -84,28 +83,28 @@ export function assertRoadmapSource(source: OalSource): void {
 		if (!source.agents.some((agent) => agent.id === id))
 			throw new Error(`Missing core agent \`${id}\``);
 	for (const id of [
-		"planning",
-		"implementation",
-		"review",
-		"testing",
+		"plan-work",
+		"implement",
+		"review-changes",
+		"test-behavior",
 		"validate",
-		"exploration",
-		"tracing",
-		"debugging",
+		"map-repository",
+		"trace-data-flow",
+		"debug-failures",
 		"design",
-		"documentation",
+		"write-docs",
 		"orchestrate",
 		"audit",
 	])
 		if (!source.routes.some((route) => route.id === id))
 			throw new Error(`Missing route \`${id}\``);
 	for (const id of [
-		"privileged-execution",
-		"safe-deletion",
-		"command-analysis",
+		"run-privileged-command",
+		"delete-safely",
+		"analyze-commands",
 	])
 		if (!source.skills.some((skill) => skill.id === id))
-			throw new Error(`Missing runtime safety skill \`${id}\``);
+			throw new Error(`Missing runtime audit-safety skill \`${id}\``);
 }
 
 export function assertNegativePolicyFixtures(source: OalSource): void {

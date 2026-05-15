@@ -34,12 +34,13 @@ export async function assertInstalledFlowSmoke(
 				binDir,
 				"--provider",
 				"all",
+				"--optional",
+				"none",
 				"--quiet",
 			],
 			{ env },
 		);
 		const shim = join(binDir, "oal");
-		const opendexShim = join(binDir, "opendex");
 		const check = await runBinary(repoRoot, shim, ["check", "--verbose"], {
 			env,
 		});
@@ -75,14 +76,6 @@ export async function assertInstalledFlowSmoke(
 			throw new Error(
 				"Installed oal preview did not render Codex config content.",
 			);
-		const opendex = await runBinary(
-			repoRoot,
-			opendexShim,
-			["--dry-run", "--version"],
-			{ env },
-		);
-		if (!opendex.stdout.includes("opendex"))
-			throw new Error("Installed opendex shim did not route to OpenDex");
 		await runBinary(
 			repoRoot,
 			shim,
@@ -148,9 +141,10 @@ async function fakeProviderPath(
 		await writeFile(path, "#!/usr/bin/env sh\nexit 0\n");
 		await chmod(path, 0o755);
 	}
+	const hostPath = process.env["PATH"] || "/bin:/usr/bin";
 	return {
 		...process.env,
-		PATH: `${providerBin}:${process.env["PATH"] ?? ""}`,
+		PATH: `${providerBin}:${hostPath}`,
 	};
 }
 

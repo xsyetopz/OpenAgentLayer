@@ -45,7 +45,7 @@ oal mcp install oal-inspect --provider opencode --scope global
 
 ## Provider Availability
 
-Setup treats provider binaries as optional during planning. If a provider binary
+Setup treats provider binaries as optional during plan-work. If a provider binary
 is not available, OAL reports it and continues with steps that do not need that
-binary, such as source rendering, deploy planning, plugin payloads, and shared
+binary, such as source rendering, deploy plan-work, plugin payloads, and shared
 validation.

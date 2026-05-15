@@ -53,7 +53,7 @@ test("plugin sync writes provider payloads and prunes stale OAL caches", async (
 			await readFile(
 				join(
 					home,
-					`.codex/plugins/cache/openagentlayer-local/oal/${version}/skills/review/SKILL.md`,
+					`.codex/plugins/cache/openagentlayer-local/oal/${version}/skills/review-changes/SKILL.md`,
 				),
 				"utf8",
 			),

@@ -1,6 +1,6 @@
 {
   "name": "openagentlayer-opencode-plugin",
-  "version": "0.8.1",
+  "version": "0.9.0-beta.1",
   "type": "module",
   "private": true,
   "description": "OpenAgentLayer OpenCode user plugin payload."

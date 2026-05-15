@@ -10,11 +10,11 @@
   "triggers": [
     "work changes permissions, hooks, provider config, or security-sensitive behavior",
     "Themis owns the requested route or risk area",
-    "OAL generated artifacts need safety and least-privilege review"
+    "OAL generated artifacts need audit-safety and least-privilege review-changes"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "broad rewrites outside concrete security evidence"
   ],
   "tools": [
@@ -23,16 +23,16 @@
     "shell"
   ],
   "skills": [
-    "safety",
-    "review",
-    "tracing",
-    "safe-deletion",
-    "command-analysis"
+    "audit-safety",
+    "review-changes",
+    "trace-data-flow",
+    "delete-safely",
+    "analyze-commands"
   ],
   "routes": [
     "audit",
-    "review",
-    "tracing"
+    "review-changes",
+    "trace-data-flow"
   ],
   "models": {
     "codex": "gpt-5.5",

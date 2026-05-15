@@ -23,7 +23,6 @@ import {
 	peerRunPaths,
 	renderPeerSummary,
 } from "../src/commands/codex";
-import { opendexRun } from "../src/commands/opendex";
 import {
 	runOptionalSetupCommand,
 	runSetupCommand,
@@ -111,7 +110,7 @@ test("Codex peer runner builds v3-style role steps", () => {
 		["orchestrator", "orchestrate"],
 		["validate", "validate"],
 		["worker", "implement"],
-		["review", "review"],
+		["review-changes", "review-changes"],
 	]);
 	expect(steps[0]?.args).toContain("codex");
 	expect(steps[0]?.args).toContain("route");
@@ -167,15 +166,6 @@ test("Codex peer summary renders status evidence", () => {
 	expect(summary).toContain("Run ID: `run-123`");
 	expect(summary).toContain("`worker`: failed (exit 1)");
 	expect(summary).toContain("fix the auth race");
-});
-
-test("OpenDex command runs the Rust workspace binary", () => {
-	const run = opendexRun(repoRoot, ["--version"]);
-	expect(run.cwd).toBe(repoRoot);
-	expect(
-		run.command.endsWith("target/debug/opendex") ||
-			run.args.join(" ").startsWith("run -p opendex --"),
-	).toBe(true);
 });
 
 async function runMcp(
@@ -330,7 +320,6 @@ test("interactive subscription prompts are ordered from lowest to highest", () =
 	expect(CODEX_ORCHESTRATION_OPTIONS.map((option) => option.value)).toEqual([
 		"multi_agent_v2",
 		"multi_agent",
-		"opendex",
 	]);
 	expect(CLAUDE_PLAN_OPTIONS.map((option) => option.value)).toEqual([
 		"max-5",

@@ -7,7 +7,7 @@
   ],
   "agent": "mnemosyne",
   "skills": [
-    "handoff"
+    "write-handoff"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

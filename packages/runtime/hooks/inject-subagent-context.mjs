@@ -6,7 +6,7 @@ import { asString, createHookRunner } from "./_runtime.mjs";
 const SUBAGENT_EVENTS = new Set(["SubagentStart", "subagent.started"]);
 const USER_PROMPT_EVENTS = new Set(["UserPromptSubmit", "user.prompt.submit"]);
 const USER_PROMPT_GUIDANCE = [
-	"Invoke `$oal` guidance; use bounded native OAL subagents or sidecars for broad or splittable implementation, review, tests, docs, and tracing.",
+	"Invoke `$oal` guidance; use bounded native OAL subagents or sidecars for broad or splittable implement, review-changes, tests, docs, and trace-data-flow.",
 	"For quick single-owner fixes, work directly in the parent thread. If a sidecar stalls or fails, tighten scope, spawn the next relevant OAL agent, and merge evidence before continuing.",
 ];
 const SUBAGENT_GUIDANCE = [
@@ -17,7 +17,6 @@ const SUBAGENT_GUIDANCE = [
 	"Parent thread owns task split, child launch, evidence merge, continuation, and final decision.",
 	"Workers return final evidence and artifacts to the parent; do not spawn extra pooled threads or keep idle workers open.",
 	"Close or hand back promptly when the assigned output is complete, blocked, or no longer needed; stalled background work wastes token budget.",
-	"Use `opendex` or `oal opendex` only when the task explicitly needs the external control plane.",
 ];
 
 function hookEvent(payload) {

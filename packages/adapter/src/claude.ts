@@ -83,7 +83,16 @@ function renderClaudeSettings(source: OalSource): unknown {
 	return {
 		model: "claude-sonnet-4-6",
 		permissions: {
-			deny: ["Read(.env)", "Read(id_rsa)", "Bash(rm -rf)"],
+			deny: [
+				"Read(.env)",
+				"Read(id_rsa)",
+				"Bash(rm -rf)",
+				"Agent(Explore)",
+				"Agent(Plan)",
+				"Agent(general-purpose)",
+				"Agent(statusline-setup)",
+				"Agent(claude-code-guide)",
+			],
 			ask: ["Bash(git push)", "Bash(chmod)", "Bash(npm publish)"],
 			allow: ["Read", "Grep", "Glob"],
 		},
@@ -171,14 +180,14 @@ function claudeToolNames(tool: string): string[] {
 function delegationCapable(agent: AgentRecord): boolean {
 	return (
 		agent.routes.includes("orchestrate") ||
-		agent.routes.includes("implementation") ||
-		agent.routes.includes("planning") ||
-		agent.routes.includes("exploration") ||
-		agent.routes.includes("tracing") ||
+		agent.routes.includes("implement") ||
+		agent.routes.includes("plan-work") ||
+		agent.routes.includes("map-repository") ||
+		agent.routes.includes("trace-data-flow") ||
 		agent.routes.includes("validate") ||
-		agent.routes.includes("testing") ||
-		agent.routes.includes("review") ||
-		agent.routes.includes("documentation") ||
-		agent.routes.includes("plain-language-writing")
+		agent.routes.includes("test-behavior") ||
+		agent.routes.includes("review-changes") ||
+		agent.routes.includes("write-docs") ||
+		agent.routes.includes("write-plain-language")
 	);
 }

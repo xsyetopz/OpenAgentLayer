@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "role": "Memory, handoff, and session continuity",
+  "role": "Memory, write-handoff, and session continuity",
   "triggers": [
     "work requires continuation state and handoff safety",
     "Mnemosyne owns the requested route or risk area",
@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,10 +23,10 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "tracing",
-    "review",
-    "testing"
+    "plan-work",
+    "trace-data-flow",
+    "review-changes",
+    "test-behavior"
   ],
   "routes": [
     "resume"

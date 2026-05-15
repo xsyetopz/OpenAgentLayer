@@ -10,7 +10,6 @@ import { runCodexUsageCommand } from "./commands/codex-usage";
 import { runDeployCommand } from "./commands/deploy";
 import { runInspectCommand } from "./commands/inspect";
 import { runMcpCommand } from "./commands/mcp";
-import { runOpenDexCommand } from "./commands/opendex";
 import { runPluginsCommand } from "./commands/plugins";
 import { runPreviewCommand } from "./commands/preview";
 import { runProfilesCommand } from "./commands/profiles";
@@ -150,8 +149,8 @@ program
 Examples:
   $ oal codex launch "spawn hermes to map the runtime hooks, wait, then summarize"
   $ oal codex agent hermes --dry-run "map the runtime hooks"
-  $ oal codex route review --dry-run "audit the current diff"
-  $ oal codex peer batch --dry-run "investigate, implement, validate, and review"
+  $ oal codex route review-changes --dry-run "audit the current diff"
+  $ oal codex peer batch --dry-run "investigate, implement, validate, and review-changes"
 `,
 	)
 	.action((action: string, values: string[], options) =>
@@ -314,16 +313,6 @@ program
 	);
 
 program
-	.command("opendex")
-	.description("run the Rust OpenDex control-plane binary")
-	.argument("[values...]", "arguments passed to opendex")
-	.option("--dry-run", "print the planned OpenDex command without launching")
-	.allowUnknownOption(true)
-	.action((values: string[], options) =>
-		runOpenDexCommand(repoRoot, [...values, ...argsFromOptions(options)]),
-	);
-
-program
 	.command("provider-e2e")
 	.description(
 		"check real provider binaries and optionally run headless live prompts",
@@ -404,7 +393,7 @@ function addRenderOptions(command: Command): Command {
 		.option("--opencode-models-file <path>", "saved `opencode models` output")
 		.option(
 			"--codex-orchestration <mode>",
-			"Codex orchestration: opendex, multi_agent, or multi_agent_v2",
+			"Codex orchestration: multi_agent or multi_agent_v2",
 		)
 		.option("--codex-agent-max-depth <n>", "Codex agents.max_depth")
 		.option("--codex-agent-max-threads <n>", "Codex agents.max_threads")

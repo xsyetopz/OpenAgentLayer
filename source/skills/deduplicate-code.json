@@ -1,0 +1,29 @@
+{
+  "id": "deduplicate-code",
+  "title": "Deduplicate Code",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Enforce DRY across code, prompts, hooks, manifests, tests, and generated contracts by finding repeated literals, regexes, structures, and behaviors, then consolidating them into shared constants, helpers, or modules.",
+  "body": "Start with evidence: scan the owning package and direct dependents for repeated literals, regex patterns, command strings, path fragments, schema tokens, and duplicated logic branches. Consolidate exact duplicates first, then near-duplicates with clear invariant naming. Prefer shared constants/types/helpers in the owning source module over ad hoc local copies. Keep behavior stable: move data, not semantics. Update all consumers in one pass, remove stale aliases, and keep one authoritative source for each repeated value. Validate with targeted tests and lint. Final output includes: duplicated surfaces found, canonical owner for each moved constant/helper, updated consumers, and validation proof.",
+  "supportFiles": [
+    {
+      "path": "references/dry-principles.md",
+      "source": "skill-resources/deduplicate-code/references/dry-principles.md"
+    },
+    {
+      "path": "references/duplication-taxonomy.md",
+      "source": "skill-resources/deduplicate-code/references/duplication-taxonomy.md"
+    },
+    {
+      "path": "assets/dedupe-checklist.md",
+      "source": "skill-resources/deduplicate-code/assets/dedupe-checklist.md"
+    },
+    {
+      "path": "assets/dedupe-report.md",
+      "source": "skill-resources/deduplicate-code/assets/dedupe-report.md"
+    }
+  ]
+}

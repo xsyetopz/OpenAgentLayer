@@ -1,5 +1,5 @@
 {
-  "id": "review",
+  "id": "review-changes",
   "providers": [
     "codex",
     "claude",
@@ -7,9 +7,9 @@
   ],
   "agent": "nemesis",
   "skills": [
-    "review",
-    "safe-deletion",
-    "command-analysis"
+    "review-changes",
+    "delete-safely",
+    "analyze-commands"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

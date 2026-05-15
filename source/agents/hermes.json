@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "role": "Exploration, tracing, repository evidence, and dependency mapping",
+  "role": "Exploration, trace-data-flow, repository evidence, and dependency mapping",
   "triggers": [
     "work requires read-only codebase research and source evidence",
     "Hermes owns the requested route or risk area",
@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,15 +23,15 @@
     "shell"
   ],
   "skills": [
-    "exploration",
-    "tracing",
-    "oal-maintenance",
-    "command-analysis"
+    "map-repository",
+    "trace-data-flow",
+    "maintain-oal",
+    "analyze-commands"
   ],
   "routes": [
-    "exploration",
+    "map-repository",
     "inspect",
-    "tracing"
+    "trace-data-flow"
   ],
   "models": {
     "codex": "gpt-5.4",

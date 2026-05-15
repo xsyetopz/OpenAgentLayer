@@ -1,5 +1,5 @@
-import { asArray, asObject, asString } from "./_runtime.mjs";
 import { WHITESPACE_SPLIT_PATTERN } from "./_patterns.mjs";
+import { asArray, asObject, asString } from "./_runtime.mjs";
 
 const COMMAND_FIELDS = ["command", "toolCommand", "rawCommand", "script"];
 const GENERIC_COMMAND_FIELDS = ["input"];

@@ -8,13 +8,13 @@
   ],
   "role": "Frontend, UI, accessibility, and visual interaction quality",
   "triggers": [
-    "work requires accessible UI implementation and browser evidence",
+    "work requires accessible UI implement and browser evidence",
     "Apollo owns the requested route or risk area",
     "provider-specific generated behavior needs evidence"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -25,19 +25,19 @@
     "patch"
   ],
   "skills": [
-    "planning",
-    "zen-of-python",
-    "language-design",
-    "dedupe",
+    "plan-work",
+    "simplify-design",
+    "design-language",
+    "deduplicate-code",
     "impeccable",
     "taste",
-    "cross-platform-app",
-    "implementation",
-    "testing",
-    "safety",
-    "privileged-execution",
-    "safe-deletion",
-    "command-analysis"
+    "build-cross-platform-app",
+    "implement",
+    "test-behavior",
+    "audit-safety",
+    "run-privileged-command",
+    "delete-safely",
+    "analyze-commands"
   ],
   "routes": [
     "design"

@@ -1,6 +1,6 @@
 {
 	"name": "openagentlayer",
-	"version": "0.8.1",
+	"version": "0.9.0-beta.1",
 	"private": true,
 	"type": "module",
 	"workspaces": [
@@ -25,9 +25,6 @@
 		"oal:features": "bun packages/cli/src/main.ts features",
 		"oal:roadmap:evidence": "bun packages/cli/src/main.ts roadmap-evidence",
 		"oal:rtk-gain": "bun packages/cli/src/main.ts rtk-gain",
-		"opendex:test": "cargo test -p opendex",
-		"opendex:check": "cargo check --workspace && cargo check --workspace --tests",
-		"opendex:lint": "make lint",
 		"gitleaks:sync": "bun scripts/sync-gitleaks-rules.mjs",
 		"gitleaks:check": "bun scripts/sync-gitleaks-rules.mjs --check",
 		"test": "bun test packages/*/__tests__/*.test.ts tests/*.test.ts",

@@ -211,7 +211,7 @@ function filterOfficialSkillCatalog(
 	if (!category || category === "all") return catalog;
 	if (!OFFICIAL_SKILL_CATEGORIES.includes(category as OfficialSkillCategory))
 		throw new Error(
-			"`--category` must be one of all,infrastructure,development,ai-tools,ai-agents,workflows,security,data,design,docs,testing",
+			"`--category` must be one of all,infrastructure,development,ai-tools,ai-agents,workflows,security,data,design,docs,test-behavior",
 		);
 	return catalog.filter((entry) => entry.category === category);
 }

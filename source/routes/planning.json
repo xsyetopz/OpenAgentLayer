@@ -1,5 +1,5 @@
 {
-  "id": "planning",
+  "id": "plan-work",
   "providers": [
     "codex",
     "claude",
@@ -7,14 +7,14 @@
   ],
   "agent": "athena",
   "skills": [
-    "planning",
-    "zen-of-python",
-    "dedupe",
-    "roadmap-tracking",
-    "prompt-engineering",
-    "command-analysis"
+    "plan-work",
+    "simplify-design",
+    "deduplicate-code",
+    "track-roadmap",
+    "design-prompts",
+    "analyze-commands"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Produce a decision-complete plan after inspecting repo evidence, current roadmap, provider docs in source, and package boundaries. Include implementation sequence, acceptance proof, explicit assumptions, and source-required package splits, abstractions, schemas, hooks, and validation gates. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Produce a decision-complete plan after inspecting repo evidence, current roadmap, provider docs in source, and package boundaries. Include implement sequence, acceptance proof, explicit assumptions, and source-required package splits, abstractions, schemas, hooks, and validation gates. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

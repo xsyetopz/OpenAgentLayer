@@ -1,8 +1,10 @@
 import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
-import { CONTEXT7_DASHBOARD_URL } from "./patterns";
+import {
+	CONTEXT7_DASHBOARD_URL,
+	OAL_CLI_ENTRY_RELATIVE,
+} from "@openagentlayer/source";
 
 const CLI_ENTRY = OAL_CLI_ENTRY_RELATIVE;
 

@@ -1,9 +1,12 @@
 import { execFile } from "node:child_process";
+import { access } from "node:fs/promises";
+import { join } from "node:path";
 import { promisify } from "node:util";
 
 const TRACKED_PRODUCT_ROOTS = [
 	"crates",
 	"packages",
+	"prompts",
 	"source",
 	"tests",
 	"homebrew",
@@ -24,10 +27,6 @@ const ROOT_PRODUCT_FILES = [
 	"SECURITY.md",
 	"upstream-sources.lock.json",
 	"bunfig.toml",
-	"Cargo.toml",
-	"Cargo.lock",
-	"rust-toolchain.toml",
-	".rscheck.toml",
 ] as const;
 const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin"] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;
@@ -121,7 +120,18 @@ async function listFiles(root: string): Promise<string[]> {
 		"ls-files",
 		"--cached",
 	]);
-	return stdout.split("\n").filter(Boolean).map(normalizePath);
+	const files = stdout.split("\n").filter(Boolean).map(normalizePath);
+	const existing = await Promise.all(
+		files.map(async (file) => {
+			try {
+				await access(join(root, file));
+				return file;
+			} catch {
+				return undefined;
+			}
+		}),
+	);
+	return existing.filter((file): file is string => Boolean(file));
 }
 
 function normalizePath(path: string): string {

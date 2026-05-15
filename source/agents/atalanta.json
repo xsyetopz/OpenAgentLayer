@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "role": "Acceptance testing, validation execution, and outcome analysis",
+  "role": "Acceptance test-behavior, validation execution, and outcome analysis",
   "triggers": [
     "work requires commands, fixtures, and symptom diagnosis",
     "Atalanta owns the requested route or risk area",
@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "testing",
-    "debugging",
-    "tracing",
-    "privileged-execution",
-    "command-analysis"
+    "test-behavior",
+    "debug-failures",
+    "trace-data-flow",
+    "run-privileged-command",
+    "analyze-commands"
   ],
   "routes": [
-    "testing",
+    "test-behavior",
     "validate",
     "accept"
   ],

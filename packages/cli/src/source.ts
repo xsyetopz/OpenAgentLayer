@@ -39,7 +39,7 @@ export function applySourceOverrides(
 	if (!cavemanMode) return source;
 	if (!isCavemanMode(cavemanMode))
 		throw new Error(
-			`Unsupported caveman mode \`${cavemanMode}\`. Expected \`${cavemanModes.join(", ")}\`.`,
+			`Unsupported Caveman mode \`${cavemanMode}\`. Expected \`${cavemanModes.join(", ")}\`.`,
 		);
 	return { ...source, caveman: { mode: cavemanMode } };
 }

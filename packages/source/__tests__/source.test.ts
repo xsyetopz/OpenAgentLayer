@@ -19,45 +19,49 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(graph.source.promptContracts?.zenDiscipline).toContain(
 		"Namespaces are one honking great idea -- let's do more of those!",
 	);
-	const caveman = graph.source.skills.find((skill) => skill.id === "caveman");
-	const taste = graph.source.skills.find((skill) => skill.id === "taste");
+	const compressProse = graph.source.skills.find(
+		(skill) => skill.id === "caveman",
+	);
+	const polishProduct = graph.source.skills.find(
+		(skill) => skill.id === "taste",
+	);
 	const commandParse = graph.source.skills.find(
-		(skill) => skill.id === "command-analysis",
+		(skill) => skill.id === "analyze-commands",
 	);
 	const plainLanguage = graph.source.skills.find(
-		(skill) => skill.id === "plain-language-writing",
+		(skill) => skill.id === "write-plain-language",
 	);
-	const impeccable = graph.source.skills.find(
+	const polishUi = graph.source.skills.find(
 		(skill) => skill.id === "impeccable",
 	);
 	const crossPlatformApp = graph.source.skills.find(
-		(skill) => skill.id === "cross-platform-app",
+		(skill) => skill.id === "build-cross-platform-app",
 	);
 	const roadmapTracking = graph.source.skills.find(
-		(skill) => skill.id === "roadmap-tracking",
+		(skill) => skill.id === "track-roadmap",
 	);
-	expect(caveman?.body).toContain("Use compact output");
-	expect(taste?.body).toContain("Improve product UI");
-	expect(commandParse?.title).toBe("Command Analysis");
+	expect(compressProse?.body).toContain("Use compact output");
+	expect(polishProduct?.body).toContain("Improve product UI");
+	expect(commandParse?.title).toBe("Analyze Commands");
 	expect(commandParse?.body).toContain(
 		"Treat command text as structured input",
 	);
-	expect(plainLanguage?.title).toBe("Plain Language Writing");
+	expect(plainLanguage?.title).toBe("Write Plain Language");
 	expect(plainLanguage?.body).toContain("Rewrite prose");
-	expect(impeccable?.body).toContain(
+	expect(polishUi?.body).toContain(
 		"Designs and iterates production-grade frontend interfaces",
 	);
-	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
+	expect(polishUi?.supportFiles?.map((file) => file.path)).toContain(
 		"reference/brand.md",
 	);
-	expect(impeccable?.supportFiles?.map((file) => file.path)).toContain(
+	expect(polishUi?.supportFiles?.map((file) => file.path)).toContain(
 		"scripts/load-context.mjs",
 	);
 	expect(crossPlatformApp?.supportFiles?.map((file) => file.path)).toContain(
 		"references/stack.md",
 	);
 	expect(crossPlatformApp?.body).toContain("rigid product stack");
-	expect(roadmapTracking?.title).toBe("Roadmap Tracking");
+	expect(roadmapTracking?.title).toBe("Track Roadmap");
 	expect(roadmapTracking?.description).toContain("PLAN.md");
 	expect(roadmapTracking?.body).toContain("[ ]` for not started");
 	expect(roadmapTracking?.body).toContain("[~]` for in progress");
@@ -65,9 +69,9 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(roadmapTracking?.supportFiles?.map((file) => file.path)).toContain(
 		"references/checkbox-status.md",
 	);
-	expect(caveman?.upstream).toBeUndefined();
-	expect(taste?.upstream).toBeUndefined();
-	expect(impeccable?.upstream?.path).toBe(
+	expect(compressProse?.upstream).toBeUndefined();
+	expect(polishProduct?.upstream).toBeUndefined();
+	expect(polishUi?.upstream?.path).toBe(
 		"third_party/impeccable/skill/SKILL.md",
 	);
 	const commit = graph.source.skills.find((skill) => skill.id === "git-commit");
@@ -76,12 +80,12 @@ test("loadSource loads authored prompt skills", async () => {
 	expect(commit?.body).toContain("Codex <noreply@openai.com>");
 	expect(commit?.body).toContain("Claude <noreply@anthropic.com>");
 	expect(commit?.body).toContain("OpenCode: use the current agent model");
-	const git = graph.source.skills.find((skill) => skill.id === "git-workflow");
+	const git = graph.source.skills.find(
+		(skill) => skill.id === "manage-git-workflow",
+	);
 	expect(git?.body).toContain("not alone in the codebase");
 	expect(git?.body).toContain("must not be reverted");
-	const oal = graph.source.skills.find(
-		(skill) => skill.id === "oal-maintenance",
-	);
+	const oal = graph.source.skills.find((skill) => skill.id === "maintain-oal");
 	expect(oal?.body).toContain("OAL's index skill for AI/LLM use");
 	expect(oal?.body).toContain("Codex does not infer them automatically");
 	expect(oal?.body).toContain("CSV/batch subagents");
@@ -106,11 +110,11 @@ test("loadSource hydrates agent prompts from the shared template", async () => {
 	);
 	expect(hephaestus?.prompt).toContain("You are Hephaestus");
 	expect(hephaestus?.prompt).toContain(
-		"Production implementation, refactoring, and bug fixing",
+		"Production implement, refactoring, and bug fixing",
 	);
 	const rawHephaestus = await readFile(
 		resolve(repoRoot, "source/agents/hephaestus.json"),
 		"utf8",
 	);
-	expect(rawHephaestus).not.toContain('"prompt-engineering"');
+	expect(rawHephaestus).not.toContain('"design-prompts"');
 });

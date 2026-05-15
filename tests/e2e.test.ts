@@ -280,7 +280,7 @@ test("CLI Codex peer dry-run writes a coordinated run plan", async () => {
 		"orchestrator",
 		"validate",
 		"worker",
-		"review",
+		"review-changes",
 	]);
 	expect(plan.steps[0]?.args).toContain("route");
 	expect(await readFile(join(plan.root, "brief.md"), "utf8")).toContain(
@@ -508,7 +508,7 @@ test("CLI preview applies configurable Caveman mode", async () => {
 			"--caveman-mode",
 			"off",
 			"--path",
-			".claude/commands/implementation.md",
+			".claude/commands/implement.md",
 			"--content",
 		],
 		{ cwd: repoRoot, stdout: "pipe", stderr: "pipe" },
@@ -833,12 +833,12 @@ test("CLI setup apply activates Codex profile and $oal plugin", async () => {
 	expect(baseInstructions).toContain("rtk proxy -- <command>");
 	expect(baseInstructions).not.toContain("OAL scope fidelity");
 	expect(baseInstructions).toContain(
-		"documentation-only work unless the user explicitly asks",
+		"write-docs-only work unless the user explicitly asks",
 	);
 	expect(baseInstructions).toContain(
-		"implementation request into future-work documentation",
+		"implement request into future-work write-docs",
 	);
-	expect(baseInstructions).toContain("Code review and audits");
+	expect(baseInstructions).toContain("Code review-changes and audits");
 	expect(
 		await readFile(
 			join(home, ".codex/plugins/openagentlayer/.codex-plugin/plugin.json"),

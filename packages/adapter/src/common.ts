@@ -30,6 +30,8 @@ export function agentPrompt(agent: AgentRecord, source: OalSource): string {
 		...(source.promptContracts?.zenDiscipline
 			? [`Implementation consequence: ${source.promptContracts.zenDiscipline}`]
 			: []),
+		"Completion consequence: deliver the complete requested behavior inside the assigned scope; do not return scaffolds, placeholders, or partial starts.",
+		"Execution consequence: avoid compatibility aliases, fallback-only paths, or future-work substitutes unless the assigned task explicitly requires them.",
 		"Output consequence: return changed behavior plus evidence, or `STATUS BLOCKED` with Attempted/Evidence/Need.",
 	].join("\n");
 }
@@ -129,8 +131,8 @@ function renderCodexAgentInvocation(source: OalSource): string {
 
 - OAL treats native Codex subagents as the default path for broad or parallelizable work when multi_agent or multi_agent_v2 is enabled; users should not need to request them manually.
 - Before starting broad work, split independent sidecar tasks and spawn rendered OAL agent names or aliases; each assignment must fit the configured job runtime cap. Keep a narrow single-owner fix local and record why.
-- For coding implementation, prefer spawning the rendered GPT-5.3-Codex implementation agents such as hephaestus, daedalus, demeter, hecate, or prometheus when the work is significant or separable, instead of keeping all edits in the parent reasoning session.
-- Use subagents for work that can split by ownership, provider, package, test tier, review perspective, documentation lookup, or repeated batch item; do not rely on lower reasoning effort as a cost control for constantly running goal loops when a cheaper worker model can own the task.
+- For coding implement, prefer spawning the rendered GPT-5.3-Codex implement agents such as hephaestus, daedalus, demeter, hecate, or prometheus when the work is significant or separable, instead of keeping all edits in the parent reasoning session.
+- Use subagents for work that can split by ownership, provider, package, test tier, review-changes perspective, write-docs lookup, or repeated batch item; do not rely on lower reasoning effort as a cost control for constantly running goal loops when a cheaper worker model can own the task.
 - Parent sessions own task split, agent launch, wait/merge, and final decision. Ask subagents for final evidence, changed paths, validation output, or a precise blocker; merge only their final summaries into the parent context.
 - For many similar rows, create a CSV and use Codex batch subagents when available; each worker should return structured results to the parent.
 

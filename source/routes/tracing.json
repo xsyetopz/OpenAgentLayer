@@ -1,5 +1,5 @@
 {
-  "id": "tracing",
+  "id": "trace-data-flow",
   "providers": [
     "codex",
     "claude",
@@ -7,8 +7,8 @@
   ],
   "agent": "hermes",
   "skills": [
-    "tracing",
-    "command-analysis"
+    "trace-data-flow",
+    "analyze-commands"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",

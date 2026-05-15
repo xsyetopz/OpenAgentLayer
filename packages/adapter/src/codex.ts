@@ -118,7 +118,7 @@ Use contrast only when it is directly relevant to the user's request, when the u
 
 ## Mandatory Output Gate: Prevent Implementation-Context Leakage
 
-External-facing documentation, UI copy, commit messages, and public repo text must not be shaped by internal constraints, task history, migration details, local workspace boundaries, omitted files, or agent reasoning artifacts. Write only from the artifact's audience-facing purpose.`;
+External-facing write-docs, UI copy, commit messages, and public repo text must not be shaped by internal constraints, task history, migration details, local workspace boundaries, omitted files, or agent reasoning artifacts. Write only from the artifact's audience-facing purpose.`;
 
 export async function renderCodex(
 	source: OalSource,
@@ -361,6 +361,7 @@ ${renderCodexProfile({
 max_depth = ${orchestration.maxDepth}
 ${orchestration.mode === "multi_agent_v2" ? "" : `max_threads = ${orchestration.maxThreads}\n`}job_max_runtime_seconds = ${orchestration.jobMaxRuntimeSeconds}
 interrupt_message = true
+${renderCodexBuiltinAgentOverrides()}
 ${source.agents
 	.map(
 		(agent) => `
@@ -376,6 +377,40 @@ enabled = true
 `;
 }
 
+function renderCodexBuiltinAgentOverrides(): string {
+	const overrides = [
+		[
+			"default",
+			"odysseus",
+			"OAL orchestration agent; replaces the Codex built-in default role when OAL is active.",
+		],
+		[
+			"worker",
+			"hephaestus",
+			"OAL implementation agent; replaces the Codex built-in worker role when OAL is active.",
+		],
+		[
+			"explorer",
+			"hermes",
+			"OAL repository mapping agent; replaces the Codex built-in explorer role when OAL is active.",
+		],
+		[
+			"monitor",
+			"asclepius",
+			"OAL validation and reliability agent; replaces the Codex built-in monitor role when OAL is active.",
+		],
+	] as const;
+	return overrides
+		.map(
+			([role, target, description]) => `
+[agents.${role}]
+description = ${quoteToml(description)}
+nickname_candidates = [${quoteToml(role)}]
+config_file = "./agents/${target}.toml"`,
+		)
+		.join("\n");
+}
+
 function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
 	switch (mode) {
 		case "multi_agent":
@@ -383,7 +418,7 @@ function codexPrimaryProfileName(mode: CodexOrchestrationMode): string {
 		case "multi_agent_v2":
 			return "openagentlayer-multi-agent-v2";
 		default:
-			return "openagentlayer-opendex";
+			return "openagentlayer-multi-agent-v2";
 	}
 }
 
@@ -535,7 +570,7 @@ function resolveCodexOrchestration(
 				? {
 						usageHintEnabled: true,
 						rootAgentUsageHintText:
-							"Assume native subagents are encouraged for broad or parallel OAL work. For significant or separable coding implementation, spawn rendered GPT-5.3-Codex implementation agents such as hephaestus, daedalus, demeter, hecate, or prometheus instead of doing all edits in the parent reasoning session. Assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
+							"Assume native subagents are encouraged for broad or parallel OAL work. For significant or separable coding implement, spawn rendered GPT-5.3-Codex implement agents such as hephaestus, daedalus, demeter, hecate, or prometheus instead of doing all edits in the parent reasoning session. Assign bounded jobs that fit the runtime cap, keep narrow single-owner edits local, and merge only final evidence.",
 						subagentUsageHintText:
 							"You are an OAL native subagent. Complete only the bounded assigned task within the runtime cap, return concise evidence and changed paths, and do not create nested peer orchestrators.",
 					}
@@ -558,8 +593,7 @@ function renderCodexFeatures(
 	orchestration: ResolvedCodexOrchestration,
 ): string {
 	const baseFeatures = CODEX_FEATURES.map(([name, defaultEnabled]) => {
-		const enabled =
-			name === "apps" ? orchestration.mode === "opendex" : defaultEnabled;
+		const enabled = name === "apps" ? false : defaultEnabled;
 		return `${name} = ${enabled ? "true" : "false"}`;
 	});
 	return [

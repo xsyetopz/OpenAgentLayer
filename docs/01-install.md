@@ -5,7 +5,7 @@ Code, and OpenCode.
 
 ## Source Checkout
 
-Use this path when developing OAL or testing unreleased behavior:
+Use this path when developing OAL or test-behavior unreleased behavior:
 
 ```bash
 git clone https://github.com/xsyetopz/OpenAgentLayer.git

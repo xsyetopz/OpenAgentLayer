@@ -22,7 +22,20 @@ test("OpenCode config renders OAL fallback models", async () => {
 			rendered.artifacts.find((artifact) => artifact.path === "opencode.jsonc")
 				?.content ?? "{}",
 		),
-	) as { model: string; small_model: string; plugin: string[] };
+	) as {
+		model: string;
+		small_model: string;
+		plugin: string[];
+		default_agent: string;
+		agent: Record<string, { disable?: boolean; mode?: string }>;
+	};
+	expect(config.agent.build?.disable).toBe(true);
+	expect(config.agent.plan?.disable).toBe(true);
+	expect(config.agent.general?.disable).toBe(true);
+	expect(config.agent.explore?.disable).toBe(true);
+	expect(config.agent.scout?.disable).toBe(true);
+	expect(config.default_agent).toBe("hephaestus");
+	expect(config.agent.hephaestus?.mode).toBe("primary");
 	expect(config.plugin).toContain("./.opencode/plugins/openagentlayer.ts");
 	expect(config.model).toBe(OPENCODE_MODEL_FALLBACKS[0]);
 	expect(config.small_model).toBe(OPENCODE_MODEL_FALLBACKS[1]);
@@ -79,6 +92,14 @@ test("model plans route Greek agents by subscription", async () => {
 	const claude = await renderProvider("claude", graph.source, repoRoot, {
 		plan: "max-20-long",
 	});
+	const claudeSettings = JSON.parse(
+		claude.artifacts.find(
+			(artifact) => artifact.path === ".claude/settings.json",
+		)?.content ?? "{}",
+	) as { permissions: { deny: string[] } };
+	expect(claudeSettings.permissions.deny).toContain("Agent(Explore)");
+	expect(claudeSettings.permissions.deny).toContain("Agent(Plan)");
+	expect(claudeSettings.permissions.deny).toContain("Agent(general-purpose)");
 	const nemesis = claude.artifacts.find(
 		(artifact) => artifact.path === ".claude/agents/nemesis.md",
 	)?.content;
@@ -130,10 +151,12 @@ opencode/nemotron-3-super-free
 		),
 	) as { agent: Record<string, { model: string }> };
 	expect(
-		Object.values(freeConfig.agent).every((agent) =>
-			OPENCODE_MODEL_FALLBACKS.includes(
-				agent.model as (typeof OPENCODE_MODEL_FALLBACKS)[number],
-			),
+		Object.values(freeConfig.agent).every(
+			(agent) =>
+				!agent.model ||
+				OPENCODE_MODEL_FALLBACKS.includes(
+					agent.model as (typeof OPENCODE_MODEL_FALLBACKS)[number],
+				),
 		),
 	).toBe(true);
 });
@@ -206,11 +229,11 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	const graph = await loadSource(resolve(repoRoot, "source"));
 	for (const [skill, expected] of [
 		["caveman", "Use compact output"],
-		["command-analysis", "Treat command text as structured input"],
-		["plain-language-writing", "Rewrite prose"],
+		["analyze-commands", "Treat command text as structured input"],
+		["write-plain-language", "Rewrite prose"],
 		["taste", "Improve product UI"],
-		["oal-maintenance", "oal codex peer batch <task>"],
-		["cross-platform-app", "rigid product stack"],
+		["maintain-oal", "oal codex peer batch <task>"],
+		["build-cross-platform-app", "rigid product stack"],
 	] as const) {
 		for (const provider of ["codex", "claude", "opencode"] as const) {
 			const rendered = await renderProvider(provider, graph.source, repoRoot);
@@ -220,7 +243,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 			expect(artifact?.content).toContain(expected);
 			expect(artifact?.content).toContain("## Prompt contract");
 			expect(artifact?.content).toContain("General Zen discipline");
-			if (provider === "codex" && skill === "oal-maintenance") {
+			if (provider === "codex" && skill === "maintain-oal") {
 				expect(artifact?.content).toContain(
 					"explicitly spawn rendered OAL agent names or aliases",
 				);
@@ -232,7 +255,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 	}
 	for (const provider of ["codex", "claude", "opencode"] as const) {
 		const rendered = await renderProvider(provider, graph.source, repoRoot);
-		const impeccable = rendered.artifacts.find((candidate) =>
+		const polishUi = rendered.artifacts.find((candidate) =>
 			candidate.path.endsWith("/impeccable/SKILL.md"),
 		);
 		const brandReference = rendered.artifacts.find((candidate) =>
@@ -241,7 +264,7 @@ test("provider skill artifacts render authored OAL skill prompts", async () => {
 		const loadContextScript = rendered.artifacts.find((candidate) =>
 			candidate.path.endsWith("/impeccable/scripts/load-context.mjs"),
 		);
-		expect(impeccable?.content).toContain(
+		expect(polishUi?.content).toContain(
 			"Designs and iterates production-grade frontend interfaces",
 		);
 		expect(brandReference?.content).toContain("Brand");
@@ -266,7 +289,7 @@ test("provider instructions render inspection and correction discipline contract
 		expect(instructions).toContain("Shared workspace:");
 		expect(instructions).toContain("not alone in the codebase");
 		expect(instructions).toContain("Context budget:");
-		expect(instructions).toContain("- implementation:");
+		expect(instructions).toContain("- implement:");
 		if (provider === "codex") {
 			expect(instructions).toContain("Codex Base Instructions");
 			expect(instructions).toContain(OAL_CODEX_BASE_INSTRUCTIONS_FILE);
@@ -292,16 +315,16 @@ test("provider agents render inspection and correction discipline contracts", as
 			(artifact) => artifact.path === path,
 		)?.content;
 		expect(agent).toContain(
-			"senior peer for Production implementation, refactoring, and bug fixing",
+			"senior peer for Production implement, refactoring, and bug fixing",
 		);
-		expect(agent).toContain("Own routes: implementation.");
+		expect(agent).toContain("Own routes: implement.");
 		expect(agent).toContain("Inspect controlling source only");
 		expect(agent).toContain(
 			"prefer concise evidence over repeated policy text",
 		);
 		expect(agent).toContain("## Narrow Agent Contract");
 		expect(agent).toContain(
-			"Job: Production implementation, refactoring, and bug fixing.",
+			"Job: Production implement, refactoring, and bug fixing.",
 		);
 		expect(agent).toContain(
 			"Use only these tools: read, search, shell, write, patch.",
@@ -353,7 +376,7 @@ test("continuity agent and resume route render user-pasteable handoff contracts"
 			(artifact) => artifact.path === path,
 		)?.content;
 		expect(agent).toContain(
-			"senior peer for Memory, handoff, and session continuity",
+			"senior peer for Memory, write-handoff, and session continuity",
 		);
 		expect(agent).toContain("Own routes: resume.");
 		expect(agent).toContain(
@@ -440,19 +463,17 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	expect(config).not.toContain("max_threads = 1");
 	expect(config).toContain("root_agent_usage_hint_text");
 	expect(config).toContain("Assume native subagents are encouraged");
-	expect(config).toContain("significant or separable coding implementation");
-	expect(config).toContain("GPT-5.3-Codex implementation agents");
+	expect(config).toContain("significant or separable coding implement");
+	expect(config).toContain("GPT-5.3-Codex implement agents");
 	expect(config).toContain(
 		"instead of doing all edits in the parent reasoning session",
 	);
 	expect(config).toContain("fit the runtime cap");
 	expect(config).toContain("subagent_usage_hint_text");
 	expect(config).toContain("bounded assigned task within the runtime cap");
+	expect(config).toContain('nickname_candidates = ["hephaestus", "implement"]');
 	expect(config).toContain(
-		'nickname_candidates = ["hephaestus", "implementation"]',
-	);
-	expect(config).toContain(
-		'nickname_candidates = ["atalanta", "testing", "validate", "accept"]',
+		'nickname_candidates = ["atalanta", "test-behavior", "validate", "accept"]',
 	);
 	expect(config).toContain("job_max_runtime_seconds = 600");
 	expect(config).toContain("[tui]");
@@ -472,14 +493,14 @@ test("Codex default render uses normal shell and hook-based RTK enforcement", as
 	const baseInstructions = rendered.artifacts.find(
 		(artifact) => artifact.path === OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 	)?.content;
-	expect(baseInstructions).toContain("# Codex Base Instruction (Custom)");
-	expect(baseInstructions).toContain("## Codex loop model");
-	expect(baseInstructions).toContain("1. user request");
-	expect(baseInstructions).toContain("7. verify");
-	expect(baseInstructions).toContain("9. final report");
-	expect(baseInstructions).toContain("Repo evidence beats memory.");
-	expect(baseInstructions).toContain("## Design-pattern policy");
-	expect(baseInstructions).toContain("## Final report format");
+	expect(baseInstructions).toContain("# Outcome Contract");
+	expect(baseInstructions).toContain("# Literal Execution Rule");
+	expect(baseInstructions).toContain("# Anti-Drift Rule");
+	expect(baseInstructions).toContain("# Production Default");
+	expect(baseInstructions).toContain("# Final Response");
+	expect(baseInstructions).toContain(
+		"Final responses must be short, factual, and outcome-first.",
+	);
 	for (const item of [
 		"model-with-reasoning",
 		"run-state",
@@ -572,17 +593,17 @@ test("Codex instructions render subagent invocation roster", async () => {
 		"Before starting broad work, split independent sidecar tasks",
 	);
 	expect(instructions).toContain(
-		"For coding implementation, prefer spawning the rendered GPT-5.3-Codex implementation agents",
+		"For coding implement, prefer spawning the rendered GPT-5.3-Codex implement agents",
 	);
 	expect(instructions).toContain(
 		"do not rely on lower reasoning effort as a cost control for constantly running goal loops",
 	);
 	expect(instructions).toContain("fit the configured job runtime cap");
 	expect(instructions).toContain(
-		"- hephaestus: aliases=hephaestus, implementation; routes=implementation",
+		"- hephaestus: aliases=hephaestus, implement; routes=implement",
 	);
 	expect(instructions).toContain(
-		"- atalanta: aliases=atalanta, testing, validate, accept; routes=testing, validate, accept",
+		"- atalanta: aliases=atalanta, test-behavior, validate, accept; routes=test-behavior, validate, accept",
 	);
 	expect(instructions).toContain("For many similar rows, create a CSV");
 	expect(instructions).toContain(OAL_CODEX_BASE_INSTRUCTIONS_FILE);

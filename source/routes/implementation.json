@@ -1,5 +1,5 @@
 {
-  "id": "implementation",
+  "id": "implement",
   "providers": [
     "codex",
     "claude",
@@ -7,15 +7,15 @@
   ],
   "agent": "hephaestus",
   "skills": [
-    "implementation",
-    "dedupe",
-    "zen-of-python",
-    "cross-platform-app",
-    "privileged-execution",
-    "safe-deletion",
-    "command-analysis"
+    "implement",
+    "deduplicate-code",
+    "simplify-design",
+    "build-cross-platform-app",
+    "run-privileged-command",
+    "delete-safely",
+    "analyze-commands"
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Implement the requested production behavior in the owning package. Start with a delegation check: broad implementation work that can split by ownership, provider, package, test tier, or investigation path launches subagents or enters the orchestrate route with non-overlapping tasks; narrow single-owner edits record the solo ownership reason. Make the smallest complete change, preserve SRP/DRY, and run targeted validation. Adjacent cleanup enters the edit envelope through source evidence or validation need. Current-state docs, tests, comments, config, warnings, and guardrails require explicit request or current runtime/schema/security/validation need. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Implement the requested production behavior in the owning package. Start with a delegation check: broad implement work that can split by ownership, provider, package, test tier, or investigation path launches subagents or enters the orchestrate route with non-overlapping tasks; narrow single-owner edits record the solo ownership reason. Make the smallest complete change, preserve SRP/DRY, and run targeted validation. Adjacent cleanup enters the edit envelope through source evidence or validation need. Current-state docs, tests, comments, config, warnings, and guardrails require explicit request or current runtime/schema/security/validation need. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

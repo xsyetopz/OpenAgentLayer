@@ -1,0 +1,17 @@
+{
+  "id": "analyze-commands",
+  "title": "Analyze Commands",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Parse shell commands and noisy command output with structured evidence. Use for hook enforcement, RTK routing, shell audit-safety checks, CI log extraction, and command outcome summaries.",
+  "body": "Treat command text as structured input. Separate argv words, shell operators, redirection, environment assignments, glob expansion, and command segments before enforcing policy. For noisy output, extract actionable errors, warnings, file paths, exit codes, and requested facts.",
+  "supportFiles": [
+    {
+      "path": "references/commands.md",
+      "source": "skill-resources/analyze-commands/references/commands.md"
+    }
+  ]
+}

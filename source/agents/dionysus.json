@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "role": "Creative exploration and production-safe prototypes",
+  "role": "Creative map-repository and production-safe prototypes",
   "triggers": [
     "work requires prototype-to-production boundaries",
     "Dionysus owns the requested route or risk area",
@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,13 +23,13 @@
     "shell"
   ],
   "skills": [
-    "exploration",
-    "tracing",
-    "oal-maintenance",
-    "command-analysis"
+    "map-repository",
+    "trace-data-flow",
+    "maintain-oal",
+    "analyze-commands"
   ],
   "routes": [
-    "planning"
+    "plan-work"
   ],
   "models": {
     "codex": "gpt-5.4",

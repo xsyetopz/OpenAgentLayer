@@ -6,15 +6,15 @@
     "claude",
     "opencode"
   ],
-  "role": "Adversarial debugging and symptom pressure testing",
+  "role": "Adversarial debug-failures and symptom pressure test-behavior",
   "triggers": [
-    "work requires aggressive repro and edge-case testing",
+    "work requires aggressive repro and edge-case test-behavior",
     "Ares owns the requested route or risk area",
     "provider-specific generated behavior needs evidence"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "debugging",
-    "testing",
-    "tracing",
-    "review",
-    "command-analysis"
+    "debug-failures",
+    "test-behavior",
+    "trace-data-flow",
+    "review-changes",
+    "analyze-commands"
   ],
   "routes": [
-    "debugging"
+    "debug-failures"
   ],
   "models": {
     "codex": "gpt-5.5",

@@ -1,7 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { HookRecord, OalSource } from "@openagentlayer/source";
-import { OAL_CODEX_HOOKS_DIR, OAL_OPENCODE_HOOKS_DIR } from "./patterns";
+import {
+	type HookRecord,
+	OAL_CODEX_HOOKS_DIR,
+	OAL_OPENCODE_HOOKS_DIR,
+	type OalSource,
+} from "@openagentlayer/source";
 
 interface HookFixture {
 	input: unknown;
@@ -23,7 +27,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_changed_files: {
-		input: { provider: "codex", route: "implementation" },
+		input: { provider: "codex", route: "implement" },
 		decision: "pass",
 	},
 	require_completion_evidence: {
@@ -74,7 +78,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_git_context: {
-		input: { provider: "codex", route: "planning" },
+		input: { provider: "codex", route: "plan-work" },
 		decision: "pass",
 	},
 	warn_large_diff: {
@@ -90,7 +94,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_package_scripts: {
-		input: { provider: "claude", route: "testing" },
+		input: { provider: "claude", route: "test-behavior" },
 		decision: "pass",
 	},
 	inject_project_memory: {
@@ -106,7 +110,7 @@ const HOOK_BEHAVIOR_FIXTURES: Record<string, HookFixture> = {
 		decision: "block",
 	},
 	inject_route_context: {
-		input: { provider: "codex", route: "implementation" },
+		input: { provider: "codex", route: "implement" },
 		decision: "pass",
 	},
 	enforce_route_contract: {
@@ -239,10 +243,11 @@ async function assertProviderNativeHookOutput(
 		{ hook_event_name: "PreToolUse", command: "git status" },
 		{ OAL_HOOK_PROVIDER: "codex", OAL_HOOK_EVENT: "PreToolUse" },
 	);
-	if (codexDeny.stdout !== "")
-		throw new Error(
-			"Codex shimmed RTK command hook emitted stdout instead of passing through.",
-		);
+	if (
+		JSON.parse(codexDeny.stdout).hookSpecificOutput?.permissionDecision !==
+		"deny"
+	)
+		throw new Error("Codex PreToolUse hook did not emit native deny output");
 	const claudeDeny = await runNativeHook(
 		join(targetRoot, ".claude/hooks/scripts/enforce-rtk-commands.mjs"),
 		{ hook_event_name: "PreToolUse", command: "git status" },
@@ -295,10 +300,10 @@ async function assertProviderNativeHookOutput(
 		throw new Error("Codex UserPromptSubmit subagent reminder is too long");
 	for (const required of [
 		"OAL subagent reminder",
-		"spawn bounded native OAL subagents/sidecars",
-		"do not continue manually",
-		"tighten scope and spawn the next relevant OAL agent",
-		"parent merges evidence",
+		"use bounded native OAL subagents or sidecars",
+		"work directly in the parent thread",
+		"tighten scope, spawn the next relevant OAL agent",
+		"merge evidence before continuing",
 	])
 		if (!codexPromptContext.includes(required))
 			throw new Error(
@@ -399,7 +404,7 @@ async function assertRtkHookBehavior(targetRoot: string): Promise<void> {
 	await assertHook(scriptPath, { command: "make check" }, "warn");
 	await assertHook(
 		scriptPath,
-		{ provider: "codex", command: "cat package.json" },
+		{ provider: "codex", command: "rtk read --max-lines 80 package.json" },
 		"pass",
 	);
 	const script = `${await readFile(scriptPath, "utf8")}\n${await readFile(

@@ -145,19 +145,27 @@ function renderOpenCodeConfig(
 			edit: "ask",
 			write: "ask",
 		},
-		agent: Object.fromEntries(
-			source.agents.map((agent) => [
-				agent.id,
-				{
-					description: agent.role,
-					model: resolveOpenCodeModel(agent, options),
-					color: agentHexColor(agent.id),
-					permission: agent.tools.includes("write")
-						? { edit: "ask", write: "ask", bash: "ask" }
-						: { edit: "deny", write: "deny", bash: "ask" },
-				},
-			]),
-		),
+		agent: {
+			build: { disable: true },
+			plan: { disable: true },
+			general: { disable: true },
+			explore: { disable: true },
+			scout: { disable: true },
+			...Object.fromEntries(
+				source.agents.map((agent) => [
+					agent.id,
+					{
+						description: agent.role,
+						mode: "primary",
+						model: resolveOpenCodeModel(agent, options),
+						color: agentHexColor(agent.id),
+						permission: agent.tools.includes("write")
+							? { edit: "ask", write: "ask", bash: "ask" }
+							: { edit: "deny", write: "deny", bash: "ask" },
+					},
+				]),
+			),
+		},
 		command: Object.fromEntries(
 			source.routes.map((route) => [
 				route.id,

@@ -1,4 +1,4 @@
-import { LINE_BREAK_PATTERN, type AgentRecord } from "@openagentlayer/source";
+import { type AgentRecord, LINE_BREAK_PATTERN } from "@openagentlayer/source";
 
 export type ModelPlan =
 	| "plus"
@@ -16,10 +16,7 @@ export type CodexModel =
 	| "gpt-5.4"
 	| "gpt-5.4-mini"
 	| "gpt-5.3-codex";
-export type CodexOrchestrationMode =
-	| "opendex"
-	| "multi_agent"
-	| "multi_agent_v2";
+export type CodexOrchestrationMode = "multi_agent" | "multi_agent_v2";
 
 export interface CodexMultiAgentV2Options {
 	hideSpawnAgentMetadata?: boolean;
@@ -64,7 +61,6 @@ export const OPENCODE_FREE_MODELS = [
 	"opencode/big-pickle",
 	"opencode/gpt-5-nano",
 ] as const;
-
 
 const CLAUDE_PLANS: Record<
 	Extract<ModelPlan, "max-5" | "max-20" | "max-20-long">,

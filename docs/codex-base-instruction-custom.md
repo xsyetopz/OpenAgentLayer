@@ -31,7 +31,7 @@ Minimum hard gates:
 - Ship complete requested behavior.
 - Avoid placeholders and speculative abstractions.
 - Keep changes minimal, explicit, and reversible.
-- Reject architecture that adds complexity without proven payoff.
+- Reject design-architecture that adds complexity without proven payoff.
 
 ## Pattern constraints
 
@@ -39,9 +39,9 @@ Allow structural patterns only when they:
 
 - remove concrete duplication
 - isolate real change points
-- fit existing repository architecture
+- fit existing repository design-architecture
 
-Reject ceremony-heavy abstractions such as one-implementation interfaces,
+Reject ceremony-heavy abstractions such as one-implement interfaces,
 speculative plugin systems, and manager/service layering without direct value.
 
 ## Verification contract

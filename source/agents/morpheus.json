@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,12 +23,12 @@
     "shell"
   ],
   "skills": [
-    "prompt-engineering",
-    "planning",
-    "review"
+    "design-prompts",
+    "plan-work",
+    "review-changes"
   ],
   "routes": [
-    "documentation"
+    "write-docs"
   ],
   "models": {
     "codex": "gpt-5.5",

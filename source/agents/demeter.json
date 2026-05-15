@@ -8,13 +8,13 @@
   ],
   "role": "Data models, schemas, migrations, and persistence contracts",
   "triggers": [
-    "work requires data integrity and migration safety",
+    "work requires data integrity and migration audit-safety",
     "Demeter owns the requested route or risk area",
     "provider-specific generated behavior needs evidence"
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -25,13 +25,13 @@
     "patch"
   ],
   "skills": [
-    "planning",
-    "tracing",
-    "review",
-    "testing"
+    "plan-work",
+    "trace-data-flow",
+    "review-changes",
+    "test-behavior"
   ],
   "routes": [
-    "implementation"
+    "implement"
   ],
   "models": {
     "codex": "gpt-5.3-codex",

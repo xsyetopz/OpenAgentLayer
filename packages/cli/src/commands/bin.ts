@@ -1,6 +1,5 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	applyBinInstall,
 	binManifestPath,
@@ -9,6 +8,7 @@ import {
 	refineBinPlan,
 	removeBinInstall,
 } from "@openagentlayer/deploy";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import { flag, option } from "../arguments";
 
 export async function runBinCommand(
@@ -27,9 +27,6 @@ export async function runBinCommand(
 	}
 	const plan = await refineBinPlan(planBinInstall(binDir, entrypoint));
 	console.log(`binary: ${plan.action} ${plan.path} (${plan.reason})`);
-	console.log(
-		`binary: ${plan.action} ${plan.opendexPath} (owned OpenDex shim)`,
-	);
 	console.log(`manifest: ${binManifestPath(home)}`);
 	console.log(`path: ${pathContains(binDir) ? "ready" : `add ${binDir}`}`);
 	if (!pathContains(binDir)) console.log(`next: export PATH="${binDir}:$PATH"`);

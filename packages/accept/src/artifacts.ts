@@ -1,11 +1,14 @@
 import type { Artifact } from "@openagentlayer/artifact";
-import type { OalSource, Provider } from "@openagentlayer/source";
 import {
-	CODEX_COLOR_FIELD_PATTERN,
 	CODEX_CONFIG_SCHEMA_COMMENT,
-	HEX_COLOR_FRAGMENT_PATTERN,
 	OAL_CODEX_BASE_INSTRUCTIONS_FILE,
 	OAL_CODEX_HOOKS_DIR,
+	type OalSource,
+	type Provider,
+} from "@openagentlayer/source";
+import {
+	CODEX_COLOR_FIELD_PATTERN,
+	HEX_COLOR_FRAGMENT_PATTERN,
 } from "./patterns";
 
 const PROVIDERS: Provider[] = ["codex", "claude", "opencode"];
@@ -19,17 +22,17 @@ const CORE_AGENTS = [
 	"odysseus",
 ] as const;
 const REQUIRED_ROUTES = [
-	"planning",
-	"implementation",
-	"review",
-	"testing",
+	"plan-work",
+	"implement",
+	"review-changes",
+	"test-behavior",
 	"validate",
-	"exploration",
-	"tracing",
-	"debugging",
+	"map-repository",
+	"trace-data-flow",
+	"debug-failures",
 	"design",
-	"documentation",
-	"plain-language-writing",
+	"write-docs",
+	"write-plain-language",
 	"orchestrate",
 	"audit",
 ] as const;
@@ -240,11 +243,11 @@ function assertProvenanceMarkers(artifacts: Artifact[]): void {
 		"# <<< oal codex <<<",
 	]);
 	assertArtifact(OAL_CODEX_BASE_INSTRUCTIONS_FILE, artifacts, [
-		"Do not run tests, type checks, builds, simulator launches, browser automation, or full validation suites after every implementation step by default.",
-		"OAL and RTK project surfaces",
-		"rtk proxy -- <command>",
-		"Code review and audits",
-		"Unknown or potentially large command output must be bounded before it reaches context.",
+		"# Outcome Contract",
+		"# Literal Execution Rule",
+		"# Command Budget",
+		"# Validation Budget",
+		"# Final Response",
 	]);
 	assertArtifact("opencode.jsonc", artifacts, [
 		"// >>> oal opencode >>>",

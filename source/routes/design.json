@@ -7,13 +7,13 @@
   ],
   "agent": "apollo",
   "skills": [
-    "zen-of-python",
-    "language-design",
+    "simplify-design",
+    "design-language",
     "impeccable",
     "taste",
-    "dedupe",
-    "cross-platform-app",
-    "command-analysis"
+    "deduplicate-code",
+    "build-cross-platform-app",
+    "analyze-commands"
   ],
   "permissions": "write with guarded shell",
   "arguments": "task objective, target paths, and required evidence",

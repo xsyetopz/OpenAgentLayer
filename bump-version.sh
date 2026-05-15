@@ -97,18 +97,6 @@ function readRubyVersion(relativePath) {
   if (!match) fail(`${relativePath} has no cask version`);
   return { path: relativePath, version: match[1], kind: "ruby" };
 }
-function readCargoVersion(relativePath) {
-  const text = fs.readFileSync(path.join(root, relativePath), "utf8");
-  const match = /^version\s*=\s*"([^"]+)"/m.exec(text);
-  if (!match) fail(`${relativePath} has no cargo version`);
-  return { path: relativePath, version: match[1], kind: "cargo" };
-}
-function readCargoLockVersion(relativePath) {
-  const text = fs.readFileSync(path.join(root, relativePath), "utf8");
-  const match = /\[\[package\]\]\nname = "opendex"\nversion = "([^"]+)"/.exec(text);
-  if (!match) fail(`${relativePath} has no opendex package version`);
-  return { path: relativePath, version: match[1], kind: "cargo-lock" };
-}
 function readMarkdownHeadingVersion(relativePath, current) {
   const text = fs.readFileSync(path.join(root, relativePath), "utf8");
   const match = new RegExp(`^## \\[${current.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]`, "m").exec(text);
@@ -131,8 +119,6 @@ const locations = [
   readJsonVersion("plugins/claude/openagentlayer/.claude-plugin/plugin.json"),
   readJsonVersion("plugins/codex/openagentlayer/.codex-plugin/plugin.json"),
   readJsonVersion("plugins/opencode/openagentlayer/package.json"),
-  readCargoVersion("Cargo.toml"),
-  readCargoLockVersion("Cargo.lock"),
   readRubyVersion("homebrew/Casks/openagentlayer.rb"),
   readClaudeMarketplaceVersion(".claude-plugin/marketplace.json"),
   readMarkdownHeadingVersion("CHANGELOG.md", current),
@@ -149,10 +135,6 @@ const changed = new Set(locations.map((location) => location.path));
 for (const location of locations) {
   if (location.kind === "json") {
     replaceFile(location.path, (text) => text.replace(/"version"\s*:\s*"[^"]+"/, `"version": "${next}"`));
-  } else if (location.kind === "cargo") {
-    replaceFile(location.path, (text) => text.replace(/^version\s*=\s*"[^"]+"/m, `version = "${next}"`));
-  } else if (location.kind === "cargo-lock") {
-    replaceFile(location.path, (text) => text.replace(/(\[\[package\]\]\nname = "opendex"\nversion = )"[^"]+"/, `$1"${next}"`));
   } else if (location.kind === "ruby") {
     replaceFile(location.path, (text) => text.replace(/^\s*version\s+"[^"]+"/m, `  version "${next}"`));
   } else if (location.kind === "markdown") {

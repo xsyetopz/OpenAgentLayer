@@ -1,7 +1,7 @@
 import {
 	OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE,
 	POSITIVE_INTEGER_PATTERN,
-} from "./patterns";
+} from "@openagentlayer/source";
 
 interface CodexProfile {
 	model?: string;
@@ -79,10 +79,7 @@ export function assertCodexTomlSchema(toml: string): void {
 		throw new Error("Codex config active profile is not rendered");
 	if (parsed.approvals_reviewer !== "auto_review")
 		throw new Error("Codex config does not enable auto approval review");
-	if (
-		parsed.model_instructions_file !==
-		OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE
-	)
+	if (parsed.model_instructions_file !== OAL_CODEX_MODEL_INSTRUCTIONS_RELATIVE)
 		throw new Error(
 			"Codex config does not load the patched OAL base instructions",
 		);

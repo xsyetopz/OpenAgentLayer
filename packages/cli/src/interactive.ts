@@ -92,11 +92,6 @@ export const CODEX_ORCHESTRATION_OPTIONS = [
 		label: "Codex multi_agent",
 		hint: "native shallow agents, bounded by agents table",
 	},
-	{
-		value: "opendex",
-		label: "OpenDex",
-		hint: "external Rust control-plane mode, native multi-agent disabled",
-	},
 ] as const;
 
 export const CLAUDE_PLAN_OPTIONS = [
@@ -105,7 +100,7 @@ export const CLAUDE_PLAN_OPTIONS = [
 	{
 		value: "max-20-long",
 		label: "Max 20x + 1M Opus",
-		hint: "1M Opus for lead/review",
+		hint: "1M Opus for lead/review-changes",
 	},
 ];
 

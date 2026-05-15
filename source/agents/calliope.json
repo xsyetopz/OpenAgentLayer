@@ -6,7 +6,7 @@
     "claude",
     "opencode"
   ],
-  "role": "Documentation, handoff, changelog, and public prose maintenance",
+  "role": "Documentation, write-handoff, changelog, and public prose maintenance",
   "triggers": [
     "work requires docs backed by implemented behavior",
     "Calliope owns the requested route or risk area",
@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,14 +23,14 @@
     "shell"
   ],
   "skills": [
-    "documentation",
-    "handoff",
-    "planning",
-    "plain-language-writing"
+    "write-docs",
+    "write-handoff",
+    "plan-work",
+    "write-plain-language"
   ],
   "routes": [
-    "documentation",
-    "plain-language-writing"
+    "write-docs",
+    "write-plain-language"
   ],
   "models": {
     "codex": "gpt-5.4",

@@ -1,0 +1,21 @@
+{
+  "id": "plan-work",
+  "title": "Plan Work",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Turn current repo evidence and user goals into a decision-complete implement plan. Use before broad multi-file work, design-architecture changes, or uncertain provider behavior.",
+  "body": "Planning is done when implement can proceed from evidence. Gather evidence first, list decisions, define the owner package, and name the acceptance signal. For provider behavior, separate stable instruction-file contracts from reloadable skills/hooks/commands, and do not encode model/window or reload claims without current provider docs, provider source, or validated runtime evidence.",
+  "supportFiles": [
+    {
+      "path": "references/plan.md",
+      "source": "skill-resources/plan-work/references/plan.md"
+    },
+    {
+      "path": "assets/prd.md",
+      "source": "skill-resources/plan-work/assets/prd.md"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "design-prompts",
+  "title": "Design Prompts",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Design strict operational prompts, skill bodies, agent instructions, and route contracts that keep agents inside the requested scope. Use when prompt behavior is the product surface.",
+  "body": "Prompts constrain behavior through affirmative artifact targets, ordered steps, ambiguity rules, output contracts, edit envelopes, source gates, consent boundaries, and explicit blocker paths. Strong pressure is valid when it is task-relevant, transparent, and aimed at current-state artifacts, scope control, and source-backed progress.",
+  "supportFiles": [
+    {
+      "path": "references/prompt.md",
+      "source": "skill-resources/design-prompts/references/prompt.md"
+    },
+    {
+      "path": "assets/contract.md",
+      "source": "skill-resources/design-prompts/assets/contract.md"
+    },
+    {
+      "path": "references/markdown-prompts.md",
+      "source": "skill-resources/design-prompts/references/markdown-prompts.md"
+    }
+  ]
+}

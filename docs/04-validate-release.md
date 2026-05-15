@@ -1,7 +1,7 @@
 # Validate and Release
 
-Use focused validation during implementation, then run full product gates before
-release or handoff.
+Use focused validation during implement, then run full product gates before
+release or write-handoff.
 
 ## Core Checks
 

@@ -7,13 +7,13 @@
   ],
   "agent": "odysseus",
   "skills": [
-    "planning",
-    "handoff",
-    "privileged-execution",
-    "safe-deletion",
-    "command-analysis"
+    "plan-work",
+    "write-handoff",
+    "run-privileged-command",
+    "delete-safely",
+    "analyze-commands"
   ],
   "permissions": "coordination",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Split work across independent agents with non-overlapping paths, merge results, and produce a single verified outcome. Use this route when implementation spans multiple ownership areas, provider surfaces, packages, test tiers, or independent investigation paths. In default Codex profiles, route orchestration through OpenDex using `oal codex peer batch <task>`, `oal opendex`, or `opendex`. In Codex profiles where native subagents are explicitly enabled, spawn rendered OAL agents by name, have them own focused roles, wait for their final summaries, and merge only final evidence into the parent thread. The orchestrator owns task routing, child launch, evidence integration, and final decision. Record each subagent task, owned paths, expected evidence, and merge order before broad edits. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Split work across independent agents with non-overlapping paths, merge results, and produce a single verified outcome. Use this route when implement spans multiple ownership areas, provider surfaces, packages, test tiers, or independent investigation paths. In Codex profiles, default to native subagent orchestration by spawning rendered OAL agents by name, assigning focused roles, waiting for final summaries, and merging only final evidence into the parent thread. Use `oal codex peer batch <task>` only when a fixed staged write-handoff is explicitly required by the user or acceptance contract. The orchestrator owns task routing, child launch, evidence integration, and final decision. Record each subagent task, owned paths, expected evidence, and merge order before broad edits. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

@@ -2,7 +2,6 @@ import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { renderProvider } from "@openagentlayer/adapter";
-import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	pathContains,
 	planBinInstall,
@@ -10,6 +9,7 @@ import {
 	refineBinPlan,
 } from "@openagentlayer/deploy";
 import type { Provider } from "@openagentlayer/source";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import { optionalFeatureCommands } from "@openagentlayer/toolchain";
 import { flag, option, providerOptions } from "../arguments";
 import {

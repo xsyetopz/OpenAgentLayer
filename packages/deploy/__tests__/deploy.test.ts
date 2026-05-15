@@ -158,7 +158,7 @@ test("dry-run diffs render merged generated artifact changes without writing", a
 	await rm(root, { recursive: true, force: true });
 });
 
-test("bin install owns oal and opendex shims", async () => {
+test("bin install owns oal shim", async () => {
 	const home = await mkdtemp(join(tmpdir(), "oal-bin-install-"));
 	const binDir = join(home, "bin");
 	const entrypoint = `/repo/${OAL_CLI_ENTRY_RELATIVE}`;
@@ -167,17 +167,10 @@ test("bin install owns oal and opendex shims", async () => {
 	expect(await readFile(join(binDir, "oal"), "utf8")).toContain(
 		`exec bun ${JSON.stringify(entrypoint)} "$@"`,
 	);
-	expect(await readFile(join(binDir, "opendex"), "utf8")).toContain(
-		`exec bun ${JSON.stringify(entrypoint)} "opendex" "$@"`,
-	);
-	expect(await readFile(binManifestPath(home), "utf8")).toContain(
-		'"opendexPath"',
-	);
 	expect(await readFile(binManifestPath(home), "utf8")).not.toContain(
 		["sym", "phony"].join(""),
 	);
 	await removeBinInstall(home);
 	await expect(readFile(join(binDir, "oal"), "utf8")).rejects.toThrow();
-	await expect(readFile(join(binDir, "opendex"), "utf8")).rejects.toThrow();
 	await rm(home, { recursive: true, force: true });
 });

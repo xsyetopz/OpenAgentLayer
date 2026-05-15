@@ -16,7 +16,7 @@ OAL now uses `prompts/codex_base_instruction.custom.md` as the Codex
 `third_party/openai-codex/codex-rs/protocol/src/prompts/base_instructions/default.md`.
 - **Agents run tests too eagerly:** the custom prompt tells agents not to run
   tests, type checks, builds, browser automation, simulator launches, or full
-  validation suites after every implementation step by default.
+  validation suites after every implement step by default.
 - **Validation should be targeted:** the custom prompt keeps targeted checks
   as the first validation tier and broadens only when the task requires broader
   confidence.
@@ -27,7 +27,7 @@ OAL now uses `prompts/codex_base_instruction.custom.md` as the Codex
 - **Command output can destroy context:** the custom prompt requires unknown
   or potentially large command output to be byte bounded before it reaches
   context.
-- **Audit false positives waste review time:** the custom prompt adds review
+- **Audit false positives waste review time:** the custom prompt adds review-changes
   guidance requiring conclusive, actionable findings and allowing a no-findings
   result.
 - **Reasoning effort has a real quality/cost curve:** heavy GPT-5.5 reasoning
@@ -37,7 +37,7 @@ OAL now uses `prompts/codex_base_instruction.custom.md` as the Codex
   `gpt-5.4` for quota-sensitive sustained work; Pro-20 keeps `gpt-5.5` for
   high-stakes orchestration unless the user selects the quota-sensitive
   profile model. Significant code-writing work routes to rendered
-  GPT-5.3-Codex implementation workers; utility/light profiles keep
+  GPT-5.3-Codex implement workers; utility/light profiles keep
   `gpt-5.4-mini`.
 - **Local weekly usage evidence:** the local Codex state database showed the
   fastest weekly drain came from `gpt-5.5` medium sessions, including 45
@@ -48,9 +48,9 @@ OAL now uses `prompts/codex_base_instruction.custom.md` as the Codex
   rollouts were blank/root Codex sessions with thousands of shell calls and
   many compactions. Native `thread_source = subagent` usage was tiny by
   comparison. OAL therefore adds `oal codex-usage` and a generated parent
-  quota guard that moves broad root work into handoff, peer batch,
-  OpenDex/Symphony, or a fresh bounded session before the parent thread runs
-  away. With Codex goals enabled, that handoff is session-complete only and
+  quota guard that moves broad root work into native subagents, peer batch,
+  or a fresh bounded session before the parent thread runs
+  away. With Codex goals enabled, that write-handoff is session-complete only and
   must not be reported as COMPLETE-complete product completion unless the
   original objective is actually done.
 

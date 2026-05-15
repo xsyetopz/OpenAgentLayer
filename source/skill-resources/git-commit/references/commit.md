@@ -7,4 +7,4 @@
 - Include body paragraphs for summary, rationale, and validation when the commit is non-trivial
 - Add exactly one provider-appropriate `Co-authored-by` trailer unless the user requests a different identity
 - For Codex, use `Co-authored-by: Codex <noreply@openai.com>`
-- Do not use review-status trailers such as `Codex-Reviewed: yes`
+- Do not use review-changes-status trailers such as `Codex-Reviewed: yes`

@@ -7,12 +7,12 @@
   ],
   "agent": "nemesis",
   "skills": [
-    "safety",
-    "review",
-    "safe-deletion",
-    "command-analysis"
+    "audit-safety",
+    "review-changes",
+    "delete-safely",
+    "analyze-commands"
   ],
   "permissions": "read-only",
   "arguments": "task objective, target paths, and required evidence",
-  "body": "Audit product behavior against roadmap, provider surfaces, manifest ownership, source boundaries, and safety guardrails. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
+  "body": "Audit product behavior against roadmap, provider surfaces, manifest ownership, source boundaries, and audit-safety guardrails. The route declares owner, permissions, allowed tools, validation expectations, output contract, hook expectations, and provider-specific differences."
 }

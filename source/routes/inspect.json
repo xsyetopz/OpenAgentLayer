@@ -7,9 +7,9 @@
   ],
   "agent": "hermes",
   "skills": [
-    "exploration",
-    "command-analysis",
-    "oal-maintenance"
+    "map-repository",
+    "analyze-commands",
+    "maintain-oal"
   ],
   "permissions": "read-only plus OAL inspect command",
   "arguments": "topic: capabilities, manifest, generated-diff, rtk-report, command-policy, or release-witness",

@@ -21,7 +21,7 @@ export const OFFICIAL_SKILL_CATEGORIES = [
 	"data",
 	"design",
 	"docs",
-	"testing",
+	"test-behavior",
 ] as const;
 export const OFFICIAL_SKILLS_BASE_URL = "https://officialskills.sh";
 export const OFFICIAL_SKILLS_HOSTNAME = new URL(OFFICIAL_SKILLS_BASE_URL)
@@ -67,7 +67,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		skill: "gh-address-comments",
 		sourceUrl: officialSkillsUrl("/openai/skills/gh-address-comments"),
 		description:
-			"Read PR comments and review threads with the GitHub CLI, then address selected feedback.",
+			"Read PR comments and review-changes threads with the GitHub CLI, then address selected feedback.",
 	},
 	{
 		id: "skill-openai-yeet",
@@ -85,7 +85,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		id: "skill-openai-playwright",
 		publisher: "OpenAI",
 		name: "playwright",
-		category: "testing",
+		category: "test-behavior",
 		sourceStatus: "community",
 		repo: "https://github.com/openai/skills",
 		skill: "playwright",
@@ -152,7 +152,7 @@ export const OFFICIAL_SKILL_CATALOG = [
 		skill: "sentry-workflow",
 		sourceUrl: officialSkillsUrl("/getsentry/skills/sentry-workflow"),
 		description:
-			"Fix production issues and review code with Sentry context in one workflow.",
+			"Fix production issues and review-changes code with Sentry context in one workflow.",
 	},
 	{
 		id: "skill-anthropics-mcp-builder",

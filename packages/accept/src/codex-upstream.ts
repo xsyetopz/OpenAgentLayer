@@ -27,20 +27,12 @@ export async function assertCodexUpstreamPatch(
 		"utf8",
 	);
 	for (const required of [
-		"## Codex loop model",
-		"1. user request",
-		"2. inspect",
-		"3. plan",
-		"4. tool call",
-		"5. observe",
-		"6. edit",
-		"7. verify",
-		"8. fix",
-		"9. final report",
-		"Repo evidence beats memory.",
-		"Never invent APIs, files, configs, test results, command output, or project structure.",
-		"## Design-pattern policy",
-		"## Final report format",
+		"# Outcome Contract",
+		"# Literal Execution Rule",
+		"# Anti-Drift Rule",
+		"# Production Default",
+		"# Final Response",
+		"Final responses must be short, factual, and outcome-first.",
 	])
 		if (!systemPrompt.includes(required))
 			throw new Error(`Codex system prompt missing \`${required}\``);

@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,12 +23,12 @@
     "shell"
   ],
   "skills": [
-    "planning",
+    "plan-work",
     "impeccable",
     "taste",
-    "tracing",
-    "review",
-    "testing"
+    "trace-data-flow",
+    "review-changes",
+    "test-behavior"
   ],
   "routes": [
     "design"

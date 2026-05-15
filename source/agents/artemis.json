@@ -14,7 +14,7 @@
   ],
   "nonGoals": [
     "decorative persona output",
-    "placeholder or demo implementation",
+    "placeholder or demo implement",
     "generated-output editing with authored source available"
   ],
   "tools": [
@@ -23,13 +23,13 @@
     "shell"
   ],
   "skills": [
-    "planning",
-    "tracing",
-    "review",
-    "testing"
+    "plan-work",
+    "trace-data-flow",
+    "review-changes",
+    "test-behavior"
   ],
   "routes": [
-    "tracing"
+    "trace-data-flow"
   ],
   "models": {
     "codex": "gpt-5.4",

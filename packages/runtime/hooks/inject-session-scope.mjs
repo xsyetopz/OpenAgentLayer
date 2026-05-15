@@ -10,6 +10,7 @@ const SESSION_SCOPE_DETAILS = [
 	"Scope rule: compatibility aliases, parser fallbacks, extra behavior, guardrails, docs, cleanup, and adjacent changes need explicit user request or controlling source requirement",
 	"Edit rule: change authored source first; use apply_patch for focused edits and inspect the final diff.",
 	"Delegation rule: split broad work into bounded owners early; name each child owner, output, runtime fit, and close idle agents promptly.",
+	"Quality rule: deliver complete requested behavior in scope; do not return scaffolds, placeholders, compatibility aliases, or future-work substitutes.",
 	"Workflow rule: obey hook replacement commands exactly; use raw proxy fallbacks only as a last resort after RTK options are exhausted.",
 	"Evidence rule: report changed behavior and validation evidence, or return STATUS BLOCKED with Attempted, Evidence, and Need.",
 ];

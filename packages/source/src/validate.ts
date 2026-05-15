@@ -135,7 +135,7 @@ export function validateProductSource(record: ProductSource): void {
 	if (record.caveman) {
 		if (!CAVEMAN_MODES.has(record.caveman.mode))
 			throw new Error(
-				`Product caveman mode \`${String(record.caveman.mode)}\` needs a supported value`,
+				`Product Caveman mode \`${String(record.caveman.mode)}\` needs a supported value`,
 			);
 	}
 	if (

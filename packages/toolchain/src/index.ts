@@ -128,7 +128,7 @@ const CORE_TOOLS = [
 	"jo", // Build JSON in shell scripts without quoting issues.
 	"xan", // Fast CSV slicing/stats/inspection utility.
 	"miller", // CSV/TSV/JSONL data wrangling from shell.
-	"difftastic", // Syntax-aware diff for review signal quality.
+	"difftastic", // Syntax-aware diff for review-changes signal quality.
 	"git-absorb", // Auto-create fixup commits from local changes.
 	"actionlint", // Lint GitHub Actions workflow files.
 	"hadolint", // Lint Dockerfiles and container best practices.
@@ -143,8 +143,8 @@ const CORE_TOOLS = [
 	"graphviz", // Graph rendering (dot) for diagrams/dependencies.
 	"duckdb", // Local SQL over CSV/JSON/Parquet/log datasets.
 	"lsof", // Inspect open files/sockets/ports/process handles.
-	"strace", // Linux syscall tracing for process debugging.
-	"dtruss", // macOS syscall tracing via DTrace tooling.
+	"strace", // Linux syscall trace-data-flow for process debug-failures.
+	"dtruss", // macOS syscall trace-data-flow via DTrace tooling.
 	"sqlite3", // Local database CLI for structured inspection.
 	"file", // Byte-level file type detection via libmagic.
 	"imagemagick", // Image inspect/convert/resize workflows.
@@ -202,7 +202,7 @@ const PYTHON_PACKAGES = [
 	"scipy", // Scientific computing and algorithm fallback.
 	"opencv-python", // Advanced image/video processing.
 	"pytesseract", // OCR wrapper (expects native tesseract).
-	"imagehash", // Perceptual image hashing and dedupe.
+	"imagehash", // Perceptual image hashing and deduplicate-code.
 	"mutagen", // Audio metadata reading/writing.
 	"jinja2", // Template rendering for generated artifacts.
 	"hypothesis", // Property-based test case generation.

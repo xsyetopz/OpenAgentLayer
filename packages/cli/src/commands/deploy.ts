@@ -1,7 +1,6 @@
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { renderProvider } from "@openagentlayer/adapter";
-import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import {
 	applyBinInstall,
 	applyDeploy,
@@ -12,6 +11,7 @@ import {
 	refineBinPlan,
 	renderDeployDiffs,
 } from "@openagentlayer/deploy";
+import { OAL_CLI_ENTRY_RELATIVE } from "@openagentlayer/source";
 import { flag, option, providerOptions } from "../arguments";
 import { renderOptions } from "../model-options";
 import { printDeployReport } from "../output";

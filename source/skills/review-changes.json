@@ -1,0 +1,25 @@
+{
+  "id": "review-changes",
+  "title": "Review Changes",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Audit code, generated artifacts, provider configs, docs, and tests for correctness, regressions, naming, audit-safety, and needed validation. Use for review-changes and quality gates.",
+  "body": "Review against behavior and evidence. Findings need exact evidence, consequence, and concrete fix. Review changes stay inside the requested review-changes surface.",
+  "supportFiles": [
+    {
+      "path": "references/review.md",
+      "source": "skill-resources/review-changes/references/review.md"
+    },
+    {
+      "path": "references/simplicity.md",
+      "source": "skill-resources/shared/references/simplicity.md"
+    },
+    {
+      "path": "assets/findings.md",
+      "source": "skill-resources/review-changes/assets/findings.md"
+    }
+  ]
+}

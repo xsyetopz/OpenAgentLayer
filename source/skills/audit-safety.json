@@ -1,0 +1,22 @@
+{
+  "id": "audit-safety",
+  "title": "Audit Safety",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Check destructive actions, generated-file edits, secrets, permissions, and deploy/uninstall audit-safety. Use for security-sensitive code, hooks, configuration, and release automation.",
+  "body": "Security work starts with what can be damaged or leaked. Classify the path, permission surface, ownership boundary, and least-privilege runtime before editing.",
+  "supportFiles": [
+    {
+      "path": "references/guards.md",
+      "source": "skill-resources/audit-safety/references/guards.md"
+    },
+    {
+      "path": "scripts/classify-path.mjs",
+      "source": "skill-resources/audit-safety/scripts/classify-path.mjs",
+      "executable": true
+    }
+  ]
+}

@@ -14,7 +14,6 @@ const REQUIRED_CASK_SNIPPETS = [
 	"strategy :github_latest",
 	'depends_on formula: "bun"',
 	'binary "bin/oal", target: "oal"',
-	'binary "bin/opendex", target: "opendex"',
 	"`oal check`",
 ] as const;
 

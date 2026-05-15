@@ -1,0 +1,21 @@
+{
+  "id": "debug-failures",
+  "title": "Debug Failures",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Build a reproducible diagnosis loop, rank falsifiable causes, instrument one variable at a time, fix, and prove the original symptom is gone. Use for bugs, broken flows, flaky behavior, and performance regressions.",
+  "body": "Start by making the symptom observable. Patch from reproduced evidence. A debug-failures run is valid when it reproduces the user-described symptom, narrows the cause with falsifiable evidence, removes temporary probes, and leaves a regression signal or a write-handoff naming the evidence seam to inspect next.",
+  "supportFiles": [
+    {
+      "path": "references/loop.md",
+      "source": "skill-resources/debug-failures/references/loop.md"
+    },
+    {
+      "path": "assets/symptom-report.md",
+      "source": "skill-resources/debug-failures/assets/symptom-report.md"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "write-docs",
+  "title": "Write Docs",
+  "providers": [
+    "codex",
+    "claude",
+    "opencode"
+  ],
+  "description": "Write or update docs for implemented behavior. Use for README, changelog, contribution docs, provider notes, handoffs, and user-facing generated artifact explanations.",
+  "body": "Documentation is product surface. Inspect current code, generated artifacts, commands, manifests, and validation output before editing. Describe current behavior and explicit release/history artifacts requested by the user.",
+  "supportFiles": [
+    {
+      "path": "references/doc-standard.md",
+      "source": "skill-resources/write-docs/references/doc-standard.md"
+    },
+    {
+      "path": "assets/change-note.md",
+      "source": "skill-resources/write-docs/assets/change-note.md"
+    },
+    {
+      "path": "references/markdown.md",
+      "source": "skill-resources/write-docs/references/markdown.md"
+    }
+  ]
+}
