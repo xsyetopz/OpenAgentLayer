@@ -170,6 +170,7 @@ function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
 					: provider === "claude"
 						? `.claude/skills/${skill.id}/SKILL.md`
 						: `.opencode/skills/${skill.id}/SKILL.md`;
+			assertSkillFrontmatter(path, artifacts);
 			assertArtifact(
 				path,
 				artifacts,
@@ -204,6 +205,15 @@ function assertSkillArtifacts(source: OalSource, artifacts: Artifact[]): void {
 			}
 		}
 	}
+}
+
+function assertSkillFrontmatter(path: string, artifacts: Artifact[]): void {
+	const artifact = findArtifact(path, artifacts);
+	if (!artifact.content.startsWith("---\n"))
+		throw new Error(`Skill artifact missing YAML frontmatter start: ${path}`);
+	const end = artifact.content.indexOf("\n---", 4);
+	if (end < 0)
+		throw new Error(`Skill artifact missing YAML frontmatter end: ${path}`);
 }
 
 function assertInstructionBlocks(artifacts: Artifact[]): void {

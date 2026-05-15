@@ -28,7 +28,7 @@ const ROOT_PRODUCT_FILES = [
 	"upstream-sources.lock.json",
 	"bunfig.toml",
 ] as const;
-const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin"] as const;
+const ROOT_PRODUCT_DIRS = [".agents", ".claude-plugin", ".codex"] as const;
 const PRODUCT_FILE_PATTERN = /\.(ts|mts|mjs|json|jsonc|md|toml)$/;
 const GENERATED_PATH_PATTERN = /(^|\/)(generated|dist|build)(\/|$)/;
 const execFileAsync = promisify(execFile);
